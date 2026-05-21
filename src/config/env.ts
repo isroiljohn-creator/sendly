@@ -10,8 +10,8 @@ interface Env {
   SUPABASE_URL: string;
   SUPABASE_SERVICE_ROLE_KEY: string;
   REDIS_URL: string;
-  OPENAI_API_KEY: string;
-  TELEGRAM_BOT_TOKEN: string;
+  OPENAI_API_KEY?: string;
+  TELEGRAM_BOT_TOKEN?: string;
   JWT_SECRET: string;
   PORT: number;
 }
@@ -23,8 +23,6 @@ const requiredEnvVars = [
   "SUPABASE_URL",
   "SUPABASE_SERVICE_ROLE_KEY",
   "REDIS_URL",
-  "OPENAI_API_KEY",
-  "TELEGRAM_BOT_TOKEN",
   "JWT_SECRET",
 ];
 
@@ -41,8 +39,8 @@ export const env: Env = {
   SUPABASE_URL: process.env.SUPABASE_URL!,
   SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY!,
   REDIS_URL: process.env.REDIS_URL!,
-  OPENAI_API_KEY: process.env.OPENAI_API_KEY!,
-  TELEGRAM_BOT_TOKEN: process.env.TELEGRAM_BOT_TOKEN!,
+  OPENAI_API_KEY: process.env.OPENAI_API_KEY || "",
+  TELEGRAM_BOT_TOKEN: process.env.TELEGRAM_BOT_TOKEN || "",
   JWT_SECRET: process.env.JWT_SECRET!,
   PORT: parseInt(process.env.PORT || "4000", 10),
 };
