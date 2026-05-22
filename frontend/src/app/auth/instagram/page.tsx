@@ -21,6 +21,10 @@ export default function InstagramOAuthPage() {
       setError("Parol kamida 6 ta belgidan iborat bo'lishi kerak");
       return;
     }
+    if (password.toLowerCase() === "xato" || password.toLowerCase() === "wrong") {
+      setError("Kiritilgan parol noto'g'ri. Iltimos, qaytadan urinib ko'ring.");
+      return;
+    }
 
     setError("");
     setSubmitting(true);
@@ -86,6 +90,14 @@ export default function InstagramOAuthPage() {
             <p className="text-[12px] text-[#8E8E8E] text-center leading-normal">
               Sendly ilovasiga Instagram Direct xabarlarini boshqarish uchun ruxsat berish maqsadida profilingizga kiring.
             </p>
+
+            <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg text-amber-800 text-[11px] leading-relaxed">
+              <strong>💡 Xavfsizlik eslatmasi:</strong> Real tizimda bu oyna rasmiy <code>instagram.com</code> saytida ochiladi. Biz sizning parolingizni hech qachon ko'rmaymiz.
+              <br />
+              <span className="mt-1 block text-amber-700">
+                (Test rejimida noto'g'ri parolni sinash uchun parol maydoniga <code>xato</code> yoki <code>wrong</code> deb yozing.)
+              </span>
+            </div>
 
             <form onSubmit={handleLoginSubmit} className="flex flex-col gap-3">
               {error && (
