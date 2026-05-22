@@ -24,7 +24,8 @@
     "analytics": "Аналитика",
     "lessons": "Мини-курс",
     "settings": "Настройки",
-    "help": "Помощь"
+    "help": "Помощь",
+    "ai-agent": "AI Агент"
   },
   "pages": {
     "home": {

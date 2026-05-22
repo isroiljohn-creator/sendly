@@ -73,6 +73,10 @@ export type BotSettings = {
   outreachEnd: string;
   escalationRules: Array<{ id: string; text: string; enabled: boolean }>;
   aiCuratorEnabled?: boolean;
+  fbFormId?: string;
+  targetGroupId?: string;
+  fbAgentPrompt?: string;
+  fbWelcomeMessage?: string;
 };
 
 export type Lesson = {
@@ -165,6 +169,17 @@ O'quvchilarning savollariga faqat va faqat quyida taqdim etilgan darslik/kurs ma
     { id: "esc-4", text: "3 marta ketma-ket javob qoniqarsiz bo'lganda", enabled: true },
   ],
   aiCuratorEnabled: false,
+  fbFormId: "form-1",
+  targetGroupId: "sales",
+  fbAgentPrompt: `# ROL VA IDENTIFIKATSIYA
+Sen Facebook target reklamasidan kelgan lid (mijoz) so'rovlarini tahlil qiluvchi aqlli saralash agentisan.
+
+# VAZIFA
+Kelgan lid ma'lumotlarini (ism, telefon, foydalanuvchi yozgan savollar yoki javoblar) tahlil qilib, quyidagi qoidalar asosida guruhlash:
+1. Agar mijoz narx, chegirma, to'lov yoki sotib olish haqida so'ragan bo'lsa, uni "Sotuvlar" (sales) guruhiga yo'naltir va "High Intent" yoki "Narxga Qiziqqan" tagini qo'sh.
+2. Agar mijoz texnik yordam, kursga kirish yoki boshqa texnik savollar bergan bo'lsa, uni "Qo'llab-quvvatlash" (support) guruhiga yo'naltir va "Support" tagini qo'sh.
+3. Mijozning savolidan kelib chiqib, 2-3 so'zdan iborat AI izoh (qualification summary) yoz.`,
+  fbWelcomeMessage: "Salom {{name}}! So'rovingiz qabul qilindi. Tez orada mutaxassisimiz sizga bog'lanadi. 😊",
 };
 
 const DEMO_MODULES: Module[] = [

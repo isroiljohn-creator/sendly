@@ -24,7 +24,8 @@
     "analytics": "Analytics",
     "lessons": "Mini-course",
     "settings": "Settings",
-    "help": "Help"
+    "help": "Help",
+    "ai-agent": "AI Agent"
   },
   "pages": {
     "home": {

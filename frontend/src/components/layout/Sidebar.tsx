@@ -35,37 +35,46 @@ import { useI18n } from "@/i18n/I18nProvider";
 type NavItem = {
   to: string;
   Icon: ComponentType<LucideProps>;
+  labelKey: string;
   badge?: { kind: "lime" | "dark"; label: string };
 };
 
 const TOP_ITEMS: NavItem[] = [
-  { to: "/", Icon: Home },
-  { to: "/automations", Icon: Zap },
-  { to: "/chats", Icon: MessageSquare },
-  { to: "/contacts", Icon: Users },
-  { to: "/broadcast", Icon: Send },
-  { to: "/analytics", Icon: BarChart3 },
-  { to: "/lessons", Icon: GraduationCap },
-  { to: "/ai-agent", Icon: Sparkles },
+  { to: "/", Icon: Home, labelKey: "nav.home" },
+  { to: "/automations", Icon: Zap, labelKey: "nav.automations" },
+  { to: "/ai-agent", Icon: Sparkles, labelKey: "nav.ai-agent" },
+  { to: "/chats", Icon: MessageSquare, labelKey: "nav.chats" },
+  { to: "/contacts", Icon: Users, labelKey: "nav.contacts" },
+  { to: "/broadcast", Icon: Send, labelKey: "nav.broadcast" },
+  { to: "/analytics", Icon: BarChart3, labelKey: "nav.analytics" },
+  { to: "/lessons", Icon: GraduationCap, labelKey: "nav.lessons" },
 ];
 
 const BOTTOM_ITEMS: NavItem[] = [
-  { to: "/settings", Icon: Settings },
+  { to: "/settings", Icon: Settings, labelKey: "nav.settings" },
 ];
 
 function NavButton({ item, active }: { item: NavItem; active: boolean }) {
-  const { Icon } = item;
+  const { Icon, labelKey } = item;
+  const { t } = useI18n();
+  const label = t(labelKey);
+
   return (
     <Link
       href={item.to}
       className={[
-        "relative grid h-11 w-11 place-items-center rounded-full transition-all duration-150 active:scale-95",
+        "group relative grid h-11 w-11 place-items-center rounded-full transition-all duration-150 active:scale-95",
         active
           ? "bg-black text-[#C7F33C]"
           : "bg-transparent text-[#595959] hover:bg-white hover:text-black",
       ].join(" ")}
     >
       <Icon size={18} strokeWidth={1.75} />
+      
+      {/* Hover Tooltip */}
+      <div className="absolute left-[54px] top-1/2 -translate-y-1/2 pointer-events-none opacity-0 translate-x-[-8px] group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-200 ease-out z-50 whitespace-nowrap bg-black text-white px-3 py-1.5 rounded-lg text-[11px] font-bold shadow-xl border border-neutral-800/60 flex items-center gap-1.5">
+        <span>{label}</span>
+      </div>
     </Link>
   );
 }
