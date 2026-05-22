@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import Link from "next/link";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { db, BotSettings, Lesson, Module } from "@/lib/db";
@@ -59,6 +60,33 @@ export default function AIAgentPage() {
   // Toast notification state
   const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
 
+  // Telegram Bot Verification States
+  const [isTelegramLinked, setIsTelegramLinked] = useState(false);
+  const [telegramBotUsername, setTelegramBotUsername] = useState("");
+
+  // Custom Modal States
+  const [confirmModal, setConfirmModal] = useState<{
+    isOpen: boolean;
+    title: string;
+    message: string;
+    onConfirm: () => void;
+  }>({
+    isOpen: false,
+    title: "",
+    message: "",
+    onConfirm: () => {},
+  });
+
+  const [alertModal, setAlertModal] = useState<{
+    isOpen: boolean;
+    title: string;
+    message: string;
+  }>({
+    isOpen: false,
+    title: "",
+    message: "",
+  });
+
   // Sandbox Simulator States
   const [chatMessages, setChatMessages] = useState<SimulatedMessage[]>([
     {
@@ -76,6 +104,14 @@ export default function AIAgentPage() {
   // Sync state from local storage / db
   useEffect(() => {
     loadDatabase();
+
+    const handleUpdate = () => {
+      loadDatabase();
+    };
+    window.addEventListener("replai-db-update", handleUpdate);
+    return () => {
+      window.removeEventListener("replai-db-update", handleUpdate);
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -94,6 +130,25 @@ export default function AIAgentPage() {
     setModules(loadedModules);
     setLessons(loadedLessons);
 
+    // Check Telegram link status
+    const channels = db.getChannels();
+    const telegramChannel = channels.find(
+      (c) => c.type === "telegram" && c.isConnected && c.telegramToken
+    );
+    if (telegramChannel) {
+      setIsTelegramLinked(true);
+      setTelegramBotUsername(telegramChannel.username);
+    } else {
+      setIsTelegramLinked(false);
+      setTelegramBotUsername("");
+      // If AI Curator was enabled but bot is missing, disable it
+      if (loadedSettings.aiCuratorEnabled) {
+        loadedSettings.aiCuratorEnabled = false;
+        db.saveBotSettings(loadedSettings);
+        setSettings({ ...loadedSettings, aiCuratorEnabled: false });
+      }
+    }
+
     // Default to select first lesson if available
     if (loadedLessons.length > 0 && !selectedLesson) {
       setSelectedLesson(loadedLessons[0]);
@@ -107,23 +162,50 @@ export default function AIAgentPage() {
     }, 3000);
   };
 
+  // Toggle AI Curator state with Telegram connection checking
+  const handleToggleAiCurator = (enabled: boolean) => {
+    if (!settings) return;
+    if (enabled) {
+      // Check Telegram bot status
+      const channels = db.getChannels();
+      const telegramChannel = channels.find(
+        (c) => c.type === "telegram" && c.isConnected && c.telegramToken
+      );
+      if (!telegramChannel) {
+        setAlertModal({
+          isOpen: true,
+          title: "Telegram Bot ulanmagan",
+          message: "AI Agentni faollashtirish uchun avval Telegram botingizni integratsiya qilishingiz kerak. Kanallar bo'limiga o'ting va Telegram bot tokenini kiriting.",
+        });
+        return;
+      }
+    }
+    handleUpdateSettings("aiCuratorEnabled", enabled);
+  };
+
   // Reset to default demo data
   const handleResetDemo = () => {
-    if (window.confirm("Barcha ma'lumotlarni o'chirib, Kurs Yordamchisi namunaviy darslari va AI sozlamalarini qayta yuklashni xohlaysizmi?")) {
-      db.resetToDemo();
-      loadDatabase();
-      setSelectedLesson(null);
-      setChatMessages([
-        {
-          id: `welcome-${Date.now()}`,
-          sender: "bot",
-          text: "Namunaviy demo ma'lumotlar muvaffaqiyatli yuklandi! ⚡️ Savollaringizni berishingiz mumkin.",
-          time: "Hozir",
-          confidence: 100
-        }
-      ]);
-      showToast("Demo ma'lumotlar qayta tiklandi");
-    }
+    setConfirmModal({
+      isOpen: true,
+      title: "Namunaviy ma'lumotlarni yuklash",
+      message: "Barcha ma'lumotlarni o'chirib, Kurs Yordamchisi namunaviy darslari va AI sozlamalarini qayta yuklashni xohlaysizmi?",
+      onConfirm: () => {
+        db.resetToDemo();
+        loadDatabase();
+        setSelectedLesson(null);
+        setChatMessages([
+          {
+            id: `welcome-${Date.now()}`,
+            sender: "bot",
+            text: "Namunaviy demo ma'lumotlar muvaffaqiyatli yuklandi! ⚡️ Savollaringizni berishingiz mumkin.",
+            time: "Hozir",
+            confidence: 100
+          }
+        ]);
+        showToast("Demo ma'lumotlar qayta tiklandi");
+        setConfirmModal(prev => ({ ...prev, isOpen: false }));
+      }
+    });
   };
 
   // Save changes to DB
@@ -164,16 +246,22 @@ export default function AIAgentPage() {
   // Delete module
   const handleDeleteModule = (moduleId: string, e: React.MouseEvent) => {
     e.stopPropagation();
-    if (window.confirm("Ushbu modul va uning ichidagi barcha darslarni o'chirishni tasdiqlaysizmi?")) {
-      db.deleteModule(moduleId);
-      setModules(db.getModules());
-      const remainingLessons = db.getLessons();
-      setLessons(remainingLessons);
-      if (selectedLesson && selectedLesson.moduleId === moduleId) {
-        setSelectedLesson(remainingLessons[0] || null);
+    setConfirmModal({
+      isOpen: true,
+      title: "Modulni o'chirish",
+      message: "Ushbu modul va uning ichidagi barcha darslarni o'chirishni tasdiqlaysizmi?",
+      onConfirm: () => {
+        db.deleteModule(moduleId);
+        setModules(db.getModules());
+        const remainingLessons = db.getLessons();
+        setLessons(remainingLessons);
+        if (selectedLesson && selectedLesson.moduleId === moduleId) {
+          setSelectedLesson(remainingLessons[0] || null);
+        }
+        showToast("Modul o'chirildi");
+        setConfirmModal(prev => ({ ...prev, isOpen: false }));
       }
-      showToast("Modul o'chirildi");
-    }
+    });
   };
 
   // Add new lesson
@@ -191,15 +279,21 @@ export default function AIAgentPage() {
   // Delete lesson
   const handleDeleteLesson = (lessonId: string, e: React.MouseEvent) => {
     e.stopPropagation();
-    if (window.confirm("Ushbu darsni o'chirishni tasdiqlaysizmi?")) {
-      db.deleteLesson(lessonId);
-      const updatedLessons = db.getLessons();
-      setLessons(updatedLessons);
-      if (selectedLesson && selectedLesson.id === lessonId) {
-        setSelectedLesson(updatedLessons[0] || null);
+    setConfirmModal({
+      isOpen: true,
+      title: "Darsni o'chirish",
+      message: "Ushbu darsni o'chirishni tasdiqlaysizmi?",
+      onConfirm: () => {
+        db.deleteLesson(lessonId);
+        const updatedLessons = db.getLessons();
+        setLessons(updatedLessons);
+        if (selectedLesson && selectedLesson.id === lessonId) {
+          setSelectedLesson(updatedLessons[0] || null);
+        }
+        showToast("Dars o'chirildi");
+        setConfirmModal(prev => ({ ...prev, isOpen: false }));
       }
-      showToast("Dars o'chirildi");
-    }
+    });
   };
 
   // Update current lesson transcript or title
@@ -425,6 +519,45 @@ export default function AIAgentPage() {
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
             {/* Left Side: Settings panel */}
             <div className="lg:col-span-7 flex flex-col gap-6">
+              {/* AI Agent Status Card */}
+              <div className="bg-white border border-[#E8E8E8] rounded-[24px] p-6 shadow-sm flex flex-col gap-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className={`w-10 h-10 rounded-full flex items-center justify-center ${settings.aiCuratorEnabled ? "bg-[#C7F33C]/25 text-[#7CA607]" : "bg-gray-100 text-[#707070]"}`}>
+                      <Sparkles size={20} className={settings.aiCuratorEnabled ? "animate-pulse" : ""} />
+                    </div>
+                    <div>
+                      <h3 className="text-[14px] font-bold text-black">AI Kurator holati</h3>
+                      <p className="text-[11px] text-[#707070] mt-0.5">
+                        {settings.aiCuratorEnabled 
+                          ? "AI Kurator hozirda Telegram bot orqali faol ravishda o'quvchilarga javob bermoqda." 
+                          : "AI Kurator o'chirilgan. Savollaringizga Telegram'da avtomatlashtirilgan kalit so'zlar javob beradi."}
+                      </p>
+                    </div>
+                  </div>
+                  <label className="relative inline-flex items-center cursor-pointer shrink-0">
+                    <input
+                      type="checkbox"
+                      checked={settings.aiCuratorEnabled || false}
+                      onChange={(e) => handleToggleAiCurator(e.target.checked)}
+                      className="sr-only peer"
+                    />
+                    <div className="w-11 h-6 bg-[#E8E8E8] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-[#D8D8D8] after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-black"></div>
+                  </label>
+                </div>
+                {isTelegramLinked ? (
+                  <div className="flex items-center gap-2 px-3 py-2 bg-green-50 border border-green-100 rounded-xl text-[11px] text-green-700">
+                    <CheckCircle size={14} className="shrink-0 text-green-500" />
+                    <span>Ulangan Telegram bot: <span className="font-bold text-black">{telegramBotUsername}</span></span>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2 px-3 py-2 bg-amber-50 border border-amber-100 rounded-xl text-[11px] text-amber-700">
+                    <Info size={14} className="shrink-0 text-amber-500" />
+                    <span>Telegram bot ulanmagan. AI Kurator ishlashi uchun avval Telegram botni sozlang.</span>
+                  </div>
+                )}
+              </div>
+
               {/* System Prompt Settings */}
               <div className="bg-white border border-[#E8E8E8] rounded-[24px] p-6 shadow-sm flex flex-col gap-4">
                 <div className="flex items-center justify-between">
@@ -820,7 +953,11 @@ export default function AIAgentPage() {
                   <button
                     onClick={() => {
                       if (modules.length === 0) {
-                        alert("Avval modul yarating!");
+                        setAlertModal({
+                          isOpen: true,
+                          title: "Modul mavjud emas",
+                          message: "Dars yaratish uchun avval kamida bitta modul yaratishingiz kerak.",
+                        });
                         return;
                       }
                       setNewLessonModuleId(modules[0].id);
@@ -1070,6 +1207,72 @@ export default function AIAgentPage() {
                 >
                   Yaratish
                 </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Custom Confirmation Modal */}
+        {confirmModal.isOpen && (
+          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[9999] flex items-center justify-center p-4">
+            <div className="bg-white border border-[#E8E8E8] rounded-[24px] max-w-[420px] w-full p-6 shadow-2xl flex flex-col gap-4 animate-in zoom-in-95 duration-150">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-red-50 text-red-600 flex items-center justify-center shrink-0">
+                  <ShieldAlert size={20} />
+                </div>
+                <h3 className="text-[15px] font-bold text-black">{confirmModal.title}</h3>
+              </div>
+              <p className="text-[12px] text-[#595959] leading-relaxed">
+                {confirmModal.message}
+              </p>
+              <div className="flex items-center justify-end gap-3 mt-2">
+                <button
+                  onClick={() => setConfirmModal(prev => ({ ...prev, isOpen: false }))}
+                  className="px-4 py-2 rounded-xl border border-[#D8D8D8] text-[12px] font-bold text-[#595959] hover:bg-[#F9F9F7] transition-all"
+                >
+                  Bekor qilish
+                </button>
+                <button
+                  onClick={confirmModal.onConfirm}
+                  className="px-4 py-2 rounded-xl bg-black text-[#C7F33C] text-[12px] font-bold hover:bg-black/90 transition-all"
+                >
+                  Tasdiqlash
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Custom Alert Modal */}
+        {alertModal.isOpen && (
+          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[9999] flex items-center justify-center p-4">
+            <div className="bg-white border border-[#E8E8E8] rounded-[24px] max-w-[420px] w-full p-6 shadow-2xl flex flex-col gap-4 animate-in zoom-in-95 duration-150">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-amber-50 text-amber-600 flex items-center justify-center shrink-0">
+                  <Info size={20} />
+                </div>
+                <h3 className="text-[15px] font-bold text-black">{alertModal.title}</h3>
+              </div>
+              <p className="text-[12px] text-[#595959] leading-relaxed">
+                {alertModal.message}
+              </p>
+              <div className="flex items-center justify-end gap-3 mt-2">
+                <button
+                  onClick={() => setAlertModal(prev => ({ ...prev, isOpen: false }))}
+                  className="px-4 py-2 rounded-xl border border-[#D8D8D8] text-[12px] font-bold text-[#595959] hover:bg-[#F9F9F7] transition-all"
+                >
+                  Tushunarli
+                </button>
+                {!isTelegramLinked && alertModal.title.includes("Telegram") && (
+                  <Link
+                    href="/channels"
+                    onClick={() => setAlertModal(prev => ({ ...prev, isOpen: false }))}
+                    className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-black text-[#C7F33C] text-[12px] font-bold hover:bg-black/90 transition-all"
+                  >
+                    <span>Sozlash</span>
+                    <ArrowRight size={13} />
+                  </Link>
+                )}
               </div>
             </div>
           </div>

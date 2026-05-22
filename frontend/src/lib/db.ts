@@ -72,6 +72,7 @@ export type BotSettings = {
   outreachStart: string;
   outreachEnd: string;
   escalationRules: Array<{ id: string; text: string; enabled: boolean }>;
+  aiCuratorEnabled?: boolean;
 };
 
 export type Lesson = {
@@ -163,6 +164,7 @@ O'quvchilarning savollariga faqat va faqat quyida taqdim etilgan darslik/kurs ma
     { id: "esc-3", text: "To'lov yoki sertifikat haqida savol bo'lganda", enabled: true },
     { id: "esc-4", text: "3 marta ketma-ket javob qoniqarsiz bo'lganda", enabled: true },
   ],
+  aiCuratorEnabled: false,
 };
 
 const DEMO_MODULES: Module[] = [

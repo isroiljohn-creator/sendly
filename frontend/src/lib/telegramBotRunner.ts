@@ -209,7 +209,7 @@ async function runBotPollLoop(channelId: string, botState: TelegramBotState) {
                 } else {
                   botReplyText = `🤖 [Oqim: ${matchedAutomation.name}] bot avtomatik javob berdi! Kalit so'z: "${matchedKeyword}"`;
                 }
-              } else {
+              } else if (settings.aiCuratorEnabled) {
                 // 3. AI Curator RAG Logic
                 const rawLessons = dbData["replai_lessons"];
                 const lessons: Lesson[] = rawLessons ? JSON.parse(rawLessons) : [];
