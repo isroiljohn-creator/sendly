@@ -2,6 +2,7 @@
 
 // Types
 export type User = {
+  id?: string;
   email: string;
   fullName: string;
   password?: string;
@@ -161,6 +162,12 @@ export const db = {
     if (!isClient) return null;
     const parsed = safeParse<User | null>(localStorage.getItem("replai_current_user"), null);
     if (parsed && typeof parsed === "object" && typeof parsed.email === "string") {
+      if (!parsed.id) {
+        parsed.id = parsed.email === "admin@sendly.uz"
+          ? "11111111-1111-4111-8111-111111111111"
+          : (typeof crypto !== "undefined" && crypto.randomUUID ? crypto.randomUUID() : "22222222-2222-4222-8222-222222222222");
+        localStorage.setItem("replai_current_user", JSON.stringify(parsed));
+      }
       return parsed;
     }
     return null;
@@ -173,6 +180,7 @@ export const db = {
       return { success: false, error: "Ushbu email bilan allaqachon ro'yxatdan o'tilgan." };
     }
     const newUser: User = { 
+      id: typeof crypto !== "undefined" && crypto.randomUUID ? crypto.randomUUID() : "33333333-3333-4333-8333-333333333333",
       email, 
       fullName, 
       password,
@@ -194,6 +202,7 @@ export const db = {
       let user = users.find((u) => u.email === email);
       if (!user) {
         user = { 
+          id: "11111111-1111-4111-8111-111111111111",
           email, 
           fullName: "Admin Foydalanuvchi", 
           password,
@@ -204,6 +213,9 @@ export const db = {
         users.push(user);
         localStorage.setItem("replai_users", JSON.stringify(users));
       } else {
+        if (!user.id) {
+          user.id = "11111111-1111-4111-8111-111111111111";
+        }
         if (!user.plan) {
           user.plan = "premium";
           user.isCardLinked = true;
@@ -224,6 +236,14 @@ export const db = {
     const user = users.find((u) => u.email === email && u.password === password);
     if (!user) {
       return { success: false, error: "Email yoki parol noto'g'ri." };
+    }
+    if (!user.id) {
+      user.id = typeof crypto !== "undefined" && crypto.randomUUID ? crypto.randomUUID() : "44444444-4444-4444-8444-444444444444";
+      const idx = users.findIndex((u) => u.email === email);
+      if (idx > -1) {
+        users[idx] = user;
+        localStorage.setItem("replai_users", JSON.stringify(users));
+      }
     }
     localStorage.setItem("replai_current_user", JSON.stringify(user));
     notifyUpdate();

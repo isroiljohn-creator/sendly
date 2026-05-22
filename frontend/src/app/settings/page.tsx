@@ -39,7 +39,15 @@ export default function SettingsPage() {
   // Listen to Meta OAuth messages
   useEffect(() => {
     const handleOAuthMessage = (event: MessageEvent) => {
-      if (event.origin !== window.location.origin) return;
+      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "https://instagram-chatbot-engine-production.up.railway.app";
+      const allowedOrigins = [window.location.origin];
+      try {
+        allowedOrigins.push(new URL(backendUrl).origin);
+      } catch {
+        console.error("Invalid NEXT_PUBLIC_BACKEND_URL:", backendUrl);
+      }
+
+      if (!allowedOrigins.includes(event.origin)) return;
 
       if (event.data?.type === "INSTAGRAM_CONNECTED") {
         const { username, name, followers } = event.data;
@@ -97,17 +105,41 @@ export default function SettingsPage() {
     );
   };
 
-  const handleInstagramLogin = () => {
+  const handleInstagramLogin = async () => {
+    if (!currentUser?.id) {
+      showAlert("Xato", "Foydalanuvchi seansidan ID topilmadi. Iltimos, sahifani yangilab qaytadan urinib ko'ring.");
+      return;
+    }
+
     setOAuthWaiting(true);
     const width = 580;
     const height = 700;
     const left = window.screenX + (window.innerWidth - width) / 2;
     const top = window.screenY + (window.innerHeight - height) / 2;
-    window.open(
-      "/auth/instagram",
-      "instagram_oauth",
-      `width=${width},height=${height},left=${left},top=${top},toolbar=no,menubar=no,scrollbars=yes`
-    );
+
+    try {
+      // 1. Fetch backend auth token from Next.js server
+      const tokenRes = await fetch(`/api/auth/token?userId=${currentUser.id}`);
+      if (!tokenRes.ok) {
+        throw new Error("Token olishda xatolik yuz berdi");
+      }
+      const tokenData = await tokenRes.json();
+      const jwtToken = tokenData.token;
+
+      // 2. Open popup pointing directly to the real backend Meta OAuth start flow
+      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "https://instagram-chatbot-engine-production.up.railway.app";
+      const startUrl = `${backendUrl}/oauth/instagram/start?token=${jwtToken}`;
+
+      window.open(
+        startUrl,
+        "instagram_oauth",
+        `width=${width},height=${height},left=${left},top=${top},toolbar=no,menubar=no,scrollbars=yes`
+      );
+    } catch (err: unknown) {
+      setOAuthWaiting(false);
+      const message = err instanceof Error ? err.message : String(err);
+      showAlert("Xatolik", `Instagram-ga ulanishda xatolik yuz berdi: ${message}`);
+    }
   };
 
 
