@@ -92,10 +92,10 @@ export default function InstagramOAuthPage() {
             </p>
 
             <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg text-amber-800 text-[11px] leading-relaxed">
-              <strong>💡 Xavfsizlik eslatmasi:</strong> Real tizimda bu oyna rasmiy <code>instagram.com</code> saytida ochiladi. Biz sizning parolingizni hech qachon ko'rmaymiz.
+              <strong>💡 Xavfsizlik eslatmasi:</strong> Real tizimda bu oyna rasmiy <code>instagram.com</code> saytida ochiladi. {"Biz sizning parolingizni hech qachon ko'rmaymiz."}
               <br />
               <span className="mt-1 block text-amber-700">
-                (Test rejimida noto'g'ri parolni sinash uchun parol maydoniga <code>xato</code> yoki <code>wrong</code> deb yozing.)
+                {"(Test rejimida noto'g'ri parolni sinash uchun parol maydoniga "}<code>xato</code>{" yoki "}<code>wrong</code>{" deb yozing.)"}
               </span>
             </div>
 
