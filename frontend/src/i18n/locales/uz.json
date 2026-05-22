@@ -1,0 +1,121 @@
+{
+  "common": {
+    "create": "Yaratish",
+    "save": "Saqlash",
+    "cancel": "Bekor qilish",
+    "delete": "O'chirish",
+    "connect": "Ulash",
+    "create_bot": "+ Bot yaratish",
+    "connect_instagram": "Ulash →",
+    "date_range": "15 May — 21 May",
+    "active": "Faol",
+    "inactive": "Nofaol",
+    "edit": "Tahrirlash",
+    "status": "Holat",
+    "actions": "Amallar",
+    "back": "Orqaga"
+  },
+  "nav": {
+    "home": "Bosh sahifa",
+    "automations": "Avtomatlashtirish",
+    "contacts": "Mijozlar",
+    "chats": "Chatlar",
+    "broadcast": "Broadcast",
+    "analytics": "Analitika",
+    "lessons": "Mini-kurs",
+    "settings": "Sozlamalar",
+    "help": "Yordam"
+  },
+  "pages": {
+    "home": {
+      "title": "Chatbot natijalari",
+      "breadcrumb": "Boshqaruv / Tahlil",
+      "pro_plan": "Pro plan",
+      "pro_caption": "Pro versiya sotuvi",
+      "activity": "Faollik",
+      "activity_sub": "Bu hafta xabarlar",
+      "revenue": "Daromad",
+      "revenue_sub": "Jami davr uchun",
+      "ig_title": "Instagram\nhisobini ulang",
+      "ig_sub": "Boshlash uchun zarur"
+    },
+    "automations": {
+      "title": "Avtomatlashtirishlar",
+      "breadcrumb": "Boshqaruv / Avtomatlashtirish",
+      "create": "+ Yaratish",
+      "builder_title": "Avtomatlashtirish quruvchi",
+      "builder_breadcrumb": "Avtomatlashtirish / Quruvchi",
+      "save_flow": "Sinxronlash",
+      "run_count": "Ishga tushdi",
+      "trigger_kw": "Kalit so'z",
+      "trigger_story": "Story javob"
+    },
+    "chats": {
+      "title": "Chat xabarlari",
+      "breadcrumb": "Mijozlar / Chatlar",
+      "search_placeholder": "Qidiruv...",
+      "no_chat_selected": "Chatni tanlang",
+      "details": "Mijoz ma'lumotlari",
+      "tags": "Teglar"
+    },
+    "contacts": {
+      "title": "Mijozlar ro'yxati",
+      "breadcrumb": "Boshqaruv / Mijozlar",
+      "table_name": "Mijoz ismi",
+      "table_username": "Instagram",
+      "table_chats": "Jami xabarlar",
+      "search_placeholder": "Ism yoki username bo'yicha qidiruv..."
+    },
+    "broadcast": {
+      "title": "Broadcast xabarnomalari",
+      "breadcrumb": "Boshqaruv / Broadcast",
+      "create_new": "+ Yangi xabar",
+      "table_title": "Xabar mavzusi",
+      "table_status": "Holat",
+      "table_sent": "Yuborildi",
+      "table_date": "Sana"
+    },
+    "analytics": {
+      "title": "Tizim tahlili",
+      "breadcrumb": "Tahlil / Analitika",
+      "optin_rate": "Ulanishlar darajasi",
+      "optin_sub": "Mijoz ulanishi",
+      "avg_completion": "O'rtacha yakunlash",
+      "avg_completion_sub": "Bot muloqotlari",
+      "messages_sent": "Yuborilgan xabarlar",
+      "messages_sent_sub": "Jami davr"
+    },
+    "lessons": {
+      "title": "Mini-kurslar",
+      "breadcrumb": "O'rganish / Kurslar",
+      "play_video": "Tomosha qilish"
+    },
+    "settings": {
+      "title": "Tizim sozlamalari",
+      "breadcrumb": "Boshqaruv / Sozlamalar",
+      "tab_profile": "Profil",
+      "tab_sub": "Obuna",
+      "tab_integrations": "Integratsiyalar",
+      "save_settings": "Sozlamalarni saqlash"
+    },
+    "help": {
+      "title": "Yordam markazi",
+      "breadcrumb": "Qo'llab-quvvatlash / Yordam",
+      "contact_support": "Aloqa markazi",
+      "faq_title": "Ko'p beriladigan savollar",
+      "search_placeholder": "Savollarni izlash..."
+    }
+  },
+  "forms": {
+    "email": "Email",
+    "password": "Parol",
+    "login": "Kirish",
+    "register": "Ro'yxatdan o'tish",
+    "no_account": "Hisobingiz yo'qmi?",
+    "has_account": "Hisobingiz bormi?"
+  },
+  "toast": {
+    "success": "Muvaffaqiyatli",
+    "error": "Xatolik yuz berdi"
+  }
+}

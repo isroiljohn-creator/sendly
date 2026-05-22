@@ -1,0 +1,121 @@
+{
+  "common": {
+    "create": "Создать",
+    "save": "Сохранить",
+    "cancel": "Отмена",
+    "delete": "Удалить",
+    "connect": "Подключить",
+    "create_bot": "+ Создать бота",
+    "connect_instagram": "Подключить →",
+    "date_range": "15 мая — 21 мая",
+    "active": "Активен",
+    "inactive": "Неактивен",
+    "edit": "Редактировать",
+    "status": "Статус",
+    "actions": "Действия",
+    "back": "Назад"
+  },
+  "nav": {
+    "home": "Главная",
+    "automations": "Автоматизации",
+    "contacts": "Клиенты",
+    "chats": "Чаты",
+    "broadcast": "Рассылка",
+    "analytics": "Аналитика",
+    "lessons": "Мини-курс",
+    "settings": "Настройки",
+    "help": "Помощь"
+  },
+  "pages": {
+    "home": {
+      "title": "Результаты чатбота",
+      "breadcrumb": "Клиенты / Аналитика",
+      "pro_plan": "Pro план",
+      "pro_caption": "Продажи Pro версии",
+      "activity": "Активность",
+      "activity_sub": "Сообщений за неделю",
+      "revenue": "Доход",
+      "revenue_sub": "За весь период",
+      "ig_title": "Подключите\nInstagram аккаунт",
+      "ig_sub": "Необходимо для старта"
+    },
+    "automations": {
+      "title": "Автоматизации",
+      "breadcrumb": "Управление / Автоматизации",
+      "create": "+ Создать",
+      "builder_title": "Конструктор автоматизаций",
+      "builder_breadcrumb": "Автоматизации / Конструктор",
+      "save_flow": "Синхронизировать",
+      "run_count": "Запущено",
+      "trigger_kw": "Ключевое слово",
+      "trigger_story": "Ответ на Story"
+    },
+    "chats": {
+      "title": "Сообщения чата",
+      "breadcrumb": "Клиенты / Чаты",
+      "search_placeholder": "Поиск...",
+      "no_chat_selected": "Выберите чат",
+      "details": "Информация о клиенте",
+      "tags": "Теги"
+    },
+    "contacts": {
+      "title": "Список клиентов",
+      "breadcrumb": "Управление / Клиенты",
+      "table_name": "Имя клиента",
+      "table_username": "Instagram",
+      "table_chats": "Всего сообщений",
+      "search_placeholder": "Поиск по имени или username..."
+    },
+    "broadcast": {
+      "title": "Рассылки сообщений",
+      "breadcrumb": "Управление / Рассылка",
+      "create_new": "+ Новая рассылка",
+      "table_title": "Тема рассылки",
+      "table_status": "Статус",
+      "table_sent": "Отправлено",
+      "table_date": "Дата"
+    },
+    "analytics": {
+      "title": "Аналитика системы",
+      "breadcrumb": "Анализ / Аналитика",
+      "optin_rate": "Уровень подписок",
+      "optin_sub": "Подключения клиентов",
+      "avg_completion": "Ср. завершенность",
+      "avg_completion_sub": "Диалоги с ботом",
+      "messages_sent": "Отправлено сообщений",
+      "messages_sent_sub": "Всего за период"
+    },
+    "lessons": {
+      "title": "Мини-курсы",
+      "breadcrumb": "Обучение / Курсы",
+      "play_video": "Смотреть видео"
+    },
+    "settings": {
+      "title": "Настройки системы",
+      "breadcrumb": "Управление / Настройки",
+      "tab_profile": "Профиль",
+      "tab_sub": "Подписка",
+      "tab_integrations": "Интеграции",
+      "save_settings": "Сохранить настройки"
+    },
+    "help": {
+      "title": "Центр поддержки",
+      "breadcrumb": "Поддержка / Помощь",
+      "contact_support": "Контактный центр",
+      "faq_title": "Часто задаваемые вопросы",
+      "search_placeholder": "Поиск вопросов..."
+    }
+  },
+  "forms": {
+    "email": "Электронная почта",
+    "password": "Пароль",
+    "login": "Войти",
+    "register": "Регистрация",
+    "no_account": "Нет аккаунта?",
+    "has_account": "Уже есть аккаунт?"
+  },
+  "toast": {
+    "success": "Успешно",
+    "error": "Произошла ошибка"
+  }
+}

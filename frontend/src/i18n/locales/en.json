@@ -1,0 +1,121 @@
+{
+  "common": {
+    "create": "Create",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "connect": "Connect",
+    "create_bot": "+ Create bot",
+    "connect_instagram": "Connect →",
+    "date_range": "May 15 — May 21",
+    "active": "Active",
+    "inactive": "Inactive",
+    "edit": "Edit",
+    "status": "Status",
+    "actions": "Actions",
+    "back": "Back"
+  },
+  "nav": {
+    "home": "Home",
+    "automations": "Automations",
+    "contacts": "Contacts",
+    "chats": "Chats",
+    "broadcast": "Broadcast",
+    "analytics": "Analytics",
+    "lessons": "Mini-course",
+    "settings": "Settings",
+    "help": "Help"
+  },
+  "pages": {
+    "home": {
+      "title": "Chatbot results",
+      "breadcrumb": "Contacts / Analysis",
+      "pro_plan": "Pro plan",
+      "pro_caption": "Pro version sales",
+      "activity": "Activity",
+      "activity_sub": "Messages this week",
+      "revenue": "Revenue",
+      "revenue_sub": "Total for period",
+      "ig_title": "Connect your\nInstagram account",
+      "ig_sub": "Required to start"
+    },
+    "automations": {
+      "title": "Automations",
+      "breadcrumb": "Manage / Automations",
+      "create": "+ Create",
+      "builder_title": "Automation Builder",
+      "builder_breadcrumb": "Automations / Builder",
+      "save_flow": "Sync Flow",
+      "run_count": "Runs",
+      "trigger_kw": "Keyword",
+      "trigger_story": "Story Reply"
+    },
+    "chats": {
+      "title": "Chat Messages",
+      "breadcrumb": "Contacts / Chats",
+      "search_placeholder": "Search...",
+      "no_chat_selected": "Select a chat",
+      "details": "Customer Details",
+      "tags": "Tags"
+    },
+    "contacts": {
+      "title": "Contact List",
+      "breadcrumb": "Manage / Contacts",
+      "table_name": "Contact Name",
+      "table_username": "Instagram",
+      "table_chats": "Total messages",
+      "search_placeholder": "Search name or username..."
+    },
+    "broadcast": {
+      "title": "Broadcast Notifications",
+      "breadcrumb": "Manage / Broadcast",
+      "create_new": "+ New Broadcast",
+      "table_title": "Broadcast Topic",
+      "table_status": "Status",
+      "table_sent": "Sent",
+      "table_date": "Date"
+    },
+    "analytics": {
+      "title": "System Analytics",
+      "breadcrumb": "Analysis / Analytics",
+      "optin_rate": "Opt-in Rate",
+      "optin_sub": "Customer Opt-in",
+      "avg_completion": "Avg. Completion",
+      "avg_completion_sub": "Bot Conversations",
+      "messages_sent": "Messages Sent",
+      "messages_sent_sub": "Total in Period"
+    },
+    "lessons": {
+      "title": "Mini Courses",
+      "breadcrumb": "Learn / Courses",
+      "play_video": "Watch Video"
+    },
+    "settings": {
+      "title": "System Settings",
+      "breadcrumb": "Manage / Settings",
+      "tab_profile": "Profile",
+      "tab_sub": "Subscription",
+      "tab_integrations": "Integrations",
+      "save_settings": "Save Settings"
+    },
+    "help": {
+      "title": "Help Center",
+      "breadcrumb": "Support / Help",
+      "contact_support": "Contact Support",
+      "faq_title": "Frequently Asked Questions",
+      "search_placeholder": "Search questions..."
+    }
+  },
+  "forms": {
+    "email": "Email",
+    "password": "Password",
+    "login": "Login",
+    "register": "Register",
+    "no_account": "Don't have an account?",
+    "has_account": "Already have an account?"
+  },
+  "toast": {
+    "success": "Success",
+    "error": "An error occurred"
+  }
+}
