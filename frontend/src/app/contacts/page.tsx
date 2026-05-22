@@ -128,7 +128,7 @@ export default function ContactsPage() {
                         <Avatar size={36} />
                         <span className="font-medium text-black">{c.name}</span>
                       </td>
-                      <td className="px-6 py-4 text-[#707070]">@{c.username}</td>
+                      <td className="px-6 py-4 text-[#707070]">{c.username.startsWith("@") ? c.username : `@${c.username}`}</td>
                       <td className="px-6 py-4">
                         <div className="flex flex-wrap gap-1">
                           {c.tags.map((tag, i) => (
