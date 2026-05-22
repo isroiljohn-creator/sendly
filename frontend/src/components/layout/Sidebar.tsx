@@ -22,6 +22,7 @@ import {
   LogOut,
   ChevronRight,
   Check,
+  Sparkles,
 } from "lucide-react";
 import { Instagram } from "@/components/ui/icons";
 import type { ComponentType } from "react";
@@ -45,6 +46,7 @@ const TOP_ITEMS: NavItem[] = [
   { to: "/broadcast", Icon: Send },
   { to: "/analytics", Icon: BarChart3 },
   { to: "/lessons", Icon: GraduationCap },
+  { to: "/ai-agent", Icon: Sparkles },
 ];
 
 const BOTTOM_ITEMS: NavItem[] = [

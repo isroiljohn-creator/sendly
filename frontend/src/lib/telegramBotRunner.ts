@@ -1,6 +1,8 @@
 import fs from "fs";
 import path from "path";
-import { Channel, Automation } from "./db";
+import { Channel, Automation, BotSettings, Lesson, Module } from "./db";
+import { moderateMessage } from "./ai/moderation";
+import { queryRAG } from "./ai/rag";
 
 const DB_FILE = path.join(process.cwd(), "db.json");
 
@@ -50,7 +52,7 @@ async function sendTelegramMessage(token: string, chatId: number | string, text:
   }
 }
 
-function updateDbFile(updater: (dbData: Record<string, string>) => void) {
+async function updateDbFile(updater: (dbData: Record<string, string>) => Promise<void> | void) {
   let dbData: Record<string, string> = {};
   if (fs.existsSync(DB_FILE)) {
     try {
@@ -59,7 +61,7 @@ function updateDbFile(updater: (dbData: Record<string, string>) => void) {
       console.error("Failed to read/parse db.json in updater", e);
     }
   }
-  updater(dbData);
+  await updater(dbData);
   try {
     fs.writeFileSync(DB_FILE, JSON.stringify(dbData, null, 2), "utf-8");
   } catch (e) {
@@ -107,7 +109,7 @@ async function runBotPollLoop(channelId: string, botState: TelegramBotState) {
         
         console.log(`Bot ${channelId} received message from ${chatId}: "${text}"`);
         
-        updateDbFile((dbData) => {
+        await updateDbFile(async (dbData) => {
           // 1. Get chats key
           const chatsKey = `replai_chats_${channelId}`;
           const rawChats = dbData[chatsKey];
@@ -146,55 +148,164 @@ async function runBotPollLoop(channelId: string, botState: TelegramBotState) {
           
           // 4. Bot auto-reply if not liveTakeover
           if (!chat.liveTakeover) {
-            // Read automations
-            const rawAutos = dbData[`replai_automations_${channelId}`];
-            const automations: Automation[] = rawAutos ? JSON.parse(rawAutos) : [];
-            let matchedAutomation: Automation | null = null;
-            let matchedKeyword = "";
-            
-            // Find active automations
-            const activeAutos = automations.filter((a: Automation) => a.active);
-            for (const auto of activeAutos) {
-              if (auto.triggerType === "keyword") {
-                const keywords = auto.triggerDetails
-                  .split(",")
-                  .map((k: string) => k.trim().toLowerCase())
-                  .filter(Boolean);
-                const foundKeyword = keywords.find((kw: string) =>
-                  text.toLowerCase().includes(kw)
-                );
-                if (foundKeyword) {
-                  matchedAutomation = auto;
-                  matchedKeyword = foundKeyword;
-                  break;
+            // Load Settings
+            const rawSettings = dbData["replai_bot_settings"];
+            const settings: BotSettings = rawSettings ? JSON.parse(rawSettings) : {
+              tone: 60,
+              length: 40,
+              humor: 30,
+              systemPrompt: "",
+              topics: [],
+              autoOutreach: true,
+              outreachStart: "09:00",
+              outreachEnd: "21:00",
+              escalationRules: []
+            };
+
+            // 1. Moderate message
+            const moderation = moderateMessage(text, settings.topics || []);
+            let botReplyText = "";
+
+            if (moderation.flagged) {
+              botReplyText = moderation.warningMessage || "Iltimos, yozish qoidalariga rioya qiling. ⚠️";
+            } else {
+              // 2. Check keyword automations
+              const rawAutos = dbData[`replai_automations_${channelId}`];
+              const automations: Automation[] = rawAutos ? JSON.parse(rawAutos) : [];
+              let matchedAutomation: Automation | null = null;
+              let matchedKeyword = "";
+              
+              // Find active automations
+              const activeAutos = automations.filter((a: Automation) => a.active);
+              for (const auto of activeAutos) {
+                if (auto.triggerType === "keyword") {
+                  const keywords = auto.triggerDetails
+                    .split(",")
+                    .map((k: string) => k.trim().toLowerCase())
+                    .filter(Boolean);
+                  const foundKeyword = keywords.find((kw: string) =>
+                    text.toLowerCase().includes(kw)
+                  );
+                  if (foundKeyword) {
+                    matchedAutomation = auto;
+                    matchedKeyword = foundKeyword;
+                    break;
+                  }
+                }
+              }
+              
+              if (matchedAutomation) {
+                // Increment runs count
+                matchedAutomation.runs = String(parseInt(matchedAutomation.runs || "0") + 1);
+                dbData[`replai_automations_${channelId}`] = JSON.stringify(automations);
+                
+                const nameLower = matchedAutomation.name.toLowerCase();
+                if (nameLower.includes("lead magnet") || matchedKeyword === "kitob" || matchedKeyword === "bonus") {
+                  botReplyText = "🤖 Bepul qo'llanma havolasi: https://sendly.uz/book. Obunangiz uchun rahmat! 📚";
+                } else if (matchedKeyword === "/start" || matchedKeyword === "boshlash") {
+                  botReplyText = "🤖 Assalomu alaykum! Sendly chatbot xizmatiga xush kelibsiz. Tizimimiz muvaffaqiyatli ulangan! ⚡️";
+                } else if (matchedKeyword === "narxi" || matchedKeyword === "tarif" || matchedKeyword === "kurs") {
+                  botReplyText = "🤖 Bizning tariflarimiz: \n• Pro: 150,000 so'm/oy (1ta akkaunt)\n• Premium: 1,000,000 so'm/oy (10ta akkaunt)\n\nBatafsil ma'lumot olish yoki ulanish uchun operatorimiz tez orada javob yozadi.";
+                } else {
+                  botReplyText = `🤖 [Oqim: ${matchedAutomation.name}] bot avtomatik javob berdi! Kalit so'z: "${matchedKeyword}"`;
+                }
+              } else {
+                // 3. AI Curator RAG Logic
+                const rawLessons = dbData["replai_lessons"];
+                const lessons: Lesson[] = rawLessons ? JSON.parse(rawLessons) : [];
+                const rawModules = dbData["replai_modules"];
+                const modules: Module[] = rawModules ? JSON.parse(rawModules) : [];
+
+                const studentName = chat.name || "Talaba";
+                const chatHistory = chat.messages
+                  .filter(m => m.text)
+                  .map(m => ({
+                    role: m.sender === "user" ? ("user" as const) : ("model" as const),
+                    parts: [{ text: m.text }]
+                  }));
+
+                try {
+                  const ragResult = await queryRAG(
+                    text,
+                    studentName,
+                    lessons,
+                    modules,
+                    settings,
+                    chatHistory
+                  );
+
+                  // Check escalation rules
+                  let shouldEscalate = false;
+                  
+                  // Explicit human request check
+                  const explicitHumanRequest = ["operator", "inson", "admin", "aloqa", "bog'lanish", "boglanish", "odam"].some(kw => 
+                    text.toLowerCase().includes(kw)
+                  );
+                  if (explicitHumanRequest) {
+                    shouldEscalate = true;
+                  }
+
+                  // Check active settings rules
+                  if (!shouldEscalate) {
+                    for (const rule of settings.escalationRules || []) {
+                      if (!rule.enabled) continue;
+
+                      if (rule.text.includes("60% dan past") && ragResult.confidence < 60) {
+                        shouldEscalate = true;
+                        break;
+                      }
+
+                      if (rule.text.includes("shikoyat") && (
+                        text.toLowerCase().includes("shikoyat") || 
+                        text.toLowerCase().includes("norozi") || 
+                        text.toLowerCase().includes("yomon") || 
+                        text.toLowerCase().includes("ishlamayapti") || 
+                        text.toLowerCase().includes("aldashdi")
+                      )) {
+                        shouldEscalate = true;
+                        break;
+                      }
+
+                      if (rule.text.includes("To'lov") && (
+                        text.toLowerCase().includes("to'lov") || 
+                        text.toLowerCase().includes("tolov") || 
+                        text.toLowerCase().includes("sertifikat") || 
+                        text.toLowerCase().includes("diplom") || 
+                        text.toLowerCase().includes("narxi") || 
+                        text.toLowerCase().includes("pul")
+                      )) {
+                        shouldEscalate = true;
+                        break;
+                      }
+
+                      if (rule.text.includes("3 marta ketma-ket") && (
+                        text.toLowerCase().includes("tushunmadim") || 
+                        text.toLowerCase().includes("operator") || 
+                        text.toLowerCase().includes("inson") || 
+                        text.toLowerCase().includes("odam")
+                      )) {
+                        shouldEscalate = true;
+                        break;
+                      }
+                    }
+                  }
+
+                  if (shouldEscalate) {
+                    chat.liveTakeover = true;
+                    botReplyText = "Kechirasiz, ushbu savolga to'g'ri va aniq javob berish uchun suhbatni inson-kuratorga yo'naltirdim. Tez orada sizga javob yozishadi. 🤝";
+                  } else {
+                    botReplyText = ragResult.text;
+                  }
+                } catch (ragError) {
+                  console.error("RAG logic error in bot runner:", ragError);
+                  botReplyText = "Murojaatingiz uchun rahmat! Tizimda kichik uzilish yuz berdi. Tez orada operatorimiz sizga bog'lanadi. ⚡️";
                 }
               }
             }
             
-            let botReplyText = "";
-            if (matchedAutomation) {
-              // Increment runs count
-              matchedAutomation.runs = String(parseInt(matchedAutomation.runs || "0") + 1);
-              dbData[`replai_automations_${channelId}`] = JSON.stringify(automations);
-              
-              const nameLower = matchedAutomation.name.toLowerCase();
-              if (nameLower.includes("lead magnet") || matchedKeyword === "kitob" || matchedKeyword === "bonus") {
-                botReplyText = "🤖 Bepul qo'llanma havolasi: https://sendly.uz/book. Obunangiz uchun rahmat! 📚";
-              } else if (matchedKeyword === "/start" || matchedKeyword === "boshlash") {
-                botReplyText = "🤖 Assalomu alaykum! Sendly chatbot xizmatiga xush kelibsiz. Tizimimiz muvaffaqiyatli ulangan! ⚡️";
-              } else if (matchedKeyword === "narxi" || matchedKeyword === "tarif" || matchedKeyword === "kurs") {
-                botReplyText = "🤖 Bizning tariflarimiz: \n• Pro: 150,000 so'm/oy (1ta akkaunt)\n• Premium: 1,000,000 so'm/oy (10ta akkaunt)\n\nBatafsil ma'lumot olish yoki ulanish uchun operatorimiz tez orada javob yozadi.";
-              } else {
-                botReplyText = `🤖 [Oqim: ${matchedAutomation.name}] bot avtomatik javob berdi! Kalit so'z: "${matchedKeyword}"`;
-              }
-            } else {
-              // Send fallback reply
-              botReplyText = "Murojaatingiz uchun rahmat! Tez orada operatorimiz sizga bog'lanadi. ⚡️";
-            }
-            
             if (botReplyText) {
               // Send message via Telegram API
-              sendTelegramMessage(botState.token, chatId, botReplyText);
+              await sendTelegramMessage(botState.token, chatId, botReplyText);
               
               // Log the reply
               const botMsg: ChatMessage = {

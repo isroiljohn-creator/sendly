@@ -61,6 +61,33 @@ export type Channel = {
   createdAt: string;
 };
 
+export type BotSettings = {
+  id?: string;
+  tone: number;
+  length: number;
+  humor: number;
+  systemPrompt: string;
+  topics: string[];
+  autoOutreach: boolean;
+  outreachStart: string;
+  outreachEnd: string;
+  escalationRules: Array<{ id: string; text: string; enabled: boolean }>;
+};
+
+export type Lesson = {
+  id: string;
+  moduleId: string;
+  title: string;
+  transcript: string;
+  pdfMaterials?: string[];
+};
+
+export type Module = {
+  id: string;
+  title: string;
+  order: number;
+};
+
 // Initial Demo Data
 const DEMO_CHANNELS: Channel[] = [
   {
@@ -98,6 +125,110 @@ const DEMO_BROADCASTS: Broadcast[] = [
   { id: "2", name: "Vip mijozlar uchun bonus", segment: "VIP foydalanuvchilar", sentCount: "480", date: "Bugun, 09:15", status: "Completed" },
   { id: "3", name: "Qiziqqanlarga eslatma", segment: "Qiziqqan (Leads)", sentCount: "928", date: "Ertaga, 10:00", status: "Pending" },
   { id: "4", name: "Tizimli yangiliklar", segment: "Barcha obunachilar", sentCount: "3,892", date: "15 May, 14:00", status: "Completed" },
+];
+
+const DEFAULT_BOT_SETTINGS: BotSettings = {
+  tone: 60,
+  length: 40,
+  humor: 30,
+  systemPrompt: `# ROL VA IDENTIFIKATSIYA
+Sen marketing kursi o'quvchilariga yordam beruvchi "Mently" nomli shaxsiy AI kuratorsan. Xaraktering: samimiy, do'stona, qisqa va aniq gapiradigan, ortiqcha rasmiyatchilikdan xoli.
+
+# ASOSIY VAZIFA
+O'quvchilarning savollariga faqat va faqat quyida taqdim etilgan darslik/kurs materiallari (KURS MATERIALLARI) asosida tushunarli, qisqa va tabiiy javob berish.
+
+# KURS MATERIALLARI:
+{{context}}
+
+# QAT'IY YO'RIQNOMALAR VA CHEKLOVLAR
+1. Cheklangan Ma'lumot: Faqat berilgan KURS MATERIALLARI ichidagi ma'lumotlardan foydalan. Kurs materialida yo'q bo'lgan ma'lumotlarni o'zingdan to'qib chiqarma!
+2. Noma'lum Savollar: Agar savolning javobi darslik materiallarida mavjud bo'lmasa, muloyimlik bilan mana shu javobni ber:
+   "Afsuski, ushbu savolga darslik materiallarida javob topilmadi. Sizga to'g'ri yo'nalish berish va yordam berish uchun ushbu savolni inson-kuratorga yo'naltirdim. Tez orada javob berishadi. 😊"
+3. Taqiqlangan Mavzular: Siyosat, din, raqobatchi kurslar yoki marketingga aloqasi bo'lmagan mavzular haqida gapirma. Agar bunday savol berilsa, muloyimlik bilan rad et:
+   "Men faqat ushbu marketing kursi bo'yicha savollarga javob bera olaman. Keling, darsimizga qaytamiz! 📚"
+4. Til qoidasi: O'quvchi qaysi tilda va yozuvda yozgan bo'lsa (Lotin yoki Kirill o'zbek yozuvi, Rus tili yoki Ingliz tili), o'sha yozuv va tilda tabiiy javob ber.
+
+# JAVOB FORMATI VA STILI
+- Tabiiylik va Qisqalik: Javoblaring juda qisqa, aniq va londa bo'lsin (ko'pi bilan 2-3 ta gap). Ortiqcha uzun gaplar, kirish so'zlar yoki sun'iy gaplardan qoch. Oddiy suhbatdoshdek tabiiy gapir.
+- Soddalik: Murakkab marketing atamalarini sodda, kundalik tilda tushuntir.
+- Manba ko'rsatmaslik: JAVOBINGGA HECH QANDAY MANBA YOKI SHUNGA O'XSHASH MA'LUMOTLARNI QO'SHMA (Masalan: "Manba: 1-Modul..." kabi yozuvlar umuman bo'lmasligi shart).
+- Emojilar: Faqat o'rinli va me'yorida, minimal foydalan (ko'pi bilan 1-2 ta emoji).`,
+  topics: ["Siyosat", "Din", "Raqobatchilar"],
+  autoOutreach: true,
+  outreachStart: "09:00",
+  outreachEnd: "21:00",
+  escalationRules: [
+    { id: "esc-1", text: "Ishonch darajasi 60% dan past bo'lganda", enabled: true },
+    { id: "esc-2", text: "O'quvchi shikoyat qilganda", enabled: true },
+    { id: "esc-3", text: "To'lov yoki sertifikat haqida savol bo'lganda", enabled: true },
+    { id: "esc-4", text: "3 marta ketma-ket javob qoniqarsiz bo'lganda", enabled: true },
+  ],
+};
+
+const DEMO_MODULES: Module[] = [
+  { id: "mod-1", title: "1-Modul. Asoslar va Kirish", order: 1 },
+  { id: "mod-2", title: "2-Modul. Target marketing", order: 2 },
+  { id: "mod-3", title: "3-Modul. Kontent va SMM", order: 3 },
+  { id: "mod-4", title: "4-Modul. Reklama va Tahlil", order: 4 },
+];
+
+const DEMO_LESSONS: Lesson[] = [
+  {
+    id: "les-1",
+    moduleId: "mod-1",
+    title: "1-Dars. Marketing nima?",
+    transcript: "Marketing — bu mahsulot yoki xizmatni maqsadli mijozlarga yetkazish jarayoni. Marketingning asosiy maqsadi mijozlarning muammolarini aniqlash va ularga yechim taklif qilishdir. Marketing 4P tushunchasiga asoslanadi: Mahsulot (Product), Narx (Price), Joy (Place) va Targ'ibot (Promotion). Yaxshi marketing strategiyasi uchun avvalo bozorni o'rganish, raqobatchilarni tahlil qilish va maqsadli auditoriyani aniqlash kerak. Marketing sotuvdan farq qiladi — marketing uzoq muddatli munosabat qurishga qaratilgan, sotuv esa bir martalik tranzaksiya. Hozirgi kunda digital marketing, ijtimoiy tarmoqlar marketing va kontent marketing kabi yangi yo'nalishlar rivojlanmoqda. Har qanday biznes uchun marketing rejasi tuzish muhim — bu reja maqsadlar, vositalar va byudjetni o'z ichiga olishi kerak.",
+    pdfMaterials: ["qollanma-marketing-asoslari.pdf"]
+  },
+  {
+    id: "les-2",
+    moduleId: "mod-1",
+    title: "2-Dars. Biznes maqsadlar va KPI",
+    transcript: "KPI (Key Performance Indicators) — bu biznes maqsadlarini o'lchash uchun ishlatiladigan asosiy ko'rsatkichlar. Marketing uchun eng muhim KPIlar: konversiya darajasi (conversion rate), mijoz jalb qilish narxi (CAC — Customer Acquisition Cost), mijozning umr bo'yi qiymati (LTV — Lifetime Value), brend tanilishi va savdo hajmi. Maqsad qo'yishda SMART tizimidan foydalaning: Specific (aniq), Measurable (o'lchanadigan), Achievable (erishish mumkin), Relevant (tegishli), Time-bound (muddatli). Masalan, 'oyiga 100 ta yangi mijoz jalb qilish' — bu SMART maqsad. KPIlarni har hafta kuzatib boring va natijalar asosida strategiyangizni moslang.",
+    pdfMaterials: ["kpi-jadval.pdf"]
+  },
+  {
+    id: "les-3",
+    moduleId: "mod-2",
+    title: "1-Dars. Mijozlar segmentatsiyasi",
+    transcript: "Mijozlar segmentatsiyasi — bu yirik bozorni o'xshash xususiyatlarga ega kichik guruhlarga ajratish jarayoni. Segmentatsiya 4 turga bo'linadi: 1) Demografik: yosh, jins, daromad, ta'lim; 2) Geografik: shahar, hudud, mamlakat; 3) Psixografik: qiziqishlar, hayot tarzi, qadriyatlar; 4) Xulq-atvor: sotib olish odatlari, brendga sadoqat. Maqsadli segment tanlashda 3 omilni hisobga oling: segmentning kattaligi, ularga yetib borish imkoniyati va ularning daromad keltirish salohiyati. Persona yaratish — bu maqsadli mijozingizning batafsil portretini chizish. Masalan: '28 yoshli, Toshkentda yashovchi, onlayn biznes ochmoqchi bo'lgan ayol' — bu aniq persona.",
+    pdfMaterials: ["segmentatsiya-jadvali.pdf"]
+  },
+  {
+    id: "les-4",
+    moduleId: "mod-2",
+    title: "2-Dars. Target reklama asoslari",
+    transcript: "Target reklama — bu aniq maqsadli auditoriyaga yo'naltirilgan reklama. Facebook va Instagram'da target reklamani Meta Ads Manager orqali boshqarasiz. Asosiy targeting turlar: demografik (yosh, jins, joylashuv), qiziqishlar bo'yicha (interest targeting), xulq-atvor bo'yicha (behavior targeting), lookalike audience (o'xshash auditoriya) va retargeting (qayta nishonlash). Reklama byudjetini CPC (click uchun narx) va CPM (1000 ta ko'rsatuv uchun narx) ko'rsatkichlari orqali boshqaring. A/B test qiling — bir vaqtda bir nechta reklama varianti ishlab, eng samaralisini aniqlang. Retargeting orqali saytingizga kirgan lekin sotib olmagan foydalanuvchilarni qayta nishonlang.",
+    pdfMaterials: ["target-reklama-qollanma.pdf"]
+  },
+  {
+    id: "les-5",
+    moduleId: "mod-3",
+    title: "1-Dars. SMM strategiya tuzish",
+    transcript: "SMM (Social Media Marketing) — ijtimoiy tarmoqlarda marketing. SMM strategiyasi quyidagilarni o'z ichiga oladi: platforma tanlash (Instagram, Telegram, YouTube, TikTok), kontent kalendar tuzish, auditoriya bilan muloqot va analitika. Instagram'da biznes akkauntini to'g'ri sozlash: profil rasmi, bio, kontakt ma'lumotlar va havolalar. Kontent turlari: ta'lim beruvchi postlar (80%), reklama postlar (20%) — bu 80/20 qoidasi. Stories, Reels va IGTV dan samarali foydalaning. Hashtag strategiyasi: katta (#marketing), o'rta (#uzbekmarketing) va kichik (#toshkentmarketing) hashtaglar aralashmasidan foydalaning. Eng faol vaqt — odatda kechki 7-9 soatlar.",
+    pdfMaterials: ["smm-shablon.xlsx"]
+  },
+  {
+    id: "les-6",
+    moduleId: "mod-3",
+    title: "2-Dars. Kontent yaratish siri",
+    transcript: "Kontent marketing — bu foydali ma'lumot berish orqali mijozlarni jalb qilish. Yaxshi kontent 3 shartga javob beradi: auditoriya uchun foydali, brendga mos va SEO uchun optimallashtirilgan. Kontent turlari: blog maqolalar, video darslar, infografika, podcast, case study va testimoniallar. Kontent ideya topish uchun: mijozlar savollari, raqobatchilar tahlili va trend mavzular. Viral kontent yaratish uchun: his-tuyg'ularni qo'zg'atish, amaliy foydali bo'lish yoki e'tiborni tortuvchi zamonaviy mavzularni tanlash. Kontent kalendarida haftalik rejani tuzib oling: dushanba — ta'lim, chorshanba — case study, juma — motivatsiya. Har bir kontent uchun CTA (Call To Action) qo'shing.",
+    pdfMaterials: ["kontent-plan-shablon.pdf"]
+  },
+  {
+    id: "les-7",
+    moduleId: "mod-4",
+    title: "1-Dars. Reklama byudjetini boshqarish",
+    transcript: "Reklama byudjetini to'g'ri taqsimlash biznesingiz muvaffaqiyatiga to'g'ridan-to'g'ri ta'sir qiladi. ROAS (Return on Ad Spend) — reklama sarfidan daromad ko'rsatkichi, kamida 3x bo'lishi kerak. Byudjet taqsimlash: 50% test reklamalar, 30% muvaffaqiyatli reklamalarni kengaytirish, 20% yangi eksperimentlar. Facebook Ads uchun minimal kunlik byudjet $5-10 dan boshlang. Google Ads uchun keyword bidding strategiyasini tanlang: manual CPC, target CPA yoki ROAS maqsadli. Reklama samaradorligini o'lchash uchun UTM parametrlar va Google Analytics dan foydalaning. Har hafta reklama hisobotini ko'rib chiqing va past samarali reklamalarni o'chiring.",
+    pdfMaterials: ["byudjet-hisobot.xlsx"]
+  },
+  {
+    id: "les-8",
+    moduleId: "mod-4",
+    title: "2-Dars. Analitika va o'sish",
+    transcript: "Marketing analitikasi — bu ma'lumotlar asosida qaror qabul qilish. Google Analytics, Meta Business Suite va Telegram Analytics kabi vositalar orqali o'z natijalaringizni kuzating. Muhim ko'rsatkichlar: trafik manbalari, bounce rate (sahifani tark etish darajasi), o'rtacha sessiya davomiyligi va konversiya yo'llari. Funnel (voronka) tahlili: Awareness (xabardorlik) → Interest (qiziqish) → Decision (qaror) → Action (harakat). Har bir bosqichda qancha odam tushibdi — shu asosda zaif joylarni toping. Growth hacking — bu tezkor o'sish uchun ijodiy eksperimentlar. Referral marketing (tavsiya marketing) eng arzon va samarali usullardan biri. A/B test orqali landing page, email sarlavha va CTA larni doimiy yaxshilab boring.",
+    pdfMaterials: ["analitika-dashboard.pdf"]
+  }
 ];
 
 // Helper wrapper for SSR check
@@ -140,13 +271,16 @@ function safeParse<T>(jsonString: string | null, fallback: T): T {
 }
 
 // DB version — bump this to force-clear old localStorage data
-const DB_VERSION = "v6"; // Bump to clear potentially corrupted states
+const DB_VERSION = "v7"; // Bump to clear potentially corrupted states
 if (isClient && localStorage.getItem("replai_db_version") !== DB_VERSION) {
   localStorage.removeItem("replai_automations");
   localStorage.removeItem("replai_contacts");
   localStorage.removeItem("replai_broadcasts");
   localStorage.removeItem("replai_channels");
   localStorage.removeItem("replai_active_channel");
+  localStorage.removeItem("replai_modules");
+  localStorage.removeItem("replai_lessons");
+  localStorage.removeItem("replai_bot_settings");
   localStorage.setItem("replai_db_version", DB_VERSION);
 }
 
@@ -428,6 +562,9 @@ export const db = {
     localStorage.setItem("replai_channels", JSON.stringify([]));
     localStorage.setItem("replai_groups", JSON.stringify([]));
     localStorage.removeItem("replai_active_channel");
+    localStorage.setItem("replai_modules", JSON.stringify([]));
+    localStorage.setItem("replai_lessons", JSON.stringify([]));
+    localStorage.removeItem("replai_bot_settings");
     
     // Also remove all per-channel automations
     const keys = Object.keys(localStorage);
@@ -446,6 +583,9 @@ export const db = {
     localStorage.setItem("replai_active_channel", "ch_demo_ig");
     localStorage.setItem("replai_contacts", JSON.stringify(DEMO_CONTACTS));
     localStorage.setItem("replai_broadcasts", JSON.stringify(DEMO_BROADCASTS));
+    localStorage.setItem("replai_modules", JSON.stringify(DEMO_MODULES));
+    localStorage.setItem("replai_lessons", JSON.stringify(DEMO_LESSONS));
+    localStorage.setItem("replai_bot_settings", JSON.stringify(DEFAULT_BOT_SETTINGS));
     
     const demoIGAutomations: Automation[] = [
       { id: "1", name: "Lead Magnet (Bepul qo'llanma)", triggerType: "keyword", triggerDetails: "kitob, kurs, bonus", runs: "148", completion: "92%", active: true },
@@ -578,6 +718,97 @@ export const db = {
   deleteGroup(id: string): void {
     const groups = this.getGroups().filter(g => g.id !== id);
     this.saveGroups(groups);
+  },
+
+  // 7. Bot Settings Database
+  getBotSettings(): BotSettings {
+    if (!isClient) return DEFAULT_BOT_SETTINGS;
+    const stored = localStorage.getItem("replai_bot_settings");
+    if (!stored) {
+      localStorage.setItem("replai_bot_settings", JSON.stringify(DEFAULT_BOT_SETTINGS));
+      return DEFAULT_BOT_SETTINGS;
+    }
+    return safeParse<BotSettings>(stored, DEFAULT_BOT_SETTINGS);
+  },
+
+  saveBotSettings(settings: BotSettings): void {
+    if (!isClient) return;
+    localStorage.setItem("replai_bot_settings", JSON.stringify(settings));
+    notifyUpdate();
+  },
+
+  // 8. Modules Database
+  getModules(): Module[] {
+    if (!isClient) return [];
+    const stored = localStorage.getItem("replai_modules");
+    if (!stored) {
+      localStorage.setItem("replai_modules", JSON.stringify(DEMO_MODULES));
+      return DEMO_MODULES;
+    }
+    return safeParse<Module[]>(stored, DEMO_MODULES);
+  },
+
+  saveModules(list: Module[]): void {
+    if (!isClient) return;
+    localStorage.setItem("replai_modules", JSON.stringify(list));
+    notifyUpdate();
+  },
+
+  addModule(title: string): Module {
+    const modules = this.getModules();
+    const newModule: Module = {
+      id: `mod-${Date.now()}`,
+      title,
+      order: modules.length + 1
+    };
+    modules.push(newModule);
+    this.saveModules(modules);
+    return newModule;
+  },
+
+  deleteModule(id: string): void {
+    const modules = this.getModules().filter(m => m.id !== id);
+    this.saveModules(modules);
+    // Also delete associated lessons
+    const lessons = this.getLessons().filter(l => l.moduleId !== id);
+    this.saveLessons(lessons);
+    notifyUpdate();
+  },
+
+  // 9. Lessons Database
+  getLessons(): Lesson[] {
+    if (!isClient) return [];
+    const stored = localStorage.getItem("replai_lessons");
+    if (!stored) {
+      localStorage.setItem("replai_lessons", JSON.stringify(DEMO_LESSONS));
+      return DEMO_LESSONS;
+    }
+    return safeParse<Lesson[]>(stored, DEMO_LESSONS);
+  },
+
+  saveLessons(list: Lesson[]): void {
+    if (!isClient) return;
+    localStorage.setItem("replai_lessons", JSON.stringify(list));
+    notifyUpdate();
+  },
+
+  addLesson(moduleId: string, title: string, transcript: string): Lesson {
+    const lessons = this.getLessons();
+    const newLesson: Lesson = {
+      id: `les-${Date.now()}`,
+      moduleId,
+      title,
+      transcript,
+      pdfMaterials: []
+    };
+    lessons.push(newLesson);
+    this.saveLessons(lessons);
+    return newLesson;
+  },
+
+  deleteLesson(id: string): void {
+    const lessons = this.getLessons().filter(l => l.id !== id);
+    this.saveLessons(lessons);
   },
 
   getAllAutomations(): (Automation & { channel?: Channel })[] {
