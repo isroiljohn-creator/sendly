@@ -32,16 +32,6 @@ export default function LoginPage() {
     }
   };
 
-  const handleDemoSignIn = () => {
-    setError("");
-    const res = db.signIn("admin@sendly.uz", "123456");
-    if (res.success) {
-      window.location.href = "/";
-    } else {
-      setError(res.error || "Xatolik yuz berdi.");
-    }
-  };
-
   return (
     <div className="relative flex min-h-screen w-full flex-col items-center justify-center bg-[#E8E8E8] p-6">
       {/* Language Switcher */}
@@ -117,15 +107,6 @@ export default function LoginPage() {
 
           <Button type="submit" variant="primary" className="mt-2 w-full py-3.5">
             {t("forms.login")}
-          </Button>
-
-          <Button
-            type="button"
-            variant="secondary"
-            onClick={handleDemoSignIn}
-            className="w-full py-3.5 border border-[#E8E8E8] hover:bg-[#F0F0F0]"
-          >
-            Demo hisob bilan kirish
           </Button>
         </form>
 
