@@ -39,7 +39,7 @@ export default function SettingsPage() {
   // Listen to Meta OAuth messages
   useEffect(() => {
     const handleOAuthMessage = (event: MessageEvent) => {
-      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "https://instagram-chatbot-engine-production.up.railway.app";
+      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "https://api.sendly.uz";
       const allowedOrigins = [window.location.origin];
       try {
         allowedOrigins.push(new URL(backendUrl).origin);
@@ -127,7 +127,7 @@ export default function SettingsPage() {
       const jwtToken = tokenData.token;
 
       // 2. Open popup pointing directly to the real backend Meta OAuth start flow
-      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "https://instagram-chatbot-engine-production.up.railway.app";
+      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "https://api.sendly.uz";
       const startUrl = `${backendUrl}/oauth/instagram/start?token=${jwtToken}`;
 
       window.open(
