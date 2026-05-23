@@ -215,11 +215,7 @@ export default function SettingsPage() {
     }
 
     const connectParam = searchParams.get("connect");
-    if (connectParam === "instagram") {
-      setModal("instagram");
-    } else if (connectParam === "telegram") {
-      setModal("telegram");
-    } else if (connectParam === "choose") {
+    if (connectParam) {
       setModal("choose");
     }
 

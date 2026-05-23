@@ -43,7 +43,7 @@ export default function ContactsPage() {
                 <p className="text-[11px] text-white/60">Kontaktlarni ko&apos;rish uchun avval kanal ulang.</p>
               </div>
             </div>
-            <Link href="/settings">
+            <Link href="/settings?connect=choose">
               <button className="bg-white text-black text-[11px] font-semibold py-2 px-4 rounded-full whitespace-nowrap hover:bg-[#F0F0F0] transition-colors">
                 Kanal ulash →
               </button>
@@ -59,7 +59,7 @@ export default function ContactsPage() {
             </div>
             <span className="text-[12px] font-semibold text-black">{activeChannel.username}</span>
             <span className="text-[11px] text-[#707070]">kontaktlari</span>
-            <Link href="/settings" className="text-[10px] text-[#a0a0a0] hover:text-black transition-colors">O&apos;zgartirish →</Link>
+            <Link href="/settings?connect=choose" className="text-[10px] text-[#a0a0a0] hover:text-black transition-colors">O&apos;zgartirish →</Link>
           </div>
         )}
 
@@ -104,7 +104,7 @@ export default function ContactsPage() {
                     : "Tizimda hech qanday bog'langan foydalanuvchi topilmadi."}
                 </p>
                 {!activeChannel && (
-                  <Link href="/settings" className="mt-4">
+                  <Link href="/settings?connect=choose" className="mt-4">
                     <Button variant="primary">Kanal ulash</Button>
                   </Link>
                 )}

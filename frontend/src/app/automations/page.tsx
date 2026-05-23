@@ -361,7 +361,7 @@ export default function AutomationsPage() {
             <div className="flex items-center justify-between text-[10px] uppercase tracking-wider font-extrabold text-[#A0A0A0]">
               <span>Akkauntlar</span>
               <Link
-                href="/settings"
+                href="/settings?connect=choose"
                 className="hover:text-black transition-colors p-0.5 rounded hover:bg-[#F5F5F5]"
                 title="Kanal qo'shish"
               >
@@ -373,7 +373,7 @@ export default function AutomationsPage() {
               {channels.length === 0 ? (
                 <div className="p-3 text-center border border-dashed border-[#E8E8E8] rounded-[16px]">
                   <p className="text-[10px] text-[#A0A0A0] leading-normal">Hozircha hisob ulanmagan.</p>
-                  <Link href="/settings">
+                  <Link href="/settings?connect=choose">
                     <span className="inline-block mt-1 text-[10px] text-blue-600 font-semibold cursor-pointer hover:underline">
                       Kanal ulash →
                     </span>
@@ -491,7 +491,7 @@ export default function AutomationsPage() {
                   <p className="text-[10px] text-white/60">{"Yangi oqim yaratish yoki ishga tushirish uchun avval sahifada hisobni bog'lang."}</p>
                 </div>
               </div>
-              <Link href="/settings">
+              <Link href="/settings?connect=choose">
                 <Button variant="accent" className="text-[10px] py-1.5 px-3.5 rounded-full whitespace-nowrap bg-[#C7F33C] text-black hover:bg-[#b0d82f]">
                   Hisob ulash →
                 </Button>

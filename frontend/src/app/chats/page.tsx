@@ -307,7 +307,7 @@ export default function ChatsPage() {
                 <p className="text-[11px] text-white/60">Chatlarni ko&apos;rish uchun avval kanal ulang.</p>
               </div>
             </div>
-            <Link href="/settings">
+            <Link href="/settings?connect=choose">
               <button className="bg-white text-black text-[11px] font-semibold py-2 px-4 rounded-full whitespace-nowrap hover:bg-[#F0F0F0] transition-colors">
                 Kanal ulash →
               </button>
@@ -323,7 +323,7 @@ export default function ChatsPage() {
             </div>
             <span className="text-[12px] font-semibold text-black">{activeChannel.username}</span>
             <span className="text-[11px] text-[#707070]">inbox</span>
-            <Link href="/settings" className="text-[10px] text-[#a0a0a0] hover:text-black transition-colors">O&apos;zgartirish →</Link>
+            <Link href="/settings?connect=choose" className="text-[10px] text-[#a0a0a0] hover:text-black transition-colors">O&apos;zgartirish →</Link>
           </div>
         )}
 
