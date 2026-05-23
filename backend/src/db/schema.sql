@@ -18,6 +18,13 @@ CREATE TABLE IF NOT EXISTS instagram_accounts (
   username TEXT,
   access_token TEXT NOT NULL,
   is_active BOOLEAN DEFAULT true,
+  fb_agent_enabled BOOLEAN DEFAULT false,
+  fb_form_id TEXT,
+  target_group_id TEXT,
+  fb_agent_prompt TEXT,
+  fb_welcome_message TEXT,
+  fb_field_mappings JSONB DEFAULT '[]'::jsonb,
+  fb_tags TEXT[] DEFAULT '{}',
   created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );

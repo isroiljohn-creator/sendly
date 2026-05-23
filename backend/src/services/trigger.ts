@@ -1,6 +1,7 @@
 import { supabase } from "../config/db";
 import { env } from "../config/env";
 import { decrypt } from "../utils/crypto";
+import { sendInstagramMessage } from "../utils/meta";
 import { executeSessionStep } from "./interpreter";
 import { cancelSessionDelay } from "./queue";
 
@@ -464,3 +465,314 @@ export async function handleIncomingWebhookEvent(payload: WebhookEventPayload): 
     console.error(`[Trigger] Session execution failed for ${newSession.id}:`, err);
   });
 }
+
+export interface LeadgenEventPayload {
+  accountId: string;          // Database ID of instagram_accounts
+  pageId: string;             // Meta Page ID
+  leadgenId: string;          // Meta Leadgen ID
+  formId: string;             // Meta Form ID
+  fieldData?: Array<{ name: string; values: string[] }>;
+}
+
+export async function handleIncomingLeadgenEvent(payload: LeadgenEventPayload): Promise<void> {
+  const { accountId, pageId, leadgenId, formId, fieldData } = payload;
+  console.log(`[Trigger] Handling incoming Leadgen event for account ${accountId}, leadgenId ${leadgenId}, formId ${formId}`);
+
+  // 1. Resolve Instagram Account to verify active state and read settings
+  const { data: account, error: accountErr } = await supabase
+    .from("instagram_accounts")
+    .select("*")
+    .eq("id", accountId)
+    .maybeSingle();
+
+  if (accountErr || !account) {
+    console.error(`[Trigger] Instagram account not found in database for ID ${accountId}:`, accountErr);
+    return;
+  }
+
+  // Check if Facebook agent is enabled
+  if (!account.fb_agent_enabled) {
+    console.log(`[Trigger] Facebook lead handler is disabled for account ${accountId}. Skipping.`);
+    return;
+  }
+
+  // 2. Fetch Lead Field Data if not present
+  let resolvedFieldData = fieldData;
+  if (!resolvedFieldData && env.META_APP_ID !== "123456789") {
+    try {
+      let token = account.access_token;
+      if (token.includes(":")) {
+        token = decrypt(token);
+      }
+      const response = await fetch(
+        `https://graph.facebook.com/v18.0/${leadgenId}?access_token=${encodeURIComponent(token)}`
+      );
+      if (response.ok) {
+        const data = await response.json();
+        resolvedFieldData = data.field_data;
+      } else {
+        console.warn(`[Trigger] Could not fetch lead details from Graph API, HTTP ${response.status}`);
+      }
+    } catch (err) {
+      console.error(`[Trigger] Error fetching lead details from Meta:`, err);
+    }
+  }
+
+  if (!resolvedFieldData) {
+    console.error(`[Trigger] Missing field data for leadgenId ${leadgenId}`);
+    return;
+  }
+
+  // 3. Match Field Mappings
+  const mappings = typeof account.fb_field_mappings === "string" 
+    ? JSON.parse(account.fb_field_mappings) 
+    : (account.fb_field_mappings || []);
+
+  let leadName = "Noma'lum Mijoz";
+  let leadPhone = "Noma'lum Telefon";
+  let leadMessage = "";
+
+  mappings.forEach((m: any) => {
+    const match = resolvedFieldData?.find((fd: any) => fd.name === m.metaField);
+    if (match && match.values && match.values[0]) {
+      if (m.sendlyField === "name") leadName = match.values[0];
+      else if (m.sendlyField === "phone") leadPhone = match.values[0];
+      else if (m.sendlyField === "message") leadMessage = match.values[0];
+    }
+  });
+
+  // Fallback to searching basic field names if mappings didn't find anything
+  if (leadName === "Noma'lum Mijoz") {
+    const nameMatch = resolvedFieldData.find((fd: any) => 
+      ["full_name", "name", "first_name", "last_name", "ism", "familiya"].includes(fd.name.toLowerCase())
+    );
+    if (nameMatch && nameMatch.values && nameMatch.values[0]) {
+      leadName = nameMatch.values[0];
+    }
+  }
+  if (leadPhone === "Noma'lum Telefon") {
+    const phoneMatch = resolvedFieldData.find((fd: any) => 
+      ["phone_number", "phone", "tel", "telefon", "raqam"].includes(fd.name.toLowerCase())
+    );
+    if (phoneMatch && phoneMatch.values && phoneMatch.values[0]) {
+      leadPhone = phoneMatch.values[0];
+    }
+  }
+  if (leadMessage === "") {
+    const msgMatch = resolvedFieldData.find((fd: any) => 
+      ["message", "question", "comment", "notes", "savol", "izoh", "murojaat"].includes(fd.name.toLowerCase())
+    );
+    if (msgMatch && msgMatch.values && msgMatch.values[0]) {
+      leadMessage = msgMatch.values[0];
+    }
+  }
+
+  // 4. Run AI Qualification / Categorization
+  let detectedGroupId = account.target_group_id || "sales";
+  let tags = Array.isArray(account.fb_tags) ? [...account.fb_tags] : [];
+  let summary = "Mijoz reklama formasi orqali murojaat qildi.";
+
+  // If OpenAI key is available, attempt to call OpenAI GPT models
+  let runRuleFallback = true;
+  if (env.OPENAI_API_KEY && env.OPENAI_API_KEY !== "mock_openai_key") {
+    try {
+      const response = await fetch("https://api.openai.com/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${env.OPENAI_API_KEY}`
+        },
+        body: JSON.stringify({
+          model: "gpt-3.5-turbo",
+          messages: [
+            {
+              role: "system",
+              content: account.fb_agent_prompt || "Categorize this customer query to 'sales' or 'support' and provide tags."
+            },
+            {
+              role: "user",
+              content: `Mijoz ismi: ${leadName}\nTelefon raqami: ${leadPhone}\nSavol/Murojaat: ${leadMessage}`
+            }
+          ],
+          response_format: { type: "json_object" }
+        })
+      });
+
+      if (response.ok) {
+        const json = await response.json();
+        const aiData = JSON.parse(json.choices[0].message.content);
+        if (aiData.group) {
+          detectedGroupId = aiData.group.toLowerCase().includes("support") || aiData.group.toLowerCase().includes("qo'llab") ? "support" : "sales";
+        }
+        if (Array.isArray(aiData.tags)) {
+          tags = [...tags, ...aiData.tags];
+        }
+        if (aiData.summary) {
+          summary = aiData.summary;
+        }
+        runRuleFallback = false;
+        console.log(`[Trigger] AI Qualification Success. Group: ${detectedGroupId}, Tags: ${tags.join(", ")}, Summary: ${summary}`);
+      }
+    } catch (openaiErr) {
+      console.error("[Trigger] OpenAI call failed, falling back to rule engine:", openaiErr);
+    }
+  }
+
+  // Rule-based qualification fallback (Uzbek language keywords)
+  if (runRuleFallback) {
+    const msg = leadMessage.toLowerCase();
+    if (
+      msg.includes("narx") ||
+      msg.includes("qancha") ||
+      msg.includes("chegirma") ||
+      msg.includes("to'lov") ||
+      msg.includes("narxi") ||
+      msg.includes("aksiy") ||
+      msg.includes("sotib") ||
+      msg.includes("dollar") ||
+      msg.includes("so'm") ||
+      msg.includes("aksiya") ||
+      msg.includes("skidka") ||
+      msg.includes("pul")
+    ) {
+      detectedGroupId = "sales";
+      tags.push("Yuqori qiziqish", "Narxga qiziqqan");
+      summary = "Mijoz to'lov shakli, narx yoki chegirmalar bo'yinta ma'lumot so'ragan.";
+    } else if (
+      msg.includes("kirish") ||
+      msg.includes("kirmayapti") ||
+      msg.includes("parol") ||
+      msg.includes("kod") ||
+      msg.includes("ochilmadi") ||
+      msg.includes("texnik") ||
+      msg.includes("yordam") ||
+      msg.includes("xatolik") ||
+      msg.includes("muammo") ||
+      msg.includes("sayt") ||
+      msg.includes("ishlamayapti")
+    ) {
+      detectedGroupId = "support";
+      tags.push("Texnik muammo", "Qo'llab-quvvatlash");
+      summary = "Mijoz tizimga kirish yoki texnik nosozlik yuzasidan yordam so'ragan.";
+    } else {
+      detectedGroupId = account.target_group_id || "sales";
+      tags.push("Yangi Lead");
+      summary = leadMessage ? `Mijoz savoli: "${leadMessage}"` : "Mijoz reklama formasi orqali murojaat qildi.";
+    }
+  }
+
+  // Remove duplicates from tags
+  tags = Array.from(new Set(tags.filter(Boolean)));
+
+  // 5. Create or Update Contact in CRM
+  let contact: any = null;
+  const username = `fb_${leadPhone.replace(/\s+/g, "").replace("+", "") || leadgenId}`;
+
+  const { data: existingContact } = await supabase
+    .from("contacts")
+    .select("*")
+    .eq("account_id", account.id)
+    .eq("instagram_user_id", `fb_${leadgenId}`)
+    .maybeSingle();
+
+  const updates: any = {
+    full_name: leadName,
+    username: username,
+    last_message: leadMessage || "Facebook Lead Form submitted",
+    last_message_at: new Date().toISOString(),
+    tags: tags,
+    variables: {
+      qualification_summary: summary,
+      lead_phone: leadPhone,
+      lead_message: leadMessage,
+      form_id: formId,
+      assigned_group: detectedGroupId
+    }
+  };
+
+  if (existingContact) {
+    const { data: updatedContact } = await supabase
+      .from("contacts")
+      .update(updates)
+      .eq("id", existingContact.id)
+      .select()
+      .single();
+    contact = updatedContact;
+  } else {
+    const { data: newContact, error: insertErr } = await supabase
+      .from("contacts")
+      .insert({
+        user_id: account.user_id,
+        account_id: account.id,
+        instagram_user_id: `fb_${leadgenId}`,
+        full_name: leadName,
+        username: username,
+        profile_picture: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100",
+        last_message: leadMessage || "Facebook Lead Form submitted",
+        last_message_at: new Date().toISOString(),
+        tags: tags,
+        variables: updates.variables,
+        dialog_window_open: true,
+        dialog_expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
+      })
+      .select()
+      .single();
+    if (insertErr) {
+      console.error("[Trigger] Error creating contact for Facebook lead:", insertErr);
+      return;
+    }
+    contact = newContact;
+  }
+
+  // 6. Log message in Messages table
+  try {
+    await supabase.from("messages").insert({
+      contact_id: contact.id,
+      direction: "inbound",
+      content: leadMessage || `Facebook lead submitted (Form ID: ${formId})`,
+      message_type: "text",
+      instagram_message_id: null
+    });
+  } catch (logErr) {
+    console.error("[Trigger] Lead inbound message logging failed:", logErr);
+  }
+
+  // 7. Send Auto Welcome Message if configured
+  if (account.fb_welcome_message && contact) {
+    let welcomeMsg = account.fb_welcome_message;
+    welcomeMsg = welcomeMsg.replace(/\{\{\s*name\s*\}\}/gi, leadName);
+
+    console.log(`[Trigger] Dispatching Facebook Welcome Message: "${welcomeMsg}"`);
+
+    let messageId = null;
+    if (env.META_APP_ID !== "123456789") {
+      try {
+        let token = account.access_token;
+        if (token.includes(":")) {
+          token = decrypt(token);
+        }
+        const sendRes = await sendInstagramMessage(token, {
+          recipientId: contact.instagram_user_id,
+          text: welcomeMsg
+        });
+        messageId = sendRes.messageId;
+      } catch (sendErr) {
+        console.error("[Trigger] Failed to send Facebook welcome message:", sendErr);
+      }
+    }
+
+    // Log outbound message
+    try {
+      await supabase.from("messages").insert({
+        contact_id: contact.id,
+        direction: "outbound",
+        content: welcomeMsg,
+        message_type: "text",
+        instagram_message_id: messageId
+      });
+    } catch (logErr) {
+      console.error("[Trigger] Lead welcome message outbound logging failed:", logErr);
+    }
+  }
+}
+

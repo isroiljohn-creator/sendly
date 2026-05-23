@@ -214,6 +214,15 @@ export default function SettingsPage() {
       }
     }
 
+    const connectParam = searchParams.get("connect");
+    if (connectParam === "instagram") {
+      setModal("instagram");
+    } else if (connectParam === "telegram") {
+      setModal("telegram");
+    } else if (connectParam === "choose") {
+      setModal("choose");
+    }
+
     window.addEventListener("replai-db-update", refreshChannels);
     return () => {
       window.removeEventListener("replai-db-update", refreshChannels);

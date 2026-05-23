@@ -969,6 +969,99 @@ async function runTests() {
 
 
     // -----------------------------------------------------------
+    // TEST CASE 8: Facebook Leadgen Webhook Qualification
+    // -----------------------------------------------------------
+    console.log("\n[Test 8] Facebook Leadgen Webhook Qualification");
+
+    // Configure the mock account with Facebook Lead Handler settings
+    const updatedAccount = mockDb.instagram_accounts.find((a) => a.id === mockAccount.id);
+    if (updatedAccount) {
+      updatedAccount.fb_agent_enabled = true;
+      updatedAccount.fb_form_id = "form-1";
+      updatedAccount.target_group_id = "sales";
+      updatedAccount.fb_welcome_message = "Salom {{name}}! Biz tez orada siz bilan bog'lanamiz.";
+      updatedAccount.fb_field_mappings = [
+        { id: "map-1", metaField: "full_name", sendlyField: "name" },
+        { id: "map-2", metaField: "phone_number", sendlyField: "phone" },
+        { id: "map-3", metaField: "user_question", sendlyField: "message" },
+      ];
+      updatedAccount.fb_tags = ["Meta Lead", "AI Qualified"];
+    }
+
+    const leadgenPayload = {
+      object: "page",
+      entry: [
+        {
+          id: "page_insta_1",
+          time: 1600000000,
+          changes: [
+            {
+              field: "leadgen",
+              value: {
+                form_id: "form-1",
+                leadgen_id: "lead_9999",
+                page_id: "page_insta_1",
+                created_time: 1600000000,
+                field_data: [
+                  { name: "full_name", values: ["Sardor Salimov"] },
+                  { name: "phone_number", values: ["+998901234567"] },
+                  { name: "user_question", values: ["Kurs narxi qancha? Chegirma bormi?"] },
+                ],
+              },
+            },
+          ],
+        },
+      ],
+    };
+
+    const leadgenBodyStr = JSON.stringify(leadgenPayload);
+    const leadgenSig = generateSignatureHeader(leadgenBodyStr);
+
+    const resLeadgenWebhook = await makeRequest(
+      "POST",
+      "/webhook/instagram",
+      { "x-hub-signature-256": leadgenSig },
+      leadgenBodyStr
+    );
+
+    if (resLeadgenWebhook.status !== 200 || !resLeadgenWebhook.data.success) {
+      throw new Error(`Leadgen webhook trigger failed: status ${resLeadgenWebhook.status}`);
+    }
+
+    // Yield CPU time to process the async handler
+    await sleep(200);
+
+    // Verify contact creation and fields mapping
+    const createdContact = mockDb.contacts.find((c) => c.instagram_user_id === "fb_lead_9999");
+    if (!createdContact) {
+      throw new Error("Facebook Lead contact not created in database");
+    }
+
+    if (createdContact.full_name !== "Sardor Salimov") {
+      throw new Error(`Facebook Lead name mapping failed: expected 'Sardor Salimov', got '${createdContact.full_name}'`);
+    }
+
+    if (createdContact.variables.lead_phone !== "+998901234567") {
+      throw new Error(`Facebook Lead phone mapping failed: expected '+998901234567', got '${createdContact.variables.lead_phone}'`);
+    }
+
+    // Verify tags were added (should include fb_tags and rule-based tags)
+    if (!createdContact.tags.includes("Yuqori qiziqish") || !createdContact.tags.includes("Meta Lead")) {
+      throw new Error(`Lead qualification tags missing: ${JSON.stringify(createdContact.tags)}`);
+    }
+    console.log("✅ Facebook Lead successfully ingested, mapped, and qualified in database");
+
+    // Verify Welcome message was sent and logged
+    const welcomeLog = mockDb.messages.find(
+      (m) => m.contact_id === createdContact.id && m.direction === "outbound"
+    );
+    if (!welcomeLog || !welcomeLog.content.includes("Salom Sardor Salimov!")) {
+      throw new Error(`Facebook Welcome message not logged correctly: ${JSON.stringify(welcomeLog)}`);
+    }
+    console.log("✅ Facebook Lead welcome message automatically sent and logged successfully");
+
+
+    // -----------------------------------------------------------
     // TERMINATE AND SUCCESS REPORT
     // -----------------------------------------------------------
     console.log("\n=================================================");

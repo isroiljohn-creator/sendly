@@ -2,6 +2,7 @@
 
 import { useI18n } from "@/i18n/I18nProvider";
 import { Card, Button } from "@/components/ui/primitives";
+import Link from "next/link";
 
 export function InstagramConnectCard() {
   const { t } = useI18n();
@@ -33,9 +34,11 @@ export function InstagramConnectCard() {
         </h3>
         <p className="mt-1.5 text-[12px] text-[#9CA3AF]">{t("pages.home.ig_sub")}</p>
 
-        <Button variant="accent" className="mt-5 w-full py-3.5">
-          {t("common.connect_instagram")}
-        </Button>
+        <Link href="/settings?connect=instagram" className="w-full block">
+          <Button variant="accent" className="mt-5 w-full py-3.5">
+            {t("common.connect_instagram")}
+          </Button>
+        </Link>
       </div>
     </Card>
   );

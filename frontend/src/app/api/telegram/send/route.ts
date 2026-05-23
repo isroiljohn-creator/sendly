@@ -61,7 +61,7 @@ export async function POST(request: Request) {
 
     // 2. Log message in db.json if channelId is provided
     if (channelId) {
-      const dbPath = path.join(process.cwd(), "db.json");
+      const dbPath = process.env.DB_FILE_PATH || path.join(process.cwd(), "db.json");
       let dbData: Record<string, string> = {};
       
       if (fs.existsSync(dbPath)) {

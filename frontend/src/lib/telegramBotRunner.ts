@@ -4,7 +4,7 @@ import { Channel, Automation, BotSettings, Lesson, Module } from "./db";
 import { moderateMessage } from "./ai/moderation";
 import { queryRAG } from "./ai/rag";
 
-const DB_FILE = path.join(process.cwd(), "db.json");
+const DB_FILE = process.env.DB_FILE_PATH || path.join(process.cwd(), "db.json");
 
 interface ChatMessage {
   id: string;

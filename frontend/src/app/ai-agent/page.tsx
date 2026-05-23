@@ -405,12 +405,6 @@ export default function AIAgentPage() {
   // Sync state from local storage / db
   useEffect(() => {
     loadDatabase();
-    if (typeof window !== "undefined") {
-      const savedType = localStorage.getItem("sendly_selected_agent_type");
-      if (savedType === "kurator" || savedType === "fb-leads") {
-        setSelectedAgentType(savedType);
-      }
-    }
 
     const handleUpdate = () => {
       loadDatabase();
@@ -991,13 +985,38 @@ export default function AIAgentPage() {
             <div className="bg-white border border-[#E8E8E8] hover:border-black/20 hover:shadow-xl rounded-[28px] p-8 flex flex-col justify-between transition-all group relative overflow-hidden">
               <div className="absolute top-0 right-0 w-24 h-24 bg-[#C7F33C]/10 rounded-bl-full -z-10 group-hover:scale-110 transition-transform" />
               <div className="flex flex-col gap-5">
-                <div className="w-12 h-12 rounded-2xl bg-black text-[#C7F33C] grid place-items-center font-bold text-[18px]">
-                  <Sparkles size={22} />
+                <div className="flex items-center justify-between">
+                  <div className="w-12 h-12 rounded-2xl bg-black text-[#C7F33C] grid place-items-center font-bold text-[18px]">
+                    <Sparkles size={22} />
+                  </div>
+                  {settings?.aiCuratorEnabled ? (
+                    <div className="flex items-center gap-1.5 px-3 py-1.5 bg-[#C7F33C]/20 border border-[#7CA607]/20 rounded-full">
+                      <span className="relative flex h-2 w-2">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#7CA607] opacity-75"></span>
+                        <span className="relative inline-flex rounded-full h-2 w-2 bg-[#7CA607]"></span>
+                      </span>
+                      <span className="text-[10px] font-extrabold text-[#7CA607] uppercase tracking-wider">
+                        Faol
+                      </span>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-full">
+                      <span className="w-2 h-2 rounded-full bg-gray-300"></span>
+                      <span className="text-[10px] font-extrabold text-[#707070] uppercase tracking-wider">
+                        Faolsiz
+                      </span>
+                    </div>
+                  )}
                 </div>
                 <div>
                   <h3 className="text-[18px] font-bold text-black group-hover:text-[#7CA607] transition-colors">
                     AI Kurator (Kurs Yordamchisi)
                   </h3>
+                  {settings?.aiCuratorEnabled && telegramBotUsername && (
+                    <p className="text-[11px] text-[#7CA607] font-semibold mt-1">
+                      Bot: @{telegramBotUsername}
+                    </p>
+                  )}
                   <p className="text-[12px] text-[#707070] mt-2 leading-relaxed">
                     Telegram bot orqali o&apos;quvchilarga darsliklar, transkriptlar va PDF materiallar asosida aqlli, do&apos;stona va aniq javob beruvchi shaxsiy yordamchi (RAG tizimi).
                   </p>
@@ -1051,13 +1070,38 @@ export default function AIAgentPage() {
             <div className="bg-white border border-[#E8E8E8] hover:border-black/20 hover:shadow-xl rounded-[28px] p-8 flex flex-col justify-between transition-all group relative overflow-hidden">
               <div className="absolute top-0 right-0 w-24 h-24 bg-blue-500/5 rounded-bl-full -z-10 group-hover:scale-110 transition-transform" />
               <div className="flex flex-col gap-5">
-                <div className="w-12 h-12 rounded-2xl bg-blue-600 text-white grid place-items-center font-bold text-[18px]">
-                  <Facebook size={22} />
+                <div className="flex items-center justify-between">
+                  <div className="w-12 h-12 rounded-2xl bg-blue-600 text-white grid place-items-center font-bold text-[18px]">
+                    <Facebook size={22} />
+                  </div>
+                  {settings?.fbAgentEnabled ? (
+                    <div className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 border border-blue-200 rounded-full">
+                      <span className="relative flex h-2 w-2">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+                        <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
+                      </span>
+                      <span className="text-[10px] font-extrabold text-blue-600 uppercase tracking-wider">
+                        Faol
+                      </span>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-full">
+                      <span className="w-2 h-2 rounded-full bg-gray-300"></span>
+                      <span className="text-[10px] font-extrabold text-[#707070] uppercase tracking-wider">
+                        Faolsiz
+                      </span>
+                    </div>
+                  )}
                 </div>
                 <div>
                   <h3 className="text-[18px] font-bold text-black group-hover:text-blue-600 transition-colors">
                     Facebook Lead Handler
                   </h3>
+                  {settings?.fbAgentEnabled && (
+                    <p className="text-[11px] text-blue-600 font-semibold mt-1">
+                      Guruh: {db.getGroups().find(g => g.id === (settings.targetGroupId || "sales"))?.name || "Sotuvlar"}
+                    </p>
+                  )}
                   <p className="text-[12px] text-[#707070] mt-2 leading-relaxed">
                     Facebook target reklama formalaridan kelgan lid (mijoz) ma&apos;lumotlarini AI yordamida saralab, guruhlarga yo&apos;naltiruvchi va avtomatik salomlashish xabari yuboruvchi agent.
                   </p>
@@ -1305,6 +1349,33 @@ export default function AIAgentPage() {
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
             {/* Left Side: Settings panel based on activeNode */}
             <div className="lg:col-span-7 flex flex-col gap-6">
+              {/* Facebook Lead Handler Status Card */}
+              <div className="bg-white border border-[#E8E8E8] rounded-[24px] p-6 shadow-sm flex flex-col gap-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className={`w-10 h-10 rounded-full flex items-center justify-center ${settings.fbAgentEnabled ? "bg-blue-50 text-blue-600" : "bg-gray-100 text-[#707070]"}`}>
+                      <Facebook size={20} className={settings.fbAgentEnabled ? "animate-pulse" : ""} />
+                    </div>
+                    <div>
+                      <h3 className="text-[14px] font-bold text-black">Facebook Lead Handler holati</h3>
+                      <p className="text-[11px] text-[#707070] mt-0.5">
+                        {settings.fbAgentEnabled 
+                          ? "AI Agent Facebook target reklamasidan kelgan yangi so'rovlarni avtomatik ravishda guruhga va CRM ga saralab yubormoqda." 
+                          : "Facebook Lead Handler o'chirilgan. So'rovlar CRM-ga tushmaydi."}
+                      </p>
+                    </div>
+                  </div>
+                  <label className="relative inline-flex items-center cursor-pointer shrink-0">
+                    <input
+                      type="checkbox"
+                      checked={settings.fbAgentEnabled || false}
+                      onChange={(e) => handleUpdateSettings("fbAgentEnabled", e.target.checked)}
+                      className="sr-only peer"
+                    />
+                    <div className="w-11 h-6 bg-[#E8E8E8] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-[#D8D8D8] after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                  </label>
+                </div>
+              </div>
               
               {/* TRIGGER CONFIGURATION CARD */}
               {activeNode === "trigger" && (

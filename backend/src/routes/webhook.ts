@@ -2,7 +2,7 @@ import { Router, Response } from "express";
 import { env } from "../config/env";
 import { verifyWebhookSignature, RequestWithRawBody } from "../middleware/signature";
 import { supabase } from "../config/db";
-import { handleIncomingWebhookEvent } from "../services/trigger";
+import { handleIncomingWebhookEvent, handleIncomingLeadgenEvent } from "../services/trigger";
 
 const router = Router();
 
@@ -165,6 +165,39 @@ router.post("/instagram", verifyWebhookSignature, async (req: RequestWithRawBody
             } else {
               console.log("[Webhook] [Comment] Ignoring comment authored by self/unknown user.");
             }
+          }
+        } else if (field === "leadgen" && value) {
+          const pageId = entryId;
+          const leadgenId = value.leadgen_id;
+          const formId = value.form_id;
+          const fieldData = value.field_data;
+
+          let dbAccount = null;
+          try {
+            const { data } = await supabase
+              .from("instagram_accounts")
+              .select("id, username")
+              .eq("instagram_page_id", pageId)
+              .eq("is_active", true)
+              .maybeSingle();
+            dbAccount = data;
+          } catch (dbErr) {
+            console.error("[Webhook] DB query failed when resolving account for leadgen:", dbErr);
+          }
+
+          if (dbAccount) {
+            console.log(`[Webhook] [Leadgen] Received lead gen event for Page ${pageId} (${dbAccount.username}). Form ID: ${formId}, Lead ID: ${leadgenId}`);
+            handleIncomingLeadgenEvent({
+              accountId: dbAccount.id,
+              pageId,
+              leadgenId,
+              formId,
+              fieldData,
+            }).catch((err) => {
+              console.error("[Webhook] Error in handleIncomingLeadgenEvent:", err);
+            });
+          } else {
+            console.warn(`[Webhook] [Leadgen] Received lead gen event for unlinked Page ID: ${pageId}`);
           }
         }
       }

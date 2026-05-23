@@ -3,7 +3,7 @@ import fs from "fs";
 import path from "path";
 import { startTelegramBots } from "@/lib/telegramBotRunner";
 
-const DB_FILE = path.join(process.cwd(), "db.json");
+const DB_FILE = process.env.DB_FILE_PATH || path.join(process.cwd(), "db.json");
 
 function getInitialData() {
   return {};

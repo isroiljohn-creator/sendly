@@ -77,6 +77,7 @@ export type BotSettings = {
   targetGroupId?: string;
   fbAgentPrompt?: string;
   fbWelcomeMessage?: string;
+  fbAgentEnabled?: boolean;
 };
 
 export type Lesson = {
@@ -118,17 +119,17 @@ const DEMO_CHANNELS: Channel[] = [
 ];
 
 const DEMO_CONTACTS: Contact[] = [
-  { id: "1", name: "Aziz Rahimov", username: "@aziz_rahim", status: true, messagesCount: 24, tags: ["Lead", "Qiziqqan"], lastActive: "Bugun, 14:20" },
-  { id: "2", name: "Madina Umarova", username: "@madina_u", status: true, messagesCount: 118, tags: ["Mijoz", "Vip"], lastActive: "Bugun, 11:05" },
-  { id: "3", name: "Sardor Salimov", username: "@sardor_s", status: false, messagesCount: 8, tags: ["Lead"], lastActive: "Kecha, 22:40" },
+  { id: "1", name: "Aziz Rahimov", username: "@aziz_rahim", status: true, messagesCount: 24, tags: ["Ariza", "Qiziqqan"], lastActive: "Bugun, 14:20" },
+  { id: "2", name: "Madina Umarova", username: "@madina_u", status: true, messagesCount: 118, tags: ["Mijoz", "VIP"], lastActive: "Bugun, 11:05" },
+  { id: "3", name: "Sardor Salimov", username: "@sardor_s", status: false, messagesCount: 8, tags: ["Ariza"], lastActive: "Kecha, 22:40" },
   { id: "4", name: "Dilorom Alieva", username: "@dili_alieva", status: true, messagesCount: 42, tags: ["Mijoz"], lastActive: "19 May, 15:30" },
   { id: "5", name: "Farruh Karimov", username: "@farruh_k", status: false, messagesCount: 15, tags: ["Qiziqqan"], lastActive: "18 May, 09:15" },
 ];
 
 const DEMO_BROADCASTS: Broadcast[] = [
   { id: "1", name: "Yangi fasl chegirmalari", segment: "Barcha faol mijozlar", sentCount: "2,418", date: "Bugun, 12:00", status: "Completed" },
-  { id: "2", name: "Vip mijozlar uchun bonus", segment: "VIP foydalanuvchilar", sentCount: "480", date: "Bugun, 09:15", status: "Completed" },
-  { id: "3", name: "Qiziqqanlarga eslatma", segment: "Qiziqqan (Leads)", sentCount: "928", date: "Ertaga, 10:00", status: "Pending" },
+  { id: "2", name: "VIP mijozlar uchun bonus", segment: "VIP foydalanuvchilar", sentCount: "480", date: "Bugun, 09:15", status: "Completed" },
+  { id: "3", name: "Qiziqqanlarga eslatma", segment: "Qiziqqanlar (arizalar)", sentCount: "928", date: "Ertaga, 10:00", status: "Pending" },
   { id: "4", name: "Tizimli yangiliklar", segment: "Barcha obunachilar", sentCount: "3,892", date: "15 May, 14:00", status: "Completed" },
 ];
 
@@ -172,14 +173,15 @@ O'quvchilarning savollariga faqat va faqat quyida taqdim etilgan darslik/kurs ma
   fbFormId: "form-1",
   targetGroupId: "sales",
   fbAgentPrompt: `# ROL VA IDENTIFIKATSIYA
-Sen Facebook target reklamasidan kelgan lid (mijoz) so'rovlarini tahlil qiluvchi aqlli saralash agentisan.
+Sen Facebook target reklamasidan kelgan ariza (mijoz) so'rovlarini tahlil qiluvchi aqlli saralash agentisan.
 
 # VAZIFA
-Kelgan lid ma'lumotlarini (ism, telefon, foydalanuvchi yozgan savollar yoki javoblar) tahlil qilib, quyidagi qoidalar asosida guruhlash:
-1. Agar mijoz narx, chegirma, to'lov yoki sotib olish haqida so'ragan bo'lsa, uni "Sotuvlar" (sales) guruhiga yo'naltir va "High Intent" yoki "Narxga Qiziqqan" tagini qo'sh.
-2. Agar mijoz texnik yordam, kursga kirish yoki boshqa texnik savollar bergan bo'lsa, uni "Qo'llab-quvvatlash" (support) guruhiga yo'naltir va "Support" tagini qo'sh.
-3. Mijozning savolidan kelib chiqib, 2-3 so'zdan iborat AI izoh (qualification summary) yoz.`,
+Kelgan ariza ma'lumotlarini (ism, telefon, foydalanuvchi yozgan savollar yoki javoblar) tahlil qilib, quyidagi qoidalar asosida guruhlash:
+1. Agar mijoz narx, chegirma, to'lov yoki sotib olish haqida so'ragan bo'lsa, uni "Sotuvlar" (sales) guruhiga yo'naltir va "Yuqori qiziqish" yoki "Narxga qiziqqan" tegini qo'sh.
+2. Agar mijoz texnik yordam, kursga kirish yoki boshqa texnik savollar bergan bo'lsa, uni "Qo'llab-quvvatlash" (support) guruhiga yo'naltir va "Qo'llab-quvvatlash" tegini qo'sh.
+3. Mijozning savolidan kelib chiqib, 2-3 so'zdan iborat AI izoh (saralash xulosasi) yoz.`,
   fbWelcomeMessage: "Salom {{name}}! So'rovingiz qabul qilindi. Tez orada mutaxassisimiz sizga bog'lanadi. 😊",
+  fbAgentEnabled: false,
 };
 
 const DEMO_MODULES: Module[] = [
