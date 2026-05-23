@@ -29,7 +29,13 @@ export function verifyWebhookSignature(req: RequestWithRawBody, res: Response, n
     .update(rawBodyPayload)
     .digest("hex");
 
-  if (receivedHash !== expectedHash) {
+  const receivedHashBuffer = Buffer.from(receivedHash, "utf8");
+  const expectedHashBuffer = Buffer.from(expectedHash, "utf8");
+
+  if (
+    receivedHashBuffer.length !== expectedHashBuffer.length ||
+    !crypto.timingSafeEqual(receivedHashBuffer, expectedHashBuffer)
+  ) {
     return res.status(403).json({ error: "Signature verification failed. Payload signature mismatch." });
   }
 

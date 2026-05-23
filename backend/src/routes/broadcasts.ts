@@ -37,15 +37,15 @@ async function processBroadcast(broadcastId: string, userId: string) {
       .update({ status: "sending" })
       .eq("id", broadcastId);
 
-    // 2. Fetch contacts matching the account
-    const { data: contacts, error: contactsErr } = await supabase
+    // 2. Fetch contact count to get total_count
+    const { count: totalCount, error: countErr } = await supabase
       .from("contacts")
-      .select("*")
+      .select("*", { count: "exact", head: true })
       .eq("account_id", broadcast.account_id)
       .eq("user_id", userId);
 
-    if (contactsErr || !contacts) {
-      console.error(`[Broadcast Worker] Contacts fetch failed:`, contactsErr);
+    if (countErr) {
+      console.error(`[Broadcast Worker] Contacts count fetch failed:`, countErr);
       await supabase
         .from("broadcasts")
         .update({ status: "failed" })
@@ -53,14 +53,13 @@ async function processBroadcast(broadcastId: string, userId: string) {
       return;
     }
 
-    // Set total count
-    const totalCount = contacts.length;
+    const total = totalCount || 0;
     await supabase
       .from("broadcasts")
-      .update({ total_count: totalCount })
+      .update({ total_count: total })
       .eq("id", broadcastId);
 
-    if (totalCount === 0) {
+    if (total === 0) {
       console.log(`[Broadcast Worker] No contacts found for broadcast ${broadcastId}`);
       await supabase
         .from("broadcasts")
@@ -87,62 +86,83 @@ async function processBroadcast(broadcastId: string, userId: string) {
 
     let sent = 0;
     let failed = 0;
+    let page = 0;
+    const pageSize = 50;
+    let hasMore = true;
 
-    // 4. Send messages sequentially with 1 second delay between each send
-    for (let i = 0; i < totalCount; i++) {
-      const contact = contacts[i];
+    // 4. Send messages sequentially in paginated chunks
+    while (hasMore) {
+      const { data: contacts, error: contactsErr } = await supabase
+        .from("contacts")
+        .select("*")
+        .eq("account_id", broadcast.account_id)
+        .eq("user_id", userId)
+        .order("created_at", { ascending: true })
+        .range(page * pageSize, (page + 1) * pageSize - 1);
 
-      // Double-check status in database to allow cancellation (if status becomes stopped/failed)
-      const { data: currentBroadcast } = await supabase
-        .from("broadcasts")
-        .select("status")
-        .eq("id", broadcastId)
-        .maybeSingle();
-
-      if (currentBroadcast && currentBroadcast.status !== "sending") {
-        console.log(`[Broadcast Worker] Broadcast ${broadcastId} stopped/cancelled externally.`);
-        return;
+      if (contactsErr || !contacts || contacts.length === 0) {
+        hasMore = false;
+        break;
       }
 
-      console.log(`[Broadcast Worker] Sending broadcast ${i + 1}/${totalCount} to contact ${contact.id}`);
+      for (let i = 0; i < contacts.length; i++) {
+        const contact = contacts[i];
 
-      // Call Meta Graph API client
-      const sendRes = await sendInstagramMessage(account.access_token, {
-        recipientId: contact.instagram_user_id,
-        text: broadcast.message_text,
-      });
+        // Double-check status in database to allow cancellation (if status becomes stopped/failed)
+        const { data: currentBroadcast } = await supabase
+          .from("broadcasts")
+          .select("status")
+          .eq("id", broadcastId)
+          .maybeSingle();
 
-      if (sendRes.success) {
-        sent++;
-        // Log outbound message
-        try {
-          await supabase.from("messages").insert({
-            contact_id: contact.id,
-            direction: "outbound",
-            content: broadcast.message_text,
-            message_type: "text",
-            instagram_message_id: sendRes.messageId,
-          });
-        } catch (logErr) {
-          console.error("[Broadcast Worker] Message log entry insertion failed:", logErr);
+        if (currentBroadcast && currentBroadcast.status !== "sending") {
+          console.log(`[Broadcast Worker] Broadcast ${broadcastId} stopped/cancelled externally.`);
+          return;
         }
-      } else {
-        failed++;
+
+        const currentIndex = page * pageSize + i + 1;
+        console.log(`[Broadcast Worker] Sending broadcast ${currentIndex}/${total} to contact ${contact.id}`);
+
+        // Call Meta Graph API client
+        const sendRes = await sendInstagramMessage(account.access_token, {
+          recipientId: contact.instagram_user_id,
+          text: broadcast.message_text,
+        });
+
+        if (sendRes.success) {
+          sent++;
+          // Log outbound message
+          try {
+            await supabase.from("messages").insert({
+              contact_id: contact.id,
+              direction: "outbound",
+              content: broadcast.message_text,
+              message_type: "text",
+              instagram_message_id: sendRes.messageId,
+            });
+          } catch (logErr) {
+            console.error("[Broadcast Worker] Message log entry insertion failed:", logErr);
+          }
+        } else {
+          failed++;
+        }
+
+        // Update progress in database
+        await supabase
+          .from("broadcasts")
+          .update({
+            sent_count: sent,
+            failed_count: failed,
+          })
+          .eq("id", broadcastId);
+
+        // Throttling: 1 second sleep between sends (except for the last contact)
+        if (currentIndex < total) {
+          await sleep(1000);
+        }
       }
 
-      // Update progress in database
-      await supabase
-        .from("broadcasts")
-        .update({
-          sent_count: sent,
-          failed_count: failed,
-        })
-        .eq("id", broadcastId);
-
-      // Throttling: 1 second sleep between sends (except for the last contact)
-      if (i < totalCount - 1) {
-        await sleep(1000);
-      }
+      page++;
     }
 
     // Set final status to completed

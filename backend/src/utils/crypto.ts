@@ -1,8 +1,9 @@
 import crypto from "crypto";
 import { env } from "../config/env";
 
-// Generate a stable 32-byte encryption key by hashing the JWT_SECRET
-const ENCRYPTION_KEY = crypto.createHash("sha256").update(env.JWT_SECRET).digest();
+// Generate a stable 32-byte encryption key by hashing the ENCRYPTION_SECRET or JWT_SECRET as fallback
+const rawSecret = process.env.ENCRYPTION_SECRET || env.JWT_SECRET;
+const ENCRYPTION_KEY = crypto.createHash("sha256").update(rawSecret).digest();
 const IV_LENGTH = 16; // AES block size is 16 bytes
 
 /**

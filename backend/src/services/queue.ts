@@ -72,6 +72,94 @@ async function resumeSession(sessionId: string, nextBlockId: string) {
 }
 
 /**
+ * Recovers waiting_delay sessions on startup.
+ * Checks for past next_step_at (runs immediately) and future next_step_at (reschedules).
+ */
+export async function recoverStuckSessions(): Promise<void> {
+  console.log("[Recovery] Checking for stuck waiting_delay sessions...");
+  try {
+    const now = new Date();
+    const nowStr = now.toISOString();
+
+    // 1. Fetch sessions stuck in waiting_delay where next_step_at is in the past or null
+    const { data: stuckSessions, error } = await supabase
+      .from("automation_sessions")
+      .select("id, current_block_id, automation_id")
+      .eq("status", "waiting_delay")
+      .or(`next_step_at.lt.${nowStr},next_step_at.is.null`);
+
+    if (error) {
+      console.error("[Recovery] Failed to fetch stuck sessions:", error);
+    } else if (stuckSessions && stuckSessions.length > 0) {
+      console.log(`[Recovery] Found ${stuckSessions.length} stuck sessions. Attempting recovery...`);
+      for (const session of stuckSessions) {
+        const { data: automation } = await supabase
+          .from("automations")
+          .select("flow_data")
+          .eq("id", session.automation_id)
+          .maybeSingle();
+
+        if (!automation) {
+          console.warn(`[Recovery] Automation ${session.automation_id} not found for session ${session.id}. Skipping.`);
+          continue;
+        }
+
+        const blocks = automation.flow_data?.blocks || [];
+        const delayBlock = blocks.find((b: any) => b.id === session.current_block_id);
+        const nextBlockId = delayBlock?.data?.next_block_id;
+
+        if (!nextBlockId) {
+          console.warn(`[Recovery] Could not resolve next block for session ${session.id}. Marking as completed.`);
+          await supabase
+            .from("automation_sessions")
+            .update({ status: "completed" })
+            .eq("id", session.id);
+          continue;
+        }
+
+        console.log(`[Recovery] Resuming session ${session.id} to block ${nextBlockId}`);
+        await resumeSession(session.id, nextBlockId);
+      }
+    }
+
+    // 2. Fetch future sessions to reschedule
+    const { data: futureSessions, error: futErr } = await supabase
+      .from("automation_sessions")
+      .select("id, current_block_id, automation_id, next_step_at")
+      .eq("status", "waiting_delay")
+      .gt("next_step_at", nowStr);
+
+    if (futErr) {
+      console.error("[Recovery] Failed to fetch future sessions:", futErr);
+    } else if (futureSessions && futureSessions.length > 0) {
+      console.log(`[Recovery] Found ${futureSessions.length} future sessions. Rescheduling delays...`);
+      for (const session of futureSessions) {
+        const nextStepAt = new Date(session.next_step_at).getTime();
+        const delaySeconds = Math.max(1, Math.round((nextStepAt - Date.now()) / 1000));
+
+        const { data: automation } = await supabase
+          .from("automations")
+          .select("flow_data")
+          .eq("id", session.automation_id)
+          .maybeSingle();
+
+        if (automation) {
+          const blocks = automation.flow_data?.blocks || [];
+          const delayBlock = blocks.find((b: any) => b.id === session.current_block_id);
+          const nextBlockId = delayBlock?.data?.next_block_id;
+          if (nextBlockId) {
+            await scheduleSessionDelay(session.id, nextBlockId, delaySeconds);
+          }
+        }
+      }
+    }
+  } catch (err) {
+    console.error("[Recovery] Unexpected error during session recovery:", err);
+  }
+}
+
+
+/**
  * Schedules a delayed execution step for a session.
  */
 export async function scheduleSessionDelay(

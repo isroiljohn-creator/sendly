@@ -75,13 +75,37 @@ router.get("/api/referral-links", authMiddleware, async (req: AuthenticatedReque
   }
 });
 
+// In-memory rate limiting map for public redirects to prevent DoS/spam
+const rateLimitMap = new Map<string, { count: number; resetTime: number }>();
+const REFERRAL_LIMIT = 30; // 30 requests per minute
+const LIMIT_WINDOW = 60 * 1000; // 1 minute
+
+function referralRateLimiter(req: any, res: any, next: any) {
+  const ip = req.ip || req.headers["x-forwarded-for"] || req.socket.remoteAddress || "unknown";
+  const now = Date.now();
+  const record = rateLimitMap.get(ip);
+
+  if (!record || now > record.resetTime) {
+    rateLimitMap.set(ip, { count: 1, resetTime: now + LIMIT_WINDOW });
+    return next();
+  }
+
+  if (record.count >= REFERRAL_LIMIT) {
+    console.warn(`[Referral Rate Limit] IP ${ip} exceeded limit.`);
+    return res.status(429).send("Too many requests. Please try again later.");
+  }
+
+  record.count++;
+  return next();
+}
+
 /**
  * GET /r/:code
  * Public route to handle referral link redirection.
  * Increments click count and redirects user to Instagram DM.
  * Expected query parameter: ?ref=<referrerContactId>
  */
-router.get("/r/:code", async (req: Request, res: Response) => {
+router.get("/r/:code", referralRateLimiter, async (req: Request, res: Response) => {
   const { code } = req.params;
   const referrerContactId = req.query.ref as string || "none";
 

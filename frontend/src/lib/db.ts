@@ -219,9 +219,7 @@ export const db = {
     const parsed = safeParse<User | null>(localStorage.getItem("replai_current_user"), null);
     if (parsed && typeof parsed === "object" && typeof parsed.email === "string") {
       if (!parsed.id) {
-        parsed.id = parsed.email === "admin@sendly.uz"
-          ? "11111111-1111-4111-8111-111111111111"
-          : (typeof crypto !== "undefined" && crypto.randomUUID ? crypto.randomUUID() : "22222222-2222-4222-8222-222222222222");
+        parsed.id = typeof crypto !== "undefined" && crypto.randomUUID ? crypto.randomUUID() : "22222222-2222-4222-8222-222222222222";
         localStorage.setItem("replai_current_user", JSON.stringify(parsed));
       }
       return parsed;
@@ -251,42 +249,6 @@ export const db = {
 
   signIn(email: string, password: string): { success: boolean; error?: string } {
     if (!isClient) return { success: false };
-    
-    // Auto-create admin account for easy testing
-    if (email === "admin@sendly.uz" && password === "123456") {
-      const users = this.getUsers();
-      let user = users.find((u) => u.email === email);
-      if (!user) {
-        user = { 
-          id: "11111111-1111-4111-8111-111111111111",
-          email, 
-          fullName: "Admin Foydalanuvchi", 
-          password,
-          isCardLinked: true,
-          cardNumber: "Visa, *1402",
-          plan: "premium"
-        };
-        users.push(user);
-        localStorage.setItem("replai_users", JSON.stringify(users));
-      } else {
-        if (!user.id) {
-          user.id = "11111111-1111-4111-8111-111111111111";
-        }
-        if (!user.plan) {
-          user.plan = "premium";
-          user.isCardLinked = true;
-          user.cardNumber = "Visa, *1402";
-          const idx = users.findIndex((u) => u.email === email);
-          if (idx > -1) {
-            users[idx] = user;
-            localStorage.setItem("replai_users", JSON.stringify(users));
-          }
-        }
-      }
-      localStorage.setItem("replai_current_user", JSON.stringify(user));
-      notifyUpdate();
-      return { success: true };
-    }
 
     const users = this.getUsers();
     const user = users.find((u) => u.email === email && u.password === password);

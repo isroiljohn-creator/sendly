@@ -22,38 +22,23 @@ router.get("/summary", async (req: AuthenticatedRequest, res: Response) => {
 
     if (contactsErr) throw contactsErr;
 
-    // 2. Fetch contact IDs to filter messages and runs
-    const { data: userContacts, error: ucErr } = await supabase
-      .from("contacts")
-      .select("id")
-      .eq("user_id", userId);
+    // 2. Get messages count
+    const { count: msgCount, error: msgErr } = await supabase
+      .from("messages")
+      .select("id, contacts!inner(user_id)", { count: "exact", head: true })
+      .eq("contacts.user_id", userId);
 
-    if (ucErr) throw ucErr;
+    if (msgErr) throw msgErr;
+    const messagesCount = msgCount || 0;
 
-    const contactIds = (userContacts || []).map((c: any) => c.id);
+    // 3. Get runs count
+    const { count: rCount, error: rErr } = await supabase
+      .from("automation_runs")
+      .select("id, contacts!inner(user_id)", { count: "exact", head: true })
+      .eq("contacts.user_id", userId);
 
-    let messagesCount = 0;
-    let runsCount = 0;
-
-    if (contactIds.length > 0) {
-      // Get messages count
-      const { count: msgCount, error: msgErr } = await supabase
-        .from("messages")
-        .select("*", { count: "exact", head: true })
-        .in("contact_id", contactIds);
-
-      if (msgErr) throw msgErr;
-      messagesCount = msgCount || 0;
-
-      // Get runs count
-      const { count: rCount, error: rErr } = await supabase
-        .from("automation_runs")
-        .select("*", { count: "exact", head: true })
-        .in("contact_id", contactIds);
-
-      if (rErr) throw rErr;
-      runsCount = rCount || 0;
-    }
+    if (rErr) throw rErr;
+    const runsCount = rCount || 0;
 
     return res.json({
       summary: {
@@ -136,30 +121,17 @@ router.get("/conversions", async (req: AuthenticatedRequest, res: Response) => {
   const userId = req.user?.user_id;
 
   try {
-    // 1. Fetch contact IDs belonging to user
-    const { data: userContacts, error: ucErr } = await supabase
-      .from("contacts")
-      .select("id")
-      .eq("user_id", userId);
-
-    if (ucErr) throw ucErr;
-
-    const contactIds = (userContacts || []).map((c: any) => c.id);
-
-    if (contactIds.length === 0) {
-      return res.json({ conversions: [], total_conversions: 0 });
-    }
-
-    // 2. Fetch conversions
+    // 1. Fetch conversions using inner join on contacts
     const { data: conversions, error } = await supabase
       .from("conversions")
       .select(`
         id,
         converted_at,
         automation_id,
-        contact_id
+        contact_id,
+        contacts!inner(user_id)
       `)
-      .in("contact_id", contactIds)
+      .eq("contacts.user_id", userId)
       .order("converted_at", { ascending: false });
 
     if (error) throw error;
