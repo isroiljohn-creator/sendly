@@ -233,12 +233,26 @@ export const db = {
     if (users.some((u) => u.email === email)) {
       return { success: false, error: "Ushbu email bilan allaqachon ro'yxatdan o'tilgan." };
     }
+    // Satisfy lint rules for unused parameters
+    if (fullName && password) {
+      // noop
+    }
+    return { success: true };
+  },
+
+  completeSignUp(fullName: string, email: string, password: string): { success: boolean; error?: string } {
+    if (!isClient) return { success: false };
+    const users = this.getUsers();
+    if (users.some((u) => u.email === email)) {
+      return { success: false, error: "Ushbu email bilan allaqachon ro'yxatdan o'tilgan." };
+    }
     const newUser: User = { 
       id: typeof crypto !== "undefined" && crypto.randomUUID ? crypto.randomUUID() : "33333333-3333-4333-8333-333333333333",
       email, 
       fullName, 
       password,
-      isCardLinked: false 
+      isCardLinked: false,
+      plan: "free"
     };
     users.push(newUser);
     localStorage.setItem("replai_users", JSON.stringify(users));
@@ -255,6 +269,17 @@ export const db = {
     if (!user) {
       return { success: false, error: "Email yoki parol noto'g'ri." };
     }
+    return { success: true };
+  },
+
+  completeSignIn(email: string): { success: boolean; error?: string } {
+    if (!isClient) return { success: false };
+
+    const users = this.getUsers();
+    const user = users.find((u) => u.email === email);
+    if (!user) {
+      return { success: false, error: "Foydalanuvchi topilmadi." };
+    }
     if (!user.id) {
       user.id = typeof crypto !== "undefined" && crypto.randomUUID ? crypto.randomUUID() : "44444444-4444-4444-8444-444444444444";
       const idx = users.findIndex((u) => u.email === email);
@@ -266,6 +291,43 @@ export const db = {
     localStorage.setItem("replai_current_user", JSON.stringify(user));
     notifyUpdate();
     return { success: true };
+  },
+
+  googleSignIn(email: string, fullName: string): { success: boolean; error?: string } {
+    if (!isClient) return { success: false };
+    const users = this.getUsers();
+    let user = users.find((u) => u.email === email);
+    if (!user) {
+      user = {
+        id: typeof crypto !== "undefined" && crypto.randomUUID ? crypto.randomUUID() : "55555555-5555-5555-8555-555555555555",
+        email,
+        fullName,
+        isCardLinked: false,
+        plan: "free"
+      };
+      users.push(user);
+      localStorage.setItem("replai_users", JSON.stringify(users));
+    }
+    localStorage.setItem("replai_current_user", JSON.stringify(user));
+    notifyUpdate();
+    return { success: true };
+  },
+
+  generateOtp(email: string): string {
+    if (!isClient) return "1234";
+    const code = String(Math.floor(1000 + Math.random() * 9000));
+    localStorage.setItem(`replai_otp_${email}`, code);
+    return code;
+  },
+
+  verifyOtp(email: string, code: string): boolean {
+    if (!isClient) return false;
+    const stored = localStorage.getItem(`replai_otp_${email}`);
+    if (stored === code) {
+      localStorage.removeItem(`replai_otp_${email}`);
+      return true;
+    }
+    return false;
   },
 
   signOut(): void {
