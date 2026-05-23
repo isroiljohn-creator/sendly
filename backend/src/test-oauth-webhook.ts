@@ -462,17 +462,18 @@ async function runTests() {
     }
     console.log("- Correctly rejected missing state/code with 400.");
 
-    // Test 3.2: With invalid/expired state token
     const invalidState = "invalid_state_token";
     const c2 = await makeRequest("GET", `/oauth/instagram/callback?code=mock_code&state=${invalidState}`);
-    if (c2.status !== 400 || !c2.data.error.includes("state")) {
+    const c2Body = typeof c2.data === "string" ? c2.data : JSON.stringify(c2.data || "");
+    if (c2.status !== 400 || !c2Body.includes("Xavfsizlik")) {
       throw new Error(`OAuth callback with invalid state should return 400, got ${c2.status} (${JSON.stringify(c2.data)})`);
     }
     console.log("- Correctly rejected invalid state JWT with 400.");
 
     // Test 3.3: Successful OAuth Callback (Mock Mode triggered by META_APP_ID = "123456789")
     const c3 = await makeRequest("GET", `/oauth/instagram/callback?code=mock_code&state=${stateParam}`);
-    if (c3.status !== 200 || !c3.data.success) {
+    const c3Body = typeof c3.data === "string" ? c3.data : JSON.stringify(c3.data || "");
+    if (c3.status !== 200 || !c3Body.includes("Muvaffaqiyatli")) {
       throw new Error(`OAuth callback mock run failed: status ${c3.status}, data ${JSON.stringify(c3.data)}`);
     }
     console.log("- Successful mock exchange callback received 200 OK.");

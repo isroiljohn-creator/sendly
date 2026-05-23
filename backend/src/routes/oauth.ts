@@ -221,48 +221,45 @@ router.get("/callback", async (req, res, next) => {
       let acctId = "mock_acct_" + page.id;
 
       // Handle Database persistence gracefully
-      const isMockDb = env.SUPABASE_URL.includes("mockproject.supabase.co");
-      if (!isMockDb) {
-        try {
-          // Check if account already exists in database
-          const { data: existingAcct } = await supabase
+      try {
+        // Check if account already exists in database
+        const { data: existingAcct } = await supabase
+          .from("instagram_accounts")
+          .select("id")
+          .eq("instagram_page_id", page.id)
+          .maybeSingle();
+
+        if (existingAcct) {
+          acctId = existingAcct.id;
+          const { error: updateErr } = await supabase
             .from("instagram_accounts")
+            .update({
+              user_id: userId,
+              username: igDetails.username,
+              access_token: encryptedToken,
+              is_active: true,
+            })
+            .eq("id", acctId);
+
+          if (updateErr) throw updateErr;
+        } else {
+          const { data: newAcct, error: insertErr } = await supabase
+            .from("instagram_accounts")
+            .insert({
+              user_id: userId,
+              instagram_page_id: page.id,
+              username: igDetails.username,
+              access_token: encryptedToken,
+              is_active: true,
+            })
             .select("id")
-            .eq("instagram_page_id", page.id)
-            .maybeSingle();
+            .single();
 
-          if (existingAcct) {
-            acctId = existingAcct.id;
-            const { error: updateErr } = await supabase
-              .from("instagram_accounts")
-              .update({
-                user_id: userId,
-                username: igDetails.username,
-                access_token: encryptedToken,
-                is_active: true,
-              })
-              .eq("id", acctId);
-
-            if (updateErr) throw updateErr;
-          } else {
-            const { data: newAcct, error: insertErr } = await supabase
-              .from("instagram_accounts")
-              .insert({
-                user_id: userId,
-                instagram_page_id: page.id,
-                username: igDetails.username,
-                access_token: encryptedToken,
-                is_active: true,
-              })
-              .select("id")
-              .single();
-
-            if (insertErr) throw insertErr;
-            acctId = newAcct.id;
-          }
-        } catch (dbErr) {
-          console.error("[OAuth] Supabase DB write failed, proceeding with generation:", dbErr);
+          if (insertErr) throw insertErr;
+          acctId = newAcct.id;
         }
+      } catch (dbErr) {
+        console.error("[OAuth] Supabase DB write failed, proceeding with generation:", dbErr);
       }
 
       // Real Flow: Subscribe page to webhook events

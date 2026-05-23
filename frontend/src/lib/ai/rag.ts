@@ -175,9 +175,6 @@ O'quvchilarning savollariga faqat dars materiallari (KURS MATERIALLARI) asosida 
           generationConfig: {
             temperature: 0.5 + (settings.humor || 30) / 200, // Dynamic temperature
             maxOutputTokens: 1024,
-            thinkingConfig: {
-              thinkingBudget: 0,
-            },
           },
         }),
       }
