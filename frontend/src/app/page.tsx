@@ -13,7 +13,8 @@ import { Button } from "@/components/ui/primitives";
 import { useI18n } from "@/i18n/I18nProvider";
 import { ChevronDown } from "lucide-react";
 import { db } from "@/lib/db";
-import type { Channel, Contact, Automation } from "@/lib/db";
+import type { Channel, Contact, Automation, User } from "@/lib/db";
+import { LandingPageView } from "@/components/landing/LandingPageView";
 
 type RangeKey = "today" | "7days" | "30days" | "all";
 
@@ -84,7 +85,11 @@ const RANGE_PRESETS: Record<RangeKey, RangeData> = {
 export default function Home() {
   const { t } = useI18n();
 
-  // State
+  // Authentication State
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [isAuthLoaded, setIsAuthLoaded] = useState(false);
+
+  // Dashboard States
   const [selectedRangeKey, setSelectedRangeKey] = useState<RangeKey>("7days");
   const [isDateOpen, setIsDateOpen] = useState(false);
   
@@ -112,16 +117,22 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
-    const ch = db.getActiveChannel();
-    setActiveChannel(ch);
-    setChannels(db.getChannels());
-    setContacts(db.getContacts());
-    if (ch) {
-      setAutomations(db.getChannelAutomations(ch.id));
-    } else {
-      setAutomations([]);
+    const user = db.getCurrentUser();
+    setCurrentUser(user);
+    setIsAuthLoaded(true);
+
+    if (user) {
+      const ch = db.getActiveChannel();
+      setActiveChannel(ch);
+      setChannels(db.getChannels());
+      setContacts(db.getContacts());
+      if (ch) {
+        setAutomations(db.getChannelAutomations(ch.id));
+      } else {
+        setAutomations([]);
+      }
+      setIsLoaded(true);
     }
-    setIsLoaded(true);
   }, []);
 
   const getDynamicStats = (rangeKey: RangeKey): RangeData => {
@@ -239,6 +250,20 @@ export default function Home() {
     };
   };
 
+  if (!isAuthLoaded) {
+    return (
+      <div className="flex h-screen items-center justify-center bg-[#070708] text-white">
+        Yuklanmoqda...
+      </div>
+    );
+  }
+
+  // Render Landing Page for guest users
+  if (!currentUser) {
+    return <LandingPageView />;
+  }
+
+  // Render Dashboard for authenticated users
   const activeRange = getDynamicStats(selectedRangeKey);
 
   return (
@@ -323,13 +348,13 @@ export default function Home() {
             <h3 className="text-[17px] font-semibold text-black leading-none">
               {"Yangi Bot yaratish"}
             </h3>
-            <p className="text-[12px] text-[#707070] mt-2 leading-relaxed">
+            <p className="text-[12px] text-[#707075] mt-2 leading-relaxed">
               {"Avtomatlashtirish oqimini yaratish uchun bot parametrlarini kiriting."}
             </p>
             
             <div className="mt-5 flex flex-col gap-4">
               <div className="flex flex-col gap-1.5">
-                <label className="text-[11px] font-semibold text-[#707070] px-1">
+                <label className="text-[11px] font-semibold text-[#707075] px-1">
                   {"Bot nomi"}
                 </label>
                 <input
@@ -343,7 +368,7 @@ export default function Home() {
               </div>
               
               <div className="flex flex-col gap-1.5">
-                <label className="text-[11px] font-semibold text-[#707070] px-1">
+                <label className="text-[11px] font-semibold text-[#707075] px-1">
                   {"Trigger turi"}
                 </label>
                 <div className="flex gap-2">
