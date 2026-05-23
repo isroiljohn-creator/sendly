@@ -1,9 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import Link from "next/link";
 import { 
-  Zap, 
   Bot, 
   ArrowRight, 
   Check, 
@@ -15,14 +14,89 @@ import {
   MessageCircle, 
   Menu, 
   X,
-  Play,
-  Sparkles
+  User as UserIcon
 } from "lucide-react";
 
 // Interactive Simulator Messages
 interface SimMessage {
   sender: "user" | "bot";
   text: string;
+}
+
+// 3D Tilt Robot Container
+function Robot3DContainer() {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [transformStyle, setTransformStyle] = useState("");
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!containerRef.current) return;
+    const card = containerRef.current;
+    const rect = card.getBoundingClientRect();
+    const x = e.clientX - rect.left - rect.width / 2;
+    const y = e.clientY - rect.top - rect.height / 2;
+    
+    // Max rotation is 12 degrees
+    const rX = -(y / (rect.height / 2)) * 12;
+    const rY = (x / (rect.width / 2)) * 12;
+    
+    setTransformStyle(`rotateX(${rX}deg) rotateY(${rY}deg) scale(1.02)`);
+  };
+
+  const handleMouseLeave = () => {
+    setTransformStyle("");
+  };
+
+  return (
+    <div 
+      className="relative flex items-center justify-center p-4 transition-transform duration-300 ease-out cursor-pointer z-10"
+      style={{ perspective: "1000px" }}
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
+    >
+      <style>{`
+        @keyframes float {
+          0%, 100% {
+            transform: translateY(0px) rotate(0deg);
+          }
+          50% {
+            transform: translateY(-20px) rotate(1deg);
+          }
+        }
+        @keyframes shadow {
+          0%, 100% {
+            transform: translateX(-50%) scale(1);
+            opacity: 0.4;
+          }
+          50% {
+            transform: translateX(-50%) scale(0.85);
+            opacity: 0.15;
+          }
+        }
+      `}</style>
+      <div 
+        ref={containerRef}
+        className="relative flex items-center justify-center transition-all duration-300 ease-out select-none"
+        style={{ transform: transformStyle, transformStyle: "preserve-3d" }}
+      >
+        {/* Glow behind the robot */}
+        <div className="absolute h-[340px] w-[340px] rounded-full bg-[#C7F33C]/20 blur-[60px] -z-10 animate-pulse" />
+        
+        {/* 3D Robot Image */}
+        <img 
+          src="/robot.png" 
+          alt="Sendly 3D Waving Robot" 
+          className="w-[320px] sm:w-[400px] h-[320px] sm:h-[400px] object-contain drop-shadow-[0_25px_60px_rgba(0,0,0,0.06)]"
+          style={{ animation: "float 6s ease-in-out infinite" }}
+        />
+
+        {/* Dynamic lower shadow */}
+        <div 
+          className="absolute bottom-[-15px] left-1/2 w-[220px] h-[20px] rounded-full bg-black/10 blur-[10px] -z-10" 
+          style={{ animation: "shadow 6s ease-in-out infinite" }}
+        />
+      </div>
+    </div>
+  );
 }
 
 export function LandingPageView() {
@@ -40,7 +114,6 @@ export function LandingPageView() {
   ]);
 
   const handleSimButtonClick = (btnText: string) => {
-    // Add user message
     const updated = [...simMessages, { sender: "user" as const, text: btnText }];
     setSimMessages(updated);
     setSimButtons([]); // Temporarily disable buttons
@@ -95,40 +168,45 @@ export function LandingPageView() {
   ];
 
   return (
-    <div className="min-h-screen bg-[#070708] text-[#E8E8E8] font-sans overflow-x-hidden selection:bg-[#C7F33C] selection:text-[#070708]">
+    <div className="min-h-screen bg-[#FAFAF9] text-[#0C0C0E] font-sans overflow-x-hidden selection:bg-[#C7F33C] selection:text-[#0C0C0E]">
       
-      {/* Glow effects */}
-      <div className="absolute top-[-10%] left-[-10%] w-[50vw] h-[50vw] rounded-full bg-[#C7F33C]/10 blur-[120px] pointer-events-none z-0" />
-      <div className="absolute top-[30%] right-[-10%] w-[45vw] h-[45vw] rounded-full bg-purple-600/10 blur-[130px] pointer-events-none z-0" />
-      <div className="absolute bottom-[10%] left-[20%] w-[40vw] h-[40vw] rounded-full bg-[#C7F33C]/5 blur-[120px] pointer-events-none z-0" />
-
       {/* HEADER / NAVBAR */}
-      <header className="sticky top-0 z-50 w-full border-b border-white/5 bg-[#070708]/80 backdrop-blur-md transition-all">
+      <header className="sticky top-0 z-50 w-full border-b border-[#E8E8E8] bg-white/95 backdrop-blur-md">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
-          <div className="flex items-center gap-3">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#C7F33C] text-black shadow-[0_0_20px_rgba(199,243,60,0.4)]">
-              <Zap size={18} className="fill-black" />
+          <div className="flex items-center gap-6">
+            <Link href="/" className="flex items-center gap-3">
+              <span className="text-[22px] font-[900] tracking-tighter text-black uppercase flex items-center gap-1.5">
+                {"Sendly"}
+                <span className="h-2 w-2 rounded-full bg-[#C7F33C]" />
+              </span>
+            </Link>
+            
+            {/* Language Selector Dropdown style */}
+            <div className="flex items-center gap-1 text-[12px] font-semibold text-black/60 bg-[#F0F0F0] px-2.5 py-1 rounded-full cursor-pointer hover:bg-[#E8E8E8] transition-colors">
+              <span>{"UZ"}</span>
+              <ChevronDown size={12} />
             </div>
-            <span className="text-xl font-bold tracking-tight text-white">{"Sendly"}<span className="text-[#C7F33C]">{".uz"}</span></span>
           </div>
 
-          {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center gap-8 text-[13.5px] font-medium text-[#A0A0A5]">
-            <a href="#features" className="hover:text-white transition-colors">{"Xususiyatlar"}</a>
-            <a href="#simulator" className="hover:text-white transition-colors">{"Demo Bot"}</a>
-            <a href="#pricing" className="hover:text-white transition-colors">{"Tariflar"}</a>
-            <a href="#faq" className="hover:text-white transition-colors">{"FAQ"}</a>
+          {/* Center Navigation Menu */}
+          <nav className="hidden md:flex items-center gap-8 text-[13.5px] font-bold text-black/60">
+            <a href="#features" className="hover:text-black transition-colors">{"Yechimlar"}</a>
+            <a href="#pricing" className="hover:text-black transition-colors">{"Tariflar"}</a>
+            <a href="#simulator" className="hover:text-black transition-colors">{"Mini-kurs"}</a>
+            <a href="#features" className="hover:text-black transition-colors">{"Hamkorlar"}</a>
+            <a href="#faq" className="hover:text-black transition-colors">{"Manbalar"}</a>
           </nav>
 
+          {/* Right Action buttons */}
           <div className="hidden md:flex items-center gap-4">
             <Link href="/login">
-              <button className="text-[13.5px] font-semibold text-white/90 hover:text-white px-4 py-2 transition-colors">
-                {"Kirish"}
+              <button className="flex h-10 w-10 items-center justify-center rounded-full bg-black/5 hover:bg-black/10 transition-colors">
+                <UserIcon size={18} className="text-black" />
               </button>
             </Link>
             <Link href="/register">
-              <button className="rounded-full bg-white/10 hover:bg-white/15 border border-white/10 text-[13.5px] font-semibold text-white px-5 py-2.5 transition-all hover:scale-105 active:scale-95">
-                {"Ro'yxatdan o'tish"}
+              <button className="rounded-full bg-black text-white hover:bg-black/95 text-[13.5px] font-bold px-5 py-2.5 transition-all hover:scale-105 active:scale-95 shadow-sm">
+                {"Try it for free"}
               </button>
             </Link>
           </div>
@@ -136,7 +214,7 @@ export function LandingPageView() {
           {/* Mobile menu toggle */}
           <button 
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="md:hidden text-white/90 hover:text-white transition-colors p-1"
+            className="md:hidden text-black hover:text-black/85 transition-colors p-1"
           >
             {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
@@ -144,44 +222,44 @@ export function LandingPageView() {
 
         {/* Mobile Navigation Dropdown */}
         {mobileMenuOpen && (
-          <div className="md:hidden border-b border-white/5 bg-[#070708]/95 px-6 py-5 flex flex-col gap-4 animate-in slide-in-from-top duration-200">
+          <div className="md:hidden border-b border-[#E8E8E8] bg-white px-6 py-5 flex flex-col gap-4 animate-in slide-in-from-top duration-200">
             <a 
               href="#features" 
               onClick={() => setMobileMenuOpen(false)}
-              className="text-[14.5px] font-medium text-[#A0A0A5] py-1 border-b border-white/5"
+              className="text-[14.5px] font-bold text-black/60 py-1 border-b border-[#E8E8E8]"
             >
-              {"Xususiyatlar"}
-            </a>
-            <a 
-              href="#simulator" 
-              onClick={() => setMobileMenuOpen(false)}
-              className="text-[14.5px] font-medium text-[#A0A0A5] py-1 border-b border-white/5"
-            >
-              {"Demo Bot"}
+              {"Yechimlar"}
             </a>
             <a 
               href="#pricing" 
               onClick={() => setMobileMenuOpen(false)}
-              className="text-[14.5px] font-medium text-[#A0A0A5] py-1 border-b border-white/5"
+              className="text-[14.5px] font-bold text-black/60 py-1 border-b border-[#E8E8E8]"
             >
               {"Tariflar"}
             </a>
             <a 
+              href="#simulator" 
+              onClick={() => setMobileMenuOpen(false)}
+              className="text-[14.5px] font-bold text-black/60 py-1 border-b border-[#E8E8E8]"
+            >
+              {"Mini-kurs"}
+            </a>
+            <a 
               href="#faq" 
               onClick={() => setMobileMenuOpen(false)}
-              className="text-[14.5px] font-medium text-[#A0A0A5] py-1 border-b border-white/5"
+              className="text-[14.5px] font-bold text-black/60 py-1 border-b border-[#E8E8E8]"
             >
-              {"FAQ"}
+              {"Manbalar"}
             </a>
             <div className="flex gap-2 mt-2">
               <Link href="/login" className="flex-1">
-                <button className="w-full rounded-full border border-white/10 py-3 text-[13.5px] font-semibold text-center text-white bg-white/5">
+                <button className="w-full rounded-full border border-[#E8E8E8] py-3 text-[13.5px] font-bold text-center text-black bg-[#F5F5F3]">
                   {"Kirish"}
                 </button>
               </Link>
               <Link href="/register" className="flex-1">
-                <button className="w-full rounded-full py-3 text-[13.5px] font-semibold text-center text-black bg-[#C7F33C]">
-                  {"Ro'yxatdan o'tish"}
+                <button className="w-full rounded-full py-3 text-[13.5px] font-bold text-center text-white bg-black">
+                  {"Try it for free"}
                 </button>
               </Link>
             </div>
@@ -189,111 +267,60 @@ export function LandingPageView() {
         )}
       </header>
 
-      {/* HERO SECTION */}
-      <section className="relative mx-auto max-w-7xl px-6 pt-16 pb-20 md:pt-24 md:pb-28 text-center z-10">
-        <div className="inline-flex items-center gap-2 rounded-full border border-[#C7F33C]/20 bg-[#C7F33C]/5 px-4 py-2 text-[11.5px] font-semibold text-[#C7F33C] mb-6 animate-pulse">
-          <Sparkles size={13} className="fill-[#C7F33C]/20" />
-          <span>{"INSTAGRAM CHATBOT & AI AVTOMATLASHTIRISH TIZIMI"}</span>
-        </div>
+      {/* NEW ALERT BANNER */}
+      <div className="w-full bg-[#120024] py-3 text-center text-[12px] font-bold text-white tracking-wide">
+        <span className="inline-flex items-center gap-1.5">
+          <span className="bg-[#C7F33C] text-black px-1.5 py-0.5 rounded text-[10px] font-extrabold uppercase">{"NEW"}</span>
+          <span>{"Virale — AI Agent for viral content"}</span>
+          <ArrowRight size={13} className="inline ml-0.5" />
+        </span>
+      </div>
 
-        <h1 className="mx-auto max-w-4xl text-4xl font-extrabold tracking-tight text-white sm:text-6xl md:text-7xl leading-[1.1] md:leading-[1.05]">
-          {"Instagram DMs va Izohlarini"} <br />
-          <span className="bg-gradient-to-r from-[#C7F33C] via-[#E2FF7D] to-purple-400 bg-clip-text text-transparent">
-            {"Savdoga Aylantiring"}
-          </span>
+      {/* HERO SECTION */}
+      <section className="relative mx-auto max-w-7xl px-6 pt-16 pb-28 text-center z-10 flex flex-col items-center">
+        
+        {/* Title */}
+        <h1 className="mx-auto max-w-4xl text-[38px] sm:text-[62px] md:text-[80px] font-[900] tracking-tighter text-black leading-[1.05] sm:leading-[1] text-center">
+          {"Unlock the power of"} <br />
+          {"your content and chats"}
         </h1>
 
-        <p className="mx-auto mt-6 max-w-2xl text-[16px] md:text-[18.5px] text-[#A0A0A5] leading-relaxed">
-          {"Mijozlarga 24/7 tezkor javob bering, izohlarga shaxsiy xabarda avtomatik javob qaytaring va arizalarni AI orqali saralang. Chatplace.io ning mukammal muqobili."}
+        {/* Subtitle */}
+        <p className="mx-auto mt-6 max-w-[580px] text-[15px] sm:text-[18px] text-black/50 leading-relaxed font-medium">
+          {"AI Agents and chatbots to help you grow followers, engage and sell on Instagram & TikTok. Set up from your phone in minutes"}
         </p>
 
-        <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
+        {/* CTA Button */}
+        <div className="mt-8">
           <Link href="/register">
-            <button className="group flex items-center gap-2 rounded-full bg-[#C7F33C] text-black px-8 py-4 text-[15px] font-bold shadow-[0_10px_30px_rgba(199,243,60,0.3)] transition-all hover:bg-[#b0d82d] hover:scale-105 active:scale-95">
-              <span>{"Tekin Boshlash (7 kunlik sinov)"}</span>
-              <ArrowRight size={16} className="transition-transform group-hover:translate-x-1" />
+            <button className="group inline-flex items-center gap-2.5 rounded-full bg-[#C7F33C] text-black px-8 py-4 text-[16px] font-extrabold transition-all hover:scale-105 active:scale-95 shadow-[0_10px_25px_rgba(199,243,60,0.35)]">
+              <span>{"Try it for Free"}</span>
+              <span className="flex h-6 w-6 items-center justify-center rounded-full bg-black text-[#C7F33C]">
+                <ArrowRight size={14} className="transition-transform group-hover:translate-x-0.5" />
+              </span>
             </button>
           </Link>
-          <a href="#simulator">
-            <button className="flex items-center gap-2 rounded-full border border-white/10 bg-white/5 hover:bg-white/10 px-8 py-4 text-[15px] font-bold text-white transition-all active:scale-95">
-              <Play size={14} className="fill-white" />
-              <span>{"Demoni ko'rish"}</span>
-            </button>
-          </a>
         </div>
 
-        {/* Visual Bot Flow builder mock-up representation */}
-        <div className="mx-auto mt-16 max-w-5xl rounded-[28px] border border-white/5 bg-[#0C0C0E] p-4 shadow-[0_20px_50px_rgba(0,0,0,0.5)]">
-          <div className="flex items-center justify-between border-b border-white/5 pb-3 mb-4 px-2">
-            <div className="flex gap-2">
-              <div className="h-3 w-3 rounded-full bg-red-500/80" />
-              <div className="h-3 w-3 rounded-full bg-yellow-500/80" />
-              <div className="h-3 w-3 rounded-full bg-green-500/80" />
-            </div>
-            <span className="text-[11px] text-[#707075] font-mono">{"Sendly Visual Flow Builder v1.0"}</span>
-            <div className="h-3 w-3" />
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-[1fr_20px_1.2fr] gap-4 items-center text-left py-6 px-4">
-            
-            {/* Block 1: Trigger */}
-            <div className="rounded-2xl border border-[#C7F33C]/20 bg-[#C7F33C]/5 p-5 shadow-[0_8px_20px_rgba(199,243,60,0.05)]">
-              <div className="flex items-center gap-2 text-[#C7F33C] text-[11px] font-bold uppercase tracking-wider mb-2">
-                <Bot size={14} />
-                <span>{"1-QADAM: TRIGGER (Trigger)"}</span>
-              </div>
-              <h4 className="text-[15px] font-bold text-white">{"Mijoz yozganda yoki izoh qoldirganda"}</h4>
-              <p className="text-[12px] text-[#A0A0A5] mt-1.5 leading-relaxed">
-                {"Agar yozilgan xabarda yoki post ostidagi izohda "} <span className="text-[#C7F33C] font-mono">{"\"narx\""}</span>{", "} <span className="text-[#C7F33C] font-mono">{"\"aksiya\""}</span> {" yoki "} <span className="text-[#C7F33C] font-mono">{"\"katalog\""}</span> {" so'zlari ishtirok etsa."}
-              </p>
-            </div>
-
-            {/* Connection Arrow */}
-            <div className="hidden md:flex justify-center text-[#C7F33C]">
-              <ArrowRight size={20} />
-            </div>
-
-            {/* Block 2: Actions */}
-            <div className="rounded-2xl border border-purple-500/20 bg-purple-500/5 p-5 shadow-[0_8px_20px_rgba(168,85,247,0.05)]">
-              <div className="flex items-center gap-2 text-purple-400 text-[11px] font-bold uppercase tracking-wider mb-2">
-                <Zap size={14} />
-                <span>{"2-QADAM: AVTOMATIK JAVOB"}</span>
-              </div>
-              <h4 className="text-[15px] font-bold text-white">{"Shaxsiy xabarda yoki izoh ostida javob berish"}</h4>
-              <div className="rounded-xl bg-black/40 border border-white/5 p-3 mt-3 text-[12.5px] text-white/90 leading-relaxed font-mono">
-                {"\"Assalomu alaykum, "} <span className="text-purple-400">{"{{first_name}}"}</span>{"! Katalog va chegirmalar ushbu havolada: "} <span className="text-[#C7F33C]">{"sendly.uz/katalog"}</span> {" ⚡️\""}
-              </div>
-            </div>
-
-          </div>
+        {/* Mascot Center 3D visual */}
+        <div className="mt-14 w-full max-w-[500px] flex justify-center">
+          <Robot3DContainer />
         </div>
+
       </section>
 
-      {/* METRICS / TRUST SECTION */}
-      <section className="border-y border-white/5 bg-[#0C0C0E]/50 py-12">
-        <div className="mx-auto max-w-7xl px-6 grid grid-cols-1 sm:grid-cols-3 gap-8 text-center">
-          <div className="flex flex-col gap-1">
-            <span className="text-4xl md:text-5xl font-extrabold text-[#C7F33C] tracking-tight">{"1M+"}</span>
-            <span className="text-[13px] text-[#A0A0A5] font-semibold uppercase tracking-wider">{"Yuborilgan avtomatik xabarlar"}</span>
-          </div>
-          <div className="flex flex-col gap-1">
-            <span className="text-4xl md:text-5xl font-extrabold text-white tracking-tight">{"99.9%"}</span>
-            <span className="text-[13px] text-[#A0A0A5] font-semibold uppercase tracking-wider">{"Tizim barqarorligi (Uptime)"}</span>
-          </div>
-          <div className="flex flex-col gap-1">
-            <span className="text-4xl md:text-5xl font-extrabold text-[#C7F33C] tracking-tight">{"3.5x"}</span>
-            <span className="text-[13px] text-[#A0A0A5] font-semibold uppercase tracking-wider">{"Mijozlar konversiyasi o'sishi"}</span>
-          </div>
-        </div>
-      </section>
+      {/* SLANTED MAGENTA DIVIDER ACCENT */}
+      <div className="relative w-full h-[60px] sm:h-[120px] bg-[#E1007A] -skew-y-3 origin-top-left -mt-8 z-0 overflow-hidden">
+        <div className="w-full h-full bg-[#120024]/5" />
+      </div>
 
       {/* DETAILED FEATURES SECTION */}
-      <section id="features" className="mx-auto max-w-7xl px-6 py-20 md:py-28 z-10 relative">
-        <div className="text-center max-w-3xl mx-auto mb-16 md:mb-20">
-          <h2 className="text-3xl font-extrabold sm:text-5xl text-white tracking-tight">
+      <section id="features" className="mx-auto max-w-7xl px-6 py-24 z-10 relative bg-[#FAFAF9]">
+        <div className="text-center max-w-3xl mx-auto mb-16">
+          <h2 className="text-3xl font-[900] sm:text-5xl text-black tracking-tight">
             {"Savdolarni Oshirish Uchun Barcha Qurollar"}
           </h2>
-          <p className="text-[15px] md:text-[17px] text-[#A0A0A5] mt-4 leading-relaxed">
+          <p className="text-[15px] md:text-[16px] text-black/50 mt-4 leading-relaxed font-medium">
             {"Biz sizga mijozlar oqimi bilan ishlashni engillashtirish va har bir yozilgan izohni arizaga aylantirish uchun mukammal tizimni taqdim etamiz."}
           </p>
         </div>
@@ -301,67 +328,67 @@ export function LandingPageView() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           
           {/* Feature 1 */}
-          <div className="rounded-[24px] border border-white/5 bg-[#0C0C0E] p-7 transition-all hover:border-white/10 hover:scale-[1.02] shadow-sm">
-            <div className="h-12 w-12 rounded-2xl bg-blue-500/10 text-blue-400 flex items-center justify-center mb-6">
+          <div className="rounded-[24px] border border-[#E8E8E8] bg-white p-7 transition-all hover:border-[#C7F33C] hover:scale-[1.02] shadow-[0_8px_30px_rgba(0,0,0,0.02)] text-left">
+            <div className="h-12 w-12 rounded-2xl bg-blue-500/10 text-blue-500 flex items-center justify-center mb-6">
               <MessageSquare size={22} />
             </div>
-            <h3 className="text-[18px] font-bold text-white">{"Direct Avtomatlashtirish"}</h3>
-            <p className="text-[13px] text-[#A0A0A5] mt-3 leading-relaxed">
+            <h3 className="text-[18px] font-extrabold text-black">{"Direct Avtomatlashtirish"}</h3>
+            <p className="text-[13px] text-black/50 mt-3 leading-relaxed">
               {"Mijozlar Direct'da savol berishganda, bot ularga oldindan tayyorlangan tugmalar, rasm va havolalar bilan soniyalar ichida javob beradi."}
             </p>
           </div>
 
           {/* Feature 2 */}
-          <div className="rounded-[24px] border border-white/5 bg-[#0C0C0E] p-7 transition-all hover:border-white/10 hover:scale-[1.02] shadow-sm">
-            <div className="h-12 w-12 rounded-2xl bg-[#C7F33C]/10 text-[#C7F33C] flex items-center justify-center mb-6">
+          <div className="rounded-[24px] border border-[#E8E8E8] bg-white p-7 transition-all hover:border-[#C7F33C] hover:scale-[1.02] shadow-[0_8px_30px_rgba(0,0,0,0.02)] text-left">
+            <div className="h-12 w-12 rounded-2xl bg-[#C7F33C]/10 text-black flex items-center justify-center mb-6">
               <Share2 size={22} />
             </div>
-            <h3 className="text-[18px] font-bold text-white">{"Izohlar Bilan Isoslash"}</h3>
-            <p className="text-[13px] text-[#A0A0A5] mt-3 leading-relaxed">
+            <h3 className="text-[18px] font-extrabold text-black">{"Izohlar Bilan Isoslash"}</h3>
+            <p className="text-[13px] text-black/50 mt-3 leading-relaxed">
               {"Post ostida izoh qoldirgan har bir foydalanuvchiga shaxsiy xabarda avtomatik havola yuborish orqali virusli savdoni ta'minlang."}
             </p>
           </div>
 
           {/* Feature 3 */}
-          <div className="rounded-[24px] border border-white/5 bg-[#0C0C0E] p-7 transition-all hover:border-white/10 hover:scale-[1.02] shadow-sm">
-            <div className="h-12 w-12 rounded-2xl bg-purple-500/10 text-purple-400 flex items-center justify-center mb-6">
+          <div className="rounded-[24px] border border-[#E8E8E8] bg-white p-7 transition-all hover:border-[#C7F33C] hover:scale-[1.02] shadow-[0_8px_30px_rgba(0,0,0,0.02)] text-left">
+            <div className="h-12 w-12 rounded-2xl bg-purple-500/10 text-purple-500 flex items-center justify-center mb-6">
               <Award size={22} />
             </div>
-            <h3 className="text-[18px] font-bold text-white">{"Geymifikatsiya va Ballar"}</h3>
-            <p className="text-[13px] text-[#A0A0A5] mt-3 leading-relaxed">
+            <h3 className="text-[18px] font-extrabold text-black">{"Geymifikatsiya va Ballar"}</h3>
+            <p className="text-[13px] text-black/50 mt-3 leading-relaxed">
               {"Foydalanuvchilarni faolligi, do'stlarini taklif qilganligi uchun ballar bilan mukofotlang. Ular o'z ballarini sovg'a yoki chegirmalarga almashtira oladilar."}
             </p>
           </div>
 
           {/* Feature 4 */}
-          <div className="rounded-[24px] border border-white/5 bg-[#0C0C0E] p-7 transition-all hover:border-white/10 hover:scale-[1.02] shadow-sm">
-            <div className="h-12 w-12 rounded-2xl bg-orange-500/10 text-orange-400 flex items-center justify-center mb-6">
+          <div className="rounded-[24px] border border-[#E8E8E8] bg-white p-7 transition-all hover:border-[#C7F33C] hover:scale-[1.02] shadow-[0_8px_30px_rgba(0,0,0,0.02)] text-left">
+            <div className="h-12 w-12 rounded-2xl bg-orange-500/10 text-orange-500 flex items-center justify-center mb-6">
               <Bot size={22} />
             </div>
-            <h3 className="text-[18px] font-bold text-white">{"AI Agent Saralash (RAG)"}</h3>
-            <p className="text-[13px] text-[#A0A0A5] mt-3 leading-relaxed">
+            <h3 className="text-[18px] font-extrabold text-black">{"AI Agent Saralash (RAG)"}</h3>
+            <p className="text-[13px] text-black/50 mt-3 leading-relaxed">
               {"OpenAI va RAG tizimi yordamida mijoz arizalarini qualified qiladi, guruhlarga (Sotuvlar/Qo'llab-quvvatlash) ajratadi va teglar qo'shadi."}
             </p>
           </div>
 
           {/* Feature 5 */}
-          <div className="rounded-[24px] border border-white/5 bg-[#0C0C0E] p-7 transition-all hover:border-white/10 hover:scale-[1.02] shadow-sm">
-            <div className="h-12 w-12 rounded-2xl bg-green-500/10 text-green-400 flex items-center justify-center mb-6">
+          <div className="rounded-[24px] border border-[#E8E8E8] bg-white p-7 transition-all hover:border-[#C7F33C] hover:scale-[1.02] shadow-[0_8px_30px_rgba(0,0,0,0.02)] text-left">
+            <div className="h-12 w-12 rounded-2xl bg-green-500/10 text-green-500 flex items-center justify-center mb-6">
               <MessageCircle size={22} />
             </div>
-            <h3 className="text-[18px] font-bold text-white">{"Telegram Bot Runner"}</h3>
-            <p className="text-[13px] text-[#A0A0A5] mt-3 leading-relaxed">
+            <h3 className="text-[18px] font-extrabold text-black">{"Telegram Bot Runner"}</h3>
+            <p className="text-[13px] text-black/50 mt-3 leading-relaxed">
               {"Tizimga faqat Instagram emas, balki Telegram botlarini ham ulab, bitta boshqaruv paneli orqali avtomatlashtirish oqimini ishlating."}
             </p>
           </div>
 
           {/* Feature 6 */}
-          <div className="rounded-[24px] border border-white/5 bg-[#0C0C0E] p-7 transition-all hover:border-white/10 hover:scale-[1.02] shadow-sm">
-            <div className="h-12 w-12 rounded-2xl bg-pink-500/10 text-pink-400 flex items-center justify-center mb-6">
+          <div className="rounded-[24px] border border-[#E8E8E8] bg-white p-7 transition-all hover:border-[#C7F33C] hover:scale-[1.02] shadow-[0_8px_30px_rgba(0,0,0,0.02)] text-left">
+            <div className="h-12 w-12 rounded-2xl bg-pink-500/10 text-pink-500 flex items-center justify-center mb-6">
               <Shield size={22} />
             </div>
-            <h3 className="text-[18px] font-bold text-white">{"Live Chat Takeover"}</h3>
-            <p className="text-[13px] text-[#A0A0A5] mt-3 leading-relaxed">
+            <h3 className="text-[18px] font-extrabold text-black">{"Live Chat Takeover"}</h3>
+            <p className="text-[13px] text-black/50 mt-3 leading-relaxed">
               {"Mijoz murakkab texnik yoki sotuvga doir muammo bilan murojaat qilsa, bot muloqotni inson operatorga uzatadi va to'xtaydi."}
             </p>
           </div>
@@ -370,25 +397,25 @@ export function LandingPageView() {
       </section>
 
       {/* INTERACTIVE SIMULATOR SECTION */}
-      <section id="simulator" className="mx-auto max-w-4xl px-6 py-12 md:py-20 z-10 relative">
-        <div className="rounded-[32px] border border-white/5 bg-[#0C0C0E] p-6 md:p-10 shadow-[0_30px_60px_rgba(0,0,0,0.6)]">
-          <div className="grid grid-cols-1 md:grid-cols-[1fr_1.2fr] gap-8 items-center">
+      <section id="simulator" className="mx-auto max-w-5xl px-6 py-12 md:py-20 z-10 relative">
+        <div className="rounded-[32px] border border-[#E8E8E8] bg-white p-6 md:p-10 shadow-[0_20px_50px_rgba(0,0,0,0.03)]">
+          <div className="grid grid-cols-1 md:grid-cols-[1fr_1.1fr] gap-8 items-center">
             
             <div className="text-left">
-              <span className="text-[11px] font-bold text-[#C7F33C] uppercase tracking-wider px-3 py-1.5 rounded-full bg-[#C7F33C]/10 border border-[#C7F33C]/20 inline-block mb-4">{"INTERAKTIV SIMULYATOR"}</span>
-              <h3 className="text-2xl md:text-3xl font-extrabold text-white leading-tight">{"Botimiz Qanday Javob Berishini Tekshiring"}</h3>
-              <p className="text-[13px] text-[#A0A0A5] mt-3 leading-relaxed">
+              <span className="text-[11px] font-extrabold text-black uppercase tracking-wider px-3 py-1.5 rounded-full bg-[#C7F33C] inline-block mb-4">{"INTERAKTIV SIMULYATOR"}</span>
+              <h3 className="text-2xl md:text-3xl font-[900] text-black leading-tight">{"Botimiz Qanday Javob Berishini Tekshiring"}</h3>
+              <p className="text-[13.5px] text-black/50 mt-3 leading-relaxed font-medium">
                 {"Tugmalardan birini bosing va o'ng tarafdagi virtual Instagram Direct chatida botning javob tezligi va formatini ko'ring."}
               </p>
               
               <div className="mt-8 flex flex-col gap-2">
-                <span className="text-[11px] font-bold text-[#707075] uppercase px-1">{"Variantlardan birini bosing:"}</span>
+                <span className="text-[11px] font-bold text-black/40 uppercase px-1">{"Variantlardan birini bosing:"}</span>
                 <div className="flex flex-wrap gap-2 mt-1">
                   {simButtons.map((btnText, idx) => (
                     <button
                       key={idx}
                       onClick={() => handleSimButtonClick(btnText)}
-                      className="rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 px-4 py-2.5 text-[12.5px] font-medium text-white transition-all active:scale-[0.98] text-left"
+                      className="rounded-xl border border-[#E8E8E8] bg-[#FAFAF9] hover:bg-[#F0F0F0] px-4 py-2.5 text-[12.5px] font-bold text-black transition-all active:scale-[0.98] text-left"
                     >
                       {btnText}
                     </button>
@@ -401,7 +428,7 @@ export function LandingPageView() {
                         ]);
                         setSimButtons(["Narxi qancha? 💰", "Aksiya bormi? 🎁", "Qanday ulanadi? 🔌"]);
                       }}
-                      className="rounded-xl border border-[#C7F33C]/20 bg-[#C7F33C]/5 text-[#C7F33C] px-5 py-2.5 text-[12.5px] font-semibold transition-all active:scale-[0.98]"
+                      className="rounded-xl border border-[#C7F33C]/40 bg-[#C7F33C]/10 text-black px-5 py-2.5 text-[12.5px] font-extrabold transition-all active:scale-[0.98]"
                     >
                       {"Chatni boshidan boshlash 🔄"}
                     </button>
@@ -411,7 +438,7 @@ export function LandingPageView() {
             </div>
 
             {/* Virtual Direct Mockup */}
-            <div className="rounded-[24px] border border-white/5 bg-[#050506] p-4 flex flex-col h-[350px] shadow-inner relative overflow-hidden">
+            <div className="rounded-[24px] border border-black/5 bg-[#050506] p-4 flex flex-col h-[350px] shadow-inner relative overflow-hidden">
               
               {/* Simulator header */}
               <div className="flex items-center gap-3 border-b border-white/5 pb-3 mb-3">
@@ -432,7 +459,7 @@ export function LandingPageView() {
                     className={[
                       "max-w-[85%] rounded-[18px] px-3.5 py-2.5 text-[12px] leading-relaxed text-left",
                       msg.sender === "user" 
-                        ? "bg-[#C7F33C] text-black self-end rounded-tr-none font-medium" 
+                        ? "bg-[#C7F33C] text-black self-end rounded-tr-none font-bold" 
                         : "bg-white/5 text-white/90 self-start rounded-tl-none border border-white/5"
                     ].join(" ")}
                     style={{ whiteSpace: "pre-line" }}
@@ -449,10 +476,10 @@ export function LandingPageView() {
       </section>
 
       {/* PRICING SECTION */}
-      <section id="pricing" className="mx-auto max-w-7xl px-6 py-20 md:py-28 z-10 relative">
+      <section id="pricing" className="mx-auto max-w-7xl px-6 py-20 md:py-24 z-10 relative">
         <div className="text-center max-w-3xl mx-auto mb-16">
-          <h2 className="text-3xl font-extrabold sm:text-5xl text-white tracking-tight">{"Har Qanday Biznes Uchun Oddiy Tariflar"}</h2>
-          <p className="text-[15px] md:text-[17px] text-[#A0A0A5] mt-4 leading-relaxed">
+          <h2 className="text-3xl font-[900] sm:text-5xl text-black tracking-tight">{"Har Qanday Biznes Uchun Oddiy Tariflar"}</h2>
+          <p className="text-[15px] md:text-[16px] text-black/50 mt-4 leading-relaxed font-medium">
             {"Hozir ulaning va barcha Pro imkoniyatlarini bepul 7 kunlik sinov muddati bilan his qiliying. Hech qanday kredit karta so'ralmaydi."}
           </p>
         </div>
@@ -460,46 +487,46 @@ export function LandingPageView() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
           
           {/* Plan Pro */}
-          <div className="rounded-[32px] border border-white/10 bg-[#0C0C0E] p-8 md:p-10 relative overflow-hidden flex flex-col justify-between shadow-sm">
+          <div className="rounded-[32px] border border-[#E8E8E8] bg-white p-8 md:p-10 relative overflow-hidden flex flex-col justify-between shadow-[0_12px_40px_rgba(0,0,0,0.02)]">
             <div>
               <div className="absolute top-0 right-0 bg-[#C7F33C] text-black text-[10px] font-extrabold uppercase px-4 py-1.5 rounded-bl-[16px] tracking-wider">{"POPULAR"}</div>
-              <h3 className="text-xl font-bold text-white">{"PRO Plan"}</h3>
-              <p className="text-[12.5px] text-[#A0A0A5] mt-2 leading-relaxed">{"Kichik va o'rta bizneslar uchun ideal reja."}</p>
+              <h3 className="text-xl font-extrabold text-black text-left">{"PRO Plan"}</h3>
+              <p className="text-[12.5px] text-black/50 mt-2 leading-relaxed text-left">{"Kichik va o'rta bizneslar uchun ideal reja."}</p>
               
               <div className="mt-6 flex items-baseline gap-1.5">
-                <span className="text-4xl md:text-5xl font-extrabold text-white tracking-tight">{"150,000"}</span>
-                <span className="text-[#A0A0A5] text-[13.5px] font-semibold">{"so'm / oy"}</span>
+                <span className="text-4xl md:text-5xl font-[900] text-black tracking-tight">{"150,000"}</span>
+                <span className="text-black/50 text-[13.5px] font-semibold">{"so'm / oy"}</span>
               </div>
 
-              <hr className="border-white/5 my-8" />
+              <hr className="border-[#E8E8E8] my-8" />
 
-              <ul className="flex flex-col gap-4 text-[13.5px] text-white/95">
+              <ul className="flex flex-col gap-4 text-[13.5px] text-black/85 text-left">
                 <li className="flex items-center gap-3">
-                  <div className="h-5 w-5 rounded-full bg-[#C7F33C]/10 text-[#C7F33C] flex items-center justify-center">
+                  <div className="h-5 w-5 rounded-full bg-[#C7F33C]/20 text-black flex items-center justify-center">
                     <Check size={12} />
                   </div>
                   <span>{"1 ta Instagram Professional akkaunt"}</span>
                 </li>
                 <li className="flex items-center gap-3">
-                  <div className="h-5 w-5 rounded-full bg-[#C7F33C]/10 text-[#C7F33C] flex items-center justify-center">
+                  <div className="h-5 w-5 rounded-full bg-[#C7F33C]/20 text-black flex items-center justify-center">
                     <Check size={12} />
                   </div>
                   <span>{"Cheksiz avtomatlashtirish oqimlari (flows)"}</span>
                 </li>
                 <li className="flex items-center gap-3">
-                  <div className="h-5 w-5 rounded-full bg-[#C7F33C]/10 text-[#C7F33C] flex items-center justify-center">
+                  <div className="h-5 w-5 rounded-full bg-[#C7F33C]/20 text-black flex items-center justify-center">
                     <Check size={12} />
                   </div>
                   <span>{"Izohlar va Direct xabarlariga avtomatik javoblar"}</span>
                 </li>
                 <li className="flex items-center gap-3">
-                  <div className="h-5 w-5 rounded-full bg-[#C7F33C]/10 text-[#C7F33C] flex items-center justify-center">
+                  <div className="h-5 w-5 rounded-full bg-[#C7F33C]/20 text-black flex items-center justify-center">
                     <Check size={12} />
                   </div>
                   <span>{"Referral tizimi va Ballar to'plash"}</span>
                 </li>
                 <li className="flex items-center gap-3">
-                  <div className="h-5 w-5 rounded-full bg-[#C7F33C]/10 text-[#C7F33C] flex items-center justify-center">
+                  <div className="h-5 w-5 rounded-full bg-[#C7F33C]/20 text-black flex items-center justify-center">
                     <Check size={12} />
                   </div>
                   <span>{"1 ta Telegram Bot ulash (Sinov rejimda)"}</span>
@@ -508,52 +535,52 @@ export function LandingPageView() {
             </div>
 
             <Link href="/register" className="mt-10">
-              <button className="w-full rounded-full bg-[#C7F33C] text-black py-4 text-[14.5px] font-bold shadow-[0_10px_20px_rgba(199,243,60,0.15)] hover:bg-[#b0d82d] active:scale-[0.98] transition-all">
+              <button className="w-full rounded-full bg-black text-white hover:bg-black/95 py-4 text-[14.5px] font-bold active:scale-[0.98] transition-all">
                 {"Bepul sinab ko'rish"}
               </button>
             </Link>
           </div>
 
           {/* Plan Premium */}
-          <div className="rounded-[32px] border border-white/5 bg-[#0C0C0E]/60 p-8 md:p-10 flex flex-col justify-between shadow-sm">
+          <div className="rounded-[32px] border border-[#E8E8E8] bg-white p-8 md:p-10 flex flex-col justify-between shadow-[0_12px_40px_rgba(0,0,0,0.02)]">
             <div>
-              <h3 className="text-xl font-bold text-white">{"PREMIUM Plan"}</h3>
-              <p className="text-[12.5px] text-[#A0A0A5] mt-2 leading-relaxed">{"Katta agentliklar va kengaytirilgan marketing oqimlari uchun."}</p>
+              <h3 className="text-xl font-extrabold text-black text-left">{"PREMIUM Plan"}</h3>
+              <p className="text-[12.5px] text-black/50 mt-2 leading-relaxed text-left">{"Katta agentliklar va kengaytirilgan marketing oqimlari uchun."}</p>
               
               <div className="mt-6 flex items-baseline gap-1.5">
-                <span className="text-4xl md:text-5xl font-extrabold text-white tracking-tight">{"1,000,000"}</span>
-                <span className="text-[#A0A0A5] text-[13.5px] font-semibold">{"so'm / oy"}</span>
+                <span className="text-4xl md:text-5xl font-[900] text-black tracking-tight">{"1,000,000"}</span>
+                <span className="text-black/50 text-[13.5px] font-semibold">{"so'm / oy"}</span>
               </div>
 
-              <hr className="border-white/5 my-8" />
+              <hr className="border-[#E8E8E8] my-8" />
 
-              <ul className="flex flex-col gap-4 text-[13.5px] text-white/95">
+              <ul className="flex flex-col gap-4 text-[13.5px] text-black/85 text-left">
                 <li className="flex items-center gap-3">
-                  <div className="h-5 w-5 rounded-full bg-[#C7F33C]/10 text-[#C7F33C] flex items-center justify-center">
+                  <div className="h-5 w-5 rounded-full bg-[#C7F33C]/20 text-black flex items-center justify-center">
                     <Check size={12} />
                   </div>
                   <span>{"10 ta Instagram Professional akkaunt"}</span>
                 </li>
                 <li className="flex items-center gap-3">
-                  <div className="h-5 w-5 rounded-full bg-[#C7F33C]/10 text-[#C7F33C] flex items-center justify-center">
+                  <div className="h-5 w-5 rounded-full bg-[#C7F33C]/20 text-black flex items-center justify-center">
                     <Check size={12} />
                   </div>
                   <span>{"Cheksiz avtomatlashtirish oqimlari (flows)"}</span>
                 </li>
                 <li className="flex items-center gap-3">
-                  <div className="h-5 w-5 rounded-full bg-[#C7F33C]/10 text-[#C7F33C] flex items-center justify-center">
+                  <div className="h-5 w-5 rounded-full bg-[#C7F33C]/20 text-black flex items-center justify-center">
                     <Check size={12} />
                   </div>
                   <span>{"OpenAI & AI Agent Qualification"}</span>
                 </li>
                 <li className="flex items-center gap-3">
-                  <div className="h-5 w-5 rounded-full bg-[#C7F33C]/10 text-[#C7F33C] flex items-center justify-center">
+                  <div className="h-5 w-5 rounded-full bg-[#C7F33C]/20 text-black flex items-center justify-center">
                     <Check size={12} />
                   </div>
                   <span>{"VIP qo'llab-quvvatlash (24/7 shaxsiy menejer)"}</span>
                 </li>
                 <li className="flex items-center gap-3">
-                  <div className="h-5 w-5 rounded-full bg-[#C7F33C]/10 text-[#C7F33C] flex items-center justify-center">
+                  <div className="h-5 w-5 rounded-full bg-[#C7F33C]/20 text-black flex items-center justify-center">
                     <Check size={12} />
                   </div>
                   <span>{"10 tagacha Telegram Bot ulash imkoni"}</span>
@@ -562,7 +589,7 @@ export function LandingPageView() {
             </div>
 
             <Link href="/register" className="mt-10">
-              <button className="w-full rounded-full border border-white/10 hover:border-white/20 bg-white/5 hover:bg-white/10 py-4 text-[14.5px] font-bold text-white active:scale-[0.98] transition-all">
+              <button className="w-full rounded-full border border-[#E8E8E8] bg-[#FAFAF9] hover:bg-[#F0F0F0] text-black py-4 text-[14.5px] font-bold active:scale-[0.98] transition-all">
                 {"Bog'lanish va ulash"}
               </button>
             </Link>
@@ -574,29 +601,29 @@ export function LandingPageView() {
       {/* FAQ SECTION */}
       <section id="faq" className="mx-auto max-w-4xl px-6 py-20 z-10 relative">
         <div className="text-center mb-12">
-          <h2 className="text-3xl font-extrabold sm:text-5xl text-white tracking-tight">{"Ko'p Beriladigan Savollar"}</h2>
-          <p className="text-[14.5px] text-[#A0A0A5] mt-3">{"Sendly tizimi bo'yicha eng ko'p so'raladigan savollarga javoblar."}</p>
+          <h2 className="text-3xl font-[900] sm:text-5xl text-black tracking-tight">{"Ko'p Beriladigan Savollar"}</h2>
+          <p className="text-[14.5px] text-black/50 mt-3 font-medium">{"Sendly tizimi bo'yicha eng ko'p so'raladigan savollarga javoblar."}</p>
         </div>
 
         <div className="flex flex-col gap-3">
           {faqs.map((faq, idx) => (
             <div 
               key={idx}
-              className="rounded-2xl border border-white/5 bg-[#0C0C0E] overflow-hidden transition-all duration-200"
+              className="rounded-2xl border border-[#E8E8E8] bg-white overflow-hidden transition-all duration-200"
             >
               <button
                 onClick={() => setActiveFaq(activeFaq === idx ? null : idx)}
-                className="w-full px-6 py-5 flex items-center justify-between text-left font-bold text-[14.5px] md:text-[15.5px] text-white hover:text-[#C7F33C] transition-colors"
+                className="w-full px-6 py-5 flex items-center justify-between text-left font-bold text-[14.5px] md:text-[15.5px] text-black hover:text-[#C7F33C] transition-colors"
               >
                 <span>{faq.q}</span>
                 <ChevronDown 
                   size={16} 
-                  className={`text-[#A0A0A5] transition-transform duration-200 ${activeFaq === idx ? "rotate-180 text-[#C7F33C]" : ""}`} 
+                  className={`text-black/30 transition-transform duration-200 ${activeFaq === idx ? "rotate-180 text-black" : ""}`} 
                 />
               </button>
               
               {activeFaq === idx && (
-                <div className="px-6 pb-5 text-[13px] md:text-[13.5px] text-[#A0A0A5] leading-relaxed border-t border-white/5 pt-4 animate-in fade-in slide-in-from-top-1 duration-150 text-left">
+                <div className="px-6 pb-5 text-[13px] md:text-[13.5px] text-black/50 leading-relaxed border-t border-[#E8E8E8] pt-4 animate-in fade-in slide-in-from-top-1 duration-150 text-left">
                   {faq.a}
                 </div>
               )}
@@ -606,34 +633,34 @@ export function LandingPageView() {
       </section>
 
       {/* FOOTER CALL TO ACTION */}
-      <section className="border-t border-white/5 bg-[#08080A] py-16 text-center z-10 relative">
+      <section className="border-t border-[#E8E8E8] bg-white py-16 text-center z-10 relative">
         <div className="mx-auto max-w-4xl px-6">
-          <h2 className="text-3xl font-extrabold sm:text-5xl text-white tracking-tight">{"Instagram marketingingizni bugunoq yangilang"}</h2>
-          <p className="text-[14.5px] text-[#A0A0A5] mt-4 max-w-2xl mx-auto leading-relaxed">
+          <h2 className="text-3xl font-[900] sm:text-5xl text-black tracking-tight">{"Instagram marketingingizni bugunoq yangilang"}</h2>
+          <p className="text-[14.5px] text-black/50 mt-4 max-w-2xl mx-auto leading-relaxed font-medium">
             {"Biznes arizalarni avtomatlashtiring, mijozlar kutib qolishining oldini oling va foyda hajmini oshiring."}
           </p>
           <div className="mt-8 flex justify-center">
             <Link href="/register">
-              <button className="flex items-center gap-2 rounded-full bg-[#C7F33C] text-black px-8 py-4 text-[15px] font-bold shadow-[0_10px_30px_rgba(199,243,60,0.2)] hover:scale-105 transition-all">
+              <button className="flex items-center gap-2 rounded-full bg-black text-white px-8 py-4 text-[15px] font-bold shadow-sm hover:scale-105 transition-all">
                 <span>{"Tekin sinab ko'rish"}</span>
                 <ArrowRight size={16} />
               </button>
             </Link>
           </div>
 
-          <hr className="border-white/5 my-12" />
+          <hr className="border-[#E8E8E8] my-12" />
 
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-[12.5px] text-[#707075] px-2">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-[12.5px] text-black/40 px-2">
             <div className="flex items-center gap-2">
-              <div className="h-5 w-5 rounded bg-[#C7F33C] text-black flex items-center justify-center">
-                <Zap size={10} className="fill-black" />
-              </div>
-              <span className="font-bold text-white">{"Sendly.uz"}</span>
+              <span className="text-[16px] font-[900] tracking-tighter text-black uppercase flex items-center gap-1">
+                {"Sendly"}
+                <span className="h-1.5 w-1.5 rounded-full bg-[#C7F33C]" />
+              </span>
               <span>{"© 2026. Barcha huquqlar himoyalangan."}</span>
             </div>
-            <div className="flex gap-4">
-              <Link href="/privacy" className="hover:text-white transition-colors">{"Maxfiylik kelishuvi"}</Link>
-              <a href="#" className="hover:text-white transition-colors">{"Foydalanish shartlari"}</a>
+            <div className="flex gap-4 font-semibold text-black/60">
+              <Link href="/privacy" className="hover:text-black transition-colors">{"Maxfiylik kelishuvi"}</Link>
+              <a href="#" className="hover:text-black transition-colors">{"Foydalanish shartlari"}</a>
             </div>
           </div>
         </div>
