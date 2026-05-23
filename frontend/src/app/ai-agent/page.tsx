@@ -484,30 +484,7 @@ export default function AIAgentPage() {
     handleUpdateSettings("aiCuratorEnabled", enabled);
   };
 
-  // Reset to default demo data
-  const handleResetDemo = () => {
-    setConfirmModal({
-      isOpen: true,
-      title: "Namunaviy ma'lumotlarni yuklash",
-      message: "Barcha ma'lumotlarni o'chirib, Kurs Yordamchisi namunaviy darslari va AI sozlamalarini qayta yuklashni xohlaysizmi?",
-      onConfirm: () => {
-        db.resetToDemo();
-        loadDatabase();
-        setSelectedLesson(null);
-        setChatMessages([
-          {
-            id: `welcome-${Date.now()}`,
-            sender: "bot",
-            text: "Namunaviy demo ma'lumotlar muvaffaqiyatli yuklandi! ⚡️ Savollaringizni berishingiz mumkin.",
-            time: "Hozir",
-            confidence: 100
-          }
-        ]);
-        showToast("Demo ma'lumotlar qayta tiklandi");
-        setConfirmModal(prev => ({ ...prev, isOpen: false }));
-      }
-    });
-  };
+
 
   // Save changes to DB
   const handleSaveAll = async () => {
@@ -1918,12 +1895,6 @@ export default function AIAgentPage() {
               className="px-4 py-2.5 rounded-full border border-[#D8D8D8] text-[12px] font-bold text-[#595959] hover:bg-white hover:text-black transition-colors"
             >
               Shablonni almashtirish
-            </button>
-            <button
-              onClick={handleResetDemo}
-              className="px-4 py-2.5 rounded-full border border-[#D8D8D8] text-[12px] font-bold text-[#595959] hover:bg-white hover:text-black transition-colors"
-            >
-              Namunaviy ma&apos;lumotlarni yuklash
             </button>
             <button
               onClick={handleSaveAll}

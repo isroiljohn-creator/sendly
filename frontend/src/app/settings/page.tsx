@@ -5,7 +5,7 @@ import { AppLayout } from "@/components/layout/AppLayout";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Card, Button, StatusPill, ConfirmModal, AlertModal } from "@/components/ui/primitives";
 import { useI18n } from "@/i18n/I18nProvider";
-import { Save, Database, Trash2, RotateCcw, Plus, Bot, X, CheckCircle, ChevronDown, Download, Upload } from "lucide-react";
+import { Save, Database, Trash2, Plus, Bot, X, CheckCircle, ChevronDown, Download, Upload } from "lucide-react";
 import { Instagram } from "@/components/ui/icons";
 import { db } from "@/lib/db";
 import type { User, Channel } from "@/lib/db";
@@ -152,7 +152,6 @@ export default function SettingsPage() {
 
   // Modal states
   const [isClearModalOpen, setIsClearModalOpen] = useState(false);
-  const [isResetModalOpen, setIsResetModalOpen] = useState(false);
   const [isChannelDeleteModalOpen, setIsChannelDeleteModalOpen] = useState(false);
   const [isAlertOpen, setIsAlertOpen] = useState(false);
   const [alertTitle, setAlertTitle] = useState("");
@@ -251,10 +250,7 @@ export default function SettingsPage() {
     window.location.reload();
   };
 
-  const handleConfirmReset = () => {
-    db.resetToDemo();
-    window.location.reload();
-  };
+
 
   // Instagram connection is now handled securely via Facebook login flow
 
@@ -598,14 +594,6 @@ export default function SettingsPage() {
                           <Trash2 size={13} />
                           {"Barcha ma'lumotlarni o'chirish"}
                         </button>
-                        <button
-                          type="button"
-                          onClick={() => setIsResetModalOpen(true)}
-                          className="flex items-center gap-1.5 rounded-full bg-[#F0F0F0] text-black hover:bg-[#E8E8E8] px-4 py-2 text-[11px] font-semibold transition-all active:scale-95"
-                        >
-                          <RotateCcw size={13} />
-                          {"Demo ma'lumotlarni tiklash"}
-                        </button>
                       </div>
                     </div>
                   </div>
@@ -875,15 +863,7 @@ export default function SettingsPage() {
         cancelText={"Bekor qilish"}
       />
 
-      <ConfirmModal
-        isOpen={isResetModalOpen}
-        onClose={() => setIsResetModalOpen(false)}
-        onConfirm={handleConfirmReset}
-        title={"Demo ma'lumotlarni qayta tiklash"}
-        message={"Ushbu amal tizimni asl demo ma'lumotlari bilan qayta to'ldiradi."}
-        confirmText={"Ha, tiklash"}
-        cancelText={"Bekor qilish"}
-      />
+
 
       {/* Delete Channel confirmation */}
       {isChannelDeleteModalOpen && (

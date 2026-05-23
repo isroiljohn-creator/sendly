@@ -95,43 +95,9 @@ export type Module = {
 };
 
 // Initial Demo Data
-const DEMO_CHANNELS: Channel[] = [
-  {
-    id: "ch_demo_ig",
-    type: "instagram",
-    name: "My Brand Shop",
-    username: "@mybrand_shop",
-    isConnected: true,
-    followersCount: "4,820",
-    createdAt: "20 May, 2026",
-    isActive: true
-  },
-  {
-    id: "ch_demo_tg",
-    type: "telegram",
-    name: "Support Bot",
-    username: "@mybrand_support_bot",
-    isConnected: true,
-    followersCount: "1,240",
-    createdAt: "20 May, 2026",
-    isActive: false
-  }
-];
-
-const DEMO_CONTACTS: Contact[] = [
-  { id: "1", name: "Aziz Rahimov", username: "@aziz_rahim", status: true, messagesCount: 24, tags: ["Ariza", "Qiziqqan"], lastActive: "Bugun, 14:20" },
-  { id: "2", name: "Madina Umarova", username: "@madina_u", status: true, messagesCount: 118, tags: ["Mijoz", "VIP"], lastActive: "Bugun, 11:05" },
-  { id: "3", name: "Sardor Salimov", username: "@sardor_s", status: false, messagesCount: 8, tags: ["Ariza"], lastActive: "Kecha, 22:40" },
-  { id: "4", name: "Dilorom Alieva", username: "@dili_alieva", status: true, messagesCount: 42, tags: ["Mijoz"], lastActive: "19 May, 15:30" },
-  { id: "5", name: "Farruh Karimov", username: "@farruh_k", status: false, messagesCount: 15, tags: ["Qiziqqan"], lastActive: "18 May, 09:15" },
-];
-
-const DEMO_BROADCASTS: Broadcast[] = [
-  { id: "1", name: "Yangi fasl chegirmalari", segment: "Barcha faol mijozlar", sentCount: "2,418", date: "Bugun, 12:00", status: "Completed" },
-  { id: "2", name: "VIP mijozlar uchun bonus", segment: "VIP foydalanuvchilar", sentCount: "480", date: "Bugun, 09:15", status: "Completed" },
-  { id: "3", name: "Qiziqqanlarga eslatma", segment: "Qiziqqanlar (arizalar)", sentCount: "928", date: "Ertaga, 10:00", status: "Pending" },
-  { id: "4", name: "Tizimli yangiliklar", segment: "Barcha obunachilar", sentCount: "3,892", date: "15 May, 14:00", status: "Completed" },
-];
+const DEMO_CHANNELS: Channel[] = [];
+const DEMO_CONTACTS: Contact[] = [];
+const DEMO_BROADCASTS: Broadcast[] = [];
 
 const DEFAULT_BOT_SETTINGS: BotSettings = {
   tone: 60,
@@ -184,71 +150,8 @@ Kelgan ariza ma'lumotlarini (ism, telefon, foydalanuvchi yozgan savollar yoki ja
   fbAgentEnabled: false,
 };
 
-const DEMO_MODULES: Module[] = [
-  { id: "mod-1", title: "1-Modul. Asoslar va Kirish", order: 1 },
-  { id: "mod-2", title: "2-Modul. Target marketing", order: 2 },
-  { id: "mod-3", title: "3-Modul. Kontent va SMM", order: 3 },
-  { id: "mod-4", title: "4-Modul. Reklama va Tahlil", order: 4 },
-];
-
-const DEMO_LESSONS: Lesson[] = [
-  {
-    id: "les-1",
-    moduleId: "mod-1",
-    title: "1-Dars. Marketing nima?",
-    transcript: "Marketing — bu mahsulot yoki xizmatni maqsadli mijozlarga yetkazish jarayoni. Marketingning asosiy maqsadi mijozlarning muammolarini aniqlash va ularga yechim taklif qilishdir. Marketing 4P tushunchasiga asoslanadi: Mahsulot (Product), Narx (Price), Joy (Place) va Targ'ibot (Promotion). Yaxshi marketing strategiyasi uchun avvalo bozorni o'rganish, raqobatchilarni tahlil qilish va maqsadli auditoriyani aniqlash kerak. Marketing sotuvdan farq qiladi — marketing uzoq muddatli munosabat qurishga qaratilgan, sotuv esa bir martalik tranzaksiya. Hozirgi kunda digital marketing, ijtimoiy tarmoqlar marketing va kontent marketing kabi yangi yo'nalishlar rivojlanmoqda. Har qanday biznes uchun marketing rejasi tuzish muhim — bu reja maqsadlar, vositalar va byudjetni o'z ichiga olishi kerak.",
-    pdfMaterials: ["qollanma-marketing-asoslari.pdf"]
-  },
-  {
-    id: "les-2",
-    moduleId: "mod-1",
-    title: "2-Dars. Biznes maqsadlar va KPI",
-    transcript: "KPI (Key Performance Indicators) — bu biznes maqsadlarini o'lchash uchun ishlatiladigan asosiy ko'rsatkichlar. Marketing uchun eng muhim KPIlar: konversiya darajasi (conversion rate), mijoz jalb qilish narxi (CAC — Customer Acquisition Cost), mijozning umr bo'yi qiymati (LTV — Lifetime Value), brend tanilishi va savdo hajmi. Maqsad qo'yishda SMART tizimidan foydalaning: Specific (aniq), Measurable (o'lchanadigan), Achievable (erishish mumkin), Relevant (tegishli), Time-bound (muddatli). Masalan, 'oyiga 100 ta yangi mijoz jalb qilish' — bu SMART maqsad. KPIlarni har hafta kuzatib boring va natijalar asosida strategiyangizni moslang.",
-    pdfMaterials: ["kpi-jadval.pdf"]
-  },
-  {
-    id: "les-3",
-    moduleId: "mod-2",
-    title: "1-Dars. Mijozlar segmentatsiyasi",
-    transcript: "Mijozlar segmentatsiyasi — bu yirik bozorni o'xshash xususiyatlarga ega kichik guruhlarga ajratish jarayoni. Segmentatsiya 4 turga bo'linadi: 1) Demografik: yosh, jins, daromad, ta'lim; 2) Geografik: shahar, hudud, mamlakat; 3) Psixografik: qiziqishlar, hayot tarzi, qadriyatlar; 4) Xulq-atvor: sotib olish odatlari, brendga sadoqat. Maqsadli segment tanlashda 3 omilni hisobga oling: segmentning kattaligi, ularga yetib borish imkoniyati va ularning daromad keltirish salohiyati. Persona yaratish — bu maqsadli mijozingizning batafsil portretini chizish. Masalan: '28 yoshli, Toshkentda yashovchi, onlayn biznes ochmoqchi bo'lgan ayol' — bu aniq persona.",
-    pdfMaterials: ["segmentatsiya-jadvali.pdf"]
-  },
-  {
-    id: "les-4",
-    moduleId: "mod-2",
-    title: "2-Dars. Target reklama asoslari",
-    transcript: "Target reklama — bu aniq maqsadli auditoriyaga yo'naltirilgan reklama. Facebook va Instagram'da target reklamani Meta Ads Manager orqali boshqarasiz. Asosiy targeting turlar: demografik (yosh, jins, joylashuv), qiziqishlar bo'yicha (interest targeting), xulq-atvor bo'yicha (behavior targeting), lookalike audience (o'xshash auditoriya) va retargeting (qayta nishonlash). Reklama byudjetini CPC (click uchun narx) va CPM (1000 ta ko'rsatuv uchun narx) ko'rsatkichlari orqali boshqaring. A/B test qiling — bir vaqtda bir nechta reklama varianti ishlab, eng samaralisini aniqlang. Retargeting orqali saytingizga kirgan lekin sotib olmagan foydalanuvchilarni qayta nishonlang.",
-    pdfMaterials: ["target-reklama-qollanma.pdf"]
-  },
-  {
-    id: "les-5",
-    moduleId: "mod-3",
-    title: "1-Dars. SMM strategiya tuzish",
-    transcript: "SMM (Social Media Marketing) — ijtimoiy tarmoqlarda marketing. SMM strategiyasi quyidagilarni o'z ichiga oladi: platforma tanlash (Instagram, Telegram, YouTube, TikTok), kontent kalendar tuzish, auditoriya bilan muloqot va analitika. Instagram'da biznes akkauntini to'g'ri sozlash: profil rasmi, bio, kontakt ma'lumotlar va havolalar. Kontent turlari: ta'lim beruvchi postlar (80%), reklama postlar (20%) — bu 80/20 qoidasi. Stories, Reels va IGTV dan samarali foydalaning. Hashtag strategiyasi: katta (#marketing), o'rta (#uzbekmarketing) va kichik (#toshkentmarketing) hashtaglar aralashmasidan foydalaning. Eng faol vaqt — odatda kechki 7-9 soatlar.",
-    pdfMaterials: ["smm-shablon.xlsx"]
-  },
-  {
-    id: "les-6",
-    moduleId: "mod-3",
-    title: "2-Dars. Kontent yaratish siri",
-    transcript: "Kontent marketing — bu foydali ma'lumot berish orqali mijozlarni jalb qilish. Yaxshi kontent 3 shartga javob beradi: auditoriya uchun foydali, brendga mos va SEO uchun optimallashtirilgan. Kontent turlari: blog maqolalar, video darslar, infografika, podcast, case study va testimoniallar. Kontent ideya topish uchun: mijozlar savollari, raqobatchilar tahlili va trend mavzular. Viral kontent yaratish uchun: his-tuyg'ularni qo'zg'atish, amaliy foydali bo'lish yoki e'tiborni tortuvchi zamonaviy mavzularni tanlash. Kontent kalendarida haftalik rejani tuzib oling: dushanba — ta'lim, chorshanba — case study, juma — motivatsiya. Har bir kontent uchun CTA (Call To Action) qo'shing.",
-    pdfMaterials: ["kontent-plan-shablon.pdf"]
-  },
-  {
-    id: "les-7",
-    moduleId: "mod-4",
-    title: "1-Dars. Reklama byudjetini boshqarish",
-    transcript: "Reklama byudjetini to'g'ri taqsimlash biznesingiz muvaffaqiyatiga to'g'ridan-to'g'ri ta'sir qiladi. ROAS (Return on Ad Spend) — reklama sarfidan daromad ko'rsatkichi, kamida 3x bo'lishi kerak. Byudjet taqsimlash: 50% test reklamalar, 30% muvaffaqiyatli reklamalarni kengaytirish, 20% yangi eksperimentlar. Facebook Ads uchun minimal kunlik byudjet $5-10 dan boshlang. Google Ads uchun keyword bidding strategiyasini tanlang: manual CPC, target CPA yoki ROAS maqsadli. Reklama samaradorligini o'lchash uchun UTM parametrlar va Google Analytics dan foydalaning. Har hafta reklama hisobotini ko'rib chiqing va past samarali reklamalarni o'chiring.",
-    pdfMaterials: ["byudjet-hisobot.xlsx"]
-  },
-  {
-    id: "les-8",
-    moduleId: "mod-4",
-    title: "2-Dars. Analitika va o'sish",
-    transcript: "Marketing analitikasi — bu ma'lumotlar asosida qaror qabul qilish. Google Analytics, Meta Business Suite va Telegram Analytics kabi vositalar orqali o'z natijalaringizni kuzating. Muhim ko'rsatkichlar: trafik manbalari, bounce rate (sahifani tark etish darajasi), o'rtacha sessiya davomiyligi va konversiya yo'llari. Funnel (voronka) tahlili: Awareness (xabardorlik) → Interest (qiziqish) → Decision (qaror) → Action (harakat). Har bir bosqichda qancha odam tushibdi — shu asosda zaif joylarni toping. Growth hacking — bu tezkor o'sish uchun ijodiy eksperimentlar. Referral marketing (tavsiya marketing) eng arzon va samarali usullardan biri. A/B test orqali landing page, email sarlavha va CTA larni doimiy yaxshilab boring.",
-    pdfMaterials: ["analitika-dashboard.pdf"]
-  }
-];
+const DEMO_MODULES: Module[] = [];
+const DEMO_LESSONS: Lesson[] = [];
 
 // Helper wrapper for SSR check
 const isClient = typeof window !== "undefined";
@@ -598,24 +501,7 @@ export const db = {
   // Reset to Demo Data
   resetToDemo(): void {
     if (!isClient) return;
-    localStorage.setItem("replai_channels", JSON.stringify(DEMO_CHANNELS));
-    localStorage.setItem("replai_active_channel", "ch_demo_ig");
-    localStorage.setItem("replai_contacts", JSON.stringify(DEMO_CONTACTS));
-    localStorage.setItem("replai_broadcasts", JSON.stringify(DEMO_BROADCASTS));
-    localStorage.setItem("replai_modules", JSON.stringify(DEMO_MODULES));
-    localStorage.setItem("replai_lessons", JSON.stringify(DEMO_LESSONS));
-    localStorage.setItem("replai_bot_settings", JSON.stringify(DEFAULT_BOT_SETTINGS));
-    
-    const demoIGAutomations: Automation[] = [
-      { id: "1", name: "Lead Magnet (Bepul qo'llanma)", triggerType: "keyword", triggerDetails: "kitob, kurs, bonus", runs: "148", completion: "92%", active: true },
-      { id: "2", name: "Stories-da belgilaganda kupon", triggerType: "story", triggerDetails: "Story mentions", runs: "42", completion: "88%", active: true },
-    ];
-    const demoTGAutomations: Automation[] = [
-      { id: "1", name: "Kutib olish va Tezkor FAQ", triggerType: "keyword", triggerDetails: "/start, boshlash", runs: "320", completion: "95%", active: true },
-    ];
-    localStorage.setItem("replai_automations_ch_demo_ig", JSON.stringify(demoIGAutomations));
-    localStorage.setItem("replai_automations_ch_demo_tg", JSON.stringify(demoTGAutomations));
-    notifyUpdate();
+    this.clearAllData();
   },
 
   // 6. Channels Database
