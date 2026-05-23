@@ -1,7 +1,7 @@
 "use client";
 
 import { useI18n } from "@/i18n/I18nProvider";
-import { Card, Button } from "@/components/ui/primitives";
+import { Card } from "@/components/ui/primitives";
 import Link from "next/link";
 
 export function InstagramConnectCard() {
@@ -34,10 +34,11 @@ export function InstagramConnectCard() {
         </h3>
         <p className="mt-1.5 text-[12px] text-[#9CA3AF]">{t("pages.home.ig_sub")}</p>
 
-        <Link href="/settings?connect=instagram" className="w-full block">
-          <Button variant="accent" className="mt-5 w-full py-3.5">
-            {t("common.connect_instagram")}
-          </Button>
+        <Link
+          href="/settings?connect=instagram"
+          className="mt-5 w-full inline-flex items-center justify-center font-medium transition-all duration-150 active:scale-[0.98] text-[13px] bg-[#C7F33C] text-[#1A2906] hover:bg-[#9BC92E] px-5 py-3.5 rounded-full text-center block"
+        >
+          {t("common.connect_instagram")}
         </Link>
       </div>
     </Card>
