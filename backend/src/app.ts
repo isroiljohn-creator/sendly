@@ -15,7 +15,16 @@ import analyticsRouter from "./routes/analytics";
 const app = express();
 
 // Standard middleware
-app.use(cors());
+app.use(
+  cors({
+    origin: [
+      "https://www.sendly.uz",
+      "https://sendly.uz",
+      "http://localhost:3000",
+    ],
+    credentials: true,
+  })
+);
 
 // Configure express.json to capture the raw body buffer for signature verification
 app.use(
