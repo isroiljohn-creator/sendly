@@ -957,7 +957,7 @@ export default function AIAgentPage() {
   if (selectedAgentType === null) {
     return (
       <AppLayout>
-        <div className="flex flex-col gap-8 relative min-h-[calc(100vh-140px)] pb-12 items-center justify-center max-w-4xl mx-auto py-12">
+        <div className="flex flex-col gap-8 relative min-h-[calc(100vh-140px)] pb-12 items-center justify-start md:justify-center max-w-4xl mx-auto py-6 md:py-10">
           {/* Toast Alert */}
           {toast && (
             <div className="fixed top-6 right-6 z-[999] flex items-center gap-3 px-5 py-3.5 rounded-xl border bg-white shadow-lg animate-in fade-in slide-in-from-top-3 duration-250">
@@ -967,24 +967,24 @@ export default function AIAgentPage() {
           )}
 
           {/* Header */}
-          <div className="text-center flex flex-col gap-3">
+          <div className="text-center flex flex-col gap-2">
             <span className="px-3.5 py-1.5 bg-[#C7F33C]/20 text-[#7CA607] rounded-full text-[11px] font-bold tracking-wider uppercase inline-block mx-auto">
               AI Agent Platformasi
             </span>
-            <h1 className="text-[28px] md:text-[34px] font-extrabold text-black tracking-tight leading-tight">
+            <h1 className="text-[26px] md:text-[32px] font-extrabold text-black tracking-tight leading-tight">
               AI Agent Shablonini Tanlang
             </h1>
-            <p className="text-[13px] md:text-[14px] text-[#707070] max-w-lg mx-auto leading-relaxed">
+            <p className="text-[13px] text-[#707070] max-w-lg mx-auto leading-relaxed">
               Biznesingizni avtomatlashtirish uchun mos keladigan sun&apos;iy intellekt agenti shablonlaridan birini ishga tushiring.
             </p>
           </div>
 
           {/* Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full mt-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5 w-full mt-2">
             {/* Card 1: AI Kurator */}
-            <div className="bg-white border border-[#E8E8E8] hover:border-black/20 hover:shadow-xl rounded-[28px] p-8 flex flex-col justify-between transition-all group relative overflow-hidden">
+            <div className="bg-white border border-[#E8E8E8] hover:border-black/20 hover:shadow-xl rounded-[28px] p-6 flex flex-col justify-between transition-all group relative overflow-hidden">
               <div className="absolute top-0 right-0 w-24 h-24 bg-[#C7F33C]/10 rounded-bl-full -z-10 group-hover:scale-110 transition-transform" />
-              <div className="flex flex-col gap-5">
+              <div className="flex flex-col gap-4">
                 <div className="flex items-center justify-between">
                   <div className="w-12 h-12 rounded-2xl bg-black text-[#C7F33C] grid place-items-center font-bold text-[18px]">
                     <Sparkles size={22} />
@@ -1009,7 +1009,7 @@ export default function AIAgentPage() {
                   )}
                 </div>
                 <div>
-                  <h3 className="text-[18px] font-bold text-black group-hover:text-[#7CA607] transition-colors">
+                  <h3 className="text-[17px] font-bold text-black group-hover:text-[#7CA607] transition-colors">
                     AI Kurator (Kurs Yordamchisi)
                   </h3>
                   {settings?.aiCuratorEnabled && telegramBotUsername && (
@@ -1017,36 +1017,28 @@ export default function AIAgentPage() {
                       Bot: @{telegramBotUsername}
                     </p>
                   )}
-                  <p className="text-[12px] text-[#707070] mt-2 leading-relaxed">
+                  <p className="text-[12px] text-[#707070] mt-1.5 leading-relaxed">
                     Telegram bot orqali o&apos;quvchilarga darsliklar, transkriptlar va PDF materiallar asosida aqlli, do&apos;stona va aniq javob beruvchi shaxsiy yordamchi (RAG tizimi).
                   </p>
                 </div>
 
-                <div className="border-t border-[#F0F0F0] my-2" />
+                <div className="border-t border-[#F0F0F0] my-1" />
 
-                <ul className="flex flex-col gap-2.5 text-[11px] text-[#595959]">
-                  <li className="flex items-center gap-2">
-                    <div className="w-4 h-4 rounded-full bg-green-55 text-green-600 grid place-items-center font-bold text-[10px]">
-                      ✓
-                    </div>
+                <ul className="flex flex-col gap-2 text-[11px] text-[#595959]">
+                  <li className="flex items-start gap-2.5">
+                    <CheckCircle className="w-4 h-4 text-[#9BC92E] shrink-0 mt-0.5" />
                     <span>RAG (Bilimlar bazasi) tizimi</span>
                   </li>
-                  <li className="flex items-center gap-2">
-                    <div className="w-4 h-4 rounded-full bg-green-55 text-green-600 grid place-items-center font-bold text-[10px]">
-                      ✓
-                    </div>
+                  <li className="flex items-start gap-2.5">
+                    <CheckCircle className="w-4 h-4 text-[#9BC92E] shrink-0 mt-0.5" />
                     <span>Telegram bot integratsiyasi</span>
                   </li>
-                  <li className="flex items-center gap-2">
-                    <div className="w-4 h-4 rounded-full bg-green-55 text-green-600 grid place-items-center font-bold text-[10px]">
-                      ✓
-                    </div>
+                  <li className="flex items-start gap-2.5">
+                    <CheckCircle className="w-4 h-4 text-[#9BC92E] shrink-0 mt-0.5" />
                     <span>Ohang va hazil darajasini sozlash</span>
                   </li>
-                  <li className="flex items-center gap-2">
-                    <div className="w-4 h-4 rounded-full bg-green-55 text-green-600 grid place-items-center font-bold text-[10px]">
-                      ✓
-                    </div>
+                  <li className="flex items-start gap-2.5">
+                    <CheckCircle className="w-4 h-4 text-[#9BC92E] shrink-0 mt-0.5" />
                     <span>Inson-kuratorga yo&apos;naltirish qoidalari</span>
                   </li>
                 </ul>
@@ -1059,7 +1051,7 @@ export default function AIAgentPage() {
                     localStorage.setItem("sendly_selected_agent_type", "kurator");
                   }
                 }}
-                className="w-full mt-8 py-3 rounded-full bg-black text-[#C7F33C] text-[12px] font-bold hover:bg-black/90 hover:scale-[1.02] active:scale-95 transition-all text-center flex items-center justify-center gap-2"
+                className="w-full mt-6 py-3 rounded-full bg-black text-[#C7F33C] text-[12px] font-bold hover:bg-black/90 hover:scale-[1.02] active:scale-95 transition-all text-center flex items-center justify-center gap-2"
               >
                 <span>Ushbu shablonni sozlash</span>
                 <ArrowRight size={14} />
@@ -1067,9 +1059,9 @@ export default function AIAgentPage() {
             </div>
 
             {/* Card 2: Facebook Lead Handler */}
-            <div className="bg-white border border-[#E8E8E8] hover:border-black/20 hover:shadow-xl rounded-[28px] p-8 flex flex-col justify-between transition-all group relative overflow-hidden">
+            <div className="bg-white border border-[#E8E8E8] hover:border-black/20 hover:shadow-xl rounded-[28px] p-6 flex flex-col justify-between transition-all group relative overflow-hidden">
               <div className="absolute top-0 right-0 w-24 h-24 bg-blue-500/5 rounded-bl-full -z-10 group-hover:scale-110 transition-transform" />
-              <div className="flex flex-col gap-5">
+              <div className="flex flex-col gap-4">
                 <div className="flex items-center justify-between">
                   <div className="w-12 h-12 rounded-2xl bg-blue-600 text-white grid place-items-center font-bold text-[18px]">
                     <Facebook size={22} />
@@ -1094,7 +1086,7 @@ export default function AIAgentPage() {
                   )}
                 </div>
                 <div>
-                  <h3 className="text-[18px] font-bold text-black group-hover:text-blue-600 transition-colors">
+                  <h3 className="text-[17px] font-bold text-black group-hover:text-blue-600 transition-colors">
                     Facebook Lead Handler
                   </h3>
                   {settings?.fbAgentEnabled && (
@@ -1102,36 +1094,28 @@ export default function AIAgentPage() {
                       Guruh: {db.getGroups().find(g => g.id === (settings.targetGroupId || "sales"))?.name || "Sotuvlar"}
                     </p>
                   )}
-                  <p className="text-[12px] text-[#707070] mt-2 leading-relaxed">
+                  <p className="text-[12px] text-[#707070] mt-1.5 leading-relaxed">
                     Facebook target reklama formalaridan kelgan lid (mijoz) ma&apos;lumotlarini AI yordamida saralab, guruhlarga yo&apos;naltiruvchi va avtomatik salomlashish xabari yuboruvchi agent.
                   </p>
                 </div>
 
-                <div className="border-t border-[#F0F0F0] my-2" />
+                <div className="border-t border-[#F0F0F0] my-1" />
 
-                <ul className="flex flex-col gap-2.5 text-[11px] text-[#595959]">
-                  <li className="flex items-center gap-2">
-                    <div className="w-4 h-4 rounded-full bg-green-55 text-green-600 grid place-items-center font-bold text-[10px]">
-                      ✓
-                    </div>
+                <ul className="flex flex-col gap-2 text-[11px] text-[#595959]">
+                  <li className="flex items-start gap-2.5">
+                    <CheckCircle className="w-4 h-4 text-blue-500 shrink-0 mt-0.5" />
                     <span>Meta Lead Ads formalari bilan bog&apos;lanish</span>
                   </li>
-                  <li className="flex items-center gap-2">
-                    <div className="w-4 h-4 rounded-full bg-green-55 text-green-600 grid place-items-center font-bold text-[10px]">
-                      ✓
-                    </div>
+                  <li className="flex items-start gap-2.5">
+                    <CheckCircle className="w-4 h-4 text-blue-500 shrink-0 mt-0.5" />
                     <span>AI orqali mijoz xohishini tahlil qilish</span>
                   </li>
-                  <li className="flex items-center gap-2">
-                    <div className="w-4 h-4 rounded-full bg-green-55 text-green-600 grid place-items-center font-bold text-[10px]">
-                      ✓
-                    </div>
+                  <li className="flex items-start gap-2.5">
+                    <CheckCircle className="w-4 h-4 text-blue-500 shrink-0 mt-0.5" />
                     <span>Guruhlarga yo&apos;naltirish va taglash</span>
                   </li>
-                  <li className="flex items-center gap-2">
-                    <div className="w-4 h-4 rounded-full bg-green-55 text-green-600 grid place-items-center font-bold text-[10px]">
-                      ✓
-                    </div>
+                  <li className="flex items-start gap-2.5">
+                    <CheckCircle className="w-4 h-4 text-blue-500 shrink-0 mt-0.5" />
                     <span>Avtomatik salomlashish xabarlari</span>
                   </li>
                 </ul>
@@ -1144,7 +1128,7 @@ export default function AIAgentPage() {
                     localStorage.setItem("sendly_selected_agent_type", "fb-leads");
                   }
                 }}
-                className="w-full mt-8 py-3 rounded-full bg-blue-600 text-white text-[12px] font-bold hover:bg-blue-700 hover:scale-[1.02] active:scale-95 transition-all text-center flex items-center justify-center gap-2"
+                className="w-full mt-6 py-3 rounded-full bg-blue-600 text-white text-[12px] font-bold hover:bg-blue-700 hover:scale-[1.02] active:scale-95 transition-all text-center flex items-center justify-center gap-2"
               >
                 <span>Ushbu shablonni sozlash</span>
                 <ArrowRight size={14} />
