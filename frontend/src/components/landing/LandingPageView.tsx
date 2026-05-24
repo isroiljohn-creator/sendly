@@ -253,7 +253,7 @@ export function LandingPageView() {
   ];
 
   return (
-    <div className="min-h-screen bg-[#E8E8E8] text-[#1D1D1F] font-sans overflow-x-hidden selection:bg-[#C7F33C] selection:text-black">
+    <div className="min-h-screen bg-[#F5F5F7] text-[#1D1D1F] font-sans overflow-x-hidden selection:bg-[#C7F33C] selection:text-black">
 
       {/* Ambient background glows */}
       <div className="fixed top-[-15%] left-[-10%] w-[55vw] h-[55vw] rounded-full bg-[#C7F33C]/8 blur-[130px] pointer-events-none z-0" />
@@ -261,7 +261,7 @@ export function LandingPageView() {
       <div className="fixed bottom-[0%] left-[25%] w-[45vw] h-[45vw] rounded-full bg-[#C7F33C]/6 blur-[120px] pointer-events-none z-0" />
 
       {/* ─── NAVBAR ─── */}
-      <header className="sticky top-0 z-50 w-full border-b border-[#D8D8D8]/60 bg-[#E8E8E8]/85 backdrop-blur-xl">
+      <header className="sticky top-0 z-50 w-full border-b border-[#D8D8D8]/60 bg-[#F5F5F7]/85 backdrop-blur-xl">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-5 sm:px-8 py-4">
 
           {/* Logo */}
@@ -329,7 +329,7 @@ export function LandingPageView() {
       <section className="relative z-10 mx-auto max-w-7xl px-5 sm:px-8 pt-16 sm:pt-20 pb-10 flex flex-col lg:flex-row items-center gap-12 lg:gap-0">
 
         {/* Left — text */}
-        <div className="flex-1 text-center lg:text-left max-w-xl mx-auto lg:mx-0">
+        <div className="flex-1 text-center lg:text-left max-w-2xl lg:max-w-3xl mx-auto lg:mx-0 z-20">
 
           {/* Badge */}
           <div className="inline-flex items-center gap-2 rounded-full bg-[#C7F33C] px-4 py-2 text-[11.5px] font-bold text-black mb-6 shadow-sm">
@@ -337,7 +337,7 @@ export function LandingPageView() {
           </div>
 
           {/* Title - Sentence Case and shaxsiy xabar */}
-          <h1 className="text-[36px] sm:text-[52px] md:text-[60px] font-[900] text-black tracking-tight leading-[1.07]">
+          <h1 className="text-[32px] sm:text-[46px] lg:text-[54px] font-[900] text-black tracking-tight leading-[1.07]">
             {"Instagram shaxsiy xabarlari"}
             <br />
             {"va "}
