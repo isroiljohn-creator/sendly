@@ -302,7 +302,7 @@ export function LandingPageView() {
       </header>
 
       {/* ─── HERO ─── */}
-      <section className="relative z-10 mx-auto max-w-7xl px-5 sm:px-8 pt-16 sm:pt-20 pb-10 flex flex-col lg:flex-row items-center gap-12 lg:gap-0">
+      <section className="relative z-10 mx-auto max-w-7xl px-5 sm:px-8 pt-12 sm:pt-14 pb-8 flex flex-col lg:flex-row items-center gap-12 lg:gap-0">
 
         {/* Left — text */}
         <div className="flex-1 text-center lg:text-left max-w-2xl lg:max-w-3xl mx-auto lg:mx-0 z-20">
@@ -363,7 +363,7 @@ export function LandingPageView() {
       </section>
 
       {/* ─── STATS BAR ─── */}
-      <div className="border-y border-[#D8D8D8]/60 bg-white py-10 z-10 relative">
+      <div className="border-y border-[#D8D8D8]/60 bg-white py-7 z-10 relative">
         <div className="mx-auto max-w-5xl px-5 sm:px-8 grid grid-cols-1 sm:grid-cols-3 gap-8 text-center">
           <div>
             <p className="text-[40px] sm:text-[50px] font-[900] text-[#7CA607] leading-none tracking-tight">{"1M+"}</p>
@@ -381,7 +381,7 @@ export function LandingPageView() {
       </div>
 
       {/* ─── FEATURES ─── */}
-      <section id="features" className="relative z-10 mx-auto max-w-7xl px-5 sm:px-8 py-20 sm:py-28">
+      <section id="features" className="relative z-10 mx-auto max-w-7xl px-5 sm:px-8 py-12 sm:py-16">
         <div className="text-center max-w-2xl mx-auto mb-14">
           <h2 className="text-[28px] sm:text-[42px] font-[900] text-black tracking-tight">
             {"Savdoni oshirish uchun"} <span className="text-[#7CA607]">{"barcha qurollar"}</span>
@@ -408,7 +408,7 @@ export function LandingPageView() {
       </section>
 
       {/* ─── DEMO SIMULATOR ─── */}
-      <section id="simulator" className="relative z-10 mx-auto max-w-5xl px-5 sm:px-8 py-12 sm:py-20">
+      <section id="simulator" className="relative z-10 mx-auto max-w-5xl px-5 sm:px-8 py-8 sm:py-12">
         <div className="rounded-[24px] border border-[#D8D8D8]/60 bg-white p-6 sm:p-10 shadow-sm">
           <div className="grid grid-cols-1 md:grid-cols-[1fr_1.15fr] gap-8 items-center">
 
@@ -475,7 +475,7 @@ export function LandingPageView() {
       </section>
 
       {/* ─── PRICING ─── */}
-      <section id="pricing" className="relative z-10 mx-auto max-w-7xl px-5 sm:px-8 py-16 sm:py-24">
+      <section id="pricing" className="relative z-10 mx-auto max-w-7xl px-5 sm:px-8 py-12 sm:py-16">
         <div className="text-center max-w-2xl mx-auto mb-14">
           <h2 className="text-[28px] sm:text-[42px] font-[900] text-black tracking-tight">{"Oddiy va shaffof tariflar"}</h2>
           <p className="text-[14px] sm:text-[15px] text-[#515154] mt-3 leading-relaxed">
@@ -542,23 +542,23 @@ export function LandingPageView() {
       </section>
 
       {/* ─── FAQ ─── */}
-      <section id="faq" className="relative z-10 mx-auto max-w-3xl px-5 sm:px-8 py-16 sm:py-20">
+      <section id="faq" className="relative z-10 mx-auto max-w-3xl px-5 sm:px-8 py-12 sm:py-16">
         <div className="text-center mb-12">
           <h2 className="text-[28px] sm:text-[40px] font-[900] text-black tracking-tight">{"Ko'p beriladigan savollar"}</h2>
           <p className="text-[13.5px] text-[#515154] mt-3">{"Eng ko'p so'raladigan savollarga javoblar."}</p>
         </div>
         <div className="flex flex-col gap-3">
           {faqs.map((faq, i) => (
-            <div key={i} className="rounded-[16px] border border-[#D8D8D8]/60 bg-white overflow-hidden shadow-sm">
+            <div key={i} className="rounded-[20px] border border-[#D8D8D8]/60 bg-white overflow-hidden shadow-sm hover:shadow-md transition-all">
               <button
                 onClick={() => setActiveFaq(activeFaq === i ? null : i)}
-                className="w-full px-5 py-4.5 flex items-center justify-between text-left font-bold text-[14px] sm:text-[15px] text-black hover:text-[#7CA607] transition-colors"
+                className="w-full px-7 py-6 flex items-center justify-between text-left font-extrabold text-[15px] sm:text-[16px] text-black hover:text-[#7CA607] transition-colors"
               >
                 <span>{faq.q}</span>
                 <ChevronDown size={15} className={`text-[#A0A0A5] transition-transform duration-200 shrink-0 ml-3 ${activeFaq === i ? "rotate-180 text-[#7CA607]" : ""}`} />
               </button>
               {activeFaq === i && (
-                <div className="px-5 pb-5 text-[13px] text-[#515154] leading-relaxed border-t border-black/5 pt-4 animate-in fade-in duration-150">
+                <div className="px-7 pb-6 text-[13.5px] text-[#515154] leading-relaxed border-t border-black/5 pt-5 animate-in fade-in duration-150">
                   {faq.a}
                 </div>
               )}
@@ -568,7 +568,7 @@ export function LandingPageView() {
       </section>
 
       {/* ─── FOOTER CTA ─── */}
-      <section className="relative z-10 border-t border-[#D8D8D8] bg-[#DFDFDF] py-16 sm:py-20 text-center">
+      <section className="relative z-10 border-t border-[#D8D8D8] bg-[#DFDFDF] py-10 sm:py-12 text-center">
         <div className="mx-auto max-w-3xl px-5 sm:px-8">
           <h2 className="text-[26px] sm:text-[40px] font-[900] text-black tracking-tight">{"Instagram savdongizni bugunoq kuchaytiring"}</h2>
           <p className="text-[13.5px] text-[#515154] mt-4 max-w-xl mx-auto leading-relaxed">
