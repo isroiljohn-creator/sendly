@@ -146,7 +146,7 @@ export function LandingPageView() {
       let reply = "";
       let next: string[] = [];
       if (btnText.includes("Narxi")) {
-        reply = "💎 Sendly tariflari:\n• PRO: 150,000 so'm/oy — 1 akkaunt\n• PREMIUM: 1,000,000 so'm/oy — 10 akkaunt\n\n7 kun bepul sinab ko'ring! Karta bog'lash shart emas.";
+        reply = "💎 Sendly tariflari:\n• PRO: 150,000 so'm/oy — 1 akkaunt\n• PREMIUM: 1,000,000 so'm/oy — 10 akkaunt\n\n7 kun bepul sinab ko'ring! Sinash uchun karta bog'lash shart.";
         next = ["Bepul boshlash 🚀", "Boshqa savol ❓"];
       } else if (btnText.includes("ishlaydi")) {
         reply = "⚡ Juda oson:\n1️⃣ Ro'yxatdan o'ting\n2️⃣ Instagram professional akkauntingizni ulang\n3️⃣ Bot oqimlarini yarating\n\nBot 24/7 avtomatik javob beradi!";
@@ -240,7 +240,7 @@ export function LandingPageView() {
     },
     {
       q: "7 kunlik sinov muddati haqiqiymi?",
-      a: "Ha, mutlaqo haqiqiy. Ro'yxatdan o'tganingizdan so'ng 7 kun davomida barcha Pro funksiyalardan bepul foydalanasiz. Kredit karta talab qilinmaydi.",
+      a: "Ha, mutlaqo haqiqiy. Ro'yxatdan o'tganingizdan so'ng 7 kun davomida barcha Pro funksiyalardan bepul foydalanasiz. Sinov muddatini boshlash uchun karta bog'lash talab etiladi.",
     },
     {
       q: "Bir nechta Instagram akkauntni ulasa bo'ladimi?",
@@ -349,8 +349,10 @@ export function LandingPageView() {
           </h1>
 
           {/* Subtitle */}
-          <p className="mt-5 text-[15px] sm:text-[17px] text-[#515154] leading-relaxed max-w-[500px] mx-auto lg:mx-0">
-            {"Mijozlarga 24/7 tezkor javob bering, izohlarga shaxsiy xabar orqali avtomatik javob qaytaring va AI yordamida arizalarni saralang."}
+          <p className="mt-5 text-[15px] sm:text-[17px] text-[#515154] leading-relaxed max-w-[620px] mx-auto lg:mx-0">
+            <span className="block md:whitespace-nowrap">{"Mijozlarga 24/7 tezkor javob bering, izohlarga"}</span>
+            <span className="block md:whitespace-nowrap">{"shaxsiy xabar orqali avtomatik javob qaytaring"}</span>
+            <span className="block md:whitespace-nowrap">{"va AI yordamida arizalarni saralang."}</span>
           </p>
 
           {/* Buttons */}
@@ -373,7 +375,7 @@ export function LandingPageView() {
           {/* Trust badges */}
           <div className="mt-8 flex items-center gap-5 justify-center lg:justify-start text-[11.5px] text-[#707075] font-semibold">
             <span className="flex items-center gap-1.5"><Check size={12} className="text-[#7CA607]" />{"7 kun bepul"}</span>
-            <span className="flex items-center gap-1.5"><Check size={12} className="text-[#7CA607]" />{"Karta shart emas"}</span>
+            <span className="flex items-center gap-1.5"><Check size={12} className="text-[#7CA607]" />{"Karta bog'lash shart"}</span>
             <span className="flex items-center gap-1.5"><Check size={12} className="text-[#7CA607]" />{"Meta API orqali"}</span>
           </div>
         </div>
@@ -501,7 +503,7 @@ export function LandingPageView() {
         <div className="text-center max-w-2xl mx-auto mb-14">
           <h2 className="text-[28px] sm:text-[42px] font-[900] text-black tracking-tight">{"Oddiy va shaffof tariflar"}</h2>
           <p className="text-[14px] sm:text-[15px] text-[#515154] mt-3 leading-relaxed">
-            {"7 kun bepul. Kredit karta talab qilinmaydi."}
+            {"7 kun bepul. Sinash uchun karta bog'lash shart."}
           </p>
         </div>
 
