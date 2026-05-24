@@ -13,7 +13,8 @@ import {
   Phone,
   Video,
   Smile,
-  Bot
+  Bot,
+  Megaphone
 } from "lucide-react";
 import { db, Channel, Automation } from "@/lib/db";
 import { CustomDropdown } from "@/components/ui/CustomDropdown";
@@ -56,21 +57,18 @@ export default function QuickBotWizardPage() {
         
         if (usernameClean.toLowerCase() === "sincerelyabror") {
           botChannels = [
-            { username: "Sincerelyabror_bot", name: "Sincerelyabror_bot" },
             { username: "abror_channel", name: "Abror Ahmedov Kanal" },
             { username: "marketing_uz", name: "Marketing Darslari Uz" }
           ];
         } else if (usernameClean.toLowerCase() === "nuvioffice") {
           botChannels = [
-            { username: "Sincerelyabror_bot", name: "Sincerelyabror_bot" },
             { username: "nuvioffice_channel", name: "Nuvioffice Kanal" },
             { username: "nuvioffice_office", name: "Nuvioffice Office" }
           ];
         } else {
           botChannels = [
             { username: `${usernameClean}_channel`, name: `${formattedName} Kanal` },
-            { username: `marketing_${usernameClean}`, name: `Marketing Uz (${formattedName})` },
-            { username: "Sincerelyabror_bot", name: "Sincerelyabror_bot" }
+            { username: `marketing_${usernameClean}`, name: `Marketing Uz (${formattedName})` }
           ];
         }
         
@@ -84,7 +82,7 @@ export default function QuickBotWizardPage() {
       const options = botChannels.map(ch => ({
         value: ch.username,
         label: ch.name,
-        icon: <Bot size={13} className="text-[#229ED9]" />
+        icon: <Megaphone size={13} className="text-[#229ED9]" />
       }));
       
       setTgSubChannels(options);
