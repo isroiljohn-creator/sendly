@@ -567,7 +567,7 @@
       "fb_feature_3": "Guruhlarga yo'naltirish va taglash",
       "fb_feature_4": "Avtomatik salomlashish xabarlari",
       "kurator_agent": "AI Kurator (FAQ yordamchi)",
-      "fb_leads_agent": "Meta Leads + AI Categorization",
+      "fb_leads_agent": "Meta Leads + AI orqali saralash",
       "config_title": "AI Agent Sozlamalari",
       "enable_agent": "AI Agentni yoqish",
       "system_prompt": "Tizim yo'riqnomasi (System Instruction)",
