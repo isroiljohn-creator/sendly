@@ -337,15 +337,15 @@ export function LandingPageView() {
           </div>
 
           {/* Title - Sentence Case and shaxsiy xabar */}
-          <h1 className="text-[32px] sm:text-[46px] lg:text-[54px] font-[900] text-black tracking-tight leading-[1.07]">
-            {"Instagram shaxsiy xabarlari"}
-            <br />
-            {"va "}
-            <span className="bg-gradient-to-r from-[#7CA607] via-purple-600 to-blue-600 bg-clip-text text-transparent">
-              {"izohlarini savdoga"}
+          <h1 className="text-[30px] sm:text-[42px] lg:text-[48px] xl:text-[54px] font-[900] text-black tracking-tight leading-[1.1]">
+            <span className="block md:whitespace-nowrap">{"Instagram shaxsiy xabarlari"}</span>
+            <span className="block md:whitespace-nowrap">
+              {"va "}
+              <span className="bg-gradient-to-r from-[#7CA607] via-purple-600 to-blue-600 bg-clip-text text-transparent">
+                {"izohlarini savdoga"}
+              </span>
             </span>
-            <br />
-            {"aylantiring"}
+            <span className="block md:whitespace-nowrap">{"aylantiring"}</span>
           </h1>
 
           {/* Subtitle */}
