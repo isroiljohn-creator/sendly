@@ -45,7 +45,7 @@ function RobotHero() {
   return (
     <div
       className="relative flex items-center justify-center select-none"
-      style={{ perspective: "900px" }}
+      style={{ perspective: "950px" }}
       onMouseMove={onMove}
       onMouseLeave={onLeave}
     >
@@ -56,12 +56,12 @@ function RobotHero() {
           66% { transform: translateY(-9px) rotate(-0.5deg); }
         }
         @keyframes sendly-shadow-pulse {
-          0%, 100% { transform: translateX(-50%) scale(1); opacity: 0.5; }
-          50% { transform: translateX(-50%) scale(0.78); opacity: 0.18; }
+          0%, 100% { transform: translateX(-50%) scale(1); opacity: 0.3; }
+          50% { transform: translateX(-50%) scale(0.78); opacity: 0.12; }
         }
         @keyframes sendly-glow-pulse {
-          0%, 100% { opacity: 0.5; transform: scale(1); }
-          50% { opacity: 0.85; transform: scale(1.08); }
+          0%, 100% { opacity: 0.35; transform: scale(1); }
+          50% { opacity: 0.65; transform: scale(1.08); }
         }
         @keyframes sendly-badge-float {
           0%, 100% { transform: translateY(0px); }
@@ -71,47 +71,40 @@ function RobotHero() {
 
       {/* Outer glow ring */}
       <div
-        className="absolute w-[420px] h-[420px] rounded-full"
+        className="absolute w-[450px] h-[450px] rounded-full"
         style={{
-          background: "radial-gradient(circle, rgba(199,243,60,0.18) 0%, rgba(199,243,60,0.04) 60%, transparent 75%)",
+          background: "radial-gradient(circle, rgba(155,201,46,0.2) 0%, rgba(155,201,46,0.05) 60%, transparent 75%)",
           animation: "sendly-glow-pulse 4s ease-in-out infinite",
         }}
       />
 
-      {/* Second glow */}
+      {/* Floating badge - Auto-reply */}
       <div
-        className="absolute w-[280px] h-[280px] rounded-full"
-        style={{
-          background: "radial-gradient(circle, rgba(199,243,60,0.22) 0%, transparent 70%)",
-          animation: "sendly-glow-pulse 4s ease-in-out infinite 1s",
-        }}
-      />
-
-      {/* Floating badge - DM count */}
-      <div
-        className="absolute top-[60px] -left-[20px] sm:-left-[40px] flex items-center gap-2 rounded-2xl border border-[#C7F33C]/20 bg-[#0C0C0E]/90 backdrop-blur-md px-3 py-2 shadow-[0_8px_30px_rgba(0,0,0,0.4)] z-20"
+        className="absolute top-[60px] -left-[20px] sm:-left-[40px] flex items-center gap-2 rounded-2xl border border-black/5 bg-white/90 backdrop-blur-md px-3 py-2 shadow-[0_8px_30px_rgba(0,0,0,0.06)] z-20"
         style={{ animation: "sendly-badge-float 3.5s ease-in-out infinite" }}
       >
-        <div className="w-7 h-7 rounded-full bg-[#C7F33C] flex items-center justify-center text-black text-[11px] font-extrabold">{"DM"}</div>
+        <div className="w-7 h-7 rounded-full bg-[#C7F33C] flex items-center justify-center text-black">
+          <MessageSquare size={13} className="fill-black text-black" />
+        </div>
         <div>
-          <p className="text-[11px] font-bold text-white leading-none">{"Auto-javob"}</p>
-          <p className="text-[9px] text-[#A0A0A5] mt-0.5">{"1.2k xabar / kun"}</p>
+          <p className="text-[11px] font-bold text-black leading-none">{"Auto-javob"}</p>
+          <p className="text-[9px] text-[#707075] mt-0.5">{"1.2k xabar / kun"}</p>
         </div>
       </div>
 
       {/* Floating badge - conversion */}
       <div
-        className="absolute bottom-[80px] -right-[10px] sm:-right-[30px] flex items-center gap-2 rounded-2xl border border-[#C7F33C]/20 bg-[#0C0C0E]/90 backdrop-blur-md px-3 py-2 shadow-[0_8px_30px_rgba(0,0,0,0.4)] z-20"
+        className="absolute bottom-[80px] -right-[10px] sm:-right-[30px] flex items-center gap-2 rounded-2xl border border-black/5 bg-white/90 backdrop-blur-md px-3 py-2 shadow-[0_8px_30px_rgba(0,0,0,0.06)] z-20"
         style={{ animation: "sendly-badge-float 4s ease-in-out infinite 0.8s" }}
       >
-        <div className="w-7 h-7 rounded-full bg-purple-500/20 flex items-center justify-center text-purple-400 text-[11px] font-extrabold">{"3x"}</div>
+        <div className="w-7 h-7 rounded-full bg-purple-100 flex items-center justify-center text-purple-600 text-[11px] font-extrabold">{"3x"}</div>
         <div>
-          <p className="text-[11px] font-bold text-white leading-none">{"Konversiya"}</p>
-          <p className="text-[9px] text-[#A0A0A5] mt-0.5">{"sotuvlar o'sdi"}</p>
+          <p className="text-[11px] font-bold text-black leading-none">{"Konversiya"}</p>
+          <p className="text-[9px] text-[#707075] mt-0.5">{"sotuvlar o'sdi"}</p>
         </div>
       </div>
 
-      {/* Robot image */}
+      {/* Robot image - Large and transparent */}
       <div
         ref={ref}
         className="relative transition-all duration-300 ease-out"
@@ -120,9 +113,9 @@ function RobotHero() {
         <Image
           src="/robot.png"
           alt="Sendly AI Robot"
-          width={420}
-          height={420}
-          className="w-[340px] sm:w-[420px] h-[340px] sm:h-[420px] object-contain relative z-10"
+          width={650}
+          height={650}
+          className="w-[420px] sm:w-[550px] md:w-[600px] lg:w-[680px] h-[420px] sm:h-[550px] md:h-[600px] lg:h-[680px] object-contain relative z-10 lg:-mr-20 lg:-mt-10"
           style={{ animation: "sendly-float 7s ease-in-out infinite" }}
           priority
         />
@@ -130,7 +123,7 @@ function RobotHero() {
 
       {/* Ground shadow */}
       <div
-        className="absolute bottom-[-10px] left-1/2 w-[200px] h-[18px] rounded-full bg-[#C7F33C]/15 blur-[14px]"
+        className="absolute bottom-[-10px] left-1/2 w-[220px] h-[18px] rounded-full bg-black/5 blur-[14px]"
         style={{ animation: "sendly-shadow-pulse 7s ease-in-out infinite" }}
       />
     </div>
@@ -141,7 +134,7 @@ export function LandingPageView() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeFaq, setActiveFaq] = useState<number | null>(null);
   const [simMessages, setSimMessages] = useState<SimMessage[]>([
-    { sender: "bot", text: "Assalomu alaykum! 👋 Sendly botiman. Instagram Direct va izohlaringizni avtomatlashtirib beraman. Nima bilmoqchisiz?" },
+    { sender: "bot", text: "Assalomu alaykum! 👋 Sendly botiman. Instagram shaxsiy xabarlari va izohlaringizni avtomatlashtirib beraman. Nima bilmoqchisiz?" },
   ]);
   const [simButtons, setSimButtons] = useState<string[]>(["Narxi qancha? 💰", "Qanday ishlaydi? ⚡", "Bepul sinash 🚀"]);
 
@@ -156,7 +149,7 @@ export function LandingPageView() {
         reply = "💎 Sendly tariflari:\n• PRO: 150,000 so'm/oy — 1 akkaunt\n• PREMIUM: 1,000,000 so'm/oy — 10 akkaunt\n\n7 kun bepul sinab ko'ring! Karta bog'lash shart emas.";
         next = ["Bepul boshlash 🚀", "Boshqa savol ❓"];
       } else if (btnText.includes("ishlaydi")) {
-        reply = "⚡ Juda oson:\n1️⃣ Ro'yxatdan o'ting\n2️⃣ Instagram Professional akkauntingizni ulang\n3️⃣ Bot oqimlarini yarating\n\nBot 24/7 avtomatik javob beradi!";
+        reply = "⚡ Juda oson:\n1️⃣ Ro'yxatdan o'ting\n2️⃣ Instagram professional akkauntingizni ulang\n3️⃣ Bot oqimlarini yarating\n\nBot 24/7 avtomatik javob beradi!";
         next = ["Boshlash 🎯", "Boshqa savol ❓"];
       } else if (btnText.includes("Boshqa")) {
         reply = "Sizga qanday yordam bera olaman?";
@@ -173,65 +166,65 @@ export function LandingPageView() {
   const features = [
     {
       icon: MessageSquare,
-      color: "text-blue-400",
-      bg: "bg-blue-400/10",
-      title: "Direct Avtomatlashtirish",
-      desc: "Mijozlar DM yozganda bot soniyalar ichida javob beradi — xabarlami, havolami, tugmami.",
+      color: "text-blue-600",
+      bg: "bg-blue-50",
+      title: "Shaxsiy xabarlarni avtomatlashtirish",
+      desc: "Mijozlar shaxsiy xabar yozganda bot soniyalar ichida javob beradi — matn, havola yoki tugmalar bilan.",
     },
     {
       icon: Share2,
-      color: "text-[#C7F33C]",
-      bg: "bg-[#C7F33C]/10",
-      title: "Izoh → DM Oqimi",
+      color: "text-[#7CA607]",
+      bg: "bg-[#C7F33C]/20",
+      title: "Izoh → shaxsiy xabar oqimi",
       desc: "Post ostida izoh qoldirgan foydalanuvchiga avtomatik shaxsiy xabar yuboring.",
     },
     {
       icon: Sparkles,
-      color: "text-purple-400",
-      bg: "bg-purple-400/10",
-      title: "AI Agent (GPT)",
-      desc: "OpenAI yordamida arizalarni tahlil qilib, Sotuvlar yoki Support guruhlariga ajratadi.",
+      color: "text-purple-600",
+      bg: "bg-purple-50",
+      title: "AI agent (GPT)",
+      desc: "OpenAI yordamida arizalarni tahlil qilib, sotuvlar yoki qo'llab-quvvatlash guruhlariga ajratadi.",
     },
     {
       icon: Award,
-      color: "text-orange-400",
-      bg: "bg-orange-400/10",
-      title: "Referral va Ballar",
+      color: "text-orange-600",
+      bg: "bg-orange-50",
+      title: "Referral va ballar",
       desc: "Foydalanuvchilarni taklif qilganligi uchun mukofotlang. Ballarni chegirma va sovg'alarga almashtirish.",
     },
     {
       icon: MessageCircle,
-      color: "text-green-400",
-      bg: "bg-green-400/10",
-      title: "Telegram Bot Runner",
+      color: "text-green-600",
+      bg: "bg-green-50",
+      title: "Telegram bot runner",
       desc: "Instagram bilan birga Telegram botlarini ham bitta panelda boshqaring.",
     },
     {
       icon: Shield,
-      color: "text-pink-400",
-      bg: "bg-pink-400/10",
-      title: "Live Chat Takeover",
+      color: "text-pink-600",
+      bg: "bg-pink-50",
+      title: "Live chat takeover",
       desc: "Murakkab holatlarda bot operatorga uzatadi — insoniy muloqot zarur bo'lganda.",
     },
     {
       icon: BarChart3,
-      color: "text-cyan-400",
-      bg: "bg-cyan-400/10",
-      title: "Analitika va Hisobotlar",
+      color: "text-cyan-600",
+      bg: "bg-cyan-50",
+      title: "Analitika va hisobotlar",
       desc: "Qancha xabar yuborildi, qancha mijoz jalb qilindi — real vaqtda statistika.",
     },
     {
       icon: Users,
-      color: "text-yellow-400",
-      bg: "bg-yellow-400/10",
-      title: "Kontaktlar Bazasi",
+      color: "text-yellow-600",
+      bg: "bg-yellow-50",
+      title: "Kontaktlar bazasi",
       desc: "Barcha suhbatlashgan foydalanuvchilar ma'lumotlari teglar va status bilan saqlanadi.",
     },
     {
       icon: Bot,
-      color: "text-rose-400",
-      bg: "bg-rose-400/10",
-      title: "Visual Flow Builder",
+      color: "text-rose-600",
+      bg: "bg-rose-50",
+      title: "Visual flow builder",
       desc: "Drag-and-drop orqali murakkab bot oqimlarini kodlamasdan vizual yarating.",
     },
   ];
@@ -239,7 +232,7 @@ export function LandingPageView() {
   const faqs = [
     {
       q: "Sendly nima va kimlar uchun?",
-      a: "Sendly — Instagram Professional akkauntlari uchun avtomatlashtirilgan chatbot va marketing platformasi. Onlayn biznes yurituvchi, savdoni kengaytirmoqchi bo'lgan har qanday kishi uchun.",
+      a: "Sendly — Instagram professional akkauntlari uchun avtomatlashtirilgan chatbot va marketing platformasi. Onlayn biznes yurituvchi, savdoni kengaytirmoqchi bo'lgan har qanday kishi uchun.",
     },
     {
       q: "Akkauntim bloklanib ketmaydimi?",
@@ -251,7 +244,7 @@ export function LandingPageView() {
     },
     {
       q: "Bir nechta Instagram akkauntni ulasa bo'ladimi?",
-      a: "Ha. PRO tarifida 1 ta, PREMIUM tarifida esa 10 tagacha Instagram Professional akkauntni ulashingiz mumkin.",
+      a: "Ha. PRO tarifida 1 ta, PREMIUM tarifida esa 10 tagacha Instagram professional akkauntini ulashingiz mumkin.",
     },
     {
       q: "To'lovni qanday amalga oshiraman?",
@@ -260,44 +253,44 @@ export function LandingPageView() {
   ];
 
   return (
-    <div className="min-h-screen bg-[#070708] text-[#E8E8E8] font-sans overflow-x-hidden selection:bg-[#C7F33C] selection:text-[#070708]">
+    <div className="min-h-screen bg-[#F9F9F7] text-[#1D1D1F] font-sans overflow-x-hidden selection:bg-[#C7F33C] selection:text-black">
 
       {/* Ambient background glows */}
-      <div className="fixed top-[-15%] left-[-10%] w-[55vw] h-[55vw] rounded-full bg-[#C7F33C]/6 blur-[130px] pointer-events-none z-0" />
-      <div className="fixed top-[40%] right-[-15%] w-[50vw] h-[50vw] rounded-full bg-purple-700/8 blur-[140px] pointer-events-none z-0" />
-      <div className="fixed bottom-[0%] left-[25%] w-[45vw] h-[45vw] rounded-full bg-[#C7F33C]/4 blur-[120px] pointer-events-none z-0" />
+      <div className="fixed top-[-15%] left-[-10%] w-[55vw] h-[55vw] rounded-full bg-[#C7F33C]/10 blur-[130px] pointer-events-none z-0" />
+      <div className="fixed top-[40%] right-[-15%] w-[50vw] h-[50vw] rounded-full bg-purple-300/10 blur-[140px] pointer-events-none z-0" />
+      <div className="fixed bottom-[0%] left-[25%] w-[45vw] h-[45vw] rounded-full bg-[#C7F33C]/8 blur-[120px] pointer-events-none z-0" />
 
       {/* ─── NAVBAR ─── */}
-      <header className="sticky top-0 z-50 w-full border-b border-white/5 bg-[#070708]/85 backdrop-blur-xl">
+      <header className="sticky top-0 z-50 w-full border-b border-black/5 bg-[#F9F9F7]/85 backdrop-blur-xl">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-5 sm:px-8 py-4">
 
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2.5 shrink-0">
-            <div className="grid h-9 w-9 place-items-center rounded-[12px] bg-[#C7F33C] shadow-[0_0_20px_rgba(199,243,60,0.35)]">
+            <div className="grid h-9 w-9 place-items-center rounded-[12px] bg-[#C7F33C] shadow-[0_4px_15px_rgba(199,243,60,0.3)]">
               <Zap size={18} className="fill-black text-black" />
             </div>
-            <span className="text-[19px] font-extrabold tracking-tight text-white">
-              {"Sendly"}<span className="text-[#C7F33C]">{".uz"}</span>
+            <span className="text-[19px] font-extrabold tracking-tight text-black">
+              {"Sendly"}<span className="text-[#7CA607]">{".uz"}</span>
             </span>
           </Link>
 
           {/* Desktop nav links */}
-          <nav className="hidden lg:flex items-center gap-7 text-[13px] font-semibold text-[#A0A0A5]">
-            <a href="#features" className="hover:text-white transition-colors">{"Xususiyatlar"}</a>
-            <a href="#simulator" className="hover:text-white transition-colors">{"Demo"}</a>
-            <a href="#pricing" className="hover:text-white transition-colors">{"Tariflar"}</a>
-            <a href="#faq" className="hover:text-white transition-colors">{"Savol-Javob"}</a>
+          <nav className="hidden lg:flex items-center gap-7 text-[13px] font-semibold text-[#515154]">
+            <a href="#features" className="hover:text-black transition-colors">{"Xususiyatlar"}</a>
+            <a href="#simulator" className="hover:text-black transition-colors">{"Demo"}</a>
+            <a href="#pricing" className="hover:text-black transition-colors">{"Tariflar"}</a>
+            <a href="#faq" className="hover:text-black transition-colors">{"Savol-javob"}</a>
           </nav>
 
           {/* Right CTA */}
           <div className="hidden md:flex items-center gap-3">
             <Link href="/login">
-              <button className="text-[13px] font-semibold text-[#A0A0A5] hover:text-white px-4 py-2 transition-colors">
+              <button className="text-[13px] font-semibold text-[#515154] hover:text-black px-4 py-2 transition-colors">
                 {"Kirish"}
               </button>
             </Link>
             <Link href="/register">
-              <button className="flex items-center gap-2 rounded-full bg-[#C7F33C] text-black px-5 py-2.5 text-[13px] font-extrabold transition-all hover:scale-105 active:scale-95 shadow-[0_6px_20px_rgba(199,243,60,0.3)]">
+              <button className="flex items-center gap-2 rounded-full bg-[#C7F33C] text-black px-5 py-2.5 text-[13px] font-extrabold transition-all hover:scale-105 active:scale-95 shadow-[0_6px_15px_rgba(199,243,60,0.25)]">
                 {"Bepul boshlash"}
                 <ArrowRight size={14} />
               </button>
@@ -307,7 +300,7 @@ export function LandingPageView() {
           {/* Mobile burger */}
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="md:hidden text-white/80 hover:text-white p-1 transition-colors"
+            className="md:hidden text-black/80 hover:text-black p-1 transition-colors"
           >
             {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
@@ -315,14 +308,14 @@ export function LandingPageView() {
 
         {/* Mobile menu */}
         {mobileMenuOpen && (
-          <div className="md:hidden bg-[#0C0C0E] border-b border-white/5 px-5 py-5 flex flex-col gap-3 animate-in slide-in-from-top duration-200">
-            <a href="#features" onClick={() => setMobileMenuOpen(false)} className="text-[14px] font-semibold text-[#A0A0A5] py-2 border-b border-white/5">{"Xususiyatlar"}</a>
-            <a href="#simulator" onClick={() => setMobileMenuOpen(false)} className="text-[14px] font-semibold text-[#A0A0A5] py-2 border-b border-white/5">{"Demo Bot"}</a>
-            <a href="#pricing" onClick={() => setMobileMenuOpen(false)} className="text-[14px] font-semibold text-[#A0A0A5] py-2 border-b border-white/5">{"Tariflar"}</a>
-            <a href="#faq" onClick={() => setMobileMenuOpen(false)} className="text-[14px] font-semibold text-[#A0A0A5] py-2 border-b border-white/5">{"Savol-Javob"}</a>
+          <div className="md:hidden bg-white border-b border-black/5 px-5 py-5 flex flex-col gap-3 animate-in slide-in-from-top duration-200">
+            <a href="#features" onClick={() => setMobileMenuOpen(false)} className="text-[14px] font-semibold text-[#515154] py-2 border-b border-black/5">{"Xususiyatlar"}</a>
+            <a href="#simulator" onClick={() => setMobileMenuOpen(false)} className="text-[14px] font-semibold text-[#515154] py-2 border-b border-black/5">{"Demo bot"}</a>
+            <a href="#pricing" onClick={() => setMobileMenuOpen(false)} className="text-[14px] font-semibold text-[#515154] py-2 border-b border-black/5">{"Tariflar"}</a>
+            <a href="#faq" onClick={() => setMobileMenuOpen(false)} className="text-[14px] font-semibold text-[#515154] py-2 border-b border-black/5">{"Savol-javob"}</a>
             <div className="flex gap-2 mt-2">
               <Link href="/login" className="flex-1">
-                <button className="w-full rounded-full border border-white/10 bg-white/5 py-3 text-[13px] font-bold text-white">{"Kirish"}</button>
+                <button className="w-full rounded-full border border-black/10 bg-black/5 py-3 text-[13px] font-bold text-black">{"Kirish"}</button>
               </Link>
               <Link href="/register" className="flex-1">
                 <button className="w-full rounded-full bg-[#C7F33C] text-black py-3 text-[13px] font-extrabold">{"Bepul boshlash"}</button>
@@ -339,49 +332,49 @@ export function LandingPageView() {
         <div className="flex-1 text-center lg:text-left max-w-xl mx-auto lg:mx-0">
 
           {/* Badge */}
-          <div className="inline-flex items-center gap-2 rounded-full border border-[#C7F33C]/20 bg-[#C7F33C]/5 px-4 py-2 text-[11.5px] font-bold text-[#C7F33C] mb-6">
+          <div className="inline-flex items-center gap-2 rounded-full border border-[#C7F33C]/30 bg-[#C7F33C]/10 px-4 py-2 text-[11.5px] font-bold text-[#7CA607] mb-6">
             <Sparkles size={12} />
-            <span>{"INSTAGRAM CHATBOT & AI AVTOMATLASHTIRISH"}</span>
+            <span>{"Instagram chatbot va AI avtomatlashtirish"}</span>
           </div>
 
-          {/* Title */}
-          <h1 className="text-[36px] sm:text-[52px] md:text-[60px] font-[900] text-white tracking-tight leading-[1.07]">
-            {"Instagram DM va"}
+          {/* Title - Sentence Case and shaxsiy xabar */}
+          <h1 className="text-[36px] sm:text-[52px] md:text-[60px] font-[900] text-black tracking-tight leading-[1.07]">
+            {"Instagram shaxsiy xabarlari va"}
             <br />
-            <span className="bg-gradient-to-r from-[#C7F33C] via-[#DEFF7A] to-purple-400 bg-clip-text text-transparent">
-              {"Izohlarni Savdoga"}
+            <span className="bg-gradient-to-r from-[#7CA607] via-purple-600 to-blue-600 bg-clip-text text-transparent">
+              {"izohlarini savdoga"}
             </span>
             <br />
-            {"Aylantiring"}
+            {"aylantiring"}
           </h1>
 
           {/* Subtitle */}
-          <p className="mt-5 text-[15px] sm:text-[17px] text-[#A0A0A5] leading-relaxed max-w-[500px] mx-auto lg:mx-0">
-            {"Mijozlarga 24/7 tezkor javob bering, izohlarga DM orqali avtomatik javob qaytaring va AI yordamida arizalarni saralang."}
+          <p className="mt-5 text-[15px] sm:text-[17px] text-[#515154] leading-relaxed max-w-[500px] mx-auto lg:mx-0">
+            {"Mijozlarga 24/7 tezkor javob bering, izohlarga shaxsiy xabar orqali avtomatik javob qaytaring va AI yordamida arizalarni saralang."}
           </p>
 
           {/* Buttons */}
           <div className="mt-8 flex flex-col sm:flex-row items-center gap-3 justify-center lg:justify-start">
             <Link href="/register">
-              <button className="group flex items-center gap-2.5 rounded-full bg-[#C7F33C] text-black px-8 py-4 text-[15px] font-extrabold shadow-[0_12px_35px_rgba(199,243,60,0.3)] transition-all hover:scale-105 active:scale-95">
-                <span>{"Tekin Boshlash"}</span>
+              <button className="group flex items-center gap-2.5 rounded-full bg-[#C7F33C] text-black px-8 py-4 text-[15px] font-extrabold shadow-[0_8px_25px_rgba(199,243,60,0.3)] transition-all hover:scale-105 active:scale-95">
+                <span>{"Tekin boshlash"}</span>
                 <span className="flex h-6 w-6 items-center justify-center rounded-full bg-black text-[#C7F33C]">
                   <ArrowRight size={13} className="transition-transform group-hover:translate-x-0.5" />
                 </span>
               </button>
             </Link>
             <a href="#simulator">
-              <button className="flex items-center gap-2 rounded-full border border-white/10 bg-white/5 hover:bg-white/10 px-8 py-4 text-[15px] font-bold text-white transition-all active:scale-95">
-                <span>{"Demo Ko'rish"}</span>
+              <button className="flex items-center gap-2 rounded-full border border-black/10 bg-white hover:bg-gray-50 px-8 py-4 text-[15px] font-bold text-black transition-all active:scale-95 shadow-[0_2px_10px_rgba(0,0,0,0.04)]">
+                <span>{"Demo ko'rish"}</span>
               </button>
             </a>
           </div>
 
           {/* Trust badges */}
           <div className="mt-8 flex items-center gap-5 justify-center lg:justify-start text-[11.5px] text-[#707075] font-semibold">
-            <span className="flex items-center gap-1.5"><Check size={12} className="text-[#C7F33C]" />{"7 kun bepul"}</span>
-            <span className="flex items-center gap-1.5"><Check size={12} className="text-[#C7F33C]" />{"Karta shart emas"}</span>
-            <span className="flex items-center gap-1.5"><Check size={12} className="text-[#C7F33C]" />{"Meta API orqali"}</span>
+            <span className="flex items-center gap-1.5"><Check size={12} className="text-[#7CA607]" />{"7 kun bepul"}</span>
+            <span className="flex items-center gap-1.5"><Check size={12} className="text-[#7CA607]" />{"Karta shart emas"}</span>
+            <span className="flex items-center gap-1.5"><Check size={12} className="text-[#7CA607]" />{"Meta API orqali"}</span>
           </div>
         </div>
 
@@ -392,19 +385,19 @@ export function LandingPageView() {
       </section>
 
       {/* ─── STATS BAR ─── */}
-      <div className="border-y border-white/5 bg-[#0C0C0E]/60 py-10 z-10 relative">
+      <div className="border-y border-black/5 bg-[#F0F0F0]/50 py-10 z-10 relative">
         <div className="mx-auto max-w-5xl px-5 sm:px-8 grid grid-cols-1 sm:grid-cols-3 gap-8 text-center">
           <div>
-            <p className="text-[40px] sm:text-[50px] font-[900] text-[#C7F33C] leading-none tracking-tight">{"1M+"}</p>
-            <p className="text-[12px] text-[#A0A0A5] font-semibold uppercase tracking-wider mt-1">{"Yuborilgan avtomatik xabarlar"}</p>
+            <p className="text-[40px] sm:text-[50px] font-[900] text-[#7CA607] leading-none tracking-tight">{"1M+"}</p>
+            <p className="text-[12px] text-[#515154] font-semibold uppercase tracking-wider mt-1">{"Yuborilgan avtomatik xabarlar"}</p>
           </div>
           <div>
-            <p className="text-[40px] sm:text-[50px] font-[900] text-white leading-none tracking-tight">{"99.9%"}</p>
-            <p className="text-[12px] text-[#A0A0A5] font-semibold uppercase tracking-wider mt-1">{"Tizim barqarorligi"}</p>
+            <p className="text-[40px] sm:text-[50px] font-[900] text-black leading-none tracking-tight">{"99.9%"}</p>
+            <p className="text-[12px] text-[#515154] font-semibold uppercase tracking-wider mt-1">{"Tizim barqarorligi"}</p>
           </div>
           <div>
-            <p className="text-[40px] sm:text-[50px] font-[900] text-[#C7F33C] leading-none tracking-tight">{"3.5x"}</p>
-            <p className="text-[12px] text-[#A0A0A5] font-semibold uppercase tracking-wider mt-1">{"Konversiya o'sishi"}</p>
+            <p className="text-[40px] sm:text-[50px] font-[900] text-[#7CA607] leading-none tracking-tight">{"3.5x"}</p>
+            <p className="text-[12px] text-[#515154] font-semibold uppercase tracking-wider mt-1">{"Konversiya o'sishi"}</p>
           </div>
         </div>
       </div>
@@ -412,11 +405,11 @@ export function LandingPageView() {
       {/* ─── FEATURES ─── */}
       <section id="features" className="relative z-10 mx-auto max-w-7xl px-5 sm:px-8 py-20 sm:py-28">
         <div className="text-center max-w-2xl mx-auto mb-14">
-          <h2 className="text-[28px] sm:text-[42px] font-[900] text-white tracking-tight">
-            {"Savdoni Oshirish Uchun"} <span className="text-[#C7F33C]">{"Barcha Qurollar"}</span>
+          <h2 className="text-[28px] sm:text-[42px] font-[900] text-black tracking-tight">
+            {"Savdoni oshirish uchun"} <span className="text-[#7CA607]">{"barcha qurollar"}</span>
           </h2>
-          <p className="text-[14px] sm:text-[15px] text-[#A0A0A5] mt-3 leading-relaxed">
-            {"Har bir izohni arizaga, har bir DM ni sotuvga aylantiring."}
+          <p className="text-[14px] sm:text-[15px] text-[#515154] mt-3 leading-relaxed">
+            {"Har bir izohni arizaga, har bir shaxsiy xabarni sotuvga aylantiring."}
           </p>
         </div>
 
@@ -424,13 +417,13 @@ export function LandingPageView() {
           {features.map((f, i) => (
             <div
               key={i}
-              className="rounded-[22px] border border-white/5 bg-[#0C0C0E] p-6 transition-all hover:border-[#C7F33C]/20 hover:scale-[1.015] hover:bg-[#0E0E10] group"
+              className="rounded-[22px] border border-black/5 bg-white p-6 transition-all hover:border-[#C7F33C]/80 hover:scale-[1.015] hover:shadow-[0_10px_30px_rgba(0,0,0,0.03)] group"
             >
               <div className={`h-11 w-11 rounded-[14px] ${f.bg} ${f.color} flex items-center justify-center mb-5 transition-transform group-hover:scale-110`}>
                 <f.icon size={20} />
               </div>
-              <h3 className="text-[16px] font-extrabold text-white">{f.title}</h3>
-              <p className="text-[12.5px] text-[#A0A0A5] mt-2 leading-relaxed">{f.desc}</p>
+              <h3 className="text-[16px] font-extrabold text-black">{f.title}</h3>
+              <p className="text-[12.5px] text-[#515154] mt-2 leading-relaxed">{f.desc}</p>
             </div>
           ))}
         </div>
@@ -438,13 +431,13 @@ export function LandingPageView() {
 
       {/* ─── DEMO SIMULATOR ─── */}
       <section id="simulator" className="relative z-10 mx-auto max-w-5xl px-5 sm:px-8 py-12 sm:py-20">
-        <div className="rounded-[28px] border border-white/5 bg-[#0C0C0E] p-6 sm:p-10 shadow-[0_30px_80px_rgba(0,0,0,0.5)]">
+        <div className="rounded-[28px] border border-black/5 bg-white p-6 sm:p-10 shadow-[0_15px_45px_rgba(0,0,0,0.03)]">
           <div className="grid grid-cols-1 md:grid-cols-[1fr_1.15fr] gap-8 items-center">
 
             <div>
-              <span className="inline-block text-[10.5px] font-extrabold text-[#C7F33C] uppercase tracking-wider px-3 py-1.5 rounded-full bg-[#C7F33C]/10 border border-[#C7F33C]/20 mb-4">{"INTERAKTIV DEMO"}</span>
-              <h3 className="text-[22px] sm:text-[28px] font-[900] text-white leading-tight">{"Bot Qanday Ishlashini Ko'ring"}</h3>
-              <p className="text-[13px] text-[#A0A0A5] mt-3 leading-relaxed">
+              <span className="inline-block text-[10.5px] font-extrabold text-[#7CA607] uppercase tracking-wider px-3 py-1.5 rounded-full bg-[#C7F33C]/20 border border-[#7CA607]/20 mb-4">{"INTERAKTIV DEMO"}</span>
+              <h3 className="text-[22px] sm:text-[28px] font-[900] text-black leading-tight">{"Bot qanday ishlashini ko'ring"}</h3>
+              <p className="text-[13px] text-[#515154] mt-3 leading-relaxed">
                 {"Tugmalardan birini bosing va botning real javob tezligini tekshiring."}
               </p>
 
@@ -453,7 +446,7 @@ export function LandingPageView() {
                   <button
                     key={i}
                     onClick={() => handleSimClick(b)}
-                    className="rounded-[12px] border border-white/10 bg-white/5 hover:bg-white/10 px-4 py-2.5 text-[12px] font-semibold text-white transition-all active:scale-[0.97]"
+                    className="rounded-[12px] border border-black/10 bg-gray-50 hover:bg-gray-100 px-4 py-2.5 text-[12px] font-semibold text-black transition-all active:scale-[0.97]"
                   >
                     {b}
                   </button>
@@ -461,10 +454,10 @@ export function LandingPageView() {
                 {simButtons.length === 0 && (
                   <button
                     onClick={() => {
-                      setSimMessages([{ sender: "bot", text: "Assalomu alaykum! 👋 Sendly botiman. Instagram Direct va izohlaringizni avtomatlashtirib beraman. Nima bilmoqchisiz?" }]);
+                      setSimMessages([{ sender: "bot", text: "Assalomu alaykum! 👋 Sendly botiman. Instagram shaxsiy xabarlari va izohlaringizni avtomatlashtirib beraman. Nima bilmoqchisiz?" }]);
                       setSimButtons(["Narxi qancha? 💰", "Qanday ishlaydi? ⚡", "Bepul sinash 🚀"]);
                     }}
-                    className="rounded-[12px] border border-[#C7F33C]/20 bg-[#C7F33C]/5 text-[#C7F33C] px-5 py-2.5 text-[12px] font-extrabold transition-all active:scale-[0.97]"
+                    className="rounded-[12px] border border-[#C7F33C]/30 bg-[#C7F33C]/10 text-[#7CA607] px-5 py-2.5 text-[12px] font-extrabold transition-all active:scale-[0.97]"
                   >
                     {"Qayta boshlash 🔄"}
                   </button>
@@ -473,12 +466,12 @@ export function LandingPageView() {
             </div>
 
             {/* Chat mockup */}
-            <div className="rounded-[20px] border border-white/5 bg-[#050506] p-4 flex flex-col h-[320px]">
-              <div className="flex items-center gap-2.5 border-b border-white/5 pb-3 mb-3">
+            <div className="rounded-[20px] border border-black/5 bg-[#F3F3F0] p-4 flex flex-col h-[320px]">
+              <div className="flex items-center gap-2.5 border-b border-black/5 pb-3 mb-3">
                 <div className="h-8 w-8 rounded-full bg-[#C7F33C] flex items-center justify-center text-black text-[10px] font-extrabold font-mono">{"S"}</div>
                 <div>
-                  <p className="text-[12.5px] font-bold text-white leading-none">{"Sendly Bot"}</p>
-                  <p className="text-[10px] text-green-400 mt-0.5">{"● Onlayn"}</p>
+                  <p className="text-[12.5px] font-bold text-black leading-none">{"Sendly Bot"}</p>
+                  <p className="text-[10px] text-green-600 mt-0.5">{"● Onlayn"}</p>
                 </div>
               </div>
               <div className="flex-1 overflow-y-auto flex flex-col gap-2.5 pr-1 py-1">
@@ -489,7 +482,7 @@ export function LandingPageView() {
                       "max-w-[85%] rounded-[16px] px-3.5 py-2.5 text-[12px] leading-relaxed",
                       m.sender === "user"
                         ? "bg-[#C7F33C] text-black self-end rounded-tr-sm font-bold"
-                        : "bg-white/5 text-white/90 self-start rounded-tl-sm border border-white/5",
+                        : "bg-white text-black self-start rounded-tl-sm border border-black/5 shadow-[0_2px_8px_rgba(0,0,0,0.02)]",
                     ].join(" ")}
                     style={{ whiteSpace: "pre-line" }}
                   >
@@ -506,8 +499,8 @@ export function LandingPageView() {
       {/* ─── PRICING ─── */}
       <section id="pricing" className="relative z-10 mx-auto max-w-7xl px-5 sm:px-8 py-16 sm:py-24">
         <div className="text-center max-w-2xl mx-auto mb-14">
-          <h2 className="text-[28px] sm:text-[42px] font-[900] text-white tracking-tight">{"Oddiy va Shaffof Tariflar"}</h2>
-          <p className="text-[14px] sm:text-[15px] text-[#A0A0A5] mt-3 leading-relaxed">
+          <h2 className="text-[28px] sm:text-[42px] font-[900] text-black tracking-tight">{"Oddiy va shaffof tariflar"}</h2>
+          <p className="text-[14px] sm:text-[15px] text-[#515154] mt-3 leading-relaxed">
             {"7 kun bepul. Kredit karta talab qilinmaydi."}
           </p>
         </div>
@@ -515,20 +508,20 @@ export function LandingPageView() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
 
           {/* PRO */}
-          <div className="relative rounded-[28px] border border-[#C7F33C]/25 bg-[#0C0C0E] p-8 flex flex-col overflow-hidden shadow-[0_0_50px_rgba(199,243,60,0.06)]">
+          <div className="relative rounded-[28px] border border-[#C7F33C]/60 bg-white p-8 flex flex-col overflow-hidden shadow-[0_10px_35px_rgba(0,0,0,0.02)]">
             <div className="absolute top-0 right-0 bg-[#C7F33C] text-black text-[10px] font-extrabold uppercase px-4 py-1.5 rounded-bl-[16px] tracking-wider">{"MASHHUR"}</div>
-            <h3 className="text-[20px] font-extrabold text-white">{"PRO"}</h3>
+            <h3 className="text-[20px] font-extrabold text-black">{"PRO"}</h3>
             <p className="text-[12px] text-[#707075] mt-1">{"Kichik va o'rta bizneslar uchun"}</p>
             <div className="mt-5 flex items-baseline gap-1.5">
-              <span className="text-[46px] font-[900] text-white tracking-tight leading-none">{"150,000"}</span>
-              <span className="text-[#A0A0A5] text-[13px] font-semibold">{"so'm / oy"}</span>
+              <span className="text-[46px] font-[900] text-black tracking-tight leading-none">{"150,000"}</span>
+              <span className="text-[#515154] text-[13px] font-semibold">{"so'm / oy"}</span>
             </div>
-            <div className="h-px bg-white/5 my-6" />
-            <ul className="flex flex-col gap-3 text-[13px] text-[#E8E8E8] flex-1">
-              {["1 ta Instagram Professional akkaunt", "Cheksiz avtomatlashtirish oqimlari", "DM va Izoh avtomatik javoblari", "Referral tizimi va Ballar", "1 ta Telegram Bot ulash", "Analitika paneli"].map((item, i) => (
+            <div className="h-px bg-black/5 my-6" />
+            <ul className="flex flex-col gap-3 text-[13px] text-black flex-1">
+              {["1 ta Instagram professional akkaunti", "Cheksiz avtomatlashtirish oqimlari", "Shaxsiy xabarlar va izohlar uchun avtomatik javoblar", "Referral tizimi va ballar", "1 ta Telegram bot ulash", "Analitika paneli"].map((item, i) => (
                 <li key={i} className="flex items-center gap-2.5">
-                  <div className="h-4.5 w-4.5 rounded-full bg-[#C7F33C]/15 flex items-center justify-center shrink-0">
-                    <Check size={11} className="text-[#C7F33C]" />
+                  <div className="h-4.5 w-4.5 rounded-full bg-[#C7F33C]/20 flex items-center justify-center shrink-0">
+                    <Check size={11} className="text-[#7CA607]" />
                   </div>
                   {item}
                 </li>
@@ -536,33 +529,33 @@ export function LandingPageView() {
             </ul>
             <Link href="/register" className="mt-8">
               <button className="w-full rounded-full bg-[#C7F33C] text-black py-4 text-[14px] font-extrabold hover:bg-[#B0D82D] active:scale-[0.98] transition-all shadow-[0_8px_25px_rgba(199,243,60,0.2)]">
-                {"Bepul Sinab Ko'rish"}
+                {"Bepul sinab ko'rish"}
               </button>
             </Link>
           </div>
 
           {/* PREMIUM */}
-          <div className="rounded-[28px] border border-white/8 bg-[#0A0A0C] p-8 flex flex-col">
-            <h3 className="text-[20px] font-extrabold text-white">{"PREMIUM"}</h3>
+          <div className="rounded-[28px] border border-black/5 bg-white p-8 flex flex-col shadow-[0_10px_30px_rgba(0,0,0,0.01)]">
+            <h3 className="text-[20px] font-extrabold text-black">{"PREMIUM"}</h3>
             <p className="text-[12px] text-[#707075] mt-1">{"Agentliklar va katta bizneslar uchun"}</p>
             <div className="mt-5 flex items-baseline gap-1.5">
-              <span className="text-[46px] font-[900] text-white tracking-tight leading-none">{"1,000,000"}</span>
-              <span className="text-[#A0A0A5] text-[13px] font-semibold">{"so'm / oy"}</span>
+              <span className="text-[46px] font-[900] text-black tracking-tight leading-none">{"1,000,000"}</span>
+              <span className="text-[#515154] text-[13px] font-semibold">{"so'm / oy"}</span>
             </div>
-            <div className="h-px bg-white/5 my-6" />
-            <ul className="flex flex-col gap-3 text-[13px] text-[#E8E8E8] flex-1">
-              {["10 ta Instagram Professional akkaunt", "PRO dagi barcha imkoniyatlar", "OpenAI & AI Agent Saralash", "VIP qo'llab-quvvatlash (24/7)", "10 tagacha Telegram Bot ulash", "Shaxsiy menejer"].map((item, i) => (
+            <div className="h-px bg-black/5 my-6" />
+            <ul className="flex flex-col gap-3 text-[13px] text-black flex-1">
+              {["10 ta Instagram professional akkaunti", "PRO dagi barcha imkoniyatlar", "OpenAI va AI agent saralash", "VIP qo'llab-quvvatlash (24/7)", "10 tagacha Telegram bot ulash", "Shaxsiy menejer"].map((item, i) => (
                 <li key={i} className="flex items-center gap-2.5">
-                  <div className="h-4.5 w-4.5 rounded-full bg-purple-500/15 flex items-center justify-center shrink-0">
-                    <Check size={11} className="text-purple-400" />
+                  <div className="h-4.5 w-4.5 rounded-full bg-purple-50 flex items-center justify-center shrink-0">
+                    <Check size={11} className="text-purple-600" />
                   </div>
                   {item}
                 </li>
               ))}
             </ul>
             <Link href="/register" className="mt-8">
-              <button className="w-full rounded-full border border-white/10 bg-white/5 hover:bg-white/10 text-white py-4 text-[14px] font-extrabold active:scale-[0.98] transition-all">
-                {"Bog'lanish va Ulash"}
+              <button className="w-full rounded-full border border-black/15 bg-white hover:bg-gray-50 text-black py-4 text-[14px] font-extrabold active:scale-[0.98] transition-all">
+                {"Bog'lanish va ulash"}
               </button>
             </Link>
           </div>
@@ -573,21 +566,21 @@ export function LandingPageView() {
       {/* ─── FAQ ─── */}
       <section id="faq" className="relative z-10 mx-auto max-w-3xl px-5 sm:px-8 py-16 sm:py-20">
         <div className="text-center mb-12">
-          <h2 className="text-[28px] sm:text-[40px] font-[900] text-white tracking-tight">{"Ko'p Beriladigan Savollar"}</h2>
-          <p className="text-[13.5px] text-[#A0A0A5] mt-3">{"Eng ko'p so'raladigan savollarga javoblar."}</p>
+          <h2 className="text-[28px] sm:text-[40px] font-[900] text-black tracking-tight">{"Ko'p beriladigan savollar"}</h2>
+          <p className="text-[13.5px] text-[#515154] mt-3">{"Eng ko'p so'raladigan savollarga javoblar."}</p>
         </div>
         <div className="flex flex-col gap-3">
           {faqs.map((faq, i) => (
-            <div key={i} className="rounded-[18px] border border-white/5 bg-[#0C0C0E] overflow-hidden">
+            <div key={i} className="rounded-[18px] border border-black/5 bg-white overflow-hidden shadow-[0_2px_15px_rgba(0,0,0,0.01)]">
               <button
                 onClick={() => setActiveFaq(activeFaq === i ? null : i)}
-                className="w-full px-5 py-4.5 flex items-center justify-between text-left font-bold text-[14px] sm:text-[15px] text-white hover:text-[#C7F33C] transition-colors"
+                className="w-full px-5 py-4.5 flex items-center justify-between text-left font-bold text-[14px] sm:text-[15px] text-black hover:text-[#7CA607] transition-colors"
               >
                 <span>{faq.q}</span>
-                <ChevronDown size={15} className={`text-[#A0A0A5] transition-transform duration-200 shrink-0 ml-3 ${activeFaq === i ? "rotate-180 text-[#C7F33C]" : ""}`} />
+                <ChevronDown size={15} className={`text-[#A0A0A5] transition-transform duration-200 shrink-0 ml-3 ${activeFaq === i ? "rotate-180 text-[#7CA607]" : ""}`} />
               </button>
               {activeFaq === i && (
-                <div className="px-5 pb-5 text-[13px] text-[#A0A0A5] leading-relaxed border-t border-white/5 pt-4 animate-in fade-in duration-150">
+                <div className="px-5 pb-5 text-[13px] text-[#515154] leading-relaxed border-t border-black/5 pt-4 animate-in fade-in duration-150">
                   {faq.a}
                 </div>
               )}
@@ -597,32 +590,32 @@ export function LandingPageView() {
       </section>
 
       {/* ─── FOOTER CTA ─── */}
-      <section className="relative z-10 border-t border-white/5 bg-[#050506] py-16 sm:py-20 text-center">
+      <section className="relative z-10 border-t border-black/5 bg-[#F3F3F0] py-16 sm:py-20 text-center">
         <div className="mx-auto max-w-3xl px-5 sm:px-8">
-          <h2 className="text-[26px] sm:text-[40px] font-[900] text-white tracking-tight">{"Instagram savdongizni bugunoq kuchaytiring"}</h2>
-          <p className="text-[13.5px] text-[#A0A0A5] mt-4 max-w-xl mx-auto leading-relaxed">
+          <h2 className="text-[26px] sm:text-[40px] font-[900] text-black tracking-tight">{"Instagram savdongizni bugunoq kuchaytiring"}</h2>
+          <p className="text-[13.5px] text-[#515154] mt-4 max-w-xl mx-auto leading-relaxed">
             {"Avtomatik javob, AI saralash, real vaqt analitikasi — barchasi bitta platformada."}
           </p>
           <Link href="/register">
-            <button className="mt-8 inline-flex items-center gap-2.5 rounded-full bg-[#C7F33C] text-black px-9 py-4 text-[15px] font-extrabold shadow-[0_12px_35px_rgba(199,243,60,0.25)] hover:scale-105 active:scale-95 transition-all">
-              <span>{"Bepul Boshlash"}</span>
+            <button className="mt-8 inline-flex items-center gap-2.5 rounded-full bg-[#C7F33C] text-black px-9 py-4 text-[15px] font-extrabold shadow-[0_10px_30px_rgba(199,243,60,0.25)] hover:scale-105 active:scale-95 transition-all">
+              <span>{"Bepul boshlash"}</span>
               <ArrowRight size={16} />
             </button>
           </Link>
 
-          <div className="mt-14 h-px bg-white/5" />
+          <div className="mt-14 h-px bg-black/5" />
 
-          <div className="mt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-[12px] text-[#555]">
+          <div className="mt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-[12px] text-[#707075]">
             <div className="flex items-center gap-2">
               <div className="grid h-5 w-5 place-items-center rounded-[6px] bg-[#C7F33C]">
                 <Zap size={11} className="fill-black text-black" />
               </div>
-              <span className="font-extrabold text-white/80">{"Sendly.uz"}</span>
+              <span className="font-extrabold text-black">{"Sendly.uz"}</span>
               <span>{"© 2026. Barcha huquqlar himoyalangan."}</span>
             </div>
             <div className="flex gap-5 font-semibold text-[#707075]">
-              <Link href="/privacy" className="hover:text-white transition-colors">{"Maxfiylik"}</Link>
-              <a href="#" className="hover:text-white transition-colors">{"Shartlar"}</a>
+              <Link href="/privacy" className="hover:text-black transition-colors">{"Maxfiylik"}</Link>
+              <a href="#" className="hover:text-black transition-colors">{"Shartlar"}</a>
             </div>
           </div>
         </div>
