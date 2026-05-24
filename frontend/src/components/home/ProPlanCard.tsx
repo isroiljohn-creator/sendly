@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { CreditCard, Sparkles } from "lucide-react";
+import { Sparkles } from "lucide-react";
 import { Card } from "@/components/ui/primitives";
 import { db } from "@/lib/db";
 import type { User } from "@/lib/db";
@@ -39,14 +39,14 @@ export function ProPlanCard({ value: _value = "12,233" }: { value?: string }) {
 
         <div className="flex flex-col gap-2">
           <Link
-            href="/settings?tab=subscription"
+            href="/account?tab=billing"
             className="w-full py-3 rounded-full text-[12px] font-bold text-[#1A2906] bg-[#C7F33C] hover:bg-[#9BC92E] transition-colors flex items-center justify-center gap-1.5 active:scale-[0.98] text-center block"
           >
-            <CreditCard size={13} />
-            {"Karta ulash va boshlash"}
+            <Sparkles size={13} />
+            {"Sinov muddatini boshlash"}
           </Link>
           <span className="text-[9px] text-[#707070] text-center block">
-            {"Karta bog'lash mutlaqo bepul, pul yozilmaydi."}
+            {"7 kunlik bepul sinov muddati davomida pul yechilmaydi."}
           </span>
         </div>
       </Card>

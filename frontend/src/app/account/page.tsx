@@ -8,7 +8,8 @@ import {
   CreditCard, 
   Save, 
   Trash2,
-  X
+  X,
+  Plus
 } from "lucide-react";
 import { db, type User } from "@/lib/db";
 import { useI18n } from "@/i18n/I18nProvider";
@@ -89,6 +90,10 @@ export default function AccountPage() {
     const tabParam = searchParams.get("tab");
     if (tabParam === "billing") {
       setActiveTab("billing");
+      const realUser = db.getCurrentUser() || user;
+      if (realUser && !realUser.isCardLinked) {
+        setIsLinking(true);
+      }
     } else if (tabParam === "limits") {
       setActiveTab("limits");
     } else if (tabParam === "bonuses") {
@@ -358,8 +363,8 @@ export default function AccountPage() {
                 </div>
               </div>
 
-              {/* Tarifni o'zgartirish button */}
-              <div className="flex items-center justify-start py-2">
+              {/* Tarifni o'zgartirish va Karta bog'lash buttonlari */}
+              <div className="flex flex-wrap items-center gap-4 py-2">
                 <button
                   onClick={() => setIsPricingOpen(true)}
                   className="flex items-center gap-1.5 text-[#2563EB] hover:text-[#1d4ed8] hover:underline font-semibold text-[13px]"
@@ -367,6 +372,15 @@ export default function AccountPage() {
                   <CreditCard size={15} />
                   <span>{t("pages.account.billing.change_plan")}</span>
                 </button>
+                {!currentUser?.isCardLinked && !isLinking && (
+                  <button
+                    onClick={() => setIsLinking(true)}
+                    className="flex items-center gap-1.5 text-[#2563EB] hover:text-[#1d4ed8] hover:underline font-semibold text-[13px] border-l border-[#E8E8E8] pl-4"
+                  >
+                    <Plus size={15} />
+                    <span>{"Karta bog'lash"}</span>
+                  </button>
+                )}
               </div>
 
               {/* Linked Card block */}
@@ -496,6 +510,13 @@ export default function AccountPage() {
                       </div>
                     </form>
                   )}
+
+                  <div className="text-[11px] text-[#707070] leading-relaxed bg-[#F9F9F7] p-3.5 rounded-[12px] border border-[#F0F0F0] mt-4 flex items-start gap-2">
+                    <span className="text-[#2563EB] font-bold shrink-0">ⓘ</span>
+                    <span>
+                      {"Kartani bog'lash mutlaqo bepul. 7 kunlik bepul sinov muddati yakunlanmaguncha kartangizdan pul yechilmaydi. Sinov muddati tugagandan so'nggina keyingi davr uchun to'lov olinadi."}
+                    </span>
+                  </div>
                 </Card>
               )}
             </div>
