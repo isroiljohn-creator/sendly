@@ -72,21 +72,21 @@ export default function BroadcastPage() {
               </button>
 
               <h2 className="text-[20px] font-medium text-black pr-8">
-                Yangi Direct xabar yuborish
+                {t("pages.broadcast.modal_title")}
               </h2>
               <p className="text-[12px] text-[#707070] mt-1">
-                {"Barcha yoki ma'lum bir guruhdagi mijozlarga ommaviy reklama yuboring."}
+                {t("pages.broadcast.modal_desc")}
               </p>
 
               <form onSubmit={handleCreateBroadcast} className="mt-6 flex flex-col gap-4">
                 <div className="flex flex-col gap-1.5">
                   <label className="text-[11px] font-medium text-[#707070] px-1">
-                    Xabarnoma mavzusi (Ichki eslatma uchun)
+                    {t("pages.broadcast.field_subject")}
                   </label>
                   <input
                     type="text"
                     required
-                    placeholder="Masalan: Yozgi chegirmalar"
+                    placeholder={t("pages.broadcast.field_subject_placeholder")}
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
                     className="w-full rounded-[14px] bg-[#F0F0F0] px-4 py-3 text-[13px] text-black outline-none placeholder:text-[#a0a0a0] transition-colors focus:bg-[#e8e8e8]"
@@ -95,7 +95,7 @@ export default function BroadcastPage() {
 
                 <div className="flex flex-col gap-1.5">
                   <label className="text-[11px] font-medium text-[#707070] px-1">
-                    {"Kimlarga yuborilsin? (Teg bo'yicha filter)"}
+                    {t("pages.broadcast.field_recipient")}
                   </label>
                   <CustomDropdown
                     value={tag}
@@ -103,21 +103,21 @@ export default function BroadcastPage() {
                     className="bg-[#F0F0F0] border-none px-4 py-3 text-[13px] rounded-[14px] focus:border-none focus:shadow-none hover:bg-[#e8e8e8]/80 text-black font-semibold h-11"
                     dropdownClassName="mt-2 rounded-[16px]"
                     options={[
-                      { value: "Barcha faol mijozlar", label: "Barchaga (All)" },
-                      { value: "VIP foydalanuvchilar", label: "VIP foydalanuvchilar" },
-                      { value: "Qiziqqan (Leads)", label: "Qiziqayotganlar (Lead)" },
+                      { value: "Barcha faol mijozlar", label: t("pages.broadcast.recipient_all") },
+                      { value: "VIP foydalanuvchilar", label: t("pages.broadcast.recipient_vip") },
+                      { value: "Qiziqqan (Leads)", label: t("pages.broadcast.recipient_leads") },
                     ]}
                   />
                 </div>
 
                 <div className="flex flex-col gap-1.5">
                   <label className="text-[11px] font-medium text-[#707070] px-1">
-                    Instagram Direct xabar matni
+                    {t("pages.broadcast.field_message")}
                   </label>
                   <textarea
                     required
                     rows={4}
-                    placeholder="Salom! Siz uchun ajoyib yangiligimiz bor..."
+                    placeholder={t("pages.broadcast.field_message_placeholder")}
                     value={message}
                     onChange={(e) => setMessage(e.target.value)}
                     className="w-full rounded-[14px] bg-[#F0F0F0] px-4 py-3 text-[13px] text-black outline-none placeholder:text-[#a0a0a0] transition-colors focus:bg-[#e8e8e8] resize-none"
@@ -131,7 +131,7 @@ export default function BroadcastPage() {
                     onClick={() => setIsModalOpen(false)}
                     className="px-5 py-2.5"
                   >
-                    Bekor qilish
+                    {t("pages.broadcast.btn_cancel")}
                   </Button>
                   <Button
                     type="submit"
@@ -139,7 +139,7 @@ export default function BroadcastPage() {
                     className="flex items-center gap-1.5 px-5 py-2.5"
                   >
                     <Send size={14} />
-                    Yuborish
+                    {t("pages.broadcast.btn_send")}
                   </Button>
                 </div>
               </form>
@@ -155,9 +155,9 @@ export default function BroadcastPage() {
                 <div className="grid h-12 w-12 place-items-center rounded-full bg-[#F0F0F0] text-[#707070] mb-4">
                   <Radio size={20} />
                 </div>
-                <h3 className="text-[15px] font-semibold text-black">{"Broadcastlar mavjud emas"}</h3>
+                <h3 className="text-[15px] font-semibold text-black">{t("pages.broadcast.no_broadcasts_title")}</h3>
                 <p className="text-[12px] text-[#707070] mt-1 max-w-[280px]">
-                  {"Hech qanday ommaviy xabar yuborilmagan yoki rejalashtirilmagan."}
+                  {t("pages.broadcast.no_broadcasts_desc")}
                 </p>
               </div>
             ) : (
@@ -165,7 +165,7 @@ export default function BroadcastPage() {
                 <thead>
                   <tr className="border-b border-[#F0F0F0] text-[11px] font-semibold text-[#707070] uppercase tracking-wider bg-[#F9F9F7]">
                     <th className="px-6 py-3.5">{t("pages.broadcast.table_title")}</th>
-                    <th className="px-6 py-3.5">Segment</th>
+                    <th className="px-6 py-3.5">{t("pages.broadcast.table_segment")}</th>
                     <th className="px-6 py-3.5">{t("pages.broadcast.table_status")}</th>
                     <th className="px-6 py-3.5">{t("pages.broadcast.table_sent")}</th>
                     <th className="px-6 py-3.5">{t("pages.broadcast.table_date")}</th>
@@ -190,11 +190,13 @@ export default function BroadcastPage() {
                       <td className="px-6 py-4">
                         <StatusPill
                           status={b.status === "Completed"}
-                          activeText="Yuborildi"
-                          inactiveText="Kutilmoqda"
+                          activeText={t("pages.broadcast.status_sent")}
+                          inactiveText={t("pages.broadcast.status_pending")}
                         />
                       </td>
-                      <td className="px-6 py-4 font-medium text-black">{b.sentCount} ta</td>
+                      <td className="px-6 py-4 font-medium text-black">
+                        {t("pages.broadcast.sent_unit").replace("{count}", b.sentCount)}
+                      </td>
                       <td className="px-6 py-4 text-[#707070]">{b.date}</td>
                     </tr>
                   ))}
