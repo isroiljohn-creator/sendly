@@ -13,13 +13,15 @@ import {
   MessageSquare,
   Gift,
   Send,
-  Music
+  Music,
+  X
 } from "lucide-react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Card, Button, AlertModal } from "@/components/ui/primitives";
 import { Instagram } from "@/components/ui/icons";
 import { db, Channel, Automation } from "@/lib/db";
 import { useI18n } from "@/i18n/I18nProvider";
+import { CustomDropdown } from "@/components/ui/CustomDropdown";
 
 interface TemplateItem {
   id: string;
@@ -41,8 +43,20 @@ export default function TemplatesPage() {
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [alertConfig, setAlertConfig] = useState<{ isOpen: boolean; title: string; message: string } | null>(null);
 
+  // Modal States
+  const [isSelectChannelModalOpen, setIsSelectChannelModalOpen] = useState(false);
+  const [selectedTemplate, setSelectedTemplate] = useState<TemplateItem | null>(null);
+  const [selectedChannelId, setSelectedChannelId] = useState<string>("");
+
   useEffect(() => {
-    setChannels(db.getChannels());
+    const chs = db.getChannels();
+    setChannels(chs);
+    const active = db.getActiveChannel();
+    if (active) {
+      setSelectedChannelId(active.id);
+    } else if (chs.length > 0) {
+      setSelectedChannelId(chs[0].id);
+    }
   }, []);
 
   const showAlert = (title: string, message: string) => {
@@ -220,26 +234,38 @@ export default function TemplatesPage() {
   ];
 
   const handleUseTemplate = (tmpl: TemplateItem) => {
-    if (tmpl.actionKey === "quick_bot") {
+    const chs = db.getChannels();
+    if (chs.length === 0) {
+      showAlert(t("common.error"), "Ulagan akkauntingiz mavjud emas. Shablonni yuklash uchun avval sozlamalardan akkaunt ulashing.");
+      return;
+    }
+    setSelectedTemplate(tmpl);
+    const active = db.getActiveChannel();
+    if (active) {
+      setSelectedChannelId(active.id);
+    } else {
+      setSelectedChannelId(chs[0].id);
+    }
+    setIsSelectChannelModalOpen(true);
+  };
+
+  const handleConfirmTemplate = () => {
+    if (!selectedTemplate || !selectedChannelId) return;
+
+    db.setActiveChannel(selectedChannelId);
+
+    if (selectedTemplate.actionKey === "quick_bot") {
+      setIsSelectChannelModalOpen(false);
       window.location.href = "/automations/quick-bot";
       return;
     }
-    if (tmpl.actionKey === "ai_agent") {
+    if (selectedTemplate.actionKey === "ai_agent") {
+      setIsSelectChannelModalOpen(false);
       window.location.href = "/ai-agent";
       return;
     }
 
     // Builder template path
-    let targetChannelId = "all";
-    const chs = db.getChannels();
-    if (chs.length > 0) {
-      const activeCh = db.getActiveChannel() || chs[0];
-      targetChannelId = activeCh.id;
-    } else {
-      showAlert(t("common.error"), "Ulagan akkauntingiz mavjud emas. Shablonni yuklash uchun avval sozlamalardan akkaunt ulashing.");
-      return;
-    }
-
     const user = db.getCurrentUser();
     const plan = user?.plan || "free";
     const maxAutos = plan === "premium" ? 500 : plan === "pro" ? 50 : 2;
@@ -253,10 +279,10 @@ export default function TemplatesPage() {
       );
     }
 
-    const current = db.getChannelAutomations(targetChannelId);
+    const current = db.getChannelAutomations(selectedChannelId);
     const newAuto: Automation = {
       id: `tmpl_${Date.now()}`,
-      name: tmpl.name,
+      name: selectedTemplate.name,
       triggerType: "keyword",
       triggerDetails: "test, dars",
       runs: "0",
@@ -265,10 +291,36 @@ export default function TemplatesPage() {
     };
 
     current.push(newAuto);
-    db.saveChannelAutomations(targetChannelId, current);
-    db.setActiveChannel(targetChannelId);
-    window.location.href = `/automations/builder?id=${newAuto.id}&template=${tmpl.templateKey || "lead_magnet"}`;
+    db.saveChannelAutomations(selectedChannelId, current);
+    
+    setIsSelectChannelModalOpen(false);
+    window.location.href = `/automations/builder?id=${newAuto.id}&template=${selectedTemplate.templateKey || "lead_magnet"}`;
   };
+
+  const channelOptions = channels.map((ch) => {
+    const isIg = ch.type === "instagram";
+    return {
+      value: ch.id,
+      label: ch.username.startsWith("@") ? ch.username : `@${ch.username}`,
+      icon: ch.avatar ? (
+        <img src={ch.avatar} alt={ch.name} className="w-5 h-5 rounded-full object-cover shrink-0" />
+      ) : (
+        <div
+          className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold text-white shrink-0 ${
+            isIg
+              ? "bg-gradient-to-br from-[#f09433] via-[#e6683c] to-[#bc1888]"
+              : "bg-[#229ED9]"
+          }`}
+        >
+          {isIg ? (
+            <Instagram size={10} className="text-white" />
+          ) : (
+            <Send size={10} className="text-white" />
+          )}
+        </div>
+      )
+    };
+  });
 
   // Filter templates
   const filteredTemplates = templates.filter((t) => {
@@ -451,6 +503,49 @@ export default function TemplatesPage() {
         </div>
 
       </div>
+
+      {/* Account Selector Modal */}
+      {isSelectChannelModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-xs p-4 animate-in fade-in duration-200">
+          <div className="relative w-full max-w-[440px] bg-white rounded-[28px] p-6 shadow-2xl border border-[#E8E8E8] flex flex-col gap-5 animate-in zoom-in-95 duration-200">
+            
+            {/* Close Button */}
+            <button
+              onClick={() => setIsSelectChannelModalOpen(false)}
+              className="absolute top-5 right-5 text-[#8E8E93] hover:text-black transition-colors"
+            >
+              <span className="bg-[#E4E4E6]/60 rounded-full p-1.5 flex items-center justify-center hover:bg-[#E4E4E6] transition-all">
+                <X size={12} strokeWidth={2.5} />
+              </span>
+            </button>
+
+            {/* Modal Header */}
+            <div className="flex flex-col gap-1">
+              <h3 className="text-[18px] font-black text-black tracking-tight leading-none">Shablon qo&apos;shish</h3>
+              <p className="text-[11px] text-[#707070] font-medium leading-none mt-1">Shablon joriy loyihada saqlanadi</p>
+            </div>
+
+            {/* Account Selector Dropdown */}
+            <div className="flex flex-col gap-1.5">
+              <CustomDropdown
+                value={selectedChannelId}
+                onChange={(val) => setSelectedChannelId(val)}
+                options={channelOptions}
+                placeholder="Akkauntni tanlash"
+                className="h-11 rounded-[14px]"
+              />
+            </div>
+
+            {/* Action Button */}
+            <button
+              onClick={handleConfirmTemplate}
+              className="w-full h-11 bg-black text-white rounded-[16px] text-[12px] font-black hover:bg-black/95 active:scale-[0.98] transition-all flex items-center justify-center"
+            >
+              Qo&apos;shish
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Alert Modal */}
       <AlertModal
