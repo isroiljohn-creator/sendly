@@ -111,11 +111,11 @@ function RobotHero() {
         style={{ transformStyle: "preserve-3d", ...style }}
       >
         <Image
-          src="/robot-v2.png"
+          src="/robot-v3.png"
           alt="Sendly AI Robot"
-          width={650}
-          height={650}
-          className="w-[420px] sm:w-[550px] md:w-[600px] lg:w-[680px] h-[420px] sm:h-[550px] md:h-[600px] lg:h-[680px] object-contain relative z-10 lg:-mr-20 lg:-mt-10"
+          width={750}
+          height={750}
+          className="w-[480px] sm:w-[600px] md:w-[680px] lg:w-[780px] h-[480px] sm:h-[600px] md:h-[680px] lg:h-[780px] object-contain relative z-10 lg:-mr-24 lg:-mt-14"
           style={{ animation: "sendly-float 7s ease-in-out infinite" }}
           priority
         />
@@ -182,28 +182,28 @@ export function LandingPageView() {
       icon: Sparkles,
       color: "text-purple-600",
       bg: "bg-purple-50",
-      title: "AI agent (GPT)",
-      desc: "OpenAI yordamida arizalarni tahlil qilib, sotuvlar yoki qo'llab-quvvatlash guruhlariga ajratadi.",
+      title: "Sun'iy intellekt agenti",
+      desc: "Sun'iy intellekt yordamida arizalarni tahlil qilib, sotuvlar yoki qo'llab-quvvatlash guruhlariga ajratadi.",
     },
     {
       icon: Award,
       color: "text-orange-600",
       bg: "bg-orange-50",
-      title: "Referral va ballar",
+      title: "Tavsiyalar va ballar",
       desc: "Foydalanuvchilarni taklif qilganligi uchun mukofotlang. Ballarni chegirma va sovg'alarga almashtirish.",
     },
     {
       icon: MessageCircle,
       color: "text-green-600",
       bg: "bg-green-50",
-      title: "Telegram bot runner",
+      title: "Telegram bot boshqaruvi",
       desc: "Instagram bilan birga Telegram botlarini ham bitta panelda boshqaring.",
     },
     {
       icon: Shield,
       color: "text-pink-600",
       bg: "bg-pink-50",
-      title: "Live chat takeover",
+      title: "Operator aralashuvi",
       desc: "Murakkab holatlarda bot operatorga uzatadi — insoniy muloqot zarur bo'lganda.",
     },
     {
@@ -224,8 +224,8 @@ export function LandingPageView() {
       icon: Bot,
       color: "text-rose-600",
       bg: "bg-rose-50",
-      title: "Visual flow builder",
-      desc: "Drag-and-drop orqali murakkab bot oqimlarini kodlamasdan vizual yarating.",
+      title: "Vizual oqim quruvchisi",
+      desc: "Oddiy tortib tushirish orqali murakkab bot oqimlarini kodlamasdan vizual yarating.",
     },
   ];
 
@@ -556,8 +556,8 @@ export function LandingPageView() {
               ))}
             </ul>
             <Link href="/register" className="mt-8">
-              <button className="w-full rounded-full border border-black/15 bg-white hover:bg-gray-50 text-black py-4 text-[14px] font-extrabold active:scale-[0.98] transition-all">
-                {"Bog'lanish va ulash"}
+              <button className="w-full rounded-full bg-black text-[#C7F33C] py-4 text-[14px] font-extrabold hover:bg-black/90 active:scale-[0.98] transition-all shadow-[0_8px_25px_rgba(0,0,0,0.1)]">
+                {"Ulash va boshlash"}
               </button>
             </Link>
           </div>
