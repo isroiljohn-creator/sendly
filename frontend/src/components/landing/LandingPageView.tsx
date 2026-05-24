@@ -113,9 +113,9 @@ function RobotHero() {
         <Image
           src="/robot-v3.png"
           alt="Sendly AI Robot"
-          width={750}
-          height={750}
-          className="w-[480px] sm:w-[600px] md:w-[680px] lg:w-[780px] h-[480px] sm:h-[600px] md:h-[680px] lg:h-[780px] object-contain relative z-10 lg:-mr-24 lg:-mt-14"
+          width={613}
+          height={758}
+          className="w-[340px] sm:w-[440px] md:w-[480px] lg:w-[580px] h-auto object-contain relative z-10 lg:-mr-20 lg:-mt-10"
           style={{ animation: "sendly-float 7s ease-in-out infinite" }}
           priority
         />
