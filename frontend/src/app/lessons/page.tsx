@@ -5,55 +5,60 @@ import { AppLayout } from "@/components/layout/AppLayout";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Card, Button, LimeBadge } from "@/components/ui/primitives";
 import { useI18n } from "@/i18n/I18nProvider";
-import { Play, PlayCircle, Clock, X, BookOpen } from "lucide-react";
+import { Play, Clock, X, BookOpen } from "lucide-react";
 
 type Lesson = {
   id: string;
   title: string;
   duration: string;
-  level: "Boshlang'ich" | "O'rta" | "Kengaytirilgan";
+  level: string;
   thumbnail: string;
   description: string;
+  videoUrl: string;
 };
-
-const INITIAL_LESSONS: Lesson[] = [
-  {
-    id: "1",
-    title: "Sendly platformasini Instagramga ulash",
-    duration: "6 daqiqa",
-    level: "Boshlang'ich",
-    thumbnail: "https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?w=300&auto=format&fit=crop",
-    description: "Ushbu darsda siz platformada ro'yxatdan o'tish va Instagram Professional hisobini ulashni to'liq o'rganasiz.",
-  },
-  {
-    id: "2",
-    title: "Direct orqali avtomatik savdo zanjiri qurish",
-    duration: "14 daqiqa",
-    level: "O'rta",
-    thumbnail: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=300&auto=format&fit=crop",
-    description: "Kalit so'zlar yordamida mijozlarga avtomatik ravishda mahsulot narxlarini aytish va ularni buyurtmaga yo'naltirish.",
-  },
-  {
-    id: "3",
-    title: "Story va Izohlar triggerlarini sozlash",
-    duration: "10 daqiqa",
-    level: "O'rta",
-    thumbnail: "https://images.unsplash.com/photo-1611162616305-c69b3fa7fbe0?w=300&auto=format&fit=crop",
-    description: "Mijozlar storyda belgilaganda yoki post ostida izoh yozganda bot orqali javob qaytarishni sozlash.",
-  },
-  {
-    id: "4",
-    title: "Broadcast orqali ommaviy reklama yuborish",
-    duration: "8 daqiqa",
-    level: "Kengaytirilgan",
-    thumbnail: "https://images.unsplash.com/photo-1557200134-90327ee9fafa?w=300&auto=format&fit=crop",
-    description: "Ma'lumotlar bazasidagi barcha faol obunachilarga ommaviy ravishda aksiyalar va chegirma xabarlarini yuborish.",
-  },
-];
 
 export default function LessonsPage() {
   const { t } = useI18n();
   const [activeVideo, setActiveVideo] = useState<Lesson | null>(null);
+
+  const INITIAL_LESSONS: Lesson[] = [
+    {
+      id: "1",
+      title: t("pages.lessons_page.lesson_1_title"),
+      duration: t("pages.lessons_page.duration_mins").replace("{count}", "6"),
+      level: t("pages.lessons_page.level_beginner"),
+      thumbnail: "https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?w=300&auto=format&fit=crop",
+      description: t("pages.lessons_page.lesson_1_desc"),
+      videoUrl: "https://www.youtube.com/embed/8_F8E2sYI_Y",
+    },
+    {
+      id: "2",
+      title: t("pages.lessons_page.lesson_2_title"),
+      duration: t("pages.lessons_page.duration_mins").replace("{count}", "14"),
+      level: t("pages.lessons_page.level_intermediate"),
+      thumbnail: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=300&auto=format&fit=crop",
+      description: t("pages.lessons_page.lesson_2_desc"),
+      videoUrl: "https://www.youtube.com/embed/t8_wJgR32-o",
+    },
+    {
+      id: "3",
+      title: t("pages.lessons_page.lesson_3_title"),
+      duration: t("pages.lessons_page.duration_mins").replace("{count}", "10"),
+      level: t("pages.lessons_page.level_intermediate"),
+      thumbnail: "https://images.unsplash.com/photo-1611162616305-c69b3fa7fbe0?w=300&auto=format&fit=crop",
+      description: t("pages.lessons_page.lesson_3_desc"),
+      videoUrl: "https://www.youtube.com/embed/_r4U2yB4Xic",
+    },
+    {
+      id: "4",
+      title: t("pages.lessons_page.lesson_4_title"),
+      duration: t("pages.lessons_page.duration_mins").replace("{count}", "8"),
+      level: t("pages.lessons_page.level_advanced"),
+      thumbnail: "https://images.unsplash.com/photo-1557200134-90327ee9fafa?w=300&auto=format&fit=crop",
+      description: t("pages.lessons_page.lesson_4_desc"),
+      videoUrl: "https://www.youtube.com/embed/oK75kU39Q_8",
+    },
+  ];
 
   return (
     <AppLayout>
@@ -63,7 +68,7 @@ export default function LessonsPage() {
           breadcrumbs={t("pages.lessons.breadcrumb")}
         />
 
-        {/* Video Player Modal Mock */}
+        {/* Video Player Modal */}
         {activeVideo && (
           <div className="fixed inset-0 bg-black/85 backdrop-blur-md z-[99] flex items-center justify-center p-4">
             <div className="w-full max-w-[800px] flex flex-col gap-4 relative">
@@ -74,18 +79,16 @@ export default function LessonsPage() {
                 <X size={20} />
               </button>
 
-              {/* Video aspect ratio container */}
-              <div className="w-full aspect-video rounded-[28px] bg-black border border-white/10 overflow-hidden flex flex-col items-center justify-center text-center relative group">
-                {/* Simulated playback visual */}
-                <div className="absolute inset-0 bg-cover bg-center opacity-40 filter blur-sm" style={{ backgroundImage: `url(${activeVideo.thumbnail})` }} />
-                <div className="relative z-10 flex flex-col items-center gap-4 text-white p-6 max-w-[500px]">
-                  <PlayCircle size={64} className="text-[#C7F33C] animate-pulse" />
-                  <h3 className="text-[20px] font-medium">{activeVideo.title}</h3>
-                  <p className="text-[12px] text-[#A3A3A3]">{activeVideo.description}</p>
-                  <span className="text-[11px] bg-[#C7F33C]/20 text-[#C7F33C] px-3 py-1 rounded-full font-medium">
-                    {"Simulyatsiya yuklanmoqda... (Batafsil ma'lumot)"}
-                  </span>
-                </div>
+              {/* Video aspect ratio container using iframe for real playback */}
+              <div className="w-full aspect-video rounded-[28px] bg-black border border-white/10 overflow-hidden shadow-2xl relative">
+                <iframe
+                  className="absolute inset-0 w-full h-full"
+                  src={activeVideo.videoUrl}
+                  title={activeVideo.title}
+                  frameBorder="0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                  allowFullScreen
+                />
               </div>
             </div>
           </div>
@@ -136,7 +139,7 @@ export default function LessonsPage() {
                     className="w-full py-2.5 text-[12px] border border-[#E8E8E8] flex items-center justify-center gap-1.5"
                   >
                     <BookOpen size={13} />
-                    <span>Darsni boshlash</span>
+                    <span>{t("pages.lessons_page.start_lesson")}</span>
                   </Button>
                 </div>
               </div>

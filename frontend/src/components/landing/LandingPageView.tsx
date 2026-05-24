@@ -1,100 +1,138 @@
 "use client";
 
 import { useState, useRef } from "react";
+import Image from "next/image";
 import Link from "next/link";
-import { 
-  Bot, 
-  ArrowRight, 
-  Check, 
-  MessageSquare, 
-  Share2, 
-  Award, 
-  Shield, 
-  ChevronDown, 
-  MessageCircle, 
-  Menu, 
+import {
+  Zap,
+  Bot,
+  ArrowRight,
+  Check,
+  MessageSquare,
+  Share2,
+  Award,
+  Shield,
+  ChevronDown,
+  MessageCircle,
+  Menu,
   X,
-  User as UserIcon
+  Users,
+  BarChart3,
+  Sparkles,
 } from "lucide-react";
 
-// Interactive Simulator Messages
 interface SimMessage {
   sender: "user" | "bot";
   text: string;
 }
 
-// 3D Tilt Robot Container
-function Robot3DContainer() {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const [transformStyle, setTransformStyle] = useState("");
+function RobotHero() {
+  const ref = useRef<HTMLDivElement>(null);
+  const [style, setStyle] = useState<React.CSSProperties>({});
 
-  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!containerRef.current) return;
-    const card = containerRef.current;
-    const rect = card.getBoundingClientRect();
-    const x = e.clientX - rect.left - rect.width / 2;
-    const y = e.clientY - rect.top - rect.height / 2;
-    
-    // Max rotation is 12 degrees
-    const rX = -(y / (rect.height / 2)) * 12;
-    const rY = (x / (rect.width / 2)) * 12;
-    
-    setTransformStyle(`rotateX(${rX}deg) rotateY(${rY}deg) scale(1.02)`);
+  const onMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!ref.current) return;
+    const r = ref.current.getBoundingClientRect();
+    const x = e.clientX - r.left - r.width / 2;
+    const y = e.clientY - r.top - r.height / 2;
+    const rX = -(y / (r.height / 2)) * 14;
+    const rY = (x / (r.width / 2)) * 14;
+    setStyle({ transform: `rotateX(${rX}deg) rotateY(${rY}deg) scale(1.03)` });
   };
 
-  const handleMouseLeave = () => {
-    setTransformStyle("");
-  };
+  const onLeave = () => setStyle({});
 
   return (
-    <div 
-      className="relative flex items-center justify-center p-4 transition-transform duration-300 ease-out cursor-pointer z-10"
-      style={{ perspective: "1000px" }}
-      onMouseMove={handleMouseMove}
-      onMouseLeave={handleMouseLeave}
+    <div
+      className="relative flex items-center justify-center select-none"
+      style={{ perspective: "900px" }}
+      onMouseMove={onMove}
+      onMouseLeave={onLeave}
     >
       <style>{`
-        @keyframes float {
-          0%, 100% {
-            transform: translateY(0px) rotate(0deg);
-          }
-          50% {
-            transform: translateY(-20px) rotate(1deg);
-          }
+        @keyframes sendly-float {
+          0%, 100% { transform: translateY(0px) rotate(0deg); }
+          33% { transform: translateY(-18px) rotate(0.8deg); }
+          66% { transform: translateY(-9px) rotate(-0.5deg); }
         }
-        @keyframes shadow {
-          0%, 100% {
-            transform: translateX(-50%) scale(1);
-            opacity: 0.4;
-          }
-          50% {
-            transform: translateX(-50%) scale(0.85);
-            opacity: 0.15;
-          }
+        @keyframes sendly-shadow-pulse {
+          0%, 100% { transform: translateX(-50%) scale(1); opacity: 0.5; }
+          50% { transform: translateX(-50%) scale(0.78); opacity: 0.18; }
+        }
+        @keyframes sendly-glow-pulse {
+          0%, 100% { opacity: 0.5; transform: scale(1); }
+          50% { opacity: 0.85; transform: scale(1.08); }
+        }
+        @keyframes sendly-badge-float {
+          0%, 100% { transform: translateY(0px); }
+          50% { transform: translateY(-6px); }
         }
       `}</style>
-      <div 
-        ref={containerRef}
-        className="relative flex items-center justify-center transition-all duration-300 ease-out select-none"
-        style={{ transform: transformStyle, transformStyle: "preserve-3d" }}
-      >
-        {/* Glow behind the robot */}
-        <div className="absolute h-[340px] w-[340px] rounded-full bg-[#C7F33C]/20 blur-[60px] -z-10 animate-pulse" />
-        
-        {/* 3D Robot Image */}
-        <img 
-          src="/robot.png" 
-          alt="Sendly 3D Waving Robot" 
-          className="w-[320px] sm:w-[400px] h-[320px] sm:h-[400px] object-contain drop-shadow-[0_25px_60px_rgba(0,0,0,0.06)]"
-          style={{ animation: "float 6s ease-in-out infinite" }}
-        />
 
-        {/* Dynamic lower shadow */}
-        <div 
-          className="absolute bottom-[-15px] left-1/2 w-[220px] h-[20px] rounded-full bg-black/10 blur-[10px] -z-10" 
-          style={{ animation: "shadow 6s ease-in-out infinite" }}
+      {/* Outer glow ring */}
+      <div
+        className="absolute w-[420px] h-[420px] rounded-full"
+        style={{
+          background: "radial-gradient(circle, rgba(199,243,60,0.18) 0%, rgba(199,243,60,0.04) 60%, transparent 75%)",
+          animation: "sendly-glow-pulse 4s ease-in-out infinite",
+        }}
+      />
+
+      {/* Second glow */}
+      <div
+        className="absolute w-[280px] h-[280px] rounded-full"
+        style={{
+          background: "radial-gradient(circle, rgba(199,243,60,0.22) 0%, transparent 70%)",
+          animation: "sendly-glow-pulse 4s ease-in-out infinite 1s",
+        }}
+      />
+
+      {/* Floating badge - DM count */}
+      <div
+        className="absolute top-[60px] -left-[20px] sm:-left-[40px] flex items-center gap-2 rounded-2xl border border-[#C7F33C]/20 bg-[#0C0C0E]/90 backdrop-blur-md px-3 py-2 shadow-[0_8px_30px_rgba(0,0,0,0.4)] z-20"
+        style={{ animation: "sendly-badge-float 3.5s ease-in-out infinite" }}
+      >
+        <div className="w-7 h-7 rounded-full bg-[#C7F33C] flex items-center justify-center text-black text-[11px] font-extrabold">{"DM"}</div>
+        <div>
+          <p className="text-[11px] font-bold text-white leading-none">{"Auto-javob"}</p>
+          <p className="text-[9px] text-[#A0A0A5] mt-0.5">{"1.2k xabar / kun"}</p>
+        </div>
+      </div>
+
+      {/* Floating badge - conversion */}
+      <div
+        className="absolute bottom-[80px] -right-[10px] sm:-right-[30px] flex items-center gap-2 rounded-2xl border border-[#C7F33C]/20 bg-[#0C0C0E]/90 backdrop-blur-md px-3 py-2 shadow-[0_8px_30px_rgba(0,0,0,0.4)] z-20"
+        style={{ animation: "sendly-badge-float 4s ease-in-out infinite 0.8s" }}
+      >
+        <div className="w-7 h-7 rounded-full bg-purple-500/20 flex items-center justify-center text-purple-400 text-[11px] font-extrabold">{"3x"}</div>
+        <div>
+          <p className="text-[11px] font-bold text-white leading-none">{"Konversiya"}</p>
+          <p className="text-[9px] text-[#A0A0A5] mt-0.5">{"sotuvlar o'sdi"}</p>
+        </div>
+      </div>
+
+      {/* Robot image */}
+      <div
+        ref={ref}
+        className="relative transition-all duration-300 ease-out"
+        style={{ transformStyle: "preserve-3d", ...style }}
+      >
+        <Image
+          src="/robot.png"
+          alt="Sendly AI Robot"
+          width={420}
+          height={420}
+          className="w-[340px] sm:w-[420px] h-[340px] sm:h-[420px] object-contain relative z-10"
+          style={{ animation: "sendly-float 7s ease-in-out infinite" }}
+          priority
         />
       </div>
+
+      {/* Ground shadow */}
+      <div
+        className="absolute bottom-[-10px] left-1/2 w-[200px] h-[18px] rounded-full bg-[#C7F33C]/15 blur-[14px]"
+        style={{ animation: "sendly-shadow-pulse 7s ease-in-out infinite" }}
+      />
     </div>
   );
 }
@@ -102,495 +140,429 @@ function Robot3DContainer() {
 export function LandingPageView() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeFaq, setActiveFaq] = useState<number | null>(null);
-
-  // Chatbot Simulator State
   const [simMessages, setSimMessages] = useState<SimMessage[]>([
-    { sender: "bot", text: "Salom! Men Sendly avtomatlashtirilgan botiman. Instagram sahifangizni savdo mashinasiga aylantirishga tayyormisiz? 🚀" }
+    { sender: "bot", text: "Assalomu alaykum! 👋 Sendly botiman. Instagram Direct va izohlaringizni avtomatlashtirib beraman. Nima bilmoqchisiz?" },
   ]);
-  const [simButtons, setSimButtons] = useState<string[]>([
-    "Narxi qancha? 💰",
-    "Aksiya bormi? 🎁",
-    "Qanday ulanadi? 🔌"
-  ]);
+  const [simButtons, setSimButtons] = useState<string[]>(["Narxi qancha? 💰", "Qanday ishlaydi? ⚡", "Bepul sinash 🚀"]);
 
-  const handleSimButtonClick = (btnText: string) => {
-    const updated = [...simMessages, { sender: "user" as const, text: btnText }];
+  const handleSimClick = (btnText: string) => {
+    const updated: SimMessage[] = [...simMessages, { sender: "user", text: btnText }];
     setSimMessages(updated);
-    setSimButtons([]); // Temporarily disable buttons
-
+    setSimButtons([]);
     setTimeout(() => {
-      let replyText = "";
-      let nextButtons: string[] = [];
-
+      let reply = "";
+      let next: string[] = [];
       if (btnText.includes("Narxi")) {
-        replyText = "🤖 Sendly tariflari:\n• Pro: 150,000 so'm/oy (1ta akkaunt)\n• Premium: 1,000,000 so'm/oy (10ta akkaunt)\n\nHozir ro'yxatdan o'tib 7 kunlik Pro versiyani tekin sinab ko'rishingiz mumkin! ⚡️";
-        nextButtons = ["Tekin sinash 🚀", "Boshqa savol ❓"];
-      } else if (btnText.includes("Aksiya")) {
-        replyText = "🎁 Ha! Hozir yangi foydalanuvchilar uchun 7 kunlik sinov muddati mutlaqo bepul. Hech qanday karta bog'lash shart emas!";
-        nextButtons = ["Ro'yxatdan o'tish 🌟", "Boshqa savol ❓"];
-      } else if (btnText.includes("Qanday ulanadi")) {
-        replyText = "🔌 Juda oson:\n1. Saytimizda ro'yxatdan o'tasiz.\n2. Facebook profil orqali Instagram Professional hisobingizni ulaysiz.\n3. Tayyor! Bot avtomatik ishga tushadi.";
-        nextButtons = ["Ulab ko'rish 🔗", "Boshqa savol ❓"];
-      } else if (btnText.includes("Boshqa savol") || btnText.includes("Orqaga")) {
-        replyText = "Sizga qanday yordam bera olaman? Tanlang:";
-        nextButtons = ["Narxi qancha? 💰", "Aksiya bormi? 🎁", "Qanday ulanadi? 🔌"];
+        reply = "💎 Sendly tariflari:\n• PRO: 150,000 so'm/oy — 1 akkaunt\n• PREMIUM: 1,000,000 so'm/oy — 10 akkaunt\n\n7 kun bepul sinab ko'ring! Karta bog'lash shart emas.";
+        next = ["Bepul boshlash 🚀", "Boshqa savol ❓"];
+      } else if (btnText.includes("ishlaydi")) {
+        reply = "⚡ Juda oson:\n1️⃣ Ro'yxatdan o'ting\n2️⃣ Instagram Professional akkauntingizni ulang\n3️⃣ Bot oqimlarini yarating\n\nBot 24/7 avtomatik javob beradi!";
+        next = ["Boshlash 🎯", "Boshqa savol ❓"];
+      } else if (btnText.includes("Boshqa")) {
+        reply = "Sizga qanday yordam bera olaman?";
+        next = ["Narxi qancha? 💰", "Qanday ishlaydi? ⚡", "Bepul sinash 🚀"];
       } else {
-        replyText = "Ajoyib tanlov! Tizimda to'liq sozlash va chatbot bloklarini vizual quruvchi orqali o'zingiz xohlagancha yasashingiz mumkin. Boshlaymizmi?";
-        nextButtons = ["Ha, boshlaymiz! 🔥", "Orqaga 🔙"];
+        reply = "Ajoyib! Hoziroq ro'yxatdan o'ting va 7 kunlik Pro versiyani tekin ishlating. 🎉";
+        next = ["Ro'yxatdan o'tish →", "Boshqa savol ❓"];
       }
-
-      setSimMessages([...updated, { sender: "bot" as const, text: replyText }]);
-      setSimButtons(nextButtons);
-    }, 800);
+      setSimMessages([...updated, { sender: "bot", text: reply }]);
+      setSimButtons(next);
+    }, 700);
   };
+
+  const features = [
+    {
+      icon: MessageSquare,
+      color: "text-blue-400",
+      bg: "bg-blue-400/10",
+      title: "Direct Avtomatlashtirish",
+      desc: "Mijozlar DM yozganda bot soniyalar ichida javob beradi — xabarlami, havolami, tugmami.",
+    },
+    {
+      icon: Share2,
+      color: "text-[#C7F33C]",
+      bg: "bg-[#C7F33C]/10",
+      title: "Izoh → DM Oqimi",
+      desc: "Post ostida izoh qoldirgan foydalanuvchiga avtomatik shaxsiy xabar yuboring.",
+    },
+    {
+      icon: Sparkles,
+      color: "text-purple-400",
+      bg: "bg-purple-400/10",
+      title: "AI Agent (GPT)",
+      desc: "OpenAI yordamida arizalarni tahlil qilib, Sotuvlar yoki Support guruhlariga ajratadi.",
+    },
+    {
+      icon: Award,
+      color: "text-orange-400",
+      bg: "bg-orange-400/10",
+      title: "Referral va Ballar",
+      desc: "Foydalanuvchilarni taklif qilganligi uchun mukofotlang. Ballarni chegirma va sovg'alarga almashtirish.",
+    },
+    {
+      icon: MessageCircle,
+      color: "text-green-400",
+      bg: "bg-green-400/10",
+      title: "Telegram Bot Runner",
+      desc: "Instagram bilan birga Telegram botlarini ham bitta panelda boshqaring.",
+    },
+    {
+      icon: Shield,
+      color: "text-pink-400",
+      bg: "bg-pink-400/10",
+      title: "Live Chat Takeover",
+      desc: "Murakkab holatlarda bot operatorga uzatadi — insoniy muloqot zarur bo'lganda.",
+    },
+    {
+      icon: BarChart3,
+      color: "text-cyan-400",
+      bg: "bg-cyan-400/10",
+      title: "Analitika va Hisobotlar",
+      desc: "Qancha xabar yuborildi, qancha mijoz jalb qilindi — real vaqtda statistika.",
+    },
+    {
+      icon: Users,
+      color: "text-yellow-400",
+      bg: "bg-yellow-400/10",
+      title: "Kontaktlar Bazasi",
+      desc: "Barcha suhbatlashgan foydalanuvchilar ma'lumotlari teglar va status bilan saqlanadi.",
+    },
+    {
+      icon: Bot,
+      color: "text-rose-400",
+      bg: "bg-rose-400/10",
+      title: "Visual Flow Builder",
+      desc: "Drag-and-drop orqali murakkab bot oqimlarini kodlamasdan vizual yarating.",
+    },
+  ];
 
   const faqs = [
     {
-      q: "Sendly o'zi nima va u qanday ishlaydi?",
-      a: "Sendly — bu Instagram Professional akkauntlari uchun avtomatlashtirilgan chatbot va marketing platformasi. U mijozlaringiz sizga Direct'da yozganda yoki postlaringiz ostida izoh qoldirganda avtomatik ravishda soniyalar ichida javob berish, havolalar yuborish va savdoni oshirish imkonini beradi."
+      q: "Sendly nima va kimlar uchun?",
+      a: "Sendly — Instagram Professional akkauntlari uchun avtomatlashtirilgan chatbot va marketing platformasi. Onlayn biznes yurituvchi, savdoni kengaytirmoqchi bo'lgan har qanday kishi uchun.",
     },
     {
-      q: "Instagram akkauntim bloklanib ketmaydimi?",
-      a: "Yo'q. Sendly rasmiy Meta Graph API orqali ishlaydi. Biz hech qanday norasmiy skriptlar yoki parollarni talab qilmaymiz, shuning uchun akkauntingiz mutlaqo xavfsiz va bloklanish xavfidan xoli bo'ladi."
+      q: "Akkauntim bloklanib ketmaydimi?",
+      a: "Yo'q. Sendly faqat rasmiy Meta Graph API orqali ishlaydi. Hech qanday norasmiy tizim yoki parol talab qilinmaydi — akkauntingiz to'liq xavfsiz.",
     },
     {
-      q: "Arizalarni (Lead generation) AI yordamida saralash qanday ishlaydi?",
-      a: "Mijozlar reklama formalaridan ariza yuborishganda, tizim OpenAI (GPT) yordamida ularning savollari va ehtiyojlarini tahlil qiladi hamda arizalarni avtomatik tarzda 'Sotuvlar' (sales) yoki 'Qo'llab-quvvatlash' (support) guruhlariga saralab beradi."
+      q: "7 kunlik sinov muddati haqiqiymi?",
+      a: "Ha, mutlaqo haqiqiy. Ro'yxatdan o'tganingizdan so'ng 7 kun davomida barcha Pro funksiyalardan bepul foydalanasiz. Kredit karta talab qilinmaydi.",
     },
     {
-      q: "Bepul sinov muddati bormi?",
-      a: "Ha! Barcha yangi ro'yxatdan o'tgan foydalanuvchilarga pro funksiyalardan foydalanish uchun 7 kunlik bepul sinov muddati taqdim etiladi."
+      q: "Bir nechta Instagram akkauntni ulasa bo'ladimi?",
+      a: "Ha. PRO tarifida 1 ta, PREMIUM tarifida esa 10 tagacha Instagram Professional akkauntni ulashingiz mumkin.",
     },
     {
-      q: "To'lovlarni qanday amalga oshirsa bo'ladi?",
-      a: "Sayt orqali UzCard, Humo, Visa yoki MasterCard kartalarini xavfsiz bog'lash orqali obunani faollashtirishingiz mumkin."
-    }
+      q: "To'lovni qanday amalga oshiraman?",
+      a: "UzCard, Humo, Visa yoki MasterCard orqali to'lov qilishingiz mumkin. To'lov tizimi xavfsiz shifrlash bilan himoyalangan.",
+    },
   ];
 
   return (
-    <div className="min-h-screen bg-[#FAFAF9] text-[#0C0C0E] font-sans overflow-x-hidden selection:bg-[#C7F33C] selection:text-[#0C0C0E]">
-      
-      {/* HEADER / NAVBAR */}
-      <header className="sticky top-0 z-50 w-full border-b border-[#E8E8E8] bg-white/95 backdrop-blur-md">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
-          <div className="flex items-center gap-6">
-            <Link href="/" className="flex items-center gap-3">
-              <span className="text-[22px] font-[900] tracking-tighter text-black uppercase flex items-center gap-1.5">
-                {"Sendly"}
-                <span className="h-2 w-2 rounded-full bg-[#C7F33C]" />
-              </span>
-            </Link>
-            
-            {/* Language Selector Dropdown style */}
-            <div className="flex items-center gap-1 text-[12px] font-semibold text-black/60 bg-[#F0F0F0] px-2.5 py-1 rounded-full cursor-pointer hover:bg-[#E8E8E8] transition-colors">
-              <span>{"UZ"}</span>
-              <ChevronDown size={12} />
-            </div>
-          </div>
+    <div className="min-h-screen bg-[#070708] text-[#E8E8E8] font-sans overflow-x-hidden selection:bg-[#C7F33C] selection:text-[#070708]">
 
-          {/* Center Navigation Menu */}
-          <nav className="hidden md:flex items-center gap-8 text-[13.5px] font-bold text-black/60">
-            <a href="#features" className="hover:text-black transition-colors">{"Yechimlar"}</a>
-            <a href="#pricing" className="hover:text-black transition-colors">{"Tariflar"}</a>
-            <a href="#simulator" className="hover:text-black transition-colors">{"Mini-kurs"}</a>
-            <a href="#features" className="hover:text-black transition-colors">{"Hamkorlar"}</a>
-            <a href="#faq" className="hover:text-black transition-colors">{"Manbalar"}</a>
+      {/* Ambient background glows */}
+      <div className="fixed top-[-15%] left-[-10%] w-[55vw] h-[55vw] rounded-full bg-[#C7F33C]/6 blur-[130px] pointer-events-none z-0" />
+      <div className="fixed top-[40%] right-[-15%] w-[50vw] h-[50vw] rounded-full bg-purple-700/8 blur-[140px] pointer-events-none z-0" />
+      <div className="fixed bottom-[0%] left-[25%] w-[45vw] h-[45vw] rounded-full bg-[#C7F33C]/4 blur-[120px] pointer-events-none z-0" />
+
+      {/* ─── NAVBAR ─── */}
+      <header className="sticky top-0 z-50 w-full border-b border-white/5 bg-[#070708]/85 backdrop-blur-xl">
+        <div className="mx-auto flex max-w-7xl items-center justify-between px-5 sm:px-8 py-4">
+
+          {/* Logo */}
+          <Link href="/" className="flex items-center gap-2.5 shrink-0">
+            <div className="grid h-9 w-9 place-items-center rounded-[12px] bg-[#C7F33C] shadow-[0_0_20px_rgba(199,243,60,0.35)]">
+              <Zap size={18} className="fill-black text-black" />
+            </div>
+            <span className="text-[19px] font-extrabold tracking-tight text-white">
+              {"Sendly"}<span className="text-[#C7F33C]">{".uz"}</span>
+            </span>
+          </Link>
+
+          {/* Desktop nav links */}
+          <nav className="hidden lg:flex items-center gap-7 text-[13px] font-semibold text-[#A0A0A5]">
+            <a href="#features" className="hover:text-white transition-colors">{"Xususiyatlar"}</a>
+            <a href="#simulator" className="hover:text-white transition-colors">{"Demo"}</a>
+            <a href="#pricing" className="hover:text-white transition-colors">{"Tariflar"}</a>
+            <a href="#faq" className="hover:text-white transition-colors">{"Savol-Javob"}</a>
           </nav>
 
-          {/* Right Action buttons */}
-          <div className="hidden md:flex items-center gap-4">
+          {/* Right CTA */}
+          <div className="hidden md:flex items-center gap-3">
             <Link href="/login">
-              <button className="flex h-10 w-10 items-center justify-center rounded-full bg-black/5 hover:bg-black/10 transition-colors">
-                <UserIcon size={18} className="text-black" />
+              <button className="text-[13px] font-semibold text-[#A0A0A5] hover:text-white px-4 py-2 transition-colors">
+                {"Kirish"}
               </button>
             </Link>
             <Link href="/register">
-              <button className="rounded-full bg-black text-white hover:bg-black/95 text-[13.5px] font-bold px-5 py-2.5 transition-all hover:scale-105 active:scale-95 shadow-sm">
-                {"Try it for free"}
+              <button className="flex items-center gap-2 rounded-full bg-[#C7F33C] text-black px-5 py-2.5 text-[13px] font-extrabold transition-all hover:scale-105 active:scale-95 shadow-[0_6px_20px_rgba(199,243,60,0.3)]">
+                {"Bepul boshlash"}
+                <ArrowRight size={14} />
               </button>
             </Link>
           </div>
 
-          {/* Mobile menu toggle */}
-          <button 
+          {/* Mobile burger */}
+          <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="md:hidden text-black hover:text-black/85 transition-colors p-1"
+            className="md:hidden text-white/80 hover:text-white p-1 transition-colors"
           >
             {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
         </div>
 
-        {/* Mobile Navigation Dropdown */}
+        {/* Mobile menu */}
         {mobileMenuOpen && (
-          <div className="md:hidden border-b border-[#E8E8E8] bg-white px-6 py-5 flex flex-col gap-4 animate-in slide-in-from-top duration-200">
-            <a 
-              href="#features" 
-              onClick={() => setMobileMenuOpen(false)}
-              className="text-[14.5px] font-bold text-black/60 py-1 border-b border-[#E8E8E8]"
-            >
-              {"Yechimlar"}
-            </a>
-            <a 
-              href="#pricing" 
-              onClick={() => setMobileMenuOpen(false)}
-              className="text-[14.5px] font-bold text-black/60 py-1 border-b border-[#E8E8E8]"
-            >
-              {"Tariflar"}
-            </a>
-            <a 
-              href="#simulator" 
-              onClick={() => setMobileMenuOpen(false)}
-              className="text-[14.5px] font-bold text-black/60 py-1 border-b border-[#E8E8E8]"
-            >
-              {"Mini-kurs"}
-            </a>
-            <a 
-              href="#faq" 
-              onClick={() => setMobileMenuOpen(false)}
-              className="text-[14.5px] font-bold text-black/60 py-1 border-b border-[#E8E8E8]"
-            >
-              {"Manbalar"}
-            </a>
+          <div className="md:hidden bg-[#0C0C0E] border-b border-white/5 px-5 py-5 flex flex-col gap-3 animate-in slide-in-from-top duration-200">
+            <a href="#features" onClick={() => setMobileMenuOpen(false)} className="text-[14px] font-semibold text-[#A0A0A5] py-2 border-b border-white/5">{"Xususiyatlar"}</a>
+            <a href="#simulator" onClick={() => setMobileMenuOpen(false)} className="text-[14px] font-semibold text-[#A0A0A5] py-2 border-b border-white/5">{"Demo Bot"}</a>
+            <a href="#pricing" onClick={() => setMobileMenuOpen(false)} className="text-[14px] font-semibold text-[#A0A0A5] py-2 border-b border-white/5">{"Tariflar"}</a>
+            <a href="#faq" onClick={() => setMobileMenuOpen(false)} className="text-[14px] font-semibold text-[#A0A0A5] py-2 border-b border-white/5">{"Savol-Javob"}</a>
             <div className="flex gap-2 mt-2">
               <Link href="/login" className="flex-1">
-                <button className="w-full rounded-full border border-[#E8E8E8] py-3 text-[13.5px] font-bold text-center text-black bg-[#F5F5F3]">
-                  {"Kirish"}
-                </button>
+                <button className="w-full rounded-full border border-white/10 bg-white/5 py-3 text-[13px] font-bold text-white">{"Kirish"}</button>
               </Link>
               <Link href="/register" className="flex-1">
-                <button className="w-full rounded-full py-3 text-[13.5px] font-bold text-center text-white bg-black">
-                  {"Try it for free"}
-                </button>
+                <button className="w-full rounded-full bg-[#C7F33C] text-black py-3 text-[13px] font-extrabold">{"Bepul boshlash"}</button>
               </Link>
             </div>
           </div>
         )}
       </header>
 
-      {/* NEW ALERT BANNER */}
-      <div className="w-full bg-[#120024] py-3 text-center text-[12px] font-bold text-white tracking-wide">
-        <span className="inline-flex items-center gap-1.5">
-          <span className="bg-[#C7F33C] text-black px-1.5 py-0.5 rounded text-[10px] font-extrabold uppercase">{"NEW"}</span>
-          <span>{"Virale — AI Agent for viral content"}</span>
-          <ArrowRight size={13} className="inline ml-0.5" />
-        </span>
-      </div>
+      {/* ─── HERO ─── */}
+      <section className="relative z-10 mx-auto max-w-7xl px-5 sm:px-8 pt-16 sm:pt-20 pb-10 flex flex-col lg:flex-row items-center gap-12 lg:gap-0">
 
-      {/* HERO SECTION */}
-      <section className="relative mx-auto max-w-7xl px-6 pt-16 pb-28 text-center z-10 flex flex-col items-center">
-        
-        {/* Title */}
-        <h1 className="mx-auto max-w-4xl text-[38px] sm:text-[62px] md:text-[80px] font-[900] tracking-tighter text-black leading-[1.05] sm:leading-[1] text-center">
-          {"Unlock the power of"} <br />
-          {"your content and chats"}
-        </h1>
+        {/* Left — text */}
+        <div className="flex-1 text-center lg:text-left max-w-xl mx-auto lg:mx-0">
 
-        {/* Subtitle */}
-        <p className="mx-auto mt-6 max-w-[580px] text-[15px] sm:text-[18px] text-black/50 leading-relaxed font-medium">
-          {"AI Agents and chatbots to help you grow followers, engage and sell on Instagram & TikTok. Set up from your phone in minutes"}
-        </p>
+          {/* Badge */}
+          <div className="inline-flex items-center gap-2 rounded-full border border-[#C7F33C]/20 bg-[#C7F33C]/5 px-4 py-2 text-[11.5px] font-bold text-[#C7F33C] mb-6">
+            <Sparkles size={12} />
+            <span>{"INSTAGRAM CHATBOT & AI AVTOMATLASHTIRISH"}</span>
+          </div>
 
-        {/* CTA Button */}
-        <div className="mt-8">
-          <Link href="/register">
-            <button className="group inline-flex items-center gap-2.5 rounded-full bg-[#C7F33C] text-black px-8 py-4 text-[16px] font-extrabold transition-all hover:scale-105 active:scale-95 shadow-[0_10px_25px_rgba(199,243,60,0.35)]">
-              <span>{"Try it for Free"}</span>
-              <span className="flex h-6 w-6 items-center justify-center rounded-full bg-black text-[#C7F33C]">
-                <ArrowRight size={14} className="transition-transform group-hover:translate-x-0.5" />
-              </span>
-            </button>
-          </Link>
+          {/* Title */}
+          <h1 className="text-[36px] sm:text-[52px] md:text-[60px] font-[900] text-white tracking-tight leading-[1.07]">
+            {"Instagram DM va"}
+            <br />
+            <span className="bg-gradient-to-r from-[#C7F33C] via-[#DEFF7A] to-purple-400 bg-clip-text text-transparent">
+              {"Izohlarni Savdoga"}
+            </span>
+            <br />
+            {"Aylantiring"}
+          </h1>
+
+          {/* Subtitle */}
+          <p className="mt-5 text-[15px] sm:text-[17px] text-[#A0A0A5] leading-relaxed max-w-[500px] mx-auto lg:mx-0">
+            {"Mijozlarga 24/7 tezkor javob bering, izohlarga DM orqali avtomatik javob qaytaring va AI yordamida arizalarni saralang."}
+          </p>
+
+          {/* Buttons */}
+          <div className="mt-8 flex flex-col sm:flex-row items-center gap-3 justify-center lg:justify-start">
+            <Link href="/register">
+              <button className="group flex items-center gap-2.5 rounded-full bg-[#C7F33C] text-black px-8 py-4 text-[15px] font-extrabold shadow-[0_12px_35px_rgba(199,243,60,0.3)] transition-all hover:scale-105 active:scale-95">
+                <span>{"Tekin Boshlash"}</span>
+                <span className="flex h-6 w-6 items-center justify-center rounded-full bg-black text-[#C7F33C]">
+                  <ArrowRight size={13} className="transition-transform group-hover:translate-x-0.5" />
+                </span>
+              </button>
+            </Link>
+            <a href="#simulator">
+              <button className="flex items-center gap-2 rounded-full border border-white/10 bg-white/5 hover:bg-white/10 px-8 py-4 text-[15px] font-bold text-white transition-all active:scale-95">
+                <span>{"Demo Ko'rish"}</span>
+              </button>
+            </a>
+          </div>
+
+          {/* Trust badges */}
+          <div className="mt-8 flex items-center gap-5 justify-center lg:justify-start text-[11.5px] text-[#707075] font-semibold">
+            <span className="flex items-center gap-1.5"><Check size={12} className="text-[#C7F33C]" />{"7 kun bepul"}</span>
+            <span className="flex items-center gap-1.5"><Check size={12} className="text-[#C7F33C]" />{"Karta shart emas"}</span>
+            <span className="flex items-center gap-1.5"><Check size={12} className="text-[#C7F33C]" />{"Meta API orqali"}</span>
+          </div>
         </div>
 
-        {/* Mascot Center 3D visual */}
-        <div className="mt-14 w-full max-w-[500px] flex justify-center">
-          <Robot3DContainer />
+        {/* Right — Robot */}
+        <div className="flex-1 flex justify-center lg:justify-end relative">
+          <RobotHero />
         </div>
-
       </section>
 
-      {/* SLANTED MAGENTA DIVIDER ACCENT */}
-      <div className="relative w-full h-[60px] sm:h-[120px] bg-[#E1007A] -skew-y-3 origin-top-left -mt-8 z-0 overflow-hidden">
-        <div className="w-full h-full bg-[#120024]/5" />
+      {/* ─── STATS BAR ─── */}
+      <div className="border-y border-white/5 bg-[#0C0C0E]/60 py-10 z-10 relative">
+        <div className="mx-auto max-w-5xl px-5 sm:px-8 grid grid-cols-1 sm:grid-cols-3 gap-8 text-center">
+          <div>
+            <p className="text-[40px] sm:text-[50px] font-[900] text-[#C7F33C] leading-none tracking-tight">{"1M+"}</p>
+            <p className="text-[12px] text-[#A0A0A5] font-semibold uppercase tracking-wider mt-1">{"Yuborilgan avtomatik xabarlar"}</p>
+          </div>
+          <div>
+            <p className="text-[40px] sm:text-[50px] font-[900] text-white leading-none tracking-tight">{"99.9%"}</p>
+            <p className="text-[12px] text-[#A0A0A5] font-semibold uppercase tracking-wider mt-1">{"Tizim barqarorligi"}</p>
+          </div>
+          <div>
+            <p className="text-[40px] sm:text-[50px] font-[900] text-[#C7F33C] leading-none tracking-tight">{"3.5x"}</p>
+            <p className="text-[12px] text-[#A0A0A5] font-semibold uppercase tracking-wider mt-1">{"Konversiya o'sishi"}</p>
+          </div>
+        </div>
       </div>
 
-      {/* DETAILED FEATURES SECTION */}
-      <section id="features" className="mx-auto max-w-7xl px-6 py-24 z-10 relative bg-[#FAFAF9]">
-        <div className="text-center max-w-3xl mx-auto mb-16">
-          <h2 className="text-3xl font-[900] sm:text-5xl text-black tracking-tight">
-            {"Savdolarni Oshirish Uchun Barcha Qurollar"}
+      {/* ─── FEATURES ─── */}
+      <section id="features" className="relative z-10 mx-auto max-w-7xl px-5 sm:px-8 py-20 sm:py-28">
+        <div className="text-center max-w-2xl mx-auto mb-14">
+          <h2 className="text-[28px] sm:text-[42px] font-[900] text-white tracking-tight">
+            {"Savdoni Oshirish Uchun"} <span className="text-[#C7F33C]">{"Barcha Qurollar"}</span>
           </h2>
-          <p className="text-[15px] md:text-[16px] text-black/50 mt-4 leading-relaxed font-medium">
-            {"Biz sizga mijozlar oqimi bilan ishlashni engillashtirish va har bir yozilgan izohni arizaga aylantirish uchun mukammal tizimni taqdim etamiz."}
+          <p className="text-[14px] sm:text-[15px] text-[#A0A0A5] mt-3 leading-relaxed">
+            {"Har bir izohni arizaga, har bir DM ni sotuvga aylantiring."}
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          
-          {/* Feature 1 */}
-          <div className="rounded-[24px] border border-[#E8E8E8] bg-white p-7 transition-all hover:border-[#C7F33C] hover:scale-[1.02] shadow-[0_8px_30px_rgba(0,0,0,0.02)] text-left">
-            <div className="h-12 w-12 rounded-2xl bg-blue-500/10 text-blue-500 flex items-center justify-center mb-6">
-              <MessageSquare size={22} />
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+          {features.map((f, i) => (
+            <div
+              key={i}
+              className="rounded-[22px] border border-white/5 bg-[#0C0C0E] p-6 transition-all hover:border-[#C7F33C]/20 hover:scale-[1.015] hover:bg-[#0E0E10] group"
+            >
+              <div className={`h-11 w-11 rounded-[14px] ${f.bg} ${f.color} flex items-center justify-center mb-5 transition-transform group-hover:scale-110`}>
+                <f.icon size={20} />
+              </div>
+              <h3 className="text-[16px] font-extrabold text-white">{f.title}</h3>
+              <p className="text-[12.5px] text-[#A0A0A5] mt-2 leading-relaxed">{f.desc}</p>
             </div>
-            <h3 className="text-[18px] font-extrabold text-black">{"Direct Avtomatlashtirish"}</h3>
-            <p className="text-[13px] text-black/50 mt-3 leading-relaxed">
-              {"Mijozlar Direct'da savol berishganda, bot ularga oldindan tayyorlangan tugmalar, rasm va havolalar bilan soniyalar ichida javob beradi."}
-            </p>
-          </div>
-
-          {/* Feature 2 */}
-          <div className="rounded-[24px] border border-[#E8E8E8] bg-white p-7 transition-all hover:border-[#C7F33C] hover:scale-[1.02] shadow-[0_8px_30px_rgba(0,0,0,0.02)] text-left">
-            <div className="h-12 w-12 rounded-2xl bg-[#C7F33C]/10 text-black flex items-center justify-center mb-6">
-              <Share2 size={22} />
-            </div>
-            <h3 className="text-[18px] font-extrabold text-black">{"Izohlar Bilan Isoslash"}</h3>
-            <p className="text-[13px] text-black/50 mt-3 leading-relaxed">
-              {"Post ostida izoh qoldirgan har bir foydalanuvchiga shaxsiy xabarda avtomatik havola yuborish orqali virusli savdoni ta'minlang."}
-            </p>
-          </div>
-
-          {/* Feature 3 */}
-          <div className="rounded-[24px] border border-[#E8E8E8] bg-white p-7 transition-all hover:border-[#C7F33C] hover:scale-[1.02] shadow-[0_8px_30px_rgba(0,0,0,0.02)] text-left">
-            <div className="h-12 w-12 rounded-2xl bg-purple-500/10 text-purple-500 flex items-center justify-center mb-6">
-              <Award size={22} />
-            </div>
-            <h3 className="text-[18px] font-extrabold text-black">{"Geymifikatsiya va Ballar"}</h3>
-            <p className="text-[13px] text-black/50 mt-3 leading-relaxed">
-              {"Foydalanuvchilarni faolligi, do'stlarini taklif qilganligi uchun ballar bilan mukofotlang. Ular o'z ballarini sovg'a yoki chegirmalarga almashtira oladilar."}
-            </p>
-          </div>
-
-          {/* Feature 4 */}
-          <div className="rounded-[24px] border border-[#E8E8E8] bg-white p-7 transition-all hover:border-[#C7F33C] hover:scale-[1.02] shadow-[0_8px_30px_rgba(0,0,0,0.02)] text-left">
-            <div className="h-12 w-12 rounded-2xl bg-orange-500/10 text-orange-500 flex items-center justify-center mb-6">
-              <Bot size={22} />
-            </div>
-            <h3 className="text-[18px] font-extrabold text-black">{"AI Agent Saralash (RAG)"}</h3>
-            <p className="text-[13px] text-black/50 mt-3 leading-relaxed">
-              {"OpenAI va RAG tizimi yordamida mijoz arizalarini qualified qiladi, guruhlarga (Sotuvlar/Qo'llab-quvvatlash) ajratadi va teglar qo'shadi."}
-            </p>
-          </div>
-
-          {/* Feature 5 */}
-          <div className="rounded-[24px] border border-[#E8E8E8] bg-white p-7 transition-all hover:border-[#C7F33C] hover:scale-[1.02] shadow-[0_8px_30px_rgba(0,0,0,0.02)] text-left">
-            <div className="h-12 w-12 rounded-2xl bg-green-500/10 text-green-500 flex items-center justify-center mb-6">
-              <MessageCircle size={22} />
-            </div>
-            <h3 className="text-[18px] font-extrabold text-black">{"Telegram Bot Runner"}</h3>
-            <p className="text-[13px] text-black/50 mt-3 leading-relaxed">
-              {"Tizimga faqat Instagram emas, balki Telegram botlarini ham ulab, bitta boshqaruv paneli orqali avtomatlashtirish oqimini ishlating."}
-            </p>
-          </div>
-
-          {/* Feature 6 */}
-          <div className="rounded-[24px] border border-[#E8E8E8] bg-white p-7 transition-all hover:border-[#C7F33C] hover:scale-[1.02] shadow-[0_8px_30px_rgba(0,0,0,0.02)] text-left">
-            <div className="h-12 w-12 rounded-2xl bg-pink-500/10 text-pink-500 flex items-center justify-center mb-6">
-              <Shield size={22} />
-            </div>
-            <h3 className="text-[18px] font-extrabold text-black">{"Live Chat Takeover"}</h3>
-            <p className="text-[13px] text-black/50 mt-3 leading-relaxed">
-              {"Mijoz murakkab texnik yoki sotuvga doir muammo bilan murojaat qilsa, bot muloqotni inson operatorga uzatadi va to'xtaydi."}
-            </p>
-          </div>
-
+          ))}
         </div>
       </section>
 
-      {/* INTERACTIVE SIMULATOR SECTION */}
-      <section id="simulator" className="mx-auto max-w-5xl px-6 py-12 md:py-20 z-10 relative">
-        <div className="rounded-[32px] border border-[#E8E8E8] bg-white p-6 md:p-10 shadow-[0_20px_50px_rgba(0,0,0,0.03)]">
-          <div className="grid grid-cols-1 md:grid-cols-[1fr_1.1fr] gap-8 items-center">
-            
-            <div className="text-left">
-              <span className="text-[11px] font-extrabold text-black uppercase tracking-wider px-3 py-1.5 rounded-full bg-[#C7F33C] inline-block mb-4">{"INTERAKTIV SIMULYATOR"}</span>
-              <h3 className="text-2xl md:text-3xl font-[900] text-black leading-tight">{"Botimiz Qanday Javob Berishini Tekshiring"}</h3>
-              <p className="text-[13.5px] text-black/50 mt-3 leading-relaxed font-medium">
-                {"Tugmalardan birini bosing va o'ng tarafdagi virtual Instagram Direct chatida botning javob tezligi va formatini ko'ring."}
+      {/* ─── DEMO SIMULATOR ─── */}
+      <section id="simulator" className="relative z-10 mx-auto max-w-5xl px-5 sm:px-8 py-12 sm:py-20">
+        <div className="rounded-[28px] border border-white/5 bg-[#0C0C0E] p-6 sm:p-10 shadow-[0_30px_80px_rgba(0,0,0,0.5)]">
+          <div className="grid grid-cols-1 md:grid-cols-[1fr_1.15fr] gap-8 items-center">
+
+            <div>
+              <span className="inline-block text-[10.5px] font-extrabold text-[#C7F33C] uppercase tracking-wider px-3 py-1.5 rounded-full bg-[#C7F33C]/10 border border-[#C7F33C]/20 mb-4">{"INTERAKTIV DEMO"}</span>
+              <h3 className="text-[22px] sm:text-[28px] font-[900] text-white leading-tight">{"Bot Qanday Ishlashini Ko'ring"}</h3>
+              <p className="text-[13px] text-[#A0A0A5] mt-3 leading-relaxed">
+                {"Tugmalardan birini bosing va botning real javob tezligini tekshiring."}
               </p>
-              
-              <div className="mt-8 flex flex-col gap-2">
-                <span className="text-[11px] font-bold text-black/40 uppercase px-1">{"Variantlardan birini bosing:"}</span>
-                <div className="flex flex-wrap gap-2 mt-1">
-                  {simButtons.map((btnText, idx) => (
-                    <button
-                      key={idx}
-                      onClick={() => handleSimButtonClick(btnText)}
-                      className="rounded-xl border border-[#E8E8E8] bg-[#FAFAF9] hover:bg-[#F0F0F0] px-4 py-2.5 text-[12.5px] font-bold text-black transition-all active:scale-[0.98] text-left"
-                    >
-                      {btnText}
-                    </button>
-                  ))}
-                  {simButtons.length === 0 && (
-                    <button
-                      onClick={() => {
-                        setSimMessages([
-                          { sender: "bot", text: "Salom! Men Sendly avtomatlashtirilgan botiman. Instagram sahifangizni savdo mashinasiga aylantirishga tayyormisiz? 🚀" }
-                        ]);
-                        setSimButtons(["Narxi qancha? 💰", "Aksiya bormi? 🎁", "Qanday ulanadi? 🔌"]);
-                      }}
-                      className="rounded-xl border border-[#C7F33C]/40 bg-[#C7F33C]/10 text-black px-5 py-2.5 text-[12.5px] font-extrabold transition-all active:scale-[0.98]"
-                    >
-                      {"Chatni boshidan boshlash 🔄"}
-                    </button>
-                  )}
-                </div>
+
+              <div className="mt-6 flex flex-wrap gap-2">
+                {simButtons.map((b, i) => (
+                  <button
+                    key={i}
+                    onClick={() => handleSimClick(b)}
+                    className="rounded-[12px] border border-white/10 bg-white/5 hover:bg-white/10 px-4 py-2.5 text-[12px] font-semibold text-white transition-all active:scale-[0.97]"
+                  >
+                    {b}
+                  </button>
+                ))}
+                {simButtons.length === 0 && (
+                  <button
+                    onClick={() => {
+                      setSimMessages([{ sender: "bot", text: "Assalomu alaykum! 👋 Sendly botiman. Instagram Direct va izohlaringizni avtomatlashtirib beraman. Nima bilmoqchisiz?" }]);
+                      setSimButtons(["Narxi qancha? 💰", "Qanday ishlaydi? ⚡", "Bepul sinash 🚀"]);
+                    }}
+                    className="rounded-[12px] border border-[#C7F33C]/20 bg-[#C7F33C]/5 text-[#C7F33C] px-5 py-2.5 text-[12px] font-extrabold transition-all active:scale-[0.97]"
+                  >
+                    {"Qayta boshlash 🔄"}
+                  </button>
+                )}
               </div>
             </div>
 
-            {/* Virtual Direct Mockup */}
-            <div className="rounded-[24px] border border-black/5 bg-[#050506] p-4 flex flex-col h-[350px] shadow-inner relative overflow-hidden">
-              
-              {/* Simulator header */}
-              <div className="flex items-center gap-3 border-b border-white/5 pb-3 mb-3">
-                <div className="h-8 w-8 rounded-full bg-[#C7F33C] text-black flex items-center justify-center font-bold text-[10px] font-mono">
-                  {"IG"}
-                </div>
-                <div className="flex flex-col text-left">
-                  <span className="text-[13px] font-bold text-white leading-none">{"Sendly Bot"}</span>
-                  <span className="text-[10px] text-green-400 mt-0.5 leading-none">{"● Onlayn"}</span>
+            {/* Chat mockup */}
+            <div className="rounded-[20px] border border-white/5 bg-[#050506] p-4 flex flex-col h-[320px]">
+              <div className="flex items-center gap-2.5 border-b border-white/5 pb-3 mb-3">
+                <div className="h-8 w-8 rounded-full bg-[#C7F33C] flex items-center justify-center text-black text-[10px] font-extrabold font-mono">{"S"}</div>
+                <div>
+                  <p className="text-[12.5px] font-bold text-white leading-none">{"Sendly Bot"}</p>
+                  <p className="text-[10px] text-green-400 mt-0.5">{"● Onlayn"}</p>
                 </div>
               </div>
-
-              {/* Messages Body */}
-              <div className="flex-1 overflow-y-auto flex flex-col gap-3 pr-1 py-1">
-                {simMessages.map((msg, idx) => (
-                  <div 
-                    key={idx}
+              <div className="flex-1 overflow-y-auto flex flex-col gap-2.5 pr-1 py-1">
+                {simMessages.map((m, i) => (
+                  <div
+                    key={i}
                     className={[
-                      "max-w-[85%] rounded-[18px] px-3.5 py-2.5 text-[12px] leading-relaxed text-left",
-                      msg.sender === "user" 
-                        ? "bg-[#C7F33C] text-black self-end rounded-tr-none font-bold" 
-                        : "bg-white/5 text-white/90 self-start rounded-tl-none border border-white/5"
+                      "max-w-[85%] rounded-[16px] px-3.5 py-2.5 text-[12px] leading-relaxed",
+                      m.sender === "user"
+                        ? "bg-[#C7F33C] text-black self-end rounded-tr-sm font-bold"
+                        : "bg-white/5 text-white/90 self-start rounded-tl-sm border border-white/5",
                     ].join(" ")}
                     style={{ whiteSpace: "pre-line" }}
                   >
-                    {msg.text}
+                    {m.text}
                   </div>
                 ))}
               </div>
-
             </div>
 
           </div>
         </div>
       </section>
 
-      {/* PRICING SECTION */}
-      <section id="pricing" className="mx-auto max-w-7xl px-6 py-20 md:py-24 z-10 relative">
-        <div className="text-center max-w-3xl mx-auto mb-16">
-          <h2 className="text-3xl font-[900] sm:text-5xl text-black tracking-tight">{"Har Qanday Biznes Uchun Oddiy Tariflar"}</h2>
-          <p className="text-[15px] md:text-[16px] text-black/50 mt-4 leading-relaxed font-medium">
-            {"Hozir ulaning va barcha Pro imkoniyatlarini bepul 7 kunlik sinov muddati bilan his qiliying. Hech qanday kredit karta so'ralmaydi."}
+      {/* ─── PRICING ─── */}
+      <section id="pricing" className="relative z-10 mx-auto max-w-7xl px-5 sm:px-8 py-16 sm:py-24">
+        <div className="text-center max-w-2xl mx-auto mb-14">
+          <h2 className="text-[28px] sm:text-[42px] font-[900] text-white tracking-tight">{"Oddiy va Shaffof Tariflar"}</h2>
+          <p className="text-[14px] sm:text-[15px] text-[#A0A0A5] mt-3 leading-relaxed">
+            {"7 kun bepul. Kredit karta talab qilinmaydi."}
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-          
-          {/* Plan Pro */}
-          <div className="rounded-[32px] border border-[#E8E8E8] bg-white p-8 md:p-10 relative overflow-hidden flex flex-col justify-between shadow-[0_12px_40px_rgba(0,0,0,0.02)]">
-            <div>
-              <div className="absolute top-0 right-0 bg-[#C7F33C] text-black text-[10px] font-extrabold uppercase px-4 py-1.5 rounded-bl-[16px] tracking-wider">{"POPULAR"}</div>
-              <h3 className="text-xl font-extrabold text-black text-left">{"PRO Plan"}</h3>
-              <p className="text-[12.5px] text-black/50 mt-2 leading-relaxed text-left">{"Kichik va o'rta bizneslar uchun ideal reja."}</p>
-              
-              <div className="mt-6 flex items-baseline gap-1.5">
-                <span className="text-4xl md:text-5xl font-[900] text-black tracking-tight">{"150,000"}</span>
-                <span className="text-black/50 text-[13.5px] font-semibold">{"so'm / oy"}</span>
-              </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
 
-              <hr className="border-[#E8E8E8] my-8" />
-
-              <ul className="flex flex-col gap-4 text-[13.5px] text-black/85 text-left">
-                <li className="flex items-center gap-3">
-                  <div className="h-5 w-5 rounded-full bg-[#C7F33C]/20 text-black flex items-center justify-center">
-                    <Check size={12} />
-                  </div>
-                  <span>{"1 ta Instagram Professional akkaunt"}</span>
-                </li>
-                <li className="flex items-center gap-3">
-                  <div className="h-5 w-5 rounded-full bg-[#C7F33C]/20 text-black flex items-center justify-center">
-                    <Check size={12} />
-                  </div>
-                  <span>{"Cheksiz avtomatlashtirish oqimlari (flows)"}</span>
-                </li>
-                <li className="flex items-center gap-3">
-                  <div className="h-5 w-5 rounded-full bg-[#C7F33C]/20 text-black flex items-center justify-center">
-                    <Check size={12} />
-                  </div>
-                  <span>{"Izohlar va Direct xabarlariga avtomatik javoblar"}</span>
-                </li>
-                <li className="flex items-center gap-3">
-                  <div className="h-5 w-5 rounded-full bg-[#C7F33C]/20 text-black flex items-center justify-center">
-                    <Check size={12} />
-                  </div>
-                  <span>{"Referral tizimi va Ballar to'plash"}</span>
-                </li>
-                <li className="flex items-center gap-3">
-                  <div className="h-5 w-5 rounded-full bg-[#C7F33C]/20 text-black flex items-center justify-center">
-                    <Check size={12} />
-                  </div>
-                  <span>{"1 ta Telegram Bot ulash (Sinov rejimda)"}</span>
-                </li>
-              </ul>
+          {/* PRO */}
+          <div className="relative rounded-[28px] border border-[#C7F33C]/25 bg-[#0C0C0E] p-8 flex flex-col overflow-hidden shadow-[0_0_50px_rgba(199,243,60,0.06)]">
+            <div className="absolute top-0 right-0 bg-[#C7F33C] text-black text-[10px] font-extrabold uppercase px-4 py-1.5 rounded-bl-[16px] tracking-wider">{"MASHHUR"}</div>
+            <h3 className="text-[20px] font-extrabold text-white">{"PRO"}</h3>
+            <p className="text-[12px] text-[#707075] mt-1">{"Kichik va o'rta bizneslar uchun"}</p>
+            <div className="mt-5 flex items-baseline gap-1.5">
+              <span className="text-[46px] font-[900] text-white tracking-tight leading-none">{"150,000"}</span>
+              <span className="text-[#A0A0A5] text-[13px] font-semibold">{"so'm / oy"}</span>
             </div>
-
-            <Link href="/register" className="mt-10">
-              <button className="w-full rounded-full bg-black text-white hover:bg-black/95 py-4 text-[14.5px] font-bold active:scale-[0.98] transition-all">
-                {"Bepul sinab ko'rish"}
+            <div className="h-px bg-white/5 my-6" />
+            <ul className="flex flex-col gap-3 text-[13px] text-[#E8E8E8] flex-1">
+              {["1 ta Instagram Professional akkaunt", "Cheksiz avtomatlashtirish oqimlari", "DM va Izoh avtomatik javoblari", "Referral tizimi va Ballar", "1 ta Telegram Bot ulash", "Analitika paneli"].map((item, i) => (
+                <li key={i} className="flex items-center gap-2.5">
+                  <div className="h-4.5 w-4.5 rounded-full bg-[#C7F33C]/15 flex items-center justify-center shrink-0">
+                    <Check size={11} className="text-[#C7F33C]" />
+                  </div>
+                  {item}
+                </li>
+              ))}
+            </ul>
+            <Link href="/register" className="mt-8">
+              <button className="w-full rounded-full bg-[#C7F33C] text-black py-4 text-[14px] font-extrabold hover:bg-[#B0D82D] active:scale-[0.98] transition-all shadow-[0_8px_25px_rgba(199,243,60,0.2)]">
+                {"Bepul Sinab Ko'rish"}
               </button>
             </Link>
           </div>
 
-          {/* Plan Premium */}
-          <div className="rounded-[32px] border border-[#E8E8E8] bg-white p-8 md:p-10 flex flex-col justify-between shadow-[0_12px_40px_rgba(0,0,0,0.02)]">
-            <div>
-              <h3 className="text-xl font-extrabold text-black text-left">{"PREMIUM Plan"}</h3>
-              <p className="text-[12.5px] text-black/50 mt-2 leading-relaxed text-left">{"Katta agentliklar va kengaytirilgan marketing oqimlari uchun."}</p>
-              
-              <div className="mt-6 flex items-baseline gap-1.5">
-                <span className="text-4xl md:text-5xl font-[900] text-black tracking-tight">{"1,000,000"}</span>
-                <span className="text-black/50 text-[13.5px] font-semibold">{"so'm / oy"}</span>
-              </div>
-
-              <hr className="border-[#E8E8E8] my-8" />
-
-              <ul className="flex flex-col gap-4 text-[13.5px] text-black/85 text-left">
-                <li className="flex items-center gap-3">
-                  <div className="h-5 w-5 rounded-full bg-[#C7F33C]/20 text-black flex items-center justify-center">
-                    <Check size={12} />
-                  </div>
-                  <span>{"10 ta Instagram Professional akkaunt"}</span>
-                </li>
-                <li className="flex items-center gap-3">
-                  <div className="h-5 w-5 rounded-full bg-[#C7F33C]/20 text-black flex items-center justify-center">
-                    <Check size={12} />
-                  </div>
-                  <span>{"Cheksiz avtomatlashtirish oqimlari (flows)"}</span>
-                </li>
-                <li className="flex items-center gap-3">
-                  <div className="h-5 w-5 rounded-full bg-[#C7F33C]/20 text-black flex items-center justify-center">
-                    <Check size={12} />
-                  </div>
-                  <span>{"OpenAI & AI Agent Qualification"}</span>
-                </li>
-                <li className="flex items-center gap-3">
-                  <div className="h-5 w-5 rounded-full bg-[#C7F33C]/20 text-black flex items-center justify-center">
-                    <Check size={12} />
-                  </div>
-                  <span>{"VIP qo'llab-quvvatlash (24/7 shaxsiy menejer)"}</span>
-                </li>
-                <li className="flex items-center gap-3">
-                  <div className="h-5 w-5 rounded-full bg-[#C7F33C]/20 text-black flex items-center justify-center">
-                    <Check size={12} />
-                  </div>
-                  <span>{"10 tagacha Telegram Bot ulash imkoni"}</span>
-                </li>
-              </ul>
+          {/* PREMIUM */}
+          <div className="rounded-[28px] border border-white/8 bg-[#0A0A0C] p-8 flex flex-col">
+            <h3 className="text-[20px] font-extrabold text-white">{"PREMIUM"}</h3>
+            <p className="text-[12px] text-[#707075] mt-1">{"Agentliklar va katta bizneslar uchun"}</p>
+            <div className="mt-5 flex items-baseline gap-1.5">
+              <span className="text-[46px] font-[900] text-white tracking-tight leading-none">{"1,000,000"}</span>
+              <span className="text-[#A0A0A5] text-[13px] font-semibold">{"so'm / oy"}</span>
             </div>
-
-            <Link href="/register" className="mt-10">
-              <button className="w-full rounded-full border border-[#E8E8E8] bg-[#FAFAF9] hover:bg-[#F0F0F0] text-black py-4 text-[14.5px] font-bold active:scale-[0.98] transition-all">
-                {"Bog'lanish va ulash"}
+            <div className="h-px bg-white/5 my-6" />
+            <ul className="flex flex-col gap-3 text-[13px] text-[#E8E8E8] flex-1">
+              {["10 ta Instagram Professional akkaunt", "PRO dagi barcha imkoniyatlar", "OpenAI & AI Agent Saralash", "VIP qo'llab-quvvatlash (24/7)", "10 tagacha Telegram Bot ulash", "Shaxsiy menejer"].map((item, i) => (
+                <li key={i} className="flex items-center gap-2.5">
+                  <div className="h-4.5 w-4.5 rounded-full bg-purple-500/15 flex items-center justify-center shrink-0">
+                    <Check size={11} className="text-purple-400" />
+                  </div>
+                  {item}
+                </li>
+              ))}
+            </ul>
+            <Link href="/register" className="mt-8">
+              <button className="w-full rounded-full border border-white/10 bg-white/5 hover:bg-white/10 text-white py-4 text-[14px] font-extrabold active:scale-[0.98] transition-all">
+                {"Bog'lanish va Ulash"}
               </button>
             </Link>
           </div>
@@ -598,32 +570,24 @@ export function LandingPageView() {
         </div>
       </section>
 
-      {/* FAQ SECTION */}
-      <section id="faq" className="mx-auto max-w-4xl px-6 py-20 z-10 relative">
+      {/* ─── FAQ ─── */}
+      <section id="faq" className="relative z-10 mx-auto max-w-3xl px-5 sm:px-8 py-16 sm:py-20">
         <div className="text-center mb-12">
-          <h2 className="text-3xl font-[900] sm:text-5xl text-black tracking-tight">{"Ko'p Beriladigan Savollar"}</h2>
-          <p className="text-[14.5px] text-black/50 mt-3 font-medium">{"Sendly tizimi bo'yicha eng ko'p so'raladigan savollarga javoblar."}</p>
+          <h2 className="text-[28px] sm:text-[40px] font-[900] text-white tracking-tight">{"Ko'p Beriladigan Savollar"}</h2>
+          <p className="text-[13.5px] text-[#A0A0A5] mt-3">{"Eng ko'p so'raladigan savollarga javoblar."}</p>
         </div>
-
         <div className="flex flex-col gap-3">
-          {faqs.map((faq, idx) => (
-            <div 
-              key={idx}
-              className="rounded-2xl border border-[#E8E8E8] bg-white overflow-hidden transition-all duration-200"
-            >
+          {faqs.map((faq, i) => (
+            <div key={i} className="rounded-[18px] border border-white/5 bg-[#0C0C0E] overflow-hidden">
               <button
-                onClick={() => setActiveFaq(activeFaq === idx ? null : idx)}
-                className="w-full px-6 py-5 flex items-center justify-between text-left font-bold text-[14.5px] md:text-[15.5px] text-black hover:text-[#C7F33C] transition-colors"
+                onClick={() => setActiveFaq(activeFaq === i ? null : i)}
+                className="w-full px-5 py-4.5 flex items-center justify-between text-left font-bold text-[14px] sm:text-[15px] text-white hover:text-[#C7F33C] transition-colors"
               >
                 <span>{faq.q}</span>
-                <ChevronDown 
-                  size={16} 
-                  className={`text-black/30 transition-transform duration-200 ${activeFaq === idx ? "rotate-180 text-black" : ""}`} 
-                />
+                <ChevronDown size={15} className={`text-[#A0A0A5] transition-transform duration-200 shrink-0 ml-3 ${activeFaq === i ? "rotate-180 text-[#C7F33C]" : ""}`} />
               </button>
-              
-              {activeFaq === idx && (
-                <div className="px-6 pb-5 text-[13px] md:text-[13.5px] text-black/50 leading-relaxed border-t border-[#E8E8E8] pt-4 animate-in fade-in slide-in-from-top-1 duration-150 text-left">
+              {activeFaq === i && (
+                <div className="px-5 pb-5 text-[13px] text-[#A0A0A5] leading-relaxed border-t border-white/5 pt-4 animate-in fade-in duration-150">
                   {faq.a}
                 </div>
               )}
@@ -632,35 +596,33 @@ export function LandingPageView() {
         </div>
       </section>
 
-      {/* FOOTER CALL TO ACTION */}
-      <section className="border-t border-[#E8E8E8] bg-white py-16 text-center z-10 relative">
-        <div className="mx-auto max-w-4xl px-6">
-          <h2 className="text-3xl font-[900] sm:text-5xl text-black tracking-tight">{"Instagram marketingingizni bugunoq yangilang"}</h2>
-          <p className="text-[14.5px] text-black/50 mt-4 max-w-2xl mx-auto leading-relaxed font-medium">
-            {"Biznes arizalarni avtomatlashtiring, mijozlar kutib qolishining oldini oling va foyda hajmini oshiring."}
+      {/* ─── FOOTER CTA ─── */}
+      <section className="relative z-10 border-t border-white/5 bg-[#050506] py-16 sm:py-20 text-center">
+        <div className="mx-auto max-w-3xl px-5 sm:px-8">
+          <h2 className="text-[26px] sm:text-[40px] font-[900] text-white tracking-tight">{"Instagram savdongizni bugunoq kuchaytiring"}</h2>
+          <p className="text-[13.5px] text-[#A0A0A5] mt-4 max-w-xl mx-auto leading-relaxed">
+            {"Avtomatik javob, AI saralash, real vaqt analitikasi — barchasi bitta platformada."}
           </p>
-          <div className="mt-8 flex justify-center">
-            <Link href="/register">
-              <button className="flex items-center gap-2 rounded-full bg-black text-white px-8 py-4 text-[15px] font-bold shadow-sm hover:scale-105 transition-all">
-                <span>{"Tekin sinab ko'rish"}</span>
-                <ArrowRight size={16} />
-              </button>
-            </Link>
-          </div>
+          <Link href="/register">
+            <button className="mt-8 inline-flex items-center gap-2.5 rounded-full bg-[#C7F33C] text-black px-9 py-4 text-[15px] font-extrabold shadow-[0_12px_35px_rgba(199,243,60,0.25)] hover:scale-105 active:scale-95 transition-all">
+              <span>{"Bepul Boshlash"}</span>
+              <ArrowRight size={16} />
+            </button>
+          </Link>
 
-          <hr className="border-[#E8E8E8] my-12" />
+          <div className="mt-14 h-px bg-white/5" />
 
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-[12.5px] text-black/40 px-2">
+          <div className="mt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-[12px] text-[#555]">
             <div className="flex items-center gap-2">
-              <span className="text-[16px] font-[900] tracking-tighter text-black uppercase flex items-center gap-1">
-                {"Sendly"}
-                <span className="h-1.5 w-1.5 rounded-full bg-[#C7F33C]" />
-              </span>
+              <div className="grid h-5 w-5 place-items-center rounded-[6px] bg-[#C7F33C]">
+                <Zap size={11} className="fill-black text-black" />
+              </div>
+              <span className="font-extrabold text-white/80">{"Sendly.uz"}</span>
               <span>{"© 2026. Barcha huquqlar himoyalangan."}</span>
             </div>
-            <div className="flex gap-4 font-semibold text-black/60">
-              <Link href="/privacy" className="hover:text-black transition-colors">{"Maxfiylik kelishuvi"}</Link>
-              <a href="#" className="hover:text-black transition-colors">{"Foydalanish shartlari"}</a>
+            <div className="flex gap-5 font-semibold text-[#707075]">
+              <Link href="/privacy" className="hover:text-white transition-colors">{"Maxfiylik"}</Link>
+              <a href="#" className="hover:text-white transition-colors">{"Shartlar"}</a>
             </div>
           </div>
         </div>

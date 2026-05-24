@@ -137,10 +137,18 @@ export default function Home() {
 
   const getDynamicStats = (rangeKey: RangeKey): RangeData => {
     const preset = RANGE_PRESETS[rangeKey];
+    const localizedLabel = t(`pages.home.ranges.${rangeKey}` as string);
+    const localizedDateText = t(`pages.home.ranges.${rangeKey}_date` as string);
+    const localizedActivitySub = t(`pages.home.ranges.${rangeKey}_sub` as string);
+    const localizedRevenueSub = t(`pages.home.ranges.${rangeKey}_rev` as string);
     
     if (!isLoaded) {
       return {
         ...preset,
+        label: localizedLabel,
+        dateText: localizedDateText,
+        activitySub: localizedActivitySub,
+        revenueSub: localizedRevenueSub,
         activityVal: "0",
         activityPoints: [0, 0, 0, 0, 0, 0, 0],
         revenueVal: "0.00 mln",
@@ -152,23 +160,19 @@ export default function Home() {
 
     if (channels.length === 0 || !activeChannel) {
       return {
-        label: preset.label,
-        dateText: preset.dateText,
+        label: localizedLabel,
+        dateText: localizedDateText,
         activityVal: "0",
-        activitySub: preset.activitySub,
+        activitySub: localizedActivitySub,
         activityPoints: [0, 0, 0, 0, 0, 0, 0],
         revenueVal: "0.00 mln",
-        revenueSub: preset.revenueSub,
+        revenueSub: localizedRevenueSub,
         revenuePoints: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
         revenueTag: "+0%",
         proVal: "0",
       };
     }
 
-    const isDemo = activeChannel.id === "ch_demo_ig" || activeChannel.id === "ch_demo_tg";
-    if (isDemo) {
-      return preset;
-    }
 
     const totalRuns = automations.reduce((sum, a) => {
       const val = parseInt(a.runs.replace(/[^0-9]/g, "")) || 0;
@@ -237,13 +241,13 @@ export default function Home() {
     }
 
     return {
-      label: preset.label,
-      dateText: preset.dateText,
+      label: localizedLabel,
+      dateText: localizedDateText,
       activityVal,
-      activitySub: preset.activitySub,
+      activitySub: localizedActivitySub,
       activityPoints,
       revenueVal,
-      revenueSub: preset.revenueSub,
+      revenueSub: localizedRevenueSub,
       revenuePoints,
       revenueTag,
       proVal,
@@ -253,7 +257,7 @@ export default function Home() {
   if (!isAuthLoaded) {
     return (
       <div className="flex h-screen items-center justify-center bg-[#070708] text-white">
-        Yuklanmoqda...
+        {t("common.loading")}
       </div>
     );
   }
@@ -286,7 +290,6 @@ export default function Home() {
                 <div className="absolute left-0 sm:right-0 sm:left-auto mt-2 w-[180px] rounded-[20px] bg-white p-2 border border-[#D8D8D8] shadow-lg z-[90] animate-in fade-in slide-in-from-top-2 duration-150">
                   <div className="flex flex-col gap-1 text-[12px]">
                     {(Object.keys(RANGE_PRESETS) as RangeKey[]).map((key) => {
-                      const item = RANGE_PRESETS[key];
                       return (
                         <button
                           key={key}
@@ -299,7 +302,7 @@ export default function Home() {
                             selectedRangeKey === key ? "bg-[#C7F33C]/20 text-[#1A2906]" : "hover:bg-[#F9F9F7]",
                           ].join(" ")}
                         >
-                          {item.label}
+                          {t(`pages.home.ranges.${key}` as string)}
                         </button>
                       );
                     })}
@@ -346,30 +349,30 @@ export default function Home() {
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-[4px] p-4 animate-in fade-in duration-200">
           <div className="w-full max-w-[420px] rounded-[28px] bg-white p-7 border border-[#D8D8D8] shadow-[0_20px_50px_rgba(0,0,0,0.15)] animate-in zoom-in-95 duration-200">
             <h3 className="text-[17px] font-semibold text-black leading-none">
-              {"Yangi Bot yaratish"}
+              {t("pages.home.create_bot.title")}
             </h3>
             <p className="text-[12px] text-[#707075] mt-2 leading-relaxed">
-              {"Avtomatlashtirish oqimini yaratish uchun bot parametrlarini kiriting."}
+              {t("pages.home.create_bot.desc")}
             </p>
             
             <div className="mt-5 flex flex-col gap-4">
               <div className="flex flex-col gap-1.5">
                 <label className="text-[11px] font-semibold text-[#707075] px-1">
-                  {"Bot nomi"}
+                  {t("pages.home.create_bot.bot_name")}
                 </label>
                 <input
                   type="text"
                   required
                   value={newBotName}
                   onChange={(e) => setNewBotName(e.target.value)}
-                  placeholder={"Masalan: Chegirma tarqatuvchi bot"}
+                  placeholder={t("pages.home.create_bot.bot_name_placeholder")}
                   className="w-full rounded-[14px] bg-[#F0F0F0] px-4 py-3 text-[13px] text-black border border-[#E8E8E8] outline-none placeholder:text-[#a0a0a0] focus:bg-[#E8E8E8]/70 focus:border-[#C7F33C] transition-all"
                 />
               </div>
               
               <div className="flex flex-col gap-1.5">
                 <label className="text-[11px] font-semibold text-[#707075] px-1">
-                  {"Trigger turi"}
+                  {t("pages.home.create_bot.trigger_type")}
                 </label>
                 <div className="flex gap-2">
                   <button
@@ -382,7 +385,7 @@ export default function Home() {
                         : "bg-transparent text-black border-[#D8D8D8] hover:bg-[#F9F9F7]"
                     ].join(" ")}
                   >
-                    {"Kalit so'z (Direct)"}
+                    {t("pages.home.create_bot.keyword_direct")}
                   </button>
                   <button
                     type="button"
@@ -394,7 +397,7 @@ export default function Home() {
                         : "bg-transparent text-black border-[#D8D8D8] hover:bg-[#F9F9F7]"
                     ].join(" ")}
                   >
-                    {"Story Mentions"}
+                    {t("pages.home.create_bot.story_mentions")}
                   </button>
                 </div>
               </div>
@@ -406,7 +409,7 @@ export default function Home() {
                 onClick={() => setIsCreateBotOpen(false)}
                 className="rounded-full bg-[#F0F0F0] px-4 py-2.5 font-medium text-black hover:bg-[#E8E8E8] active:scale-95 transition-all"
               >
-                {"Bekor qilish"}
+                {t("common.cancel")}
               </button>
               <Link
                 href={`/automations/builder?name=${encodeURIComponent(newBotName || "Yangi Instagram Bot")}&trigger=${newBotTrigger}`}
@@ -416,7 +419,7 @@ export default function Home() {
                   type="button"
                   className="rounded-full bg-[#C7F33C] text-[#1A2906] px-5 py-2.5 font-semibold hover:bg-[#9BC92E] active:scale-95 transition-all"
                 >
-                  {"Quruvchini ochish"}
+                  {t("pages.home.create_bot.open_builder")}
                 </button>
               </Link>
             </div>

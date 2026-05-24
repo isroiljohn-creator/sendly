@@ -94,10 +94,10 @@ export type Module = {
   order: number;
 };
 
-// Initial Demo Data
-const DEMO_CHANNELS: Channel[] = [];
-const DEMO_CONTACTS: Contact[] = [];
-const DEMO_BROADCASTS: Broadcast[] = [];
+// Initial Data (empty)
+const INITIAL_CHANNELS: Channel[] = [];
+const INITIAL_CONTACTS: Contact[] = [];
+const INITIAL_BROADCASTS: Broadcast[] = [];
 
 const DEFAULT_BOT_SETTINGS: BotSettings = {
   tone: 60,
@@ -150,8 +150,8 @@ Kelgan ariza ma'lumotlarini (ism, telefon, foydalanuvchi yozgan savollar yoki ja
   fbAgentEnabled: false,
 };
 
-const DEMO_MODULES: Module[] = [];
-const DEMO_LESSONS: Lesson[] = [];
+const INITIAL_MODULES: Module[] = [];
+const INITIAL_LESSONS: Lesson[] = [];
 
 // Helper wrapper for SSR check
 const isClient = typeof window !== "undefined";
@@ -207,6 +207,32 @@ if (isClient && localStorage.getItem("replai_db_version") !== DB_VERSION) {
 }
 
 export const db = {
+  // Internal helper: remove leftover mock/demo channels from localStorage
+  _cleanMockChannels(): void {
+    if (!isClient) return;
+    const MOCK_NAMES = ["my brand shop", "support bot", "mock shop page"];
+    const stored = localStorage.getItem("replai_channels");
+    if (!stored) return;
+    const channels = safeParse<Channel[]>(stored, []);
+    const cleaned = channels.filter((ch) => {
+      if (ch.id?.startsWith("ch_demo")) return false;
+      if (ch.id?.startsWith("mock_")) return false;
+      if (MOCK_NAMES.includes(ch.name?.toLowerCase())) return false;
+      return true;
+    });
+    if (cleaned.length !== channels.length) {
+      localStorage.setItem("replai_channels", JSON.stringify(cleaned));
+      // Also clear active channel if it was a mock one
+      const active = localStorage.getItem("replai_active_channel");
+      if (active) {
+        const activeCh = safeParse<Channel | null>(active, null);
+        if (activeCh && (activeCh.id?.startsWith("ch_demo") || activeCh.id?.startsWith("mock_") || MOCK_NAMES.includes(activeCh.name?.toLowerCase()))) {
+          localStorage.removeItem("replai_active_channel");
+        }
+      }
+    }
+  },
+
   // 1. Auth Database
   getUsers(): User[] {
     if (!isClient) return [];
@@ -257,6 +283,8 @@ export const db = {
     users.push(newUser);
     localStorage.setItem("replai_users", JSON.stringify(users));
     localStorage.setItem("replai_current_user", JSON.stringify(newUser));
+    // Clean up any leftover mock/demo channels for new users
+    this._cleanMockChannels();
     notifyUpdate();
     return { success: true };
   },
@@ -289,6 +317,10 @@ export const db = {
       }
     }
     localStorage.setItem("replai_current_user", JSON.stringify(user));
+
+    // Clean up any leftover mock/demo channels
+    this._cleanMockChannels();
+
     notifyUpdate();
     return { success: true };
   },
@@ -408,30 +440,21 @@ export const db = {
     notifyUpdate();
   },
 
-  updatePlan(planName: "free" | "pro" | "premium"): void {
-    if (!isClient) return;
+  updatePlan(planName: "free" | "pro" | "premium"): { success: boolean; error?: string } {
+    if (!isClient) return { success: false, error: "Client not available" };
     const currentUser = this.getCurrentUser();
-    if (!currentUser) return;
+    if (!currentUser) return { success: false, error: "User not found" };
+
+    // Paid plans require a real linked card
+    if (planName !== "free" && !currentUser.isCardLinked) {
+      return { success: false, error: "card_required" };
+    }
 
     currentUser.plan = planName;
     if (planName === "free") {
       currentUser.isCardLinked = false;
       delete currentUser.cardNumber;
       delete currentUser.trialExpiresAt;
-    } else {
-      currentUser.isCardLinked = true;
-      if (!currentUser.cardNumber) {
-        currentUser.cardNumber = "Visa, *1402";
-      }
-      if (!currentUser.trialExpiresAt) {
-        const expiresAt = new Date();
-        expiresAt.setDate(expiresAt.getDate() + 7);
-        currentUser.trialExpiresAt = expiresAt.toLocaleDateString("uz-UZ", {
-          day: "numeric",
-          month: "long",
-          year: "numeric",
-        });
-      }
     }
 
     const users = this.getUsers();
@@ -443,6 +466,7 @@ export const db = {
 
     localStorage.setItem("replai_current_user", JSON.stringify(currentUser));
     notifyUpdate();
+    return { success: true };
   },
 
   // 2. Automations Database
@@ -468,8 +492,8 @@ export const db = {
     if (!isClient) return [];
     const stored = localStorage.getItem("replai_contacts");
     if (!stored) {
-      localStorage.setItem("replai_contacts", JSON.stringify(DEMO_CONTACTS));
-      return DEMO_CONTACTS;
+      localStorage.setItem("replai_contacts", JSON.stringify(INITIAL_CONTACTS));
+      return INITIAL_CONTACTS;
     }
     const parsed = safeParse(stored, []);
     return Array.isArray(parsed) ? parsed.filter((c: unknown): c is Contact => !!c && typeof c === "object" && typeof (c as Record<string, unknown>).id === "string") : [];
@@ -486,8 +510,8 @@ export const db = {
     if (!isClient) return [];
     const stored = localStorage.getItem("replai_broadcasts");
     if (!stored) {
-      localStorage.setItem("replai_broadcasts", JSON.stringify(DEMO_BROADCASTS));
-      return DEMO_BROADCASTS;
+      localStorage.setItem("replai_broadcasts", JSON.stringify(INITIAL_BROADCASTS));
+      return INITIAL_BROADCASTS;
     }
     const parsed = safeParse(stored, []);
     return Array.isArray(parsed) ? parsed.filter((b: unknown): b is Broadcast => !!b && typeof b === "object" && typeof (b as Record<string, unknown>).id === "string") : [];
@@ -522,19 +546,13 @@ export const db = {
     notifyUpdate();
   },
 
-  // Reset to Demo Data
-  resetToDemo(): void {
-    if (!isClient) return;
-    this.clearAllData();
-  },
-
   // 6. Channels Database
   getChannels(): Channel[] {
     if (!isClient) return [];
     const stored = localStorage.getItem("replai_channels");
     if (!stored) {
-      localStorage.setItem("replai_channels", JSON.stringify(DEMO_CHANNELS));
-      return DEMO_CHANNELS;
+      localStorage.setItem("replai_channels", JSON.stringify(INITIAL_CHANNELS));
+      return INITIAL_CHANNELS;
     }
     const parsed = safeParse(stored, []);
     return Array.isArray(parsed) ? parsed.filter((c: unknown): c is Channel => !!c && typeof c === "object" && typeof (c as Record<string, unknown>).id === "string") : [];
@@ -671,10 +689,10 @@ export const db = {
     if (!isClient) return [];
     const stored = localStorage.getItem("replai_modules");
     if (!stored) {
-      localStorage.setItem("replai_modules", JSON.stringify(DEMO_MODULES));
-      return DEMO_MODULES;
+      localStorage.setItem("replai_modules", JSON.stringify(INITIAL_MODULES));
+      return INITIAL_MODULES;
     }
-    return safeParse<Module[]>(stored, DEMO_MODULES);
+    return safeParse<Module[]>(stored, INITIAL_MODULES);
   },
 
   saveModules(list: Module[]): void {
@@ -709,10 +727,10 @@ export const db = {
     if (!isClient) return [];
     const stored = localStorage.getItem("replai_lessons");
     if (!stored) {
-      localStorage.setItem("replai_lessons", JSON.stringify(DEMO_LESSONS));
-      return DEMO_LESSONS;
+      localStorage.setItem("replai_lessons", JSON.stringify(INITIAL_LESSONS));
+      return INITIAL_LESSONS;
     }
-    return safeParse<Lesson[]>(stored, DEMO_LESSONS);
+    return safeParse<Lesson[]>(stored, INITIAL_LESSONS);
   },
 
   saveLessons(list: Lesson[]): void {

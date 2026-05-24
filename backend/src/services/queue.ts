@@ -3,33 +3,28 @@ import { env } from "../config/env";
 import { supabase } from "../config/db";
 import { executeSessionStep } from "./interpreter";
 
-const isMockMode = env.META_APP_ID === "123456789";
-
 let queue: Queue.Queue | null = null;
-const mockTimers = new Map<string, NodeJS.Timeout>();
 
-if (!isMockMode) {
-  try {
-    queue = new Queue("instagram-chatbot-delays", env.REDIS_URL, {
-      settings: {
-        backoffStrategies: {},
-      },
-    });
+try {
+  queue = new Queue("instagram-chatbot-delays", env.REDIS_URL, {
+    settings: {
+      backoffStrategies: {},
+    },
+  });
 
-    // Set up the processor
-    queue.process(async (job) => {
-      const { sessionId, nextBlockId } = job.data;
-      console.log(`[Queue Processor] Processing delay job for session: ${sessionId}, next block: ${nextBlockId}`);
-      await resumeSession(sessionId, nextBlockId);
-    });
+  // Set up the processor
+  queue.process(async (job) => {
+    const { sessionId, nextBlockId } = job.data;
+    console.log(`[Queue Processor] Processing delay job for session: ${sessionId}, next block: ${nextBlockId}`);
+    await resumeSession(sessionId, nextBlockId);
+  });
 
-    queue.on("error", (err) => {
-      console.error("[Queue] Bull queue error:", err);
-    });
-  } catch (err) {
-    console.error("[Queue] Failed to initialize Bull queue, falling back to mock mode:", err);
-    queue = null;
-  }
+  queue.on("error", (err) => {
+    console.error("[Queue] Bull queue error:", err);
+  });
+} catch (err) {
+  console.error("[Queue] Failed to initialize Bull queue:", err);
+  queue = null;
 }
 
 /**
@@ -176,22 +171,7 @@ export async function scheduleSessionDelay(
     .update({ next_step_at: nextStepAt })
     .eq("id", sessionId);
 
-  if (isMockMode || !queue) {
-    // Memory mock mode delay using setTimeout
-    const timer = setTimeout(async () => {
-      mockTimers.delete(sessionId);
-      await resumeSession(sessionId, nextBlockId);
-    }, delaySeconds * 1000);
-    
-    // Cancel any existing timer first
-    const existingTimer = mockTimers.get(sessionId);
-    if (existingTimer) {
-      clearTimeout(existingTimer);
-    }
-    mockTimers.set(sessionId, timer);
-    console.log(`[Queue Mock] Delay registered in-memory for session ${sessionId}`);
-  } else {
-    // Bull queue delay
+  if (queue) {
     const jobId = `delay_session_${sessionId}`;
     await queue.add(
       { sessionId, nextBlockId },
@@ -202,7 +182,9 @@ export async function scheduleSessionDelay(
         removeOnFail: true,
       }
     );
-    console.log(`[Queue Production] Delay job added to Bull queue for session ${sessionId}`);
+    console.log(`[Queue] Delay job added to Bull queue for session ${sessionId}`);
+  } else {
+    console.warn(`[Queue] Bull queue not available. Delay for session ${sessionId} could not be scheduled.`);
   }
 }
 
@@ -212,20 +194,13 @@ export async function scheduleSessionDelay(
 export async function cancelSessionDelay(sessionId: string): Promise<void> {
   console.log(`[Queue] Cancelling delay for session ${sessionId}`);
 
-  if (isMockMode || !queue) {
-    const timer = mockTimers.get(sessionId);
-    if (timer) {
-      clearTimeout(timer);
-      mockTimers.delete(sessionId);
-      console.log(`[Queue Mock] Cleared in-memory delay timer for session ${sessionId}`);
-    }
-  } else {
+  if (queue) {
     try {
       const jobId = `delay_session_${sessionId}`;
       const job = await queue.getJob(jobId);
       if (job) {
         await job.remove();
-        console.log(`[Queue Production] Removed job ${jobId} from Bull queue`);
+        console.log(`[Queue] Removed job ${jobId} from Bull queue`);
       }
     } catch (err) {
       console.error(`[Queue] Error cancelling Bull job for session ${sessionId}:`, err);

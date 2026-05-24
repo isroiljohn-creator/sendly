@@ -119,92 +119,74 @@ router.get("/callback", async (req, res, next) => {
     let accessToken = "";
     let pagesData: any[] = [];
 
-    // Mock Mode: Runs locally without Meta sandbox requirements if using our mock app_id
-    if (env.META_APP_ID === "123456789") {
-      console.log("[OAuth Mock] Simulating Graph API OAuth exchanges...");
-      accessToken = "mock_long_lived_user_access_token_98765";
-      pagesData = [
-        {
-          id: "page_12345",
-          name: "Mock Shop Page",
-          access_token: "mock_page_access_token_12345",
-          instagram_business_account: {
-            id: "ig_54321",
-            username: "mock_instagram_bot",
-            profile_picture: "https://example.com/pic.png",
-          },
-        },
-      ];
-    } else {
-      // Real Flow: Exchange code for short-lived user token
-      const redirectUri = getRedirectUri(req);
-      const tokenExchangeUrl = `https://graph.facebook.com/v18.0/oauth/access_token?client_id=${
-        env.META_APP_ID
-      }&client_secret=${env.META_APP_SECRET}&redirect_uri=${encodeURIComponent(redirectUri)}&code=${code}`;
+    // Real Flow: Exchange code for short-lived user token
+    const redirectUri = getRedirectUri(req);
+    const tokenExchangeUrl = `https://graph.facebook.com/v18.0/oauth/access_token?client_id=${
+      env.META_APP_ID
+    }&client_secret=${env.META_APP_SECRET}&redirect_uri=${encodeURIComponent(redirectUri)}&code=${code}`;
 
-      const tokenRes = await fetch(tokenExchangeUrl);
-      if (!tokenRes.ok) {
-        const errText = await tokenRes.text();
-        return sendErrorHtml(res, "Token olishda xatolik", `Meta-dan token olish amalga oshmadi: ${errText}`);
-      }
-      const tokenData = await tokenRes.json();
-      const shortLivedToken = tokenData.access_token;
+    const tokenRes = await fetch(tokenExchangeUrl);
+    if (!tokenRes.ok) {
+      const errText = await tokenRes.text();
+      return sendErrorHtml(res, "Token olishda xatolik", `Meta-dan token olish amalga oshmadi: ${errText}`);
+    }
+    const tokenData = await tokenRes.json();
+    const shortLivedToken = tokenData.access_token;
 
-      // Exchange short-lived token for long-lived user token (expires in ~60 days)
-      const longLivedUrl = `https://graph.facebook.com/v18.0/oauth/access_token?grant_type=fb_exchange_token&client_id=${env.META_APP_ID}&client_secret=${env.META_APP_SECRET}&fb_exchange_token=${shortLivedToken}`;
-      
-      const longLivedRes = await fetch(longLivedUrl);
-      if (!longLivedRes.ok) {
-        const errText = await longLivedRes.text();
-        return sendErrorHtml(res, "Token olishda xatolik", `Meta long-lived token olishda xatolik: ${errText}`);
-      }
-      const longLivedData = await longLivedRes.json();
-      accessToken = longLivedData.access_token;
+    // Exchange short-lived token for long-lived user token (expires in ~60 days)
+    const longLivedUrl = `https://graph.facebook.com/v18.0/oauth/access_token?grant_type=fb_exchange_token&client_id=${env.META_APP_ID}&client_secret=${env.META_APP_SECRET}&fb_exchange_token=${shortLivedToken}`;
+    
+    const longLivedRes = await fetch(longLivedUrl);
+    if (!longLivedRes.ok) {
+      const errText = await longLivedRes.text();
+      return sendErrorHtml(res, "Token olishda xatolik", `Meta long-lived token olishda xatolik: ${errText}`);
+    }
+    const longLivedData = await longLivedRes.json();
+    accessToken = longLivedData.access_token;
 
-      // Fetch Facebook Pages managed by the authenticated user
-      const pagesUrl = `https://graph.facebook.com/v18.0/me/accounts?access_token=${accessToken}`;
-      const pagesRes = await fetch(pagesUrl);
-      if (!pagesRes.ok) {
-        const errText = await pagesRes.text();
-        return sendErrorHtml(res, "Sahifalarni yuklashda xatolik", `Meta sahifalar ro'yxatini ololmadi: ${errText}`);
-      }
-      const pagesRaw = await pagesRes.json();
-      const pagesList = pagesRaw.data || [];
+    // Fetch Facebook Pages managed by the authenticated user
+    const pagesUrl = `https://graph.facebook.com/v18.0/me/accounts?access_token=${accessToken}`;
+    const pagesRes = await fetch(pagesUrl);
+    if (!pagesRes.ok) {
+      const errText = await pagesRes.text();
+      return sendErrorHtml(res, "Sahifalarni yuklashda xatolik", `Meta sahifalar ro'yxatini ololmadi: ${errText}`);
+    }
+    const pagesRaw = await pagesRes.json();
+    const pagesList = pagesRaw.data || [];
 
-      // Query connected Instagram Business Account for each page
-      for (const page of pagesList) {
-        const pageDetailUrl = `https://graph.facebook.com/v18.0/${page.id}?fields=instagram_business_account,access_token&access_token=${accessToken}`;
-        const pageDetailRes = await fetch(pageDetailUrl);
-        if (!pageDetailRes.ok) continue;
+    // Query connected Instagram Business Account for each page
+    for (const page of pagesList) {
+      const pageDetailUrl = `https://graph.facebook.com/v18.0/${page.id}?fields=instagram_business_account,access_token&access_token=${accessToken}`;
+      const pageDetailRes = await fetch(pageDetailUrl);
+      if (!pageDetailRes.ok) continue;
 
-        const pageDetail = await pageDetailRes.json();
-        const igBusinessAccount = pageDetail.instagram_business_account;
+      const pageDetail = await pageDetailRes.json();
+      const igBusinessAccount = pageDetail.instagram_business_account;
 
-        if (igBusinessAccount && igBusinessAccount.id) {
-          // Retrieve Instagram profile information
-          const igUrl = `https://graph.facebook.com/v18.0/${igBusinessAccount.id}?fields=username,profile_picture_url&access_token=${accessToken}`;
-          const igRes = await fetch(igUrl);
-          
-          let username = "instagram_bot";
-          let profilePic = "";
-          
-          if (igRes.ok) {
-            const igData = await igRes.json();
-            username = igData.username || username;
-            profilePic = igData.profile_picture_url || profilePic;
-          }
-
-          pagesData.push({
-            id: page.id,
-            name: page.name,
-            access_token: pageDetail.access_token,
-            instagram_business_account: {
-              id: igBusinessAccount.id,
-              username,
-              profile_picture: profilePic,
-            },
-          });
+      if (igBusinessAccount && igBusinessAccount.id) {
+        // Retrieve Instagram profile information
+        const igUrl = `https://graph.facebook.com/v18.0/${igBusinessAccount.id}?fields=username,profile_picture_url&access_token=${accessToken}`;
+        const igRes = await fetch(igUrl);
+        
+        let username = "instagram_bot";
+        let profilePic = "";
+        
+        if (igRes.ok) {
+          const igData = await igRes.json();
+          username = igData.username || username;
+          profilePic = igData.profile_picture_url || profilePic;
         }
+
+        pagesData.push({
+          id: page.id,
+          name: page.name,
+          access_token: pageDetail.access_token,
+          instagram_business_account: {
+            id: igBusinessAccount.id,
+            username,
+            profile_picture: profilePic,
+          },
+        });
       }
     }
 
@@ -218,7 +200,7 @@ router.get("/callback", async (req, res, next) => {
     for (const page of pagesData) {
       const encryptedToken = encrypt(page.access_token);
       const igDetails = page.instagram_business_account;
-      let acctId = "mock_acct_" + page.id;
+      let acctId = "";
 
       // Handle Database persistence gracefully
       try {
@@ -262,15 +244,11 @@ router.get("/callback", async (req, res, next) => {
         console.error("[OAuth] Supabase DB write failed, proceeding with generation:", dbErr);
       }
 
-      // Real Flow: Subscribe page to webhook events
-      if (env.META_APP_ID !== "123456789") {
-        const subUrl = `https://graph.facebook.com/v18.0/${page.id}/subscribed_apps?subscribed_fields=messages,messaging_postbacks,comments,mention,story_insights&access_token=${page.access_token}`;
-        const subRes = await fetch(subUrl, { method: "POST" });
-        if (!subRes.ok) {
-          console.error(`Failed to subscribe Page ${page.id} to webhooks:`, await subRes.text());
-        }
-      } else {
-        console.log(`[OAuth Mock] Subscribed page ${page.id} to webhook changes.`);
+      // Subscribe page to webhook events
+      const subUrl = `https://graph.facebook.com/v18.0/${page.id}/subscribed_apps?subscribed_fields=messages,messaging_postbacks,comments,mention,story_insights&access_token=${page.access_token}`;
+      const subRes = await fetch(subUrl, { method: "POST" });
+      if (!subRes.ok) {
+        console.error(`Failed to subscribe Page ${page.id} to webhooks:`, await subRes.text());
       }
 
       connectedAccounts.push({

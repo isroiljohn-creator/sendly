@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { PageHeader } from "@/components/layout/PageHeader";
+import { useI18n } from "@/i18n/I18nProvider";
 import { db, BotSettings, Lesson, Module } from "@/lib/db";
 import { queryRAG } from "@/lib/ai/rag";
 import { moderateMessage } from "@/lib/ai/moderation";
@@ -229,6 +230,7 @@ const MOCK_FB_FORMS = [
 ];
 
 export default function AIAgentPage() {
+  const { t } = useI18n();
   const [selectedAgentType, setSelectedAgentType] = useState<"kurator" | "fb-leads" | null>(null);
   const [activeTab, setActiveTab] = useState<"settings" | "knowledge">("settings");
   
@@ -946,13 +948,13 @@ export default function AIAgentPage() {
           {/* Header */}
           <div className="text-center flex flex-col gap-2">
             <span className="px-3.5 py-1.5 bg-[#C7F33C]/20 text-[#7CA607] rounded-full text-[11px] font-bold tracking-wider uppercase inline-block mx-auto">
-              AI Agent Platformasi
+              {t("ai_agent.agent_platform")}
             </span>
             <h1 className="text-[26px] md:text-[32px] font-extrabold text-black tracking-tight leading-tight">
-              AI Agent Shablonini Tanlang
+              {t("ai_agent.select_template_title")}
             </h1>
             <p className="text-[13px] text-[#707070] max-w-lg mx-auto leading-relaxed">
-              Biznesingizni avtomatlashtirish uchun mos keladigan sun&apos;iy intellekt agenti shablonlaridan birini ishga tushiring.
+              {t("ai_agent.select_template_desc")}
             </p>
           </div>
 
@@ -973,21 +975,21 @@ export default function AIAgentPage() {
                         <span className="relative inline-flex rounded-full h-2 w-2 bg-[#7CA607]"></span>
                       </span>
                       <span className="text-[10px] font-extrabold text-[#7CA607] uppercase tracking-wider">
-                        Faol
+                        {t("ai_agent.active")}
                       </span>
                     </div>
                   ) : (
                     <div className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-full">
                       <span className="w-2 h-2 rounded-full bg-gray-300"></span>
                       <span className="text-[10px] font-extrabold text-[#707070] uppercase tracking-wider">
-                        Faolsiz
+                        {t("ai_agent.inactive")}
                       </span>
                     </div>
                   )}
                 </div>
                 <div>
                   <h3 className="text-[17px] font-bold text-black group-hover:text-[#7CA607] transition-colors">
-                    AI Kurator (Kurs Yordamchisi)
+                    {t("ai_agent.kurator_agent")}
                   </h3>
                   {settings?.aiCuratorEnabled && telegramBotUsername && (
                     <p className="text-[11px] text-[#7CA607] font-semibold mt-1">
@@ -995,7 +997,7 @@ export default function AIAgentPage() {
                     </p>
                   )}
                   <p className="text-[12px] text-[#707070] mt-1.5 leading-relaxed">
-                    Telegram bot orqali o&apos;quvchilarga darsliklar, transkriptlar va PDF materiallar asosida aqlli, do&apos;stona va aniq javob beruvchi shaxsiy yordamchi (RAG tizimi).
+                    {t("ai_agent.curator_desc")}
                   </p>
                 </div>
 
@@ -1004,19 +1006,19 @@ export default function AIAgentPage() {
                 <ul className="flex flex-col gap-2 text-[11px] text-[#595959]">
                   <li className="flex items-start gap-2.5">
                     <CheckCircle className="w-4 h-4 text-[#9BC92E] shrink-0 mt-0.5" />
-                    <span>RAG (Bilimlar bazasi) tizimi</span>
+                    <span>{t("ai_agent.curator_feature_1")}</span>
                   </li>
                   <li className="flex items-start gap-2.5">
                     <CheckCircle className="w-4 h-4 text-[#9BC92E] shrink-0 mt-0.5" />
-                    <span>Telegram bot integratsiyasi</span>
+                    <span>{t("ai_agent.curator_feature_2")}</span>
                   </li>
                   <li className="flex items-start gap-2.5">
                     <CheckCircle className="w-4 h-4 text-[#9BC92E] shrink-0 mt-0.5" />
-                    <span>Ohang va hazil darajasini sozlash</span>
+                    <span>{t("ai_agent.curator_feature_3")}</span>
                   </li>
                   <li className="flex items-start gap-2.5">
                     <CheckCircle className="w-4 h-4 text-[#9BC92E] shrink-0 mt-0.5" />
-                    <span>Inson-kuratorga yo&apos;naltirish qoidalari</span>
+                    <span>{t("ai_agent.curator_feature_4")}</span>
                   </li>
                 </ul>
               </div>
@@ -1030,7 +1032,7 @@ export default function AIAgentPage() {
                 }}
                 className="w-full mt-6 py-3 rounded-full bg-black text-[#C7F33C] text-[12px] font-bold hover:bg-black/90 hover:scale-[1.02] active:scale-95 transition-all text-center flex items-center justify-center gap-2"
               >
-                <span>Ushbu shablonni sozlash</span>
+                <span>{t("ai_agent.setup_template_btn")}</span>
                 <ArrowRight size={14} />
               </button>
             </div>
@@ -1050,21 +1052,21 @@ export default function AIAgentPage() {
                         <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
                       </span>
                       <span className="text-[10px] font-extrabold text-blue-600 uppercase tracking-wider">
-                        Faol
+                        {t("ai_agent.active")}
                       </span>
                     </div>
                   ) : (
                     <div className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-full">
                       <span className="w-2 h-2 rounded-full bg-gray-300"></span>
                       <span className="text-[10px] font-extrabold text-[#707070] uppercase tracking-wider">
-                        Faolsiz
+                        {t("ai_agent.inactive")}
                       </span>
                     </div>
                   )}
                 </div>
                 <div>
                   <h3 className="text-[17px] font-bold text-black group-hover:text-blue-600 transition-colors">
-                    Facebook Lead Handler
+                    {t("ai_agent.fb_leads_agent")}
                   </h3>
                   {settings?.fbAgentEnabled && (
                     <p className="text-[11px] text-blue-600 font-semibold mt-1">
@@ -1072,7 +1074,7 @@ export default function AIAgentPage() {
                     </p>
                   )}
                   <p className="text-[12px] text-[#707070] mt-1.5 leading-relaxed">
-                    Facebook target reklama formalaridan kelgan lid (mijoz) ma&apos;lumotlarini AI yordamida saralab, guruhlarga yo&apos;naltiruvchi va avtomatik salomlashish xabari yuboruvchi agent.
+                    {t("ai_agent.fb_leads_desc_card")}
                   </p>
                 </div>
 
@@ -1081,19 +1083,19 @@ export default function AIAgentPage() {
                 <ul className="flex flex-col gap-2 text-[11px] text-[#595959]">
                   <li className="flex items-start gap-2.5">
                     <CheckCircle className="w-4 h-4 text-blue-500 shrink-0 mt-0.5" />
-                    <span>Meta Lead Ads formalari bilan bog&apos;lanish</span>
+                    <span>{t("ai_agent.fb_feature_1")}</span>
                   </li>
                   <li className="flex items-start gap-2.5">
                     <CheckCircle className="w-4 h-4 text-blue-500 shrink-0 mt-0.5" />
-                    <span>AI orqali mijoz xohishini tahlil qilish</span>
+                    <span>{t("ai_agent.fb_feature_2")}</span>
                   </li>
                   <li className="flex items-start gap-2.5">
                     <CheckCircle className="w-4 h-4 text-blue-500 shrink-0 mt-0.5" />
-                    <span>Guruhlarga yo&apos;naltirish va taglash</span>
+                    <span>{t("ai_agent.fb_feature_3")}</span>
                   </li>
                   <li className="flex items-start gap-2.5">
                     <CheckCircle className="w-4 h-4 text-blue-500 shrink-0 mt-0.5" />
-                    <span>Avtomatik salomlashish xabarlari</span>
+                    <span>{t("ai_agent.fb_feature_4")}</span>
                   </li>
                 </ul>
               </div>
@@ -1107,7 +1109,7 @@ export default function AIAgentPage() {
                 }}
                 className="w-full mt-6 py-3 rounded-full bg-blue-600 text-white text-[12px] font-bold hover:bg-blue-700 hover:scale-[1.02] active:scale-95 transition-all text-center flex items-center justify-center gap-2"
               >
-                <span>Ushbu shablonni sozlash</span>
+                <span>{t("ai_agent.setup_template_btn")}</span>
                 <ArrowRight size={14} />
               </button>
             </div>
@@ -1126,7 +1128,7 @@ export default function AIAgentPage() {
 
     const removeFieldMapping = (id: string) => {
       setFieldMappings(prev => prev.filter(m => m.id !== id));
-      showToast("Maydon mosligi o'chirildi");
+      showToast(t("pages.ai_agent.field_mapping_deleted"));
     };
 
     const addFieldMapping = () => {
@@ -1134,10 +1136,10 @@ export default function AIAgentPage() {
         id: `map-${Date.now()}`,
         metaField: `meta_field_${fieldMappings.length + 1}`,
         sendlyField: "message",
-        description: "Qo'shimcha maydon"
+        description: t("pages.ai_agent.description_placeholder")
       };
       setFieldMappings(prev => [...prev, newMap]);
-      showToast("Yangi maydon mosligi qo'shildi! ➕");
+      showToast(t("pages.ai_agent.field_mapping_added"));
     };
 
     const addFbTag = (e: React.FormEvent) => {
@@ -1149,12 +1151,12 @@ export default function AIAgentPage() {
       }
       setFbTags(prev => [...prev, newTagInput.trim()]);
       setNewTagInput("");
-      showToast("Teg qo'shildi! 🏷️");
+      showToast(t("pages.ai_agent.tag_added"));
     };
 
     const removeFbTag = (tagToRemove: string) => {
       setFbTags(prev => prev.filter(t => t !== tagToRemove));
-      showToast("Teg o'chirildi");
+      showToast(t("pages.ai_agent.tag_removed"));
     };
 
     return (
@@ -1191,7 +1193,7 @@ export default function AIAgentPage() {
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <PageHeader
               title="Facebook Lead Handler"
-              breadcrumbs="Bosh sahifa / AI Agent / Facebook Leads"
+              breadcrumbs={t("pages.ai_agent.fb_leads_breadcrumb")}
             />
             <div className="flex items-center gap-3 shrink-0">
               <button
@@ -1203,14 +1205,14 @@ export default function AIAgentPage() {
                 }}
                 className="px-4 py-2.5 rounded-full border border-[#D8D8D8] text-[12px] font-bold text-[#595959] hover:bg-white hover:text-black transition-colors"
               >
-                Shablonni almashtirish
+                {t("pages.ai_agent.change_template")}
               </button>
               <button
                 onClick={handleSaveAll}
                 className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-black text-[#C7F33C] text-[12px] font-bold shadow-sm hover:bg-black/90 hover:scale-[1.02] active:scale-95 transition-all"
               >
                 <Save size={14} />
-                <span>Saqlash va faollashtirish</span>
+                <span>{t("pages.ai_agent.save_activate")}</span>
               </button>
             </div>
           </div>
@@ -1245,8 +1247,8 @@ export default function AIAgentPage() {
                   </span>
                 </div>
                 <div className="text-center">
-                  <h5 className="text-[12px] font-bold text-white leading-tight">Facebook Trigger</h5>
-                  <span className="text-[9px] text-[#9BC92E] font-bold uppercase tracking-wider block mt-0.5">Webhook Faol</span>
+                  <h5 className="text-[12px] font-bold text-white leading-tight">{t("pages.ai_agent.fb_trigger_node")}</h5>
+                  <span className="text-[9px] text-[#9BC92E] font-bold uppercase tracking-wider block mt-0.5">{t("pages.ai_agent.active")}</span>
                 </div>
               </div>
 
@@ -1270,9 +1272,9 @@ export default function AIAgentPage() {
                   <Sparkles size={28} />
                 </div>
                 <div className="text-center">
-                  <h5 className="text-[12px] font-bold text-white leading-tight">AI Lead Mapper</h5>
+                  <h5 className="text-[12px] font-bold text-white leading-tight">{t("pages.ai_agent.ai_mapper_node")}</h5>
                   <span className="text-[9px] text-[#A78BFA] font-bold uppercase tracking-wider block mt-0.5">
-                    {fieldMappings.length} ta maydon
+                    {t("pages.ai_agent.fields_count").replace("{count}", fieldMappings.length.toString())}
                   </span>
                 </div>
               </div>
@@ -1299,7 +1301,7 @@ export default function AIAgentPage() {
                 <div className="text-center">
                   <h5 className="text-[12px] font-bold text-white leading-tight">Sendly CRM</h5>
                   <span className="text-[9px] text-[#C7F33C] font-bold uppercase tracking-wider block mt-0.5 truncate max-w-[110px]">
-                    {db.getGroups().find(g => g.id === (settings.targetGroupId || "sales"))?.name || "Guruh"}
+                    {db.getGroups().find(g => g.id === (settings.targetGroupId || "sales"))?.name || t("pages.ai_agent.th_group")}
                   </span>
                 </div>
               </div>
@@ -1318,11 +1320,11 @@ export default function AIAgentPage() {
                       <Facebook size={20} className={settings.fbAgentEnabled ? "animate-pulse" : ""} />
                     </div>
                     <div>
-                      <h3 className="text-[14px] font-bold text-black">Facebook Lead Handler holati</h3>
+                      <h3 className="text-[14px] font-bold text-black">{t("pages.ai_agent.fb_leads_status")}</h3>
                       <p className="text-[11px] text-[#707070] mt-0.5">
                         {settings.fbAgentEnabled 
-                          ? "AI Agent Facebook target reklamasidan kelgan yangi so'rovlarni avtomatik ravishda guruhga va CRM ga saralab yubormoqda." 
-                          : "Facebook Lead Handler o'chirilgan. So'rovlar CRM-ga tushmaydi."}
+                          ? t("pages.ai_agent.fb_leads_status_active_desc") 
+                          : t("pages.ai_agent.fb_leads_status_inactive_desc")}
                       </p>
                     </div>
                   </div>
@@ -1348,7 +1350,7 @@ export default function AIAgentPage() {
                     <div>
                       <h3 className="text-[15px] font-extrabold text-black">Meta Lead Ads Trigger</h3>
                       <p className="text-[11px] text-[#707070] mt-0.5">
-                        Facebook Lead Ads forms webhook sozlamalari va kiruvchi kanal
+                        {t("pages.ai_agent.fb_leads_desc")}
                       </p>
                     </div>
                   </div>
@@ -1356,8 +1358,8 @@ export default function AIAgentPage() {
                   {/* Webhook URL */}
                   <div className="flex flex-col gap-1.5">
                     <label className="text-[11px] font-bold text-black flex items-center justify-between">
-                      <span>Webhook URL manzili</span>
-                      <span className="text-[9px] text-[#707070] font-normal">Bu URLni Facebook Developer Console-ga yuklang</span>
+                      <span>{t("pages.ai_agent.webhook_url_label")}</span>
+                      <span className="text-[9px] text-[#707070] font-normal">{t("pages.ai_agent.webhook_url_desc")}</span>
                     </label>
                     <div className="flex gap-2">
                       <input
@@ -1369,13 +1371,13 @@ export default function AIAgentPage() {
                       <button
                         onClick={() => {
                           navigator.clipboard.writeText(`https://api.sendly.uz/webhooks/fb-leads/${settings.fbFormId || "form-1"}`);
-                          showToast("Webhook URL nusxalandi! 📋");
+                          showToast(t("common.copied"));
                         }}
                         className="px-3.5 py-2.5 bg-black hover:bg-black/90 text-white rounded-xl flex items-center justify-center gap-1.5 transition-all text-[11px] font-bold shrink-0"
-                        title="Nusxalash"
+                        title={t("common.copy")}
                       >
                         <CopyIcon size={14} />
-                        <span>Nusxa</span>
+                        <span>{t("common.copy")}</span>
                       </button>
                     </div>
                   </div>
@@ -1383,8 +1385,8 @@ export default function AIAgentPage() {
                   {/* Verify Token */}
                   <div className="flex flex-col gap-1.5">
                     <label className="text-[11px] font-bold text-black flex items-center justify-between">
-                      <span>Verify Token (Access Token)</span>
-                      <span className="text-[9px] text-[#707070] font-normal">Meta Webhook &quot;Verify Token&quot; maydoniga yozing</span>
+                      <span>{t("pages.ai_agent.verify_token_label")}</span>
+                      <span className="text-[9px] text-[#707070] font-normal">{t("pages.ai_agent.verify_token_desc")}</span>
                     </label>
                     <div className="flex gap-2">
                       <input
@@ -1396,20 +1398,20 @@ export default function AIAgentPage() {
                       <button
                         onClick={() => {
                           navigator.clipboard.writeText(`sdly_fb_tok_${settings.fbFormId || "form-1"}_${settings.targetGroupId || "sales"}`);
-                          showToast("Verify Token nusxalandi! 🔑");
+                          showToast(t("common.copied"));
                         }}
                         className="px-3.5 py-2.5 bg-black hover:bg-black/90 text-white rounded-xl flex items-center justify-center gap-1.5 transition-all text-[11px] font-bold shrink-0"
-                        title="Nusxalash"
+                        title={t("common.copy")}
                       >
                         <CopyIcon size={14} />
-                        <span>Nusxa</span>
+                        <span>{t("common.copy")}</span>
                       </button>
                     </div>
                   </div>
 
                   {/* Target Form dropdown */}
                   <div className="flex flex-col gap-1.5">
-                    <label className="text-[11px] font-bold text-black">Ulanadigan Facebook Target Formasi</label>
+                    <label className="text-[11px] font-bold text-black">{t("pages.ai_agent.fb_target_form")}</label>
                     <CustomDropdown
                       value={settings.fbFormId || "form-1"}
                       onChange={(val) => handleUpdateSettings("fbFormId", val)}
@@ -1429,7 +1431,7 @@ export default function AIAgentPage() {
                     <div>
                       <h3 className="text-[15px] font-extrabold text-black">AI Lead Mapper & Processor</h3>
                       <p className="text-[11px] text-[#707070] mt-0.5">
-                        Meta maydonlarini CRM maydonlariga xaritalash va AI yo&apos;riqnomasi
+                        {t("pages.ai_agent.mapping_desc")}
                       </p>
                     </div>
                   </div>
@@ -1437,30 +1439,30 @@ export default function AIAgentPage() {
                   {/* System Prompt */}
                   <div className="flex flex-col gap-1.5">
                     <div className="flex items-center justify-between">
-                      <label className="text-[11px] font-bold text-black">AI Saralash Prompti (System Instruction)</label>
+                      <label className="text-[11px] font-bold text-black">{t("pages.ai_agent.ai_prompt_label")}</label>
                       <div className="flex items-center gap-1 text-[10px] text-[#707070]">
                         <Info size={12} />
-                        <span>Mijoz savoli va intentini tahlil qilish.</span>
+                        <span>{t("pages.ai_agent.ai_prompt_desc")}</span>
                       </div>
                     </div>
                     <textarea
                       value={settings.fbAgentPrompt || ""}
                       onChange={(e) => handleUpdateSettings("fbAgentPrompt", e.target.value)}
                       className="w-full min-h-[140px] p-3 text-[12px] font-mono leading-relaxed bg-[#F9F9F7] border border-[#E8E8E8] rounded-xl focus:outline-none focus:border-black resize-y text-black"
-                      placeholder="AI mijoz arizasini tahlil qilib, qanday guruhga yo'naltirishini yozing..."
+                      placeholder={t("pages.ai_agent.ai_prompt_placeholder")}
                     />
                   </div>
 
                   {/* Field Mapping Editor */}
                   <div className="flex flex-col gap-3">
                     <div className="flex items-center justify-between">
-                      <h4 className="text-[12px] font-bold text-black">Maydonlar Mosligi Sozlamasi (Field Mapping)</h4>
+                      <h4 className="text-[12px] font-bold text-black">{t("pages.ai_agent.field_mapping_title")}</h4>
                       <button
                         onClick={addFieldMapping}
                         className="text-[10px] bg-[#C7F33C] hover:bg-[#b5de32] text-black px-2.5 py-1.5 rounded-lg font-bold flex items-center gap-1 transition-all"
                         type="button"
                       >
-                        <span>+ Yangi Maydon</span>
+                        <span>{t("pages.ai_agent.add_field_btn")}</span>
                       </button>
                     </div>
 
@@ -1469,10 +1471,10 @@ export default function AIAgentPage() {
                         <table className="w-full text-left border-collapse text-[11px]">
                           <thead>
                             <tr className="bg-[#F9F9F7] border-b border-[#E8E8E8] text-black font-bold">
-                              <th className="p-2.5">Meta Maydon Kaliti</th>
-                              <th className="p-2.5">Sendly CRM Turi</th>
-                              <th className="p-2.5">Izoh/Tavsif</th>
-                              <th className="p-2.5 text-center w-[60px]">Amal</th>
+                              <th className="p-2.5">{t("pages.ai_agent.meta_field_key")}</th>
+                              <th className="p-2.5">{t("pages.ai_agent.sendly_crm_type")}</th>
+                              <th className="p-2.5">{t("pages.ai_agent.field_description_label")}</th>
+                              <th className="p-2.5 text-center w-[60px]">{t("pages.ai_agent.action_th")}</th>
                             </tr>
                           </thead>
                           <tbody>
@@ -1484,7 +1486,7 @@ export default function AIAgentPage() {
                                     value={m.metaField}
                                     onChange={(e) => updateFieldMapping(m.id, "metaField", e.target.value)}
                                     className="w-full px-2 py-1.5 border border-[#E8E8E8] rounded-lg bg-white focus:outline-none focus:border-black font-semibold text-black"
-                                    placeholder="Masalan: full_name"
+                                    placeholder={t("pages.ai_agent.field_key_placeholder")}
                                   />
                                 </td>
                                 <td className="p-2">
@@ -1492,11 +1494,11 @@ export default function AIAgentPage() {
                                     value={m.sendlyField}
                                     onChange={(val) => updateFieldMapping(m.id, "sendlyField", val)}
                                     options={[
-                                      { value: "name", label: "Ism (name)" },
-                                      { value: "phone", label: "Telefon (phone)" },
-                                      { value: "message", label: "Murojaat (message)" },
-                                      { value: "email", label: "Email (email)" },
-                                      { value: "company", label: "Kompaniya (company)" }
+                                      { value: "name", label: t("pages.ai_agent.field_type_name") },
+                                      { value: "phone", label: t("pages.ai_agent.field_type_phone") },
+                                      { value: "message", label: t("pages.ai_agent.field_type_message") },
+                                      { value: "email", label: t("pages.ai_agent.field_type_email") },
+                                      { value: "company", label: t("pages.ai_agent.field_type_company") }
                                     ]}
                                     className="w-full"
                                   />
@@ -1507,7 +1509,7 @@ export default function AIAgentPage() {
                                     value={m.description}
                                     onChange={(e) => updateFieldMapping(m.id, "description", e.target.value)}
                                     className="w-full px-2 py-1.5 border border-[#E8E8E8] rounded-lg bg-white focus:outline-none focus:border-black text-[#595959]"
-                                    placeholder="Izoh..."
+                                    placeholder={t("pages.ai_agent.description_placeholder")}
                                   />
                                 </td>
                                 <td className="p-2 text-center">
@@ -1515,7 +1517,7 @@ export default function AIAgentPage() {
                                     onClick={() => removeFieldMapping(m.id)}
                                     className="p-1.5 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-lg transition-all"
                                     type="button"
-                                    title="Maydonni o'chirish"
+                                    title={t("common.delete")}
                                   >
                                     <Trash2 size={14} />
                                   </button>
@@ -1540,14 +1542,14 @@ export default function AIAgentPage() {
                     <div>
                       <h3 className="text-[15px] font-extrabold text-black">Sendly CRM Router</h3>
                       <p className="text-[11px] text-[#707070] mt-0.5">
-                        Tahlil qilingan lidlarni CRM guruhlariga yo&apos;naltirish va javob sozlamalari
+                        {t("pages.ai_agent.routing_desc")}
                       </p>
                     </div>
                   </div>
 
                   {/* Standard Group Dropdown */}
                   <div className="flex flex-col gap-1.5">
-                    <label className="text-[11px] font-bold text-black">Yo&apos;naltiriladigan Standart Guruh</label>
+                    <label className="text-[11px] font-bold text-black">{t("pages.ai_agent.target_group_label")}</label>
                     <CustomDropdown
                       value={settings.targetGroupId || "sales"}
                       onChange={(val) => handleUpdateSettings("targetGroupId", val)}
@@ -1558,9 +1560,9 @@ export default function AIAgentPage() {
                   {/* Welcome Message */}
                   <div className="flex flex-col gap-1.5">
                     <div className="flex items-center justify-between">
-                      <label className="text-[11px] font-bold text-black">Avtomatik Salomlashish Xabari</label>
+                      <label className="text-[11px] font-bold text-black">{t("pages.ai_agent.welcome_message_label")}</label>
                       <span className="text-[9px] text-[#707070] italic">
-                        {"{{name}}"} o&apos;rniga mijoz ismi qo&apos;yiladi.
+                        {t("pages.ai_agent.welcome_message_desc")}
                       </span>
                     </div>
                     <input
@@ -1568,33 +1570,33 @@ export default function AIAgentPage() {
                       value={settings.fbWelcomeMessage || ""}
                       onChange={(e) => handleUpdateSettings("fbWelcomeMessage", e.target.value)}
                       className="w-full px-4 py-2.5 text-[12px] bg-[#F9F9F7] border border-[#E8E8E8] rounded-xl focus:outline-none focus:border-black text-black"
-                      placeholder="Avtomatik yuboriladigan salomlashish xabari..."
+                      placeholder={t("pages.ai_agent.welcome_message_placeholder")}
                     />
                   </div>
 
                   {/* Automatic CRM Tags */}
                   <div className="flex flex-col gap-2">
-                    <label className="text-[11px] font-bold text-black">Birlashtiriladigan Avtomatik Teglar (Auto-Tags)</label>
+                    <label className="text-[11px] font-bold text-black">{t("pages.ai_agent.auto_tags_label")}</label>
                     
                     <form onSubmit={addFbTag} className="flex gap-2">
                       <input
                         type="text"
                         value={newTagInput}
                         onChange={(e) => setNewTagInput(e.target.value)}
-                        placeholder="Yangi teg yozing va enter bosing..."
+                        placeholder={t("pages.ai_agent.add_tag_placeholder")}
                         className="flex-1 px-3 py-2 text-[11px] bg-[#F9F9F7] border border-[#E8E8E8] rounded-xl focus:outline-none focus:border-black text-black"
                       />
                       <button
                         type="submit"
                         className="px-4 py-2 bg-black hover:bg-black/90 text-white rounded-xl text-[11px] font-bold transition-all shrink-0"
                       >
-                        Qo&apos;shish
+                        {t("pages.ai_agent.add_btn")}
                       </button>
                     </form>
 
                     <div className="flex flex-wrap gap-1.5 mt-1 bg-[#F9F9F7] border border-[#E8E8E8] p-3 rounded-xl min-h-[48px]">
                       {fbTags.length === 0 ? (
-                        <span className="text-[10px] text-[#A0A0A0] italic">Hozircha teglar yo&apos;q.</span>
+                        <span className="text-[10px] text-[#A0A0A0] italic">{t("pages.ai_agent.no_tags_yet")}</span>
                       ) : (
                         fbTags.map(tag => (
                           <span
@@ -1626,11 +1628,11 @@ export default function AIAgentPage() {
                 <div className="flex items-center justify-between border-b border-[#F0F0F0] pb-3">
                   <h4 className="text-[13px] font-bold text-black flex items-center gap-1.5">
                     <RefreshCw size={14} className={`text-blue-500 ${simLoading ? "animate-spin" : ""}`} />
-                    <span>Sandbox Lead Simulator</span>
+                    <span>{t("pages.ai_agent.sandbox_title")}</span>
                   </h4>
                   <span className="text-[10px] text-green-600 flex items-center gap-1 font-semibold bg-green-50 px-2 py-0.5 rounded border border-green-100">
                     <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
-                    Sinov rejimi
+                    {t("pages.ai_agent.sandbox_mode_title")}
                   </span>
                 </div>
 
@@ -1643,7 +1645,7 @@ export default function AIAgentPage() {
                       !isSimulatorJsonMode ? "bg-white text-black shadow-sm" : "text-[#707070] hover:text-black"
                     }`}
                   >
-                    Sodda shakl
+                    {t("pages.ai_agent.simple_form")}
                   </button>
                   <button
                     type="button"
@@ -1652,7 +1654,7 @@ export default function AIAgentPage() {
                       isSimulatorJsonMode ? "bg-white text-black shadow-sm" : "text-[#707070] hover:text-black"
                     }`}
                   >
-                    Webhook JSON
+                    {t("pages.ai_agent.webhook_json")}
                   </button>
                 </div>
 
@@ -1661,34 +1663,34 @@ export default function AIAgentPage() {
                     <>
                       {/* Simple input fields */}
                       <div className="flex flex-col gap-1.5">
-                        <label className="text-[10px] font-bold text-black">Mijoz Ismi</label>
+                        <label className="text-[10px] font-bold text-black">{t("pages.ai_agent.customer_name")}</label>
                         <input
                           type="text"
                           value={simLeadName}
                           onChange={(e) => setSimLeadName(e.target.value)}
                           className="px-3 py-2 text-[11px] bg-[#F9F9F7] border border-[#E8E8E8] rounded-xl focus:outline-none focus:border-black text-black"
-                          placeholder="Mijoz ismi..."
+                          placeholder={t("pages.ai_agent.customer_name_placeholder")}
                         />
                       </div>
 
                       <div className="flex flex-col gap-1.5">
-                        <label className="text-[10px] font-bold text-black">Mijoz Telefoni</label>
+                        <label className="text-[10px] font-bold text-black">{t("pages.ai_agent.customer_phone")}</label>
                         <input
                           type="text"
                           value={simLeadPhone}
                           onChange={(e) => setSimLeadPhone(e.target.value)}
                           className="px-3 py-2 text-[11px] bg-[#F9F9F7] border border-[#E8E8E8] rounded-xl focus:outline-none focus:border-black text-black"
-                          placeholder="Telefon..."
+                          placeholder={t("pages.ai_agent.customer_phone_placeholder")}
                         />
                       </div>
 
                       <div className="flex flex-col gap-1.5">
-                        <label className="text-[10px] font-bold text-black">Mijoz Murojaat Matni</label>
+                        <label className="text-[10px] font-bold text-black">{t("pages.ai_agent.customer_message")}</label>
                         <textarea
                           value={simLeadMessage}
                           onChange={(e) => setSimLeadMessage(e.target.value)}
                           className="w-full h-20 px-3 py-2 text-[11px] bg-[#F9F9F7] border border-[#E8E8E8] rounded-xl focus:outline-none focus:border-black resize-none text-black"
-                          placeholder="Mijoz savoli yoki arizadagi xabar matni..."
+                          placeholder={t("pages.ai_agent.customer_message_placeholder")}
                         />
                       </div>
                     </>
@@ -1697,17 +1699,17 @@ export default function AIAgentPage() {
                       {/* Raw Webhook JSON payload text area */}
                       <div className="flex flex-col gap-1.5">
                         <div className="flex items-center justify-between">
-                          <label className="text-[10px] font-bold text-black">Raw Webhook JSON Payload</label>
-                          <span className="text-[9px] text-[#707070]">Meta webhook formati</span>
+                          <label className="text-[10px] font-bold text-black">{t("pages.ai_agent.raw_webhook_json")}</label>
+                          <span className="text-[9px] text-[#707070]">{t("pages.ai_agent.raw_webhook_json_desc")}</span>
                         </div>
                         <textarea
                           value={simJsonPayload}
                           onChange={(e) => setSimJsonPayload(e.target.value)}
                           className="w-full h-[220px] p-3 text-[11px] font-mono leading-relaxed bg-[#0A0A0C] text-[#C7F33C] border border-[#1E293B] rounded-xl focus:outline-none focus:border-[#C7F33C]/50 resize-y"
-                          placeholder="Webhook JSON ma'lumoti..."
+                          placeholder={t("pages.ai_agent.raw_webhook_placeholder")}
                         />
                         <span className="text-[9px] text-[#909090] leading-relaxed">
-                          ⚠️ JSON ichidagi <b>field_data</b> kalitlari chap tomondagi <b>Field Mapping</b> jadvali kalitlariga mos bo&apos;lishi kerak.
+                          {t("pages.ai_agent.raw_webhook_warning")}
                         </span>
                       </div>
                     </>
@@ -1721,12 +1723,12 @@ export default function AIAgentPage() {
                     {simLoading ? (
                       <>
                         <RefreshCw size={14} className="animate-spin" />
-                        <span>AI Tahlil qilmoqda...</span>
+                        <span>{t("pages.ai_agent.ai_analyzing")}</span>
                       </>
                     ) : (
                       <>
                         <PlayIcon size={12} className="fill-white" />
-                        <span>Integratsiyani Sinab Ko&apos;rish</span>
+                        <span>{t("pages.ai_agent.test_integration")}</span>
                       </>
                     )}
                   </button>
@@ -1735,7 +1737,7 @@ export default function AIAgentPage() {
                 {/* Simulation Step Progress Checklist */}
                 {simSteps.length > 0 && (
                   <div className="mt-2 p-4 bg-[#F9F9F7] border border-[#E8E8E8] rounded-2xl flex flex-col gap-3 animate-in fade-in duration-200">
-                    <span className="text-[10px] font-bold text-black uppercase tracking-wider">Integratsiya Oqimi Bosqichlari</span>
+                    <span className="text-[10px] font-bold text-black uppercase tracking-wider">{t("pages.ai_agent.integration_flow_steps")}</span>
                     <div className="flex flex-col gap-2.5">
                       {simSteps.map((step) => {
                         const isPending = step.status === "pending";
@@ -1776,22 +1778,22 @@ export default function AIAgentPage() {
                 {simResult && !simLoading && (
                   <div className="mt-1 p-4 bg-blue-50/50 border border-blue-100 rounded-2xl flex flex-col gap-3 animate-in fade-in slide-in-from-top-2 duration-200">
                     <div className="flex justify-between items-center">
-                      <span className="text-[10px] uppercase tracking-wider text-blue-700 font-bold">AI Saralash Natijasi</span>
+                      <span className="text-[10px] uppercase tracking-wider text-blue-700 font-bold">{t("pages.ai_agent.ai_sort_result")}</span>
                       <span className="px-2 py-0.5 bg-green-100 text-green-800 text-[9px] font-bold rounded">
-                        Muvaffaqiyatli
+                        {t("pages.ai_agent.success_badge")}
                       </span>
                     </div>
 
                     <div className="grid grid-cols-2 gap-3 text-[11px]">
                       <div>
-                        <span className="text-[#707070] block text-[9px]">Yo&apos;naltirilgan Guruh</span>
+                        <span className="text-[#707070] block text-[9px]">{t("pages.ai_agent.routed_group")}</span>
                         <span className="font-bold text-black">{simResult.groupName}</span>
                       </div>
                       <div>
-                        <span className="text-[#707070] block text-[9px]">Biriktirilgan Taglar</span>
-                        <div className="flex flex-wrap gap-1 mt-0.5">
+                        <span className="text-[#707070] block text-[9px]">{t("pages.ai_agent.assigned_tags")}</span>
+                        <div className="flex flex-wrap gap-1 mt-1">
                           {simResult.tags.map(t => (
-                            <span key={t} className="px-1.5 py-0.5 bg-blue-100 text-blue-800 text-[9px] font-semibold rounded">
+                            <span key={t} className="px-1.5 py-0.5 bg-[#F0F0F0] text-[#595959] text-[8px] font-medium rounded-full">
                               {t}
                             </span>
                           ))}
@@ -1800,12 +1802,12 @@ export default function AIAgentPage() {
                     </div>
 
                     <div className="text-[11px] border-t border-blue-100/50 pt-2.5">
-                      <span className="text-[#707070] block text-[9px]">AI Tahlil Izohi</span>
+                      <span className="text-[#707070] block text-[9px]">{t("pages.ai_agent.ai_analysis_note")}</span>
                       <p className="text-black italic mt-0.5 leading-relaxed">{simResult.summary}</p>
                     </div>
 
                     <div className="text-[11px] border-t border-blue-100/50 pt-2.5">
-                      <span className="text-[#707070] block text-[9px]">Avtomatik Yuborilgan Xabar</span>
+                      <span className="text-[#707070] block text-[9px]">{t("pages.ai_agent.auto_sent_message")}</span>
                       <p className="text-black mt-0.5 font-medium leading-relaxed bg-white border border-[#E8E8E8] p-2 rounded-lg">
                         {simResult.welcomeMsg}
                       </p>
@@ -1818,7 +1820,7 @@ export default function AIAgentPage() {
               <div className="bg-white border border-[#E8E8E8] rounded-[28px] p-6 shadow-sm flex flex-col gap-4">
                 <h4 className="text-[13px] font-bold text-black flex items-center gap-1.5 border-b border-[#F0F0F0] pb-3">
                   <History size={14} className="text-[#707070]" />
-                  <span>Yaqinda olingan lidlar tarixi</span>
+                  <span>{t("pages.ai_agent.recent_leads_history")}</span>
                 </h4>
 
                 <div className="flex flex-col gap-3.5 max-h-[300px] overflow-y-auto pr-1">
@@ -1834,11 +1836,11 @@ export default function AIAgentPage() {
 
                       <div className="grid grid-cols-2 gap-2 text-[10px]">
                         <div>
-                          <span className="text-[#707070] block text-[8px]">Forma</span>
+                          <span className="text-[#707070] block text-[8px]">{t("pages.ai_agent.th_form")}</span>
                           <span className="text-black truncate block font-medium max-w-[140px]">{log.formName}</span>
                         </div>
                         <div>
-                          <span className="text-[#707070] block text-[8px]">Guruh</span>
+                          <span className="text-[#707070] block text-[8px]">{t("pages.ai_agent.th_group")}</span>
                           <span className="text-black font-semibold">{log.group}</span>
                         </div>
                       </div>
@@ -1853,7 +1855,7 @@ export default function AIAgentPage() {
                         </div>
                         <span className="text-[9px] text-[#7CA607] font-semibold flex items-center gap-1">
                           <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
-                          Saralandi
+                          {t("pages.ai_agent.status_sorted")}
                         </span>
                       </div>
                     </div>
@@ -1882,7 +1884,7 @@ export default function AIAgentPage() {
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <PageHeader
             title="AI Kurator Agent"
-            breadcrumbs="Bosh sahifa / AI Agent / Kurator"
+            breadcrumbs={t("pages.ai_agent.curator_breadcrumb")}
           />
           <div className="flex items-center gap-3 shrink-0">
             <button
@@ -1894,14 +1896,14 @@ export default function AIAgentPage() {
               }}
               className="px-4 py-2.5 rounded-full border border-[#D8D8D8] text-[12px] font-bold text-[#595959] hover:bg-white hover:text-black transition-colors"
             >
-              Shablonni almashtirish
+              {t("pages.ai_agent.change_template")}
             </button>
             <button
               onClick={handleSaveAll}
               className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-black text-[#C7F33C] text-[12px] font-bold shadow-sm hover:bg-black/90 hover:scale-[1.02] active:scale-95 transition-all"
             >
               <Save size={14} />
-              <span>Saqlash va faollashtirish</span>
+              <span>{t("pages.ai_agent.save_activate")}</span>
             </button>
           </div>
         </div>
@@ -1917,7 +1919,7 @@ export default function AIAgentPage() {
             }`}
           >
             <Sparkles size={16} />
-            <span>AI Kurator Sozlamalari</span>
+            <span>{t("pages.ai_agent.curator_settings_tab")}</span>
             {activeTab === "settings" && <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-black" />}
           </button>
           <button
@@ -1929,7 +1931,7 @@ export default function AIAgentPage() {
             }`}
           >
             <Database size={16} />
-            <span>Bilim Bazasi (Kurs transkriptlari)</span>
+            <span>{t("pages.ai_agent.knowledge_base_tab")}</span>
             {activeTab === "knowledge" && <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-black" />}
           </button>
         </div>
@@ -1947,11 +1949,11 @@ export default function AIAgentPage() {
                       <Sparkles size={20} className={settings.aiCuratorEnabled ? "animate-pulse" : ""} />
                     </div>
                     <div>
-                      <h3 className="text-[14px] font-bold text-black">AI Kurator holati</h3>
+                      <h3 className="text-[14px] font-bold text-black">{t("pages.ai_agent.curator_status")}</h3>
                       <p className="text-[11px] text-[#707070] mt-0.5">
                         {settings.aiCuratorEnabled 
-                          ? "AI Kurator hozirda Telegram bot orqali faol ravishda o'quvchilarga javob bermoqda." 
-                          : "AI Kurator o'chirilgan. Savollaringizga Telegram'da avtomatlashtirilgan kalit so'zlar javob beradi."}
+                          ? t("pages.ai_agent.curator_active_desc") 
+                          : t("pages.ai_agent.curator_inactive_desc")}
                       </p>
                     </div>
                   </div>
@@ -1968,12 +1970,12 @@ export default function AIAgentPage() {
                 {isTelegramLinked ? (
                   <div className="flex items-center gap-2 px-3 py-2 bg-green-50 border border-green-100 rounded-xl text-[11px] text-green-700">
                     <CheckCircle size={14} className="shrink-0 text-green-500" />
-                    <span>Ulangan Telegram bot: <span className="font-bold text-black">{telegramBotUsername}</span></span>
+                    <span>{t("pages.ai_agent.linked_tg_bot")} <span className="font-bold text-black">{telegramBotUsername}</span></span>
                   </div>
                 ) : (
                   <div className="flex items-center gap-2 px-3 py-2 bg-amber-50 border border-amber-100 rounded-xl text-[11px] text-amber-700">
                     <Info size={14} className="shrink-0 text-amber-500" />
-                    <span>Telegram bot ulanmagan. AI Kurator ishlashi uchun avval Telegram botni sozlang.</span>
+                    <span>{t("pages.ai_agent.tg_bot_not_linked_desc")}</span>
                   </div>
                 )}
               </div>
@@ -1982,34 +1984,34 @@ export default function AIAgentPage() {
               <div className="bg-white border border-[#E8E8E8] rounded-[24px] p-6 shadow-sm flex flex-col gap-4">
                 <div className="flex items-center justify-between">
                   <h3 className="text-[15px] font-bold text-black flex items-center gap-2">
-                    Tizimli Ko&apos;rsatma (System Prompt)
+                    {t("pages.ai_agent.system_instruction_label")}
                   </h3>
                   <div className="flex items-center gap-1.5 text-[11px] text-[#707070]">
                     <Info size={13} />
-                    <span>Darslik konteksti {"{{context}}"} o&apos;rniga keladi.</span>
+                    <span>{t("pages.ai_agent.system_instruction_desc")}</span>
                   </div>
                 </div>
                 <textarea
                   value={settings.systemPrompt}
                   onChange={(e) => handleUpdateSettings("systemPrompt", e.target.value)}
                   className="w-full min-h-[220px] p-4 text-[12px] font-mono leading-relaxed bg-[#F9F9F7] border border-[#E8E8E8] rounded-[16px] focus:outline-none focus:border-black focus:ring-1 focus:ring-black resize-y"
-                  placeholder="AI agent rolini va javob berish tartibini yozing..."
+                  placeholder={t("pages.ai_agent.system_instruction_placeholder")}
                 />
               </div>
 
               {/* Sliders (Tone, Length, Humor) */}
               <div className="bg-white border border-[#E8E8E8] rounded-[24px] p-6 shadow-sm flex flex-col gap-6">
                 <h3 className="text-[15px] font-bold text-black">
-                  AI Kurator Ohangi va Xarakteri
+                  {t("pages.ai_agent.curator_tone_title")}
                 </h3>
 
                 <div className="flex flex-col gap-5">
                   {/* Tone slider */}
                   <div className="flex flex-col gap-2">
                     <div className="flex justify-between text-[12px] font-bold text-black">
-                      <span>Ohang (Tone)</span>
+                      <span>{t("pages.ai_agent.tone_label")}</span>
                       <span className="text-[#707070]">
-                        {settings.tone > 75 ? "Rasmiy" : settings.tone < 25 ? "Norasmiy" : "Do'stona"}
+                        {settings.tone > 75 ? t("pages.ai_agent.tone_formal") : settings.tone < 25 ? t("pages.ai_agent.tone_informal") : t("pages.ai_agent.tone_friendly")}
                       </span>
                     </div>
                     <input
@@ -2021,17 +2023,17 @@ export default function AIAgentPage() {
                       className="w-full accent-black h-1 bg-[#F0F0F0] rounded-lg appearance-none cursor-pointer"
                     />
                     <div className="flex justify-between text-[10px] text-[#A0A0A0]">
-                      <span>Norasmiy (Do&apos;stona)</span>
-                      <span>Rasmiy</span>
+                      <span>{t("pages.ai_agent.tone_informal_friendly_desc")}</span>
+                      <span>{t("pages.ai_agent.tone_formal_desc")}</span>
                     </div>
                   </div>
 
                   {/* Length slider */}
                   <div className="flex flex-col gap-2">
                     <div className="flex justify-between text-[12px] font-bold text-black">
-                      <span>Javob uzunligi</span>
+                      <span>{t("pages.ai_agent.response_length_label")}</span>
                       <span className="text-[#707070]">
-                        {settings.length > 75 ? "Batafsil" : settings.length < 25 ? "Londa" : "Me&apos;yorida"}
+                        {settings.length > 75 ? t("pages.ai_agent.length_detailed") : settings.length < 25 ? t("pages.ai_agent.length_concise") : t("pages.ai_agent.length_moderate")}
                       </span>
                     </div>
                     <input
@@ -2043,17 +2045,17 @@ export default function AIAgentPage() {
                       className="w-full accent-black h-1 bg-[#F0F0F0] rounded-lg appearance-none cursor-pointer"
                     />
                     <div className="flex justify-between text-[10px] text-[#A0A0A0]">
-                      <span>Qisqa (Londa)</span>
-                      <span>Batafsil tushuntirish</span>
+                      <span>{t("pages.ai_agent.length_concise_desc")}</span>
+                      <span>{t("pages.ai_agent.length_detailed_desc")}</span>
                     </div>
                   </div>
 
                   {/* Humor slider */}
                   <div className="flex flex-col gap-2">
                     <div className="flex justify-between text-[12px] font-bold text-black">
-                      <span>Hazil va Emojilar</span>
+                      <span>{t("pages.ai_agent.humor_emojis_label")}</span>
                       <span className="text-[#707070]">
-                        {settings.humor > 75 ? "Ko&apos;p" : settings.humor < 25 ? "Jiddiy" : "Me&apos;yorida"}
+                        {settings.humor > 75 ? t("pages.ai_agent.humor_many") : settings.humor < 25 ? t("pages.ai_agent.humor_serious") : t("pages.ai_agent.humor_moderate")}
                       </span>
                     </div>
                     <input
@@ -2065,8 +2067,8 @@ export default function AIAgentPage() {
                       className="w-full accent-black h-1 bg-[#F0F0F0] rounded-lg appearance-none cursor-pointer"
                     />
                     <div className="flex justify-between text-[10px] text-[#A0A0A0]">
-                      <span>Jiddiy (Akademik)</span>
-                      <span>Qiziqarli (Emojilar bilan)</span>
+                      <span>{t("pages.ai_agent.humor_serious_desc")}</span>
+                      <span>{t("pages.ai_agent.humor_funny_desc")}</span>
                     </div>
                   </div>
                 </div>
@@ -2076,10 +2078,10 @@ export default function AIAgentPage() {
               <div className="bg-white border border-[#E8E8E8] rounded-[24px] p-6 shadow-sm flex flex-col gap-4">
                 <h3 className="text-[15px] font-bold text-black flex items-center gap-2">
                   <ShieldAlert className="text-red-500 w-4 h-4" />
-                  <span>Taqiqlangan mavzular (Forbidden Topics)</span>
+                  <span>{t("pages.ai_agent.forbidden_topics_title")}</span>
                 </h3>
                 <p className="text-[11px] text-[#707070] leading-relaxed">
-                  Ushbu mavzular bo&apos;yicha savol berilganda, bot avtomatik ravishda dars doirasidan chiqmaslikni so&apos;raydi.
+                  {t("pages.ai_agent.forbidden_topics_desc")}
                 </p>
 
                 <form onSubmit={handleAddTopic} className="flex gap-2">
@@ -2087,14 +2089,14 @@ export default function AIAgentPage() {
                     type="text"
                     value={newTopic}
                     onChange={(e) => setNewTopic(e.target.value)}
-                    placeholder="Masalan: Bitcoin, Siyosat, Narx-navo..."
+                    placeholder={t("pages.ai_agent.forbidden_topic_placeholder")}
                     className="flex-1 px-4 py-2 text-[12px] bg-[#F9F9F7] border border-[#E8E8E8] rounded-xl focus:outline-none focus:border-black"
                   />
                   <button
                     type="submit"
                     className="px-4 py-2 rounded-xl bg-black text-white hover:bg-black/90 text-[12px] font-bold transition-all"
                   >
-                    Qo&apos;shish
+                    {t("pages.ai_agent.add_btn")}
                   </button>
                 </form>
 
@@ -2115,7 +2117,7 @@ export default function AIAgentPage() {
                     </span>
                   ))}
                   {settings.topics.length === 0 && (
-                    <span className="text-[11px] text-[#A0A0A0] italic">Hozircha taqiqlangan mavzular belgilanmagan.</span>
+                    <span className="text-[11px] text-[#A0A0A0] italic">{t("pages.ai_agent.no_forbidden_topics")}</span>
                   )}
                 </div>
               </div>
@@ -2124,10 +2126,10 @@ export default function AIAgentPage() {
               <div className="bg-white border border-[#E8E8E8] rounded-[24px] p-6 shadow-sm flex flex-col gap-4">
                 <h3 className="text-[15px] font-bold text-black flex items-center gap-2">
                   <ArrowRight className="text-blue-500 w-4 h-4" />
-                  <span>Inson-kuratorga yo&apos;naltirish qoidalari (Escalation)</span>
+                  <span>{t("pages.ai_agent.escalation_rules_title")}</span>
                 </h3>
                 <p className="text-[11px] text-[#707070]">
-                  Ushbu shartlar yuzaga kelganda bot liveTakeover bayrog&apos;ini faollashtiradi va kuratorni ogohlantiradi.
+                  {t("pages.ai_agent.escalation_rules_desc")}
                 </p>
 
                 <form onSubmit={handleAddRule} className="flex gap-2">
@@ -2135,14 +2137,14 @@ export default function AIAgentPage() {
                     type="text"
                     value={newRule}
                     onChange={(e) => setNewRule(e.target.value)}
-                    placeholder="Masalan: Kurs to'lovi haqida so'raganda..."
+                    placeholder={t("pages.ai_agent.escalation_rule_placeholder")}
                     className="flex-1 px-4 py-2 text-[12px] bg-[#F9F9F7] border border-[#E8E8E8] rounded-xl focus:outline-none focus:border-black"
                   />
                   <button
                     type="submit"
                     className="px-4 py-2 rounded-xl bg-black text-white hover:bg-black/90 text-[12px] font-bold transition-all"
                   >
-                    Qo&apos;shish
+                    {t("pages.ai_agent.add_btn")}
                   </button>
                 </form>
 
@@ -2166,7 +2168,7 @@ export default function AIAgentPage() {
                       <button
                         onClick={() => handleDeleteRule(rule.id)}
                         className="text-[#707070] hover:text-red-600 transition-colors p-1"
-                        title="O'chirish"
+                        title={t("common.delete")}
                       >
                         <Trash2 size={13} />
                       </button>
@@ -2180,10 +2182,10 @@ export default function AIAgentPage() {
                 <div className="flex items-center justify-between">
                   <div>
                     <h3 className="text-[15px] font-bold text-black">
-                      Faol aloqa (Auto outreach)
+                      {t("pages.ai_agent.auto_outreach_title")}
                     </h3>
                     <p className="text-[11px] text-[#707070] mt-1">
-                      O&apos;quvchi darsda qolib ketganda bot birinchi bo&apos;lib yordam taklif qilish xabarini yozadi.
+                      {t("pages.ai_agent.auto_outreach_desc")}
                     </p>
                   </div>
                   <label className="relative inline-flex items-center cursor-pointer">
@@ -2200,7 +2202,7 @@ export default function AIAgentPage() {
                 {settings.autoOutreach && (
                   <div className="grid grid-cols-2 gap-4 mt-2">
                     <div className="flex flex-col gap-1.5">
-                      <span className="text-[11px] font-bold text-black">Aloqa vaqti (Boshlanishi)</span>
+                      <span className="text-[11px] font-bold text-black">{t("pages.ai_agent.outreach_start_time")}</span>
                       <input
                         type="time"
                         value={settings.outreachStart}
@@ -2209,7 +2211,7 @@ export default function AIAgentPage() {
                       />
                     </div>
                     <div className="flex flex-col gap-1.5">
-                      <span className="text-[11px] font-bold text-black">Aloqa vaqti (Tugashi)</span>
+                      <span className="text-[11px] font-bold text-black">{t("pages.ai_agent.outreach_end_time")}</span>
                       <input
                         type="time"
                         value={settings.outreachEnd}
@@ -2231,10 +2233,10 @@ export default function AIAgentPage() {
                     <Sparkles size={16} />
                   </div>
                   <div>
-                    <h4 className="text-[12px] font-bold text-black">AI Kurator Sandbox</h4>
+                    <h4 className="text-[12px] font-bold text-black">{t("pages.ai_agent.curator_sandbox_title")}</h4>
                     <span className="text-[10px] text-green-600 flex items-center gap-1">
                       <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
-                      Faol sinov rejimi
+                      {t("pages.ai_agent.curator_sandbox_active")}
                     </span>
                   </div>
                 </div>
@@ -2243,14 +2245,14 @@ export default function AIAgentPage() {
                     {
                       id: `welcome-${Date.now()}`,
                       sender: "bot",
-                      text: "Suhbat tarixi tozalandi. Sinov uchun yangi savollarni yozing! 📚",
-                      time: "Hozir",
+                      text: t("pages.ai_agent.chat_history_cleared"),
+                      time: t("common.today"),
                       confidence: 100
                     }
                   ])}
                   className="text-[10px] text-[#707070] hover:text-black font-semibold"
                 >
-                  Tozalash
+                  {t("pages.ai_agent.clear_btn")}
                 </button>
               </div>
 
@@ -2266,7 +2268,7 @@ export default function AIAgentPage() {
                         <div className="bg-red-50 border border-red-100 rounded-2xl p-3.5 text-[11px] text-red-700 flex gap-2.5 items-start">
                           <ShieldAlert size={16} className="shrink-0 text-red-500 mt-0.5" />
                           <div>
-                            <p className="font-bold">Moderatsiya to&apos;sig&apos;i</p>
+                            <p className="font-bold">{t("pages.ai_agent.moderation_block_title")}</p>
                             <p className="mt-1 leading-relaxed">{msg.text}</p>
                           </div>
                         </div>
@@ -2295,7 +2297,7 @@ export default function AIAgentPage() {
                           <>
                             <span>•</span>
                             <span className="text-green-600 font-medium">
-                              Ishonch: {msg.confidence}%
+                              {t("pages.ai_agent.confidence_label")} {msg.confidence}%
                             </span>
                           </>
                         )}
@@ -2309,7 +2311,7 @@ export default function AIAgentPage() {
                               key={i}
                               className="text-[8px] bg-white border border-[#E8E8E8] px-2 py-0.5 rounded text-[#707070] italic"
                             >
-                              Manba: {src}
+                              {t("pages.ai_agent.source_label")} {src}
                             </span>
                           ))}
                         </div>
@@ -2340,7 +2342,7 @@ export default function AIAgentPage() {
                   value={chatInput}
                   disabled={chatLoading}
                   onChange={(e) => setChatInput(e.target.value)}
-                  placeholder="O'quvchi savolini yozing..."
+                  placeholder={t("pages.ai_agent.student_question_placeholder")}
                   className="flex-1 px-4 py-2.5 text-[12px] bg-[#F9F9F7] border border-[#E8E8E8] rounded-xl focus:outline-none focus:border-black"
                 />
                 <button
@@ -2361,12 +2363,12 @@ export default function AIAgentPage() {
             {/* Left Side: Tree navigation of modules/lessons */}
             <div className="md:col-span-5 bg-white border border-[#E8E8E8] rounded-[24px] p-6 shadow-sm">
               <div className="flex items-center justify-between mb-4 pb-2 border-b border-[#F0F0F0]">
-                <h3 className="text-[14px] font-bold text-black">Modullar va Darslar</h3>
+                <h3 className="text-[14px] font-bold text-black">{t("pages.ai_agent.modules_lessons_title")}</h3>
                 <div className="flex items-center gap-1.5">
                   <button
                     onClick={() => setShowAddModuleModal(true)}
                     className="p-1.5 text-black hover:bg-[#F9F9F7] rounded-lg transition-all"
-                    title="Yangi modul yaratish"
+                    title={t("pages.ai_agent.create_module_tooltip")}
                   >
                     <FolderPlus size={16} />
                   </button>
@@ -2375,8 +2377,8 @@ export default function AIAgentPage() {
                       if (modules.length === 0) {
                         setAlertModal({
                           isOpen: true,
-                          title: "Modul mavjud emas",
-                          message: "Dars yaratish uchun avval kamida bitta modul yaratishingiz kerak.",
+                          title: t("pages.ai_agent.lesson_create_error_title"),
+                          message: t("pages.ai_agent.lesson_create_error_desc"),
                         });
                         return;
                       }
@@ -2384,7 +2386,7 @@ export default function AIAgentPage() {
                       setShowAddLessonModal(true);
                     }}
                     className="p-1.5 text-black hover:bg-[#F9F9F7] rounded-lg transition-all"
-                    title="Yangi dars yaratish"
+                    title={t("pages.ai_agent.create_lesson_tooltip")}
                   >
                     <FilePlus size={16} />
                   </button>
@@ -2408,7 +2410,7 @@ export default function AIAgentPage() {
                           {isExpanded ? <ChevronDown size={14} className="text-[#707070]" /> : <ChevronRight size={14} className="text-[#707070]" />}
                           <span className="text-[12px] font-bold text-black">{mod.title}</span>
                           <span className="text-[9px] bg-[#F0F0F0] px-1.5 py-0.5 rounded-full text-[#707070] font-medium">
-                            {modLessons.length} dars
+                            {t("pages.ai_agent.lesson_count_badge").replace("{count}", modLessons.length.toString())}
                           </span>
                         </div>
                         <button
@@ -2450,7 +2452,7 @@ export default function AIAgentPage() {
                             );
                           })}
                           {modLessons.length === 0 && (
-                            <p className="text-[10px] text-[#A0A0A0] italic p-2">Darslar mavjud emas.</p>
+                            <p className="text-[10px] text-[#A0A0A0] italic p-2">{t("pages.ai_agent.no_lessons_yet")}</p>
                           )}
                         </div>
                       )}
@@ -2460,12 +2462,12 @@ export default function AIAgentPage() {
 
                 {modules.length === 0 && (
                   <div className="text-center py-8">
-                    <p className="text-[11px] text-[#707070] italic">Modullar mavjud emas.</p>
+                    <p className="text-[11px] text-[#707070] italic">{t("pages.ai_agent.no_modules_yet")}</p>
                     <button
                       onClick={() => setShowAddModuleModal(true)}
                       className="text-[11px] font-bold text-black underline mt-2"
                     >
-                      Birinchi modulni yarating
+                      {t("pages.ai_agent.create_first_module")}
                     </button>
                   </div>
                 )}
@@ -2478,7 +2480,7 @@ export default function AIAgentPage() {
                 <div className="flex flex-col gap-5 flex-1">
                   <div>
                     <span className="text-[9px] uppercase tracking-wider text-[#A0A0A0] font-bold">
-                      {modules.find((m) => m.id === selectedLesson.moduleId)?.title || "Modul"}
+                      {modules.find((m) => m.id === selectedLesson.moduleId)?.title || t("pages.ai_agent.module_label")}
                     </span>
                     <input
                       type="text"
@@ -2491,24 +2493,24 @@ export default function AIAgentPage() {
                   <div className="flex-1 flex flex-col gap-2">
                     <div className="flex items-center justify-between">
                       <label className="text-[12px] font-bold text-black">
-                        Dars Transkripti (Matnli darslik)
+                        {t("pages.ai_agent.lesson_transcript_label")}
                       </label>
                       <span className="text-[10px] text-[#707070]">
-                        {selectedLesson.transcript?.length || 0} ta belgi
+                        {t("pages.ai_agent.chars_count").replace("{count}", (selectedLesson.transcript?.length || 0).toString())}
                       </span>
                     </div>
                     <textarea
                       value={selectedLesson.transcript || ""}
                       onChange={(e) => handleUpdateSelectedLesson("transcript", e.target.value)}
                       className="w-full flex-1 min-h-[300px] p-4 text-[12px] leading-relaxed bg-[#F9F9F7] border border-[#E8E8E8] rounded-[16px] focus:outline-none focus:border-black resize-y"
-                      placeholder="Ushbu darsning audio/video yozuvi transkriptini yoki darslik matnini bu yerga joylashtiring. AI shu matnlar asosida RAG orqali javob beradi..."
+                      placeholder={t("pages.ai_agent.lesson_transcript_placeholder")}
                     />
                   </div>
 
                   {/* Materials upload Mock */}
                   <div className="border-t border-[#F0F0F0] pt-4 mt-2">
                     <label className="text-[12px] font-bold text-black block mb-2">
-                      Foydali materiallar (PDF, Ko&apos;rsatmalar)
+                      {t("pages.ai_agent.useful_materials_label")}
                     </label>
                     <div className="flex items-center gap-3">
                       <div className="flex-1 flex flex-wrap gap-2">
@@ -2519,22 +2521,22 @@ export default function AIAgentPage() {
                           >
                             📄 {pdf}
                           </span>
-                        )) || <span className="text-[11px] text-[#A0A0A0] italic">Yuklangan materiallar yo&apos;q</span>}
+                        )) || <span className="text-[11px] text-[#A0A0A0] italic">{t("pages.ai_agent.no_materials_yet")}</span>}
                       </div>
                       <button
                         type="button"
                         onClick={() => {
-                          const mockName = prompt("Material nomini yozing:");
+                          const mockName = prompt(t("pages.ai_agent.enter_material_name"));
                           if (mockName) {
                             const currentPdfs = selectedLesson.pdfMaterials || [];
                             handleUpdateSelectedLesson("pdfMaterials", [...currentPdfs, mockName + ".pdf"]);
-                            showToast("Material muvaffaqiyatli qo'shildi (mock)");
+                            showToast(t("pages.ai_agent.material_added_toast"));
                           }
                         }}
                         className="flex items-center gap-1.5 px-3 py-2 border border-[#D8D8D8] rounded-xl hover:bg-[#F9F9F7] text-[11px] font-semibold text-[#595959] transition-all"
                       >
                         <Upload size={12} />
-                        <span>Fayl yuklash</span>
+                        <span>{t("pages.ai_agent.upload_file_btn")}</span>
                       </button>
                     </div>
                   </div>
@@ -2542,9 +2544,9 @@ export default function AIAgentPage() {
               ) : (
                 <div className="flex-1 flex flex-col items-center justify-center text-center py-20">
                   <BookOpen size={48} className="text-[#A0A0A0] mb-4" />
-                  <h4 className="text-[14px] font-bold text-black">Darslik tanlanmagan</h4>
+                  <h4 className="text-[14px] font-bold text-black">{t("pages.ai_agent.no_lesson_selected")}</h4>
                   <p className="text-[11px] text-[#707070] mt-1 max-w-[280px]">
-                    Chap tomondagi ro&apos;yxatdan darsni tanlang yoki bilim bazasini to&apos;ldirish uchun yangi modul/dars yarating.
+                    {t("pages.ai_agent.no_lesson_selected_desc")}
                   </p>
                 </div>
               )}
@@ -2556,12 +2558,12 @@ export default function AIAgentPage() {
         {showAddModuleModal && (
           <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[999] flex items-center justify-center p-4">
             <div className="bg-white border border-[#E8E8E8] rounded-[24px] max-w-[400px] w-full p-6 shadow-2xl flex flex-col gap-4 animate-in zoom-in-95 duration-150">
-              <h3 className="text-[15px] font-bold text-black">Yangi Modul Yaratish</h3>
+              <h3 className="text-[15px] font-bold text-black">{t("pages.ai_agent.create_new_module_title")}</h3>
               <input
                 type="text"
                 value={newModuleName}
                 onChange={(e) => setNewModuleName(e.target.value)}
-                placeholder="Modul nomi (masalan: 5-Modul. Tahlillar)"
+                placeholder={t("pages.ai_agent.module_name_placeholder")}
                 className="w-full px-4 py-2.5 text-[12px] bg-[#F9F9F7] border border-[#E8E8E8] rounded-xl focus:outline-none focus:border-black"
               />
               <div className="flex items-center justify-end gap-3 mt-2">
@@ -2569,14 +2571,14 @@ export default function AIAgentPage() {
                   onClick={() => setShowAddModuleModal(false)}
                   className="px-4 py-2 rounded-xl border border-[#D8D8D8] text-[12px] text-[#595959] hover:bg-[#F9F9F7] transition-all"
                 >
-                  Bekor qilish
+                  {t("pages.ai_agent.confirm_modal_cancel_btn")}
                 </button>
                 <button
                   onClick={handleAddModule}
                   disabled={!newModuleName.trim()}
                   className="px-4 py-2 rounded-xl bg-black text-[#C7F33C] text-[12px] font-bold hover:bg-black/90 disabled:opacity-50 transition-all"
                 >
-                  Yaratish
+                  {t("common.create")}
                 </button>
               </div>
             </div>
@@ -2587,10 +2589,10 @@ export default function AIAgentPage() {
         {showAddLessonModal && (
           <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[999] flex items-center justify-center p-4">
             <div className="bg-white border border-[#E8E8E8] rounded-[24px] max-w-[400px] w-full p-6 shadow-2xl flex flex-col gap-4 animate-in zoom-in-95 duration-150">
-              <h3 className="text-[15px] font-bold text-black">Yangi Dars Yaratish</h3>
+              <h3 className="text-[15px] font-bold text-black">{t("pages.ai_agent.create_new_lesson_title")}</h3>
               
               <div className="flex flex-col gap-1.5">
-                <span className="text-[10px] font-bold text-black">Tegishli Modul</span>
+                <span className="text-[10px] font-bold text-black">{t("pages.ai_agent.related_module_label")}</span>
                 <CustomDropdown
                   value={newLessonModuleId}
                   onChange={(val) => setNewLessonModuleId(val)}
@@ -2599,12 +2601,12 @@ export default function AIAgentPage() {
               </div>
 
               <div className="flex flex-col gap-1.5">
-                <span className="text-[10px] font-bold text-black">Dars Nomi</span>
+                <span className="text-[10px] font-bold text-black">{t("pages.ai_agent.lesson_name_label")}</span>
                 <input
                   type="text"
                   value={newLessonName}
                   onChange={(e) => setNewLessonName(e.target.value)}
-                  placeholder="Dars nomi (masalan: 3-Dars. Funnel sozlash)"
+                  placeholder={t("pages.ai_agent.lesson_name_placeholder")}
                   className="w-full px-4 py-2.5 text-[12px] bg-[#F9F9F7] border border-[#E8E8E8] rounded-xl focus:outline-none focus:border-black"
                 />
               </div>
@@ -2614,14 +2616,14 @@ export default function AIAgentPage() {
                   onClick={() => setShowAddLessonModal(false)}
                   className="px-4 py-2 rounded-xl border border-[#D8D8D8] text-[12px] text-[#595959] hover:bg-[#F9F9F7] transition-all"
                 >
-                  Bekor qilish
+                  {t("pages.ai_agent.confirm_modal_cancel_btn")}
                 </button>
                 <button
                   onClick={handleAddLesson}
                   disabled={!newLessonName.trim() || !newLessonModuleId}
                   className="px-4 py-2 rounded-xl bg-black text-[#C7F33C] text-[12px] font-bold hover:bg-black/90 disabled:opacity-50 transition-all"
                 >
-                  Yaratish
+                  {t("common.create")}
                 </button>
               </div>
             </div>
@@ -2646,13 +2648,13 @@ export default function AIAgentPage() {
                   onClick={() => setConfirmModal(prev => ({ ...prev, isOpen: false }))}
                   className="px-4 py-2 rounded-xl border border-[#D8D8D8] text-[12px] font-bold text-[#595959] hover:bg-[#F9F9F7] transition-all"
                 >
-                  Bekor qilish
+                  {t("pages.ai_agent.confirm_modal_cancel_btn")}
                 </button>
                 <button
                   onClick={confirmModal.onConfirm}
                   className="px-4 py-2 rounded-xl bg-black text-[#C7F33C] text-[12px] font-bold hover:bg-black/90 transition-all"
                 >
-                  Tasdiqlash
+                  {t("pages.ai_agent.confirm_modal_confirm_btn")}
                 </button>
               </div>
             </div>
@@ -2677,7 +2679,7 @@ export default function AIAgentPage() {
                   onClick={() => setAlertModal(prev => ({ ...prev, isOpen: false }))}
                   className="px-4 py-2 rounded-xl border border-[#D8D8D8] text-[12px] font-bold text-[#595959] hover:bg-[#F9F9F7] transition-all"
                 >
-                  Tushunarli
+                  {t("pages.ai_agent.alert_modal_close_btn")}
                 </button>
                 {!isTelegramLinked && alertModal.title.includes("Telegram") && (
                   <Link
@@ -2685,7 +2687,7 @@ export default function AIAgentPage() {
                     onClick={() => setAlertModal(prev => ({ ...prev, isOpen: false }))}
                     className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-black text-[#C7F33C] text-[12px] font-bold hover:bg-black/90 transition-all"
                   >
-                    <span>Sozlash</span>
+                    <span>{t("pages.ai_agent.alert_modal_configure_btn")}</span>
                     <ArrowRight size={13} />
                   </Link>
                 )}

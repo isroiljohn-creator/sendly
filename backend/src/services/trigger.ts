@@ -80,28 +80,26 @@ export async function handleIncomingWebhookEvent(payload: WebhookEventPayload): 
     let username = "user_" + senderId;
     let profilePicture = "";
 
-    // If NOT mock mode, try fetching profile details from Meta Graph API
-    if (env.META_APP_ID !== "123456789") {
-      try {
-        let token = account.access_token;
-        if (token.includes(":")) {
-          token = decrypt(token);
-        }
-        // Instagram Profile API
-        const response = await fetch(
-          `https://graph.facebook.com/v18.0/${senderId}?fields=name,username,profile_pic&access_token=${encodeURIComponent(token)}`
-        );
-        if (response.ok) {
-          const data = await response.json();
-          fullName = data.name || "User";
-          username = data.username || "user_" + senderId;
-          profilePicture = data.profile_pic || "";
-        } else {
-          console.warn(`[Trigger] Could not fetch profile details, HTTP ${response.status}`);
-        }
-      } catch (err) {
-        console.error(`[Trigger] Error fetching contact profile details from Meta:`, err);
+    // Try fetching profile details from Meta Graph API
+    try {
+      let token = account.access_token;
+      if (token.includes(":")) {
+        token = decrypt(token);
       }
+      // Instagram Profile API
+      const response = await fetch(
+        `https://graph.facebook.com/v18.0/${senderId}?fields=name,username,profile_pic&access_token=${encodeURIComponent(token)}`
+      );
+      if (response.ok) {
+        const data = await response.json();
+        fullName = data.name || "User";
+        username = data.username || "user_" + senderId;
+        profilePicture = data.profile_pic || "";
+      } else {
+        console.warn(`[Trigger] Could not fetch profile details, HTTP ${response.status}`);
+      }
+    } catch (err) {
+      console.error(`[Trigger] Error fetching contact profile details from Meta:`, err);
     }
 
     const { data: newContact, error: insertErr } = await supabase
@@ -498,7 +496,7 @@ export async function handleIncomingLeadgenEvent(payload: LeadgenEventPayload): 
 
   // 2. Fetch Lead Field Data if not present
   let resolvedFieldData = fieldData;
-  if (!resolvedFieldData && env.META_APP_ID !== "123456789") {
+  if (!resolvedFieldData) {
     try {
       let token = account.access_token;
       if (token.includes(":")) {
@@ -574,7 +572,7 @@ export async function handleIncomingLeadgenEvent(payload: LeadgenEventPayload): 
 
   // If OpenAI key is available, attempt to call OpenAI GPT models
   let runRuleFallback = true;
-  if (env.OPENAI_API_KEY && env.OPENAI_API_KEY !== "mock_openai_key") {
+  if (env.OPENAI_API_KEY) {
     try {
       const response = await fetch("https://api.openai.com/v1/chat/completions", {
         method: "POST",
@@ -745,20 +743,18 @@ export async function handleIncomingLeadgenEvent(payload: LeadgenEventPayload): 
     console.log(`[Trigger] Dispatching Facebook Welcome Message: "${welcomeMsg}"`);
 
     let messageId = null;
-    if (env.META_APP_ID !== "123456789") {
-      try {
-        let token = account.access_token;
-        if (token.includes(":")) {
-          token = decrypt(token);
-        }
-        const sendRes = await sendInstagramMessage(token, {
-          recipientId: contact.instagram_user_id,
-          text: welcomeMsg
-        });
-        messageId = sendRes.messageId;
-      } catch (sendErr) {
-        console.error("[Trigger] Failed to send Facebook welcome message:", sendErr);
+    try {
+      let token = account.access_token;
+      if (token.includes(":")) {
+        token = decrypt(token);
       }
+      const sendRes = await sendInstagramMessage(token, {
+        recipientId: contact.instagram_user_id,
+        text: welcomeMsg
+      });
+      messageId = sendRes.messageId;
+    } catch (sendErr) {
+      console.error("[Trigger] Failed to send Facebook welcome message:", sendErr);
     }
 
     // Log outbound message

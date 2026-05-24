@@ -19,7 +19,6 @@ export interface SendMessageOptions {
 
 /**
  * Sends a message via the Meta Graph API to an Instagram user.
- * Supports Mock Mode if env.META_APP_ID = "123456789"
  * Decrypts the page token automatically if it starts with an encrypted prefix (contains ":").
  */
 export async function sendInstagramMessage(
@@ -143,39 +142,35 @@ export async function sendInstagramMessage(
     return { messageId: "empty_payload", success: false };
   }
 
-  let finalMessageId = "mock_mid_" + Math.floor(Math.random() * 1000000);
+  let finalMessageId = "";
   let overallSuccess = true;
 
   // Dispatch payloads
   for (const payload of payloads) {
-    if (env.META_APP_ID === "123456789") {
-      console.log(`[Meta API Mock] Outbound message to ${recipientId}:`, JSON.stringify(payload, null, 2));
-    } else {
-      const url = `https://graph.facebook.com/v18.0/me/messages?access_token=${encodeURIComponent(token)}`;
-      try {
-        const response = await fetch(url, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(payload),
-        });
+    const url = `https://graph.facebook.com/v18.0/me/messages?access_token=${encodeURIComponent(token)}`;
+    try {
+      const response = await fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
 
-        if (!response.ok) {
-          const errText = await response.text();
-          console.error(`[Meta API] Send message failed. HTTP ${response.status}: ${errText}`);
-          overallSuccess = false;
-          continue;
-        }
-
-        const data = await response.json();
-        if (data.message_id) {
-          finalMessageId = data.message_id;
-        }
-      } catch (err) {
-        console.error("[Meta API] Network error when sending message:", err);
+      if (!response.ok) {
+        const errText = await response.text();
+        console.error(`[Meta API] Send message failed. HTTP ${response.status}: ${errText}`);
         overallSuccess = false;
+        continue;
       }
+
+      const data = await response.json();
+      if (data.message_id) {
+        finalMessageId = data.message_id;
+      }
+    } catch (err) {
+      console.error("[Meta API] Network error when sending message:", err);
+      overallSuccess = false;
     }
   }
 

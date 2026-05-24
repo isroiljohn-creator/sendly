@@ -109,11 +109,11 @@ export default function RegisterPage() {
       if (res.success) {
         window.location.href = "/";
       } else {
-        setError(res.error || "Google orqali ro'yxatdan o'tishda xatolik.");
+        setError(res.error || t("login_page.error_google_auth"));
       }
     } catch (err) {
       console.error("Failed to decode Google ID Token:", err);
-      setError("Google tokenini tahlil qilishda xatolik yuz berdi.");
+      setError(t("login_page.error_google_token"));
     }
   };
 
@@ -153,15 +153,15 @@ export default function RegisterPage() {
             setShowNotification(true);
             setTimeout(() => setShowNotification(false), 15000);
           } else {
-            setError(mailData.error || "Tasdiqlash kodini yuborishda xatolik yuz berdi.");
+            setError(mailData.error || t("login_page.error_send_otp"));
           }
         }
       } catch (err: unknown) {
         const errMsg = err instanceof Error ? err.message : String(err);
-        setError("Tizimga ulanishda xatolik: " + errMsg);
+        setError(t("login_page.error_connection") + errMsg);
       }
     } else {
-      setError(checkRes.error || "Ro'yxatdan o'tishda xatolik yuz berdi.");
+      setError(checkRes.error || t("error"));
     }
   };
 
@@ -175,10 +175,10 @@ export default function RegisterPage() {
       if (res.success) {
         window.location.href = "/";
       } else {
-        setError(res.error || "Akkaunt yaratishda xatolik yuz berdi.");
+        setError(res.error || t("error"));
       }
     } else {
-      setError("Tasdiqlash kodi noto'g'ri. Qayta urinib ko'ring.");
+      setError(t("login_page.error_invalid_otp"));
     }
   };
 
@@ -208,12 +208,12 @@ export default function RegisterPage() {
           setEnteredOtp(["", "", "", ""]);
           setShowNotification(true);
         } else {
-          setError(mailData.error || "Kodni qayta yuborishda xatolik yuz berdi.");
+          setError(mailData.error || t("login_page.error_resend_otp"));
         }
       }
     } catch (err: unknown) {
       const errMsg = err instanceof Error ? err.message : String(err);
-      setError("Ulanishda xatolik: " + errMsg);
+      setError(t("login_page.error_connection") + errMsg);
     }
   };
 
@@ -257,9 +257,9 @@ export default function RegisterPage() {
               <Sparkles size={16} className="fill-black/10" />
             </div>
             <div className="flex-1 text-left">
-              <span className="text-[12px] font-bold block leading-none text-yellow-600">{"SMTP Sozlanmagan (Sinov Rejimi)"}</span>
+              <span className="text-[12px] font-bold block leading-none text-yellow-600">{t("login_page.smtp_warning_title")}</span>
               <p className="text-[11px] text-[#555] mt-1.5 leading-relaxed">
-                {"SMTP sozlamalari topilmadi. Tizim tasdiqlash kodini ekraningizga chiqardi:"}
+                {t("login_page.smtp_warning_desc")}
               </p>
               <div className="mt-3 flex items-center justify-between bg-[#F5F5F3] px-3.5 py-2 rounded-xl border border-[#E8E8E8]">
                 <span className="text-[16px] font-mono font-bold tracking-widest text-[#1A2906]">{otpCode}</span>
@@ -270,7 +270,7 @@ export default function RegisterPage() {
                   }}
                   className="text-[11px] font-semibold text-[#1A2906] hover:underline"
                 >
-                  {"Nusxalash 📋"}
+                  {t("login_page.copy_code")}
                 </button>
               </div>
             </div>
@@ -308,7 +308,7 @@ export default function RegisterPage() {
             {"Sendly"}<span className="text-[#C7F33C]">{".uz"}</span>
           </h2>
           <p className="mt-1 text-[13px] text-[#A0A0A5]">
-            {isVerifyingEmail ? "Pochtani tasdiqlash" : t("forms.register")}
+            {isVerifyingEmail ? t("login_page.otp_title") : t("forms.register")}
           </p>
         </div>
 
@@ -326,7 +326,7 @@ export default function RegisterPage() {
               
               <div className="flex flex-col gap-1.5">
                 <label className="text-[11px] font-semibold text-[#A0A0A5] px-1 text-left">
-                  {"Ism va Familiya"}
+                  {t("forms.full_name")}
                 </label>
                 <div className="relative">
                   <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[#707075]"><UserIcon size={16} /></span>
@@ -385,14 +385,14 @@ export default function RegisterPage() {
 
             <div className="relative my-6 flex items-center justify-center">
               <hr className="w-full border-white/5" />
-              <span className="absolute bg-[#0C0C0E] px-3.5 text-[11px] font-semibold text-[#555] uppercase tracking-wider">{"Yoki"}</span>
+              <span className="absolute bg-[#0C0C0E] px-3.5 text-[11px] font-semibold text-[#555] uppercase tracking-wider">{t("login_page.signin_or")}</span>
             </div>
 
             {/* Google Sign-Up SDK button rendering container */}
             <div className="flex flex-col items-center gap-2">
               {!hasGoogleClientId ? (
                 <div className="text-[10.5px] text-yellow-500/90 bg-yellow-500/5 border border-yellow-500/10 px-4 py-3.5 rounded-2xl text-left leading-relaxed">
-                  {"Google Sign-In sozlanmagan. Tizimda Google login tugmasi ko'rinishi uchun frontend muhit sozlamalarida NEXT_PUBLIC_GOOGLE_CLIENT_ID o'zgaruvchisini kiriting."}
+                  {t("login_page.google_warning")}
                 </div>
               ) : (
                 <div className="flex justify-center w-full min-h-[46px] bg-white rounded-full overflow-hidden border border-white/10 py-1 px-1">
@@ -415,7 +415,7 @@ export default function RegisterPage() {
           <form onSubmit={handleOtpVerify} className="mt-6 flex flex-col gap-6">
             <div className="text-center">
               <p className="text-[12px] text-[#A0A0A5] leading-relaxed">
-                {"Tasdiqlash kodi yuborilgan manzil:"} <br />
+                {t("login_page.otp_sent_to")} <br />
                 <span className="font-semibold text-white text-[13px]">{email}</span>
               </p>
             </div>
@@ -440,19 +440,19 @@ export default function RegisterPage() {
 
             <div className="flex flex-col items-center gap-4">
               <Button type="submit" variant="accent" className="w-full py-3.5">
-                {"Kodni tasdiqlash 🔐"}
+                {t("login_page.otp_verify_btn")}
               </Button>
 
               <div className="text-[12px] text-[#A0A0A5]">
                 {countdown > 0 ? (
-                  <span>{"Kodni qayta yuborish: "}<span className="text-[#C7F33C] font-mono">{formatTime(countdown)}</span></span>
+                  <span>{t("login_page.otp_resend_label")}<span className="text-[#C7F33C] font-mono">{formatTime(countdown)}</span></span>
                 ) : (
                   <button
                     type="button"
                     onClick={handleResendOtp}
                     className="font-bold text-[#C7F33C] hover:underline transition-all"
                   >
-                    {"Kodni qayta yuborish 🔄"}
+                    {t("login_page.otp_resend_btn")}
                   </button>
                 )}
               </div>
@@ -465,7 +465,7 @@ export default function RegisterPage() {
                 }}
                 className="text-[12px] text-[#707075] hover:text-white transition-all font-medium"
               >
-                {"Ma'lumotlarni o'zgartirish ⬅️"}
+                {t("login_page.otp_change_data")}
               </button>
             </div>
           </form>

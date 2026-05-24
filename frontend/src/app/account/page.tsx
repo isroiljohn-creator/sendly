@@ -11,8 +11,10 @@ import {
   X
 } from "lucide-react";
 import { db, type User } from "@/lib/db";
+import { useI18n } from "@/i18n/I18nProvider";
 
 export default function AccountPage() {
+  const { t } = useI18n();
   const [activeTab, setActiveTab] = useState<"general" | "billing" | "limits" | "bonuses">("general");
 
   // User state
@@ -123,7 +125,7 @@ export default function AccountPage() {
     const updatedUser = { ...currentUser, fullName: name, email, password };
     localStorage.setItem("replai_current_user", JSON.stringify(updatedUser));
     setCurrentUser(updatedUser);
-    showAlert("Saqlandi", "Profil ma'lumotlari muvaffaqiyatli yangilandi.");
+    showAlert(t("common.success"), t("pages.account.general.desc") + " " + t("common.success").toLowerCase());
   };
 
   const handleGetOtp = (e: React.FormEvent) => {
@@ -132,17 +134,17 @@ export default function AccountPage() {
     
     const rawNumber = cardNumInput.replace(/\s/g, "");
     if (rawNumber.length < 16) {
-      setCardError("Karta raqami noto'g'ri yoki to'liq emas.");
+      setCardError(t("pages.account.billing.card_input_error"));
       return;
     }
     if (cardExpiryInput.length < 5) {
-      setCardError("Karta amal qilish muddati noto'g'ri kiritilgan.");
+      setCardError(t("pages.account.billing.expiry_input_error"));
       return;
     }
 
     setCardStep("otp");
     setOtpTimer(120);
-    showAlert("SMS kod yuborildi", "Tasdiqlash kodi telefon raqamingizga yuborildi.");
+    showAlert(t("pages.account.billing.sms_sent"), t("pages.account.billing.sms_sent_msg"));
   };
 
   const handleVerifyOtp = (e: React.FormEvent) => {
@@ -150,7 +152,7 @@ export default function AccountPage() {
     setCardError("");
 
     if (otpCode.length < 4) {
-      setCardError("Tasdiqlash kodi noto'g'ri yoki to'liq emas.");
+      setCardError(t("pages.account.billing.otp_input_error"));
       return;
     }
 
@@ -163,9 +165,9 @@ export default function AccountPage() {
       setOtpCode("");
       setCardStep("card");
       setIsLinking(false);
-      showAlert("Muvaffaqiyatli", "Karta muvaffaqiyatli ulandi va 7 kunlik PRO faollashtirildi!");
+      showAlert(t("common.success"), t("pages.account.billing.link_success"));
     } else {
-      setCardError(res.error || "Tasdiqlash kodi noto'g'ri.");
+      setCardError(res.error || t("pages.account.billing.otp_error"));
     }
   };
 
@@ -178,7 +180,7 @@ export default function AccountPage() {
       setCurrentUser(updated);
       localStorage.setItem("replai_current_user", JSON.stringify(updated));
     }
-    showAlert("Bekor qilindi", "Karta o'chirildi va bepul tarifga o'tildi.");
+    showAlert(t("common.cancel"), t("pages.account.billing.card_unlink_success"));
   };
 
   const handleSelectPlan = (plan: "free" | "pro" | "premium") => {
@@ -186,13 +188,13 @@ export default function AccountPage() {
     const updated = db.getCurrentUser();
     setCurrentUser(updated);
     setIsPricingOpen(false);
-    showAlert("Tarif yangilandi", `Tarifingiz muvaffaqiyatli ${plan.toUpperCase()} ga o'zgartirildi.`);
+    showAlert(t("pages.account.billing.plan_updated"), t("pages.account.billing.plan_updated_msg").replace("{plan}", plan.toUpperCase()));
   };
 
   const handleVoucherSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!voucherCode.trim()) return;
-    showAlert("Kupon faollashtirildi", `"${voucherCode.toUpperCase()}" kuponi muvaffaqiyatli kiritildi! Hisobingizga $10 bonus qo'shildi.`);
+    showAlert(t("pages.account.bonuses.success_title"), t("pages.account.bonuses.success_msg").replace("{code}", voucherCode.toUpperCase()));
     setVoucherCode("");
   };
 
@@ -205,8 +207,8 @@ export default function AccountPage() {
   return (
     <AppLayout>
       <PageHeader 
-        title="Mening akkauntim" 
-        breadcrumbs="Boshqaruv / Mening akkauntim" 
+        title={t("pages.account.title")} 
+        breadcrumbs={t("pages.account.breadcrumb")} 
       />
 
       <div className="flex bg-white rounded-[24px] border border-[#D8D8D8] min-h-[calc(100vh-180px)] overflow-hidden shadow-sm mt-3">
@@ -214,7 +216,7 @@ export default function AccountPage() {
         <div className="w-[260px] shrink-0 border-r border-[#E8E8E8] flex flex-col justify-between bg-white p-5">
           <div className="flex flex-col gap-6">
             <div>
-              <h2 className="text-[17px] font-bold text-black px-2">Mening akkauntim</h2>
+              <h2 className="text-[17px] font-bold text-black px-2">{t("pages.account.title")}</h2>
             </div>
 
             <div className="flex flex-col gap-1">
@@ -226,7 +228,7 @@ export default function AccountPage() {
                     : "text-[#707070] hover:bg-[#F9F9F7] hover:text-black"
                 }`}
               >
-                Umumiy sozlamalar
+                {t("pages.account.tabs.general")}
               </button>
 
               <button
@@ -237,7 +239,7 @@ export default function AccountPage() {
                     : "text-[#707070] hover:bg-[#F9F9F7] hover:text-black"
                 }`}
               >
-                {"To'lov va tariflar"}
+                {t("pages.account.tabs.billing")}
               </button>
 
               <button
@@ -248,7 +250,7 @@ export default function AccountPage() {
                     : "text-[#707070] hover:bg-[#F9F9F7] hover:text-black"
                 }`}
               >
-                Limitlar
+                {t("pages.account.tabs.limits")}
               </button>
 
               <button
@@ -259,7 +261,7 @@ export default function AccountPage() {
                     : "text-[#707070] hover:bg-[#F9F9F7] hover:text-black"
                 }`}
               >
-                Bonuslar
+                {t("pages.account.tabs.bonuses")}
               </button>
             </div>
           </div>
@@ -274,51 +276,51 @@ export default function AccountPage() {
           {activeTab === "general" && (
             <div className="max-w-[600px] flex flex-col gap-6">
               <div>
-                <h3 className="text-[28px] font-bold text-black">Umumiy sozlamalar</h3>
-                <p className="text-[13px] text-[#707070] mt-1.5">{"Profil ma'lumotlarini tahrirlang"}</p>
+                <h3 className="text-[28px] font-bold text-black">{t("pages.account.general.title")}</h3>
+                <p className="text-[13px] text-[#707070] mt-1.5">{t("pages.account.general.desc")}</p>
               </div>
 
               <form onSubmit={handleSaveGeneral} className="flex flex-col gap-5 mt-2">
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-[11px] font-bold text-[#707070] uppercase tracking-wider">Ism va familiya</label>
+                  <label className="text-[11px] font-bold text-[#707070] uppercase tracking-wider">{t("pages.account.general.name")}</label>
                   <input
                     type="text"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     className="w-full rounded-[10px] border border-[#D8D8D8] px-4 py-3 text-[13px] text-black focus:outline-none focus:border-black"
-                    placeholder="Ismingizni kiriting"
+                    placeholder={t("pages.account.general.name_placeholder")}
                     required
                   />
                 </div>
 
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-[11px] font-bold text-[#707070] uppercase tracking-wider">Elektron pochta (Email)</label>
+                  <label className="text-[11px] font-bold text-[#707070] uppercase tracking-wider">{t("pages.account.general.email")}</label>
                   <input
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     className="w-full rounded-[10px] border border-[#D8D8D8] px-4 py-3 text-[13px] text-black focus:outline-none focus:border-black"
-                    placeholder="email@example.com"
+                    placeholder={t("pages.account.general.email_placeholder")}
                     required
                   />
                 </div>
 
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-[11px] font-bold text-[#707070] uppercase tracking-wider">Parol</label>
+                  <label className="text-[11px] font-bold text-[#707070] uppercase tracking-wider">{t("pages.account.general.password")}</label>
                   <input
                     type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     className="w-full rounded-[10px] border border-[#D8D8D8] px-4 py-3 text-[13px] text-black focus:outline-none focus:border-black bg-white"
-                    placeholder="Yangi parol kiriting"
+                    placeholder={t("pages.account.general.password_placeholder")}
                   />
-                  <p className="text-[10px] text-[#707070] mt-0.5">{"Profil ma'lumotlarini saqlaganingizda parolingiz ham o'zgaradi."}</p>
+                  <p className="text-[10px] text-[#707070] mt-0.5">{t("pages.account.general.password_desc")}</p>
                 </div>
 
                 <div className="mt-2 flex justify-start">
                   <Button type="submit" variant="primary" className="gap-2 px-6 py-3 rounded-[10px] text-[13px]">
                     <Save size={14} />
-                    <span>Saqlash</span>
+                    <span>{t("common.save")}</span>
                   </Button>
                 </div>
               </form>
@@ -333,34 +335,24 @@ export default function AccountPage() {
                 <div>
                   <div className="flex items-center gap-3">
                     <h3 className="text-[20px] font-bold text-black">
-                      {currentUser?.plan === "premium" 
-                        ? "Premium rejasi" 
-                        : currentUser?.plan === "pro" 
-                        ? "Pro rejasi" 
-                        : "Bepul reja"}
+                      {currentUser?.plan === "premium" ? t("pages.account.billing.premium_plan") : currentUser?.plan === "pro" ? t("pages.account.billing.pro_plan") : t("pages.account.billing.free_plan")}
                     </h3>
                   </div>
                   <p className="text-[12px] text-[#707070] mt-1.5">
-                    {currentUser?.isCardLinked 
-                      ? "Keyingi to'lov 9-oktabr, 2026"
-                      : "Avtomatlashtirish imkoniyatlarini kengaytirish uchun tarifingizni yangilang."}
+                    {currentUser?.isCardLinked ? t("pages.account.billing.next_payment").replace("{date}", "9-oktabr, 2026") : t("pages.account.billing.upgrade_desc")}
                   </p>
                 </div>
 
                 <div className="text-right flex flex-col items-end">
                   <div className="text-[20px] font-bold text-black leading-none">
-                    {currentUser?.plan === "premium" 
-                      ? "1 000 000 UZS" 
-                      : currentUser?.plan === "pro" 
-                      ? "150 000 UZS" 
-                      : "0 UZS"}
+                    {currentUser?.plan === "premium" ? "1 000 000 UZS" : currentUser?.plan === "pro" ? "150 000 UZS" : "0 UZS"}
                   </div>
                   {currentUser?.isCardLinked && (
                     <button 
                       onClick={() => setIsUnlinkModalOpen(true)}
                       className="text-[11px] text-[#707070] hover:text-black underline mt-2 block"
                     >
-                      Obunani bekor qilish
+                      {t("pages.account.billing.cancel_sub")}
                     </button>
                   )}
                 </div>
@@ -373,7 +365,7 @@ export default function AccountPage() {
                   className="flex items-center gap-1.5 text-[#2563EB] hover:text-[#1d4ed8] hover:underline font-semibold text-[13px]"
                 >
                   <CreditCard size={15} />
-                  <span>{"Tarifni o'zgartirish"}</span>
+                  <span>{t("pages.account.billing.change_plan")}</span>
                 </button>
               </div>
 
@@ -402,7 +394,7 @@ export default function AccountPage() {
               {/* Card Linking Form */}
               {isLinking && (
                 <Card className="border border-[#D8D8D8] p-5 mt-4 rounded-[16px] animate-in fade-in slide-in-from-top-4 duration-200">
-                  <h3 className="text-[15px] font-semibold text-black mb-4">{"Karta ulash (UzCard / Humo / Visa)"}</h3>
+                  <h3 className="text-[15px] font-semibold text-black mb-4">{t("pages.account.billing.link_card_title")}</h3>
                   {cardError && (
                     <div className="bg-red-50 text-red-600 rounded-[10px] p-3 text-[11px] font-medium mb-4">
                       {cardError}
@@ -412,7 +404,7 @@ export default function AccountPage() {
                   {cardStep === "card" ? (
                     <form onSubmit={handleGetOtp} className="flex flex-col gap-4">
                       <div className="flex flex-col gap-1.5">
-                        <label className="text-[10px] font-bold text-[#707070] uppercase">Karta raqami</label>
+                        <label className="text-[10px] font-bold text-[#707070] uppercase">{t("pages.account.billing.card_number")}</label>
                         <input
                           type="text"
                           value={cardNumInput}
@@ -463,10 +455,10 @@ export default function AccountPage() {
                           onClick={() => setIsLinking(false)}
                           className="rounded-[10px] text-[12px] px-4 py-2"
                         >
-                          Bekor qilish
+                          {t("common.cancel")}
                         </Button>
                         <Button type="submit" variant="accent" className="rounded-[10px] text-[12px] px-4 py-2 bg-[#2563EB] hover:bg-[#1d4ed8] text-white">
-                          Ulash
+                          {t("common.connect")}
                         </Button>
                       </div>
                     </form>
@@ -474,8 +466,7 @@ export default function AccountPage() {
                     <form onSubmit={handleVerifyOtp} className="flex flex-col gap-4">
                       <div className="flex flex-col gap-1.5">
                         <p className="text-[12px] text-[#707070]">
-                          {"SMS kod kiritilishi kutilmoqda. Amal qilish muddati: "}
-                          <span className="font-semibold text-black">{formatTimer(otpTimer)}</span>
+                          {t("pages.account.billing.otp_waiting").replace("{timer}", formatTimer(otpTimer))}
                         </p>
                         <input
                           type="text"
@@ -497,10 +488,10 @@ export default function AccountPage() {
                           }}
                           className="rounded-[10px] text-[12px] px-4 py-2"
                         >
-                          Orqaga
+                          {t("common.back")}
                         </Button>
                         <Button type="submit" variant="accent" className="rounded-[10px] text-[12px] px-4 py-2 bg-[#2563EB] hover:bg-[#1d4ed8] text-white">
-                          Tasdiqlash
+                          {t("common.confirm")}
                         </Button>
                       </div>
                     </form>
@@ -514,14 +505,14 @@ export default function AccountPage() {
           {activeTab === "limits" && (
             <div className="max-w-[640px] flex flex-col gap-6">
               <div>
-                <h3 className="text-[28px] font-bold text-black">Limitlar</h3>
-                <p className="text-[13px] text-[#707070] mt-1.5">Resurslardan foydalanish limitlari</p>
+                <h3 className="text-[28px] font-bold text-black">{t("pages.account.limits.title")}</h3>
+                <p className="text-[13px] text-[#707070] mt-1.5">{t("pages.account.limits.desc")}</p>
               </div>
 
               <div className="flex flex-col gap-6 mt-2">
                 <div>
                   <div className="flex justify-between items-center text-[12px] text-black font-semibold mb-2">
-                    <span>{"Avtomatlashtirishlar (Faol)"}</span>
+                    <span>{t("pages.account.limits.active_automations")}</span>
                     <span>{`${activeAutomationsCount} / ${currentUser?.plan === "premium" ? 50 : 5}`}</span>
                   </div>
                   <div className="w-full bg-[#E5E5E5] rounded-full h-2 overflow-hidden">
@@ -531,7 +522,7 @@ export default function AccountPage() {
 
                 <div>
                   <div className="flex justify-between items-center text-[12px] text-black font-semibold mb-2">
-                    <span>Ulangan Kanallar</span>
+                    <span>{t("pages.account.limits.connected_channels")}</span>
                     <span>{`${channelsCount} / ${currentUser?.plan === "premium" ? 10 : 1}`}</span>
                   </div>
                   <div className="w-full bg-[#E5E5E5] rounded-full h-2 overflow-hidden">
@@ -553,8 +544,8 @@ export default function AccountPage() {
           {activeTab === "bonuses" && (
             <div className="max-w-[640px] flex flex-col gap-6">
               <div>
-                <h3 className="text-[28px] font-bold text-black">Bonuslar</h3>
-                <p className="text-[13px] text-[#707070] mt-1.5">Bonus olish uchun promokodni kiriting</p>
+                <h3 className="text-[28px] font-bold text-black">{t("pages.account.bonuses.title")}</h3>
+                <p className="text-[13px] text-[#707070] mt-1.5">{t("pages.account.bonuses.desc")}</p>
               </div>
               
               <form onSubmit={handleVoucherSubmit} className="flex gap-3 items-center justify-start mt-2 pb-6 border-b border-[#F0F0F0]">
@@ -563,31 +554,31 @@ export default function AccountPage() {
                   value={voucherCode}
                   onChange={(e) => setVoucherCode(e.target.value)}
                   className="rounded-[10px] border border-[#D8D8D8] px-4 py-3 text-[13px] text-black focus:outline-none focus:border-black uppercase font-semibold w-[320px]"
-                  placeholder="Promokodni kiriting"
+                  placeholder={t("pages.account.bonuses.placeholder")}
                 />
                 <button type="submit" className="h-[44px] bg-[#2563EB] hover:bg-[#1D4ED8] text-white font-semibold text-[13px] px-6 rounded-[10px] transition-colors">
-                  Faollashtirish
+                  {t("pages.account.bonuses.activate")}
                 </button>
               </form>
 
               <div className="mt-6">
-                <h4 className="text-[12px] font-bold text-[#707070] uppercase tracking-wider mb-3">Mavjud bonuslaringiz</h4>
+                <h4 className="text-[12px] font-bold text-[#707070] uppercase tracking-wider mb-3">{t("pages.account.bonuses.my_bonuses")}</h4>
                 
                 <div className="flex flex-col gap-3">
                   <div className="flex items-center justify-between p-4 bg-[#C7F33C]/10 border border-[#C7F33C]/30 rounded-[14px]">
                     <div>
-                      <p className="text-[13px] font-bold text-[#1A2906]">{"$10.00 Ro'yxatdan o'tish bonusi"}</p>
-                      <p className="text-[10px] text-[#5A7C1E] mt-0.5">{"Avtomatik hisobga o'tkazilgan"}</p>
+                      <p className="text-[13px] font-bold text-[#1A2906]">{t("pages.account.bonuses.reg_bonus")}</p>
+                      <p className="text-[10px] text-[#5A7C1E] mt-0.5">{t("pages.account.bonuses.reg_bonus_desc")}</p>
                     </div>
-                    <span className="bg-[#C7F33C] text-[#1A2906] text-[10px] font-bold px-2 py-0.5 rounded-full">FAOL</span>
+                    <span className="bg-[#C7F33C] text-[#1A2906] text-[10px] font-bold px-2 py-0.5 rounded-full">{t("common.active")}</span>
                   </div>
 
                   <div className="flex items-center justify-between p-4 bg-white border border-[#F0F0F0] rounded-[14px]">
                     <div>
-                      <p className="text-[13px] font-bold text-black">{"7 kunlik PRO sinov muddati"}</p>
-                      <p className="text-[10px] text-[#707070] mt-0.5">Karta ulanganda faollashadi</p>
+                      <p className="text-[13px] font-bold text-black">{t("pages.account.bonuses.trial_bonus")}</p>
+                      <p className="text-[10px] text-[#707070] mt-0.5">{t("pages.account.bonuses.trial_bonus_desc")}</p>
                     </div>
-                    <span className="bg-[#F0F0F0] text-[#707070] text-[10px] font-bold px-2 py-0.5 rounded-full">KUTILMOQDA</span>
+                    <span className="bg-[#F0F0F0] text-[#707070] text-[10px] font-bold px-2 py-0.5 rounded-full">{t("pages.settings_page.no_channel") == "Kanal ulanmagan" ? "KUTILMOQDA" : "WAITING"}</span>
                   </div>
                 </div>
               </div>
@@ -607,10 +598,10 @@ export default function AccountPage() {
         isOpen={isUnlinkModalOpen}
         onClose={() => setIsUnlinkModalOpen(false)}
         onConfirm={handleUnlinkCard}
-        title="Obunani bekor qilish"
-        message="Haqiqatan ham premium obunangizni bekor qilmoqchimisiz? Obuna bekor bo'lgandan so'ng premium afzalliklar yo'qotiladi."
-        confirmText="Bekor qilish"
-        cancelText="Orqaga"
+        title={t("pages.account.cancel_confirm.title")}
+        message={t("pages.account.cancel_confirm.message")}
+        confirmText={t("pages.account.cancel_confirm.confirm")}
+        cancelText={t("pages.account.cancel_confirm.cancel")}
       />
       {/* ── PRICING MODAL ── */}
       {isPricingOpen && (
@@ -618,8 +609,8 @@ export default function AccountPage() {
           <div className="bg-white rounded-[32px] w-full max-w-[720px] shadow-2xl overflow-hidden p-8 border border-[#D8D8D8] my-8 animate-in fade-in zoom-in-95 duration-200">
             <div className="flex items-center justify-between pb-4 border-b border-[#F0F0F0] mb-6">
               <div>
-                <h3 className="text-[18px] font-black text-black">Tariflar va rejalar</h3>
-                <p className="text-[12px] text-[#707070] mt-1">Loyiha ehtiyojlariga mos tarifni tanlang</p>
+                <h3 className="text-[18px] font-black text-black">{t("pages.account.pricing.title")}</h3>
+                <p className="text-[12px] text-[#707070] mt-1">{t("pages.account.pricing.desc")}</p>
               </div>
               <button 
                 onClick={() => setIsPricingOpen(false)} 
@@ -644,7 +635,7 @@ export default function AccountPage() {
                             : "text-[#707070] hover:text-black"
                         }`}
                       >
-                        Oylik
+                        {t("pages.account.pricing.monthly")}
                       </button>
                       <button
                         type="button"
@@ -655,7 +646,7 @@ export default function AccountPage() {
                             : "text-[#707070] hover:text-black"
                         }`}
                       >
-                        <span>Yillik</span>
+                        <span>{t("pages.account.pricing.yearly")}</span>
                         <span className="bg-[#C7F33C] text-black text-[9px] font-extrabold px-1.5 py-0.5 rounded-full">-20%</span>
                       </button>
                     </div>
@@ -672,7 +663,7 @@ export default function AccountPage() {
                         <div className="flex justify-between items-start">
                           <div>
                             <h4 className="text-[16px] font-bold text-black uppercase tracking-wider">SENDLY PRO</h4>
-                            <p className="text-[11px] text-[#707070] mt-1">Kichik bizneslar uchun</p>
+                            <p className="text-[11px] text-[#707070] mt-1">{t("pages.account.pricing.pro_desc")}</p>
                           </div>
                           {currentUser?.plan === "pro" && (
                             <span className="bg-[#EFF2FC] text-black text-[9px] font-bold px-2 py-0.5 rounded-full">
@@ -716,7 +707,7 @@ export default function AccountPage() {
                               : "bg-[#EFF2FC] text-black hover:bg-[#e4e8f5]"
                           }`}
                         >
-                          {currentUser?.plan === "pro" ? "Joriy tarif" : "Proga o'tish"}
+                          {currentUser?.plan === "pro" ? t("pages.account.pricing.current_plan") : t("pages.account.pricing.switch_pro")}
                         </button>
                       </div>
                     </div>
@@ -728,14 +719,14 @@ export default function AccountPage() {
                         : "border-white/10 hover:border-white/20"
                     }`}>
                       <div className="absolute top-0 right-0 bg-[#C7F33C] text-black text-[9px] font-extrabold uppercase px-3.5 py-1 rounded-bl-[14px]">
-                        Tavsiya etiladi
+                        {t("pages.account.pricing.recommended")}
                       </div>
 
                       <div>
                         <div className="flex justify-between items-start">
                           <div>
                             <h4 className="text-[16px] font-bold text-[#C7F33C] uppercase tracking-wider">SENDLY PREMIUM</h4>
-                            <p className="text-[11px] text-white/60 mt-1">{"Katta va tez o'suvchi loyihalar"}</p>
+                            <p className="text-[11px] text-white/60 mt-1">{t("pages.account.pricing.premium_desc")}</p>
                           </div>
                           {currentUser?.plan === "premium" && (
                             <span className="bg-white/10 text-[#C7F33C] text-[9px] font-bold px-2 py-0.5 rounded-full">
@@ -780,7 +771,7 @@ export default function AccountPage() {
                               : "bg-[#C7F33C] text-black hover:bg-[#b0d82f]"
                           }`}
                         >
-                          {currentUser?.plan === "premium" ? "Joriy tarif" : "Premiumga o'tish"}
+                          {currentUser?.plan === "premium" ? t("pages.account.pricing.current_plan") : t("pages.account.pricing.switch_premium")}
                         </button>
                       </div>
                     </div>

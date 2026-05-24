@@ -53,93 +53,95 @@ interface NodeData {
   buttons?: ButtonItem[];
 }
 
-// ─────────── TEMPLATES ────────────
-const TEMPLATE_FLOWS: Record<string, { nodes: Node<NodeData>[]; edges: Edge[] }> = {
-  lead_magnet: {
-    nodes: [
-      { id: "n1", type: "input", data: { label: "Trigger: DM – kitob, kurs", nodeType: "trigger", triggerSource: "dm", triggerMatch: "contains", triggerKeywords: "kitob, kurs, bonus" }, position: { x: 250, y: 50 }, style: { background: "#C7F33C", color: "#1A2906", border: "1px solid #9BC92E", borderRadius: "14px", padding: "12px", fontSize: "12px", fontWeight: 500, width: 240 } },
-      { id: "n2", data: { label: "Shart: Obunachimi?", nodeType: "condition", conditionType: "is_follower", conditionValue: "" }, position: { x: 250, y: 200 }, style: { background: "#000", color: "#fff", border: "1px solid #333", borderRadius: "14px", padding: "12px", fontSize: "12px", width: 240 } },
-      { id: "n3", data: { label: "DM: Mana bepul qo'llanma 👇\nhttps://drive.google.com/...", nodeType: "message", buttons: [{ id: "b1", label: "📥 Qo'llanmani olish", type: "link", url: "https://t.me/yourusername" }] }, position: { x: 100, y: 370 }, style: { background: "#fff", color: "#000", border: "1px solid #E8E8E8", borderRadius: "14px", padding: "12px", fontSize: "12px", width: 240 } },
-      { id: "n4", data: { label: "DM: Avval @account'ga obuna bo'lishingizni so'raymiz 🙏", nodeType: "message", buttons: [] }, position: { x: 420, y: 370 }, style: { background: "#fff", color: "#000", border: "1px solid #E8E8E8", borderRadius: "14px", padding: "12px", fontSize: "12px", width: 240 } },
-    ],
-    edges: [
-      { id: "e1", source: "n1", target: "n2", animated: true, style: { stroke: "#000", strokeWidth: 1.5 }, markerEnd: { type: MarkerType.ArrowClosed, color: "#000" } },
-      { id: "e2", source: "n2", target: "n3", label: "Ha", animated: true, style: { stroke: "#16A34A", strokeWidth: 1.5 }, markerEnd: { type: MarkerType.ArrowClosed, color: "#16A34A" } },
-      { id: "e3", source: "n2", target: "n4", label: "Yo'q", animated: true, style: { stroke: "#DC2626", strokeWidth: 1.5 }, markerEnd: { type: MarkerType.ArrowClosed, color: "#DC2626" } },
-    ],
-  },
-  story_coupon: {
-    nodes: [
-      { id: "n1", type: "input", data: { label: "Trigger: Story Mention", nodeType: "trigger", triggerSource: "story_mention", triggerMatch: "any" }, position: { x: 250, y: 50 }, style: { background: "#C7F33C", color: "#1A2906", border: "1px solid #9BC92E", borderRadius: "14px", padding: "12px", fontSize: "12px", fontWeight: 500, width: 240 } },
-      { id: "n2", data: { label: "DM: Bizni Stories-da belgilaganingiz uchun rahmat! 🎉\nMana sizga maxsus kupon: STORY20", nodeType: "message", buttons: [{ id: "b1", label: "🛍️ Chegirma bilan buyurtma", type: "link", url: "https://t.me/yourusername" }] }, position: { x: 250, y: 200 }, style: { background: "#fff", color: "#000", border: "1px solid #E8E8E8", borderRadius: "14px", padding: "12px", fontSize: "12px", width: 240 } },
-      { id: "n3", data: { label: "Harakat: 'story_user' tegini qo'sh", nodeType: "action", actionType: "add_tag", actionValue: "story_user" }, position: { x: 250, y: 400 }, style: { background: "#F0F0F0", color: "#000", border: "1px solid #dcdcdc", borderRadius: "14px", padding: "12px", fontSize: "12px", width: 240 } },
-    ],
-    edges: [
-      { id: "e1", source: "n1", target: "n2", animated: true, style: { stroke: "#000", strokeWidth: 1.5 }, markerEnd: { type: MarkerType.ArrowClosed, color: "#000" } },
-      { id: "e2", source: "n2", target: "n3", animated: true, style: { stroke: "#000", strokeWidth: 1.5 }, markerEnd: { type: MarkerType.ArrowClosed, color: "#000" } },
-    ],
-  },
-  comment_dm: {
-    nodes: [
-      { id: "n1", type: "input", data: { label: "Trigger: Izoh – narxi, batafsil", nodeType: "trigger", triggerSource: "comment", triggerMatch: "contains", triggerKeywords: "narxi, batafsil, link" }, position: { x: 250, y: 50 }, style: { background: "#C7F33C", color: "#1A2906", border: "1px solid #9BC92E", borderRadius: "14px", padding: "12px", fontSize: "12px", fontWeight: 500, width: 240 } },
-      { id: "n2", data: { label: "Izoh javob: Salom! DM-ga yozdim 📩", nodeType: "message", buttons: [] }, position: { x: 250, y: 200 }, style: { background: "#fff", color: "#000", border: "1px solid #E8E8E8", borderRadius: "14px", padding: "12px", fontSize: "12px", width: 240 } },
-      { id: "n3", data: { label: "DM: Mana mahsulot haqida batafsil ma'lumot va narxlar 👇", nodeType: "message", buttons: [{ id: "b1", label: "💰 Narxlarni ko'rish", type: "link", url: "https://t.me/yourusername" }, { id: "b2", label: "📞 Bog'lanish", type: "action" }] }, position: { x: 250, y: 370 }, style: { background: "#fff", color: "#000", border: "1px solid #E8E8E8", borderRadius: "14px", padding: "12px", fontSize: "12px", width: 240 } },
-    ],
-    edges: [
-      { id: "e1", source: "n1", target: "n2", animated: true, style: { stroke: "#000", strokeWidth: 1.5 }, markerEnd: { type: MarkerType.ArrowClosed, color: "#000" } },
-      { id: "e2", source: "n2", target: "n3", animated: true, style: { stroke: "#000", strokeWidth: 1.5 }, markerEnd: { type: MarkerType.ArrowClosed, color: "#000" } },
-    ],
-  },
-  welcome_faq: {
-    nodes: [
-      { id: "n1", type: "input", data: { label: "Trigger: DM – salom, start", nodeType: "trigger", triggerSource: "dm", triggerMatch: "contains", triggerKeywords: "salom, start, boshlash" }, position: { x: 250, y: 50 }, style: { background: "#C7F33C", color: "#1A2906", border: "1px solid #9BC92E", borderRadius: "14px", padding: "12px", fontSize: "12px", fontWeight: 500, width: 240 } },
-      { id: "n2", data: { label: "DM: Assalomu alaykum! Xizmatlarimizdan qaysi biri bilan qiziqasiz?", nodeType: "message", buttons: [{ id: "b1", label: "💼 Xizmatlar", type: "action" }, { id: "b2", label: "💰 Narxlar", type: "action" }, { id: "b3", label: "📞 Operator bilan bog'lanish", type: "link", url: "https://t.me/yourusername" }] }, position: { x: 250, y: 200 }, style: { background: "#fff", color: "#000", border: "1px solid #E8E8E8", borderRadius: "14px", padding: "12px", fontSize: "12px", width: 240 } },
-      { id: "n3", data: { label: "DM: Bizning xizmatlarimiz: ...", nodeType: "message", buttons: [] }, position: { x: 50, y: 420 }, style: { background: "#fff", color: "#000", border: "1px solid #E8E8E8", borderRadius: "14px", padding: "12px", fontSize: "12px", width: 240 } },
-      { id: "n4", data: { label: "DM: Narxlarimiz: Asosiy – $10/oy, PRO – $25/oy", nodeType: "message", buttons: [] }, position: { x: 450, y: 420 }, style: { background: "#fff", color: "#000", border: "1px solid #E8E8E8", borderRadius: "14px", padding: "12px", fontSize: "12px", width: 240 } },
-    ],
-    edges: [
-      { id: "e1", source: "n1", target: "n2", animated: true, style: { stroke: "#000", strokeWidth: 1.5 }, markerEnd: { type: MarkerType.ArrowClosed, color: "#000" } },
-      { id: "e2", source: "n2", target: "n3", animated: true, style: { stroke: "#000", strokeWidth: 1.5 }, markerEnd: { type: MarkerType.ArrowClosed, color: "#000" } },
-      { id: "e3", source: "n2", target: "n4", animated: true, style: { stroke: "#000", strokeWidth: 1.5 }, markerEnd: { type: MarkerType.ArrowClosed, color: "#000" } },
-    ],
-  },
-};
 
-// ─────────── TRIGGER SOURCE OPTIONS ────────────
-const TRIGGER_SOURCES = [
-  { value: "dm", label: "Direct Message (DM)" },
-  { value: "comment", label: "Post Comment (Izoh)" },
-  { value: "story_mention", label: "Story Mention (Hikoyada belgilash)" },
-  { value: "story_reply", label: "Story Reply (Hikoyaga javob)" },
-  { value: "live_comment", label: "Live Stream Comment (Jonli efir)" },
-];
-
-const TRIGGER_MATCHES = [
-  { value: "any", label: "Istalgan xabar / izoh" },
-  { value: "contains", label: "Xabar qamrab olsa (contains)" },
-  { value: "is", label: "To'liq mos kelsa (is exact)" },
-];
-
-const CONDITION_TYPES = [
-  { value: "is_follower", label: "Obunachimi? (Is Follower?)" },
-  { value: "has_tag", label: "Teg mavjudmi? (Has Tag)" },
-  { value: "variable_check", label: "O'zgaruvchi qiymati (Variable)" },
-];
-
-const ACTION_TYPES = [
-  { value: "add_tag", label: "Teg qo'shish (Add Tag)" },
-  { value: "remove_tag", label: "Tegni o'chirish (Remove Tag)" },
-  { value: "set_variable", label: "O'zgaruvchi belgilash (Set Variable)" },
-  { value: "webhook", label: "Webhook yuborish" },
-  { value: "notify_telegram", label: "Telegram admin bildirishnomasi" },
-];
 
 // ─────────── COMPONENT ────────────
 export default function BuilderPage() {
   const { t } = useI18n();
+
+  const TEMPLATE_FLOWS: Record<string, { nodes: Node<NodeData>[]; edges: Edge[] }> = {
+    lead_magnet: {
+      nodes: [
+        { id: "n1", type: "input", data: { label: t("pages.builder.tmpl_lead_trigger_label"), nodeType: "trigger", triggerSource: "dm", triggerMatch: "contains", triggerKeywords: "kitob, kurs, bonus" }, position: { x: 250, y: 50 }, style: { background: "#C7F33C", color: "#1A2906", border: "1px solid #9BC92E", borderRadius: "14px", padding: "12px", fontSize: "12px", fontWeight: 500, width: 240 } },
+        { id: "n2", data: { label: t("pages.builder.tmpl_lead_cond_label"), nodeType: "condition", conditionType: "is_follower", conditionValue: "" }, position: { x: 250, y: 200 }, style: { background: "#000", color: "#fff", border: "1px solid #333", borderRadius: "14px", padding: "12px", fontSize: "12px", width: 240 } },
+        { id: "n3", data: { label: t("pages.builder.tmpl_lead_msg1_label"), nodeType: "message", buttons: [{ id: "b1", label: t("pages.builder.tmpl_lead_msg1_btn"), type: "link", url: "https://t.me/yourusername" }] }, position: { x: 100, y: 370 }, style: { background: "#fff", color: "#000", border: "1px solid #E8E8E8", borderRadius: "14px", padding: "12px", fontSize: "12px", width: 240 } },
+        { id: "n4", data: { label: t("pages.builder.tmpl_lead_msg2_label"), nodeType: "message", buttons: [] }, position: { x: 420, y: 370 }, style: { background: "#fff", color: "#000", border: "1px solid #E8E8E8", borderRadius: "14px", padding: "12px", fontSize: "12px", width: 240 } },
+      ],
+      edges: [
+        { id: "e1", source: "n1", target: "n2", animated: true, style: { stroke: "#000", strokeWidth: 1.5 }, markerEnd: { type: MarkerType.ArrowClosed, color: "#000" } },
+        { id: "e2", source: "n2", target: "n3", label: t("pages.builder.yes"), animated: true, style: { stroke: "#16A34A", strokeWidth: 1.5 }, markerEnd: { type: MarkerType.ArrowClosed, color: "#16A34A" } },
+        { id: "e3", source: "n2", target: "n4", label: t("pages.builder.no"), animated: true, style: { stroke: "#DC2626", strokeWidth: 1.5 }, markerEnd: { type: MarkerType.ArrowClosed, color: "#DC2626" } },
+      ],
+    },
+    story_coupon: {
+      nodes: [
+        { id: "n1", type: "input", data: { label: t("pages.builder.tmpl_story_trigger_label"), nodeType: "trigger", triggerSource: "story_mention", triggerMatch: "any" }, position: { x: 250, y: 50 }, style: { background: "#C7F33C", color: "#1A2906", border: "1px solid #9BC92E", borderRadius: "14px", padding: "12px", fontSize: "12px", fontWeight: 500, width: 240 } },
+        { id: "n2", data: { label: t("pages.builder.tmpl_story_msg_label"), nodeType: "message", buttons: [{ id: "b1", label: t("pages.builder.tmpl_story_msg_btn"), type: "link", url: "https://t.me/yourusername" }] }, position: { x: 250, y: 200 }, style: { background: "#fff", color: "#000", border: "1px solid #E8E8E8", borderRadius: "14px", padding: "12px", fontSize: "12px", width: 240 } },
+        { id: "n3", data: { label: t("pages.builder.tmpl_story_act_label"), nodeType: "action", actionType: "add_tag", actionValue: "story_user" }, position: { x: 250, y: 400 }, style: { background: "#F0F0F0", color: "#000", border: "1px solid #dcdcdc", borderRadius: "14px", padding: "12px", fontSize: "12px", width: 240 } },
+      ],
+      edges: [
+        { id: "e1", source: "n1", target: "n2", animated: true, style: { stroke: "#000", strokeWidth: 1.5 }, markerEnd: { type: MarkerType.ArrowClosed, color: "#000" } },
+        { id: "e2", source: "n2", target: "n3", animated: true, style: { stroke: "#000", strokeWidth: 1.5 }, markerEnd: { type: MarkerType.ArrowClosed, color: "#000" } },
+      ],
+    },
+    comment_dm: {
+      nodes: [
+        { id: "n1", type: "input", data: { label: t("pages.builder.tmpl_comment_trigger_label"), nodeType: "trigger", triggerSource: "comment", triggerMatch: "contains", triggerKeywords: "narxi, batafsil, link" }, position: { x: 250, y: 50 }, style: { background: "#C7F33C", color: "#1A2906", border: "1px solid #9BC92E", borderRadius: "14px", padding: "12px", fontSize: "12px", fontWeight: 500, width: 240 } },
+        { id: "n2", data: { label: t("pages.builder.tmpl_comment_msg1_label"), nodeType: "message", buttons: [] }, position: { x: 250, y: 200 }, style: { background: "#fff", color: "#000", border: "1px solid #E8E8E8", borderRadius: "14px", padding: "12px", fontSize: "12px", width: 240 } },
+        { id: "n3", data: { label: t("pages.builder.tmpl_comment_msg2_label"), nodeType: "message", buttons: [{ id: "b1", label: t("pages.builder.tmpl_comment_msg2_btn1"), type: "link", url: "https://t.me/yourusername" }, { id: "b2", label: t("pages.builder.tmpl_comment_msg2_btn2"), type: "action" }] }, position: { x: 250, y: 370 }, style: { background: "#fff", color: "#000", border: "1px solid #E8E8E8", borderRadius: "14px", padding: "12px", fontSize: "12px", width: 240 } },
+      ],
+      edges: [
+        { id: "e1", source: "n1", target: "n2", animated: true, style: { stroke: "#000", strokeWidth: 1.5 }, markerEnd: { type: MarkerType.ArrowClosed, color: "#000" } },
+        { id: "e2", source: "n2", target: "n3", animated: true, style: { stroke: "#000", strokeWidth: 1.5 }, markerEnd: { type: MarkerType.ArrowClosed, color: "#000" } },
+      ],
+    },
+    welcome_faq: {
+      nodes: [
+        { id: "n1", type: "input", data: { label: t("pages.builder.tmpl_welcome_trigger_label"), nodeType: "trigger", triggerSource: "dm", triggerMatch: "contains", triggerKeywords: "salom, start, boshlash" }, position: { x: 250, y: 50 }, style: { background: "#C7F33C", color: "#1A2906", border: "1px solid #9BC92E", borderRadius: "14px", padding: "12px", fontSize: "12px", fontWeight: 500, width: 240 } },
+        { id: "n2", data: { label: t("pages.builder.tmpl_welcome_msg1_label"), nodeType: "message", buttons: [{ id: "b1", label: t("pages.builder.tmpl_welcome_msg1_btn1"), type: "action" }, { id: "b2", label: t("pages.builder.tmpl_welcome_msg1_btn2"), type: "action" }, { id: "b3", label: t("pages.builder.tmpl_welcome_msg1_btn3"), type: "link", url: "https://t.me/yourusername" }] }, position: { x: 250, y: 200 }, style: { background: "#fff", color: "#000", border: "1px solid #E8E8E8", borderRadius: "14px", padding: "12px", fontSize: "12px", width: 240 } },
+        { id: "n3", data: { label: t("pages.builder.tmpl_welcome_msg2_label"), nodeType: "message", buttons: [] }, position: { x: 50, y: 420 }, style: { background: "#fff", color: "#000", border: "1px solid #E8E8E8", borderRadius: "14px", padding: "12px", fontSize: "12px", width: 240 } },
+        { id: "n4", data: { label: t("pages.builder.tmpl_welcome_msg3_label"), nodeType: "message", buttons: [] }, position: { x: 450, y: 420 }, style: { background: "#fff", color: "#000", border: "1px solid #E8E8E8", borderRadius: "14px", padding: "12px", fontSize: "12px", width: 240 } },
+      ],
+      edges: [
+        { id: "e1", source: "n1", target: "n2", animated: true, style: { stroke: "#000", strokeWidth: 1.5 }, markerEnd: { type: MarkerType.ArrowClosed, color: "#000" } },
+        { id: "e2", source: "n2", target: "n3", animated: true, style: { stroke: "#000", strokeWidth: 1.5 }, markerEnd: { type: MarkerType.ArrowClosed, color: "#000" } },
+        { id: "e3", source: "n2", target: "n4", animated: true, style: { stroke: "#000", strokeWidth: 1.5 }, markerEnd: { type: MarkerType.ArrowClosed, color: "#000" } },
+      ],
+    },
+  };
+
+  const TRIGGER_SOURCES = [
+    { value: "dm", label: t("pages.builder.trigger_dm") },
+    { value: "comment", label: t("pages.builder.trigger_comment") },
+    { value: "story_mention", label: t("pages.builder.trigger_story_mention") },
+    { value: "story_reply", label: t("pages.builder.trigger_story_reply") },
+    { value: "live_comment", label: t("pages.builder.trigger_live_comment") },
+  ];
+
+  const TRIGGER_MATCHES = [
+    { value: "any", label: t("pages.builder.match_any") },
+    { value: "contains", label: t("pages.builder.match_contains") },
+    { value: "is", label: t("pages.builder.match_is") },
+  ];
+
+  const CONDITION_TYPES = [
+    { value: "is_follower", label: t("pages.builder.cond_follower") },
+    { value: "has_tag", label: t("pages.builder.cond_tag") },
+    { value: "variable_check", label: t("pages.builder.cond_var") },
+  ];
+
+  const ACTION_TYPES = [
+    { value: "add_tag", label: t("pages.builder.act_add_tag") },
+    { value: "remove_tag", label: t("pages.builder.act_remove_tag") },
+    { value: "set_variable", label: t("pages.builder.act_set_var") },
+    { value: "webhook", label: t("pages.builder.act_webhook") },
+    { value: "notify_telegram", label: t("pages.builder.act_telegram") },
+  ];
+
   const [mounted, setMounted] = useState(false);
-  const [botName, setBotName] = useState("Yangi oqim");
+  const [botName, setBotName] = useState("");
   const [showToast, setShowToast] = useState(false);
+  const [toastMsg, setToastMsg] = useState("");
 
   const [nodes, setNodes, onNodesChange] = useNodesState<NodeData>([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
@@ -176,6 +178,7 @@ export default function BuilderPage() {
         ? db.getChannelAutomations(activeCh.id).find((a) => a.id === paramId)
         : db.getAutomations().find((a) => a.id === paramId);
       if (found) setBotName(found.name);
+      else setBotName(t("pages.builder.new_flow"));
     } else if (paramId) {
       const found = activeCh
         ? db.getChannelAutomations(activeCh.id).find((a) => a.id === paramId)
@@ -183,19 +186,20 @@ export default function BuilderPage() {
       if (found) {
         setBotName(found.name);
         setNodes([
-          { id: "n1", type: "input", data: { label: `Trigger: ${found.triggerDetails}`, nodeType: "trigger", triggerSource: found.triggerType === "story" ? "story_mention" : "dm", triggerMatch: "contains", triggerKeywords: found.triggerDetails }, position: { x: 250, y: 50 }, style: { background: "#C7F33C", color: "#1A2906", border: "1px solid #9BC92E", borderRadius: "14px", padding: "12px", fontSize: "12px", fontWeight: 500, width: 240 } },
-          { id: "n2", data: { label: "Instagram DM: Salom! Tizimga muvaffaqiyatli bog'landingiz.", nodeType: "message", buttons: [] }, position: { x: 250, y: 220 }, style: { background: "#fff", color: "#000", border: "1px solid #E8E8E8", borderRadius: "14px", padding: "12px", fontSize: "12px", width: 240 } },
+          { id: "n1", type: "input", data: { label: `${t("pages.builder.trigger_prefix")}: ${found.triggerDetails}`, nodeType: "trigger", triggerSource: found.triggerType === "story" ? "story_mention" : "dm", triggerMatch: "contains", triggerKeywords: found.triggerDetails }, position: { x: 250, y: 50 }, style: { background: "#C7F33C", color: "#1A2906", border: "1px solid #9BC92E", borderRadius: "14px", padding: "12px", fontSize: "12px", fontWeight: 500, width: 240 } },
+          { id: "n2", data: { label: t("pages.builder.initial_msg_connected"), nodeType: "message", buttons: [] }, position: { x: 250, y: 220 }, style: { background: "#fff", color: "#000", border: "1px solid #E8E8E8", borderRadius: "14px", padding: "12px", fontSize: "12px", width: 240 } },
         ]);
         setEdges([{ id: "e1", source: "n1", target: "n2", animated: true, style: { stroke: "#000", strokeWidth: 1.5 }, markerEnd: { type: MarkerType.ArrowClosed, color: "#000" } }]);
       }
     } else {
+      setBotName(t("pages.builder.new_flow"));
       setNodes([
-        { id: "n1", type: "input", data: { label: "Trigger: Kalit so'z (salom, narx)", nodeType: "trigger", triggerSource: "dm", triggerMatch: "contains", triggerKeywords: "salom, narx" }, position: { x: 250, y: 50 }, style: { background: "#C7F33C", color: "#1A2906", border: "1px solid #9BC92E", borderRadius: "14px", padding: "12px", fontSize: "12px", fontWeight: 500, width: 240 } },
-        { id: "n2", data: { label: "Instagram DM: Salom! Sizga qanday yordam bera olaman?", nodeType: "message", buttons: [] }, position: { x: 250, y: 220 }, style: { background: "#fff", color: "#000", border: "1px solid #E8E8E8", borderRadius: "14px", padding: "12px", fontSize: "12px", width: 240 } },
+        { id: "n1", type: "input", data: { label: t("pages.builder.initial_trigger_kw"), nodeType: "trigger", triggerSource: "dm", triggerMatch: "contains", triggerKeywords: "salom, narx" }, position: { x: 250, y: 50 }, style: { background: "#C7F33C", color: "#1A2906", border: "1px solid #9BC92E", borderRadius: "14px", padding: "12px", fontSize: "12px", fontWeight: 500, width: 240 } },
+        { id: "n2", data: { label: t("pages.builder.initial_msg_how_help"), nodeType: "message", buttons: [] }, position: { x: 250, y: 220 }, style: { background: "#fff", color: "#000", border: "1px solid #E8E8E8", borderRadius: "14px", padding: "12px", fontSize: "12px", width: 240 } },
       ]);
       setEdges([{ id: "e1", source: "n1", target: "n2", animated: true, style: { stroke: "#000", strokeWidth: 1.5 }, markerEnd: { type: MarkerType.ArrowClosed, color: "#000" } }]);
     }
-  }, [setNodes, setEdges]);
+  }, [setNodes, setEdges, t]);
 
   const onConnect = useCallback(
     (params: Edge | Connection) =>
@@ -225,13 +229,13 @@ export default function BuilderPage() {
     const srcLabel = TRIGGER_SOURCES.find(s => s.value === inspTriggerSource)?.label || inspTriggerSource;
     const newLabel =
       selectedNode.data.nodeType === "trigger"
-        ? `Trigger: ${srcLabel} – ${inspTriggerKeywords || "istalgan"}`
+        ? `${t("pages.builder.trigger_prefix")}: ${srcLabel} – ${inspTriggerKeywords || t("pages.builder.any_keywords")}`
         : selectedNode.data.nodeType === "condition"
-        ? `Shart: ${CONDITION_TYPES.find(c => c.value === inspConditionType)?.label || ""}`
+        ? `${t("pages.builder.condition_prefix")}: ${CONDITION_TYPES.find(c => c.value === inspConditionType)?.label || ""}`
         : selectedNode.data.nodeType === "action"
-        ? `Harakat: ${ACTION_TYPES.find(a => a.value === inspActionType)?.label || ""} – ${inspActionValue}`
+        ? `${t("pages.builder.action_prefix")}: ${ACTION_TYPES.find(a => a.value === inspActionType)?.label || ""} – ${inspActionValue}`
         : selectedNode.data.nodeType === "ai"
-        ? `AI: ${inspAiPrompt.substring(0, 40)}...`
+        ? `${t("pages.builder.ai_prefix")}: ${inspAiPrompt.substring(0, 40)}...`
         : inspLabel;
 
     setNodes((nds) =>
@@ -251,6 +255,7 @@ export default function BuilderPage() {
     const triggerNode = nodes.find((n) => n.data.nodeType === "trigger");
     const src = triggerNode?.data.triggerSource || "dm";
     const isStory = src.includes("story");
+    let savedMsg = t("pages.builder.saved_toast");
 
     if (paramId) {
       const idx = list.findIndex((a) => a.id === paramId);
@@ -258,7 +263,25 @@ export default function BuilderPage() {
         list[idx] = { ...list[idx], name: botName, triggerType: isStory ? "story" : "keyword", triggerDetails: triggerNode?.data.triggerKeywords || src };
       }
     } else {
-      list.push({ id: String(list.length + 1), name: botName, triggerType: isStory ? "story" : "keyword", triggerDetails: triggerNode?.data.triggerKeywords || src, runs: "0", completion: "100%", active: true });
+      const user = db.getCurrentUser();
+      const plan = user?.plan || "free";
+      const maxAutos = plan === "premium" ? 500 : plan === "pro" ? 50 : 2;
+      const currentActiveCount = db.getAllAutomations().filter((a) => a.active).length;
+      const shouldBeActive = currentActiveCount < maxAutos;
+
+      list.push({ 
+        id: String(list.length + 1), 
+        name: botName, 
+        triggerType: isStory ? "story" : "keyword", 
+        triggerDetails: triggerNode?.data.triggerKeywords || src, 
+        runs: "0", 
+        completion: "100%", 
+        active: shouldBeActive 
+      });
+
+      if (!shouldBeActive) {
+        savedMsg = t("pages.builder.limit_toast");
+      }
     }
 
     if (activeCh) {
@@ -266,6 +289,7 @@ export default function BuilderPage() {
     } else {
       db.saveAutomations(list);
     }
+    setToastMsg(savedMsg);
     setShowToast(true);
     setTimeout(() => { window.location.href = "/automations"; }, 1500);
   };
@@ -273,12 +297,12 @@ export default function BuilderPage() {
   const addNewNode = (type: NodeType) => {
     const id = `node-${nodes.length + 1}`;
     const configs: Record<NodeType, { label: string; style: object; data: Partial<NodeData> }> = {
-      trigger: { label: "Trigger: DM – kalit so'z", style: { background: "#C7F33C", color: "#1A2906", border: "1px solid #9BC92E", borderRadius: "14px", padding: "12px", fontSize: "12px", fontWeight: 500, width: 240 }, data: { nodeType: "trigger", triggerSource: "dm", triggerMatch: "contains", triggerKeywords: "" } },
-      message: { label: "Instagram DM: Yangi xabar", style: { background: "#fff", color: "#000", border: "1px solid #E8E8E8", borderRadius: "14px", padding: "12px", fontSize: "12px", width: 240 }, data: { nodeType: "message", buttons: [] } },
-      wait: { label: "Kutish: 15 daqiqa", style: { background: "#F0F0F0", color: "#000", border: "1px solid #dcdcdc", borderRadius: "14px", padding: "12px", fontSize: "12px", width: 240 }, data: { nodeType: "wait" } },
-      condition: { label: "Shart: Obunachimi?", style: { background: "#000", color: "#fff", border: "1px solid #333", borderRadius: "14px", padding: "12px", fontSize: "12px", width: 240 }, data: { nodeType: "condition", conditionType: "is_follower", conditionValue: "" } },
-      action: { label: "Harakat: Teg qo'shish", style: { background: "#F0F0F0", color: "#000", border: "1px solid #dcdcdc", borderRadius: "14px", padding: "12px", fontSize: "12px", width: 240 }, data: { nodeType: "action", actionType: "add_tag", actionValue: "" } },
-      ai: { label: "AI Request: Javob tayyorlash", style: { background: "#0F0F0F", color: "#C7F33C", border: "1px solid #2a2a2a", borderRadius: "14px", padding: "12px", fontSize: "12px", width: 240 }, data: { nodeType: "ai", aiPrompt: "", aiOutputVar: "ai_response" } },
+      trigger: { label: t("pages.builder.block_trigger"), style: { background: "#C7F33C", color: "#1A2906", border: "1px solid #9BC92E", borderRadius: "14px", padding: "12px", fontSize: "12px", fontWeight: 500, width: 240 }, data: { nodeType: "trigger", triggerSource: "dm", triggerMatch: "contains", triggerKeywords: "" } },
+      message: { label: t("pages.builder.block_message"), style: { background: "#fff", color: "#000", border: "1px solid #E8E8E8", borderRadius: "14px", padding: "12px", fontSize: "12px", width: 240 }, data: { nodeType: "message", buttons: [] } },
+      wait: { label: t("pages.builder.block_wait"), style: { background: "#F0F0F0", color: "#000", border: "1px solid #dcdcdc", borderRadius: "14px", padding: "12px", fontSize: "12px", width: 240 }, data: { nodeType: "wait" } },
+      condition: { label: t("pages.builder.block_condition"), style: { background: "#000", color: "#fff", border: "1px solid #333", borderRadius: "14px", padding: "12px", fontSize: "12px", width: 240 }, data: { nodeType: "condition", conditionType: "is_follower", conditionValue: "" } },
+      action: { label: t("pages.builder.block_action"), style: { background: "#F0F0F0", color: "#000", border: "1px solid #dcdcdc", borderRadius: "14px", padding: "12px", fontSize: "12px", width: 240 }, data: { nodeType: "action", actionType: "add_tag", actionValue: "" } },
+      ai: { label: t("pages.builder.ai_request_title"), style: { background: "#0F0F0F", color: "#C7F33C", border: "1px solid #2a2a2a", borderRadius: "14px", padding: "12px", fontSize: "12px", width: 240 }, data: { nodeType: "ai", aiPrompt: "", aiOutputVar: "ai_response" } },
     };
     const cfg = configs[type];
     const newNode: Node<NodeData> = { id, data: { label: cfg.label, ...cfg.data }, position: { x: 250, y: nodes.length * 120 + 50 }, style: cfg.style };
@@ -287,7 +311,7 @@ export default function BuilderPage() {
   };
 
   const addButton = () => {
-    const btn: ButtonItem = { id: `btn-${Date.now()}`, label: "Yangi tugma", type: "action" };
+    const btn: ButtonItem = { id: `btn-${Date.now()}`, label: t("pages.builder.btn_placeholder"), type: "action" };
     setInspButtons((prev) => [...prev, btn]);
   };
 
@@ -297,7 +321,7 @@ export default function BuilderPage() {
     setInspButtons((prev) => prev.map((b) => b.id === id ? { ...b, [key]: value } : b));
   };
 
-  if (!mounted) return <div className="flex h-screen items-center justify-center bg-[#E8E8E8] text-black text-[13px]">Yuklanmoqda...</div>;
+  if (!mounted) return <div className="flex h-screen items-center justify-center bg-[#E8E8E8] text-black text-[13px]">{t("common.loading")}</div>;
 
   const nodeType = selectedNode?.data.nodeType;
 
@@ -307,7 +331,7 @@ export default function BuilderPage() {
       {showToast && (
         <div className="absolute top-5 left-1/2 -translate-x-1/2 z-[999] flex items-center gap-2 bg-black text-white px-5 py-3 rounded-full shadow-2xl border border-[#C7F33C]/20 animate-in fade-in slide-in-from-top-4 duration-300">
           <CheckCircle size={16} className="text-[#C7F33C]" />
-          <span className="text-[13px] font-medium">Bot muvaffaqiyatli saqlandi!</span>
+          <span className="text-[13px] font-medium">{toastMsg}</span>
         </div>
       )}
 
@@ -333,13 +357,13 @@ export default function BuilderPage() {
       <div className="flex flex-1 overflow-hidden">
         {/* Left Palette */}
         <aside className="w-[220px] shrink-0 border-r border-[#D8D8D8] bg-white p-4 flex flex-col gap-3 overflow-y-auto">
-          <p className="text-[10px] font-semibold text-[#707070] uppercase tracking-wider px-1">Bloklar</p>
+          <p className="text-[10px] font-semibold text-[#707070] uppercase tracking-wider px-1">{t("pages.builder.blocks_title")}</p>
           {([
-            { type: "trigger" as NodeType, icon: <Zap size={15} />, label: "Start Trigger", sub: "DM, Comment, Story...", cls: "bg-[#C7F33C]/15 text-[#1A2906] border border-[#C7F33C]/40 hover:bg-[#C7F33C]/30" },
-            { type: "message" as NodeType, icon: <MessageSquare size={15} className="text-[#707070]" />, label: "Message", sub: "Instagram DM yuborish", cls: "bg-white text-black border border-[#E8E8E8] hover:bg-[#F9F9F7]" },
-            { type: "condition" as NodeType, icon: <ShieldAlert size={15} className="text-[#C7F33C]" />, label: "Condition", sub: "Shart tekshirish", cls: "bg-black text-white hover:bg-black/90" },
-            { type: "action" as NodeType, icon: <Tag size={15} className="text-[#707070]" />, label: "Action", sub: "Teg, webhook, xabar", cls: "bg-[#F0F0F0] text-black border border-[#dcdcdc] hover:bg-[#e4e4e4]" },
-            { type: "wait" as NodeType, icon: <Clock size={15} className="text-[#707070]" />, label: "Wait Delay", sub: "Tanaffus vaqti", cls: "bg-[#F0F0F0] text-black border border-[#dcdcdc] hover:bg-[#e4e4e4]" },
+            { type: "trigger" as NodeType, icon: <Zap size={15} />, label: t("pages.builder.block_trigger"), sub: t("pages.builder.block_trigger_sub"), cls: "bg-[#C7F33C]/15 text-[#1A2906] border border-[#C7F33C]/40 hover:bg-[#C7F33C]/30" },
+            { type: "message" as NodeType, icon: <MessageSquare size={15} className="text-[#707070]" />, label: t("pages.builder.block_message"), sub: t("pages.builder.block_message_sub"), cls: "bg-white text-black border border-[#E8E8E8] hover:bg-[#F9F9F7]" },
+            { type: "condition" as NodeType, icon: <ShieldAlert size={15} className="text-[#C7F33C]" />, label: t("pages.builder.block_condition"), sub: t("pages.builder.block_condition_sub"), cls: "bg-black text-white hover:bg-black/90" },
+            { type: "action" as NodeType, icon: <Tag size={15} className="text-[#707070]" />, label: t("pages.builder.block_action"), sub: t("pages.builder.block_action_sub"), cls: "bg-[#F0F0F0] text-black border border-[#dcdcdc] hover:bg-[#e4e4e4]" },
+            { type: "wait" as NodeType, icon: <Clock size={15} className="text-[#707070]" />, label: t("pages.builder.block_wait"), sub: t("pages.builder.block_wait_sub"), cls: "bg-[#F0F0F0] text-black border border-[#dcdcdc] hover:bg-[#e4e4e4]" },
           ]).map(({ type, icon, label, sub, cls }) => (
             <button key={type} onClick={() => addNewNode(type)} className={`flex w-full items-center gap-3 rounded-[12px] p-3 text-left transition-colors ${cls}`}>
               {icon}
@@ -381,7 +405,7 @@ export default function BuilderPage() {
                 </div>
                 <div>
                   <h3 className="text-[13px] font-semibold text-black leading-none">
-                    {nodeType === "trigger" ? "Start Trigger" : nodeType === "message" ? "Message Block" : nodeType === "condition" ? "Condition Block" : nodeType === "action" ? "Action Block" : nodeType === "ai" ? "AI Request" : "Wait / Delay"}
+                    {nodeType === "trigger" ? t("pages.builder.block_trigger") : nodeType === "message" ? t("pages.builder.block_message") : nodeType === "condition" ? t("pages.builder.block_condition") : nodeType === "action" ? t("pages.builder.block_action") : nodeType === "ai" ? t("pages.builder.ai_request_title") : t("pages.builder.block_wait")}
                   </h3>
                   <p className="text-[10px] text-[#707070] mt-0.5">ID: {selectedNode.id}</p>
                 </div>
@@ -394,7 +418,7 @@ export default function BuilderPage() {
                   <>
                     {/* Trigger Source Cards */}
                     <div className="flex flex-col gap-2">
-                      <p className="text-[10px] font-bold text-[#707070] uppercase tracking-widest px-0.5">Trigger manbasi</p>
+                      <p className="text-[10px] font-bold text-[#707070] uppercase tracking-widest px-0.5">{t("pages.builder.trigger_source")}</p>
                       <div className="flex flex-col gap-1.5">
                         {TRIGGER_SOURCES.map((s) => (
                           <button
@@ -416,7 +440,7 @@ export default function BuilderPage() {
                     {/* Keyword match type — only for DM / Comment */}
                     {(inspTriggerSource === "dm" || inspTriggerSource === "comment") && (
                       <div className="flex flex-col gap-2">
-                        <p className="text-[10px] font-bold text-[#707070] uppercase tracking-widest px-0.5">Moslik turi</p>
+                        <p className="text-[10px] font-bold text-[#707070] uppercase tracking-widest px-0.5">{t("pages.builder.trigger_match")}</p>
                         <div className="flex gap-2 flex-wrap">
                           {TRIGGER_MATCHES.map((m) => (
                             <button
@@ -438,14 +462,14 @@ export default function BuilderPage() {
                     {/* Keywords input */}
                     {inspTriggerMatch !== "any" && (inspTriggerSource === "dm" || inspTriggerSource === "comment") && (
                       <div className="flex flex-col gap-2">
-                        <p className="text-[10px] font-bold text-[#707070] uppercase tracking-widest px-0.5">{"Kalit so'zlar"}</p>
+                        <p className="text-[10px] font-bold text-[#707070] uppercase tracking-widest px-0.5">{t("pages.builder.trigger_keywords")}</p>
                         <input
                           value={inspTriggerKeywords}
                           onChange={(e) => setInspTriggerKeywords(e.target.value)}
-                          placeholder="salom, narx, kurs"
+                          placeholder={t("pages.builder.trigger_keywords_placeholder")}
                           className="w-full rounded-[12px] bg-[#F0F0F0] px-4 py-3 text-[12px] text-black outline-none focus:bg-[#e8e8e8] transition-colors"
                         />
-                        <p className="text-[10px] text-[#a0a0a0] px-0.5">Vergul bilan ajrating: salom, narx, kurs</p>
+                        <p className="text-[10px] text-[#a0a0a0] px-0.5">{t("pages.builder.trigger_keywords")}</p>
                       </div>
                     )}
 
@@ -453,7 +477,7 @@ export default function BuilderPage() {
                     {(inspTriggerSource === "story_mention" || inspTriggerSource === "story_reply" || inspTriggerSource === "live_comment") && (
                       <div className="flex items-start gap-2.5 p-3 rounded-[12px] bg-[#F9F9F7] border border-[#E8E8E8]">
                         <span className="text-base mt-0.5">⚡</span>
-                        <p className="text-[11px] text-[#505050] leading-relaxed">{"Bu trigger uchun kalit so'z shart emas. Belgilangan hodisa yuz berganda avtomatik ishga tushadi."}</p>
+                        <p className="text-[11px] text-[#505050] leading-relaxed">{t("pages.builder.trigger_desc_no_kw")}</p>
                       </div>
                     )}
                   </>
@@ -463,30 +487,30 @@ export default function BuilderPage() {
                 {nodeType === "message" && (
                   <>
                     <div className="flex flex-col gap-2">
-                      <p className="text-[10px] font-bold text-[#707070] uppercase tracking-widest px-0.5">Xabar matni</p>
+                      <p className="text-[10px] font-bold text-[#707070] uppercase tracking-widest px-0.5">{t("pages.builder.node_title_label")}</p>
                       <textarea
                         value={inspLabel}
                         onChange={(e) => setInspLabel(e.target.value)}
                         className="w-full min-h-[130px] rounded-[12px] bg-[#F0F0F0] px-4 py-3 text-[12px] text-black outline-none resize-none focus:bg-[#e8e8e8] transition-colors leading-relaxed"
-                        placeholder={"Xabarni yozing...\n\nO'zgaruvchi: {{user_name}}"}
+                        placeholder={t("pages.builder.placeholder_msg")}
                       />
                     </div>
 
                     {/* Buttons section */}
                     <div className="flex flex-col gap-2">
                       <div className="flex items-center justify-between px-0.5">
-                        <p className="text-[10px] font-bold text-[#707070] uppercase tracking-widest">Tugmalar</p>
+                        <p className="text-[10px] font-bold text-[#707070] uppercase tracking-widest">{t("pages.builder.buttons_desc")}</p>
                         <button
                           onClick={addButton}
                           className="flex items-center gap-1 text-[11px] font-semibold text-black bg-[#F0F0F0] hover:bg-[#E8E8E8] px-2.5 py-1 rounded-full transition-colors"
                         >
-                          <Plus size={11} /> {"Qo'shish"}
+                          <Plus size={11} /> {t("pages.builder.add_btn")}
                         </button>
                       </div>
 
                       {inspButtons.length === 0 && (
                         <div className="text-center py-4 rounded-[12px] border border-dashed border-[#D8D8D8] text-[11px] text-[#a0a0a0]">
-                          Hali tugma qo&apos;shilmagan
+                          {t("pages.builder.no_buttons")}
                         </div>
                       )}
 
@@ -498,7 +522,7 @@ export default function BuilderPage() {
                               value={btn.label}
                               onChange={(e) => updateButton(btn.id, "label", e.target.value)}
                               className="flex-1 text-[12px] font-medium bg-transparent outline-none"
-                              placeholder="Tugma nomi"
+                              placeholder={t("pages.builder.btn_placeholder")}
                             />
                             <button onClick={() => removeButton(btn.id)} className="text-[#DC2626] hover:opacity-70 shrink-0">
                               <X size={14} />
@@ -509,13 +533,13 @@ export default function BuilderPage() {
                               onClick={() => updateButton(btn.id, "type", "action")}
                               className={`flex-1 flex items-center justify-center gap-1.5 py-2 text-[11px] font-medium transition-all ${btn.type === "action" ? "bg-black text-white" : "text-[#707070] hover:bg-[#F0F0F0]"}`}
                             >
-                              <MousePointerClick size={11} /> Harakat
+                              <MousePointerClick size={11} /> {t("pages.builder.btn_action")}
                             </button>
                             <button
                               onClick={() => updateButton(btn.id, "type", "link")}
                               className={`flex-1 flex items-center justify-center gap-1.5 py-2 text-[11px] font-medium transition-all border-l border-[#F0F0F0] ${btn.type === "link" ? "bg-black text-white" : "text-[#707070] hover:bg-[#F0F0F0]"}`}
                             >
-                              <LinkIcon size={11} /> Havola
+                              <LinkIcon size={11} /> {t("pages.builder.btn_link")}
                             </button>
                           </div>
                           {btn.type === "link" && (
@@ -524,7 +548,7 @@ export default function BuilderPage() {
                                 value={btn.url || ""}
                                 onChange={(e) => updateButton(btn.id, "url", e.target.value)}
                                 className="w-full text-[11px] bg-[#F0F0F0] rounded-[8px] px-3 py-1.5 outline-none"
-                                placeholder="https://t.me/yourusername"
+                                placeholder={t("pages.builder.btn_url_placeholder")}
                               />
                             </div>
                           )}
@@ -538,7 +562,7 @@ export default function BuilderPage() {
                 {nodeType === "condition" && (
                   <>
                     <div className="flex flex-col gap-2">
-                      <p className="text-[10px] font-bold text-[#707070] uppercase tracking-widest px-0.5">Shart turi</p>
+                      <p className="text-[10px] font-bold text-[#707070] uppercase tracking-widest px-0.5">{t("pages.builder.condition_type")}</p>
                       <div className="flex flex-col gap-1.5">
                         {CONDITION_TYPES.map((c) => (
                           <button
@@ -560,7 +584,7 @@ export default function BuilderPage() {
                     {inspConditionType !== "is_follower" && (
                       <div className="flex flex-col gap-2">
                         <p className="text-[10px] font-bold text-[#707070] uppercase tracking-widest px-0.5">
-                          {inspConditionType === "has_tag" ? "Teg nomi" : "O'zgaruvchi nomi"}
+                          {inspConditionType === "has_tag" ? t("pages.builder.tag_name") : t("pages.builder.var_name")}
                         </p>
                         <input
                           value={inspConditionValue}
@@ -574,11 +598,11 @@ export default function BuilderPage() {
                     <div className="flex gap-2">
                       <div className="flex-1 flex items-center gap-2 px-3 py-2.5 rounded-[12px] bg-[#16A34A]/8 border border-[#16A34A]/20">
                         <span className="w-2 h-2 rounded-full bg-[#16A34A] shrink-0" />
-                        <span className="text-[11px] font-semibold text-[#16A34A]">Ha → keyingi</span>
+                        <span className="text-[11px] font-semibold text-[#16A34A]">{t("pages.builder.yes_next")}</span>
                       </div>
                       <div className="flex-1 flex items-center gap-2 px-3 py-2.5 rounded-[12px] bg-[#DC2626]/8 border border-[#DC2626]/20">
                         <span className="w-2 h-2 rounded-full bg-[#DC2626] shrink-0" />
-                        <span className="text-[11px] font-semibold text-[#DC2626]">{"Yo'q → alt"}</span>
+                        <span className="text-[11px] font-semibold text-[#DC2626]">{t("pages.builder.no_alt")}</span>
                       </div>
                     </div>
                   </>
@@ -588,7 +612,7 @@ export default function BuilderPage() {
                 {nodeType === "action" && (
                   <>
                     <div className="flex flex-col gap-2">
-                      <p className="text-[10px] font-bold text-[#707070] uppercase tracking-widest px-0.5">Harakat turi</p>
+                      <p className="text-[10px] font-bold text-[#707070] uppercase tracking-widest px-0.5">{t("pages.builder.action_type")}</p>
                       <div className="flex flex-col gap-1.5">
                         {ACTION_TYPES.map((a) => (
                           <button
@@ -609,7 +633,7 @@ export default function BuilderPage() {
 
                     <div className="flex flex-col gap-2">
                       <p className="text-[10px] font-bold text-[#707070] uppercase tracking-widest px-0.5">
-                        {inspActionType === "webhook" ? "Webhook URL" : inspActionType === "notify_telegram" ? "Telegram Chat ID" : "Qiymat"}
+                        {inspActionType === "webhook" ? t("pages.builder.webhook_url") : inspActionType === "notify_telegram" ? t("pages.builder.tg_chat_id") : t("pages.builder.val_label")}
                       </p>
                       <input
                         value={inspActionValue}
@@ -617,8 +641,8 @@ export default function BuilderPage() {
                         placeholder={
                           inspActionType === "webhook" ? "https://hooks.zapier.com/..."
                           : inspActionType === "notify_telegram" ? "-100123456789"
-                          : inspActionType.includes("tag") ? "teg_nomi"
-                          : "qiymat"
+                          : inspActionType.includes("tag") ? t("pages.builder.tag_name")
+                          : t("pages.builder.val_label")
                         }
                         className="w-full rounded-[12px] bg-[#F0F0F0] px-4 py-3 text-[12px] text-black outline-none focus:bg-[#e8e8e8] transition-colors font-mono"
                       />
@@ -629,21 +653,27 @@ export default function BuilderPage() {
                 {/* ── WAIT INSPECTOR ── */}
                 {nodeType === "wait" && (
                   <div className="flex flex-col gap-2">
-                    <p className="text-[10px] font-bold text-[#707070] uppercase tracking-widest px-0.5">Kutish muddati</p>
+                    <p className="text-[10px] font-bold text-[#707070] uppercase tracking-widest px-0.5">{t("pages.builder.wait_duration")}</p>
                     <input
                       value={inspLabel}
                       onChange={(e) => setInspLabel(e.target.value)}
-                      placeholder="15 daqiqa"
+                      placeholder={t("pages.builder.wait_15m")}
                       className="w-full rounded-[12px] bg-[#F0F0F0] px-4 py-3 text-[12px] text-black outline-none focus:bg-[#e8e8e8] transition-colors"
                     />
                     <div className="flex gap-2 flex-wrap">
-                      {["1 daqiqa", "5 daqiqa", "15 daqiqa", "1 soat", "24 soat"].map((preset) => (
+                      {[
+                        { label: t("pages.builder.wait_1m"), val: `Kutish: ${t("pages.builder.wait_1m")}` },
+                        { label: t("pages.builder.wait_5m"), val: `Kutish: ${t("pages.builder.wait_5m")}` },
+                        { label: t("pages.builder.wait_15m"), val: `Kutish: ${t("pages.builder.wait_15m")}` },
+                        { label: t("pages.builder.wait_1h"), val: `Kutish: ${t("pages.builder.wait_1h")}` },
+                        { label: t("pages.builder.wait_24h"), val: `Kutish: ${t("pages.builder.wait_24h")}` },
+                      ].map((preset) => (
                         <button
-                          key={preset}
-                          onClick={() => setInspLabel(`Kutish: ${preset}`)}
+                          key={preset.label}
+                          onClick={() => setInspLabel(preset.val)}
                           className="px-2.5 py-1 rounded-full text-[10px] font-medium bg-[#F0F0F0] text-[#707070] hover:bg-black hover:text-white transition-all border border-[#E8E8E8]"
                         >
-                          {preset}
+                          {preset.label}
                         </button>
                       ))}
                     </div>
@@ -654,16 +684,16 @@ export default function BuilderPage() {
                 {nodeType === "ai" && (
                   <>
                     <div className="flex flex-col gap-2">
-                      <p className="text-[10px] font-bold text-[#707070] uppercase tracking-widest px-0.5">{"AI Prompti (so'rov)"}</p>
+                      <p className="text-[10px] font-bold text-[#707070] uppercase tracking-widest px-0.5">{t("builder.ai_prompt_label")}</p>
                       <textarea
                         value={inspAiPrompt}
                         onChange={(e) => setInspAiPrompt(e.target.value)}
                         className="w-full min-h-[110px] rounded-[12px] bg-[#F0F0F0] px-4 py-3 text-[12px] text-black outline-none resize-none focus:bg-[#e8e8e8] transition-colors leading-relaxed"
-                        placeholder={"Foydalanuvchi xabarini tahlil qil va do'stona, qisqa javob tayyorla..."}
+                        placeholder={t("builder.ai_prompt_placeholder")}
                       />
                     </div>
                     <div className="flex flex-col gap-2">
-                      <p className="text-[10px] font-bold text-[#707070] uppercase tracking-widest px-0.5">{"Natija o'zgaruvchisi"}</p>
+                      <p className="text-[10px] font-bold text-[#707070] uppercase tracking-widest px-0.5">{t("builder.ai_output_var_label")}</p>
                       <div className="relative">
                         <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[#a0a0a0] text-[12px] font-mono">{"{{"}</span>
                         <input
@@ -675,7 +705,7 @@ export default function BuilderPage() {
                         <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[#a0a0a0] text-[12px] font-mono">{"}}"}</span>
                       </div>
                       <p className="text-[10px] text-[#a0a0a0] px-0.5">
-                        Keyingi xabarda <code className="bg-[#F0F0F0] px-1.5 py-0.5 rounded text-[#333]">{`{{${inspAiOutputVar || "ai_response"}}}`}</code> orqali foydalaning
+                        {t("builder.ai_output_var_desc").replace("{variable}", `{{${inspAiOutputVar || "ai_response"}}}`)}
                       </p>
                     </div>
                   </>
@@ -686,7 +716,7 @@ export default function BuilderPage() {
                   onClick={handleSaveNodeDetails}
                   className="w-full py-3 rounded-full bg-black text-white text-[12px] font-semibold hover:bg-black/80 active:scale-[0.98] transition-all mt-1"
                 >
-                  Saqlash
+                  {t("pages.builder.save_btn")}
                 </button>
               </div>
             </div>
@@ -696,11 +726,11 @@ export default function BuilderPage() {
                 <Zap size={22} className="opacity-30" />
               </div>
               <div>
-                <p className="text-[13px] font-semibold text-black">Blok tanlanmagan</p>
-                <p className="text-[11px] text-[#707070] mt-1 max-w-[190px] leading-relaxed">{"Kanvasdagi elementni tanlang yoki chap paneldan yangi blok qo'shing."}</p>
+                <p className="text-[13px] font-semibold text-black">{t("pages.builder.unselected_block")}</p>
+                <p className="text-[11px] text-[#707070] mt-1 max-w-[190px] leading-relaxed">{t("pages.builder.unselected_block_desc")}</p>
               </div>
               <div className="w-full p-3.5 rounded-[14px] bg-[#F9F9F7] border border-[#E8E8E8] text-left">
-                <p className="text-[10px] font-bold text-[#707070] uppercase tracking-widest mb-2.5">{"O'zgaruvchilar"}</p>
+                <p className="text-[10px] font-bold text-[#707070] uppercase tracking-widest mb-2.5">{t("pages.builder.variables")}</p>
                 {["{{user_name}}", "{{user_points}}"].map((v) => (
                   <code key={v} className="block text-[11px] text-black py-1 border-b border-[#F0F0F0] last:border-0">{v}</code>
                 ))}

@@ -146,23 +146,17 @@ export function TopBar() {
             className="relative grid h-[38px] w-[38px] place-items-center rounded-full bg-white text-black border border-[#D8D8D8]/60 transition-all duration-150 active:scale-95 hover:bg-white/95"
           >
             <Bell size={16} strokeWidth={1.75} />
-            <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-[#C7F33C] ring-2 ring-white" />
+            {/* Only show green dot when there are real notifications */}
           </button>
 
           {isNotifOpen && (
-            <div className="absolute right-0 mt-2 w-[280px] rounded-[24px] bg-white p-4.5 border border-[#D8D8D8] shadow-xl z-[90] animate-in fade-in slide-in-from-top-2 duration-150">
+            <div className="absolute right-0 mt-2 w-[280px] rounded-[24px] bg-white p-4 border border-[#D8D8D8] shadow-xl z-[90] animate-in fade-in slide-in-from-top-2 duration-150">
               <h4 className="text-[13px] font-semibold text-black mb-3">
-                {"Bildirishnomalar"}
+                {t("nav.notifications")}
               </h4>
-              <div className="flex flex-col gap-2 text-[12px] text-black">
-                <div className="p-2.5 bg-[#F9F9F7] rounded-[14px] border border-[#F0F0F0]">
-                  <p className="font-semibold text-[11px]">{"Instagram API ulash muvaffaqiyatli"}</p>
-                  <p className="text-[10px] text-[#707070] mt-0.5">Bugun, 10:24</p>
-                </div>
-                <div className="p-2.5 bg-[#F9F9F7] rounded-[14px] border border-[#F0F0F0]">
-                  <p className="font-semibold text-[11px]">{"Yangi mijoz qo'shildi: @nodir_dev"}</p>
-                  <p className="text-[10px] text-[#707070] mt-0.5">Kecha, 18:45</p>
-                </div>
+              <div className="flex flex-col items-center justify-center py-6 text-center">
+                <Bell size={28} strokeWidth={1.5} className="text-[#D8D8D8] mb-2" />
+                <p className="text-[12px] text-[#707070]">{t("nav.no_notifications")}</p>
               </div>
             </div>
           )}
@@ -187,7 +181,7 @@ export function TopBar() {
                   className="flex items-center gap-2 w-full px-3.5 py-2.5 rounded-[14px] hover:bg-[#F9F9F7] text-left transition-colors text-black font-medium"
                 >
                   <User size={14} className="text-[#707070]" />
-                  <span>Sozlamalar</span>
+                  <span>{t("nav.settings")}</span>
                 </Link>
                 
                 <button
@@ -195,7 +189,7 @@ export function TopBar() {
                   className="flex items-center gap-2 w-full px-3.5 py-2.5 rounded-[14px] hover:bg-red-50 text-left transition-colors text-red-600 font-medium border-t border-[#F0F0F0] mt-1 pt-3.5"
                 >
                   <LogOut size={14} />
-                  <span>Tizimdan chiqish</span>
+                  <span>{t("nav.sign_out")}</span>
                 </button>
               </div>
             </div>

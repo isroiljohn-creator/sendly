@@ -102,7 +102,7 @@ function ChannelAvatar({ channel, size = 32 }: { channel: Channel; size?: number
 export function Sidebar() {
   const pathname = usePathname();
   const isActive = (to: string) => (to === "/" ? pathname === "/" : pathname.startsWith(to));
-  const { lang, setLang } = useI18n();
+  const { t, lang, setLang } = useI18n();
 
   const [channels, setChannels] = useState<Channel[]>([]);
   const [activeChannel, setActiveChannel] = useState<Channel | null>(null);
@@ -159,7 +159,7 @@ export function Sidebar() {
     if (code === "uz" || code === "ru" || code === "en") {
       setLang(code);
     } else {
-      alert("Ushbu til tez orada qo'shiladi!");
+      alert(t("nav.lang_soon"));
     }
     setLangMenuOpen(false);
   };
@@ -200,7 +200,7 @@ export function Sidebar() {
       <div className="mt-4 relative" ref={dropdownRef}>
         <button
           onClick={() => setDropdownOpen((p) => !p)}
-          title={activeChannel?.username ?? "Kanal tanlash"}
+          title={activeChannel?.username ?? t("nav.select_channel")}
           className="relative flex flex-col items-center group"
         >
           {activeChannel ? (
@@ -223,11 +223,11 @@ export function Sidebar() {
         {dropdownOpen && (
           <div className="absolute left-[52px] top-0 z-50 bg-white rounded-[16px] shadow-xl border border-[#E8E8E8] w-[220px] overflow-hidden py-2">
             <p className="text-[9px] font-bold text-[#a0a0a0] uppercase tracking-widest px-4 pb-2 pt-1">
-              Kanallar
+              {t("nav.channels_header")}
             </p>
 
             {channels.length === 0 && (
-              <p className="text-[11px] text-[#707070] px-4 py-2">Hali kanal yo&apos;q</p>
+              <p className="text-[11px] text-[#707070] px-4 py-2">{t("nav.no_channels")}</p>
             )}
 
             {channels.map((ch) => {
@@ -259,7 +259,7 @@ export function Sidebar() {
                 <div className="grid h-5 w-5 place-items-center rounded-full bg-[#F0F0F0]">
                   <Plus size={10} />
                 </div>
-                Kanal boshqarish
+                {t("nav.manage_channels")}
               </Link>
             </div>
           </div>
@@ -285,9 +285,9 @@ export function Sidebar() {
           <button
             onClick={() => setProfileMenuOpen((p) => !p)}
             className="relative h-[38px] w-[38px] rounded-full bg-[#82b4ff] flex items-center justify-center text-[15px] font-bold text-white hover:scale-105 active:scale-95 transition-all shadow-sm shrink-0"
-            title={currentUser?.fullName || "Isroiljon Abdullayev"}
+            title={currentUser?.fullName || t("nav.user_placeholder")}
           >
-            {currentUser?.fullName?.charAt(0).toUpperCase() || "I"}
+            {currentUser?.fullName?.charAt(0).toUpperCase() || "?"}
           </button>
 
           {/* Main Dropdown Menu */}
@@ -300,10 +300,10 @@ export function Sidebar() {
                 </div>
                 <div className="min-w-0 flex-1">
                   <p className="text-[13px] font-bold text-black truncate">
-                    {currentUser?.fullName || "Isroiljon Abdullayev"}
+                    {currentUser?.fullName || t("nav.user_placeholder")}
                   </p>
                   <p className="text-[10px] text-[#707070] truncate">
-                    {currentUser?.email || "isroiljohnabdullayev@gmail.com"}
+                    {currentUser?.email || ""}
                   </p>
                 </div>
               </div>
@@ -316,7 +316,7 @@ export function Sidebar() {
                   className="flex items-center gap-3 px-3 py-2 rounded-[12px] hover:bg-[#F9F9F7] text-left transition-colors text-black font-semibold text-[13px]"
                 >
                   <User size={16} className="text-[#595959]" />
-                  <span>Mening akkauntim</span>
+                  <span>{t("nav.my_account")}</span>
                 </Link>
 
                 <Link
@@ -325,7 +325,7 @@ export function Sidebar() {
                   className="flex items-center gap-3 px-3 py-2 rounded-[12px] hover:bg-[#F9F9F7] text-left transition-colors text-black font-semibold text-[13px]"
                 >
                   <CreditCard size={16} className="text-[#595959]" />
-                  <span>{"To'lov va tariflar"}</span>
+                  <span>{t("nav.billing_plans")}</span>
                 </Link>
 
                 <Link
@@ -334,7 +334,7 @@ export function Sidebar() {
                   className="flex items-center gap-3 px-3 py-2 rounded-[12px] hover:bg-[#F9F9F7] text-left transition-colors text-black font-semibold text-[13px]"
                 >
                   <Users size={16} className="text-[#595959]" />
-                  <span>Hamkor kabineti</span>
+                  <span>{t("nav.partner_dashboard")}</span>
                 </Link>
 
                 <button
@@ -345,7 +345,7 @@ export function Sidebar() {
                 >
                   <div className="flex items-center gap-3">
                     <Languages size={16} className="text-[#595959]" />
-                    <span>Til</span>
+                    <span>{t("nav.language")}</span>
                   </div>
                   <ChevronRight size={14} className={`text-[#A0A0A0] transition-transform ${langMenuOpen ? "rotate-90" : ""}`} />
                 </button>
@@ -356,7 +356,7 @@ export function Sidebar() {
                   className="flex items-center gap-3 px-3 py-2 rounded-[12px] hover:bg-[#F9F9F7] text-left transition-colors text-black font-semibold text-[13px]"
                 >
                   <HelpCircle size={16} className="text-[#595959]" />
-                  <span>Yordam</span>
+                  <span>{t("nav.help")}</span>
                 </Link>
 
                 <button
@@ -364,7 +364,7 @@ export function Sidebar() {
                   className="flex items-center gap-3 w-full px-3 py-2.5 rounded-[12px] hover:bg-red-50 text-left transition-colors text-red-600 font-bold text-[13px] border-t border-[#F0F0F0] mt-1 pt-2.5"
                 >
                   <LogOut size={16} />
-                  <span>Chiqish</span>
+                  <span>{t("nav.logout")}</span>
                 </button>
               </div>
             </div>

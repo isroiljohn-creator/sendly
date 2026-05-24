@@ -57,10 +57,7 @@ export default function SettingsPage() {
         if (db.getChannels().length >= limit) {
           setModal(null);
           setOAuthWaiting(false);
-          showAlert(
-            "Kanal qo'shish limiti",
-            `Joriy tarifingizda ko'pi bilan ${limit} ta kanal ulash mumkin. Ko'proq ulanish uchun tarifingizni 'To'lov va tariflar' bo'limida Premium tarifiga o'zgartiring.`
-          );
+          showAlert(t("pages.settings_page.card_limit_title"), t("pages.settings_page.card_limit_msg").replace("{limit}", limit.toString()));
           return;
         }
 
@@ -76,7 +73,7 @@ export default function SettingsPage() {
         setOAuthWaiting(false);
         refreshChannels();
         setActiveSection(newCh.id);
-        showAlert("Muvaffaqiyatli", "Instagram hisobi muvaffaqiyatli ulandi!");
+        showAlert(t("common.success"), t("pages.settings_page.ig_link_success"));
       }
     };
 
@@ -92,22 +89,11 @@ export default function SettingsPage() {
     }
   }, [modal]);
 
-  const handleFacebookLogin = () => {
-    setOAuthWaiting(true);
-    const width = 580;
-    const height = 700;
-    const left = window.screenX + (window.innerWidth - width) / 2;
-    const top = window.screenY + (window.innerHeight - height) / 2;
-    window.open(
-      "/auth/facebook",
-      "meta_oauth",
-      `width=${width},height=${height},left=${left},top=${top},toolbar=no,menubar=no,scrollbars=yes`
-    );
-  };
+
 
   const handleInstagramLogin = async () => {
     if (!currentUser?.id) {
-      showAlert("Xato", "Foydalanuvchi seansidan ID topilmadi. Iltimos, sahifani yangilab qaytadan urinib ko'ring.");
+      showAlert(t("common.error"), t("pages.settings_page.invalid_session"));
       return;
     }
 
@@ -118,27 +104,19 @@ export default function SettingsPage() {
     const top = window.screenY + (window.innerHeight - height) / 2;
 
     try {
-      // 1. Fetch backend auth token from Next.js server
       const tokenRes = await fetch(`/api/auth/token?userId=${currentUser.id}`);
-      if (!tokenRes.ok) {
-        throw new Error("Token olishda xatolik yuz berdi");
-      }
-      const tokenData = await tokenRes.json();
-      const jwtToken = tokenData.token;
+      if (!tokenRes.ok) throw new Error("Token olishda xatolik yuz berdi");
+      const { token: jwtToken } = await tokenRes.json();
 
-      // 2. Open popup pointing directly to the real backend Meta OAuth start flow
       const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "https://api.sendly.uz";
-      const startUrl = `${backendUrl}/oauth/instagram/start?token=${jwtToken}`;
-
       window.open(
-        startUrl,
+        `${backendUrl}/oauth/instagram/start?token=${jwtToken}`,
         "instagram_oauth",
         `width=${width},height=${height},left=${left},top=${top},toolbar=no,menubar=no,scrollbars=yes`
       );
     } catch (err: unknown) {
       setOAuthWaiting(false);
-      const message = err instanceof Error ? err.message : String(err);
-      showAlert("Xatolik", `Instagram-ga ulanishda xatolik yuz berdi: ${message}`);
+      showAlert(t("common.error"), t("pages.settings_page.ig_link_error") + ": " + (err instanceof Error ? err.message : String(err)));
     }
   };
 
@@ -157,11 +135,8 @@ export default function SettingsPage() {
   const [alertTitle, setAlertTitle] = useState("");
   const [alertMessage, setAlertMessage] = useState("");
 
-  // Team members state
-  const [teamMembers, setTeamMembers] = useState([
-    { id: "1", name: "Isroiljon Abdullayev", email: "isroiljohnabdullayev@gmail.com", role: "Egasi" },
-    { id: "2", name: "Sabrina", email: "sturgunboeyva@gmail.com", role: "Administrator" }
-  ]);
+  // Team members state — initialized from real current user in useEffect
+  const [teamMembers, setTeamMembers] = useState<{id: string; name: string; email: string; role: string}[]>([]);
   const [inviteEmail, setInviteEmail] = useState("");
   const [inviteRole, setInviteRole] = useState("Administrator");
 
@@ -176,12 +151,12 @@ export default function SettingsPage() {
     };
     setTeamMembers([...teamMembers, newMember]);
     setInviteEmail("");
-    showAlert("Taklif yuborildi", `${inviteEmail} foydalanuvchiga taklifnoma muvaffaqiyatli yuborildi!`);
+    showAlert(t("common.success"), t("pages.settings_page.team_title") + " (" + inviteEmail + ")");
   };
 
   const handleRoleChange = (id: string, newRole: string) => {
     setTeamMembers(teamMembers.map(m => m.id === id ? { ...m, role: newRole } : m));
-    showAlert("Muvaffaqiyatli", "Foydalanuvchi roli muvaffaqiyatli o'zgartirildi.");
+    showAlert(t("common.success"), t("common.success"));
   };
   const showAlert = (title: string, message: string) => {
     setAlertTitle(title);
@@ -199,6 +174,10 @@ export default function SettingsPage() {
       setCurrentUser(user);
       setName(user.fullName);
       setEmail(user.email);
+      // Initialize team with real current user as Owner
+      setTeamMembers([
+        { id: user.id || "owner", name: user.fullName, email: user.email, role: "Egasi" }
+      ]);
     }
 
     refreshChannels();
@@ -240,7 +219,7 @@ export default function SettingsPage() {
     const updatedUser = { ...currentUser, fullName: name, email };
     localStorage.setItem("replai_current_user", JSON.stringify(updatedUser));
     setCurrentUser(updatedUser);
-    showAlert("Muvaffaqiyatli", t("toast.success"));
+    showAlert(t("common.success"), t("toast.success"));
   };
 
 
@@ -260,10 +239,7 @@ export default function SettingsPage() {
     const limit = userPlan === "premium" ? 10 : 1;
     if (db.getChannels().length >= limit) {
       setModal(null);
-      showAlert(
-        "Kanal qo'shish limiti",
-        `Joriy tarifingizda ko'pi bilan ${limit} ta kanal ulash mumkin. Ko'proq ulanish uchun tarifingizni 'To'lov va tariflar' bo'limida Premium tarifiga o'zgartiring.`
-      );
+      showAlert(t("pages.settings_page.card_limit_title"), t("pages.settings_page.card_limit_msg").replace("{limit}", limit.toString()));
       return;
     }
     setSaving(true);
@@ -283,7 +259,7 @@ export default function SettingsPage() {
       setSaving(false);
       refreshChannels();
       setActiveSection(newCh.id);
-      showAlert("Muvaffaqiyatli", "Telegram bot muvaffaqiyatli ulandi!");
+      showAlert(t("common.success"), t("pages.settings_page.tg_link_success"));
     }, 800);
   };
 
@@ -295,7 +271,7 @@ export default function SettingsPage() {
     setChannelToDelete(null);
     setDeleteConfirmInput("");
     setActiveSection("general");
-    showAlert("Muvaffaqiyatli", "Kanal muvaffaqiyatli o'chirildi.");
+    showAlert(t("common.success"), t("pages.settings_page.delete_success"));
   };
 
   const handleExportDatabase = () => {
@@ -313,9 +289,9 @@ export default function SettingsPage() {
       downloadAnchor.click();
       downloadAnchor.remove();
       
-      showAlert("Muvaffaqiyatli", "Tizim ma'lumotlar bazasi muvaffaqiyatli yuklab olindi (Eksport qilindi).");
+      showAlert(t("common.success"), t("pages.settings_page.export_success"));
     } catch {
-      showAlert("Xato", "Eksport qilishda xatolik yuz berdi.");
+      showAlert(t("common.error"), t("common.error"));
     }
   };
 
@@ -331,15 +307,15 @@ export default function SettingsPage() {
         
         const success = db.importData(parsedData);
         if (success) {
-          showAlert("Muvaffaqiyatli", "Ma'lumotlar bazasi muvaffaqiyatli yuklandi va tiklandi!");
+          showAlert(t("common.success"), t("pages.settings_page.import_success"));
           setTimeout(() => {
             window.location.reload();
           }, 1500);
         } else {
-          showAlert("Xato", "Yuklangan fayl mos emas yoki unda tizim ma'lumotlari mavjud emas.");
+          showAlert(t("common.error"), t("pages.settings_page.import_error"));
         }
       } catch {
-        showAlert("Xato", "Faylni o'qishda yoki JSON formatini tahlil qilishda xatolik yuz berdi.");
+        showAlert(t("common.error"), t("common.error"));
       }
     };
     fileReader.readAsText(file);
@@ -358,13 +334,13 @@ export default function SettingsPage() {
           <div className="w-[260px] shrink-0 border-r border-[#E8E8E8] flex flex-col justify-between bg-white p-5">
             <div className="flex flex-col gap-6">
               <div>
-                <h2 className="text-[17px] font-bold text-black px-2">Sozlamalar</h2>
+                <h2 className="text-[17px] font-bold text-black px-2">{t("pages.settings.title")}</h2>
               </div>
 
               {/* Workspace Section */}
               <div className="flex flex-col gap-1">
                 <span className="text-[10px] font-bold text-[#909090] uppercase tracking-wider px-2 mb-1">
-                  Loyiha
+                  {t("pages.settings_page.workspace_section")}
                 </span>
                 <button
                   onClick={() => setActiveSection("general")}
@@ -374,7 +350,7 @@ export default function SettingsPage() {
                       : "text-[#707070] hover:bg-[#F9F9F7] hover:text-black"
                   }`}
                 >
-                  Umumiy
+                  {t("pages.settings_page.general")}
                 </button>
                 <button
                   onClick={() => {
@@ -382,7 +358,7 @@ export default function SettingsPage() {
                   }}
                   className="flex items-center w-full px-3 py-2 text-[12px] font-semibold rounded-[10px] transition-colors text-[#707070] hover:bg-[#F9F9F7] hover:text-black text-left"
                 >
-                  Kontaktlar
+                  {t("pages.settings_page.contacts")}
                 </button>
                 <button
                   onClick={() => setActiveSection("integrations")}
@@ -392,7 +368,7 @@ export default function SettingsPage() {
                       : "text-[#707070] hover:bg-[#F9F9F7] hover:text-black"
                   }`}
                 >
-                  Integratsiyalar
+                  {t("pages.settings.tab_integrations")}
                 </button>
                 <button
                   onClick={() => setActiveSection("team")}
@@ -402,7 +378,7 @@ export default function SettingsPage() {
                       : "text-[#707070] hover:bg-[#F9F9F7] hover:text-black"
                   }`}
                 >
-                  Jamoa qatnashchilari
+                  {t("pages.settings_page.team")}
                 </button>
                 <button
                   onClick={() => setActiveSection("apikeys")}
@@ -412,7 +388,7 @@ export default function SettingsPage() {
                       : "text-[#707070] hover:bg-[#F9F9F7] hover:text-black"
                   }`}
                 >
-                  API Keys
+                  {t("pages.settings_page.apikeys")}
                 </button>
               </div>
 
@@ -420,7 +396,7 @@ export default function SettingsPage() {
               <div className="flex flex-col gap-1">
                 <div className="flex items-center justify-between px-2 mb-1">
                   <span className="text-[10px] font-bold text-[#909090] uppercase tracking-wider">
-                    Akkauntlar
+                    {t("pages.settings_page.accounts")}
                   </span>
                   <button
                     onClick={() => setModal("choose")}
@@ -432,7 +408,7 @@ export default function SettingsPage() {
 
                 <div className="flex flex-col gap-1 max-h-[250px] overflow-y-auto pr-1">
                   {channels.length === 0 ? (
-                    <span className="text-[11px] text-[#a0a0a0] px-2 italic py-1">Kanal ulanmagan</span>
+                    <span className="text-[11px] text-[#a0a0a0] px-2 italic py-1">{t("pages.settings_page.no_channel")}</span>
                   ) : (
                     channels.map((ch) => {
                       const isSelected = activeSection === ch.id;
@@ -482,16 +458,16 @@ export default function SettingsPage() {
                   <form onSubmit={handleSave} className="flex flex-col gap-5">
                     <div>
                       <h3 className="text-[15px] font-medium text-black">
-                        {"Foydalanuvchi ma'lumotlari"}
+                        {t("pages.settings_page.user_details")}
                       </h3>
                       <p className="text-[12px] text-[#707070] mt-0.5">
-                        {"Tizimdagi profilingiz ma'lumotlarini o'zgartiring"}
+                        {t("pages.settings_page.user_details_desc")}
                       </p>
                     </div>
 
                     <div className="flex flex-col gap-1.5">
                       <label className="text-[11px] font-medium text-[#707070] px-1">
-                        Ism va Familiya
+                        {t("pages.settings_page.full_name")}
                       </label>
                       <input
                         type="text"
@@ -504,7 +480,7 @@ export default function SettingsPage() {
 
                     <div className="flex flex-col gap-1.5">
                       <label className="text-[11px] font-medium text-[#707070] px-1">
-                        Email manzili
+                        {t("pages.settings_page.email")}
                       </label>
                       <input
                         type="email"
@@ -533,11 +509,11 @@ export default function SettingsPage() {
                       <div className="flex items-center gap-2">
                         <Database size={16} className="text-black" />
                         <h3 className="text-[15px] font-medium text-black">
-                          {"Ma'lumotlar boshqaruvi"}
+                          {t("pages.settings_page.db_manage")}
                         </h3>
                       </div>
                       <p className="text-[12px] text-[#707070] mt-1.5 leading-relaxed">
-                        {"Tizim ma'lumotlar bazasini yuklab olishingiz, boshqa akkauntga ko'chirish uchun yuklashingiz yoki butunlay tozalab tiklashingiz mumkin."}
+                        {t("pages.settings_page.db_manage_desc")}
                       </p>
                     </div>
 
@@ -553,8 +529,8 @@ export default function SettingsPage() {
                           <Download size={18} />
                         </div>
                         <div>
-                          <span className="text-[13px] font-bold block">Bazani yuklab olish</span>
-                          <span className="text-[10px] text-[#707070] block mt-0.5">Hozirgi barcha sozlamalar va botlar zaxirasi (.json)</span>
+                          <span className="text-[13px] font-bold block">{t("pages.settings_page.db_export")}</span>
+                          <span className="text-[10px] text-[#707070] block mt-0.5">{t("pages.settings_page.db_export_desc")}</span>
                         </div>
                       </button>
 
@@ -570,8 +546,8 @@ export default function SettingsPage() {
                           <Upload size={18} />
                         </div>
                         <div>
-                          <span className="text-[13px] font-bold block">Bazani yuklash</span>
-                          <span className="text-[10px] text-[#707070] block mt-0.5">Zaxira faylini (.json) yuklab ishlashda davom etish</span>
+                          <span className="text-[13px] font-bold block">{t("pages.settings_page.db_import")}</span>
+                          <span className="text-[10px] text-[#707070] block mt-0.5">{t("pages.settings_page.db_import_desc")}</span>
                         </div>
                       </label>
                     </div>
@@ -581,8 +557,8 @@ export default function SettingsPage() {
                     {/* Reset Actions (Secondary) */}
                     <div className="flex flex-wrap items-center justify-between gap-4">
                       <div className="flex flex-col">
-                        <span className="text-[12px] font-bold text-black">{"Qo'shimcha amallar"}</span>
-                        <span className="text-[10px] text-[#707070]">Tizimni tozalash yoki namunaviy holatga keltirish</span>
+                        <span className="text-[12px] font-bold text-black">{t("pages.settings_page.extra_actions")}</span>
+                        <span className="text-[10px] text-[#707070]">{t("pages.settings_page.extra_actions_desc")}</span>
                       </div>
                       
                       <div className="flex flex-wrap items-center gap-2">
@@ -592,7 +568,7 @@ export default function SettingsPage() {
                           className="flex items-center gap-1.5 rounded-full border border-[#DC2626] text-[#DC2626] hover:bg-[#DC2626]/5 px-4 py-2 text-[11px] font-semibold transition-all active:scale-95"
                         >
                           <Trash2 size={13} />
-                          {"Barcha ma'lumotlarni o'chirish"}
+                          {t("pages.settings_page.clear_all")}
                         </button>
                       </div>
                     </div>
@@ -604,7 +580,7 @@ export default function SettingsPage() {
             {activeSection === "team" && (
               <div className="max-w-[640px] flex flex-col gap-6">
                 <div>
-                  <h3 className="text-[28px] font-bold text-black">Jamoa qatnashchilari</h3>
+                  <h3 className="text-[28px] font-bold text-black">{t("pages.settings_page.team")}</h3>
                 </div>
 
                 {/* Invite form row */}
@@ -615,7 +591,7 @@ export default function SettingsPage() {
                     value={inviteEmail}
                     onChange={(e) => setInviteEmail(e.target.value)}
                     className="flex-1 rounded-[10px] border border-[#D8D8D8] px-4 py-3 text-[13px] text-black focus:outline-none focus:border-black"
-                    placeholder="Email'ni kiriting"
+                    placeholder={t("pages.settings_page.invite_email_placeholder")}
                   />
                   <div className="relative">
                     <select
@@ -623,8 +599,8 @@ export default function SettingsPage() {
                       onChange={(e) => setInviteRole(e.target.value)}
                       className="appearance-none bg-white rounded-[10px] border border-[#D8D8D8] pl-4 pr-10 py-3 text-[13px] font-semibold text-black focus:outline-none focus:border-black cursor-pointer h-[44px]"
                     >
-                      <option value="Administrator">Administrator</option>
-                      <option value="Egasi">Egasi</option>
+                      <option value="Administrator">{t("pages.settings_page.team_role_admin")}</option>
+                      <option value="Egasi">{t("pages.settings_page.team_role_owner")}</option>
                     </select>
                     <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-[#707070]">
                       <ChevronDown size={14} />
@@ -634,7 +610,7 @@ export default function SettingsPage() {
                     type="submit"
                     className="h-[44px] bg-[#2563EB] hover:bg-[#1D4ED8] text-white font-semibold text-[13px] px-6 rounded-[10px] transition-colors"
                   >
-                    Taklif etish
+                    {t("pages.settings_page.invite_btn")}
                   </button>
                 </form>
 
@@ -652,8 +628,8 @@ export default function SettingsPage() {
                           onChange={(e) => handleRoleChange(member.id, e.target.value)}
                           className="appearance-none bg-transparent pl-2 pr-8 py-1.5 text-[13px] font-semibold text-[#707070] hover:text-black focus:outline-none cursor-pointer"
                         >
-                          <option value="Egasi">Egasi</option>
-                          <option value="Administrator">Administrator</option>
+                          <option value="Egasi">{t("pages.settings_page.team_role_owner")}</option>
+                          <option value="Administrator">{t("pages.settings_page.team_role_admin")}</option>
                         </select>
                         <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-1 text-[#707070]">
                           <ChevronDown size={14} />
@@ -682,16 +658,16 @@ export default function SettingsPage() {
                       <div>
                         <div className="flex items-center gap-2">
                           <h3 className="text-[16px] font-medium text-black">Instagram Direct Api</h3>
-                          <StatusPill status={isIgConnected} activeText="Ulangan" inactiveText="Ulanmagan" />
+                          <StatusPill status={isIgConnected} activeText={t("common.active")} inactiveText={t("common.inactive")} />
                         </div>
                         <p className="mt-1 text-[12px] text-[#707070]">
-                          Ushbu ulanish avtomatlashtirilgan javoblar uchun zarur.
+                          {t("pages.settings_page.ig_direct_desc")}
                         </p>
                       </div>
                     </div>
 
                     <div className="px-4 py-2 rounded-full text-[12px] font-medium bg-[#C7F33C]/10 text-[#5A7C1E]">
-                      Mijozlar bilan aloqa faol
+                      {t("pages.settings_page.ig_direct_active")}
                     </div>
                   </div>
                 </Card>
@@ -705,13 +681,13 @@ export default function SettingsPage() {
                         <h3 className="text-[15px] font-medium text-black">Webhooks & API</h3>
                       </div>
                       <p className="text-[12px] text-[#707070] mt-0.5">
-                        Tashqi xizmatlar yoki CRM ulanishi uchun webhook havolasini sozlang
+                        {t("pages.settings_page.webhook_desc")}
                       </p>
                     </div>
 
                     <div className="flex flex-col gap-1.5">
                       <label className="text-[11px] font-medium text-[#707070] px-1">
-                        Instagram Voqealar Webhook URL manzili
+                        {t("pages.settings_page.webhook_url_label")}
                       </label>
                       <input
                         type="url"
@@ -727,7 +703,7 @@ export default function SettingsPage() {
                       className="flex items-center justify-center gap-1.5 py-3 self-start text-[12px]"
                     >
                       <Save size={14} />
-                      <span>Webhookni yangilash</span>
+                      <span>{t("pages.settings_page.webhook_update_btn")}</span>
                     </Button>
                   </form>
                 </Card>
@@ -739,13 +715,13 @@ export default function SettingsPage() {
               <div className="max-w-[640px] flex flex-col gap-6">
                 <div>
                   <h3 className="text-[28px] font-bold text-black">API Keys</h3>
-                  <p className="text-[13px] text-[#707070] mt-1.5">Tashqi integratsiyalar uchun API kalitlarini boshqaring</p>
+                  <p className="text-[13px] text-[#707070] mt-1.5">{t("pages.settings_page.api_keys_desc")}</p>
                 </div>
 
                 <div className="p-5 rounded-[14px] bg-[#F9F9F7] border border-[#F0F0F0] mt-2 flex flex-col gap-3">
                   <div className="flex items-center justify-between">
-                    <span className="text-[12px] font-bold text-black uppercase tracking-wider">Mavjud API kaliti</span>
-                    <span className="bg-[#C7F33C]/20 text-[#5A7C1E] text-[10px] font-bold px-2 py-0.5 rounded-full">FAOL</span>
+                    <span className="text-[12px] font-bold text-black uppercase tracking-wider">{t("pages.settings_page.api_key_label")}</span>
+                    <span className="bg-[#C7F33C]/20 text-[#5A7C1E] text-[10px] font-bold px-2 py-0.5 rounded-full">{t("common.active")}</span>
                   </div>
                   <div className="flex gap-2 items-center">
                     <input
@@ -758,7 +734,7 @@ export default function SettingsPage() {
                       onClick={() => showAlert("Nusxalandi", "API kalit buferga nusxalandi.")}
                       className="h-[38px] bg-black hover:bg-black/80 text-white font-semibold text-[12px] px-4 rounded-[10px] transition-colors"
                     >
-                      Nusxalash
+                      {t("common.copy")}
                     </button>
                   </div>
                 </div>
@@ -787,18 +763,16 @@ export default function SettingsPage() {
                   </div>
 
                   <div>
-                    <h1 className="text-[26px] font-bold text-black leading-tight">Account settings</h1>
+                    <h1 className="text-[26px] font-bold text-black leading-tight">{t("pages.settings_page.acct_settings_title")}</h1>
                   </div>
 
                   {/* Section 1: Refresh Permissions */}
                   <div className="flex flex-col gap-3">
                     <h3 className="text-[15px] font-bold text-black">
-                      {isInstagram ? "Refresh Instagram Permissions" : "Refresh Telegram Connection"}
+                      {isInstagram ? t("pages.settings_page.refresh_ig_perms") : t("pages.settings_page.refresh_tg_conn")}
                     </h3>
                     <p className="text-[13px] text-[#707070] leading-relaxed">
-                      {isInstagram
-                        ? "Instagram can unexpectedly lose the connection to your page permissions. If you encounter any trouble, like content not sending, refresh your permissions first."
-                        : "Telegram bot connection can occasionally fail or need a token update. If you encounter any trouble, like messages not replying, refresh connection first."}
+                      {isInstagram ? t("pages.settings_page.ig_perms_desc") : t("pages.settings_page.tg_perms_desc")}
                     </p>
                     <button
                       disabled={refreshingPermissions}
@@ -808,9 +782,7 @@ export default function SettingsPage() {
                           setRefreshingPermissions(false);
                           showAlert(
                             "Muvaffaqiyatli",
-                            isInstagram
-                              ? "Instagram ulanishi muvaffaqiyatli yangilandi!"
-                              : "Telegram bot ulanishi muvaffaqiyatli yangilandi!"
+                            isInstagram ? t("pages.settings_page.refresh_success_ig") : t("pages.settings_page.refresh_success_tg")
                           );
                         }, 1500);
                       }}
@@ -819,10 +791,10 @@ export default function SettingsPage() {
                       {refreshingPermissions ? (
                         <>
                           <span className="inline-block w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                          <span>Yangilanmoqda...</span>
+                          <span>{t("pages.settings_page.refreshing")}</span>
                         </>
                       ) : (
-                        <span>Refresh Permissions</span>
+                        <span>{t("pages.settings_page.refresh_btn")}</span>
                       )}
                     </button>
                   </div>
@@ -831,9 +803,9 @@ export default function SettingsPage() {
 
                   {/* Section 2: Remove Account */}
                   <div className="flex flex-col gap-3">
-                    <h3 className="text-[15px] font-bold text-black">Remove account?</h3>
+                    <h3 className="text-[15px] font-bold text-black">{t("pages.settings_page.remove_account")}</h3>
                     <p className="text-[13px] text-[#707070] leading-relaxed">
-                      It will remove Account and all Contacts, Chats, Automations and Growth tools associated with selected Account.
+                      {t("pages.settings_page.remove_account_desc")}
                     </p>
                     <button
                       onClick={() => {
@@ -842,7 +814,7 @@ export default function SettingsPage() {
                       }}
                       className="border border-[#DC2626] text-[#DC2626] hover:bg-[#DC2626]/5 text-[12px] font-semibold px-5 py-3 rounded-[12px] self-start transition-all active:scale-95"
                     >
-                      Remove account
+                      {t("pages.settings_page.remove_account")}
                     </button>
                   </div>
                 </div>
@@ -857,10 +829,10 @@ export default function SettingsPage() {
         isOpen={isClearModalOpen}
         onClose={() => setIsClearModalOpen(false)}
         onConfirm={handleConfirmClear}
-        title={"Ma'lumotlarni tozalashni tasdiqlaysizmi?"}
-        message={"Ushbu amal barcha mijozlar, botlar va broadcastlar ro'yxatini butunlay tozalaydi."}
-        confirmText={"Ha, tozalash"}
-        cancelText={"Bekor qilish"}
+        title={t("pages.settings_page.clear_data_confirm_title")}
+        message={t("pages.settings_page.clear_data_confirm_desc")}
+        confirmText={t("pages.settings_page.clear_data_confirm_btn")}
+        cancelText={t("common.cancel")}
       />
 
 
@@ -870,18 +842,18 @@ export default function SettingsPage() {
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-[4px] p-4">
           <div className="w-full max-w-[380px] rounded-[28px] bg-white p-6 border border-[#D8D8D8] shadow-[0_20px_50px_rgba(0,0,0,0.15)] transition-all scale-100 animate-in fade-in zoom-in-95 duration-200">
             <h3 className="text-[16px] font-semibold text-black leading-tight">
-              {"Kanalni o'chirishni tasdiqlaysizmi?"}
+              {t("pages.settings_page.delete_channel_confirm_title")}
             </h3>
             <p className="mt-2.5 text-[12px] text-[#707070] leading-relaxed">
-              {"Ushbu amal tanlangan kanal ulanishini, unga tegishli barcha suhbatlar va avtomatlashtirishlarni butunlay o'chirib tashlaydi."}
+              {t("pages.settings_page.delete_channel_confirm_desc")}
             </p>
             <div className="mt-4 flex flex-col gap-1.5">
-              <label className="text-[10px] font-bold text-[#707070] uppercase">Tasdiqlash uchun &quot;O&apos;chirish&quot; deb yozing</label>
+              <label className="text-[10px] font-bold text-[#707070] uppercase">{t("pages.settings_page.delete_confirm_label")}</label>
               <input
                 type="text"
                 value={deleteConfirmInput}
                 onChange={(e) => setDeleteConfirmInput(e.target.value)}
-                placeholder="O'chirish"
+                placeholder={t("pages.settings_page.delete_confirm_placeholder")}
                 className="w-full rounded-[10px] border border-[#D8D8D8] px-3 py-2 text-[12px] text-black outline-none focus:border-black"
               />
             </div>
@@ -895,15 +867,15 @@ export default function SettingsPage() {
                 }}
                 className="rounded-full bg-[#F0F0F0] px-4 py-2 font-medium text-black hover:bg-[#E8E8E8] active:scale-95 transition-all"
               >
-                Bekor qilish
+                {t("common.cancel")}
               </button>
               <button
                 type="button"
-                disabled={deleteConfirmInput !== "O'chirish"}
+                disabled={deleteConfirmInput !== t("pages.settings_page.delete_confirm_placeholder")}
                 onClick={handleConfirmDeleteChannel}
                 className="rounded-full bg-[#DC2626] px-4 py-2 font-medium text-white hover:bg-[#B91C1C] disabled:opacity-40 disabled:hover:bg-[#DC2626] active:scale-95 transition-all"
               >
-                {"Ha, o'chirish"}
+                {t("pages.settings_page.delete_confirm_btn")}
               </button>
             </div>
           </div>
@@ -923,7 +895,7 @@ export default function SettingsPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
           <div className="bg-white rounded-[24px] w-full max-w-[360px] shadow-2xl overflow-hidden p-6 border border-[#D8D8D8]">
             <div className="flex items-center justify-between pb-4 border-b border-[#F0F0F0] mb-5">
-              <h3 className="text-[15px] font-bold text-black">Kanal turini tanlang</h3>
+              <h3 className="text-[15px] font-bold text-black">{t("pages.settings_page.choose_channel_type")}</h3>
               <button onClick={() => setModal(null)} className="grid h-8 w-8 place-items-center rounded-full hover:bg-[#F0F0F0] text-[#707070]">
                 <X size={16} />
               </button>
@@ -937,8 +909,8 @@ export default function SettingsPage() {
                   <Instagram size={16} />
                 </div>
                 <div>
-                  <p className="font-semibold text-black">Instagram Direct API</p>
-                  <p className="text-[11px] text-[#707070]">Direct xabarlarini avtomatlashtirish</p>
+                  <p className="font-semibold text-black">{t("pages.settings_page.ig_direct_api")}</p>
+                  <p className="text-[11px] text-[#707070]">{t("pages.settings_page.ig_direct_subtitle")}</p>
                 </div>
               </button>
               <button
@@ -949,8 +921,8 @@ export default function SettingsPage() {
                   <Bot size={16} />
                 </div>
                 <div>
-                  <p className="font-semibold text-black">Telegram Bot</p>
-                  <p className="text-[11px] text-[#707070]">Muloqot botini ulash</p>
+                  <p className="font-semibold text-black">{t("pages.settings_page.tg_bot_title")}</p>
+                  <p className="text-[11px] text-[#707070]">{t("pages.settings_page.tg_bot_subtitle")}</p>
                 </div>
               </button>
             </div>
@@ -968,8 +940,8 @@ export default function SettingsPage() {
                 <Instagram size={18} className="text-white" />
               </div>
               <div className="flex-1">
-                <h2 className="text-[15px] font-bold text-black">Instagram hisob ulash</h2>
-                <p className="text-[11px] text-[#707070]">Business yoki Creator hisob bo&apos;lishi kerak</p>
+                <h2 className="text-[15px] font-bold text-black">{t("pages.settings_page.link_ig_title")}</h2>
+                <p className="text-[11px] text-[#707070]">{t("pages.settings_page.link_ig_subtitle")}</p>
               </div>
               <button onClick={() => setModal(null)} className="grid h-8 w-8 place-items-center rounded-full hover:bg-[#F0F0F0] text-[#707070]">
                 <X size={16} />
@@ -990,10 +962,10 @@ export default function SettingsPage() {
 
               <div>
                 <h3 className="text-[16px] font-bold text-black leading-snug">
-                  Instagram profilingizni ulash
+                  {t("pages.settings_page.link_ig_title")}
                 </h3>
                 <p className="text-[12px] text-[#707070] mt-2 max-w-[320px] mx-auto leading-relaxed">
-                  Direct xabarlarni avtomatlashtirish va avtomatik javoblar sozlash uchun Instagram Creator yoki Business profilingizni ulang.
+                  {t("pages.settings_page.ig_connect_desc")}
                 </p>
               </div>
 
@@ -1001,7 +973,7 @@ export default function SettingsPage() {
                 <div className="w-full p-4 rounded-2xl bg-[#EFF2FC] border border-[#EFF2FC] flex flex-col items-center gap-3 animate-pulse">
                   <span className="w-6 h-6 border-3 border-[#0095f6]/30 border-t-[#0095f6] rounded-full animate-spin" />
                   <p className="text-[12px] font-medium text-[#0095f6]">
-                    Hisobni tanlash kutilmoqda...
+                    {t("pages.settings_page.waiting_for_account")}
                   </p>
                 </div>
               ) : (
@@ -1012,40 +984,23 @@ export default function SettingsPage() {
                     className="w-full flex items-center justify-center gap-2.5 py-3.5 rounded-full bg-gradient-to-r from-[#f09433] via-[#bc1888] to-[#e6683c] hover:opacity-95 text-white text-[13px] font-bold shadow-md hover:shadow-lg active:scale-[0.98] transition-all"
                   >
                     <Instagram size={18} className="shrink-0" />
-                    <span>Instagram orqali ulanish</span>
+                    <span>{t("pages.settings_page.connect_via_ig")}</span>
                   </button>
 
-                  {/* Divider */}
-                  <div className="flex items-center gap-3 my-1">
-                    <span className="h-[1px] bg-[#E8E8E8] flex-grow"></span>
-                    <span className="text-[11px] text-[#A0A0A0] font-medium">yoki muqobil yo&apos;l</span>
-                    <span className="h-[1px] bg-[#E8E8E8] flex-grow"></span>
-                  </div>
-
-                  {/* Secondary Facebook Button */}
-                  <button
-                    onClick={handleFacebookLogin}
-                    className="w-full flex items-center justify-center gap-2.5 py-3 rounded-full border border-[#1877F2] hover:bg-[#1877F2]/5 text-[#1877F2] text-[13px] font-bold active:scale-[0.98] transition-all"
-                  >
-                    <svg className="w-5 h-5 fill-current shrink-0" viewBox="0 0 24 24">
-                      <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
-                    </svg>
-                    <span>Facebook sahifasi orqali ulanish</span>
-                  </button>
                 </div>
               )}
 
               <div className="p-3.5 rounded-xl bg-[#F9F9F7] border border-[#E8E8E8] flex items-start gap-2.5 text-left w-full">
                 <CheckCircle size={14} className="text-[#16A34A] mt-0.5 shrink-0" />
                 <p className="text-[11px] text-[#505050] leading-relaxed">
-                  Facebook sahifangiz orqali faqat Instagram Business yoki Creator hisoblarini ulashingiz mumkin. Shaxsiy profillar qo&apos;llab-quvvatlanmaydi.
+                  {t("pages.settings_page.ig_personal_warning")}
                 </p>
               </div>
             </div>
 
             <div className="px-6 pb-6 flex gap-3">
               <Button onClick={() => setModal(null)} variant="secondary" className="w-full py-3 text-[12px] border border-[#E8E8E8]">
-                Bekor qilish
+                {t("common.cancel")}
               </Button>
             </div>
           </div>
@@ -1062,8 +1017,8 @@ export default function SettingsPage() {
                 <Bot size={18} className="text-white" />
               </div>
               <div className="flex-1">
-                <h2 className="text-[15px] font-bold text-black">Telegram Bot ulash</h2>
-                <p className="text-[11px] text-[#707070]">@BotFather orqali yaratilgan token</p>
+                <h2 className="text-[15px] font-bold text-black">{t("pages.settings_page.link_tg_title")}</h2>
+                <p className="text-[11px] text-[#707070]">{t("pages.settings_page.link_tg_subtitle")}</p>
               </div>
               <button onClick={() => setModal(null)} className="grid h-8 w-8 place-items-center rounded-full hover:bg-[#F0F0F0] text-[#707070]">
                 <X size={16} />
@@ -1072,7 +1027,7 @@ export default function SettingsPage() {
 
             <div className="px-6 py-5 flex flex-col gap-4">
               <div className="flex flex-col gap-1.5">
-                <label className="text-[10px] font-bold text-[#707070] uppercase tracking-widest">Bot Token</label>
+                <label className="text-[10px] font-bold text-[#707070] uppercase tracking-widest">{t("pages.settings_page.bot_token_label")}</label>
                 <input
                   value={tgToken}
                   onChange={(e) => setTgToken(e.target.value)}
@@ -1082,7 +1037,7 @@ export default function SettingsPage() {
               </div>
 
               <div className="flex flex-col gap-1.5">
-                <label className="text-[10px] font-bold text-[#707070] uppercase tracking-widest">Bot username</label>
+                <label className="text-[10px] font-bold text-[#707070] uppercase tracking-widest">{t("pages.settings_page.bot_username_label")}</label>
                 <div className="flex items-center gap-0 rounded-[12px] bg-[#F0F0F0] overflow-hidden focus-within:bg-[#e8e8e8] transition-colors">
                   <span className="pl-4 text-[13px] text-[#707070] font-medium select-none">@</span>
                   <input
@@ -1095,23 +1050,23 @@ export default function SettingsPage() {
               </div>
 
               <div className="flex flex-col gap-1.5">
-                <label className="text-[10px] font-bold text-[#707070] uppercase tracking-widest">Kanal nomi (ixtiyoriy)</label>
+                <label className="text-[10px] font-bold text-[#707070] uppercase tracking-widest">{t("pages.settings_page.channel_name_optional")}</label>
                 <input
                   value={tgName}
                   onChange={(e) => setTgName(e.target.value)}
-                  placeholder="Masalan: Mening Telegram Botim"
+                  placeholder={t("pages.settings_page.channel_name_placeholder")}
                   className="w-full rounded-[12px] bg-[#F0F0F0] px-4 py-3 text-[13px] text-black outline-none focus:bg-[#e8e8e8] transition-colors"
                 />
               </div>
 
               {/* Steps */}
               <div className="p-3 rounded-[12px] bg-[#F9F9F7] border border-[#E8E8E8] flex flex-col gap-2">
-                <p className="text-[10px] font-bold text-[#707070] uppercase tracking-widest">Qanday olish mumkin?</p>
+                <p className="text-[10px] font-bold text-[#707070] uppercase tracking-widest">{t("pages.settings_page.how_to_get_title")}</p>
                 {[
-                  "Telegramda @BotFather ga yozing",
-                  "/newbot buyrug'ini yuboring",
-                  "Bot nomini va username kiriting",
-                  "Token nusxalab shu yerga qo'ying",
+                  t("pages.settings_page.tg_step_1"),
+                  t("pages.settings_page.tg_step_2"),
+                  t("pages.settings_page.tg_step_3"),
+                  t("pages.settings_page.tg_step_4"),
                 ].map((step, i) => (
                   <div key={i} className="flex items-start gap-2.5">
                     <span className="grid h-4 w-4 place-items-center rounded-full bg-black text-white text-[9px] font-bold shrink-0 mt-0.5">{i + 1}</span>
@@ -1123,7 +1078,7 @@ export default function SettingsPage() {
 
             <div className="px-6 pb-6 flex gap-3">
               <Button onClick={() => setModal(null)} variant="secondary" className="flex-1 py-3 text-[12px] border border-[#E8E8E8]">
-                Bekor qilish
+                {t("common.cancel")}
               </Button>
               <button
                 onClick={handleAddTelegram}
@@ -1133,7 +1088,7 @@ export default function SettingsPage() {
                 {saving ? (
                   <span className="inline-block w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                 ) : (
-                  <><Bot size={13} /> Ulash</>
+                  <><Bot size={13} /> {t("common.connect")}</>
                 )}
               </button>
             </div>

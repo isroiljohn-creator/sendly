@@ -14,6 +14,7 @@ import {
   DollarSign, 
   Wallet
 } from "lucide-react";
+import { useI18n } from "@/i18n/I18nProvider";
 
 type ReferredUser = {
   id: string;
@@ -25,17 +26,11 @@ type ReferredUser = {
   status: "Faol" | "Kutilmoqda";
 };
 
-const REFERRALS: ReferredUser[] = [
-  { id: "1", name: "Nodir Dev", username: "@nodir_dev", date: "20 May, 2026", plan: "Premium", commission: "$75.00", status: "Faol" },
-  { id: "2", name: "Marketing Hub", username: "@marketing_hub", date: "19 May, 2026", plan: "Premium", commission: "$75.00", status: "Faol" },
-  { id: "3", name: "Sardor Salimov", username: "@sardor_salim", date: "18 May, 2026", plan: "Trial", commission: "$0.00", status: "Faol" },
-  { id: "4", name: "Dilshod Media", username: "@dilshod_media", date: "15 May, 2026", plan: "Premium", commission: "$75.00", status: "Faol" },
-  { id: "5", name: "Lola Beauty", username: "@lola_beauty", date: "14 May, 2026", plan: "Bepul", commission: "$0.00", status: "Kutilmoqda" },
-  { id: "6", name: "Farruh Karimov", username: "@farruh_k", status: "Faol", plan: "Premium", commission: "$75.00", date: "12 May, 2026" },
-  { id: "7", name: "Jasur Rahimov", username: "@jasur_r", status: "Faol", plan: "Trial", commission: "$0.00", date: "10 May, 2026" },
-];
+const REFERRALS: ReferredUser[] = [];
+
 
 export default function PartnerPage() {
+  const { t } = useI18n();
   const [activeTab, setActiveTab] = useState<"home" | "referrals">("home");
   const [copied, setCopied] = useState(false);
   const [isAlertOpen, setIsAlertOpen] = useState(false);
@@ -51,8 +46,8 @@ export default function PartnerPage() {
   return (
     <AppLayout>
       <PageHeader 
-        title="Hamkor kabineti" 
-        breadcrumbs="Boshqaruv / Hamkor kabineti" 
+        title={t("pages.partner.title")} 
+        breadcrumbs={t("pages.partner.breadcrumb")} 
       />
 
       <div className="flex flex-col lg:flex-row gap-6 mt-2">
@@ -68,7 +63,7 @@ export default function PartnerPage() {
               }`}
             >
               <Home size={16} />
-              <span>Bosh sahifa</span>
+              <span>{t("pages.partner.home_tab")}</span>
             </button>
 
             <button
@@ -80,7 +75,7 @@ export default function PartnerPage() {
               }`}
             >
               <Users size={16} />
-              <span>Taklif etilgan mijozlar</span>
+              <span>{t("pages.partner.referrals_tab")}</span>
             </button>
           </Card>
         </div>
@@ -94,15 +89,15 @@ export default function PartnerPage() {
                 {/* Joriy balans */}
                 <Card className="flex flex-col justify-between min-h-[120px] p-6 relative">
                   <div className="flex items-start justify-between">
-                    <span className="text-[13px] text-[#707070] font-medium">Joriy balans</span>
+                    <span className="text-[13px] text-[#707070] font-medium">{t("pages.partner.balance")}</span>
                     <div className="h-8 w-8 rounded-full bg-[#F0F0F0] flex items-center justify-center text-black">
                       <Wallet size={14} />
                     </div>
                   </div>
                   <div className="mt-3">
-                    <div className="text-[28px] font-semibold text-black leading-none">$61.84</div>
-                    <div className="mt-1.5 text-[10px] text-[#10B981] font-semibold flex items-center gap-1">
-                      <span>Yechib olish mumkin</span>
+                    <div className="text-[28px] font-semibold text-black leading-none">$0.00</div>
+                    <div className="mt-1.5 text-[10px] text-[#707070] font-semibold flex items-center gap-1">
+                      <span>{t("pages.partner.payout_available")}</span>
                     </div>
                   </div>
                 </Card>
@@ -110,28 +105,28 @@ export default function PartnerPage() {
                 {/* Jami daromad */}
                 <Card className="flex flex-col justify-between min-h-[120px] p-6 relative">
                   <div className="flex items-start justify-between">
-                    <span className="text-[13px] text-[#707070] font-medium">Jami daromad</span>
+                    <span className="text-[13px] text-[#707070] font-medium">{t("pages.partner.total_earned")}</span>
                     <div className="h-8 w-8 rounded-full bg-[#F0F0F0] flex items-center justify-center text-black">
                       <DollarSign size={14} />
                     </div>
                   </div>
                   <div className="mt-3">
-                    <div className="text-[28px] font-semibold text-black leading-none">$361.84</div>
-                    <div className="mt-1.5 text-[10px] text-[#707070]">Barcha davr davomida</div>
+                    <div className="text-[28px] font-semibold text-black leading-none">$0.00</div>
+                    <div className="mt-1.5 text-[10px] text-[#707070]">{t("pages.partner.total_earned_desc")}</div>
                   </div>
                 </Card>
 
                 {/* Taklif etilgan mijozlar */}
                 <Card className="flex flex-col justify-between min-h-[120px] p-6 relative cursor-pointer group" onClick={() => setActiveTab("referrals")}>
                   <div className="flex items-start justify-between">
-                    <span className="text-[13px] text-[#707070] font-medium">Taklif etilgan mijozlar</span>
+                    <span className="text-[13px] text-[#707070] font-medium">{t("pages.partner.referrals_count")}</span>
                     <div className="h-8 w-8 rounded-full bg-[#F0F0F0] group-hover:bg-[#C7F33C] flex items-center justify-center text-black transition-colors">
                       <ArrowUpRight size={14} />
                     </div>
                   </div>
                   <div className="mt-3">
-                    <div className="text-[28px] font-semibold text-black leading-none">319</div>
-                    <div className="mt-1.5 text-[10px] text-[#707070]">{"Muvaffaqiyatli ro'yxatdan o'tganlar"}</div>
+                    <div className="text-[28px] font-semibold text-black leading-none">0</div>
+                    <div className="mt-1.5 text-[10px] text-[#707070]">{t("pages.partner.referrals_count_desc")}</div>
                   </div>
                 </Card>
               </div>
@@ -142,12 +137,12 @@ export default function PartnerPage() {
                   <div className="flex items-center gap-3">
                     <div className="bg-[#3B82F6] text-white flex items-center gap-1 text-[10px] font-bold px-2.5 py-1 rounded-full uppercase shadow-sm">
                       <Check size={11} strokeWidth={3} />
-                      <span>Pro</span>
+                      <span>{t("pages.partner.status_pro")}</span>
                     </div>
                     
                     <div className="flex items-center gap-1.5">
-                      <span className="text-[13px] font-semibold text-black">Hamkor statusi:</span>
-                      <span className="text-[13px] font-bold text-[#10B981]">Faol</span>
+                      <span className="text-[13px] font-semibold text-black">{t("pages.partner.status_label")}</span>
+                      <span className="text-[13px] font-bold text-[#10B981]">{t("pages.partner.status_active")}</span>
                       <button onClick={() => setIsAlertOpen(true)} className="text-[#A0A0A0] hover:text-black">
                         <HelpCircle size={14} />
                       </button>
@@ -155,24 +150,24 @@ export default function PartnerPage() {
                   </div>
 
                   <div className="text-[11px] text-[#707070]">
-                    Hisob-kitob har oyning 5-sanasida amalga oshiriladi.
+                    {t("pages.partner.monthly_payout_info")}
                   </div>
                 </div>
 
                 <div className="pt-6">
                   <div className="flex items-center gap-2">
-                    <span className="text-[22px] font-bold text-black leading-none">30%</span>
-                    <span className="text-[13px] font-semibold text-black">36 oy davomida</span>
+                    <span className="text-[22px] font-bold text-black leading-none">{t("pages.partner.commission_rate")}</span>
+                    <span className="text-[13px] font-semibold text-black">{t("pages.partner.commission_duration")}</span>
                   </div>
                   <p className="text-[12px] text-[#707070] mt-2 leading-relaxed max-w-[580px]">
-                    {"Referal havola orqali ro'yxatdan o'tgan va premium obunaga to'lov qilgan foydalanuvchilarning har bir to'lovidan 30% hamkorlik komissiyasi taqdim etiladi."}
+                    {t("pages.partner.commission_desc")}
                   </p>
                 </div>
               </Card>
 
               {/* Referral Link copy block */}
               <Card className="p-6">
-                <h4 className="text-[11px] font-bold text-[#707070] uppercase tracking-wider mb-2.5">Sizning referal havolangiz</h4>
+                <h4 className="text-[11px] font-bold text-[#707070] uppercase tracking-wider mb-2.5">{t("pages.partner.your_ref_link")}</h4>
                 
                 <div className="flex items-center gap-2 w-full">
                   <div className="flex-1 bg-[#F5F5F5] rounded-[18px] border border-[#E5E5E5] px-4 py-3 text-[12px] text-black font-medium select-all truncate">
@@ -186,19 +181,19 @@ export default function PartnerPage() {
                     {copied ? (
                       <>
                         <Check size={14} />
-                        <span className="hidden sm:inline">Nusxalandi</span>
+                        <span className="hidden sm:inline">{t("pages.partner.copied_btn")}</span>
                       </>
                     ) : (
                       <>
                         <Copy size={14} />
-                        <span className="hidden sm:inline">Nusxa olish</span>
+                        <span className="hidden sm:inline">{t("pages.partner.copy_btn")}</span>
                       </>
                     )}
                   </Button>
                 </div>
 
                 <p className="text-[11px] text-[#707070] mt-3.5 leading-relaxed">
-                  {"Foydalanuvchi ushbu havola orqali ro'yxatdan o'tgandan so'ng 7 kunlik Pro sinov rejasida bepul foydalanish va qo'shimcha 7 kun bonus olish imkoniyatiga ega bo'ladi."}
+                  {t("pages.partner.ref_link_desc")}
                 </p>
               </Card>
             </div>
@@ -207,23 +202,33 @@ export default function PartnerPage() {
           {activeTab === "referrals" && (
             <Card className="overflow-hidden p-0">
               <div className="p-6 border-b border-[#F0F0F0]">
-                <h3 className="text-[16px] font-semibold text-black">Taklif etilgan mijozlar</h3>
-                <p className="text-[11px] text-[#707070] mt-1">{"Havolangiz orqali ro'yxatdan o'tgan foydalanuvchilarning to'liq tarixi"}</p>
+                <h3 className="text-[16px] font-semibold text-black">{t("pages.partner.history_title")}</h3>
+                <p className="text-[11px] text-[#707070] mt-1">{t("pages.partner.history_desc")}</p>
               </div>
 
               <div className="overflow-x-auto">
                 <table className="w-full text-left border-collapse">
                   <thead>
                     <tr className="border-b border-[#F0F0F0] text-[10px] font-bold text-[#707070] uppercase tracking-wider bg-[#F9F9F7]">
-                      <th className="py-3 px-6">Mijoz ismi</th>
-                      <th className="py-3 px-6">Sana</th>
-                      <th className="py-3 px-6">Tarif</th>
-                      <th className="py-3 px-6">Komissiya</th>
-                      <th className="py-3 px-6 text-right">Holati</th>
+                      <th className="py-3 px-6">{t("pages.partner.table_client")}</th>
+                      <th className="py-3 px-6">{t("pages.partner.table_date")}</th>
+                      <th className="py-3 px-6">{t("pages.partner.table_plan")}</th>
+                      <th className="py-3 px-6">{t("pages.partner.table_commission")}</th>
+                      <th className="py-3 px-6 text-right">{t("pages.partner.table_status")}</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {REFERRALS.map((ref) => (
+                    {REFERRALS.length === 0 ? (
+                      <tr>
+                        <td colSpan={5} className="py-16 text-center">
+                          <div className="flex flex-col items-center gap-2">
+                            <Users size={32} strokeWidth={1.5} className="text-[#D8D8D8]" />
+                            <p className="text-[13px] text-[#707070]">{t("pages.partner.no_referrals")}</p>
+                            <p className="text-[11px] text-[#A0A0A0]">{t("pages.partner.no_referrals_sub")}</p>
+                          </div>
+                        </td>
+                      </tr>
+                    ) : REFERRALS.map((ref) => (
                       <tr key={ref.id} className="border-b border-[#F0F0F0] hover:bg-[#FDFDFD] text-[12px] text-black transition-colors">
                         <td className="py-3.5 px-6">
                           <div className="font-semibold">{ref.name}</div>
@@ -244,7 +249,9 @@ export default function PartnerPage() {
                           <span className={`inline-block h-2 w-2 rounded-full mr-2 ${
                             ref.status === "Faol" ? "bg-[#10B981]" : "bg-yellow-400"
                           }`} />
-                          <span className="text-[11px] font-medium">{ref.status}</span>
+                          <span className="text-[11px] font-medium">
+                            {ref.status === "Faol" ? t("pages.partner.status_active") : t("pages.partner.status_pending")}
+                          </span>
                         </td>
                       </tr>
                     ))}
@@ -259,8 +266,8 @@ export default function PartnerPage() {
       <AlertModal
         isOpen={isAlertOpen}
         onClose={() => setIsAlertOpen(false)}
-        title="Hamkorlik Tizimi"
-        message="Sizning Pro hamkorlik darajangiz faol. Doimiy taklif qiluvchi hamkorlarimiz uchun maxsus 30% komissiya stavkasi 3 yil (36 oy) davomida amal qiladi. Komissiyalar har oyning boshida avtomatik ravishda tasdiqlanadi va joriy balansingizga qo'shiladi."
+        title={t("pages.partner.modal_title")}
+        message={t("pages.partner.modal_message")}
       />
     </AppLayout>
   );

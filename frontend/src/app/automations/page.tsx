@@ -22,10 +22,12 @@ import { Instagram } from "@/components/ui/icons";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Card, Button, ConfirmModal, AlertModal } from "@/components/ui/primitives";
 import { CustomDropdown } from "@/components/ui/CustomDropdown";
+import { useI18n } from "@/i18n/I18nProvider";
 import { db } from "@/lib/db";
 import type { Automation, Channel, Group } from "@/lib/db";
 
 export default function AutomationsPage() {
+  const { t } = useI18n();
   const [allAutomations, setAllAutomations] = useState<(Automation & { channel?: Channel })[]>([]);
   const [channels, setChannels] = useState<Channel[]>([]);
   const [groups, setGroups] = useState<Group[]>([]);
@@ -80,6 +82,25 @@ export default function AutomationsPage() {
   const toggleActive = (id: string, channelId?: string) => {
     if (!channelId) return;
     const autos = db.getChannelAutomations(channelId);
+    const targetAuto = autos.find((a) => a.id === id);
+    if (!targetAuto) return;
+
+    if (!targetAuto.active) {
+      // Activating: check active automations limit
+      const user = db.getCurrentUser();
+      const plan = user?.plan || "free";
+      const maxAutos = plan === "premium" ? 500 : plan === "pro" ? 50 : 2;
+      const currentActiveCount = db.getAllAutomations().filter((a) => a.active).length;
+
+      if (currentActiveCount >= maxAutos) {
+        showAlert(
+          t("pages.settings_page.card_limit_title"),
+          t("pages.automations_page.activation_limit_reached").replace("{limit}", String(maxAutos))
+        );
+        return;
+      }
+    }
+
     const updated = autos.map((a) => (a.id === id ? { ...a, active: !a.active } : a));
     db.saveChannelAutomations(channelId, updated);
     loadAllData();
@@ -124,27 +145,40 @@ export default function AutomationsPage() {
   // Create Quick keyword bot
   const handleCreateQuickBot = () => {
     if (!quickBotChannelId) {
-      showAlert("Xatolik", "Iltimos, kanalni tanlang.");
+      showAlert(t("common.error"), t("pages.automations_page.error_select_channel"));
       return;
     }
     if (!quickBotKeywords.trim()) {
-      showAlert("Xatolik", "Iltimos, kalit so'zlarni kiriting.");
+      showAlert(t("common.error"), t("pages.automations_page.error_enter_keywords"));
       return;
     }
     if (!quickBotReply.trim()) {
-      showAlert("Xatolik", "Iltimos, javob matnini kiriting.");
+      showAlert(t("common.error"), t("pages.automations_page.error_enter_reply"));
       return;
+    }
+
+    const user = db.getCurrentUser();
+    const plan = user?.plan || "free";
+    const maxAutos = plan === "premium" ? 500 : plan === "pro" ? 50 : 2;
+    const currentActiveCount = db.getAllAutomations().filter((a) => a.active).length;
+    const shouldBeActive = currentActiveCount < maxAutos;
+
+    if (!shouldBeActive) {
+      showAlert(
+        t("pages.automations_page.quick_bot_title"),
+        t("pages.automations_page.quick_bot_created_inactive").replace("{limit}", String(maxAutos))
+      );
     }
 
     const current = db.getChannelAutomations(quickBotChannelId);
     const newAuto: Automation = {
       id: `quick_${Date.now()}`,
-      name: quickBotName.trim() || "Tezkor Chatbot",
+      name: quickBotName.trim() || t("pages.automations_page.quick_bot"),
       triggerType: "keyword",
       triggerDetails: quickBotKeywords.trim(),
       runs: "0",
       completion: "100%",
-      active: true,
+      active: shouldBeActive,
       groupId: selectedGroupId !== "all" && selectedGroupId !== "none" ? selectedGroupId : undefined,
     };
 
@@ -163,7 +197,7 @@ export default function AutomationsPage() {
   // Add custom group
   const handleAddGroup = () => {
     if (!newGroupName.trim()) {
-      showAlert("Xatolik", "Iltimos, guruh nomini kiriting.");
+      showAlert(t("common.error"), t("pages.automations_page.error_enter_group_name"));
       return;
     }
     db.addGroup(newGroupName.trim());
@@ -187,17 +221,30 @@ export default function AutomationsPage() {
       } else if (channels.length > 0) {
         targetChannelId = channels[0].id;
       } else {
-        showAlert("Xatolik", "Shablon yuklash uchun avval sozlamalardan yoki kanallar sahifasidan hisob bog'lang!");
+        showAlert(t("common.error"), t("pages.automations_page.template_error_no_channels"));
         return;
       }
     }
 
+    const user = db.getCurrentUser();
+    const plan = user?.plan || "free";
+    const maxAutos = plan === "premium" ? 500 : plan === "pro" ? 50 : 2;
+    const currentActiveCount = db.getAllAutomations().filter((a) => a.active).length;
+    const shouldBeActive = currentActiveCount < maxAutos;
+
+    if (!shouldBeActive) {
+      showAlert(
+        t("pages.automations_page.templates_title"),
+        t("pages.automations_page.template_inactive").replace("{limit}", String(maxAutos))
+      );
+    }
+
     const current = db.getChannelAutomations(targetChannelId);
     const templates: Record<string, Automation> = {
-      lead_magnet: { id: `tmpl_${Date.now()}`, name: "Lead Magnet (Bepul qo'llanma)", triggerType: "keyword", triggerDetails: "kitob, kurs, bonus", runs: "0", completion: "98%", active: true },
-      story_coupon: { id: `tmpl_${Date.now()}`, name: "Stories-da belgilaganda kupon", triggerType: "story", triggerDetails: "Story mentions", runs: "0", completion: "95%", active: true },
-      comment_dm: { id: `tmpl_${Date.now()}`, name: "Izoh yozganda DM-ga havola", triggerType: "keyword", triggerDetails: "narxi, batafsil, link", runs: "0", completion: "92%", active: true },
-      welcome_faq: { id: `tmpl_${Date.now()}`, name: "Kutib olish va Tezkor FAQ", triggerType: "keyword", triggerDetails: "salom, start, boshlash", runs: "0", completion: "96%", active: true },
+      lead_magnet: { id: `tmpl_${Date.now()}`, name: t("pages.automations_page.tmpl_lead_magnet_name"), triggerType: "keyword", triggerDetails: t("pages.automations_page.tmpl_lead_magnet_trigger"), runs: "0", completion: "98%", active: shouldBeActive },
+      story_coupon: { id: `tmpl_${Date.now()}`, name: t("pages.automations_page.tmpl_story_coupon_name"), triggerType: "story", triggerDetails: t("pages.automations_page.tmpl_story_coupon_trigger"), runs: "0", completion: "95%", active: shouldBeActive },
+      comment_dm: { id: `tmpl_${Date.now()}`, name: t("pages.automations_page.tmpl_comment_dm_name"), triggerType: "keyword", triggerDetails: t("pages.automations_page.tmpl_comment_dm_trigger"), runs: "0", completion: "92%", active: shouldBeActive },
+      welcome_faq: { id: `tmpl_${Date.now()}`, name: t("pages.automations_page.tmpl_welcome_faq_name"), triggerType: "keyword", triggerDetails: t("pages.automations_page.tmpl_welcome_faq_trigger"), runs: "0", completion: "96%", active: shouldBeActive },
     };
 
     const newTemplate = templates[templateKey] ?? null;
@@ -257,14 +304,14 @@ export default function AutomationsPage() {
         <div className="w-full lg:w-[280px] shrink-0 flex flex-col gap-6 bg-white border border-[#E8E8E8] rounded-[24px] p-5 shadow-sm">
           {/* Header */}
           <div className="flex items-center justify-between pb-3 border-b border-[#F0F0F0]">
-            <h2 className="text-[16px] font-extrabold text-black tracking-tight">Avtomatlashtirish</h2>
+            <h2 className="text-[16px] font-extrabold text-black tracking-tight">{t("pages.automations.title")}</h2>
           </div>
 
           {/* Action buttons */}
           <div className="flex flex-col gap-2">
             <Link href="/automations/builder" className="w-full">
               <button className="w-full justify-center text-[12px] font-bold py-2.5 rounded-[12px] bg-black text-white hover:bg-black/90 transition-all flex items-center gap-1.5 shadow-sm">
-                <Plus size={14} strokeWidth={2.5} /> Yangi oqim yaratish
+                <Plus size={14} strokeWidth={2.5} /> {t("pages.automations_page.create_flow_btn")}
               </button>
             </Link>
             <button
@@ -279,7 +326,7 @@ export default function AutomationsPage() {
               }}
               className="w-full justify-center text-[12px] font-bold py-2.5 rounded-[12px] bg-[#C7F33C] text-black hover:bg-[#b5e02c] transition-all flex items-center gap-1.5 shadow-sm border border-[#b2db2a]"
             >
-              <Zap size={14} fill="currentColor" /> Tezkor Bot
+              <Zap size={14} fill="currentColor" /> {t("pages.automations_page.quick_bot")}
             </button>
           </div>
 
@@ -287,17 +334,17 @@ export default function AutomationsPage() {
             onClick={() => setShowTemplates(!showTemplates)}
             className="text-[11px] font-bold text-[#707070] hover:text-black mt-[-4px] flex items-center justify-center gap-1 transition-colors"
           >
-            <BookOpen size={12} /> {showTemplates ? "Shablonlarni yashirish" : "Shablonlarni ko'rsatish"}
+            <BookOpen size={12} /> {showTemplates ? t("pages.automations_page.hide_templates") : t("pages.automations_page.show_templates")}
           </button>
 
           {/* Groups section */}
           <div className="flex flex-col gap-2">
             <div className="flex items-center justify-between text-[10px] uppercase tracking-wider font-extrabold text-[#A0A0A0]">
-              <span>Guruhlar</span>
+              <span>{t("pages.automations_page.groups")}</span>
               <button
                 onClick={() => setIsAddGroupModalOpen(true)}
                 className="hover:text-black transition-colors p-0.5 rounded hover:bg-[#F5F5F5]"
-                title="Guruh qo'shish"
+                title={t("pages.automations_page.add_group_title")}
               >
                 <FolderPlus size={14} />
               </button>
@@ -310,7 +357,7 @@ export default function AutomationsPage() {
                 className={`flex items-center justify-between px-3 py-2 rounded-[12px] text-[12px] transition-all text-left ${selectedGroupId === "all" ? "bg-[#C7F33C]/20 text-black font-bold" : "text-[#505050] hover:bg-[#F5F5F5]"}`}
               >
                 <span className="flex items-center gap-2">
-                  <Folder size={14} className="text-black" /> Barcha oqimlar
+                  <Folder size={14} className="text-black" /> {t("pages.automations_page.all_flows")}
                 </span>
                 <span className="text-[10px] bg-white border border-[#E8E8E8] px-1.5 py-0.5 rounded-full font-bold">
                   {allAutomations.length}
@@ -323,7 +370,7 @@ export default function AutomationsPage() {
                 className={`flex items-center justify-between px-3 py-2 rounded-[12px] text-[12px] transition-all text-left ${selectedGroupId === "none" ? "bg-[#C7F33C]/20 text-black font-bold" : "text-[#505050] hover:bg-[#F5F5F5]"}`}
               >
                 <span className="flex items-center gap-2">
-                  <Folder size={14} className="text-[#808080]" /> Guruhsiz
+                  <Folder size={14} className="text-[#808080]" /> {t("pages.automations_page.uncategorized")}
                 </span>
                 <span className="text-[10px] bg-white border border-[#E8E8E8] px-1.5 py-0.5 rounded-full font-bold">
                   {allAutomations.filter((a) => !a.groupId).length}
@@ -347,7 +394,7 @@ export default function AutomationsPage() {
                   <button
                     onClick={() => handleDeleteGroup(group.id)}
                     className="opacity-0 group-hover/item:opacity-100 p-2 text-red-500 hover:text-red-700 transition-all"
-                    title="Guruhni o'chirish"
+                    title={t("pages.automations_page.delete_group_title")}
                   >
                     <Trash2 size={12} />
                   </button>
@@ -359,11 +406,11 @@ export default function AutomationsPage() {
           {/* Connected accounts section */}
           <div className="flex flex-col gap-2">
             <div className="flex items-center justify-between text-[10px] uppercase tracking-wider font-extrabold text-[#A0A0A0]">
-              <span>Akkauntlar</span>
+              <span>{t("pages.automations_page.accounts")}</span>
               <Link
                 href="/settings?connect=choose"
                 className="hover:text-black transition-colors p-0.5 rounded hover:bg-[#F5F5F5]"
-                title="Kanal qo'shish"
+                title={t("pages.settings_page.manage_channels")}
               >
                 <Plus size={14} />
               </Link>
@@ -372,10 +419,10 @@ export default function AutomationsPage() {
             <div className="flex flex-col gap-1.5">
               {channels.length === 0 ? (
                 <div className="p-3 text-center border border-dashed border-[#E8E8E8] rounded-[16px]">
-                  <p className="text-[10px] text-[#A0A0A0] leading-normal">Hozircha hisob ulanmagan.</p>
+                  <p className="text-[10px] text-[#A0A0A0] leading-normal">{t("pages.automations_page.no_accounts")}</p>
                   <Link href="/settings?connect=choose">
                     <span className="inline-block mt-1 text-[10px] text-blue-600 font-semibold cursor-pointer hover:underline">
-                      Kanal ulash →
+                      {t("pages.automations_page.connect_channel")}
                     </span>
                   </Link>
                 </div>
@@ -424,15 +471,15 @@ export default function AutomationsPage() {
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white border border-[#E8E8E8] rounded-[24px] p-5 shadow-sm">
             <div>
               <div className="text-[10px] text-[#A0A0A0] uppercase font-bold tracking-wider mb-1">
-                Boshqaruv / Oqimlar
+                {t("pages.automations.breadcrumb")}
               </div>
               <h1 className="text-[20px] font-extrabold text-black flex items-center gap-2 tracking-tight">
                 {selectedGroupId === "all" ? (
-                  "Barcha oqimlar"
+                  t("pages.automations_page.all_flows")
                 ) : selectedGroupId === "none" ? (
-                  "Guruhsiz oqimlar"
+                  t("pages.automations_page.uncategorized")
                 ) : (
-                  <span>Guruh: {groups.find((g) => g.id === selectedGroupId)?.name}</span>
+                  <span>{t("pages.automations_page.groups")}: {groups.find((g) => g.id === selectedGroupId)?.name}</span>
                 )}
                 {selectedChannelId !== "all" && (
                   <span className="text-[11px] font-normal bg-black text-[#C7F33C] px-2 py-0.5 rounded-full">
@@ -440,7 +487,7 @@ export default function AutomationsPage() {
                   </span>
                 )}
                 <span className="text-[11px] font-bold text-[#707070] bg-[#F5F5F5] border border-[#E8E8E8] px-2.5 py-0.5 rounded-full">
-                  {filteredAutomations.length} ta oqim
+                  {t("pages.automations_page.flows_count").replace("{count}", String(filteredAutomations.length))}
                 </span>
               </h1>
             </div>
@@ -450,7 +497,7 @@ export default function AutomationsPage() {
               <div className="relative">
                 <input
                   type="text"
-                  placeholder="Qidiruv..."
+                  placeholder={t("pages.automations_page.search_placeholder")}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="w-[180px] sm:w-[220px] pl-8 pr-3 py-1.5 text-[11px] bg-white border border-[#E8E8E8] rounded-full focus:outline-none focus:border-black focus:ring-1 focus:ring-black transition-all font-medium"
@@ -470,9 +517,9 @@ export default function AutomationsPage() {
                   value={sortBy}
                   onChange={setSortBy}
                   options={[
-                    { value: "recent", label: "Sana (yangi)" },
-                    { value: "oldest", label: "Sana (eski)" },
-                    { value: "runs", label: "Ishlash soni" },
+                    { value: "recent", label: t("pages.automations_page.sort_recent") },
+                    { value: "oldest", label: t("pages.automations_page.sort_oldest") },
+                    { value: "runs", label: t("pages.automations_page.sort_runs") },
                   ]}
                   className="border-0 bg-transparent p-0 text-[11px] font-bold text-[#505050] focus:border-0 focus:shadow-none hover:bg-transparent rounded-none h-auto w-auto flex-1 select-none pr-1"
                   dropdownClassName="min-w-[120px] right-0 left-auto mt-2"
@@ -487,13 +534,13 @@ export default function AutomationsPage() {
               <div className="flex items-center gap-3">
                 <AlertCircle size={18} className="text-[#C7F33C]" />
                 <div>
-                  <p className="text-[12px] font-bold">{"Hech qanday ijtimoiy tarmoq bog'lanmagan"}</p>
-                  <p className="text-[10px] text-white/60">{"Yangi oqim yaratish yoki ishga tushirish uchun avval sahifada hisobni bog'lang."}</p>
+                  <p className="text-[12px] font-bold">{t("pages.automations_page.no_channels_warning")}</p>
+                  <p className="text-[10px] text-white/60">{t("pages.automations_page.no_channels_warning_desc")}</p>
                 </div>
               </div>
               <Link href="/settings?connect=choose">
                 <Button variant="accent" className="text-[10px] py-1.5 px-3.5 rounded-full whitespace-nowrap bg-[#C7F33C] text-black hover:bg-[#b0d82f]">
-                  Hisob ulash →
+                  {t("pages.automations_page.connect_channel")}
                 </Button>
               </Link>
             </div>
@@ -504,10 +551,10 @@ export default function AutomationsPage() {
             <div className="flex flex-col gap-3 bg-white border border-[#E8E8E8] rounded-[24px] p-5 shadow-sm animate-in fade-in slide-in-from-top-4 duration-300">
               <div className="flex items-center justify-between pb-2 border-b border-[#F0F0F0]">
                 <h3 className="text-[13px] font-extrabold text-black uppercase tracking-wider flex items-center gap-1.5">
-                  📁 Shablonlar Kutubxonasi
+                  {t("pages.automations_page.templates_title")}
                 </h3>
                 <span className="text-[9px] font-bold text-[#707070] bg-[#F5F5F5] px-2 py-0.5 rounded-full">
-                  1-klikda yuklash
+                  {t("pages.automations_page.templates_desc")}
                 </span>
               </div>
 
@@ -518,9 +565,9 @@ export default function AutomationsPage() {
                     <div className="grid h-8 w-8 place-items-center rounded-[10px] bg-[#C7F33C]/20 text-black group-hover:bg-[#C7F33C] transition-all duration-300">
                       <BookOpen size={14} />
                     </div>
-                    <h4 className="text-[12px] font-bold text-black mt-3">Lead Magnet Delivery</h4>
+                    <h4 className="text-[12px] font-bold text-black mt-3">{t("pages.automations_page.tmpl_lead_magnet_name")}</h4>
                     <p className="text-[10px] text-[#707070] mt-1 leading-relaxed">
-                      {"DM orqali kalit so'z yozganda bepul qo'llanma havolasini yuborish."}
+                      {t("pages.automations_page.tmpl_lead_magnet_desc")}
                     </p>
                   </div>
                   <Button
@@ -528,7 +575,7 @@ export default function AutomationsPage() {
                     variant="secondary"
                     className="w-full mt-3.5 py-1.5 text-[10px] font-bold border border-[#E8E8E8] hover:bg-black hover:text-white hover:border-black transition-all rounded-[10px]"
                   >
-                    Shablonni yuklash
+                    {t("pages.automations_page.load_template")}
                   </Button>
                 </Card>
 
@@ -538,9 +585,9 @@ export default function AutomationsPage() {
                     <div className="grid h-8 w-8 place-items-center rounded-[10px] bg-[#C7F33C]/20 text-black group-hover:bg-[#C7F33C] transition-all duration-300">
                       <Gift size={14} />
                     </div>
-                    <h4 className="text-[12px] font-bold text-black mt-3">Story Mention Coupon</h4>
+                    <h4 className="text-[12px] font-bold text-black mt-3">{t("pages.automations_page.tmpl_story_coupon_name")}</h4>
                     <p className="text-[10px] text-[#707070] mt-1 leading-relaxed">
-                      Stories-da belgilagan foydalanuvchiga avtomatik chegirma kuponini yuborish.
+                      {t("pages.automations_page.tmpl_story_coupon_desc")}
                     </p>
                   </div>
                   <Button
@@ -548,7 +595,7 @@ export default function AutomationsPage() {
                     variant="secondary"
                     className="w-full mt-3.5 py-1.5 text-[10px] font-bold border border-[#E8E8E8] hover:bg-black hover:text-white hover:border-black transition-all rounded-[10px]"
                   >
-                    Shablonni yuklash
+                    {t("pages.automations_page.load_template")}
                   </Button>
                 </Card>
 
@@ -558,9 +605,9 @@ export default function AutomationsPage() {
                     <div className="grid h-8 w-8 place-items-center rounded-[10px] bg-[#C7F33C]/20 text-black group-hover:bg-[#C7F33C] transition-all duration-300">
                       <MessageSquare size={14} />
                     </div>
-                    <h4 className="text-[12px] font-bold text-black mt-3">Comment to DM Link</h4>
+                    <h4 className="text-[12px] font-bold text-black mt-3">{t("pages.automations_page.tmpl_comment_dm_name")}</h4>
                     <p className="text-[10px] text-[#707070] mt-1 leading-relaxed">
-                      Post ostiga izoh yozilganida izohga avtojavob va DM-ga havola.
+                      {t("pages.automations_page.tmpl_comment_dm_desc")}
                     </p>
                   </div>
                   <Button
@@ -568,7 +615,7 @@ export default function AutomationsPage() {
                     variant="secondary"
                     className="w-full mt-3.5 py-1.5 text-[10px] font-bold border border-[#E8E8E8] hover:bg-black hover:text-white hover:border-black transition-all rounded-[10px]"
                   >
-                    Shablonni yuklash
+                    {t("pages.automations_page.load_template")}
                   </Button>
                 </Card>
 
@@ -578,9 +625,9 @@ export default function AutomationsPage() {
                     <div className="grid h-8 w-8 place-items-center rounded-[10px] bg-[#C7F33C]/20 text-black group-hover:bg-[#C7F33C] transition-all duration-300">
                       <HelpCircle size={14} />
                     </div>
-                    <h4 className="text-[12px] font-bold text-black mt-3">Welcome FAQ Bot</h4>
+                    <h4 className="text-[12px] font-bold text-black mt-3">{t("pages.automations_page.tmpl_welcome_faq_name")}</h4>
                     <p className="text-[10px] text-[#707070] mt-1 leading-relaxed">
-                      {"Yangi mijozlar uchun salomlashish va tez-tez so'raladigan savollar oqimi."}
+                      {t("pages.automations_page.tmpl_welcome_faq_desc")}
                     </p>
                   </div>
                   <Button
@@ -588,7 +635,7 @@ export default function AutomationsPage() {
                     variant="secondary"
                     className="w-full mt-3.5 py-1.5 text-[10px] font-bold border border-[#E8E8E8] hover:bg-black hover:text-white hover:border-black transition-all rounded-[10px]"
                   >
-                    Shablonni yuklash
+                    {t("pages.automations_page.load_template")}
                   </Button>
                 </Card>
               </div>
@@ -604,12 +651,12 @@ export default function AutomationsPage() {
               <div className="flex flex-col">
                 <div className="flex items-center gap-2">
                   <span className="text-[9px] uppercase font-extrabold tracking-wider text-black bg-[#C7F33C] px-2 py-0.5 rounded-full">
-                    Tezkor sozlash
+                    {t("pages.automations_page.quick_setup")}
                   </span>
                 </div>
-                <h2 className="text-[17px] font-black mt-2 tracking-tight">Tezkor Keyword Chatbot</h2>
+                <h2 className="text-[17px] font-black mt-2 tracking-tight">{t("pages.automations_page.quick_bot_title")}</h2>
                 <p className="text-[11px] text-white/70 mt-1 max-w-[500px] leading-relaxed">
-                  {"Murakkab vizual sxemalarni chizmasdan, shunchaki kalit so'zlar va javob matnini kiritib, bir daqiqada chatbot oqimini tayyorlang."}
+                  {t("pages.automations_page.quick_bot_desc")}
                 </p>
               </div>
             </div>
@@ -625,7 +672,7 @@ export default function AutomationsPage() {
               }}
               className="px-5 py-2.5 bg-[#C7F33C] hover:bg-[#b0d82f] text-black font-extrabold rounded-full text-[11px] transition-all whitespace-nowrap shrink-0 shadow-md transform hover:scale-[1.02]"
             >
-              + Tezkor bot yaratish
+              {t("pages.automations_page.quick_bot_btn")}
             </button>
           </div>
 
@@ -633,10 +680,10 @@ export default function AutomationsPage() {
           <div className="flex flex-col gap-4">
             <div className="flex items-center justify-between">
               <h3 className="text-[14px] font-extrabold text-black uppercase tracking-wider">
-                {"Oqimlar Ro'yxati"}
+                {t("pages.automations_page.flows_list")}
               </h3>
               <span className="text-[10px] text-[#707070] bg-white px-2 py-0.5 rounded border border-[#E8E8E8] font-bold">
-                {filteredAutomations.filter(a => a.active).length} ta faol
+                {t("pages.automations_page.active_count").replace("{count}", String(filteredAutomations.filter(a => a.active).length))}
               </span>
             </div>
 
@@ -645,9 +692,9 @@ export default function AutomationsPage() {
                 <div className="grid h-12 w-12 place-items-center rounded-full bg-[#F5F5F5] text-[#707070] mb-4">
                   <Zap size={20} className="text-[#A0A0A0]" />
                 </div>
-                <h3 className="text-[15px] font-bold text-black">Mos keladigan oqimlar topilmadi</h3>
+                <h3 className="text-[15px] font-bold text-black">{t("pages.automations_page.no_flows_found")}</h3>
                 <p className="text-[11px] text-[#707070] mt-1 max-w-[280px] leading-normal">
-                  {"Siz tanlagan guruh yoki qidiruv so'rovi bo'yicha hech qanday avtomatlashtirish yaratilmagan."}
+                  {t("pages.automations_page.no_flows_found_desc")}
                 </p>
                 <div className="flex gap-2 mt-4">
                   <Button
@@ -659,11 +706,11 @@ export default function AutomationsPage() {
                     variant="secondary"
                     className="text-[11px]"
                   >
-                    Filtrlarni tozalash
+                    {t("pages.automations_page.clear_filters")}
                   </Button>
                   <Link href="/automations/builder">
                     <Button variant="primary" className="text-[11px] bg-black text-white hover:bg-black/90">
-                      Oqim yaratish
+                      {t("pages.automations_page.create_flow_btn")}
                     </Button>
                   </Link>
                 </div>
@@ -683,7 +730,7 @@ export default function AutomationsPage() {
                         </div>
                         <div className="min-w-0">
                           <span className="text-[9px] text-[#A0A0A0] font-bold uppercase tracking-wider block">
-                            {a.triggerType === "keyword" ? "Kalit so'z" : "Story javob"}
+                            {a.triggerType === "keyword" ? t("pages.home.keyword_direct") : t("pages.home.story_mentions")}
                           </span>
                           <h3 className="text-[13px] font-extrabold text-black leading-tight mt-0.5 truncate max-w-[170px]" title={a.name}>
                             {a.name}
@@ -714,7 +761,7 @@ export default function AutomationsPage() {
                                 }}
                                 className="w-full flex items-center gap-2 px-3 py-1.5 text-[11px] text-[#333] hover:bg-[#F5F5F5] text-left font-semibold"
                               >
-                                ✏️ Tahrirlash
+                                {t("pages.automations_page.edit_action")}
                               </button>
                               <button
                                 onClick={() => {
@@ -723,13 +770,13 @@ export default function AutomationsPage() {
                                 }}
                                 className="w-full flex items-center gap-2 px-3 py-1.5 text-[11px] text-[#333] hover:bg-[#F5F5F5] text-left font-semibold"
                               >
-                                {a.active ? "⏸ Nofaol qilish" : "▶️ Faol qilish"}
+                                {a.active ? t("pages.automations_page.deactivate_action") : t("pages.automations_page.activate_action")}
                               </button>
                               
                               {/* Assign Group */}
                               <div className="h-[1px] bg-[#F0F0F0] my-1" />
                               <div className="px-3 py-1 text-[8px] uppercase font-bold text-[#A0A0A0]">
-                                {"Guruhni o'zgartirish"}
+                                {t("pages.automations_page.change_group")}
                               </div>
                               <button
                                 onClick={() => {
@@ -738,7 +785,7 @@ export default function AutomationsPage() {
                                 }}
                                 className={`w-full flex items-center gap-1.5 px-3 py-1 text-[10px] hover:bg-[#F5F5F5] text-left ${!a.groupId ? "font-bold text-black" : "text-[#707070]"}`}
                               >
-                                📂 Guruhsiz
+                                📂 {t("pages.automations_page.uncategorized")}
                               </button>
                               {groups.map((g) => (
                                 <button
@@ -761,7 +808,7 @@ export default function AutomationsPage() {
                                 }}
                                 className="w-full flex items-center gap-2 px-3 py-1.5 text-[11px] text-red-600 hover:bg-red-50 text-left font-semibold"
                               >
-                                {"🗑️ O'chirish"}
+                                {t("pages.automations_page.delete_action")}
                               </button>
                             </div>
                           </>
@@ -771,7 +818,7 @@ export default function AutomationsPage() {
 
                     {/* Trigger details */}
                     <div className="bg-[#F9F9F9] rounded-[16px] px-3 py-2 text-[10px] text-[#505050] border border-[#F0F0F0] leading-relaxed">
-                      <span className="text-[#A0A0A0] font-bold">Tepki:</span>{" "}
+                      <span className="text-[#A0A0A0] font-bold">{t("pages.builder.trigger_settings")}:</span>{" "}
                       <span className="font-semibold text-black truncate max-w-full block mt-0.5">
                         {a.triggerDetails}
                       </span>
@@ -780,11 +827,11 @@ export default function AutomationsPage() {
                     {/* Stats Grid */}
                     <div className="grid grid-cols-2 gap-4 border-t border-b border-[#F0F0F0] py-3 text-center">
                       <div className="flex flex-col items-center">
-                        <span className="text-[9px] text-[#707070] uppercase font-bold tracking-wider">Ishga tushdi</span>
+                        <span className="text-[9px] text-[#707070] uppercase font-bold tracking-wider">{t("pages.automations.run_count")}</span>
                         <span className="text-[14px] font-extrabold text-black mt-0.5">{a.runs}</span>
                       </div>
                       <div className="flex flex-col items-center border-l border-[#F0F0F0]">
-                        <span className="text-[9px] text-[#707070] uppercase font-bold tracking-wider">Konversiya</span>
+                        <span className="text-[9px] text-[#707070] uppercase font-bold tracking-wider">{t("pages.automations_page.conversion")}</span>
                         <span className="text-[14px] font-extrabold text-[#16A34A] mt-0.5">{a.completion}</span>
                       </div>
                     </div>
@@ -806,13 +853,13 @@ export default function AutomationsPage() {
                             </span>
                           </>
                         ) : (
-                          <span className="text-[10px] text-[#A0A0A0]">{"Noma'lum kanal"}</span>
+                          <span className="text-[10px] text-[#A0A0A0]">{t("pages.automations_page.unknown_channel")}</span>
                         )}
                       </div>
 
                       <div className="flex items-center gap-2">
                         <span className={`text-[9px] font-bold ${a.active ? "text-[#16A34A]" : "text-[#707070]"}`}>
-                          {a.active ? "Faol" : "Nofaol"}
+                          {a.active ? t("common.active") : t("common.inactive")}
                         </span>
                         <button
                           onClick={() => toggleActive(a.id, a.channelId)}
@@ -848,7 +895,7 @@ export default function AutomationsPage() {
           <div className="bg-white rounded-[28px] max-w-md w-full p-6 shadow-2xl border border-[#E8E8E8] flex flex-col gap-4 animate-in fade-in zoom-in-95 duration-200">
             <div className="flex items-center justify-between pb-3 border-b border-[#F0F0F0]">
               <h3 className="text-[14px] font-extrabold text-black flex items-center gap-2 uppercase tracking-wider">
-                {"🤖 Tezkor Keyword Chatbot yaratish"}
+                🤖 {t("pages.automations_page.quick_bot_modal_title")}
               </h3>
               <button
                 onClick={() => setIsQuickBotModalOpen(false)}
@@ -861,10 +908,10 @@ export default function AutomationsPage() {
             <div className="flex flex-col gap-3">
               {/* Bot Name */}
               <div className="flex flex-col gap-1">
-                <label className="text-[10px] font-bold text-[#707070] uppercase">Bot nomi</label>
+                <label className="text-[10px] font-bold text-[#707070] uppercase">{t("pages.home.create_bot.bot_name")}</label>
                 <input
                   type="text"
-                  placeholder="Masalan: Chegirma Bot"
+                  placeholder={t("pages.home.create_bot.bot_name_placeholder")}
                   value={quickBotName}
                   onChange={(e) => setQuickBotName(e.target.value)}
                   className="w-full px-3 py-2 text-[12px] bg-white border border-[#E8E8E8] rounded-[12px] focus:outline-none focus:border-black font-semibold"
@@ -873,11 +920,11 @@ export default function AutomationsPage() {
 
               {/* Channel Selection */}
               <div className="flex flex-col gap-1">
-                <label className="text-[10px] font-bold text-[#707070] uppercase">Kanalni tanlang</label>
+                <label className="text-[10px] font-bold text-[#707070] uppercase">{t("pages.automations_page.quick_bot_channel_label")}</label>
                 <CustomDropdown
                   value={quickBotChannelId}
                   onChange={setQuickBotChannelId}
-                  placeholder="Kanalni tanlang..."
+                  placeholder={t("pages.settings_page.choose_channel_type")}
                   options={channels.map((ch) => ({
                     value: ch.id,
                     label: `${ch.name} (${ch.username})`,
@@ -892,10 +939,10 @@ export default function AutomationsPage() {
 
               {/* Keywords */}
               <div className="flex flex-col gap-1">
-                <label className="text-[10px] font-bold text-[#707070] uppercase">{"Kalit so'zlar (vergul bilan)"}</label>
+                <label className="text-[10px] font-bold text-[#707070] uppercase">{t("pages.automations_page.quick_bot_keywords_label")}</label>
                 <input
                   type="text"
-                  placeholder="Masalan: narx, buyurtma, chegirma"
+                  placeholder={t("pages.builder.trigger_keywords")}
                   value={quickBotKeywords}
                   onChange={(e) => setQuickBotKeywords(e.target.value)}
                   className="w-full px-3 py-2 text-[12px] bg-white border border-[#E8E8E8] rounded-[12px] focus:outline-none focus:border-black font-semibold"
@@ -904,9 +951,9 @@ export default function AutomationsPage() {
 
               {/* Reply Message */}
               <div className="flex flex-col gap-1">
-                <label className="text-[10px] font-bold text-[#707070] uppercase">Javob xabari matni</label>
+                <label className="text-[10px] font-bold text-[#707070] uppercase">{t("pages.automations_page.quick_bot_reply_label")}</label>
                 <textarea
-                  placeholder={"Foydalanuvchi kalit so'zni yozganda yuboriladigan xabar matni..."}
+                  placeholder={t("pages.automations_page.quick_bot_reply_placeholder")}
                   value={quickBotReply}
                   onChange={(e) => setQuickBotReply(e.target.value)}
                   rows={4}
@@ -921,14 +968,14 @@ export default function AutomationsPage() {
                 variant="secondary"
                 className="text-[11px] font-bold px-4 py-2"
               >
-                Bekor qilish
+                {t("common.cancel")}
               </Button>
               <Button
                 onClick={handleCreateQuickBot}
                 variant="primary"
                 className="text-[11px] font-bold px-4 py-2 bg-black text-white hover:bg-black/90 rounded-[12px]"
               >
-                Yaratish
+                {t("common.create")}
               </Button>
             </div>
           </div>
@@ -940,7 +987,7 @@ export default function AutomationsPage() {
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-[24px] max-w-sm w-full p-6 shadow-2xl border border-[#E8E8E8] flex flex-col gap-4 animate-in fade-in zoom-in-95 duration-200">
             <div className="flex items-center justify-between pb-2 border-b border-[#F0F0F0]">
-              <h3 className="text-[13px] font-extrabold text-black uppercase tracking-wider">{"📂 Yangi guruh qo'shish"}</h3>
+              <h3 className="text-[13px] font-extrabold text-black uppercase tracking-wider">📂 {t("pages.automations_page.add_group_title")}</h3>
               <button
                 onClick={() => setIsAddGroupModalOpen(false)}
                 className="text-[#707070] hover:text-black font-semibold text-[14px] p-1"
@@ -949,10 +996,10 @@ export default function AutomationsPage() {
               </button>
             </div>
             <div className="flex flex-col gap-1.5">
-              <label className="text-[10px] font-bold text-[#707070] uppercase">Guruh nomi</label>
+              <label className="text-[10px] font-bold text-[#707070] uppercase">{t("pages.automations_page.group_name_label")}</label>
               <input
                 type="text"
-                placeholder="Masalan: Sotuvlar"
+                placeholder={t("pages.automations_page.group_name_placeholder")}
                 value={newGroupName}
                 onChange={(e) => setNewGroupName(e.target.value)}
                 className="w-full px-3 py-2 text-[12px] bg-white border border-[#E8E8E8] rounded-[12px] focus:outline-none focus:border-black font-semibold"
@@ -964,14 +1011,14 @@ export default function AutomationsPage() {
                 variant="secondary"
                 className="text-[11px] font-bold px-3.5 py-1.5"
               >
-                Bekor qilish
+                {t("common.cancel")}
               </Button>
               <Button
                 onClick={handleAddGroup}
                 variant="primary"
                 className="text-[11px] font-bold px-3.5 py-1.5 bg-black text-white hover:bg-black/90 rounded-[12px]"
               >
-                {"Qo'shish"}
+                {t("common.create")}
               </Button>
             </div>
           </div>
@@ -986,10 +1033,10 @@ export default function AutomationsPage() {
           setDeleteTargetChannelId(null);
         }}
         onConfirm={handleConfirmDelete}
-        title={"Oqimni o'chirish"}
-        message={"Haqiqatan ham ushbu avtomatlashtirish oqimini butunlay o'chirib tashlamoqchimisiz? Ushbu amalni ortga qaytarib bo'lmaydi."}
-        confirmText={"Ha, o'chirish"}
-        cancelText={"Bekor qilish"}
+        title={t("pages.automations_page.delete_confirm_title")}
+        message={t("pages.automations_page.delete_confirm_msg")}
+        confirmText={t("pages.settings_page.delete_confirm_btn")}
+        cancelText={t("common.cancel")}
       />
 
       {/* Group Delete Confirmation Modal */}
@@ -1006,10 +1053,10 @@ export default function AutomationsPage() {
             loadAllData();
           }
         }}
-        title={"Guruhni o'chirish"}
-        message={"Haqiqatan ham ushbu guruhni o'chirib tashlamoqchimisiz? Guruh ichidagi oqimlar o'chirilmaydi."}
-        confirmText={"Ha, o'chirish"}
-        cancelText={"Bekor qilish"}
+        title={t("pages.automations_page.delete_group_title")}
+        message={t("pages.automations_page.delete_group_desc")}
+        confirmText={t("pages.settings_page.delete_confirm_btn")}
+        cancelText={t("common.cancel")}
       />
 
       {/* General Alert Modal */}
