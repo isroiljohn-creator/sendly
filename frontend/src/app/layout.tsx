@@ -11,8 +11,8 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Sendly — Instagram Chatbot Automation",
-  description: "The ultimate Instagram chatbot automation platform for the Uzbekistan market.",
+  title: "Sendly — Instagram chatbot va avtomatlashtirish",
+  description: "O'zbekiston bozori uchun Instagram chatbot va savdoni avtomatlashtirish platformasi.",
 };
 
 export default function RootLayout({
