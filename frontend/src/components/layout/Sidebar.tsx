@@ -280,6 +280,84 @@ export function Sidebar() {
         {BOTTOM_ITEMS.map((item) => (
           <NavButton key={item.to} item={item} active={isActive(item.to)} />
         ))}
+
+        {/* User profile avatar trigger and dropdown */}
+        <div className="relative mt-1" ref={profileRef}>
+          <button
+            onClick={() => setProfileMenuOpen((p) => !p)}
+            className="relative h-[38px] w-[38px] rounded-full bg-[#7CA6FF] flex items-center justify-center text-[15px] font-bold text-white hover:scale-105 active:scale-95 transition-all shadow-sm shrink-0 select-none"
+            title={currentUser?.fullName || "Isroiljon Abdullayev"}
+          >
+            {currentUser?.fullName?.charAt(0).toUpperCase() || "I"}
+          </button>
+
+          {/* Main Dropdown Menu */}
+          {profileMenuOpen && (
+            <div className="absolute left-[52px] bottom-0 z-50 bg-white rounded-[20px] shadow-[0_10px_30px_rgba(0,0,0,0.08)] border border-[#E8E8E8] w-[260px] py-3 text-black animate-in fade-in slide-in-from-left-2 duration-150">
+              {/* Header */}
+              <div className="flex items-center gap-3 px-4 pb-2.5 pt-1 border-b border-[#F0F0F0] mb-1.5">
+                <div className="w-10 h-10 rounded-full bg-[#7CA6FF] flex items-center justify-center font-bold text-[16px] text-white shrink-0">
+                  {currentUser?.fullName?.charAt(0).toUpperCase() || "I"}
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="text-[13px] font-bold text-black truncate">
+                    {currentUser?.fullName || "Isroiljon Abdullayev"}
+                  </p>
+                  <p className="text-[10px] text-[#707070] truncate">
+                    {currentUser?.email || "isroiljohnabdullayev@gmail.com"}
+                  </p>
+                </div>
+              </div>
+
+              {/* Menu items */}
+              <div className="flex flex-col gap-0.5 px-2">
+                <Link
+                  href="/account?tab=general"
+                  onClick={() => setProfileMenuOpen(false)}
+                  className="flex items-center gap-3 px-3 py-2 rounded-[12px] hover:bg-[#F9F9F7] text-left transition-colors text-black font-semibold text-[13px]"
+                >
+                  <User size={16} className="text-[#595959]" />
+                  <span>{t("nav.my_account")}</span>
+                </Link>
+
+                <Link
+                  href="/account?tab=billing"
+                  onClick={() => setProfileMenuOpen(false)}
+                  className="flex items-center gap-3 px-3 py-2 rounded-[12px] hover:bg-[#F9F9F7] text-left transition-colors text-black font-semibold text-[13px]"
+                >
+                  <CreditCard size={16} className="text-[#595959]" />
+                  <span>{t("nav.billing_plans")}</span>
+                </Link>
+
+                <Link
+                  href="/partner"
+                  onClick={() => setProfileMenuOpen(false)}
+                  className="flex items-center gap-3 px-3 py-2 rounded-[12px] hover:bg-[#F9F9F7] text-left transition-colors text-black font-semibold text-[13px]"
+                >
+                  <Users size={16} className="text-[#595959]" />
+                  <span>{t("nav.partner_dashboard")}</span>
+                </Link>
+
+                <Link
+                  href="/help"
+                  onClick={() => setProfileMenuOpen(false)}
+                  className="flex items-center gap-3 px-3 py-2 rounded-[12px] hover:bg-[#F9F9F7] text-left transition-colors text-black font-semibold text-[13px]"
+                >
+                  <HelpCircle size={16} className="text-[#595959]" />
+                  <span>{t("nav.help")}</span>
+                </Link>
+
+                <button
+                  onClick={handleSignOut}
+                  className="flex items-center gap-3 w-full px-3 py-2.5 rounded-[12px] hover:bg-red-50 text-left transition-colors text-red-600 font-bold text-[13px] border-t border-[#F0F0F0] mt-1 pt-2.5"
+                >
+                  <LogOut size={16} />
+                  <span>{t("nav.logout")}</span>
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
     </aside>
   );
