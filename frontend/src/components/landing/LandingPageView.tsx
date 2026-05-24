@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -27,28 +27,8 @@ interface SimMessage {
 }
 
 function RobotHero() {
-  const ref = useRef<HTMLDivElement>(null);
-  const [style, setStyle] = useState<React.CSSProperties>({});
-
-  const onMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!ref.current) return;
-    const r = ref.current.getBoundingClientRect();
-    const x = e.clientX - r.left - r.width / 2;
-    const y = e.clientY - r.top - r.height / 2;
-    const rX = -(y / (r.height / 2)) * 14;
-    const rY = (x / (r.width / 2)) * 14;
-    setStyle({ transform: `rotateX(${rX}deg) rotateY(${rY}deg) scale(1.03)` });
-  };
-
-  const onLeave = () => setStyle({});
-
   return (
-    <div
-      className="relative flex items-center justify-center select-none"
-      style={{ perspective: "950px" }}
-      onMouseMove={onMove}
-      onMouseLeave={onLeave}
-    >
+    <div className="relative flex items-center justify-center select-none pointer-events-none">
       <style>{`
         @keyframes sendly-float {
           0%, 100% { transform: translateY(0px) rotate(0deg); }
@@ -78,9 +58,9 @@ function RobotHero() {
         }}
       />
 
-      {/* Floating badge - Auto-reply */}
+      {/* Floating badge - Auto-reply (placed higher and shifted rightwards to avoid overlap) */}
       <div
-        className="absolute top-[60px] -left-[20px] sm:-left-[40px] flex items-center gap-2 rounded-2xl border border-black/5 bg-white/90 backdrop-blur-md px-3 py-2 shadow-[0_8px_30px_rgba(0,0,0,0.06)] z-20"
+        className="absolute top-[10px] sm:top-[20px] left-[20px] sm:left-[60px] flex items-center gap-2 rounded-2xl border border-black/5 bg-white/90 backdrop-blur-md px-3 py-2 shadow-[0_8px_30px_rgba(0,0,0,0.06)] z-20 pointer-events-auto"
         style={{ animation: "sendly-badge-float 3.5s ease-in-out infinite" }}
       >
         <div className="w-7 h-7 rounded-full bg-[#C7F33C] flex items-center justify-center text-black">
@@ -94,7 +74,7 @@ function RobotHero() {
 
       {/* Floating badge - conversion */}
       <div
-        className="absolute bottom-[80px] -right-[10px] sm:-right-[30px] flex items-center gap-2 rounded-2xl border border-black/5 bg-white/90 backdrop-blur-md px-3 py-2 shadow-[0_8px_30px_rgba(0,0,0,0.06)] z-20"
+        className="absolute bottom-[80px] -right-[10px] sm:-right-[30px] flex items-center gap-2 rounded-2xl border border-black/5 bg-white/90 backdrop-blur-md px-3 py-2 shadow-[0_8px_30px_rgba(0,0,0,0.06)] z-20 pointer-events-auto"
         style={{ animation: "sendly-badge-float 4s ease-in-out infinite 0.8s" }}
       >
         <div className="w-7 h-7 rounded-full bg-purple-100 flex items-center justify-center text-purple-600 text-[11px] font-extrabold">{"3x"}</div>
@@ -104,18 +84,14 @@ function RobotHero() {
         </div>
       </div>
 
-      {/* Robot image - Large and transparent */}
-      <div
-        ref={ref}
-        className="relative transition-all duration-300 ease-out"
-        style={{ transformStyle: "preserve-3d", ...style }}
-      >
+      {/* Robot image - Large and transparent (tilt effects removed) */}
+      <div className="relative">
         <Image
           src="/robot-v3.png"
           alt="Sendly AI Robot"
-          width={613}
-          height={758}
-          className="w-[340px] sm:w-[440px] md:w-[480px] lg:w-[580px] h-auto object-contain relative z-10 lg:-mr-20 lg:-mt-10"
+          width={700}
+          height={864}
+          className="w-[380px] sm:w-[480px] md:w-[540px] lg:w-[640px] h-auto object-contain relative z-10 lg:-mr-20 lg:-mt-10"
           style={{ animation: "sendly-float 7s ease-in-out infinite" }}
           priority
         />
