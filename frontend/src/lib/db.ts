@@ -193,7 +193,7 @@ function safeParse<T>(jsonString: string | null, fallback: T): T {
 }
 
 // DB version — bump this to force-clear old localStorage data
-const DB_VERSION = "v7"; // Bump to clear potentially corrupted states
+const DB_VERSION = "v8"; // Bump to clear potentially corrupted states
 if (isClient && localStorage.getItem("replai_db_version") !== DB_VERSION) {
   localStorage.removeItem("replai_automations");
   localStorage.removeItem("replai_contacts");
@@ -203,6 +203,15 @@ if (isClient && localStorage.getItem("replai_db_version") !== DB_VERSION) {
   localStorage.removeItem("replai_modules");
   localStorage.removeItem("replai_lessons");
   localStorage.removeItem("replai_bot_settings");
+  localStorage.removeItem("replai_groups");
+  
+  const keys = Object.keys(localStorage);
+  keys.forEach((key) => {
+    if (key.startsWith("replai_automations_") || key.startsWith("replai_chats_")) {
+      localStorage.removeItem(key);
+    }
+  });
+  
   localStorage.setItem("replai_db_version", DB_VERSION);
 }
 
@@ -231,6 +240,26 @@ export const db = {
         }
       }
     }
+  },
+
+  _clearLocalBusinessData(): void {
+    if (!isClient) return;
+    localStorage.removeItem("replai_automations");
+    localStorage.removeItem("replai_contacts");
+    localStorage.removeItem("replai_broadcasts");
+    localStorage.removeItem("replai_channels");
+    localStorage.removeItem("replai_active_channel");
+    localStorage.removeItem("replai_modules");
+    localStorage.removeItem("replai_lessons");
+    localStorage.removeItem("replai_bot_settings");
+    localStorage.removeItem("replai_groups");
+    
+    const keys = Object.keys(localStorage);
+    keys.forEach((key) => {
+      if (key.startsWith("replai_automations_") || key.startsWith("replai_chats_")) {
+        localStorage.removeItem(key);
+      }
+    });
   },
 
   // 1. Auth Database
@@ -280,6 +309,7 @@ export const db = {
       isCardLinked: false,
       plan: "free"
     };
+    this._clearLocalBusinessData();
     users.push(newUser);
     localStorage.setItem("replai_users", JSON.stringify(users));
     localStorage.setItem("replai_current_user", JSON.stringify(newUser));
@@ -316,6 +346,7 @@ export const db = {
         localStorage.setItem("replai_users", JSON.stringify(users));
       }
     }
+    this._clearLocalBusinessData();
     localStorage.setItem("replai_current_user", JSON.stringify(user));
 
     // Clean up any leftover mock/demo channels
@@ -340,6 +371,7 @@ export const db = {
       users.push(user);
       localStorage.setItem("replai_users", JSON.stringify(users));
     }
+    this._clearLocalBusinessData();
     localStorage.setItem("replai_current_user", JSON.stringify(user));
     notifyUpdate();
     return { success: true };
@@ -364,6 +396,7 @@ export const db = {
 
   signOut(): void {
     if (!isClient) return;
+    this._clearLocalBusinessData();
     localStorage.removeItem("replai_current_user");
     notifyUpdate();
   },
