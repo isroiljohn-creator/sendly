@@ -121,7 +121,7 @@
     "broadcast": {
       "title": "Ommaviy xabarnomalar",
       "breadcrumb": "Boshqaruv / Ommaviy xabarnoma",
-      "create_new": "+ Yangi xabar",
+      "create_new": "Yangi xabar",
       "table_title": "Xabar mavzusi",
       "table_status": "Holat",
       "table_sent": "Yuborildi",

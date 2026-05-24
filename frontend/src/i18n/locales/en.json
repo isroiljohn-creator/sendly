@@ -121,7 +121,7 @@
     "broadcast": {
       "title": "Broadcast Notifications",
       "breadcrumb": "Manage / Broadcast",
-      "create_new": "+ New Broadcast",
+      "create_new": "New Broadcast",
       "table_title": "Broadcast Topic",
       "table_status": "Status",
       "table_sent": "Sent",

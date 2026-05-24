@@ -8,26 +8,44 @@ import { CustomDropdown } from "@/components/ui/CustomDropdown";
 import { useI18n } from "@/i18n/I18nProvider";
 import { Send, X, Plus, Radio } from "lucide-react";
 import { db } from "@/lib/db";
-import type { Broadcast } from "@/lib/db";
-
+import type { Broadcast, Channel } from "@/lib/db";
+ 
 export default function BroadcastPage() {
   const { t } = useI18n();
   const [broadcasts, setBroadcasts] = useState<Broadcast[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
-
+  const [activeChannel, setActiveChannel] = useState<Channel | null>(null);
+ 
   // Form states
   const [title, setTitle] = useState("");
   const [tag, setTag] = useState("Barcha faol mijozlar");
   const [message, setMessage] = useState("");
-
+ 
   useEffect(() => {
     setBroadcasts(db.getBroadcasts());
+    setActiveChannel(db.getActiveChannel());
   }, []);
 
+  const handleChannelChange = (channelId: string) => {
+    const channels = db.getChannels();
+    const target = channels.find(c => c.id === channelId);
+    if (target) {
+      localStorage.setItem("replai_active_channel", target.id);
+      setActiveChannel(target);
+      window.dispatchEvent(new Event("replai-db-update"));
+    }
+  };
+
+  const channelsList = db.getChannels();
+  const channelOptions = channelsList.map(c => ({
+    value: c.id,
+    label: `${c.type === "telegram" ? "Telegram: @" : "Instagram: @"}${c.username}`
+  }));
+ 
   const handleCreateBroadcast = (e: React.FormEvent) => {
     e.preventDefault();
     if (!title.trim() || !message.trim()) return;
-
+ 
     const newBroadcast: Broadcast = {
       id: `${broadcasts.length + 1}`,
       name: title,
@@ -36,22 +54,37 @@ export default function BroadcastPage() {
       date: "Hozirgina",
       status: "Completed",
     };
-
+ 
     const updated = [newBroadcast, ...broadcasts];
     setBroadcasts(updated);
     db.saveBroadcasts(updated);
-
+ 
     setIsModalOpen(false);
     setTitle("");
     setMessage("");
   };
-
+ 
   return (
     <AppLayout>
       <div className="flex flex-col gap-[28px] relative">
         <PageHeader
           title={t("pages.broadcast.title")}
           breadcrumbs={t("pages.broadcast.breadcrumb")}
+          filters={
+            activeChannel && (
+              <div className="flex items-center gap-2">
+                <span className="text-[11px] font-extrabold text-[#707070] uppercase tracking-wider">
+                  Akkaunt:
+                </span>
+                <CustomDropdown
+                  value={activeChannel.id}
+                  onChange={handleChannelChange}
+                  options={channelOptions}
+                  className="w-48 bg-white border border-[#D8D8D8] text-[12px] h-9"
+                />
+              </div>
+            )
+          }
           actions={
             <Button variant="accent" onClick={() => setIsModalOpen(true)} className="flex items-center gap-1.5">
               <Plus size={16} />

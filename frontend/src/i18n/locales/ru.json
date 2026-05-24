@@ -121,7 +121,7 @@
     "broadcast": {
       "title": "Рассылки сообщений",
       "breadcrumb": "Управление / Рассылка",
-      "create_new": "+ Новая рассылка",
+      "create_new": "Новая рассылка",
       "table_title": "Тема рассылки",
       "table_status": "Статус",
       "table_sent": "Отправлено",
