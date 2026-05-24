@@ -111,7 +111,7 @@ function RobotHero() {
         style={{ transformStyle: "preserve-3d", ...style }}
       >
         <Image
-          src="/robot.png"
+          src="/robot-v2.png"
           alt="Sendly AI Robot"
           width={650}
           height={650}
@@ -155,7 +155,7 @@ export function LandingPageView() {
         reply = "Sizga qanday yordam bera olaman?";
         next = ["Narxi qancha? 💰", "Qanday ishlaydi? ⚡", "Bepul sinash 🚀"];
       } else {
-        reply = "Ajoyib! Hoziroq ro'yxatdan o'ting va 7 kunlik Pro versiyani tekin ishlating. 🎉";
+        reply = "Ajoyib! Hoziroq ro'yxatdan o'ting va 7 kunlik Pro versiyani bepul ishlating. 🎉";
         next = ["Ro'yxatdan o'tish →", "Boshqa savol ❓"];
       }
       setSimMessages([...updated, { sender: "bot", text: reply }]);
@@ -332,15 +332,15 @@ export function LandingPageView() {
         <div className="flex-1 text-center lg:text-left max-w-xl mx-auto lg:mx-0">
 
           {/* Badge */}
-          <div className="inline-flex items-center gap-2 rounded-full border border-[#C7F33C]/30 bg-[#C7F33C]/10 px-4 py-2 text-[11.5px] font-bold text-[#7CA607] mb-6">
-            <Sparkles size={12} />
+          <div className="inline-flex items-center gap-2 rounded-full bg-[#C7F33C] px-4 py-2 text-[11.5px] font-bold text-black mb-6 shadow-sm">
             <span>{"Instagram chatbot va AI avtomatlashtirish"}</span>
           </div>
 
           {/* Title - Sentence Case and shaxsiy xabar */}
           <h1 className="text-[36px] sm:text-[52px] md:text-[60px] font-[900] text-black tracking-tight leading-[1.07]">
-            {"Instagram shaxsiy xabarlari va"}
+            {"Instagram shaxsiy xabarlari"}
             <br />
+            {"va "}
             <span className="bg-gradient-to-r from-[#7CA607] via-purple-600 to-blue-600 bg-clip-text text-transparent">
               {"izohlarini savdoga"}
             </span>
@@ -357,7 +357,7 @@ export function LandingPageView() {
           <div className="mt-8 flex flex-col sm:flex-row items-center gap-3 justify-center lg:justify-start">
             <Link href="/register">
               <button className="group flex items-center gap-2.5 rounded-full bg-[#C7F33C] text-black px-8 py-4 text-[15px] font-extrabold shadow-[0_8px_25px_rgba(199,243,60,0.3)] transition-all hover:scale-105 active:scale-95">
-                <span>{"Tekin boshlash"}</span>
+                <span>{"Bepul boshlash"}</span>
                 <span className="flex h-6 w-6 items-center justify-center rounded-full bg-black text-[#C7F33C]">
                   <ArrowRight size={13} className="transition-transform group-hover:translate-x-0.5" />
                 </span>
