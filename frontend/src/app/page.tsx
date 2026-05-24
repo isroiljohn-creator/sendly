@@ -8,7 +8,7 @@ import { ProPlanCard } from "@/components/home/ProPlanCard";
 import { ActivityCard } from "@/components/home/ActivityCard";
 import { RevenueCard } from "@/components/home/RevenueCard";
 import { AutomationsCard } from "@/components/home/AutomationsCard";
-import { InstagramConnectCard } from "@/components/home/InstagramConnectCard";
+import { DashboardLessonsCard } from "@/components/home/DashboardLessonsCard";
 import { Button } from "@/components/ui/primitives";
 import { useI18n } from "@/i18n/I18nProvider";
 import { ChevronDown } from "lucide-react";
@@ -323,7 +323,7 @@ export default function Home() {
 
         {/* Row 1 — 3 columns */}
         <section className="grid grid-cols-1 gap-4 md:grid-cols-3">
-          <ProPlanCard value={activeRange.proVal} />
+          <ProPlanCard hasChannels={channels.length > 0} value={activeRange.proVal} />
           <ActivityCard
             value={activeRange.activityVal}
             subText={activeRange.activitySub}
@@ -340,7 +340,7 @@ export default function Home() {
         {/* Row 2 — 2 columns */}
         <section className="grid grid-cols-1 gap-4 lg:grid-cols-[1.5fr_1fr]">
           <AutomationsCard />
-          <InstagramConnectCard />
+          <DashboardLessonsCard />
         </section>
       </div>
 
