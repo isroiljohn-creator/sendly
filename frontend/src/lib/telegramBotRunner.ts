@@ -96,6 +96,67 @@ async function runBotPollLoop(channelId: string, botState: TelegramBotState) {
       for (const update of updates) {
         botState.offset = Math.max(botState.offset, update.update_id + 1);
         
+        // Handle bot added/updated in a channel/group
+        if (update.my_chat_member) {
+          const chat = update.my_chat_member.chat;
+          const newMember = update.my_chat_member.new_chat_member;
+          if (chat && (chat.type === "channel" || chat.type === "group" || chat.type === "supergroup") && newMember && newMember.status === "administrator") {
+            const username = chat.username || String(chat.id);
+            const name = chat.title || chat.username || `Kanal ${chat.id}`;
+            await updateDbFile(async (dbData) => {
+              if (dbData.userData && typeof dbData.userData === "object") {
+                for (const userVal of Object.values(dbData.userData)) {
+                  if (userVal && typeof userVal === "object") {
+                    const rawUserChannels = (userVal as Record<string, string>)["replai_channels"];
+                    const userChannels: Channel[] = rawUserChannels ? JSON.parse(rawUserChannels) : [];
+                    const foundChIdx = userChannels.findIndex(c => c.id === channelId);
+                    if (foundChIdx > -1) {
+                      const ch = userChannels[foundChIdx];
+                      const newChannels = [...(ch.telegramChannels || [])];
+                      if (!newChannels.some(c => c.username === username)) {
+                        newChannels.push({ username, name });
+                        ch.telegramChannels = newChannels;
+                        (userVal as Record<string, string>)["replai_channels"] = JSON.stringify(userChannels);
+                      }
+                      break;
+                    }
+                  }
+                }
+              }
+            });
+          }
+        }
+
+        // Handle a message post inside a channel
+        if (update.channel_post && update.channel_post.chat) {
+          const chat = update.channel_post.chat;
+          if (chat.type === "channel") {
+            const username = chat.username || String(chat.id);
+            const name = chat.title || chat.username || `Kanal ${chat.id}`;
+            await updateDbFile(async (dbData) => {
+              if (dbData.userData && typeof dbData.userData === "object") {
+                for (const userVal of Object.values(dbData.userData)) {
+                  if (userVal && typeof userVal === "object") {
+                    const rawUserChannels = (userVal as Record<string, string>)["replai_channels"];
+                    const userChannels: Channel[] = rawUserChannels ? JSON.parse(rawUserChannels) : [];
+                    const foundChIdx = userChannels.findIndex(c => c.id === channelId);
+                    if (foundChIdx > -1) {
+                      const ch = userChannels[foundChIdx];
+                      const newChannels = [...(ch.telegramChannels || [])];
+                      if (!newChannels.some(c => c.username === username)) {
+                        newChannels.push({ username, name });
+                        ch.telegramChannels = newChannels;
+                        (userVal as Record<string, string>)["replai_channels"] = JSON.stringify(userChannels);
+                      }
+                      break;
+                    }
+                  }
+                }
+              }
+            });
+          }
+        }
+
         const message = update.message;
         if (!message || !message.chat || !message.text) {
           continue;

@@ -60,6 +60,7 @@ export type Channel = {
   telegramToken?: string;
   followersCount?: string;
   createdAt: string;
+  telegramChannels?: Array<{ username: string; name: string }>;
 };
 
 export type BotSettings = {

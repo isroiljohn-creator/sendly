@@ -40,7 +40,126 @@ export default function QuickBotWizardPage() {
   const [commentPostsType, setCommentPostsType] = useState<"all" | "selected">("all");
 
   // Telegram Obuna tekshirish kanal selection
-  const [selectedTgSubChannel, setSelectedTgSubChannel] = useState("Sincerelyabror_bot");
+  const [selectedTgSubChannel, setSelectedTgSubChannel] = useState("");
+  const [tgSubChannels, setTgSubChannels] = useState<{ value: string; label: string; icon: React.ReactNode }[]>([]);
+  const [refreshingTg, setRefreshingTg] = useState(false);
+
+  // Sync / populate Telegram channels for selected bot
+  useEffect(() => {
+    if (selectedChannel && selectedChannel.type === "telegram") {
+      let botChannels = selectedChannel.telegramChannels || [];
+      
+      // Generate default mock channels if empty
+      if (botChannels.length === 0) {
+        const usernameClean = selectedChannel.username.replace(/^@+/, "").replace(/_bot$/i, "");
+        const formattedName = usernameClean.charAt(0).toUpperCase() + usernameClean.slice(1);
+        
+        if (usernameClean.toLowerCase() === "sincerelyabror") {
+          botChannels = [
+            { username: "Sincerelyabror_bot", name: "Sincerelyabror_bot" },
+            { username: "abror_channel", name: "Abror Ahmedov Kanal" },
+            { username: "marketing_uz", name: "Marketing Darslari Uz" }
+          ];
+        } else if (usernameClean.toLowerCase() === "nuvioffice") {
+          botChannels = [
+            { username: "Sincerelyabror_bot", name: "Sincerelyabror_bot" },
+            { username: "nuvioffice_channel", name: "Nuvioffice Kanal" },
+            { username: "nuvioffice_office", name: "Nuvioffice Office" }
+          ];
+        } else {
+          botChannels = [
+            { username: `${usernameClean}_channel`, name: `${formattedName} Kanal` },
+            { username: `marketing_${usernameClean}`, name: `Marketing Uz (${formattedName})` },
+            { username: "Sincerelyabror_bot", name: "Sincerelyabror_bot" }
+          ];
+        }
+        
+        // Save back to local storage database
+        selectedChannel.telegramChannels = botChannels;
+        const updatedChannels = channels.map(c => c.id === selectedChannel.id ? selectedChannel : c);
+        db.saveChannels(updatedChannels);
+        setChannels(updatedChannels);
+      }
+      
+      const options = botChannels.map(ch => ({
+        value: ch.username,
+        label: ch.name,
+        icon: <Bot size={13} className="text-[#229ED9]" />
+      }));
+      
+      setTgSubChannels(options);
+      if (options.length > 0) {
+        setSelectedTgSubChannel(options[0].value);
+      } else {
+        setSelectedTgSubChannel("");
+      }
+    }
+  }, [selectedChannel, channels]);
+
+  const handleRefreshTgChannels = async () => {
+    if (!selectedChannel || selectedChannel.type !== "telegram" || !selectedChannel.telegramToken) {
+      alert("Iltimos, avval bot tokeni mavjud bo'lgan Telegram akkauntini tanlang.");
+      return;
+    }
+    setRefreshingTg(true);
+    try {
+      const res = await fetch(`https://api.telegram.org/bot${selectedChannel.telegramToken}/getUpdates?timeout=1`);
+      if (res.ok) {
+        const data = await res.json();
+        if (data.ok && data.result) {
+          const newChannels = [...(selectedChannel.telegramChannels || [])];
+          let updated = false;
+          
+          for (const update of data.result) {
+            // Check my_chat_member
+            if (update.my_chat_member) {
+              const chat = update.my_chat_member.chat;
+              const newMember = update.my_chat_member.new_chat_member;
+              if (chat && (chat.type === "channel" || chat.type === "group" || chat.type === "supergroup") && newMember && newMember.status === "administrator") {
+                const username = chat.username || String(chat.id);
+                const name = chat.title || chat.username || `Kanal ${chat.id}`;
+                if (!newChannels.some(ch => ch.username === username)) {
+                  newChannels.push({ username, name });
+                  updated = true;
+                }
+              }
+            }
+            // Check channel_post
+            if (update.channel_post && update.channel_post.chat) {
+              const chat = update.channel_post.chat;
+              if (chat.type === "channel") {
+                const username = chat.username || String(chat.id);
+                const name = chat.title || chat.username || `Kanal ${chat.id}`;
+                if (!newChannels.some(ch => ch.username === username)) {
+                  newChannels.push({ username, name });
+                  updated = true;
+                }
+              }
+            }
+          }
+          
+          if (updated) {
+            selectedChannel.telegramChannels = newChannels;
+            const updatedChannels = channels.map(c => c.id === selectedChannel.id ? selectedChannel : c);
+            db.saveChannels(updatedChannels);
+            setChannels(updatedChannels);
+            alert("Yangi Telegram kanallari muvaffaqiyatli yuklandi! 🎉");
+          } else {
+            alert("Yangi kanallar topilmadi. Bot ushbu kanalga administrator sifatida qo'shilganiga va unda yangi harakat bo'lganiga ishonch hosil qiling.");
+          }
+        } else {
+          alert("Telegram getUpdates so'rovidan noto'g'ri javob olindi.");
+        }
+      } else {
+        alert("Telegram API bilan bog'lanishda xatolik yuz berdi. Bot tokeni to'g'riligini tekshiring.");
+      }
+    } catch (err) {
+      console.error("Failed to refresh tg channels:", err);
+      alert("Xatolik yuz berdi: " + (err instanceof Error ? err.message : String(err)));
+    } finally {
+      setRefreshingTg(false);
+    }
+  };
 
   // STEP 2 FIELDS (Message Settings)
   const [welcomeMessage, setWelcomeMessage] = useState(
@@ -252,26 +371,12 @@ export default function QuickBotWizardPage() {
                       <CustomDropdown
                         value={selectedTgSubChannel}
                         onChange={(val) => setSelectedTgSubChannel(val)}
-                        options={[
-                          { 
-                            value: "Sincerelyabror_bot", 
-                            label: "Sincerelyabror_bot",
-                            icon: <Bot size={13} className="text-[#229ED9]" />
-                          },
-                          { 
-                            value: "abror_channel", 
-                            label: "Abror Ahmedov Kanal",
-                            icon: <Bot size={13} className="text-[#229ED9]" />
-                          },
-                          { 
-                            value: "marketing_uz", 
-                            label: "Marketing Darslari Uz",
-                            icon: <Bot size={13} className="text-[#229ED9]" />
-                          }
-                        ]}
+                        options={tgSubChannels}
                       />
                       <p className="text-[10px] text-[#707070] mt-1 leading-relaxed font-medium">
-                        Agar kanal ro&apos;yxatda bo&apos;lmasa, <a href="/settings" className="text-black hover:underline font-bold">bot qo&apos;shish</a> ushbu Telegram kanalining administratori sifatida yoki <span className="text-black hover:underline font-bold cursor-pointer">ro&apos;yxatni yangilash</span>
+                        Agar kanal ro&apos;yxatda bo&apos;lmasa, <a href="/settings" className="text-black hover:underline font-bold">bot qo&apos;shish</a> ushbu Telegram kanalining administratori sifatida yoki <span onClick={handleRefreshTgChannels} className={`text-black hover:underline font-bold cursor-pointer ${refreshingTg ? "opacity-50 pointer-events-none" : ""}`}>
+                          {refreshingTg ? "yangilanmoqda..." : "ro'yxatni yangilash"}
+                        </span>
                       </p>
                     </div>
                   )}
