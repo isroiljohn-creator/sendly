@@ -258,8 +258,8 @@
         "recommended": "Recommended",
         "current_plan": "Current Plan",
         "switch_free": "Switch to Free",
-        "switch_pro": "Switch to Pro",
-        "switch_premium": "Switch to Premium"
+        "switch_pro": "Try Pro",
+        "switch_premium": "Try Premium"
       }
     },
     "settings_page": {

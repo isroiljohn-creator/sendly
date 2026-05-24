@@ -187,7 +187,7 @@ export default function BuilderPage() {
         setBotName(found.name);
         setNodes([
           { id: "n1", type: "input", data: { label: `${t("pages.builder.trigger_prefix")}: ${found.triggerDetails}`, nodeType: "trigger", triggerSource: found.triggerType === "story" ? "story_mention" : "dm", triggerMatch: "contains", triggerKeywords: found.triggerDetails }, position: { x: 250, y: 50 }, style: { background: "#C7F33C", color: "#1A2906", border: "1px solid #9BC92E", borderRadius: "14px", padding: "12px", fontSize: "12px", fontWeight: 500, width: 240 } },
-          { id: "n2", data: { label: t("pages.builder.initial_msg_connected"), nodeType: "message", buttons: [] }, position: { x: 250, y: 220 }, style: { background: "#fff", color: "#000", border: "1px solid #E8E8E8", borderRadius: "14px", padding: "12px", fontSize: "12px", width: 240 } },
+          { id: "n2", data: { label: found.replyText || t("pages.builder.initial_msg_connected"), nodeType: "message", buttons: [] }, position: { x: 250, y: 220 }, style: { background: "#fff", color: "#000", border: "1px solid #E8E8E8", borderRadius: "14px", padding: "12px", fontSize: "12px", width: 240 } },
         ]);
         setEdges([{ id: "e1", source: "n1", target: "n2", animated: true, style: { stroke: "#000", strokeWidth: 1.5 }, markerEnd: { type: MarkerType.ArrowClosed, color: "#000" } }]);
       }
@@ -253,6 +253,8 @@ export default function BuilderPage() {
     const activeCh = db.getActiveChannel();
     const list = activeCh ? db.getChannelAutomations(activeCh.id) : db.getAutomations();
     const triggerNode = nodes.find((n) => n.data.nodeType === "trigger");
+    const messageNode = nodes.find((n) => n.data.nodeType === "message");
+    const replyText = messageNode?.data.label || "";
     const src = triggerNode?.data.triggerSource || "dm";
     const isStory = src.includes("story");
     let savedMsg = t("pages.builder.saved_toast");
@@ -260,7 +262,7 @@ export default function BuilderPage() {
     if (paramId) {
       const idx = list.findIndex((a) => a.id === paramId);
       if (idx > -1) {
-        list[idx] = { ...list[idx], name: botName, triggerType: isStory ? "story" : "keyword", triggerDetails: triggerNode?.data.triggerKeywords || src };
+        list[idx] = { ...list[idx], name: botName, triggerType: isStory ? "story" : "keyword", triggerDetails: triggerNode?.data.triggerKeywords || src, replyText };
       }
     } else {
       const user = db.getCurrentUser();
@@ -276,7 +278,8 @@ export default function BuilderPage() {
         triggerDetails: triggerNode?.data.triggerKeywords || src, 
         runs: "0", 
         completion: "100%", 
-        active: shouldBeActive 
+        active: shouldBeActive,
+        replyText
       });
 
       if (!shouldBeActive) {

@@ -189,6 +189,12 @@ export default function AccountPage() {
   };
 
   const handleSelectPlan = (plan: "free" | "pro" | "premium") => {
+    if (plan !== "free" && !currentUser?.isCardLinked) {
+      setIsPricingOpen(false);
+      setIsLinking(true);
+      showAlert(t("pages.account.billing.card_required_title"), t("pages.account.billing.card_required_msg"));
+      return;
+    }
     db.updatePlan(plan);
     const updated = db.getCurrentUser();
     setCurrentUser(updated);

@@ -22,6 +22,7 @@ export type Automation = {
   active: boolean;
   groupId?: string;
   channelId?: string;
+  replyText?: string;
 };
 
 export type Group = {

@@ -255,7 +255,7 @@ export default function ChatsPage() {
           } else if (matchedKeyword === "narxi" || matchedKeyword === "tarif" || matchedKeyword === "kurs") {
             botReplyText = "🤖 Bizning tariflarimiz: \n• Pro: 150,000 so'm/oy (1ta akkaunt)\n• Premium: 1,000,000 so'm/oy (10ta akkaunt)\n\nBatafsil ma'lumot olish yoki ulanish uchun operatorimiz tez orada javob yozadi.";
           } else {
-            botReplyText = `🤖 [Oqim: ${matchedAutomation.name}] bot avtomatik javob berdi! Kalit so'z: "${matchedKeyword}"`;
+            botReplyText = matchedAutomation.replyText || matchedKeyword;
           }
         } else {
           botReplyText = "Murojaatingiz uchun rahmat! Tez orada operatorimiz sizga bog'lanadi. ⚡️";

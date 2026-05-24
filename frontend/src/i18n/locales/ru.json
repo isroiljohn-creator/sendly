@@ -258,8 +258,8 @@
         "recommended": "Рекомендуется",
         "current_plan": "Текущий тариф",
         "switch_free": "Перейти на бесплатный",
-        "switch_pro": "Перейти на Pro",
-        "switch_premium": "Перейти на Premium"
+        "switch_pro": "Попробовать Pro",
+        "switch_premium": "Попробовать Premium"
       }
     },
     "settings_page": {

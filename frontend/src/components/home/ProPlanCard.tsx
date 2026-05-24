@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { Sparkles } from "lucide-react";
+import { CreditCard } from "lucide-react";
 import { Card } from "@/components/ui/primitives";
 import { db } from "@/lib/db";
 import type { User } from "@/lib/db";
@@ -24,7 +24,7 @@ export function ProPlanCard({ value: _value = "12,233" }: { value?: string }) {
             SENDLY PRO
           </span>
           <div className="grid h-7 w-7 place-items-center rounded-full bg-white/10 text-[#C7F33C]">
-            <Sparkles size={13} />
+            <CreditCard size={13} />
           </div>
         </div>
 
@@ -42,8 +42,8 @@ export function ProPlanCard({ value: _value = "12,233" }: { value?: string }) {
             href="/account?tab=billing"
             className="w-full py-3 rounded-full text-[12px] font-bold text-[#1A2906] bg-[#C7F33C] hover:bg-[#9BC92E] transition-colors flex items-center justify-center gap-1.5 active:scale-[0.98] text-center block"
           >
-            <Sparkles size={13} />
-            {"Sinov muddatini boshlash"}
+            <CreditCard size={13} />
+            {"Sinab ko'rish"}
           </Link>
           <span className="text-[9px] text-[#707070] text-center block">
             {"7 kunlik bepul sinov muddati davomida pul yechilmaydi."}
