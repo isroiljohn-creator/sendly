@@ -506,6 +506,8 @@ export default function AIAgentPage() {
   };
 
   const handleBotChange = (botId: string) => {
+    db.setActiveChannel(botId);
+
     const loadedSettings = db.getBotSettings(botId);
     loadedSettings.telegramBotId = botId;
     setSettings(loadedSettings);

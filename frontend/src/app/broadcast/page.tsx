@@ -24,23 +24,13 @@ export default function BroadcastPage() {
   useEffect(() => {
     setBroadcasts(db.getBroadcasts());
     setActiveChannel(db.getActiveChannel());
+
+    const handleDbUpdate = () => {
+      setActiveChannel(db.getActiveChannel());
+    };
+    window.addEventListener("replai-db-update", handleDbUpdate);
+    return () => window.removeEventListener("replai-db-update", handleDbUpdate);
   }, []);
-
-  const handleChannelChange = (channelId: string) => {
-    const channels = db.getChannels();
-    const target = channels.find(c => c.id === channelId);
-    if (target) {
-      localStorage.setItem("replai_active_channel", target.id);
-      setActiveChannel(target);
-      window.dispatchEvent(new Event("replai-db-update"));
-    }
-  };
-
-  const channelsList = db.getChannels();
-  const channelOptions = channelsList.map(c => ({
-    value: c.id,
-    label: `${c.type === "telegram" ? "Telegram: @" : "Instagram: @"}${c.username}`
-  }));
  
   const handleCreateBroadcast = (e: React.FormEvent) => {
     e.preventDefault();
@@ -70,21 +60,6 @@ export default function BroadcastPage() {
         <PageHeader
           title={t("pages.broadcast.title")}
           breadcrumbs={t("pages.broadcast.breadcrumb")}
-          filters={
-            activeChannel && (
-              <div className="flex items-center gap-2">
-                <span className="text-[11px] font-extrabold text-[#707070] uppercase tracking-wider">
-                  Akkaunt:
-                </span>
-                <CustomDropdown
-                  value={activeChannel.id}
-                  onChange={handleChannelChange}
-                  options={channelOptions}
-                  className="w-48 bg-white border border-[#D8D8D8] text-[12px] h-9"
-                />
-              </div>
-            )
-          }
           actions={
             <Button variant="accent" onClick={() => setIsModalOpen(true)} className="flex items-center gap-1.5">
               <Plus size={16} />

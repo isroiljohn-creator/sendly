@@ -720,7 +720,7 @@ export default function AutomationsPage() {
                         <img src={a.channel.avatar} alt="" className="h-5 w-5 rounded-full object-cover shrink-0" />
                       ) : (
                         <div className="h-5 w-5 rounded-full bg-slate-200 flex items-center justify-center shrink-0 text-[10px] font-bold">
-                          {a.channel?.name ? a.channel.name.charAt(0).toUpperCase() : "👤"}
+                          {a.channel?.name ? a.channel.name.charAt(0).toUpperCase() : "?"}
                         </div>
                       )}
                       <span className="text-[10px] text-[#707070] font-bold truncate">

@@ -7,13 +7,8 @@ import { Bell, ChevronDown, Check, LogOut, User } from "lucide-react";
 import { useI18n } from "@/i18n/I18nProvider";
 import type { Lang } from "@/i18n/I18nProvider";
 import { db } from "@/lib/db";
-
-const TABS = [
-  { to: "/", key: "nav.home" as const },
-  { to: "/automations", key: "nav.automations" as const },
-  { to: "/contacts", key: "nav.contacts" as const },
-  { to: "/broadcast", key: "nav.broadcast" as const },
-];
+import type { Channel } from "@/lib/db";
+import { CustomDropdown } from "@/components/ui/CustomDropdown";
 
 const LANG_NAMES: Record<Lang, string> = {
   uz: "O'zbekcha",
@@ -35,6 +30,33 @@ export function TopBar() {
   const langRef = useRef<HTMLDivElement>(null);
   const notifRef = useRef<HTMLDivElement>(null);
   const profileRef = useRef<HTMLDivElement>(null);
+
+  const [channels, setChannels] = useState<Channel[]>([]);
+  const [activeChannelId, setActiveChannelId] = useState<string>("");
+
+  useEffect(() => {
+    const loadChannels = () => {
+      const list = db.getChannels();
+      setChannels(list);
+      const active = db.getActiveChannel();
+      setActiveChannelId(active ? active.id : "");
+    };
+    loadChannels();
+    window.addEventListener("replai-db-update", loadChannels);
+    return () => window.removeEventListener("replai-db-update", loadChannels);
+  }, []);
+
+  const handleChannelChange = (val: string) => {
+    db.setActiveChannel(val);
+  };
+
+  const channelOptions = channels.map((c) => ({
+    value: c.id,
+    label: `${c.type === "telegram" ? "Telegram: @" : "Instagram: @"}${c.username.replace(/^@+/, "")}`,
+    icon: (
+      <span className={`inline-block w-2 h-2 rounded-full shrink-0 ${c.type === "telegram" ? "bg-[#229ED9]" : "bg-gradient-to-br from-[#f09433] via-[#e6683c] to-[#bc1888]"}`} />
+    ),
+  }));
 
   const isActive = (to: string) => (to === "/" ? pathname === "/" : pathname.startsWith(to));
 
@@ -67,26 +89,28 @@ export function TopBar() {
 
   return (
     <div className="flex items-center justify-between gap-4">
-      {/* Navigation tabs */}
-      <nav className="flex items-center gap-1">
-        {TABS.map((tab) => {
-          const active = isActive(tab.to);
-          return (
-            <Link
-              key={tab.to}
-              href={tab.to}
-              className={[
-                "rounded-full px-4 py-2 text-[13px] font-medium transition-all duration-150 active:scale-95",
-                active
-                  ? "bg-black text-white"
-                  : "text-[#595959] hover:bg-white hover:text-black",
-              ].join(" ")}
-            >
-              {t(tab.key)}
-            </Link>
-          );
-        })}
-      </nav>
+      {/* Account Selector */}
+      <div className="flex items-center gap-2">
+        <span className="text-[11px] font-extrabold text-[#707070] uppercase tracking-wider">
+          Akkaunt:
+        </span>
+        {channels.length > 0 ? (
+          <CustomDropdown
+            value={activeChannelId}
+            onChange={handleChannelChange}
+            options={channelOptions}
+            placeholder="Akkaunt tanlang..."
+            className="w-56 bg-white border border-[#D8D8D8]/60 text-[12px] h-9"
+          />
+        ) : (
+          <Link
+            href="/settings"
+            className="text-[12px] font-bold text-red-500 hover:underline"
+          >
+            Ulanmagan (Akkaunt qo&apos;shish)
+          </Link>
+        )}
+      </div>
 
       {/* Action buttons */}
       <div className="flex items-center gap-3">

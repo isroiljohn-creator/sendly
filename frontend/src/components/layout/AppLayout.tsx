@@ -27,10 +27,10 @@ export function AppLayout({ children }: { children: ReactNode }) {
   }
 
   return (
-    <div className="min-h-screen w-full bg-[#E8E8E8] p-6">
+    <div className="min-h-screen w-full bg-[#E8E8E8] px-6 py-4">
       <div className="flex w-full gap-4">
         <Sidebar />
-        <div className="flex min-w-0 flex-1 flex-col gap-6">
+        <div className="flex min-w-0 flex-1 flex-col gap-4">
           <TopBar />
           {children}
         </div>

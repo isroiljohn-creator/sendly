@@ -912,7 +912,7 @@ export default function BuilderPage() {
                       {/* Story / Live info banner */}
                       {(inspTriggerSource === "story_mention" || inspTriggerSource === "story_reply" || inspTriggerSource === "live_comment") && (
                         <div className="flex items-start gap-2.5 p-3 rounded-[12px] bg-[#F9F9F7] border border-[#E8E8E8]">
-                          <span className="text-base mt-0.5">⚡</span>
+                          <Zap size={14} className="text-black shrink-0 mt-0.5" />
                           <p className="text-[11px] text-[#505050] leading-relaxed">{t("pages.builder.trigger_desc_no_kw")}</p>
                         </div>
                       )}

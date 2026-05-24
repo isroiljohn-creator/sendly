@@ -5,7 +5,7 @@ import { AppLayout } from "@/components/layout/AppLayout";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Avatar, LimeBadge } from "@/components/ui/primitives";
 import { useI18n } from "@/i18n/I18nProvider";
-import { Search, Send, Clock, CheckCircle, Zap, Bot, XCircle } from "lucide-react";
+import { Search, Send, Clock, CheckCircle, Zap, Bot, XCircle, User, MessageSquare } from "lucide-react";
 import { Instagram } from "@/components/ui/icons";
 import Link from "next/link";
 import { db } from "@/lib/db";
@@ -44,11 +44,15 @@ export default function ChatsPage() {
 
   // Load and sync chats from server/localStorage
   useEffect(() => {
-    const activeCh = db.getActiveChannel();
-    setActiveChannel(activeCh);
-    if (!activeCh) return;
+    const syncChannelAndChats = () => {
+      const activeCh = db.getActiveChannel();
+      setActiveChannel(activeCh);
+      if (!activeCh) {
+        setChats([]);
+        setActiveChatId("");
+        return;
+      }
 
-    const loadChats = () => {
       const stored = localStorage.getItem(`replai_chats_${activeCh.id}`);
       if (stored) {
         try {
@@ -59,28 +63,40 @@ export default function ChatsPage() {
               if (parsed.some((c: Chat) => c.id === prev)) return prev;
               return parsed[0].id;
             });
+          } else {
+            setActiveChatId("");
           }
         } catch (e) {
           console.error(e);
         }
       } else {
-        localStorage.setItem(`replai_chats_${activeCh.id}`, JSON.stringify(INITIAL_CHATS));
+        localStorage.setItem(`replai_chats_${activeCh.id}`, JSON.stringify([]));
         db.saveToServer();
-        setChats(INITIAL_CHATS);
+        setChats([]);
+        setActiveChatId("");
       }
     };
 
-    loadChats();
+    syncChannelAndChats();
+
+    const handleDbUpdate = () => {
+      syncChannelAndChats();
+    };
+
+    window.addEventListener("replai-db-update", handleDbUpdate);
 
     // Poll server for updates every 2.5 seconds
     const interval = setInterval(async () => {
       const success = await db.fetchFromServer();
       if (success) {
-        loadChats();
+        syncChannelAndChats();
       }
     }, 2500);
 
-    return () => clearInterval(interval);
+    return () => {
+      window.removeEventListener("replai-db-update", handleDbUpdate);
+      clearInterval(interval);
+    };
   }, []);
 
   const activeChat = chats.find((c) => c.id === activeChatId) || chats[0];
@@ -220,16 +236,16 @@ export default function ChatsPage() {
 
           const nameLower = (matchedAutomation as any).name.toLowerCase();
           if (nameLower.includes("lead magnet") || matchedKeyword === "kitob" || matchedKeyword === "bonus") {
-            botReplyText = "🤖 Bepul qo'llanma havolasi: https://sendly.uz/book. Obunangiz uchun rahmat! 📚";
+            botReplyText = "Bepul qo'llanma havolasi: https://sendly.uz/book. Obunangiz uchun rahmat!";
           } else if (matchedKeyword === "/start" || matchedKeyword === "boshlash") {
-            botReplyText = "🤖 Assalomu alaykum! Sendly chatbot xizmatining inbox simulyatoriga xush kelibsiz. Tizimimiz muvaffaqiyatli ulangan! ⚡️";
+            botReplyText = "Assalomu alaykum! Sendly chatbot xizmatining inbox simulyatoriga xush kelibsiz. Tizimimiz muvaffaqiyatli ulangan!";
           } else if (matchedKeyword === "narxi" || matchedKeyword === "tarif" || matchedKeyword === "kurs") {
-            botReplyText = "🤖 Bizning tariflarimiz: \n• Pro: 150,000 so'm/oy (1ta akkaunt)\n• Premium: 1,000,000 so'm/oy (10ta akkaunt)\n\nBatafsil ma'lumot olish yoki ulanish uchun operatorimiz tez orada javob yozadi.";
+            botReplyText = "Bizning tariflarimiz: \n• Pro: 150,000 so'm/oy (1ta akkaunt)\n• Premium: 1,000,000 so'm/oy (10ta akkaunt)\n\nBatafsil ma'lumot olish yoki ulanish uchun operatorimiz tez orada javob yozadi.";
           } else {
             botReplyText = (matchedAutomation as any).replyText || matchedKeyword;
           }
         } else {
-          botReplyText = "Murojaatingiz uchun rahmat! Tez orada operatorimiz sizga bog'lanadi. ⚡️";
+          botReplyText = "Murojaatingiz uchun rahmat! Tez orada operatorimiz sizga bog'lanadi.";
         }
 
         const autoReply: Message = {
@@ -429,7 +445,7 @@ export default function ChatsPage() {
                             {m.text}
                           </div>
                           <span className="text-[9px] text-[#707070] mt-1 px-1">
-                            {isBot ? "🤖 Bot" : isAgent ? "👤 Siz" : "👤 Mijoz"} • {m.timestamp}
+                            {isBot ? "Bot" : isAgent ? "Siz" : "Mijoz"} • {m.timestamp}
                           </span>
                         </div>
                       );
@@ -450,16 +466,18 @@ export default function ChatsPage() {
                         <button
                           type="button"
                           onClick={() => setSimulationSender("agent")}
-                          className={`px-3 py-1 rounded-full text-[10px] font-semibold transition-all ${simulationSender === "agent" ? "bg-black text-white shadow-sm" : "text-[#707070] hover:text-black"}`}
+                          className={`flex items-center gap-1 px-3 py-1 rounded-full text-[10px] font-semibold transition-all ${simulationSender === "agent" ? "bg-black text-white shadow-sm" : "text-[#707070] hover:text-black"}`}
                         >
-                          👤 Operator (Siz)
+                          <User size={12} />
+                          <span>Operator (Siz)</span>
                         </button>
                         <button
                           type="button"
                           onClick={() => setSimulationSender("user")}
-                          className={`px-3 py-1 rounded-full text-[10px] font-semibold transition-all ${simulationSender === "user" ? "bg-[#C7F33C] text-black shadow-sm" : "text-[#707070] hover:text-black"}`}
+                          className={`flex items-center gap-1 px-3 py-1 rounded-full text-[10px] font-semibold transition-all ${simulationSender === "user" ? "bg-[#C7F33C] text-black shadow-sm" : "text-[#707070] hover:text-black"}`}
                         >
-                          💬 Mijoz (Sinash)
+                          <MessageSquare size={12} />
+                          <span>Mijoz (Sinash)</span>
                         </button>
                       </div>
                     </div>
