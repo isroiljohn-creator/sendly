@@ -948,13 +948,13 @@ export default function AIAgentPage() {
           {/* Header */}
           <div className="text-center flex flex-col gap-2">
             <span className="px-3.5 py-1.5 bg-[#C7F33C]/20 text-[#7CA607] rounded-full text-[11px] font-bold tracking-wider uppercase inline-block mx-auto">
-              {t("ai_agent.agent_platform")}
+              {t("pages.ai_agent.agent_platform")}
             </span>
             <h1 className="text-[26px] md:text-[32px] font-extrabold text-black tracking-tight leading-tight">
-              {t("ai_agent.select_template_title")}
+              {t("pages.ai_agent.select_template_title")}
             </h1>
             <p className="text-[13px] text-[#707070] max-w-lg mx-auto leading-relaxed">
-              {t("ai_agent.select_template_desc")}
+              {t("pages.ai_agent.select_template_desc")}
             </p>
           </div>
 
@@ -975,21 +975,21 @@ export default function AIAgentPage() {
                         <span className="relative inline-flex rounded-full h-2 w-2 bg-[#7CA607]"></span>
                       </span>
                       <span className="text-[10px] font-extrabold text-[#7CA607] uppercase tracking-wider">
-                        {t("ai_agent.active")}
+                        {t("pages.ai_agent.active")}
                       </span>
                     </div>
                   ) : (
                     <div className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-full">
                       <span className="w-2 h-2 rounded-full bg-gray-300"></span>
                       <span className="text-[10px] font-extrabold text-[#707070] uppercase tracking-wider">
-                        {t("ai_agent.inactive")}
+                        {t("pages.ai_agent.inactive")}
                       </span>
                     </div>
                   )}
                 </div>
                 <div>
                   <h3 className="text-[17px] font-bold text-black group-hover:text-[#7CA607] transition-colors">
-                    {t("ai_agent.kurator_agent")}
+                    {t("pages.ai_agent.kurator_agent")}
                   </h3>
                   {settings?.aiCuratorEnabled && telegramBotUsername && (
                     <p className="text-[11px] text-[#7CA607] font-semibold mt-1">
@@ -997,7 +997,7 @@ export default function AIAgentPage() {
                     </p>
                   )}
                   <p className="text-[12px] text-[#707070] mt-1.5 leading-relaxed">
-                    {t("ai_agent.curator_desc")}
+                    {t("pages.ai_agent.curator_desc")}
                   </p>
                 </div>
 
@@ -1006,19 +1006,19 @@ export default function AIAgentPage() {
                 <ul className="flex flex-col gap-2 text-[11px] text-[#595959]">
                   <li className="flex items-start gap-2.5">
                     <CheckCircle className="w-4 h-4 text-[#9BC92E] shrink-0 mt-0.5" />
-                    <span>{t("ai_agent.curator_feature_1")}</span>
+                    <span>{t("pages.ai_agent.curator_feature_1")}</span>
                   </li>
                   <li className="flex items-start gap-2.5">
                     <CheckCircle className="w-4 h-4 text-[#9BC92E] shrink-0 mt-0.5" />
-                    <span>{t("ai_agent.curator_feature_2")}</span>
+                    <span>{t("pages.ai_agent.curator_feature_2")}</span>
                   </li>
                   <li className="flex items-start gap-2.5">
                     <CheckCircle className="w-4 h-4 text-[#9BC92E] shrink-0 mt-0.5" />
-                    <span>{t("ai_agent.curator_feature_3")}</span>
+                    <span>{t("pages.ai_agent.curator_feature_3")}</span>
                   </li>
                   <li className="flex items-start gap-2.5">
                     <CheckCircle className="w-4 h-4 text-[#9BC92E] shrink-0 mt-0.5" />
-                    <span>{t("ai_agent.curator_feature_4")}</span>
+                    <span>{t("pages.ai_agent.curator_feature_4")}</span>
                   </li>
                 </ul>
               </div>
@@ -1032,7 +1032,7 @@ export default function AIAgentPage() {
                 }}
                 className="w-full mt-6 py-3 rounded-full bg-black text-[#C7F33C] text-[12px] font-bold hover:bg-black/90 hover:scale-[1.02] active:scale-95 transition-all text-center flex items-center justify-center gap-2"
               >
-                <span>{t("ai_agent.setup_template_btn")}</span>
+                <span>{t("pages.ai_agent.setup_template_btn")}</span>
                 <ArrowRight size={14} />
               </button>
             </div>
@@ -1052,21 +1052,21 @@ export default function AIAgentPage() {
                         <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
                       </span>
                       <span className="text-[10px] font-extrabold text-blue-600 uppercase tracking-wider">
-                        {t("ai_agent.active")}
+                        {t("pages.ai_agent.active")}
                       </span>
                     </div>
                   ) : (
                     <div className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-full">
                       <span className="w-2 h-2 rounded-full bg-gray-300"></span>
                       <span className="text-[10px] font-extrabold text-[#707070] uppercase tracking-wider">
-                        {t("ai_agent.inactive")}
+                        {t("pages.ai_agent.inactive")}
                       </span>
                     </div>
                   )}
                 </div>
                 <div>
                   <h3 className="text-[17px] font-bold text-black group-hover:text-blue-600 transition-colors">
-                    {t("ai_agent.fb_leads_agent")}
+                    {t("pages.ai_agent.fb_leads_agent")}
                   </h3>
                   {settings?.fbAgentEnabled && (
                     <p className="text-[11px] text-blue-600 font-semibold mt-1">
@@ -1074,7 +1074,7 @@ export default function AIAgentPage() {
                     </p>
                   )}
                   <p className="text-[12px] text-[#707070] mt-1.5 leading-relaxed">
-                    {t("ai_agent.fb_leads_desc_card")}
+                    {t("pages.ai_agent.fb_leads_desc_card")}
                   </p>
                 </div>
 
@@ -1083,19 +1083,19 @@ export default function AIAgentPage() {
                 <ul className="flex flex-col gap-2 text-[11px] text-[#595959]">
                   <li className="flex items-start gap-2.5">
                     <CheckCircle className="w-4 h-4 text-blue-500 shrink-0 mt-0.5" />
-                    <span>{t("ai_agent.fb_feature_1")}</span>
+                    <span>{t("pages.ai_agent.fb_feature_1")}</span>
                   </li>
                   <li className="flex items-start gap-2.5">
                     <CheckCircle className="w-4 h-4 text-blue-500 shrink-0 mt-0.5" />
-                    <span>{t("ai_agent.fb_feature_2")}</span>
+                    <span>{t("pages.ai_agent.fb_feature_2")}</span>
                   </li>
                   <li className="flex items-start gap-2.5">
                     <CheckCircle className="w-4 h-4 text-blue-500 shrink-0 mt-0.5" />
-                    <span>{t("ai_agent.fb_feature_3")}</span>
+                    <span>{t("pages.ai_agent.fb_feature_3")}</span>
                   </li>
                   <li className="flex items-start gap-2.5">
                     <CheckCircle className="w-4 h-4 text-blue-500 shrink-0 mt-0.5" />
-                    <span>{t("ai_agent.fb_feature_4")}</span>
+                    <span>{t("pages.ai_agent.fb_feature_4")}</span>
                   </li>
                 </ul>
               </div>
@@ -1109,7 +1109,7 @@ export default function AIAgentPage() {
                 }}
                 className="w-full mt-6 py-3 rounded-full bg-blue-600 text-white text-[12px] font-bold hover:bg-blue-700 hover:scale-[1.02] active:scale-95 transition-all text-center flex items-center justify-center gap-2"
               >
-                <span>{t("ai_agent.setup_template_btn")}</span>
+                <span>{t("pages.ai_agent.setup_template_btn")}</span>
                 <ArrowRight size={14} />
               </button>
             </div>
