@@ -58,9 +58,9 @@ function RobotHero() {
         }}
       />
 
-      {/* Floating badge - Auto-reply (placed higher and shifted rightwards to avoid overlap) */}
+      {/* Floating badge - Auto-reply (placed higher and shifted to avoid overlap) */}
       <div
-        className="absolute top-[10px] sm:top-[20px] left-[20px] sm:left-[60px] flex items-center gap-2 rounded-2xl border border-black/5 bg-white/90 backdrop-blur-md px-3 py-2 shadow-[0_8px_30px_rgba(0,0,0,0.06)] z-20 pointer-events-auto"
+        className="absolute top-[-30px] sm:top-[-50px] left-[10px] sm:left-[20px] flex items-center gap-2 rounded-2xl border border-black/5 bg-white/90 backdrop-blur-md px-3 py-2 shadow-[0_8px_30px_rgba(0,0,0,0.06)] z-20 pointer-events-auto"
         style={{ animation: "sendly-badge-float 3.5s ease-in-out infinite" }}
       >
         <div className="w-7 h-7 rounded-full bg-[#C7F33C] flex items-center justify-center text-black">
