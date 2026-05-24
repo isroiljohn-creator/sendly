@@ -33,6 +33,13 @@ export default function AccountPage() {
   const [cardError, setCardError] = useState("");
   const [isLinking, setIsLinking] = useState(false);
 
+  // CVC is hidden for local cards (Uzcard / Humo) since they don't have CVC/CVV.
+  const cleanCardNum = cardNumInput.replace(/\s/g, "");
+  const isUzCardOrHumo = cleanCardNum.startsWith("8600") || 
+                         cleanCardNum.startsWith("5614") || 
+                         cleanCardNum.startsWith("9860") ||
+                         cleanCardNum.startsWith("6262");
+
   // OTP flow for Humo/UzCard
   const [cardStep, setCardStep] = useState<"card" | "otp">("card");
   const [otpCode, setOtpCode] = useState("");
@@ -439,7 +446,7 @@ export default function AccountPage() {
                         />
                       </div>
 
-                      <div className="grid grid-cols-2 gap-4">
+                      <div className={isUzCardOrHumo ? "flex flex-col gap-1.5" : "grid grid-cols-2 gap-4"}>
                         <div className="flex flex-col gap-1.5">
                           <label className="text-[10px] font-bold text-[#707070] uppercase">Muddati</label>
                           <input
@@ -455,17 +462,19 @@ export default function AccountPage() {
                             required
                           />
                         </div>
-                        <div className="flex flex-col gap-1.5">
-                          <label className="text-[10px] font-bold text-[#707070] uppercase">CVC / Tasdiq</label>
-                          <input
-                            type="password"
-                            value={cardCvcInput}
-                            onChange={(e) => setCardCvcInput(e.target.value.replace(/\D/g, "").substring(0, 4))}
-                            className="w-full rounded-[10px] border border-[#D8D8D8] px-4 py-3 text-[13px] text-black focus:outline-none focus:border-black"
-                            placeholder="***"
-                            required
-                          />
-                        </div>
+                        {!isUzCardOrHumo && (
+                          <div className="flex flex-col gap-1.5">
+                            <label className="text-[10px] font-bold text-[#707070] uppercase">CVC / Tasdiq</label>
+                            <input
+                              type="password"
+                              value={cardCvcInput}
+                              onChange={(e) => setCardCvcInput(e.target.value.replace(/\D/g, "").substring(0, 4))}
+                              className="w-full rounded-[10px] border border-[#D8D8D8] px-4 py-3 text-[13px] text-black focus:outline-none focus:border-black"
+                              placeholder="***"
+                              required
+                            />
+                          </div>
+                        )}
                       </div>
 
                       <div className="flex justify-end gap-2 mt-2">
