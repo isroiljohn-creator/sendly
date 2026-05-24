@@ -12,7 +12,8 @@ import {
   User,
   Phone,
   Video,
-  Smile
+  Smile,
+  Bot
 } from "lucide-react";
 import { db, Channel, Automation } from "@/lib/db";
 import { CustomDropdown } from "@/components/ui/CustomDropdown";
@@ -213,7 +214,7 @@ export default function QuickBotWizardPage() {
                         if (ch) setSelectedChannel(ch);
                       }}
                       options={dropdownOptions}
-                      className="w-full max-w-md"
+                      className="w-full max-w-xl"
                     />
                   ) : (
                     <div className="text-[12px] text-red-500 font-semibold bg-red-50 p-3.5 rounded-xl border border-red-100">
@@ -223,7 +224,7 @@ export default function QuickBotWizardPage() {
                 </div>
 
                 {/* Obunani tekshirish (Instagram vs Telegram) */}
-                <div className="flex flex-col gap-3 p-4 bg-[#F9F9F7] border border-[#E8E8E8] rounded-2xl max-w-md shadow-inner">
+                <div className="flex flex-col gap-3 p-4 bg-[#F9F9F7] border border-[#E8E8E8] rounded-2xl max-w-xl shadow-inner">
                   <div className="flex items-center justify-between">
                     <div>
                       <h3 className="text-[13px] font-bold text-black">
@@ -248,18 +249,27 @@ export default function QuickBotWizardPage() {
                   {selectedChannel?.type === "telegram" && checkSubscription && (
                     <div className="flex flex-col gap-1.5 border-t border-[#E8E8E8] pt-3 animate-in slide-in-from-top-1 duration-150">
                       <label className="text-[10px] font-extrabold text-[#707070] uppercase tracking-wider">Kanal tanlang</label>
-                      <div className="relative">
-                        <select
-                          value={selectedTgSubChannel}
-                          onChange={(e) => setSelectedTgSubChannel(e.target.value)}
-                          className="w-full text-[12px] font-bold bg-white border border-[#E8E8E8] focus:border-black rounded-xl p-2.5 outline-none appearance-none cursor-pointer pr-8 text-black"
-                        >
-                          <option value="Sincerelyabror_bot">Sincerelyabror_bot</option>
-                          <option value="abror_channel">Abror Ahmedov Kanal</option>
-                          <option value="marketing_uz">Marketing Darslari Uz</option>
-                        </select>
-                        <span className="absolute right-3.5 top-3.5 text-[#707070] pointer-events-none text-[8px]">▼</span>
-                      </div>
+                      <CustomDropdown
+                        value={selectedTgSubChannel}
+                        onChange={(val) => setSelectedTgSubChannel(val)}
+                        options={[
+                          { 
+                            value: "Sincerelyabror_bot", 
+                            label: "Sincerelyabror_bot",
+                            icon: <Bot size={13} className="text-[#229ED9]" />
+                          },
+                          { 
+                            value: "abror_channel", 
+                            label: "Abror Ahmedov Kanal",
+                            icon: <Bot size={13} className="text-[#229ED9]" />
+                          },
+                          { 
+                            value: "marketing_uz", 
+                            label: "Marketing Darslari Uz",
+                            icon: <Bot size={13} className="text-[#229ED9]" />
+                          }
+                        ]}
+                      />
                       <p className="text-[10px] text-[#707070] mt-1 leading-relaxed font-medium">
                         Agar kanal ro&apos;yxatda bo&apos;lmasa, <a href="/settings" className="text-black hover:underline font-bold">bot qo&apos;shish</a> ushbu Telegram kanalining administratori sifatida yoki <span className="text-black hover:underline font-bold cursor-pointer">ro&apos;yxatni yangilash</span>
                       </p>
@@ -278,7 +288,7 @@ export default function QuickBotWizardPage() {
 
                   {selectedChannel?.type === "telegram" ? (
                     /* Telegram Triggers Radio Options */
-                    <div className="flex flex-col gap-3 max-w-md">
+                    <div className="flex flex-col gap-3 max-w-xl">
                       <label 
                         className={`border rounded-2xl p-4 flex items-center justify-between cursor-pointer transition-all ${directTriggerType === "any" ? "border-black bg-[#C7F33C]/10 font-semibold text-black" : "border-[#E8E8E8] hover:border-black/20"}`}
                         onClick={() => {
@@ -323,7 +333,7 @@ export default function QuickBotWizardPage() {
 
                       {/* Telegram Keywords Input */}
                       {directTriggerType === "keyword" && (
-                        <div className="flex flex-col gap-2 max-w-md mt-1 animate-in slide-in-from-top-2 duration-150">
+                        <div className="flex flex-col gap-2 max-w-xl mt-1 animate-in slide-in-from-top-2 duration-150">
                           <div className="border border-[#D8D8D8] bg-white rounded-xl p-2.5 flex flex-wrap gap-1.5 focus-within:border-black transition-colors min-h-[46px] items-center">
                             {keywords.map((kw, i) => (
                               <span key={i} className="inline-flex items-center gap-1 bg-[#F0F0F0] text-black font-bold text-[10px] px-2.5 py-1 rounded-lg">
@@ -350,7 +360,7 @@ export default function QuickBotWizardPage() {
                     </div>
                   ) : (
                     /* Instagram Triggers Checkbox Options */
-                    <div className="flex flex-col gap-3 max-w-md">
+                    <div className="flex flex-col gap-3 max-w-xl">
                       {/* Trigger Direct */}
                       <div 
                         className={`border rounded-2xl p-4 flex items-center justify-between cursor-pointer transition-all ${triggerDirect ? "border-black bg-[#C7F33C]/10 font-semibold text-black" : "border-[#E8E8E8] hover:border-black/20"}`}
@@ -421,7 +431,7 @@ export default function QuickBotWizardPage() {
                     </div>
 
                     {directTriggerType === "keyword" && (
-                      <div className="flex flex-col gap-2 max-w-md animate-in slide-in-from-top-2 duration-150">
+                      <div className="flex flex-col gap-2 max-w-xl animate-in slide-in-from-top-2 duration-150">
                         {/* Keyword tags */}
                         <div className="border border-[#D8D8D8] bg-white rounded-xl p-2.5 flex flex-wrap gap-1.5 focus-within:border-black transition-colors min-h-[46px] items-center">
                           {keywords.map((kw, i) => (
@@ -488,7 +498,7 @@ export default function QuickBotWizardPage() {
                     </div>
 
                     {commentTriggerType === "keyword" && (
-                      <div className="flex flex-col gap-2 max-w-md animate-in slide-in-from-top-2 duration-150">
+                      <div className="flex flex-col gap-2 max-w-xl animate-in slide-in-from-top-2 duration-150">
                         {/* Keyword tags */}
                         <div className="border border-[#D8D8D8] bg-white rounded-xl p-2.5 flex flex-wrap gap-1.5 focus-within:border-black transition-colors min-h-[46px] items-center">
                           {keywords.map((kw, i) => (
@@ -585,7 +595,7 @@ export default function QuickBotWizardPage() {
                     value={welcomeButton}
                     onChange={(e) => setWelcomeButton(e.target.value)}
                     placeholder="Tugma matni (masalan: Olish)"
-                    className="w-full max-w-xs px-3 py-2 text-[12px] bg-white border border-[#D8D8D8] rounded-xl focus:outline-none focus:border-black font-semibold text-black"
+                    className="w-full max-w-sm px-3 py-2 text-[12px] bg-white border border-[#D8D8D8] rounded-xl focus:outline-none focus:border-black font-semibold text-black"
                   />
                 </div>
 
@@ -612,7 +622,7 @@ export default function QuickBotWizardPage() {
                         value={noSubButton}
                         onChange={(e) => setNoSubButton(e.target.value)}
                         placeholder="Tugma matni (masalan: ✅ Tugallandi)"
-                        className="w-full max-w-xs px-3 py-2 text-[12px] bg-white border border-[#D8D8D8] rounded-xl focus:outline-none focus:border-black font-semibold text-black"
+                        className="w-full max-w-sm px-3 py-2 text-[12px] bg-white border border-[#D8D8D8] rounded-xl focus:outline-none focus:border-black font-semibold text-black"
                       />
                     </div>
 
@@ -682,7 +692,7 @@ export default function QuickBotWizardPage() {
                     </div>
 
                     {autoCommentReplies && (
-                      <div className="flex flex-col gap-2.5 max-w-md animate-in slide-in-from-top-2 duration-150">
+                      <div className="flex flex-col gap-2.5 max-w-xl animate-in slide-in-from-top-2 duration-150">
                         {commentReplies.map((reply, idx) => (
                           <div key={idx} className="flex gap-2 items-center">
                             <input
@@ -725,7 +735,7 @@ export default function QuickBotWizardPage() {
                 )}
 
                 {/* Havolaga o'tishni eslatib qo'ying */}
-                <div className="flex items-center justify-between p-3.5 bg-[#F9F9F7] border border-[#E8E8E8] rounded-2xl max-w-md shadow-inner mt-2">
+                <div className="flex items-center justify-between p-3.5 bg-[#F9F9F7] border border-[#E8E8E8] rounded-2xl max-w-xl shadow-inner mt-2">
                   <div>
                     <h3 className="text-[13px] font-bold text-black">Havolaga o&apos;tishni eslatib qo&apos;ying</h3>
                     <p className="text-[11px] text-[#707070] mt-0.5">
@@ -744,7 +754,7 @@ export default function QuickBotWizardPage() {
                 </div>
 
                 {/* Qo'shimcha xabar */}
-                <div className="flex items-center justify-between p-3.5 bg-[#F9F9F7] border border-[#E8E8E8] rounded-2xl max-w-md shadow-inner">
+                <div className="flex items-center justify-between p-3.5 bg-[#F9F9F7] border border-[#E8E8E8] rounded-2xl max-w-xl shadow-inner">
                   <div>
                     <h3 className="text-[13px] font-bold text-black">Qo&apos;shimcha xabar</h3>
                     <p className="text-[11px] text-[#707070] mt-0.5">
