@@ -16,6 +16,10 @@ interface CustomDropdownProps {
   className?: string;
   dropdownClassName?: string;
   disabled?: boolean;
+  footerLabel?: string;
+  onFooterClick?: () => void;
+  trigger?: React.ReactNode;
+  containerClassName?: string;
 }
 
 export function CustomDropdown({
@@ -26,6 +30,10 @@ export function CustomDropdown({
   className,
   dropdownClassName,
   disabled = false,
+  footerLabel,
+  onFooterClick,
+  trigger,
+  containerClassName,
 }: CustomDropdownProps) {
   const [isOpen, setIsOpen] = React.useState(false);
   const containerRef = React.useRef<HTMLDivElement>(null);
@@ -45,32 +53,38 @@ export function CustomDropdown({
   const selectedOption = options.find((opt) => opt.value === value);
 
   return (
-    <div ref={containerRef} className="relative w-full">
-      <button
-        type="button"
-        disabled={disabled}
-        onClick={() => setIsOpen(!isOpen)}
-        className={cn(
-          "w-full flex items-center justify-between px-3 py-2 text-[12px] bg-white border border-[#E8E8E8] rounded-[12px] text-left focus:outline-none focus:border-black cursor-pointer font-semibold text-[#505050] transition-all disabled:opacity-50 disabled:cursor-not-allowed select-none",
-          isOpen && "border-black shadow-sm",
-          className
-        )}
-      >
-        <span className="flex items-center gap-2 truncate">
-          {selectedOption ? (
-            <>
-              {selectedOption.icon}
-              <span className="truncate">{selectedOption.label}</span>
-            </>
-          ) : (
-            <span className="text-[#A0A0A0]">{placeholder}</span>
+    <div ref={containerRef} className={cn("relative w-full", containerClassName)}>
+      {trigger ? (
+        <div onClick={() => !disabled && setIsOpen(!isOpen)} className="cursor-pointer">
+          {trigger}
+        </div>
+      ) : (
+        <button
+          type="button"
+          disabled={disabled}
+          onClick={() => setIsOpen(!isOpen)}
+          className={cn(
+            "w-full flex items-center justify-between px-3 py-2 text-[12px] bg-white border border-[#E8E8E8] rounded-[12px] text-left focus:outline-none focus:border-black cursor-pointer font-semibold text-[#505050] transition-all disabled:opacity-50 disabled:cursor-not-allowed select-none",
+            isOpen && "border-black shadow-sm",
+            className
           )}
-        </span>
-        <ChevronDown
-          size={14}
-          className={cn("text-[#808080] transition-transform duration-200 shrink-0 ml-1", isOpen && "rotate-180 text-black")}
-        />
-      </button>
+        >
+          <span className="flex items-center gap-2 truncate">
+            {selectedOption ? (
+              <>
+                {selectedOption.icon}
+                <span className="truncate">{selectedOption.label}</span>
+              </>
+            ) : (
+              <span className="text-[#A0A0A0]">{placeholder}</span>
+            )}
+          </span>
+          <ChevronDown
+            size={14}
+            className={cn("text-[#808080] transition-transform duration-200 shrink-0 ml-1", isOpen && "rotate-180 text-black")}
+          />
+        </button>
+      )}
 
       {isOpen && (
         <div
@@ -105,6 +119,21 @@ export function CustomDropdown({
                 </button>
               );
             })
+          )}
+          {footerLabel && onFooterClick && (
+            <button
+              type="button"
+              onClick={() => {
+                onFooterClick();
+                setIsOpen(false);
+              }}
+              className="w-full flex items-center gap-2 px-3 py-2 text-[11px] font-bold text-black border-t border-[#F0F0F0] mt-1 hover:bg-[#F5F5F5] select-none text-left rounded-[10px]"
+            >
+              <span className="grid h-4 w-4 place-items-center rounded-full bg-[#F0F0F0] text-black">
+                +
+              </span>
+              {footerLabel}
+            </button>
           )}
         </div>
       )}

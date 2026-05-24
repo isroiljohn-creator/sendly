@@ -104,6 +104,46 @@ export async function POST(request: Request) {
       dbData.userData[userId] = {};
     }
 
+    if (payload.replai_channels) {
+      try {
+        const incomingChannels = JSON.parse(payload.replai_channels);
+        if (Array.isArray(incomingChannels)) {
+          for (const ch of incomingChannels) {
+            if (!ch.username) continue;
+            const channelUsernameNormalized = ch.username.toLowerCase().replace(/^@+/, "");
+            // Check other users' channels
+            for (const [otherUserId, otherUserData] of Object.entries(dbData.userData || {})) {
+              if (otherUserId === userId) continue;
+              const otherUserChannelsRaw = (otherUserData as any)?.replai_channels;
+              if (otherUserChannelsRaw) {
+                const otherUserChannels = typeof otherUserChannelsRaw === "string"
+                  ? JSON.parse(otherUserChannelsRaw)
+                  : otherUserChannelsRaw;
+                if (Array.isArray(otherUserChannels)) {
+                  const duplicate = otherUserChannels.find(
+                    (oCh) =>
+                      oCh.type === ch.type &&
+                      oCh.username.toLowerCase().replace(/^@+/, "") === channelUsernameNormalized
+                  );
+                  if (duplicate) {
+                    return NextResponse.json(
+                      {
+                        success: false,
+                        error: `Ushbu ${ch.type === "telegram" ? "Telegram bot" : "Instagram sahifa"} (@${ch.username.replace(/^@+/, "")}) allaqachon boshqa foydalanuvchiga ulangan!`,
+                      },
+                      { status: 400 }
+                    );
+                  }
+                }
+              }
+            }
+          }
+        }
+      } catch (e) {
+        console.error("Failed to validate channels during POST:", e);
+      }
+    }
+
     Object.entries(payload).forEach(([key, val]) => {
       if (
         key.startsWith("replai_") &&

@@ -16,16 +16,21 @@ export function RevenueCard({ value = "29,48 mln", subText, points = DEFAULT_POI
   const { t } = useI18n();
 
   return (
-    <Card className="flex min-h-[340px] flex-col bg-white">
-      <span className="text-[13px] text-[#707070]">{t("pages.home.revenue")}</span>
-      <div className="bf-tight mt-2 text-[42px] font-medium leading-none text-black">{value}</div>
-      <div className="mt-1.5 text-[12px] text-[#707070]">{subText || t("pages.home.revenue_sub")}</div>
+    <Card className="flex min-h-[250px] flex-col bg-white justify-between p-5">
+      <div>
+        <span className="text-[13px] text-[#707070]">{t("pages.home.revenue")}</span>
+        <div className="bf-tight mt-1 text-[32px] font-bold leading-none text-black">{value}</div>
+        <div className="mt-1 text-[11px] text-[#707070] leading-tight">{subText || t("pages.home.revenue_sub")}</div>
+      </div>
 
-      <AreaChart
-        points={points}
-        highlightIndex={6}
-        highlightTag={highlightTag}
-      />
+      <div className="mt-3">
+        <AreaChart
+          points={points}
+          highlightIndex={6}
+          highlightTag={highlightTag}
+          height={80}
+        />
+      </div>
     </Card>
   );
 }

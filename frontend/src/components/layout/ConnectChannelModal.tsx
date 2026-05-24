@@ -1,0 +1,367 @@
+"use client";
+
+import { useState, useEffect } from "react";
+import { X, Bot, CheckCircle } from "lucide-react";
+import { Instagram } from "@/components/ui/icons";
+import { Button, AlertModal } from "@/components/ui/primitives";
+import { useI18n } from "@/i18n/I18nProvider";
+import { db } from "@/lib/db";
+
+export function ConnectChannelModal() {
+  const { t } = useI18n();
+  const [modal, setModal] = useState<"choose" | "instagram" | "telegram" | null>(null);
+  const [saving, setSaving] = useState(false);
+  const [oAuthWaiting, setOAuthWaiting] = useState(false);
+
+  // Telegram inputs
+  const [tgToken, setTgToken] = useState("");
+  const [tgName, setTgName] = useState("");
+  const [tgUsername, setTgUsername] = useState("");
+
+  // Alert modal state
+  const [alertOpen, setAlertOpen] = useState(false);
+  const [alertTitle, setAlertTitle] = useState("");
+  const [alertMessage, setAlertMessage] = useState("");
+
+  const showAlert = (title: string, message: string) => {
+    setAlertTitle(title);
+    setAlertMessage(message);
+    setAlertOpen(true);
+  };
+
+  // Open modal triggers from global events
+  useEffect(() => {
+    const handleOpen = () => {
+      setModal("choose");
+    };
+    const handleError = (e: Event) => {
+      const errorMsg = (e as CustomEvent).detail || t("common.error");
+      showAlert(t("common.error"), errorMsg);
+      // Automatically fetch from server to revert local updates
+      db.fetchFromServer();
+    };
+
+    window.addEventListener("replai-open-connect-modal", handleOpen);
+    window.addEventListener("replai-db-error", handleError);
+
+    return () => {
+      window.removeEventListener("replai-open-connect-modal", handleOpen);
+      window.removeEventListener("replai-db-error", handleError);
+    };
+  }, [t]);
+
+  // Handle Meta/Instagram OAuth events
+  useEffect(() => {
+    const handleOAuthMessage = (event: MessageEvent) => {
+      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "https://api.sendly.uz";
+      const allowedOrigins = [window.location.origin];
+      try {
+        allowedOrigins.push(new URL(backendUrl).origin);
+      } catch {
+        console.error("Invalid NEXT_PUBLIC_BACKEND_URL:", backendUrl);
+      }
+
+      if (!allowedOrigins.includes(event.origin)) return;
+
+      if (event.data?.type === "INSTAGRAM_CONNECTED") {
+        const { username, name, followers } = event.data;
+
+        db.addChannel({
+          type: "instagram",
+          name: name || username,
+          username: username,
+          isConnected: true,
+          followersCount: followers || "0",
+        });
+
+        setModal(null);
+        setOAuthWaiting(false);
+        showAlert(t("common.success"), t("pages.settings_page.ig_link_success"));
+      }
+    };
+
+    window.addEventListener("message", handleOAuthMessage);
+    return () => {
+      window.removeEventListener("message", handleOAuthMessage);
+    };
+  }, [t]);
+
+  useEffect(() => {
+    if (modal !== "instagram") {
+      setOAuthWaiting(false);
+    }
+  }, [modal]);
+
+  const handleInstagramLogin = async () => {
+    const currentUser = db.getCurrentUser();
+    if (!currentUser?.id) {
+      showAlert(t("common.error"), t("pages.settings_page.invalid_session"));
+      return;
+    }
+
+    setOAuthWaiting(true);
+    const width = 580;
+    const height = 700;
+    const left = window.screenX + (window.innerWidth - width) / 2;
+    const top = window.screenY + (window.innerHeight - height) / 2;
+
+    try {
+      const tokenRes = await fetch(`/api/auth/token?userId=${currentUser.id}`);
+      if (!tokenRes.ok) throw new Error("Token olishda xatolik yuz berdi");
+      const { token: jwtToken } = await tokenRes.json();
+
+      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "https://api.sendly.uz";
+      window.open(
+        `${backendUrl}/oauth/instagram/start?token=${jwtToken}`,
+        "instagram_oauth",
+        `width=${width},height=${height},left=${left},top=${top},toolbar=no,menubar=no,scrollbars=yes`
+      );
+    } catch (err: unknown) {
+      setOAuthWaiting(false);
+      showAlert(t("common.error"), t("pages.settings_page.ig_link_error") + ": " + (err instanceof Error ? err.message : String(err)));
+    }
+  };
+
+  const handleAddTelegram = () => {
+    if (!tgToken.trim() || !tgUsername.trim()) return;
+    setSaving(true);
+    setTimeout(() => {
+      db.addChannel({
+        type: "telegram",
+        name: tgName || tgUsername,
+        username: tgUsername.startsWith("@") ? tgUsername : `@${tgUsername}`,
+        telegramToken: tgToken,
+        isConnected: true,
+        followersCount: "0",
+      });
+      setTgToken("");
+      setTgName("");
+      setTgUsername("");
+      setModal(null);
+      setSaving(false);
+      showAlert(t("common.success"), t("pages.settings_page.tg_link_success"));
+    }, 800);
+  };
+
+  if (!modal) return (
+    <AlertModal
+      isOpen={alertOpen}
+      onClose={() => setAlertOpen(false)}
+      title={alertTitle}
+      message={alertMessage}
+      buttonText="OK"
+    />
+  );
+
+  return (
+    <>
+      <AlertModal
+        isOpen={alertOpen}
+        onClose={() => setAlertOpen(false)}
+        title={alertTitle}
+        message={alertMessage}
+        buttonText="OK"
+      />
+
+      {/* ── CHOOSE CHANNEL MODAL ── */}
+      {modal === "choose" && (
+        <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/40 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+          <div className="bg-white rounded-[24px] w-full max-w-[360px] shadow-2xl overflow-hidden p-6 border border-[#D8D8D8] scale-100 animate-in zoom-in-95 duration-250">
+            <div className="flex items-center justify-between pb-4 border-b border-[#F0F0F0] mb-5">
+              <h3 className="text-[15px] font-bold text-black">{t("pages.settings_page.choose_channel_type")}</h3>
+              <button onClick={() => setModal(null)} className="grid h-8 w-8 place-items-center rounded-full hover:bg-[#F0F0F0] text-[#707070] transition-colors">
+                <X size={16} />
+              </button>
+            </div>
+            <div className="flex flex-col gap-3">
+              <button
+                onClick={() => setModal("instagram")}
+                className="flex items-center gap-3 w-full p-3.5 rounded-[16px] border border-[#E8E8E8] hover:border-black text-[13px] font-medium transition-all text-left bg-white hover:shadow-sm"
+              >
+                <div className="grid h-8 w-8 place-items-center rounded-[10px] bg-gradient-to-br from-[#f09433] via-[#e6683c] to-[#bc1888] text-white shrink-0">
+                  <Instagram size={16} />
+                </div>
+                <div>
+                  <p className="font-semibold text-black">{t("pages.settings_page.ig_direct_api")}</p>
+                  <p className="text-[11px] text-[#707070]">{t("pages.settings_page.ig_direct_subtitle")}</p>
+                </div>
+              </button>
+              <button
+                onClick={() => setModal("telegram")}
+                className="flex items-center gap-3 w-full p-3.5 rounded-[16px] border border-[#E8E8E8] hover:border-black text-[13px] font-medium transition-all text-left bg-white hover:shadow-sm"
+              >
+                <div className="grid h-8 w-8 place-items-center rounded-[10px] bg-[#229ED9] text-white shrink-0">
+                  <Bot size={16} />
+                </div>
+                <div>
+                  <p className="font-semibold text-black">{t("pages.settings_page.tg_bot_title")}</p>
+                  <p className="text-[11px] text-[#707070]">{t("pages.settings_page.tg_bot_subtitle")}</p>
+                </div>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── INSTAGRAM MODAL ── */}
+      {modal === "instagram" && (
+        <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/40 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+          <div className="bg-white rounded-[24px] w-full max-w-[420px] shadow-2xl overflow-hidden scale-100 animate-in zoom-in-95 duration-250 border border-[#D8D8D8]">
+            <div className="flex items-center gap-3 px-6 pt-6 pb-5 border-b border-[#F0F0F0]">
+              <div className="grid h-10 w-10 place-items-center rounded-[12px] bg-gradient-to-br from-[#f09433] via-[#e6683c] to-[#bc1888] shrink-0">
+                <Instagram size={18} className="text-white" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <h2 className="text-[15px] font-bold text-black truncate">{t("pages.settings_page.link_ig_title")}</h2>
+                <p className="text-[11px] text-[#707070] truncate">{t("pages.settings_page.link_ig_subtitle")}</p>
+              </div>
+              <button onClick={() => setModal(null)} className="grid h-8 w-8 place-items-center rounded-full hover:bg-[#F0F0F0] text-[#707070] transition-colors">
+                <X size={16} />
+              </button>
+            </div>
+
+            <div className="px-6 py-8 flex flex-col items-center text-center gap-5">
+              <div className="flex items-center justify-center gap-4">
+                <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-[#f09433] via-[#bc1888] to-[#e6683c] flex items-center justify-center shadow-lg text-white">
+                  <Instagram size={28} />
+                </div>
+                <div className="text-[#a0a0a0] font-bold text-[20px]">⇄</div>
+                <div className="w-14 h-14 rounded-2xl bg-[#0095f6]/10 flex items-center justify-center shadow-sm border border-[#0095f6]/20 text-[#0095f6]">
+                  <span className="font-bold text-[22px]">S</span>
+                </div>
+              </div>
+
+              <div>
+                <h3 className="text-[16px] font-bold text-black leading-snug">
+                  {t("pages.settings_page.link_ig_title")}
+                </h3>
+                <p className="text-[12px] text-[#707070] mt-2 max-w-[320px] mx-auto leading-relaxed">
+                  {t("pages.settings_page.ig_connect_desc")}
+                </p>
+              </div>
+
+              {oAuthWaiting ? (
+                <div className="w-full p-4 rounded-2xl bg-[#EFF2FC] border border-[#EFF2FC] flex flex-col items-center gap-3 animate-pulse">
+                  <span className="w-6 h-6 border-3 border-[#0095f6]/30 border-t-[#0095f6] rounded-full animate-spin" />
+                  <p className="text-[12px] font-medium text-[#0095f6]">
+                    {t("pages.settings_page.waiting_for_account")}
+                  </p>
+                </div>
+              ) : (
+                <div className="w-full flex flex-col gap-3">
+                  <button
+                    onClick={handleInstagramLogin}
+                    className="w-full flex items-center justify-center gap-2.5 py-3.5 rounded-full bg-gradient-to-r from-[#f09433] via-[#bc1888] to-[#e6683c] hover:opacity-95 text-white text-[13px] font-bold shadow-md hover:shadow-lg active:scale-[0.98] transition-all"
+                  >
+                    <Instagram size={18} className="shrink-0" />
+                    <span>{t("pages.settings_page.connect_via_ig")}</span>
+                  </button>
+                </div>
+              )}
+
+              <div className="p-3.5 rounded-xl bg-[#F9F9F7] border border-[#E8E8E8] flex items-start gap-2.5 text-left w-full">
+                <CheckCircle size={14} className="text-[#16A34A] mt-0.5 shrink-0" />
+                <p className="text-[11px] text-[#505050] leading-relaxed">
+                  {t("pages.settings_page.ig_personal_warning")}
+                </p>
+              </div>
+            </div>
+
+            <div className="px-6 pb-6 flex gap-3">
+              <Button onClick={() => setModal(null)} variant="secondary" className="w-full py-3 text-[12px] border border-[#E8E8E8]">
+                {t("common.cancel")}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── TELEGRAM MODAL ── */}
+      {modal === "telegram" && (
+        <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/40 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+          <div className="bg-white rounded-[24px] w-full max-w-[440px] shadow-2xl overflow-hidden scale-100 animate-in zoom-in-95 duration-250 border border-[#D8D8D8]">
+            <div className="flex items-center gap-3 px-6 pt-6 pb-5 border-b border-[#F0F0F0]">
+              <div className="grid h-10 w-10 place-items-center rounded-[12px] bg-[#229ED9] shrink-0">
+                <Bot size={18} className="text-white" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <h2 className="text-[15px] font-bold text-black truncate">{t("pages.settings_page.link_tg_title")}</h2>
+                <p className="text-[11px] text-[#707070] truncate">{t("pages.settings_page.link_tg_subtitle")}</p>
+              </div>
+              <button onClick={() => setModal(null)} className="grid h-8 w-8 place-items-center rounded-full hover:bg-[#F0F0F0] text-[#707070] transition-colors">
+                <X size={16} />
+              </button>
+            </div>
+
+            <div className="px-6 py-5 flex flex-col gap-4">
+              <div className="flex flex-col gap-1.5">
+                <label className="text-[10px] font-bold text-[#707070] uppercase tracking-widest">{t("pages.settings_page.bot_token_label")}</label>
+                <input
+                  value={tgToken}
+                  onChange={(e) => setTgToken(e.target.value)}
+                  placeholder="1234567890:ABCdefGhIJKlmNoPQRsTUVwxyZ"
+                  className="w-full rounded-[12px] bg-[#F0F0F0] px-4 py-3 text-[12px] text-black outline-none focus:bg-[#e8e8e8] transition-colors font-mono"
+                />
+              </div>
+
+              <div className="flex flex-col gap-1.5">
+                <label className="text-[10px] font-bold text-[#707070] uppercase tracking-widest">{t("pages.settings_page.bot_username_label")}</label>
+                <div className="flex items-center gap-0 rounded-[12px] bg-[#F0F0F0] overflow-hidden focus-within:bg-[#e8e8e8] transition-colors">
+                  <span className="pl-4 text-[13px] text-[#707070] font-medium select-none">@</span>
+                  <input
+                    value={tgUsername.replace(/^@/, "")}
+                    onChange={(e) => setTgUsername(e.target.value)}
+                    placeholder="mybrandbot"
+                    className="flex-1 bg-transparent px-2 py-3 text-[13px] text-black outline-none"
+                  />
+                </div>
+              </div>
+
+              <div className="flex flex-col gap-1.5">
+                <label className="text-[10px] font-bold text-[#707070] uppercase tracking-widest">{t("pages.settings_page.channel_name_optional")}</label>
+                <input
+                  value={tgName}
+                  onChange={(e) => setTgName(e.target.value)}
+                  placeholder={t("pages.settings_page.channel_name_placeholder")}
+                  className="w-full rounded-[12px] bg-[#F0F0F0] px-4 py-3 text-[13px] text-black outline-none focus:bg-[#e8e8e8] transition-colors"
+                />
+              </div>
+
+              <div className="p-3 rounded-[12px] bg-[#F9F9F7] border border-[#E8E8E8] flex flex-col gap-2">
+                <p className="text-[10px] font-bold text-[#707070] uppercase tracking-widest">{t("pages.settings_page.how_to_get_title")}</p>
+                {[
+                  t("pages.settings_page.tg_step_1"),
+                  t("pages.settings_page.tg_step_2"),
+                  t("pages.settings_page.tg_step_3"),
+                  t("pages.settings_page.tg_step_4"),
+                ].map((step, i) => (
+                  <div key={i} className="flex items-start gap-2.5">
+                    <span className="grid h-4 w-4 place-items-center rounded-full bg-black text-white text-[9px] font-bold shrink-0 mt-0.5">{i + 1}</span>
+                    <p className="text-[11px] text-[#505050] leading-relaxed">{step}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="px-6 pb-6 flex gap-3">
+              <Button onClick={() => setModal(null)} variant="secondary" className="flex-1 py-3 text-[12px] border border-[#E8E8E8]">
+                {t("common.cancel")}
+              </Button>
+              <button
+                onClick={handleAddTelegram}
+                disabled={!tgToken.trim() || !tgUsername.trim() || saving}
+                className="flex-1 py-3 rounded-full bg-[#229ED9] text-white text-[12px] font-semibold disabled:opacity-40 hover:bg-[#1a8ec4] transition-all flex items-center justify-center gap-2"
+              >
+                {saving ? (
+                  <span className="inline-block w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                ) : (
+                  <><Bot size={13} /> {t("common.connect")}</>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
+  );
+}

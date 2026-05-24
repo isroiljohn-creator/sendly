@@ -547,33 +547,112 @@ export default function AutomationsPage() {
             </div>
 
             {filteredAutomations.length === 0 ? (
-              <Card className="flex flex-col items-center justify-center p-14 text-center border border-[#E8E8E8] rounded-[24px]">
-                <div className="grid h-12 w-12 place-items-center rounded-full bg-[#F5F5F5] text-[#707070] mb-4">
-                  <Zap size={20} className="text-[#A0A0A0]" />
+              <div className="flex flex-col gap-6 w-full">
+                {/* 1. Promotional Quick Bot Card (First Card, larger version) */}
+                <Link 
+                  href="/automations/quick-bot" 
+                  className="bg-white border border-[#E8E8E8] hover:border-black rounded-[24px] p-6 flex flex-col justify-between gap-6 shadow-sm hover:shadow-md transition-all relative group cursor-pointer bg-gradient-to-br from-[#FDFDFD] to-[#F9F9F7] text-left"
+                >
+                  <div className="flex justify-between items-start w-full">
+                    <div className="bg-[#C7F33C]/20 border border-[#b2db2a]/30 text-black font-extrabold text-[10px] uppercase tracking-wider px-2.5 py-1 rounded-lg">
+                      Tezkor bot sozlash
+                    </div>
+                    <span className="text-[16px] text-slate-400 group-hover:text-black transition-colors font-extrabold">→</span>
+                  </div>
+                  <div>
+                    <h3 className="text-[16px] font-black text-black leading-tight mt-2">
+                      Tezkor bot sozlash (Kalit so&apos;zli chat-bot)
+                    </h3>
+                    <p className="text-[12px] text-[#707070] mt-1.5 leading-relaxed font-medium">
+                      Har qanday qurilmadan, murakkab bloklar va konstruktorsiz avtomatlashtirish yaratishning eng oson va tezkor usuli. Kalit so&apos;zni kiriting va javob matnini sozlang!
+                    </p>
+                  </div>
+                </Link>
+
+                {/* Templates Section */}
+                <div className="flex flex-col gap-4 mt-2">
+                  <h3 className="text-[14px] font-extrabold text-black uppercase tracking-wider text-left">
+                    Tayyor shablonlar (Avtomatlashtirish shablonlari)
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {/* Lead Magnet Template */}
+                    <div 
+                      onClick={() => handleUseTemplate("lead_magnet")}
+                      className="bg-white border border-[#E8E8E8] hover:border-black rounded-[24px] p-5 flex flex-col justify-between gap-4 shadow-sm hover:shadow-md transition-all cursor-pointer group text-left"
+                    >
+                      <div className="flex justify-between items-center">
+                        <div className="w-9 h-9 rounded-xl bg-green-50 text-green-600 flex items-center justify-center">
+                          <BookOpen size={18} />
+                        </div>
+                        <span className="text-[12px] text-slate-400 group-hover:text-black transition-colors font-extrabold">Foydalanish →</span>
+                      </div>
+                      <div>
+                        <h4 className="text-[14px] font-bold text-black">{t("pages.automations_page.tmpl_lead_magnet_name")}</h4>
+                        <p className="text-[11px] text-[#707070] mt-1 leading-normal font-medium">
+                          Mijozlar yozgan kalit so&apos;z (masalan: &quot;bonus&quot;) orqali ularga avtomatik tarzda PDF qo&apos;llanma yoki havola yuborish.
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Story Coupon Template */}
+                    <div 
+                      onClick={() => handleUseTemplate("story_coupon")}
+                      className="bg-white border border-[#E8E8E8] hover:border-black rounded-[24px] p-5 flex flex-col justify-between gap-4 shadow-sm hover:shadow-md transition-all cursor-pointer group text-left"
+                    >
+                      <div className="flex justify-between items-center">
+                        <div className="w-9 h-9 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center">
+                          <Gift size={18} />
+                        </div>
+                        <span className="text-[12px] text-slate-400 group-hover:text-black transition-colors font-extrabold">Foydalanish →</span>
+                      </div>
+                      <div>
+                        <h4 className="text-[14px] font-bold text-black">{t("pages.automations_page.tmpl_story_coupon_name")}</h4>
+                        <p className="text-[11px] text-[#707070] mt-1 leading-normal font-medium">
+                          Mijozlar sizning hikoyangizga (story) munosabat bildirganda ularga avtomatik ravishda kupon yuborish.
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Comment DM Template */}
+                    <div 
+                      onClick={() => handleUseTemplate("comment_dm")}
+                      className="bg-white border border-[#E8E8E8] hover:border-black rounded-[24px] p-5 flex flex-col justify-between gap-4 shadow-sm hover:shadow-md transition-all cursor-pointer group text-left"
+                    >
+                      <div className="flex justify-between items-center">
+                        <div className="w-9 h-9 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
+                          <MessageSquare size={18} />
+                        </div>
+                        <span className="text-[12px] text-slate-400 group-hover:text-black transition-colors font-extrabold">Foydalanish →</span>
+                      </div>
+                      <div>
+                        <h4 className="text-[14px] font-bold text-black">{t("pages.automations_page.tmpl_comment_dm_name")}</h4>
+                        <p className="text-[11px] text-[#707070] mt-1 leading-normal font-medium">
+                          Postlar ostida izoh qoldirgan mijozlarga shaxsiy xabar (DM) orqali batafsil ma&apos;lumot yuborish.
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Welcome FAQ Template */}
+                    <div 
+                      onClick={() => handleUseTemplate("welcome_faq")}
+                      className="bg-white border border-[#E8E8E8] hover:border-black rounded-[24px] p-5 flex flex-col justify-between gap-4 shadow-sm hover:shadow-md transition-all cursor-pointer group text-left"
+                    >
+                      <div className="flex justify-between items-center">
+                        <div className="w-9 h-9 rounded-xl bg-orange-50 text-orange-600 flex items-center justify-center">
+                          <HelpCircle size={18} />
+                        </div>
+                        <span className="text-[12px] text-slate-400 group-hover:text-black transition-colors font-extrabold">Foydalanish →</span>
+                      </div>
+                      <div>
+                        <h4 className="text-[14px] font-bold text-black">{t("pages.automations_page.tmpl_welcome_faq_name")}</h4>
+                        <p className="text-[11px] text-[#707070] mt-1 leading-normal font-medium">
+                          Mijozlar birinchi marta yozganda salomlashish va eng ko&apos;p so&apos;raladigan savollarga tezkor javob berish.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
                 </div>
-                <h3 className="text-[15px] font-bold text-black">{t("pages.automations_page.no_flows_found")}</h3>
-                <p className="text-[11px] text-[#707070] mt-1 max-w-[280px] leading-normal">
-                  {t("pages.automations_page.no_flows_found_desc")}
-                </p>
-                <div className="flex gap-2 mt-4">
-                  <Button
-                    onClick={() => {
-                      setSelectedGroupId("all");
-                      setSelectedChannelId("all");
-                      setSearchQuery("");
-                    }}
-                    variant="secondary"
-                    className="text-[11px]"
-                  >
-                    {t("pages.automations_page.clear_filters")}
-                  </Button>
-                  <Link href="/automations/builder">
-                    <Button variant="primary" className="text-[11px] bg-black text-white hover:bg-black/90">
-                      {t("pages.automations_page.create_flow_btn")}
-                    </Button>
-                  </Link>
-                </div>
-              </Card>
+              </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
                 {/* 1. Promotional Quick Bot Card (First Card) */}

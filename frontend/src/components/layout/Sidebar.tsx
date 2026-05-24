@@ -48,11 +48,10 @@ const TOP_ITEMS: NavItem[] = [
   { to: "/broadcast", Icon: Send, labelKey: "nav.broadcast" },
   { to: "/analytics", Icon: BarChart3, labelKey: "nav.analytics" },
   { to: "/lessons", Icon: GraduationCap, labelKey: "nav.lessons" },
-];
-
-const BOTTOM_ITEMS: NavItem[] = [
   { to: "/settings", Icon: Settings, labelKey: "nav.settings" },
 ];
+
+const BOTTOM_ITEMS: NavItem[] = [];
 
 function NavButton({ item, active }: { item: NavItem; active: boolean }) {
   const { Icon, labelKey } = item;
@@ -251,16 +250,18 @@ export function Sidebar() {
             })}
 
             <div className="border-t border-[#F0F0F0] mt-1 pt-1">
-              <Link
-                href="/settings"
-                onClick={() => setDropdownOpen(false)}
-                className="flex items-center gap-2.5 px-4 py-2.5 text-[11px] font-semibold text-black hover:bg-[#F9F9F7] transition-colors"
+              <button
+                onClick={() => {
+                  setDropdownOpen(false);
+                  window.dispatchEvent(new Event("replai-open-connect-modal"));
+                }}
+                className="flex items-center gap-2.5 w-full px-4 py-2.5 text-[11px] font-semibold text-black hover:bg-[#F9F9F7] transition-colors text-left"
               >
                 <div className="grid h-5 w-5 place-items-center rounded-full bg-[#F0F0F0]">
                   <Plus size={10} />
                 </div>
                 {t("nav.manage_channels")}
-              </Link>
+              </button>
             </div>
           </div>
         )}
@@ -279,118 +280,6 @@ export function Sidebar() {
         {BOTTOM_ITEMS.map((item) => (
           <NavButton key={item.to} item={item} active={isActive(item.to)} />
         ))}
-
-        {/* User profile avatar trigger and popups */}
-        <div className="relative mt-1" ref={profileRef}>
-          <button
-            onClick={() => setProfileMenuOpen((p) => !p)}
-            className="relative h-[38px] w-[38px] rounded-full bg-[#82b4ff] flex items-center justify-center text-[15px] font-bold text-white hover:scale-105 active:scale-95 transition-all shadow-sm shrink-0"
-            title={currentUser?.fullName || t("nav.user_placeholder")}
-          >
-            {currentUser?.fullName?.charAt(0).toUpperCase() || "?"}
-          </button>
-
-          {/* Main Dropdown Menu */}
-          {profileMenuOpen && (
-            <div className="absolute left-[52px] bottom-0 z-50 bg-white rounded-[20px] shadow-[0_10px_30px_rgba(0,0,0,0.08)] border border-[#E8E8E8] w-[260px] py-3 text-black animate-in fade-in slide-in-from-left-2 duration-150">
-              {/* Header */}
-              <div className="flex items-center gap-3 px-4 pb-2.5 pt-1 border-b border-[#F0F0F0] mb-1.5">
-                <div className="w-10 h-10 rounded-full bg-[#82b4ff] flex items-center justify-center font-bold text-[16px] text-white shrink-0">
-                  {currentUser?.fullName?.charAt(0).toUpperCase() || "I"}
-                </div>
-                <div className="min-w-0 flex-1">
-                  <p className="text-[13px] font-bold text-black truncate">
-                    {currentUser?.fullName || t("nav.user_placeholder")}
-                  </p>
-                  <p className="text-[10px] text-[#707070] truncate">
-                    {currentUser?.email || ""}
-                  </p>
-                </div>
-              </div>
-
-              {/* Menu items */}
-              <div className="flex flex-col gap-0.5 px-2">
-                <Link
-                  href="/account?tab=general"
-                  onClick={() => setProfileMenuOpen(false)}
-                  className="flex items-center gap-3 px-3 py-2 rounded-[12px] hover:bg-[#F9F9F7] text-left transition-colors text-black font-semibold text-[13px]"
-                >
-                  <User size={16} className="text-[#595959]" />
-                  <span>{t("nav.my_account")}</span>
-                </Link>
-
-                <Link
-                  href="/account?tab=billing"
-                  onClick={() => setProfileMenuOpen(false)}
-                  className="flex items-center gap-3 px-3 py-2 rounded-[12px] hover:bg-[#F9F9F7] text-left transition-colors text-black font-semibold text-[13px]"
-                >
-                  <CreditCard size={16} className="text-[#595959]" />
-                  <span>{t("nav.billing_plans")}</span>
-                </Link>
-
-                <Link
-                  href="/partner"
-                  onClick={() => setProfileMenuOpen(false)}
-                  className="flex items-center gap-3 px-3 py-2 rounded-[12px] hover:bg-[#F9F9F7] text-left transition-colors text-black font-semibold text-[13px]"
-                >
-                  <Users size={16} className="text-[#595959]" />
-                  <span>{t("nav.partner_dashboard")}</span>
-                </Link>
-
-                <button
-                  onClick={() => setLangMenuOpen((p) => !p)}
-                  className={`flex items-center justify-between w-full px-3 py-2 rounded-[12px] hover:bg-[#F9F9F7] text-left transition-colors text-black font-semibold text-[13px] ${
-                    langMenuOpen ? "bg-[#F9F9F7]" : ""
-                  }`}
-                >
-                  <div className="flex items-center gap-3">
-                    <Languages size={16} className="text-[#595959]" />
-                    <span>{t("nav.language")}</span>
-                  </div>
-                  <ChevronRight size={14} className={`text-[#A0A0A0] transition-transform ${langMenuOpen ? "rotate-90" : ""}`} />
-                </button>
-
-                <Link
-                  href="/help"
-                  onClick={() => setProfileMenuOpen(false)}
-                  className="flex items-center gap-3 px-3 py-2 rounded-[12px] hover:bg-[#F9F9F7] text-left transition-colors text-black font-semibold text-[13px]"
-                >
-                  <HelpCircle size={16} className="text-[#595959]" />
-                  <span>{t("nav.help")}</span>
-                </Link>
-
-                <button
-                  onClick={handleSignOut}
-                  className="flex items-center gap-3 w-full px-3 py-2.5 rounded-[12px] hover:bg-red-50 text-left transition-colors text-red-600 font-bold text-[13px] border-t border-[#F0F0F0] mt-1 pt-2.5"
-                >
-                  <LogOut size={16} />
-                  <span>{t("nav.logout")}</span>
-                </button>
-              </div>
-            </div>
-          )}
-
-          {/* Language Sub-Menu Dropdown */}
-          {profileMenuOpen && langMenuOpen && (
-            <div className="absolute left-[320px] bottom-[50px] z-50 bg-white rounded-[20px] shadow-[0_10px_30px_rgba(0,0,0,0.08)] border border-[#E8E8E8] w-[200px] py-2 text-black animate-in fade-in slide-in-from-left-2 duration-150">
-              <div className="flex flex-col gap-0.5 px-2 text-[12px]">
-                {LANGUAGES.map((l) => {
-                  const isActiveLang = lang === l.code;
-                  return (
-                    <button
-                      key={l.code}
-                      onClick={() => handleLanguageSelect(l.code)}
-                      className="flex items-center justify-between w-full px-3.5 py-2 rounded-[10px] hover:bg-[#F9F9F7] text-left transition-colors text-black font-medium"
-                    >
-                      <span>{l.name}</span>
-                      {isActiveLang && <Check size={16} className="text-blue-600" />}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-          )}
-        </div>
       </div>
     </aside>
   );

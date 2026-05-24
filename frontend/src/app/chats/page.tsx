@@ -305,18 +305,6 @@ export default function ChatsPage() {
         <PageHeader
           title={t("pages.chats.title")}
           breadcrumbs={t("pages.chats.breadcrumb")}
-          actions={
-            activeChannel && (
-              <div className="flex items-center gap-2.5 px-4 py-2.5 rounded-[14px] bg-white border border-[#E8E8E8] w-fit shrink-0">
-                <div className={`grid h-7 w-7 place-items-center rounded-full ${activeChannel.type === "instagram" ? "bg-gradient-to-br from-[#f09433] via-[#e6683c] to-[#bc1888]" : "bg-[#229ED9]"}`}>
-                  {activeChannel.type === "instagram" ? <Instagram size={13} className="text-white" /> : <Bot size={13} className="text-white" />}
-                </div>
-                <span className="text-[12px] font-semibold text-black">{activeChannel.username}</span>
-                <span className="text-[11px] text-[#707070]">inbox</span>
-                <Link href="/settings?connect=choose" className="text-[10px] text-[#a0a0a0] hover:text-black transition-colors">O&apos;zgartirish →</Link>
-              </div>
-            )
-          }
         />
 
         <div className="flex flex-1 overflow-hidden rounded-[28px] border border-[#D8D8D8] bg-white">

@@ -796,7 +796,7 @@ export default function BuilderPage() {
             <div className="absolute bottom-6 right-6 z-30 flex items-center gap-3">
               <button className="h-10 bg-black hover:bg-neutral-900 text-white rounded-full px-5 flex items-center gap-2 text-[11px] font-black shadow-lg transition-all active:scale-[0.98]">
                 <Zap size={11} className="text-[#C7F33C] fill-[#C7F33C]" />
-                <span>AI bilan stsenariylarni yaxshilash</span>
+                <span>AI bilan ssenariylarni yaxshilash</span>
               </button>
               <div className="w-10 h-10 rounded-full bg-[#1F69FF] hover:bg-blue-600 flex items-center justify-center text-white shadow-lg cursor-pointer transition-all active:scale-[0.98]">
                 <MessageSquare size={14} />

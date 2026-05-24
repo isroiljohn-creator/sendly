@@ -15,17 +15,22 @@ export function ActivityCard({ value = "12,486", subText, values = DEFAULT_VALUE
   const { t, days } = useI18n();
 
   return (
-    <Card className="flex min-h-[340px] flex-col bg-white">
-      <span className="text-[13px] text-[#707070]">{t("pages.home.activity")}</span>
-      <div className="bf-tight mt-2 text-[42px] font-medium leading-none text-black">{value}</div>
-      <div className="mt-1.5 text-[12px] text-[#707070]">{subText || t("pages.home.activity_sub")}</div>
+    <Card className="flex min-h-[250px] flex-col bg-white justify-between p-5">
+      <div>
+        <span className="text-[13px] text-[#707070]">{t("pages.home.activity")}</span>
+        <div className="bf-tight mt-1 text-[32px] font-bold leading-none text-black">{value}</div>
+        <div className="mt-1 text-[11px] text-[#707070] leading-tight">{subText || t("pages.home.activity_sub")}</div>
+      </div>
 
-      <BarChart
-        values={values}
-        days={days}
-        highlightIndex={5}
-        highlightTag={String(value)}
-      />
+      <div className="mt-3">
+        <BarChart
+          values={values}
+          days={days}
+          highlightIndex={5}
+          highlightTag={String(value)}
+          height={80}
+        />
+      </div>
     </Card>
   );
 }

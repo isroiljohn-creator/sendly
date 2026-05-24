@@ -168,9 +168,12 @@ const notifyUpdate = () => {
   if (isClient) {
     window.dispatchEvent(new Event("replai-db-update"));
     // Auto-save database state to the server asynchronously
-    setTimeout(() => {
+    setTimeout(async () => {
       if (typeof db !== "undefined" && db.saveToServer) {
-        db.saveToServer();
+        const res = await db.saveToServer();
+        if (res && !res.success && res.error) {
+          window.dispatchEvent(new CustomEvent("replai-db-error", { detail: res.error }));
+        }
       }
     }, 50);
   }
@@ -893,8 +896,8 @@ export const db = {
     }
   },
 
-  async saveToServer(): Promise<boolean> {
-    if (!isClient) return false;
+  async saveToServer(): Promise<{ success: boolean; error?: string }> {
+    if (!isClient) return { success: false };
     const currentUser = this.getCurrentUser();
     const userId = currentUser?.id || "guest";
     try {
@@ -904,14 +907,17 @@ export const db = {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
       });
-      if (!res.ok) return false;
+      const result = await res.json();
+      if (!res.ok) {
+        return { success: false, error: result.error || "Xatolik yuz berdi" };
+      }
       
       // Ping background telegram runner to refresh/start bots
       fetch("/api/telegram/start");
-      return true;
+      return { success: true };
     } catch (e) {
       console.error("Failed to save database to server", e);
-      return false;
+      return { success: false, error: String(e) };
     }
   },
 

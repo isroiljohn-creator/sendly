@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import type { ReactNode } from "react";
 import { Sidebar } from "./Sidebar";
 import { TopBar } from "./TopBar";
+import { ConnectChannelModal } from "./ConnectChannelModal";
+import { SupportWidget } from "./SupportWidget";
 import { db } from "@/lib/db";
 
 export function AppLayout({ children }: { children: ReactNode }) {
@@ -35,6 +37,8 @@ export function AppLayout({ children }: { children: ReactNode }) {
           {children}
         </div>
       </div>
+      <ConnectChannelModal />
+      <SupportWidget />
     </div>
   );
 }
