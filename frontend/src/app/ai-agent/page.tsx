@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { PageHeader } from "@/components/layout/PageHeader";
@@ -995,7 +995,16 @@ export default function AIAgentPage() {
 
           {/* Active Agents Section */}
           {(() => {
-            const isAnyAgentActive = settings?.aiCuratorEnabled || settings?.fbAgentEnabled;
+            const channels = db.getChannels();
+            const activeAgents = channels.map(channel => {
+              const botSettings = db.getBotSettings(channel.id);
+              return {
+                channel,
+                settings: botSettings
+              };
+            }).filter(item => item.settings.aiCuratorEnabled || item.settings.fbAgentEnabled);
+
+            const isAnyAgentActive = activeAgents.length > 0;
             return (
               <>
                 {isAnyAgentActive && (
@@ -1004,96 +1013,112 @@ export default function AIAgentPage() {
                       Ishlab turgan AI agent
                     </h2>
                     <div className="grid grid-cols-1 gap-4 w-full">
-                      {settings?.aiCuratorEnabled && (
-                        <div className="bg-white border border-[#E8E8E8] rounded-[28px] p-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 transition-all shadow-md relative overflow-hidden group">
-                          <div className="absolute top-0 right-0 w-24 h-24 bg-[#C7F33C]/10 rounded-bl-full -z-10" />
-                          <div className="flex gap-4 items-center">
-                            <div className="w-12 h-12 rounded-2xl bg-black text-[#C7F33C] grid place-items-center font-bold text-[18px] shrink-0">
-                              <Sparkles size={22} />
-                            </div>
-                            <div>
-                              <div className="flex flex-wrap items-center gap-2">
-                                <h3 className="text-[17px] font-bold text-black">
-                                  {t("pages.ai_agent.kurator_agent")}
-                                </h3>
-                                <span className="flex items-center gap-1.5 px-2.5 py-0.5 bg-[#C7F33C]/20 border border-[#7CA607]/20 rounded-full text-[9px] font-extrabold text-[#7CA607] uppercase tracking-wider">
-                                  <span className="relative flex h-2 w-2">
-                                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#7CA607] opacity-75"></span>
-                                    <span className="relative inline-flex rounded-full h-2 w-2 bg-[#7CA607]"></span>
-                                  </span>
-                                  FAOL
-                                </span>
+                      {activeAgents.map(item => (
+                        <React.Fragment key={item.channel.id}>
+                          {item.settings.aiCuratorEnabled && (
+                            <div className="bg-white border border-[#E8E8E8] rounded-[28px] p-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 transition-all shadow-md relative overflow-hidden group">
+                              <div className="absolute top-0 right-0 w-24 h-24 bg-[#C7F33C]/10 rounded-bl-full -z-10" />
+                              <div className="flex gap-4 items-center">
+                                <div className="w-12 h-12 rounded-2xl bg-black text-[#C7F33C] grid place-items-center font-bold text-[18px] shrink-0">
+                                  <Sparkles size={22} />
+                                </div>
+                                <div>
+                                  <div className="flex flex-wrap items-center gap-2">
+                                    <h3 className="text-[17px] font-bold text-black">
+                                      {t("pages.ai_agent.kurator_agent")}
+                                    </h3>
+                                    <span className="flex items-center gap-1.5 px-2.5 py-0.5 bg-[#C7F33C]/20 border border-[#7CA607]/20 rounded-full text-[9px] font-extrabold text-[#7CA607] uppercase tracking-wider">
+                                      <span className="relative flex h-2 w-2">
+                                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#7CA607] opacity-75"></span>
+                                        <span className="relative inline-flex rounded-full h-2 w-2 bg-[#7CA607]"></span>
+                                      </span>
+                                      FAOL
+                                    </span>
+                                  </div>
+                                  <p className="text-[11px] text-[#7CA607] font-semibold mt-1">
+                                    Bot: @{item.channel.username.replace(/^@+/, "")}
+                                  </p>
+                                  <p className="text-[12px] text-[#707070] mt-1.5 leading-relaxed">
+                                    {t("pages.ai_agent.curator_desc")}
+                                  </p>
+                                </div>
                               </div>
-                              {telegramBotUsername && (
-                                <p className="text-[11px] text-[#7CA607] font-semibold mt-1">
-                                  Bot: @{telegramBotUsername.replace(/^@+/, "")}
-                                </p>
-                              )}
-                              <p className="text-[12px] text-[#707070] mt-1.5 leading-relaxed">
-                                {t("pages.ai_agent.curator_desc")}
-                              </p>
-                            </div>
-                          </div>
-                          <button
-                            onClick={() => {
-                              setSelectedAgentType("kurator");
-                              if (typeof window !== "undefined") {
-                                localStorage.setItem("sendly_selected_agent_type", "kurator");
-                              }
-                            }}
-                            className="px-5 py-2.5 bg-black text-[#C7F33C] text-[12px] font-bold hover:bg-black/90 hover:scale-[1.02] active:scale-95 transition-all text-center rounded-full flex items-center justify-center gap-2 shrink-0 self-stretch sm:self-auto shadow-sm"
-                          >
-                            <span>Sozlash</span>
-                            <ArrowRight size={14} />
-                          </button>
-                        </div>
-                      )}
+                              <button
+                                onClick={() => {
+                                  // Switch active editing context to this channel
+                                  const loadedSettings = db.getBotSettings(item.channel.id);
+                                  loadedSettings.telegramBotId = item.channel.id;
+                                  setSettings(loadedSettings);
+                                  setTelegramBotUsername(item.channel.username);
+                                  setIsTelegramLinked(true);
 
-                      {settings?.fbAgentEnabled && (
-                        <div className="bg-white border border-[#E8E8E8] rounded-[28px] p-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 transition-all shadow-md relative overflow-hidden group">
-                          <div className="absolute top-0 right-0 w-24 h-24 bg-blue-500/5 rounded-bl-full -z-10" />
-                          <div className="flex gap-4 items-center">
-                            <div className="w-12 h-12 rounded-2xl bg-blue-600 text-white grid place-items-center font-bold text-[18px] shrink-0">
-                              <Facebook size={22} />
+                                  setSelectedAgentType("kurator");
+                                  if (typeof window !== "undefined") {
+                                    localStorage.setItem("sendly_selected_agent_type", "kurator");
+                                  }
+                                }}
+                                className="px-5 py-2.5 bg-black text-[#C7F33C] text-[12px] font-bold hover:bg-black/90 hover:scale-[1.02] active:scale-95 transition-all text-center rounded-full flex items-center justify-center gap-2 shrink-0 self-stretch sm:self-auto shadow-sm"
+                              >
+                                <span>Sozlash</span>
+                                <ArrowRight size={14} />
+                              </button>
                             </div>
-                            <div>
-                              <div className="flex flex-wrap items-center gap-2">
-                                <h3 className="text-[17px] font-bold text-black">
-                                  {t("pages.ai_agent.fb_leads_agent")}
-                                </h3>
-                                <span className="flex items-center gap-1.5 px-2.5 py-0.5 bg-blue-50 border border-blue-200 rounded-full text-[9px] font-extrabold text-blue-600 uppercase tracking-wider">
-                                  <span className="relative flex h-2 w-2">
-                                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
-                                    <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
-                                  </span>
-                                  FAOL
-                                </span>
+                          )}
+
+                          {item.settings.fbAgentEnabled && (
+                            <div className="bg-white border border-[#E8E8E8] rounded-[28px] p-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 transition-all shadow-md relative overflow-hidden group">
+                              <div className="absolute top-0 right-0 w-24 h-24 bg-blue-500/5 rounded-bl-full -z-10" />
+                              <div className="flex gap-4 items-center">
+                                <div className="w-12 h-12 rounded-2xl bg-blue-600 text-white grid place-items-center font-bold text-[18px] shrink-0">
+                                  <Facebook size={22} />
+                                </div>
+                                <div>
+                                  <div className="flex flex-wrap items-center gap-2">
+                                    <h3 className="text-[17px] font-bold text-black">
+                                      {t("pages.ai_agent.fb_leads_agent")}
+                                    </h3>
+                                    <span className="flex items-center gap-1.5 px-2.5 py-0.5 bg-blue-50 border border-blue-200 rounded-full text-[9px] font-extrabold text-blue-600 uppercase tracking-wider">
+                                      <span className="relative flex h-2 w-2">
+                                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+                                        <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
+                                      </span>
+                                      FAOL
+                                    </span>
+                                  </div>
+                                  <p className="text-[11px] text-blue-600 font-semibold mt-1">
+                                    Kanal: @{item.channel.username.replace(/^@+/, "")} | Guruh: {db.getGroups().find(g => g.id === (item.settings.targetGroupId || "sales"))?.name || "Sotuvlar"}
+                                  </p>
+                                  <p className="text-[12px] text-[#707070] mt-1.5 leading-relaxed">
+                                    {t("pages.ai_agent.fb_leads_desc_card")}
+                                  </p>
+                                </div>
                               </div>
-                              <p className="text-[11px] text-blue-600 font-semibold mt-1">
-                                Guruh: {db.getGroups().find(g => g.id === (settings.targetGroupId || "sales"))?.name || "Sotuvlar"}
-                              </p>
-                              <p className="text-[12px] text-[#707070] mt-1.5 leading-relaxed">
-                                {t("pages.ai_agent.fb_leads_desc_card")}
-                              </p>
+                              <button
+                                onClick={() => {
+                                  // Switch active editing context to this channel
+                                  const loadedSettings = db.getBotSettings(item.channel.id);
+                                  loadedSettings.telegramBotId = item.channel.id;
+                                  setSettings(loadedSettings);
+                                  setTelegramBotUsername(item.channel.username);
+                                  setIsTelegramLinked(true);
+
+                                  setSelectedAgentType("fb-leads");
+                                  if (typeof window !== "undefined") {
+                                    localStorage.setItem("sendly_selected_agent_type", "fb-leads");
+                                  }
+                                }}
+                                className="px-5 py-2.5 bg-blue-600 text-white text-[12px] font-bold hover:bg-blue-700 hover:scale-[1.02] active:scale-95 transition-all text-center rounded-full flex items-center justify-center gap-2 shrink-0 self-stretch sm:self-auto shadow-sm"
+                              >
+                                <span>Sozlash</span>
+                                <ArrowRight size={14} />
+                              </button>
                             </div>
-                          </div>
-                          <button
-                            onClick={() => {
-                              setSelectedAgentType("fb-leads");
-                              if (typeof window !== "undefined") {
-                                localStorage.setItem("sendly_selected_agent_type", "fb-leads");
-                              }
-                            }}
-                            className="px-5 py-2.5 bg-blue-600 text-white text-[12px] font-bold hover:bg-blue-700 hover:scale-[1.02] active:scale-95 transition-all text-center rounded-full flex items-center justify-center gap-2 shrink-0 self-stretch sm:self-auto shadow-sm"
-                          >
-                            <span>Sozlash</span>
-                            <ArrowRight size={14} />
-                          </button>
-                        </div>
-                      )}
+                          )}
+                        </React.Fragment>
+                      ))}
                     </div>
                   </div>
-                )}
+                )/* note: isAnyAgentActive closing brace is below */}
 
                 {isAnyAgentActive && (
                   <h2 className="text-[11px] font-extrabold text-[#707070] uppercase tracking-wider self-start mt-3.5">
