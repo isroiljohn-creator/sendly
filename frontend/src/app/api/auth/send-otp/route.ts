@@ -6,13 +6,13 @@ const HTML_TEMPLATE = (otp: string) => `
     <!-- Logo -->
     <div style="text-align: center; margin-bottom: 32px;">
       <span style="font-size: 26px; font-weight: 900; color: #070708; letter-spacing: -0.5px;">
-        Sendly<span style="color: #C7F33C;">.uz</span>
+        Sendly
       </span>
     </div>
 
     <p style="font-size: 15px; color: #333; line-height: 1.6; margin: 0 0 16px;">Salom!</p>
     <p style="font-size: 14px; color: #555; line-height: 1.7; margin: 0 0 28px;">
-      Sendly.uz platformasiga kirish yoki ro'yxatdan o'tishni tasdiqlash uchun quyidagi <strong>bir martalik kodni</strong> ishlating:
+      Sendly platformasiga kirish yoki ro'yxatdan o'tishni tasdiqlash uchun quyidagi <strong>bir martalik kodni</strong> ishlating:
     </p>
 
     <!-- OTP Box -->
@@ -26,7 +26,7 @@ const HTML_TEMPLATE = (otp: string) => `
     </p>
 
     <hr style="border: none; border-top: 1px solid #F0F0F0; margin: 0 0 20px;" />
-    <p style="font-size: 11px; color: #bbb; text-align: center; margin: 0;">© ${new Date().getFullYear()} Sendly.uz • Barcha huquqlar himoyalangan.</p>
+    <p style="font-size: 11px; color: #bbb; text-align: center; margin: 0;">© ${new Date().getFullYear()} Sendly • Barcha huquqlar himoyalangan.</p>
   </div>
 `;
 
@@ -56,9 +56,9 @@ export async function POST(request: Request) {
     const resend = new Resend(apiKey);
 
     const { error } = await resend.emails.send({
-      from: "Sendly.uz <noreply@sendly.uz>",
+      from: "Sendly <noreply@sendly.uz>",
       to: email,
-      subject: "Sendly.uz — Tasdiqlash kodi",
+      subject: "Sendly — Tasdiqlash kodi",
       html: HTML_TEMPLATE(otp),
     });
 
