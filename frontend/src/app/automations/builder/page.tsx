@@ -277,7 +277,7 @@ export default function BuilderPage() {
         triggerType: isStory ? "story" : "keyword", 
         triggerDetails: triggerNode?.data.triggerKeywords || src, 
         runs: "0", 
-        completion: "100%", 
+        completion: "0%", 
         active: shouldBeActive,
         replyText
       });

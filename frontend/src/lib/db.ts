@@ -81,6 +81,7 @@ export type BotSettings = {
   fbAgentEnabled?: boolean;
   adminTelegramChatId?: string;
   adminTelegramUsername?: string;
+  telegramBotId?: string;
 };
 
 export type Lesson = {
@@ -153,6 +154,7 @@ Kelgan ariza ma'lumotlarini (ism, telefon, foydalanuvchi yozgan savollar yoki ja
   fbAgentEnabled: false,
   adminTelegramChatId: "",
   adminTelegramUsername: "",
+  telegramBotId: "",
 };
 
 const INITIAL_MODULES: Module[] = [];
@@ -901,5 +903,48 @@ export const db = {
       console.error("Failed to save database to server", e);
       return false;
     }
+  },
+
+  async getAiCreditsFromServer(userId: string): Promise<any> {
+    try {
+      const res = await fetch(`/api/credits?userId=${userId}`);
+      if (res.ok) {
+        const data = await res.json();
+        localStorage.setItem("replai_ai_credits_data", JSON.stringify(data));
+        return data;
+      }
+    } catch (e) {
+      console.error("Failed to fetch credits from server", e);
+    }
+    if (typeof window !== "undefined") {
+      const local = localStorage.getItem("replai_ai_credits_data");
+      if (local) {
+        try {
+          return JSON.parse(local);
+        } catch {
+          // ignore
+        }
+      }
+    }
+    return { balance: 0, used: 0, history: [] };
+  },
+
+  async buyAiCreditsServer(userId: string, amount: number, description: string): Promise<any> {
+    try {
+      const res = await fetch(`/api/credits?userId=${userId}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "buy", amount, description })
+      });
+      if (res.ok) {
+        const data = await res.json();
+        localStorage.setItem("replai_ai_credits_data", JSON.stringify(data));
+        window.dispatchEvent(new Event("replai-db-update"));
+        return data;
+      }
+    } catch (e) {
+      console.error("Failed to buy credits", e);
+    }
+    return null;
   },
 };

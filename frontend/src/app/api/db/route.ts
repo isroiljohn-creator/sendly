@@ -105,7 +105,12 @@ export async function POST(request: Request) {
     }
 
     Object.entries(payload).forEach(([key, val]) => {
-      if (key.startsWith("replai_") && key !== "replai_users" && key !== "replai_current_user") {
+      if (
+        key.startsWith("replai_") &&
+        key !== "replai_users" &&
+        key !== "replai_current_user" &&
+        key !== "replai_ai_credits_data"
+      ) {
         dbData.userData[userId][key] = val;
       }
     });

@@ -60,6 +60,11 @@ export default function AccountPage() {
   const [isPricingOpen, setIsPricingOpen] = useState(false);
   const [billingCycle, setBillingCycle] = useState<"monthly" | "yearly">("monthly");
 
+  // AI Credits States
+  const [aiCreditsData, setAiCreditsData] = useState<{ balance: number; used: number; history: any[] }>({ balance: 0, used: 0, history: [] });
+  const [isBuyCreditsModalOpen, setIsBuyCreditsModalOpen] = useState(false);
+  const [processingPurchase, setProcessingPurchase] = useState(false);
+
   useEffect(() => {
     let interval: NodeJS.Timeout;
     if (cardStep === "otp" && otpTimer > 0) {
@@ -77,6 +82,11 @@ export default function AccountPage() {
       setName(user.fullName);
       setEmail(user.email);
       setPassword(user.password || "123456");
+      
+      // Load credits from server
+      db.getAiCreditsFromServer(user.id || "guest").then((data) => {
+        if (data) setAiCreditsData(data);
+      });
     } else {
       // Mock user for visual presentation if no session is active
       const mockUser = {
@@ -112,12 +122,54 @@ export default function AccountPage() {
     // Load dynamic counts
     setChannelsCount(db.getChannels().length);
     setActiveAutomationsCount(db.getAllAutomations().filter(a => a.active).length);
+
+    // Setup reactive DB listener
+    const handleDbUpdate = () => {
+      const u = db.getCurrentUser();
+      if (u) {
+        setCurrentUser(u);
+        setChannelsCount(db.getChannels().length);
+        setActiveAutomationsCount(db.getAllAutomations().filter(a => a.active).length);
+        db.getAiCreditsFromServer(u.id || "guest").then((data) => {
+          if (data) setAiCreditsData(data);
+        });
+      }
+    };
+    window.addEventListener("replai-db-update", handleDbUpdate);
+    return () => window.removeEventListener("replai-db-update", handleDbUpdate);
   }, []);
 
   const showAlert = (title: string, message: string) => {
     setAlertTitle(title);
     setAlertMessage(message);
     setIsAlertOpen(true);
+  };
+
+  const handleBuyCredits = async (amount: number, priceUzs: number, packageName: string) => {
+    if (!currentUser?.isCardLinked) {
+      showAlert(t("common.error"), "AI kredit sotib olish uchun avval to'lov kartangizni bog'lang.");
+      setIsBuyCreditsModalOpen(false);
+      setIsLinking(true);
+      return;
+    }
+    setProcessingPurchase(true);
+    
+    // Simulate payment transaction then apply credits
+    const timer = setTimeout(async () => {
+      const updated = await db.buyAiCreditsServer(
+        currentUser.id || "guest",
+        amount,
+        `${packageName} paketi (${priceUzs.toLocaleString("uz-UZ")} UZS) xarid qilindi`
+      );
+      setProcessingPurchase(false);
+      if (updated) {
+        setAiCreditsData(updated);
+        setIsBuyCreditsModalOpen(false);
+        showAlert(t("common.success"), `Muvaffaqiyatli xarid qilindi! Hisobingizga ${amount} kredit qo'shildi.`);
+      } else {
+        showAlert(t("common.error"), "Xarid amalga oshmadi. Iltimos qaytadan urunib ko'ring.");
+      }
+    }, 1500);
   };
 
   const handleSaveGeneral = (e: React.FormEvent) => {
@@ -346,55 +398,86 @@ export default function AccountPage() {
           )}
 
           {/* Billing Tab */}
-          {activeTab === "billing" && (
-            <div className="flex flex-col gap-6 max-w-[640px]">
-              {/* Premium Plan block */}
-              <div className="flex items-start justify-between">
-                <div>
-                  <div className="flex items-center gap-3">
-                    <h3 className="text-[20px] font-bold text-black">
-                      {currentUser?.plan === "premium" ? t("pages.account.billing.premium_plan") : currentUser?.plan === "pro" ? t("pages.account.billing.pro_plan") : t("pages.account.billing.free_plan")}
-                    </h3>
+          {activeTab === "billing" && (() => {
+            const connectedCount = channelsCount;
+            const userPlan = currentUser?.plan || "free";
+            const basePrice = userPlan === "premium" ? 1000000 : userPlan === "pro" ? 150000 : 0;
+            const includedChannels = userPlan === "premium" ? 10 : 1;
+            const extraChannels = Math.max(0, connectedCount - includedChannels);
+            const extraCost = extraChannels * 150000;
+            const totalMonthlyPrice = basePrice + extraCost;
+
+            return (
+              <div className="flex flex-col gap-6 max-w-[640px]">
+                {/* Premium Plan block */}
+                <div className="flex items-start justify-between">
+                  <div>
+                    <div className="flex items-center gap-3">
+                      <h3 className="text-[20px] font-bold text-black">
+                        {userPlan === "premium" ? t("pages.account.billing.premium_plan") : userPlan === "pro" ? t("pages.account.billing.pro_plan") : t("pages.account.billing.free_plan")}
+                      </h3>
+                    </div>
+                    <p className="text-[12px] text-[#707070] mt-1.5">
+                      {currentUser?.isCardLinked ? t("pages.account.billing.next_payment").replace("{date}", "9-oktabr, 2026") : t("pages.account.billing.upgrade_desc")}
+                    </p>
                   </div>
-                  <p className="text-[12px] text-[#707070] mt-1.5">
-                    {currentUser?.isCardLinked ? t("pages.account.billing.next_payment").replace("{date}", "9-oktabr, 2026") : t("pages.account.billing.upgrade_desc")}
-                  </p>
+
+                  <div className="text-right flex flex-col items-end">
+                    <div className="text-[20px] font-bold text-black leading-none">
+                      {totalMonthlyPrice.toLocaleString("uz-UZ")} UZS
+                    </div>
+                    {currentUser?.isCardLinked && (
+                      <button 
+                        onClick={() => setIsUnlinkModalOpen(true)}
+                        className="text-[11px] text-[#707070] hover:text-black underline mt-2 block"
+                      >
+                        {t("pages.account.billing.cancel_sub")}
+                      </button>
+                    )}
+                  </div>
                 </div>
 
-                <div className="text-right flex flex-col items-end">
-                  <div className="text-[20px] font-bold text-black leading-none">
-                    {currentUser?.plan === "premium" ? "1 000 000 UZS" : currentUser?.plan === "pro" ? "150 000 UZS" : "0 UZS"}
+                {/* Monthly cost breakdown */}
+                <div className="p-4 bg-[#F9F9F7] border border-[#E8E8E8] rounded-2xl text-[12px] flex flex-col gap-2 shadow-sm">
+                  <div className="flex justify-between items-center">
+                    <span className="text-[#707070]">Asosiy tarif narxi ({includedChannels} ta ulanish bilan):</span>
+                    <span className="font-bold text-black">{basePrice.toLocaleString("uz-UZ")} UZS</span>
                   </div>
-                  {currentUser?.isCardLinked && (
-                    <button 
-                      onClick={() => setIsUnlinkModalOpen(true)}
-                      className="text-[11px] text-[#707070] hover:text-black underline mt-2 block"
+                  <div className="flex justify-between items-center">
+                    <span className="text-[#707070]">Joriy ulangan kanallar soni:</span>
+                    <span className="font-bold text-black">{connectedCount} ta</span>
+                  </div>
+                  {extraChannels > 0 && (
+                    <div className="flex justify-between items-center">
+                      <span className="text-[#707070]">Qo'shimcha kanallar ({extraChannels} ta x 150 000 UZS):</span>
+                      <span className="font-bold text-red-600">+{extraCost.toLocaleString("uz-UZ")} UZS</span>
+                    </div>
+                  )}
+                  <div className="border-t border-[#E8E8E8] pt-2 mt-1 flex justify-between items-center text-[13px] font-extrabold">
+                    <span className="text-black">Jami oylik to'lov:</span>
+                    <span className="text-[#7CA607] font-black">{totalMonthlyPrice.toLocaleString("uz-UZ")} UZS / oy</span>
+                  </div>
+                </div>
+
+                {/* Tarifni o'zgartirish va Karta bog'lash buttonlari */}
+                <div className="flex flex-wrap items-center gap-4 py-2">
+                  <button
+                    onClick={() => setIsPricingOpen(true)}
+                    className="flex items-center gap-1.5 text-[#2563EB] hover:text-[#1d4ed8] hover:underline font-semibold text-[13px]"
+                  >
+                    <CreditCard size={15} />
+                    <span>{t("pages.account.billing.change_plan")}</span>
+                  </button>
+                  {!currentUser?.isCardLinked && !isLinking && (
+                    <button
+                      onClick={() => setIsLinking(true)}
+                      className="flex items-center gap-1.5 text-[#2563EB] hover:text-[#1d4ed8] hover:underline font-semibold text-[13px] border-l border-[#E8E8E8] pl-4"
                     >
-                      {t("pages.account.billing.cancel_sub")}
+                      <Plus size={15} />
+                      <span>{"Karta bog'lash"}</span>
                     </button>
                   )}
                 </div>
-              </div>
-
-              {/* Tarifni o'zgartirish va Karta bog'lash buttonlari */}
-              <div className="flex flex-wrap items-center gap-4 py-2">
-                <button
-                  onClick={() => setIsPricingOpen(true)}
-                  className="flex items-center gap-1.5 text-[#2563EB] hover:text-[#1d4ed8] hover:underline font-semibold text-[13px]"
-                >
-                  <CreditCard size={15} />
-                  <span>{t("pages.account.billing.change_plan")}</span>
-                </button>
-                {!currentUser?.isCardLinked && !isLinking && (
-                  <button
-                    onClick={() => setIsLinking(true)}
-                    className="flex items-center gap-1.5 text-[#2563EB] hover:text-[#1d4ed8] hover:underline font-semibold text-[13px] border-l border-[#E8E8E8] pl-4"
-                  >
-                    <Plus size={15} />
-                    <span>{"Karta bog'lash"}</span>
-                  </button>
-                )}
-              </div>
 
               {/* Linked Card block */}
               {currentUser?.isCardLinked && (
@@ -534,8 +617,86 @@ export default function AccountPage() {
                   </div>
                 </Card>
               )}
+
+              {/* AI Credits Section */}
+              <div className="border-t border-[#F0F0F0] pt-6 flex flex-col gap-5 mt-4">
+                <div className="flex items-start justify-between">
+                  <div>
+                    <h3 className="text-[17px] font-bold text-black flex items-center gap-2">
+                      AI Kreditlar va Xarajatlar
+                    </h3>
+                    <p className="text-[12px] text-[#707070] mt-1">
+                      AI agentlarini (FAQ yordamchi va saralash botlari) ishlatish uchun zarur bo'lgan kredit balansi.
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    <div className="text-[22px] font-black text-black leading-none">
+                      {(aiCreditsData.balance || 0).toLocaleString("uz-UZ")}
+                    </div>
+                    <span className="text-[10px] text-[#707070] block mt-1 uppercase font-bold tracking-wider">kreditlar</span>
+                  </div>
+                </div>
+
+                {/* Info message */}
+                <div className="p-3.5 bg-amber-50/50 border border-amber-200/50 text-amber-800 rounded-2xl text-[11px] leading-relaxed">
+                  <strong>ℹ️ Eslatma:</strong> PRO tarifida bepul AI kreditlar berilmaydi. AI funksiyalardan (FAQ yordamchi yoki kvalifikatsiya) foydalanish uchun hisobingizni kreditlar bilan to'ldirishingiz lozim.
+                </div>
+
+                <div>
+                  <button
+                    onClick={() => setIsBuyCreditsModalOpen(true)}
+                    className="px-5 py-2.5 bg-black text-[#C7F33C] text-[12px] font-bold rounded-full hover:bg-black/90 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center gap-2 shadow-md"
+                  >
+                    <Plus size={14} />
+                    <span>AI Kredit sotib olish</span>
+                  </button>
+                </div>
+
+                {/* Transaction history */}
+                <div className="flex flex-col gap-2.5 mt-2">
+                  <h4 className="text-[11px] font-extrabold text-black uppercase tracking-wider">Xarajatlar tarixi</h4>
+                  <div className="max-h-[220px] overflow-y-auto border border-[#E8E8E8] rounded-2xl bg-white shadow-sm">
+                    <table className="w-full text-left text-[11px] border-collapse">
+                      <thead>
+                        <tr className="bg-[#F9F9F7] border-b border-[#E8E8E8] text-[#707070] font-bold">
+                          <th className="p-3">Amal</th>
+                          <th className="p-3 text-right">Miqdor</th>
+                          <th className="p-3">Tavsif</th>
+                          <th className="p-3 text-right">Sana</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {aiCreditsData.history && aiCreditsData.history.length > 0 ? (
+                          aiCreditsData.history.map((tx: any) => (
+                            <tr key={tx.id} className="border-b border-[#F0F0F0] hover:bg-gray-50/50 transition-colors">
+                              <td className="p-3 font-semibold">
+                                {tx.type === "purchase" ? (
+                                  <span className="text-[#7CA607] bg-[#C7F33C]/20 px-2 py-0.5 rounded-full text-[9px] font-bold">KIRIM</span>
+                                ) : (
+                                  <span className="text-red-600 bg-red-50 px-2 py-0.5 rounded-full text-[9px] font-bold">CHIQIM</span>
+                                )}
+                              </td>
+                              <td className={`p-3 text-right font-extrabold text-[12px] ${tx.type === "purchase" ? "text-[#7CA607]" : "text-red-500"}`}>
+                                {tx.type === "purchase" ? `+${tx.amount}` : `-${tx.amount}`}
+                              </td>
+                              <td className="p-3 text-[#505050] font-medium">{tx.description}</td>
+                              <td className="p-3 text-right text-[#A0A0A0]">{tx.date}</td>
+                            </tr>
+                          ))
+                        ) : (
+                          <tr>
+                            <td colSpan={4} className="p-6 text-center text-[#A0A0A0] italic">
+                              Hozircha xarajatlar tarixi mavjud emas.
+                            </td>
+                          </tr>
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
             </div>
-          )}
+          )})()}
 
           {/* Limits Tab */}
           {activeTab === "limits" && (
@@ -639,6 +800,92 @@ export default function AccountPage() {
         confirmText={t("pages.account.cancel_confirm.confirm")}
         cancelText={t("pages.account.cancel_confirm.cancel")}
       />
+
+      {/* ── AI CREDITS PURCHASE MODAL ── */}
+      {isBuyCreditsModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 overflow-y-auto">
+          <div className="bg-white rounded-[32px] w-full max-w-[500px] shadow-2xl overflow-hidden p-6 md:p-8 border border-[#D8D8D8] animate-in fade-in zoom-in-95 duration-200 relative">
+            <div className="flex items-center justify-between pb-4 border-b border-[#F0F0F0] mb-6">
+              <div>
+                <h3 className="text-[18px] font-black text-black">AI Kredit Sotib Olish</h3>
+                <p className="text-[12px] text-[#707070] mt-1">Sizga mos bo&apos;lgan kredit paketini tanlang</p>
+              </div>
+              <button 
+                onClick={() => setIsBuyCreditsModalOpen(false)} 
+                className="grid h-10 w-10 place-items-center rounded-full hover:bg-[#F0F0F0] text-[#707070] transition-colors"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <div className="flex flex-col gap-4">
+              {/* Package 1 */}
+              <div 
+                className="border border-[#E8E8E8] hover:border-black rounded-[20px] p-5 flex items-center justify-between transition-all bg-[#F9F9F7] hover:shadow-md cursor-pointer group"
+                onClick={() => handleBuyCredits(1000, 10000, "Ekonom")}
+              >
+                <div>
+                  <h4 className="text-[15px] font-bold text-black group-hover:text-[#7CA607] transition-colors">Ekonom paket</h4>
+                  <p className="text-[11px] text-[#707070] mt-1">~1 000 ta AI yordamchi javobi uchun</p>
+                  <span className="text-[20px] font-black text-black mt-2 block">1 000 <span className="text-[11px] font-bold text-[#707070]">kredit</span></span>
+                </div>
+                <div className="text-right">
+                  <span className="bg-black text-[#C7F33C] text-[12px] font-bold px-4 py-2 rounded-full whitespace-nowrap shadow-sm group-hover:scale-105 transition-all">
+                    10 000 UZS
+                  </span>
+                </div>
+              </div>
+
+              {/* Package 2 */}
+              <div 
+                className="border border-black bg-black text-white rounded-[20px] p-5 flex items-center justify-between transition-all hover:shadow-md cursor-pointer relative overflow-hidden group"
+                onClick={() => handleBuyCredits(5000, 45000, "Standart")}
+              >
+                <div className="absolute top-0 right-0 bg-[#C7F33C] text-black text-[8px] font-extrabold uppercase px-2.5 py-0.5 rounded-bl-[10px]">
+                  10% CHEGIRMA
+                </div>
+                <div>
+                  <h4 className="text-[15px] font-bold text-[#C7F33C]">Standart paket</h4>
+                  <p className="text-[11px] text-white/60 mt-1">~5 000 ta AI yordamchi javobi uchun</p>
+                  <span className="text-[20px] font-black text-white mt-2 block">5 000 <span className="text-[11px] font-bold text-white/60">kredit</span></span>
+                </div>
+                <div className="text-right">
+                  <span className="bg-[#C7F33C] text-black text-[12px] font-bold px-4 py-2 rounded-full whitespace-nowrap shadow-sm group-hover:scale-105 transition-all">
+                    45 000 UZS
+                  </span>
+                </div>
+              </div>
+
+              {/* Package 3 */}
+              <div 
+                className="border border-[#E8E8E8] hover:border-black rounded-[20px] p-5 flex items-center justify-between transition-all bg-[#F9F9F7] hover:shadow-md cursor-pointer group"
+                onClick={() => handleBuyCredits(10000, 80000, "Biznes")}
+              >
+                <div className="absolute top-0 right-0 bg-[#C7F33C] text-black text-[8px] font-extrabold uppercase px-2.5 py-0.5 rounded-bl-[10px]">
+                  20% CHEGIRMA
+                </div>
+                <div>
+                  <h4 className="text-[15px] font-bold text-black group-hover:text-[#7CA607] transition-colors">Biznes paket</h4>
+                  <p className="text-[11px] text-[#707070] mt-1">~10 000 ta AI yordamchi javobi uchun</p>
+                  <span className="text-[20px] font-black text-black mt-2 block">10 000 <span className="text-[11px] font-bold text-[#707070]">kredit</span></span>
+                </div>
+                <div className="text-right">
+                  <span className="bg-black text-[#C7F33C] text-[12px] font-bold px-4 py-2 rounded-full whitespace-nowrap shadow-sm group-hover:scale-105 transition-all">
+                    80 000 UZS
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {processingPurchase && (
+              <div className="absolute inset-0 bg-white/80 backdrop-blur-xs flex flex-col items-center justify-center gap-3 rounded-[32px]">
+                <div className="animate-spin text-[24px]">⚙️</div>
+                <p className="text-[12px] font-bold text-black">To&apos;lov amalga oshirilmoqda...</p>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
       {/* ── PRICING MODAL ── */}
       {isPricingOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 overflow-y-auto">

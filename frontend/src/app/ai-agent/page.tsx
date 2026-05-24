@@ -435,12 +435,19 @@ export default function AIAgentPage() {
 
     // Check Telegram link status
     const channels = db.getChannels();
-    const telegramChannel = channels.find(
+    const tgChannels = channels.filter(
       (c) => c.type === "telegram" && c.isConnected && c.telegramToken
     );
+    const selectedBotId = loadedSettings.telegramBotId;
+    const telegramChannel = tgChannels.find(c => c.id === selectedBotId) || tgChannels[0];
+
     if (telegramChannel) {
       setIsTelegramLinked(true);
       setTelegramBotUsername(telegramChannel.username);
+      if (!selectedBotId) {
+        loadedSettings.telegramBotId = telegramChannel.id;
+        db.saveBotSettings(loadedSettings);
+      }
     } else {
       setIsTelegramLinked(false);
       setTelegramBotUsername("");
@@ -484,6 +491,24 @@ export default function AIAgentPage() {
       }
     }
     handleUpdateSettings("aiCuratorEnabled", enabled);
+  };
+
+  const handleBotChange = (botId: string) => {
+    if (!settings) return;
+    const updatedSettings = { ...settings, telegramBotId: botId };
+    db.saveBotSettings(updatedSettings);
+    setSettings(updatedSettings);
+
+    const channels = db.getChannels();
+    const ch = channels.find(c => c.id === botId);
+    if (ch) {
+      setTelegramBotUsername(ch.username);
+      setIsTelegramLinked(true);
+    } else {
+      setIsTelegramLinked(false);
+      setTelegramBotUsername("");
+    }
+    showToast("Telegram bot muvaffaqiyatli bog'landi");
   };
 
 
@@ -936,7 +961,7 @@ export default function AIAgentPage() {
   if (selectedAgentType === null) {
     return (
       <AppLayout>
-        <div className="flex flex-col gap-8 relative min-h-[calc(100vh-140px)] pb-12 items-center justify-start md:justify-center max-w-4xl mx-auto py-6 md:py-10">
+        <div className="flex flex-col gap-5 relative pb-6 items-center justify-start max-w-4xl mx-auto py-2">
           {/* Toast Alert */}
           {toast && (
             <div className="fixed top-6 right-6 z-[999] flex items-center gap-3 px-5 py-3.5 rounded-xl border bg-white shadow-lg animate-in fade-in slide-in-from-top-3 duration-250">
@@ -946,7 +971,7 @@ export default function AIAgentPage() {
           )}
 
           {/* Header */}
-          <div className="text-center flex flex-col gap-2">
+          <div className="text-center flex flex-col gap-1.5">
             <span className="px-3.5 py-1.5 bg-[#C7F33C]/20 text-[#7CA607] rounded-full text-[11px] font-bold tracking-wider uppercase inline-block mx-auto">
               {t("pages.ai_agent.agent_platform")}
             </span>
@@ -958,162 +983,239 @@ export default function AIAgentPage() {
             </p>
           </div>
 
-          {/* Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5 w-full mt-2">
-            {/* Card 1: AI Kurator */}
-            <div className="bg-white border border-[#E8E8E8] hover:border-black/20 hover:shadow-xl rounded-[28px] p-6 flex flex-col justify-between transition-all group relative overflow-hidden">
-              <div className="absolute top-0 right-0 w-24 h-24 bg-[#C7F33C]/10 rounded-bl-full -z-10 group-hover:scale-110 transition-transform" />
-              <div className="flex flex-col gap-4">
-                <div className="flex items-center justify-between">
-                  <div className="w-12 h-12 rounded-2xl bg-black text-[#C7F33C] grid place-items-center font-bold text-[18px]">
-                    <Sparkles size={22} />
+          {/* Active Agents Section */}
+          {(() => {
+            const isAnyAgentActive = settings?.aiCuratorEnabled || settings?.fbAgentEnabled;
+            return (
+              <>
+                {isAnyAgentActive && (
+                  <div className="w-full flex flex-col gap-3 mt-1">
+                    <h2 className="text-[11px] font-extrabold text-[#707070] uppercase tracking-wider self-start">
+                      Ishlab turgan AI agent
+                    </h2>
+                    <div className="grid grid-cols-1 gap-4 w-full">
+                      {settings?.aiCuratorEnabled && (
+                        <div className="bg-white border border-[#E8E8E8] rounded-[28px] p-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 transition-all shadow-md relative overflow-hidden group">
+                          <div className="absolute top-0 right-0 w-24 h-24 bg-[#C7F33C]/10 rounded-bl-full -z-10" />
+                          <div className="flex gap-4 items-center">
+                            <div className="w-12 h-12 rounded-2xl bg-black text-[#C7F33C] grid place-items-center font-bold text-[18px] shrink-0">
+                              <Sparkles size={22} />
+                            </div>
+                            <div>
+                              <div className="flex flex-wrap items-center gap-2">
+                                <h3 className="text-[17px] font-bold text-black">
+                                  {t("pages.ai_agent.kurator_agent")}
+                                </h3>
+                                <span className="flex items-center gap-1.5 px-2.5 py-0.5 bg-[#C7F33C]/20 border border-[#7CA607]/20 rounded-full text-[9px] font-extrabold text-[#7CA607] uppercase tracking-wider">
+                                  <span className="relative flex h-2 w-2">
+                                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#7CA607] opacity-75"></span>
+                                    <span className="relative inline-flex rounded-full h-2 w-2 bg-[#7CA607]"></span>
+                                  </span>
+                                  FAOL
+                                </span>
+                              </div>
+                              {telegramBotUsername && (
+                                <p className="text-[11px] text-[#7CA607] font-semibold mt-1">
+                                  Bot: @{telegramBotUsername.replace(/^@+/, "")}
+                                </p>
+                              )}
+                              <p className="text-[12px] text-[#707070] mt-1.5 leading-relaxed">
+                                {t("pages.ai_agent.curator_desc")}
+                              </p>
+                            </div>
+                          </div>
+                          <button
+                            onClick={() => {
+                              setSelectedAgentType("kurator");
+                              if (typeof window !== "undefined") {
+                                localStorage.setItem("sendly_selected_agent_type", "kurator");
+                              }
+                            }}
+                            className="px-5 py-2.5 bg-black text-[#C7F33C] text-[12px] font-bold hover:bg-black/90 hover:scale-[1.02] active:scale-95 transition-all text-center rounded-full flex items-center justify-center gap-2 shrink-0 self-stretch sm:self-auto shadow-sm"
+                          >
+                            <span>Sozlash</span>
+                            <ArrowRight size={14} />
+                          </button>
+                        </div>
+                      )}
+
+                      {settings?.fbAgentEnabled && (
+                        <div className="bg-white border border-[#E8E8E8] rounded-[28px] p-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 transition-all shadow-md relative overflow-hidden group">
+                          <div className="absolute top-0 right-0 w-24 h-24 bg-blue-500/5 rounded-bl-full -z-10" />
+                          <div className="flex gap-4 items-center">
+                            <div className="w-12 h-12 rounded-2xl bg-blue-600 text-white grid place-items-center font-bold text-[18px] shrink-0">
+                              <Facebook size={22} />
+                            </div>
+                            <div>
+                              <div className="flex flex-wrap items-center gap-2">
+                                <h3 className="text-[17px] font-bold text-black">
+                                  {t("pages.ai_agent.fb_leads_agent")}
+                                </h3>
+                                <span className="flex items-center gap-1.5 px-2.5 py-0.5 bg-blue-50 border border-blue-200 rounded-full text-[9px] font-extrabold text-blue-600 uppercase tracking-wider">
+                                  <span className="relative flex h-2 w-2">
+                                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+                                    <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
+                                  </span>
+                                  FAOL
+                                </span>
+                              </div>
+                              <p className="text-[11px] text-blue-600 font-semibold mt-1">
+                                Guruh: {db.getGroups().find(g => g.id === (settings.targetGroupId || "sales"))?.name || "Sotuvlar"}
+                              </p>
+                              <p className="text-[12px] text-[#707070] mt-1.5 leading-relaxed">
+                                {t("pages.ai_agent.fb_leads_desc_card")}
+                              </p>
+                            </div>
+                          </div>
+                          <button
+                            onClick={() => {
+                              setSelectedAgentType("fb-leads");
+                              if (typeof window !== "undefined") {
+                                localStorage.setItem("sendly_selected_agent_type", "fb-leads");
+                              }
+                            }}
+                            className="px-5 py-2.5 bg-blue-600 text-white text-[12px] font-bold hover:bg-blue-700 hover:scale-[1.02] active:scale-95 transition-all text-center rounded-full flex items-center justify-center gap-2 shrink-0 self-stretch sm:self-auto shadow-sm"
+                          >
+                            <span>Sozlash</span>
+                            <ArrowRight size={14} />
+                          </button>
+                        </div>
+                      )}
+                    </div>
                   </div>
-                  {settings?.aiCuratorEnabled ? (
-                    <div className="flex items-center gap-1.5 px-3 py-1.5 bg-[#C7F33C]/20 border border-[#7CA607]/20 rounded-full">
-                      <span className="relative flex h-2 w-2">
-                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#7CA607] opacity-75"></span>
-                        <span className="relative inline-flex rounded-full h-2 w-2 bg-[#7CA607]"></span>
-                      </span>
-                      <span className="text-[10px] font-extrabold text-[#7CA607] uppercase tracking-wider">
-                        {t("pages.ai_agent.active")}
-                      </span>
+                )}
+
+                {isAnyAgentActive && (
+                  <h2 className="text-[11px] font-extrabold text-[#707070] uppercase tracking-wider self-start mt-3.5">
+                    AI agentlar qo&apos;shish
+                  </h2>
+                )}
+
+                {/* Grid */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-5 w-full mt-1">
+                  {/* Card 1: AI Kurator */}
+                  <div className="bg-white border border-[#E8E8E8] hover:border-black/20 hover:shadow-xl rounded-[28px] p-6 flex flex-col justify-between transition-all group relative overflow-hidden">
+                    <div className="absolute top-0 right-0 w-24 h-24 bg-[#C7F33C]/10 rounded-bl-full -z-10 group-hover:scale-110 transition-transform" />
+                    <div className="flex flex-col gap-4">
+                      <div className="flex items-center justify-between">
+                        <div className="w-12 h-12 rounded-2xl bg-black text-[#C7F33C] grid place-items-center font-bold text-[18px]">
+                          <Sparkles size={22} />
+                        </div>
+                        <div className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-full">
+                          <span className="w-2 h-2 rounded-full bg-gray-300"></span>
+                          <span className="text-[10px] font-extrabold text-[#707070] uppercase tracking-wider">
+                            {t("pages.ai_agent.inactive")}
+                          </span>
+                        </div>
+                      </div>
+                      <div>
+                        <h3 className="text-[17px] font-bold text-black group-hover:text-[#7CA607] transition-colors">
+                          {t("pages.ai_agent.kurator_agent")}
+                        </h3>
+                        <p className="text-[12px] text-[#707070] mt-1.5 leading-relaxed">
+                          {t("pages.ai_agent.curator_desc")}
+                        </p>
+                      </div>
+
+                      <div className="border-t border-[#F0F0F0] my-1" />
+
+                      <ul className="flex flex-col gap-2 text-[11px] text-[#595959]">
+                        <li className="flex items-start gap-2.5">
+                          <CheckCircle className="w-4 h-4 text-[#9BC92E] shrink-0 mt-0.5" />
+                          <span>{t("pages.ai_agent.curator_feature_1")}</span>
+                        </li>
+                        <li className="flex items-start gap-2.5">
+                          <CheckCircle className="w-4 h-4 text-[#9BC92E] shrink-0 mt-0.5" />
+                          <span>{t("pages.ai_agent.curator_feature_2")}</span>
+                        </li>
+                        <li className="flex items-start gap-2.5">
+                          <CheckCircle className="w-4 h-4 text-[#9BC92E] shrink-0 mt-0.5" />
+                          <span>{t("pages.ai_agent.curator_feature_3")}</span>
+                        </li>
+                        <li className="flex items-start gap-2.5">
+                          <CheckCircle className="w-4 h-4 text-[#9BC92E] shrink-0 mt-0.5" />
+                          <span>{t("pages.ai_agent.curator_feature_4")}</span>
+                        </li>
+                      </ul>
                     </div>
-                  ) : (
-                    <div className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-full">
-                      <span className="w-2 h-2 rounded-full bg-gray-300"></span>
-                      <span className="text-[10px] font-extrabold text-[#707070] uppercase tracking-wider">
-                        {t("pages.ai_agent.inactive")}
-                      </span>
-                    </div>
-                  )}
-                </div>
-                <div>
-                  <h3 className="text-[17px] font-bold text-black group-hover:text-[#7CA607] transition-colors">
-                    {t("pages.ai_agent.kurator_agent")}
-                  </h3>
-                  {settings?.aiCuratorEnabled && telegramBotUsername && (
-                    <p className="text-[11px] text-[#7CA607] font-semibold mt-1">
-                      Bot: @{telegramBotUsername}
-                    </p>
-                  )}
-                  <p className="text-[12px] text-[#707070] mt-1.5 leading-relaxed">
-                    {t("pages.ai_agent.curator_desc")}
-                  </p>
-                </div>
 
-                <div className="border-t border-[#F0F0F0] my-1" />
-
-                <ul className="flex flex-col gap-2 text-[11px] text-[#595959]">
-                  <li className="flex items-start gap-2.5">
-                    <CheckCircle className="w-4 h-4 text-[#9BC92E] shrink-0 mt-0.5" />
-                    <span>{t("pages.ai_agent.curator_feature_1")}</span>
-                  </li>
-                  <li className="flex items-start gap-2.5">
-                    <CheckCircle className="w-4 h-4 text-[#9BC92E] shrink-0 mt-0.5" />
-                    <span>{t("pages.ai_agent.curator_feature_2")}</span>
-                  </li>
-                  <li className="flex items-start gap-2.5">
-                    <CheckCircle className="w-4 h-4 text-[#9BC92E] shrink-0 mt-0.5" />
-                    <span>{t("pages.ai_agent.curator_feature_3")}</span>
-                  </li>
-                  <li className="flex items-start gap-2.5">
-                    <CheckCircle className="w-4 h-4 text-[#9BC92E] shrink-0 mt-0.5" />
-                    <span>{t("pages.ai_agent.curator_feature_4")}</span>
-                  </li>
-                </ul>
-              </div>
-
-              <button
-                onClick={() => {
-                  setSelectedAgentType("kurator");
-                  if (typeof window !== "undefined") {
-                    localStorage.setItem("sendly_selected_agent_type", "kurator");
-                  }
-                }}
-                className="w-full mt-6 py-3 rounded-full bg-black text-[#C7F33C] text-[12px] font-bold hover:bg-black/90 hover:scale-[1.02] active:scale-95 transition-all text-center flex items-center justify-center gap-2"
-              >
-                <span>{t("pages.ai_agent.setup_template_btn")}</span>
-                <ArrowRight size={14} />
-              </button>
-            </div>
-
-            {/* Card 2: Facebook Lead Handler */}
-            <div className="bg-white border border-[#E8E8E8] hover:border-black/20 hover:shadow-xl rounded-[28px] p-6 flex flex-col justify-between transition-all group relative overflow-hidden">
-              <div className="absolute top-0 right-0 w-24 h-24 bg-blue-500/5 rounded-bl-full -z-10 group-hover:scale-110 transition-transform" />
-              <div className="flex flex-col gap-4">
-                <div className="flex items-center justify-between">
-                  <div className="w-12 h-12 rounded-2xl bg-blue-600 text-white grid place-items-center font-bold text-[18px]">
-                    <Facebook size={22} />
+                    <button
+                      onClick={() => {
+                        setSelectedAgentType("kurator");
+                        if (typeof window !== "undefined") {
+                          localStorage.setItem("sendly_selected_agent_type", "kurator");
+                        }
+                      }}
+                      className="w-full mt-6 py-3 rounded-full bg-black text-[#C7F33C] text-[12px] font-bold hover:bg-black/90 hover:scale-[1.02] active:scale-95 transition-all text-center flex items-center justify-center gap-2"
+                    >
+                      <span>{t("pages.ai_agent.setup_template_btn")}</span>
+                      <ArrowRight size={14} />
+                    </button>
                   </div>
-                  {settings?.fbAgentEnabled ? (
-                    <div className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 border border-blue-200 rounded-full">
-                      <span className="relative flex h-2 w-2">
-                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
-                        <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
-                      </span>
-                      <span className="text-[10px] font-extrabold text-blue-600 uppercase tracking-wider">
-                        {t("pages.ai_agent.active")}
-                      </span>
+
+                  {/* Card 2: Facebook Lead Handler */}
+                  <div className="bg-white border border-[#E8E8E8] hover:border-black/20 hover:shadow-xl rounded-[28px] p-6 flex flex-col justify-between transition-all group relative overflow-hidden">
+                    <div className="absolute top-0 right-0 w-24 h-24 bg-blue-500/5 rounded-bl-full -z-10 group-hover:scale-110 transition-transform" />
+                    <div className="flex flex-col gap-4">
+                      <div className="flex items-center justify-between">
+                        <div className="w-12 h-12 rounded-2xl bg-blue-600 text-white grid place-items-center font-bold text-[18px]">
+                          <Facebook size={22} />
+                        </div>
+                        <div className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-full">
+                          <span className="w-2 h-2 rounded-full bg-gray-300"></span>
+                          <span className="text-[10px] font-extrabold text-[#707070] uppercase tracking-wider">
+                            {t("pages.ai_agent.inactive")}
+                          </span>
+                        </div>
+                      </div>
+                      <div>
+                        <h3 className="text-[17px] font-bold text-black group-hover:text-blue-600 transition-colors">
+                          {t("pages.ai_agent.fb_leads_agent")}
+                        </h3>
+                        <p className="text-[12px] text-[#707070] mt-1.5 leading-relaxed">
+                          {t("pages.ai_agent.fb_leads_desc_card")}
+                        </p>
+                      </div>
+
+                      <div className="border-t border-[#F0F0F0] my-1" />
+
+                      <ul className="flex flex-col gap-2 text-[11px] text-[#595959]">
+                        <li className="flex items-start gap-2.5">
+                          <CheckCircle className="w-4 h-4 text-blue-500 shrink-0 mt-0.5" />
+                          <span>{t("pages.ai_agent.fb_feature_1")}</span>
+                        </li>
+                        <li className="flex items-start gap-2.5">
+                          <CheckCircle className="w-4 h-4 text-blue-500 shrink-0 mt-0.5" />
+                          <span>{t("pages.ai_agent.fb_feature_2")}</span>
+                        </li>
+                        <li className="flex items-start gap-2.5">
+                          <CheckCircle className="w-4 h-4 text-blue-500 shrink-0 mt-0.5" />
+                          <span>{t("pages.ai_agent.fb_feature_3")}</span>
+                        </li>
+                        <li className="flex items-start gap-2.5">
+                          <CheckCircle className="w-4 h-4 text-blue-500 shrink-0 mt-0.5" />
+                          <span>{t("pages.ai_agent.fb_feature_4")}</span>
+                        </li>
+                      </ul>
                     </div>
-                  ) : (
-                    <div className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-full">
-                      <span className="w-2 h-2 rounded-full bg-gray-300"></span>
-                      <span className="text-[10px] font-extrabold text-[#707070] uppercase tracking-wider">
-                        {t("pages.ai_agent.inactive")}
-                      </span>
-                    </div>
-                  )}
+
+                    <button
+                      onClick={() => {
+                        setSelectedAgentType("fb-leads");
+                        if (typeof window !== "undefined") {
+                          localStorage.setItem("sendly_selected_agent_type", "fb-leads");
+                        }
+                      }}
+                      className="w-full mt-6 py-3 rounded-full bg-blue-600 text-white text-[12px] font-bold hover:bg-blue-700 hover:scale-[1.02] active:scale-95 transition-all text-center flex items-center justify-center gap-2"
+                    >
+                      <span>{t("pages.ai_agent.setup_template_btn")}</span>
+                      <ArrowRight size={14} />
+                    </button>
+                  </div>
                 </div>
-                <div>
-                  <h3 className="text-[17px] font-bold text-black group-hover:text-blue-600 transition-colors">
-                    {t("pages.ai_agent.fb_leads_agent")}
-                  </h3>
-                  {settings?.fbAgentEnabled && (
-                    <p className="text-[11px] text-blue-600 font-semibold mt-1">
-                      Guruh: {db.getGroups().find(g => g.id === (settings.targetGroupId || "sales"))?.name || "Sotuvlar"}
-                    </p>
-                  )}
-                  <p className="text-[12px] text-[#707070] mt-1.5 leading-relaxed">
-                    {t("pages.ai_agent.fb_leads_desc_card")}
-                  </p>
-                </div>
-
-                <div className="border-t border-[#F0F0F0] my-1" />
-
-                <ul className="flex flex-col gap-2 text-[11px] text-[#595959]">
-                  <li className="flex items-start gap-2.5">
-                    <CheckCircle className="w-4 h-4 text-blue-500 shrink-0 mt-0.5" />
-                    <span>{t("pages.ai_agent.fb_feature_1")}</span>
-                  </li>
-                  <li className="flex items-start gap-2.5">
-                    <CheckCircle className="w-4 h-4 text-blue-500 shrink-0 mt-0.5" />
-                    <span>{t("pages.ai_agent.fb_feature_2")}</span>
-                  </li>
-                  <li className="flex items-start gap-2.5">
-                    <CheckCircle className="w-4 h-4 text-blue-500 shrink-0 mt-0.5" />
-                    <span>{t("pages.ai_agent.fb_feature_3")}</span>
-                  </li>
-                  <li className="flex items-start gap-2.5">
-                    <CheckCircle className="w-4 h-4 text-blue-500 shrink-0 mt-0.5" />
-                    <span>{t("pages.ai_agent.fb_feature_4")}</span>
-                  </li>
-                </ul>
-              </div>
-
-              <button
-                onClick={() => {
-                  setSelectedAgentType("fb-leads");
-                  if (typeof window !== "undefined") {
-                    localStorage.setItem("sendly_selected_agent_type", "fb-leads");
-                  }
-                }}
-                className="w-full mt-6 py-3 rounded-full bg-blue-600 text-white text-[12px] font-bold hover:bg-blue-700 hover:scale-[1.02] active:scale-95 transition-all text-center flex items-center justify-center gap-2"
-              >
-                <span>{t("pages.ai_agent.setup_template_btn")}</span>
-                <ArrowRight size={14} />
-              </button>
-            </div>
-          </div>
+              </>
+            );
+          })()}
         </div>
       </AppLayout>
     );
@@ -1967,17 +2069,49 @@ export default function AIAgentPage() {
                     <div className="w-11 h-6 bg-[#E8E8E8] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-[#D8D8D8] after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-black"></div>
                   </label>
                 </div>
-                {isTelegramLinked ? (
-                  <div className="flex items-center gap-2 px-3 py-2 bg-green-50 border border-green-100 rounded-xl text-[11px] text-green-700">
-                    <CheckCircle size={14} className="shrink-0 text-green-500" />
-                    <span>{t("pages.ai_agent.linked_tg_bot")} <span className="font-bold text-black">{telegramBotUsername}</span></span>
-                  </div>
-                ) : (
-                  <div className="flex items-center gap-2 px-3 py-2 bg-amber-50 border border-amber-100 rounded-xl text-[11px] text-amber-700">
-                    <Info size={14} className="shrink-0 text-amber-500" />
-                    <span>{t("pages.ai_agent.tg_bot_not_linked_desc")}</span>
-                  </div>
-                )}
+                <div className="flex flex-col gap-1.5 mt-2 pt-2 border-t border-[#F0F0F0]">
+                  <label className="text-[10px] font-extrabold text-[#707070] uppercase tracking-wider">AI Curator uchun Telegram Bot</label>
+                  {(() => {
+                    const tgChannels = db.getChannels().filter(c => c.type === "telegram" && c.isConnected && c.telegramToken);
+                    if (tgChannels.length > 0) {
+                      const botOptions = tgChannels.map(c => ({
+                        value: c.id,
+                        label: `${c.name} (@${c.username.replace(/^@+/, "")})`
+                      }));
+                      const selectedBotId = settings.telegramBotId || tgChannels[0].id;
+                      return (
+                        <div className="flex flex-col gap-2 mt-1">
+                          <CustomDropdown
+                            value={selectedBotId}
+                            onChange={handleBotChange}
+                            options={botOptions}
+                            placeholder="Telegram botni tanlang..."
+                            className="w-full"
+                          />
+                          <div className="flex items-center gap-1.5 text-[10px] text-green-700 mt-1 bg-green-50/50 p-2.5 rounded-xl border border-green-100">
+                            <CheckCircle size={12} className="text-green-500 shrink-0" />
+                            <span>AI kuratori ushbu tanlangan Telegram bot orqali savollarga javob beradi.</span>
+                          </div>
+                        </div>
+                      );
+                    } else {
+                      return (
+                        <div className="flex flex-col gap-2.5 p-4 bg-amber-50/50 border border-amber-200/50 rounded-2xl text-[11px] text-amber-800 mt-1">
+                          <div className="flex items-center gap-2">
+                            <Info size={14} className="shrink-0 text-amber-500" />
+                            <span className="font-bold">Telegram bot topilmadi</span>
+                          </div>
+                          <p className="text-[10px] text-amber-600 leading-relaxed">
+                            AI kuratordan foydalanish uchun sozlamalar sahifasida kamida 1ta Telegram bot ulangan bo&apos;lishi lozim.
+                          </p>
+                          <Link href="/settings" className="mt-1 inline-block w-fit px-4 py-2 bg-black text-[#C7F33C] rounded-full hover:bg-black/90 font-bold text-[10px] shadow-sm transition-all text-center">
+                            Sozlamalar bo&apos;limiga o&apos;tish ➔
+                          </Link>
+                        </div>
+                      );
+                    }
+                  })()}
+                </div>
               </div>
 
               {/* System Prompt Settings */}

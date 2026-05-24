@@ -46,13 +46,9 @@ export default function AutomationsPage() {
   const [isAddGroupModalOpen, setIsAddGroupModalOpen] = useState(false);
   const [newGroupName, setNewGroupName] = useState("");
 
-  const [isQuickBotModalOpen, setIsQuickBotModalOpen] = useState(false);
-  const [quickBotName, setQuickBotName] = useState("");
-  const [quickBotKeywords, setQuickBotKeywords] = useState("");
-  const [quickBotReply, setQuickBotReply] = useState("");
-  const [quickBotChannelId, setQuickBotChannelId] = useState("");
-
-  const [showTemplates, setShowTemplates] = useState(true);
+  // Yangi avtomatlashtirish popup modal state
+  const [isCreateFlowModalOpen, setIsCreateFlowModalOpen] = useState(false);
+  const [createFlowMode, setCreateFlowMode] = useState<"scratch" | "template">("scratch");
 
   // Custom alert / confirm states
   const [alertConfig, setAlertConfig] = useState<{ isOpen: boolean; title: string; message: string } | null>(null);
@@ -177,7 +173,7 @@ export default function AutomationsPage() {
       triggerType: "keyword",
       triggerDetails: quickBotKeywords.trim(),
       runs: "0",
-      completion: "100%",
+      completion: "0%",
       active: shouldBeActive,
       groupId: selectedGroupId !== "all" && selectedGroupId !== "none" ? selectedGroupId : undefined,
     };
@@ -241,10 +237,10 @@ export default function AutomationsPage() {
 
     const current = db.getChannelAutomations(targetChannelId);
     const templates: Record<string, Automation> = {
-      lead_magnet: { id: `tmpl_${Date.now()}`, name: t("pages.automations_page.tmpl_lead_magnet_name"), triggerType: "keyword", triggerDetails: t("pages.automations_page.tmpl_lead_magnet_trigger"), runs: "0", completion: "98%", active: shouldBeActive },
-      story_coupon: { id: `tmpl_${Date.now()}`, name: t("pages.automations_page.tmpl_story_coupon_name"), triggerType: "story", triggerDetails: t("pages.automations_page.tmpl_story_coupon_trigger"), runs: "0", completion: "95%", active: shouldBeActive },
-      comment_dm: { id: `tmpl_${Date.now()}`, name: t("pages.automations_page.tmpl_comment_dm_name"), triggerType: "keyword", triggerDetails: t("pages.automations_page.tmpl_comment_dm_trigger"), runs: "0", completion: "92%", active: shouldBeActive },
-      welcome_faq: { id: `tmpl_${Date.now()}`, name: t("pages.automations_page.tmpl_welcome_faq_name"), triggerType: "keyword", triggerDetails: t("pages.automations_page.tmpl_welcome_faq_trigger"), runs: "0", completion: "96%", active: shouldBeActive },
+      lead_magnet: { id: `tmpl_${Date.now()}`, name: t("pages.automations_page.tmpl_lead_magnet_name"), triggerType: "keyword", triggerDetails: t("pages.automations_page.tmpl_lead_magnet_trigger"), runs: "0", completion: "0%", active: shouldBeActive },
+      story_coupon: { id: `tmpl_${Date.now()}`, name: t("pages.automations_page.tmpl_story_coupon_name"), triggerType: "story", triggerDetails: t("pages.automations_page.tmpl_story_coupon_trigger"), runs: "0", completion: "0%", active: shouldBeActive },
+      comment_dm: { id: `tmpl_${Date.now()}`, name: t("pages.automations_page.tmpl_comment_dm_name"), triggerType: "keyword", triggerDetails: t("pages.automations_page.tmpl_comment_dm_trigger"), runs: "0", completion: "0%", active: shouldBeActive },
+      welcome_faq: { id: `tmpl_${Date.now()}`, name: t("pages.automations_page.tmpl_welcome_faq_name"), triggerType: "keyword", triggerDetails: t("pages.automations_page.tmpl_welcome_faq_trigger"), runs: "0", completion: "0%", active: shouldBeActive },
     };
 
     const newTemplate = templates[templateKey] ?? null;
@@ -309,33 +305,21 @@ export default function AutomationsPage() {
 
           {/* Action buttons */}
           <div className="flex flex-col gap-2">
-            <Link href="/automations/builder" className="w-full">
-              <button className="w-full justify-center text-[12px] font-bold py-2.5 rounded-[12px] bg-black text-white hover:bg-black/90 transition-all flex items-center gap-1.5 shadow-sm">
-                <Plus size={14} strokeWidth={2.5} /> {t("pages.automations_page.create_flow_btn")}
-              </button>
-            </Link>
+            <button 
+              onClick={() => setIsCreateFlowModalOpen(true)}
+              className="w-full justify-center text-[12px] font-bold py-2.5 rounded-[12px] bg-black text-white hover:bg-black/90 transition-all flex items-center gap-1.5 shadow-sm"
+            >
+              <Plus size={14} strokeWidth={2.5} /> {t("pages.automations_page.create_flow_btn")}
+            </button>
             <button
               onClick={() => {
-                if (selectedChannelId !== "all") {
-                  setQuickBotChannelId(selectedChannelId);
-                } else if (channels.length > 0) {
-                  const activeCh = db.getActiveChannel();
-                  setQuickBotChannelId(activeCh ? activeCh.id : channels[0].id);
-                }
-                setIsQuickBotModalOpen(true);
+                window.location.href = "/automations/quick-bot";
               }}
               className="w-full justify-center text-[12px] font-bold py-2.5 rounded-[12px] bg-[#C7F33C] text-black hover:bg-[#b5e02c] transition-all flex items-center gap-1.5 shadow-sm border border-[#b2db2a]"
             >
               <Zap size={14} fill="currentColor" /> {t("pages.automations_page.quick_bot")}
             </button>
           </div>
-
-          <button
-            onClick={() => setShowTemplates(!showTemplates)}
-            className="text-[11px] font-bold text-[#707070] hover:text-black mt-[-4px] flex items-center justify-center gap-1 transition-colors"
-          >
-            <BookOpen size={12} /> {showTemplates ? t("pages.automations_page.hide_templates") : t("pages.automations_page.show_templates")}
-          </button>
 
           {/* Groups section */}
           <div className="flex flex-col gap-2">
@@ -546,135 +530,7 @@ export default function AutomationsPage() {
             </div>
           )}
 
-          {/* Templates Drawer / Accordion */}
-          {showTemplates && (
-            <div className="flex flex-col gap-3 bg-white border border-[#E8E8E8] rounded-[24px] p-5 shadow-sm animate-in fade-in slide-in-from-top-4 duration-300">
-              <div className="flex items-center justify-between pb-2 border-b border-[#F0F0F0]">
-                <h3 className="text-[13px] font-extrabold text-black uppercase tracking-wider flex items-center gap-1.5">
-                  {t("pages.automations_page.templates_title")}
-                </h3>
-                <span className="text-[9px] font-bold text-[#707070] bg-[#F5F5F5] px-2 py-0.5 rounded-full">
-                  {t("pages.automations_page.templates_desc")}
-                </span>
-              </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-3">
-                {/* Template 1 */}
-                <Card className="flex flex-col justify-between p-4 border border-[#E8E8E8] hover:border-black hover:shadow-md transition-all bg-white relative group rounded-[20px]">
-                  <div>
-                    <div className="grid h-8 w-8 place-items-center rounded-[10px] bg-[#C7F33C]/20 text-black group-hover:bg-[#C7F33C] transition-all duration-300">
-                      <BookOpen size={14} />
-                    </div>
-                    <h4 className="text-[12px] font-bold text-black mt-3">{t("pages.automations_page.tmpl_lead_magnet_name")}</h4>
-                    <p className="text-[10px] text-[#707070] mt-1 leading-relaxed">
-                      {t("pages.automations_page.tmpl_lead_magnet_desc")}
-                    </p>
-                  </div>
-                  <Button
-                    onClick={() => handleUseTemplate("lead_magnet")}
-                    variant="secondary"
-                    className="w-full mt-3.5 py-1.5 text-[10px] font-bold border border-[#E8E8E8] hover:bg-black hover:text-white hover:border-black transition-all rounded-[10px]"
-                  >
-                    {t("pages.automations_page.load_template")}
-                  </Button>
-                </Card>
-
-                {/* Template 2 */}
-                <Card className="flex flex-col justify-between p-4 border border-[#E8E8E8] hover:border-black hover:shadow-md transition-all bg-white relative group rounded-[20px]">
-                  <div>
-                    <div className="grid h-8 w-8 place-items-center rounded-[10px] bg-[#C7F33C]/20 text-black group-hover:bg-[#C7F33C] transition-all duration-300">
-                      <Gift size={14} />
-                    </div>
-                    <h4 className="text-[12px] font-bold text-black mt-3">{t("pages.automations_page.tmpl_story_coupon_name")}</h4>
-                    <p className="text-[10px] text-[#707070] mt-1 leading-relaxed">
-                      {t("pages.automations_page.tmpl_story_coupon_desc")}
-                    </p>
-                  </div>
-                  <Button
-                    onClick={() => handleUseTemplate("story_coupon")}
-                    variant="secondary"
-                    className="w-full mt-3.5 py-1.5 text-[10px] font-bold border border-[#E8E8E8] hover:bg-black hover:text-white hover:border-black transition-all rounded-[10px]"
-                  >
-                    {t("pages.automations_page.load_template")}
-                  </Button>
-                </Card>
-
-                {/* Template 3 */}
-                <Card className="flex flex-col justify-between p-4 border border-[#E8E8E8] hover:border-black hover:shadow-md transition-all bg-white relative group rounded-[20px]">
-                  <div>
-                    <div className="grid h-8 w-8 place-items-center rounded-[10px] bg-[#C7F33C]/20 text-black group-hover:bg-[#C7F33C] transition-all duration-300">
-                      <MessageSquare size={14} />
-                    </div>
-                    <h4 className="text-[12px] font-bold text-black mt-3">{t("pages.automations_page.tmpl_comment_dm_name")}</h4>
-                    <p className="text-[10px] text-[#707070] mt-1 leading-relaxed">
-                      {t("pages.automations_page.tmpl_comment_dm_desc")}
-                    </p>
-                  </div>
-                  <Button
-                    onClick={() => handleUseTemplate("comment_dm")}
-                    variant="secondary"
-                    className="w-full mt-3.5 py-1.5 text-[10px] font-bold border border-[#E8E8E8] hover:bg-black hover:text-white hover:border-black transition-all rounded-[10px]"
-                  >
-                    {t("pages.automations_page.load_template")}
-                  </Button>
-                </Card>
-
-                {/* Template 4 */}
-                <Card className="flex flex-col justify-between p-4 border border-[#E8E8E8] hover:border-black hover:shadow-md transition-all bg-white relative group rounded-[20px]">
-                  <div>
-                    <div className="grid h-8 w-8 place-items-center rounded-[10px] bg-[#C7F33C]/20 text-black group-hover:bg-[#C7F33C] transition-all duration-300">
-                      <HelpCircle size={14} />
-                    </div>
-                    <h4 className="text-[12px] font-bold text-black mt-3">{t("pages.automations_page.tmpl_welcome_faq_name")}</h4>
-                    <p className="text-[10px] text-[#707070] mt-1 leading-relaxed">
-                      {t("pages.automations_page.tmpl_welcome_faq_desc")}
-                    </p>
-                  </div>
-                  <Button
-                    onClick={() => handleUseTemplate("welcome_faq")}
-                    variant="secondary"
-                    className="w-full mt-3.5 py-1.5 text-[10px] font-bold border border-[#E8E8E8] hover:bg-black hover:text-white hover:border-black transition-all rounded-[10px]"
-                  >
-                    {t("pages.automations_page.load_template")}
-                  </Button>
-                </Card>
-              </div>
-            </div>
-          )}
-
-          {/* AI Quick Bot Creation Banner */}
-          <div className="relative overflow-hidden rounded-[24px] bg-gradient-to-r from-black via-[#111111] to-[#222222] text-white p-6 flex flex-col md:flex-row md:items-center justify-between gap-6 border border-white/10 shadow-md">
-            <div className="flex items-start gap-4">
-              <div className="grid h-11 w-11 place-items-center rounded-[16px] bg-[#C7F33C] text-black shrink-0 shadow-inner">
-                <Bot size={22} strokeWidth={2.5} />
-              </div>
-              <div className="flex flex-col">
-                <div className="flex items-center gap-2">
-                  <span className="text-[9px] uppercase font-extrabold tracking-wider text-black bg-[#C7F33C] px-2 py-0.5 rounded-full">
-                    {t("pages.automations_page.quick_setup")}
-                  </span>
-                </div>
-                <h2 className="text-[17px] font-black mt-2 tracking-tight">{t("pages.automations_page.quick_bot_title")}</h2>
-                <p className="text-[11px] text-white/70 mt-1 max-w-[500px] leading-relaxed">
-                  {t("pages.automations_page.quick_bot_desc")}
-                </p>
-              </div>
-            </div>
-            <button
-              onClick={() => {
-                if (selectedChannelId !== "all") {
-                  setQuickBotChannelId(selectedChannelId);
-                } else if (channels.length > 0) {
-                  const activeCh = db.getActiveChannel();
-                  setQuickBotChannelId(activeCh ? activeCh.id : channels[0].id);
-                }
-                setIsQuickBotModalOpen(true);
-              }}
-              className="px-5 py-2.5 bg-[#C7F33C] hover:bg-[#b0d82f] text-black font-extrabold rounded-full text-[11px] transition-all whitespace-nowrap shrink-0 shadow-md transform hover:scale-[1.02]"
-            >
-              {t("pages.automations_page.quick_bot_btn")}
-            </button>
-          </div>
 
           {/* Grid of regular automation cards */}
           <div className="flex flex-col gap-4">
@@ -717,6 +573,28 @@ export default function AutomationsPage() {
               </Card>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+                {/* 1. Promotional Quick Bot Card (First Card) */}
+                <Link 
+                  href="/automations/quick-bot" 
+                  className="bg-white border border-[#E8E8E8] hover:border-black rounded-[24px] p-5 flex flex-col justify-between gap-6 shadow-sm hover:shadow-md transition-all relative group cursor-pointer bg-gradient-to-br from-[#FDFDFD] to-[#F9F9F7]"
+                >
+                  <div className="flex justify-between items-start w-full">
+                    <div className="bg-[#C7F33C]/20 border border-[#b2db2a]/30 text-black font-extrabold text-[10px] uppercase tracking-wider px-2.5 py-1 rounded-lg">
+                      Tez
+                    </div>
+                    <span className="text-[16px] text-slate-400 group-hover:text-black transition-colors font-extrabold">→</span>
+                  </div>
+                  <div>
+                    <h3 className="text-[14px] font-black text-black leading-tight mt-2">
+                      Kalit so&apos;zli chat-bot
+                    </h3>
+                    <p className="text-[11px] text-[#707070] mt-1 leading-normal font-medium">
+                      Har qanday qurilmadan, konstruktorsiz avtomatlashtirish yaratishning yangi usuli
+                    </p>
+                  </div>
+                </Link>
+
+                {/* 2. User's Connected Automations */}
                 {filteredAutomations.map((a) => (
                   <div
                     key={a.id}
@@ -724,18 +602,11 @@ export default function AutomationsPage() {
                   >
                     {/* Header */}
                     <div className="flex items-start justify-between">
-                      <div className="flex items-center gap-2.5 min-w-0">
-                        <div className={`grid h-8 w-8 place-items-center rounded-[10px] shrink-0 ${a.active ? "bg-[#C7F33C]/20 text-black" : "bg-[#F5F5F5] text-[#A0A0A0]"}`}>
-                          <Zap size={14} fill={a.active ? "currentColor" : "none"} />
-                        </div>
-                        <div className="min-w-0">
-                          <span className="text-[9px] text-[#A0A0A0] font-bold uppercase tracking-wider block">
-                            {a.triggerType === "keyword" ? t("pages.home.keyword_direct") : t("pages.home.story_mentions")}
-                          </span>
-                          <h3 className="text-[13px] font-extrabold text-black leading-tight mt-0.5 truncate max-w-[170px]" title={a.name}>
-                            {a.name}
-                          </h3>
-                        </div>
+                      <div className="flex items-center gap-2 min-w-0">
+                        <span className="text-[#10B981] font-extrabold text-[14px] shrink-0">⚡</span>
+                        <h3 className="text-[13px] font-black text-black leading-tight truncate max-w-[170px]" title={a.name}>
+                          {a.name}
+                        </h3>
                       </div>
 
                       {/* Card Menu */}
@@ -816,66 +687,30 @@ export default function AutomationsPage() {
                       </div>
                     </div>
 
-                    {/* Trigger details */}
-                    <div className="bg-[#F9F9F9] rounded-[16px] px-3 py-2 text-[10px] text-[#505050] border border-[#F0F0F0] leading-relaxed">
-                      <span className="text-[#A0A0A0] font-bold">{t("pages.builder.trigger_settings")}:</span>{" "}
-                      <span className="font-semibold text-black truncate max-w-full block mt-0.5">
-                        {a.triggerDetails}
-                      </span>
-                    </div>
-
                     {/* Stats Grid */}
-                    <div className="grid grid-cols-2 gap-4 border-t border-b border-[#F0F0F0] py-3 text-center">
-                      <div className="flex flex-col items-center">
-                        <span className="text-[9px] text-[#707070] uppercase font-bold tracking-wider">{t("pages.automations.run_count")}</span>
-                        <span className="text-[14px] font-extrabold text-black mt-0.5">{a.runs}</span>
+                    <div className="grid grid-cols-2 gap-2 text-left mt-2">
+                      <div>
+                        <span className="text-[9px] text-[#A0A0A0] uppercase font-extrabold tracking-wider">Kontaktlar</span>
+                        <p className="text-[16px] font-black text-black mt-0.5">{a.runs}</p>
                       </div>
-                      <div className="flex flex-col items-center border-l border-[#F0F0F0]">
-                        <span className="text-[9px] text-[#707070] uppercase font-bold tracking-wider">{t("pages.automations_page.conversion")}</span>
-                        <span className="text-[14px] font-extrabold text-[#16A34A] mt-0.5">{a.completion}</span>
+                      <div>
+                        <span className="text-[9px] text-[#A0A0A0] uppercase font-extrabold tracking-wider">Konversiya</span>
+                        <p className="text-[16px] font-black text-[#16A34A] mt-0.5">{a.completion}</p>
                       </div>
                     </div>
 
-                    {/* Footer owner info and toggle switch */}
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-1.5 min-w-0">
-                        {a.channel ? (
-                          <>
-                            <div className={`grid h-5 w-5 place-items-center rounded-full shrink-0 ${a.channel.type === "instagram" ? "bg-gradient-to-br from-[#f09433] via-[#e6683c] to-[#bc1888]" : "bg-[#229ED9]"}`}>
-                              {a.channel.type === "instagram" ? (
-                                <Instagram size={8} className="text-white" />
-                              ) : (
-                                <Bot size={8} className="text-white" />
-                              )}
-                            </div>
-                            <span className="text-[10px] font-bold text-black truncate max-w-[100px]" title={a.channel.username}>
-                              {a.channel.username}
-                            </span>
-                          </>
-                        ) : (
-                          <span className="text-[10px] text-[#A0A0A0]">{t("pages.automations_page.unknown_channel")}</span>
-                        )}
-                      </div>
-
-                      <div className="flex items-center gap-2">
-                        <span className={`text-[9px] font-bold ${a.active ? "text-[#16A34A]" : "text-[#707070]"}`}>
-                          {a.active ? t("common.active") : t("common.inactive")}
-                        </span>
-                        <button
-                          onClick={() => toggleActive(a.id, a.channelId)}
-                          className={[
-                            "relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none",
-                            a.active ? "bg-black" : "bg-[#F0F0F0]",
-                          ].join(" ")}
-                        >
-                          <span
-                            className={[
-                              "pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out",
-                              a.active ? "translate-x-4 bg-[#C7F33C]" : "translate-x-0",
-                            ].join(" ")}
-                          />
-                        </button>
-                      </div>
+                    {/* Footer Owner Profile */}
+                    <div className="flex items-center gap-2 mt-2 pt-2 border-t border-[#F5F5F5] min-w-0">
+                      {a.channel?.avatar ? (
+                        <img src={a.channel.avatar} alt="" className="h-5 w-5 rounded-full object-cover shrink-0" />
+                      ) : (
+                        <div className="h-5 w-5 rounded-full bg-slate-200 flex items-center justify-center shrink-0 text-[10px] font-bold">
+                          {a.channel?.name ? a.channel.name.charAt(0).toUpperCase() : "👤"}
+                        </div>
+                      )}
+                      <span className="text-[10px] text-[#707070] font-bold truncate">
+                        @{a.channel?.username.replace(/^@+/, "") || "isroil.ai"}
+                      </span>
                     </div>
                   </div>
                 ))}
@@ -889,95 +724,81 @@ export default function AutomationsPage() {
 
       {/* ================= MODALS & CONFIRMATIONS ================= */}
 
-      {/* Quick Bot Modal */}
-      {isQuickBotModalOpen && (
+      {/* Yangi Avtomatlashtirish Modal */}
+      {isCreateFlowModalOpen && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-[28px] max-w-md w-full p-6 shadow-2xl border border-[#E8E8E8] flex flex-col gap-4 animate-in fade-in zoom-in-95 duration-200">
-            <div className="flex items-center justify-between pb-3 border-b border-[#F0F0F0]">
-              <h3 className="text-[14px] font-extrabold text-black flex items-center gap-2 uppercase tracking-wider">
-                🤖 {t("pages.automations_page.quick_bot_modal_title")}
+          <div className="bg-white rounded-[24px] max-w-md w-full p-6 shadow-2xl border border-[#E8E8E8] flex flex-col gap-5 animate-in fade-in zoom-in-95 duration-200 relative text-black">
+            <button
+              onClick={() => setIsCreateFlowModalOpen(false)}
+              className="absolute right-4 top-4 text-[#707070] hover:text-black font-semibold text-[16px] p-1"
+            >
+              ✕
+            </button>
+
+            <div>
+              <h3 className="text-[17px] font-black text-black tracking-tight">
+                Yangi avtomatlashtirish
               </h3>
-              <button
-                onClick={() => setIsQuickBotModalOpen(false)}
-                className="text-[#707070] hover:text-black font-semibold text-[16px] p-1"
-              >
-                ✕
-              </button>
+              <p className="text-[12px] text-[#707070] mt-1 font-medium">
+                Avtomatlashtirishni yaratish usulini tanlang
+              </p>
             </div>
 
             <div className="flex flex-col gap-3">
-              {/* Bot Name */}
-              <div className="flex flex-col gap-1">
-                <label className="text-[10px] font-bold text-[#707070] uppercase">{t("pages.home.create_bot.bot_name")}</label>
-                <input
-                  type="text"
-                  placeholder={t("pages.home.create_bot.bot_name_placeholder")}
-                  value={quickBotName}
-                  onChange={(e) => setQuickBotName(e.target.value)}
-                  className="w-full px-3 py-2 text-[12px] bg-white border border-[#E8E8E8] rounded-[12px] focus:outline-none focus:border-black font-semibold"
+              {/* Option 1: Scratch */}
+              <label 
+                className={`border rounded-2xl p-4 flex items-start gap-3 cursor-pointer transition-all ${createFlowMode === "scratch" ? "border-[#2563EB] bg-[#2563EB]/5 font-semibold" : "border-[#E8E8E8] hover:border-black/20"}`}
+                onClick={() => setCreateFlowMode("scratch")}
+              >
+                <input 
+                  type="radio" 
+                  name="create_flow_mode" 
+                  checked={createFlowMode === "scratch"} 
+                  readOnly 
+                  className="mt-1 h-4 w-4 text-[#2563EB] border-[#D8D8D8] focus:ring-[#2563EB] shrink-0" 
                 />
-              </div>
+                <div className="flex flex-col">
+                  <span className="text-[13px] font-bold text-black">Noldan o&apos;zingiz bajaring</span>
+                  <span className="text-[10.5px] text-[#707070] mt-0.5 font-medium leading-relaxed">
+                    Servisning imkoniyatlari bilan tanish bo&apos;lgan ilg&apos;or foydalanuvchilar uchun mos keladi
+                  </span>
+                </div>
+              </label>
 
-              {/* Channel Selection */}
-              <div className="flex flex-col gap-1">
-                <label className="text-[10px] font-bold text-[#707070] uppercase">{t("pages.automations_page.quick_bot_channel_label")}</label>
-                <CustomDropdown
-                  value={quickBotChannelId}
-                  onChange={setQuickBotChannelId}
-                  placeholder={t("pages.settings_page.choose_channel_type")}
-                  options={channels.map((ch) => ({
-                    value: ch.id,
-                    label: `${ch.name} (${ch.username})`,
-                    icon: (
-                      <span className="text-[14px]">
-                        {ch.type === "instagram" ? "📸" : "✈️"}
-                      </span>
-                    ),
-                  }))}
+              {/* Option 2: Template */}
+              <label 
+                className={`border rounded-2xl p-4 flex items-start gap-3 cursor-pointer transition-all ${createFlowMode === "template" ? "border-[#2563EB] bg-[#2563EB]/5 font-semibold" : "border-[#E8E8E8] hover:border-black/20"}`}
+                onClick={() => setCreateFlowMode("template")}
+              >
+                <input 
+                  type="radio" 
+                  name="create_flow_mode" 
+                  checked={createFlowMode === "template"} 
+                  readOnly 
+                  className="mt-1 h-4 w-4 text-[#2563EB] border-[#D8D8D8] focus:ring-[#2563EB] shrink-0" 
                 />
-              </div>
-
-              {/* Keywords */}
-              <div className="flex flex-col gap-1">
-                <label className="text-[10px] font-bold text-[#707070] uppercase">{t("pages.automations_page.quick_bot_keywords_label")}</label>
-                <input
-                  type="text"
-                  placeholder={t("pages.builder.trigger_keywords")}
-                  value={quickBotKeywords}
-                  onChange={(e) => setQuickBotKeywords(e.target.value)}
-                  className="w-full px-3 py-2 text-[12px] bg-white border border-[#E8E8E8] rounded-[12px] focus:outline-none focus:border-black font-semibold"
-                />
-              </div>
-
-              {/* Reply Message */}
-              <div className="flex flex-col gap-1">
-                <label className="text-[10px] font-bold text-[#707070] uppercase">{t("pages.automations_page.quick_bot_reply_label")}</label>
-                <textarea
-                  placeholder={t("pages.automations_page.quick_bot_reply_placeholder")}
-                  value={quickBotReply}
-                  onChange={(e) => setQuickBotReply(e.target.value)}
-                  rows={4}
-                  className="w-full px-3 py-2 text-[12px] bg-white border border-[#E8E8E8] rounded-[12px] focus:outline-none focus:border-black resize-none font-semibold text-[#303030]"
-                />
-              </div>
+                <div className="flex flex-col">
+                  <span className="text-[13px] font-bold text-black">Tayyor shablon bo&apos;yicha</span>
+                  <span className="text-[10.5px] text-[#707070] mt-0.5 font-medium leading-relaxed">
+                    5 daqiqada birinchi avtomatlashtirishni ishga tushirishni rejalashtirgan yangi boshlovchilar uchun mos keladi
+                  </span>
+                </div>
+              </label>
             </div>
 
-            <div className="flex items-center justify-end gap-2 mt-4 pt-3 border-t border-[#F0F0F0]">
-              <Button
-                onClick={() => setIsQuickBotModalOpen(false)}
-                variant="secondary"
-                className="text-[11px] font-bold px-4 py-2"
-              >
-                {t("common.cancel")}
-              </Button>
-              <Button
-                onClick={handleCreateQuickBot}
-                variant="primary"
-                className="text-[11px] font-bold px-4 py-2 bg-black text-white hover:bg-black/90 rounded-[12px]"
-              >
-                {t("common.create")}
-              </Button>
-            </div>
+            <button
+              onClick={() => {
+                setIsCreateFlowModalOpen(false);
+                if (createFlowMode === "scratch") {
+                  window.location.href = "/automations/builder";
+                } else {
+                  window.location.href = "/automations/templates";
+                }
+              }}
+              className="w-full py-3 bg-[#2563EB] hover:bg-[#1d4ed8] text-white font-extrabold rounded-xl text-[12px] transition-all text-center active:scale-95 shadow-sm mt-2"
+            >
+              Keyin
+            </button>
           </div>
         </div>
       )}

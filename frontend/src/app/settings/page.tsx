@@ -52,14 +52,7 @@ export default function SettingsPage() {
       if (event.data?.type === "INSTAGRAM_CONNECTED") {
         const { username, name, followers } = event.data;
 
-        const userPlan = db.getCurrentUser()?.plan || "free";
-        const limit = userPlan === "premium" ? 10 : 1;
-        if (db.getChannels().length >= limit) {
-          setModal(null);
-          setOAuthWaiting(false);
-          showAlert(t("pages.settings_page.card_limit_title"), t("pages.settings_page.card_limit_msg").replace("{limit}", limit.toString()));
-          return;
-        }
+        // Limit checks removed. Channel pricing dynamically increases by 150,000 UZS/month for each additional account beyond the plan.
 
         const newCh = db.addChannel({
           type: "instagram",
@@ -235,13 +228,7 @@ export default function SettingsPage() {
 
   const handleAddTelegram = () => {
     if (!tgToken.trim() || !tgUsername.trim()) return;
-    const userPlan = db.getCurrentUser()?.plan || "free";
-    const limit = userPlan === "premium" ? 10 : 1;
-    if (db.getChannels().length >= limit) {
-      setModal(null);
-      showAlert(t("pages.settings_page.card_limit_title"), t("pages.settings_page.card_limit_msg").replace("{limit}", limit.toString()));
-      return;
-    }
+    // Limit checks removed. Channel pricing dynamically increases by 150,000 UZS/month for each additional account.
     setSaving(true);
     setTimeout(() => {
       const newCh = db.addChannel({
