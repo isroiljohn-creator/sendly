@@ -185,7 +185,7 @@ async function runBotPollLoop(channelId: string, botState: TelegramBotState) {
               }
             }
             
-            const rawSettings = context["replai_bot_settings"];
+            const rawSettings = context[`replai_bot_settings_${channelId}`];
             const settings: BotSettings = rawSettings ? JSON.parse(rawSettings) : {
               tone: 60,
               length: 40,
@@ -200,10 +200,10 @@ async function runBotPollLoop(channelId: string, botState: TelegramBotState) {
             
             settings.adminTelegramChatId = String(chatId);
             settings.adminTelegramUsername = username || firstName || "Admin";
-            context["replai_bot_settings"] = JSON.stringify(settings);
+            context[`replai_bot_settings_${channelId}`] = JSON.stringify(settings);
           });
           
-          await sendTelegramMessage(botState.token, chatId, "Tabriklaymiz! Siz ushbu bot uchun kurator (admin) qilib tayinlandingiz. Mijozlar suhbatni operatorga yo'naltirishni so'rashsa, sizga xabar yuboriladi. 🔔");
+          await sendTelegramMessage(botState.token, chatId, "Tabriklaymiz! Siz ushbu bot uchun kurator (admin) qilib tayinlandingiz. Mijozlar suhbatni operatorga yo'naltirishni so'rashsa, sizga xabar yuboriladi.");
           continue;
         }
         
@@ -262,7 +262,7 @@ async function runBotPollLoop(channelId: string, botState: TelegramBotState) {
           // 4. Bot auto-reply if not liveTakeover
           if (!chat.liveTakeover) {
             // Load Settings
-            const rawSettings = context["replai_bot_settings"];
+            const rawSettings = context[`replai_bot_settings_${channelId}`];
             const settings: BotSettings = rawSettings ? JSON.parse(rawSettings) : {
               tone: 60,
               length: 40,
@@ -280,7 +280,7 @@ async function runBotPollLoop(channelId: string, botState: TelegramBotState) {
             let botReplyText = "";
 
             if (moderation.flagged) {
-              botReplyText = moderation.warningMessage || "Iltimos, yozish qoidalariga rioya qiling. ⚠️";
+              botReplyText = moderation.warningMessage || "Iltimos, yozish qoidalariga rioya qiling.";
             } else {
               // 2. Check keyword automations
               const rawAutos = context[`replai_automations_${channelId}`];
@@ -322,11 +322,11 @@ async function runBotPollLoop(channelId: string, botState: TelegramBotState) {
                 
                 const nameLower = matchedAutomation.name.toLowerCase();
                 if (nameLower.includes("lead magnet") || matchedKeyword === "kitob" || matchedKeyword === "bonus") {
-                  botReplyText = "🤖 Bepul qo'llanma havolasi: https://sendly.uz/book. Obunangiz uchun rahmat! 📚";
+                  botReplyText = "Bepul qo'llanma havolasi: https://sendly.uz/book. Obunangiz uchun rahmat!";
                 } else if (matchedKeyword === "/start" || matchedKeyword === "boshlash") {
-                  botReplyText = "🤖 Assalomu alaykum! Sendly chatbot xizmatiga xush kelibsiz. Tizimimiz muvaffaqiyatli ulangan! ⚡️";
+                  botReplyText = "Assalomu alaykum! Sendly chatbot xizmatiga xush kelibsiz. Tizimimiz muvaffaqiyatli ulangan.";
                 } else if (matchedKeyword === "narxi" || matchedKeyword === "tarif" || matchedKeyword === "kurs") {
-                  botReplyText = "🤖 Bizning tariflarimiz: \n• Pro: 150,000 so'm/oy (1ta akkaunt)\n• Premium: 1,000,000 so'm/oy (10ta akkaunt)\n\nBatafsil ma'lumot olish yoki ulanish uchun operatorimiz tez orada javob yozadi.";
+                  botReplyText = "Bizning tariflarimiz: \n• Pro: 150,000 so'm/oy (1ta akkaunt)\n• Premium: 1,000,000 so'm/oy (10ta akkaunt)\n\nBatafsil ma'lumot olish yoki ulanish uchun operatorimiz tez orada javob yozadi.";
                 } else {
                   botReplyText = matchedAutomation.replyText || matchedKeyword;
                 }
@@ -347,7 +347,7 @@ async function runBotPollLoop(channelId: string, botState: TelegramBotState) {
                 }
 
                 if ((credits.balance || 0) < 5) {
-                  botReplyText = "Hisobingizda AI kreditlar yetarli emas. Iltimos, replai.uz hisobingiz orqali AI kreditlarni to'ldiring. 💳";
+                  botReplyText = "Hisobingizda AI kreditlar yetarli emas. Iltimos, replai.uz hisobingiz orqali AI kreditlarni to'ldiring.";
                 } else {
                   const studentName = chat.name || "Talaba";
                   const chatHistory = chat.messages
@@ -425,13 +425,13 @@ async function runBotPollLoop(channelId: string, botState: TelegramBotState) {
 
                     if (shouldEscalate) {
                       chat.liveTakeover = true;
-                      botReplyText = "Kechirasiz, ushbu savolga to'g'ri va aniq javob berish uchun suhbatni inson-kuratorga yo'naltirdim. Tez orada sizga javob yozishadi. 🤝";
+                      botReplyText = "Kechirasiz, ushbu savolga to'g'ri va aniq javob berish uchun suhbatni inson-kuratorga yo'naltirdim. Tez orada sizga javob yozishadi.";
                       
                       if (settings.adminTelegramChatId) {
                         sendTelegramMessage(
                           botState.token,
                           settings.adminTelegramChatId,
-                          `⚠️ Yangi murojaat (Operator kutilmoqda):\n\nFoydalanuvchi: ${chat.name} (@${chat.username || "username_yoq"})\nSavol: ${text}\n\nUshbu foydalanuvchiga javob berish uchun Sendly inbox bo'limiga kiring.`
+                          `Yangi murojaat (Operator kutilmoqda):\n\nFoydalanuvchi: ${chat.name} (@${chat.username || "username_yoq"})\nSavol: ${text}\n\nUshbu foydalanuvchiga javob berish uchun Sendly inbox bo'limiga kiring.`
                         ).catch(err => console.error("Failed to notify admin on Telegram:", err));
                       }
                     } else {
@@ -453,7 +453,7 @@ async function runBotPollLoop(channelId: string, botState: TelegramBotState) {
 
                   } catch (ragError) {
                     console.error("RAG logic error in bot runner:", ragError);
-                    botReplyText = "Murojaatingiz uchun rahmat! Tizimda kichik uzilish yuz berdi. Tez orada operatorimiz sizga bog'lanadi. ⚡️";
+                    botReplyText = "Murojaatingiz uchun rahmat! Tizimda kichik uzilish yuz berdi. Tez orada operatorimiz sizga bog'lanadi.";
                   }
                 }
               }

@@ -149,7 +149,7 @@ O'quvchilarning savollariga faqat dars materiallari (KURS MATERIALLARI) asosida 
     characterInstructions += `\n- Javob uzunligi: ${settings.length > 70 ? "Mavzuni batafsil, tushunarli yorit." : settings.length < 30 ? "Maksimal qisqa va aniq (1-2 gapda)." : "O'rtacha uzunlikda, me'yorda bo'lsin."}`;
   }
   if (settings.humor !== undefined) {
-    characterInstructions += `\n- Hazil darajasi: ${settings.humor > 70 ? "Hazil-mutoyiba va qiziqarli emojilardan ko'p foydalan." : settings.humor < 30 ? "Jiddiy va ilmiy yondash." : "Me'yorda, iliq munosabat."}`;
+    characterInstructions += `\n- Hazil darajasi: ${settings.humor > 70 ? "Hazil-mutoyiba va qiziqarli hazillardan ko'p foydalan (hech qanday emoji ishlatma)." : settings.humor < 30 ? "Jiddiy va ilmiy yondash." : "Me'yorda, iliq munosabat."}`;
   }
 
   let systemPrompt = promptTemplate;
@@ -209,7 +209,7 @@ export async function queryRAG(
 
   if (lessonCount === 0) {
     return {
-      text: "Bilimlar bazasi hali bo'sh. Iltimos, boshqaruv panelidan dars materiallarini kiriting. 📚",
+      text: "Bilimlar bazasi hali bo'sh. Iltimos, boshqaruv panelidan dars materiallarini kiriting.",
       confidence: 20,
       sources: []
     };
@@ -251,7 +251,7 @@ export async function queryRAG(
 
   let textResult = "";
   if (bestSentence && maxMatch > 0) {
-    textResult = `${bestSentence}. 😊`;
+    textResult = `${bestSentence}.`;
   } else {
     const firstLesson = lessons[0];
     const transcript = firstLesson?.transcript || "";

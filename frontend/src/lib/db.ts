@@ -120,16 +120,16 @@ O'quvchilarning savollariga faqat va faqat quyida taqdim etilgan darslik/kurs ma
 # QAT'IY YO'RIQNOMALAR VA CHEKLOVLAR
 1. Cheklangan Ma'lumot: Faqat berilgan KURS MATERIALLARI ichidagi ma'lumotlardan foydalan. Kurs materialida yo'q bo'lgan ma'lumotlarni o'zingdan to'qib chiqarma!
 2. Noma'lum Savollar: Agar savolning javobi darslik materiallarida mavjud bo'lmasa, muloyimlik bilan mana shu javobni ber:
-   "Afsuski, ushbu savolga darslik materiallarida javob topilmadi. Sizga to'g'ri yo'nalish berish va yordam berish uchun ushbu savolni inson-kuratorga yo'naltirdim. Tez orada javob berishadi. 😊"
+   "Afsuski, ushbu savolga darslik materiallarida javob topilmadi. Sizga to'g'ri yo'nalish berish va yordam berish uchun ushbu savolni inson-kuratorga yo'naltirdim. Tez orada javob berishadi."
 3. Taqiqlangan Mavzular: Siyosat, din, raqobatchi kurslar yoki marketingga aloqasi bo'lmagan mavzular haqida gapirma. Agar bunday savol berilsa, muloyimlik bilan rad et:
-   "Men faqat ushbu marketing kursi bo'yicha savollarga javob bera olaman. Keling, darsimizga qaytamiz! 📚"
+   "Men faqat ushbu marketing kursi bo'yicha savollarga javob bera olaman. Keling, darsimizga qaytamiz!"
 4. Til qoidasi: O'quvchi qaysi tilda va yozuvda yozgan bo'lsa (Lotin yoki Kirill o'zbek yozuvi, Rus tili yoki Ingliz tili), o'sha yozuv va tilda tabiiy javob ber.
 
 # JAVOB FORMATI VA STILI
 - Tabiiylik va Qisqalik: Javoblaring juda qisqa, aniq va londa bo'lsin (ko'pi bilan 2-3 ta gap). Ortiqcha uzun gaplar, kirish so'zlar yoki sun'iy gaplardan qoch. Oddiy suhbatdoshdek tabiiy gapir.
 - Soddalik: Murakkab marketing atamalarini sodda, kundalik tilda tushuntir.
 - Manba ko'rsatmaslik: JAVOBINGGA HECH QANDAY MANBA YOKI SHUNGA O'XSHASH MA'LUMOTLARNI QO'SHMA (Masalan: "Manba: 1-Modul..." kabi yozuvlar umuman bo'lmasligi shart).
-- Emojilar: Faqat o'rinli va me'yorida, minimal foydalan (ko'pi bilan 1-2 ta emoji).`,
+- Emojilar: Mutlaqo emojilarsiz, faqat matn va belgilar yordamida javob yoz.`,
   topics: ["Siyosat", "Din", "Raqobatchilar"],
   autoOutreach: true,
   outreachStart: "09:00",
@@ -151,7 +151,7 @@ Kelgan ariza ma'lumotlarini (ism, telefon, foydalanuvchi yozgan savollar yoki ja
 1. Agar mijoz narx, chegirma, to'lov yoki sotib olish haqida so'ragan bo'lsa, uni "Sotuvlar" (sales) guruhiga yo'naltir va "Yuqori qiziqish" yoki "Narxga qiziqqan" tegini qo'sh.
 2. Agar mijoz texnik yordam, kursga kirish yoki boshqa texnik savollar bergan bo'lsa, uni "Qo'llab-quvvatlash" (support) guruhiga yo'naltir va "Qo'llab-quvvatlash" tegini qo'sh.
 3. Mijozning savolidan kelib chiqib, 2-3 so'zdan iborat AI izoh (saralash xulosasi) yoz.`,
-  fbWelcomeMessage: "Salom {{name}}! So'rovingiz qabul qilindi. Tez orada mutaxassisimiz sizga bog'lanadi. 😊",
+  fbWelcomeMessage: "Salom {{name}}! So'rovingiz qabul qilindi. Tez orada mutaxassisimiz sizga bog'lanadi.",
   fbAgentEnabled: false,
   adminTelegramChatId: "",
   adminTelegramUsername: "",
@@ -215,7 +215,7 @@ if (isClient && localStorage.getItem("replai_db_version") !== DB_VERSION) {
   
   const keys = Object.keys(localStorage);
   keys.forEach((key) => {
-    if (key.startsWith("replai_automations_") || key.startsWith("replai_chats_")) {
+    if (key.startsWith("replai_automations_") || key.startsWith("replai_chats_") || key.startsWith("replai_bot_settings_")) {
       localStorage.removeItem(key);
     }
   });
@@ -264,7 +264,7 @@ export const db = {
     
     const keys = Object.keys(localStorage);
     keys.forEach((key) => {
-      if (key.startsWith("replai_automations_") || key.startsWith("replai_chats_")) {
+      if (key.startsWith("replai_automations_") || key.startsWith("replai_chats_") || key.startsWith("replai_bot_settings_")) {
         localStorage.removeItem(key);
       }
     });
@@ -577,10 +577,10 @@ export const db = {
     localStorage.setItem("replai_lessons", JSON.stringify([]));
     localStorage.removeItem("replai_bot_settings");
     
-    // Also remove all per-channel automations
+    // Also remove all per-channel automations and bot settings
     const keys = Object.keys(localStorage);
     keys.forEach((key) => {
-      if (key.startsWith("replai_automations_")) {
+      if (key.startsWith("replai_automations_") || key.startsWith("replai_bot_settings_")) {
         localStorage.removeItem(key);
       }
     });
@@ -637,8 +637,9 @@ export const db = {
       }
     }
     this.saveChannels(channels);
-    // remove per-channel automations
+    // remove per-channel automations and bot settings
     localStorage.removeItem(`replai_automations_${id}`);
+    localStorage.removeItem(`replai_bot_settings_${id}`);
     notifyUpdate();
   },
 
@@ -709,19 +710,27 @@ export const db = {
   },
 
   // 7. Bot Settings Database
-  getBotSettings(): BotSettings {
+  getBotSettings(channelId?: string): BotSettings {
     if (!isClient) return DEFAULT_BOT_SETTINGS;
-    const stored = localStorage.getItem("replai_bot_settings");
+    const cid = channelId || this.getActiveChannel()?.id;
+    if (!cid) return DEFAULT_BOT_SETTINGS;
+    const key = `replai_bot_settings_${cid}`;
+    const stored = localStorage.getItem(key);
     if (!stored) {
-      localStorage.setItem("replai_bot_settings", JSON.stringify(DEFAULT_BOT_SETTINGS));
-      return DEFAULT_BOT_SETTINGS;
+      const initial = { ...DEFAULT_BOT_SETTINGS, id: cid, telegramBotId: cid };
+      localStorage.setItem(key, JSON.stringify(initial));
+      return initial;
     }
     return safeParse<BotSettings>(stored, DEFAULT_BOT_SETTINGS);
   },
 
-  saveBotSettings(settings: BotSettings): void {
+  saveBotSettings(settings: BotSettings, channelId?: string): void {
     if (!isClient) return;
-    localStorage.setItem("replai_bot_settings", JSON.stringify(settings));
+    const cid = channelId || settings.telegramBotId || this.getActiveChannel()?.id;
+    if (!cid) return;
+    const key = `replai_bot_settings_${cid}`;
+    const settingsWithId = { ...settings, telegramBotId: cid };
+    localStorage.setItem(key, JSON.stringify(settingsWithId));
     notifyUpdate();
   },
 

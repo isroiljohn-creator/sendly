@@ -26,6 +26,8 @@ import {
   CheckCircle,
   History,
   RefreshCw,
+  AlertTriangle,
+  FileText
 } from "lucide-react";
 
 const Facebook = ({ size = 24, className, ...props }: React.SVGProps<SVGSVGElement> & { size?: number }) => (
@@ -425,41 +427,51 @@ export default function AIAgentPage() {
   }, [chatMessages]);
 
   const loadDatabase = () => {
-    const loadedSettings = db.getBotSettings();
+    const channels = db.getChannels();
+    const tgChannels = channels.filter(
+      (c) => c.type === "telegram" && c.isConnected && c.telegramToken
+    );
+
+    const activeCh = db.getActiveChannel();
+    let initialBotId = "";
+    if (activeCh && activeCh.type === "telegram" && activeCh.isConnected && activeCh.telegramToken) {
+      initialBotId = activeCh.id;
+    } else if (tgChannels.length > 0) {
+      initialBotId = tgChannels[0].id;
+    }
+
+    const loadedSettings = db.getBotSettings(initialBotId);
     const loadedModules = db.getModules();
     const loadedLessons = db.getLessons();
+
+    if (initialBotId && loadedSettings.telegramBotId !== initialBotId) {
+      loadedSettings.telegramBotId = initialBotId;
+    }
 
     setSettings(loadedSettings);
     setModules(loadedModules);
     setLessons(loadedLessons);
 
-    // Check Telegram link status
-    const channels = db.getChannels();
-    const tgChannels = channels.filter(
-      (c) => c.type === "telegram" && c.isConnected && c.telegramToken
-    );
-    const selectedBotId = loadedSettings.telegramBotId;
-    const telegramChannel = tgChannels.find(c => c.id === selectedBotId) || tgChannels[0];
+    const selectedBotId = loadedSettings.telegramBotId || initialBotId;
+    const telegramChannel = tgChannels.find(c => c.id === selectedBotId);
 
     if (telegramChannel) {
       setIsTelegramLinked(true);
       setTelegramBotUsername(telegramChannel.username);
-      if (!selectedBotId) {
+      if (!loadedSettings.telegramBotId) {
         loadedSettings.telegramBotId = telegramChannel.id;
-        db.saveBotSettings(loadedSettings);
+        db.saveBotSettings(loadedSettings, telegramChannel.id);
       }
     } else {
       setIsTelegramLinked(false);
       setTelegramBotUsername("");
-      // If AI Curator was enabled but bot is missing, disable it
       if (loadedSettings.aiCuratorEnabled) {
         loadedSettings.aiCuratorEnabled = false;
-        db.saveBotSettings(loadedSettings);
+        db.saveBotSettings(loadedSettings, loadedSettings.telegramBotId);
         setSettings({ ...loadedSettings, aiCuratorEnabled: false });
       }
     }
 
-    // Default to select first lesson if available
     if (loadedLessons.length > 0 && !selectedLesson) {
       setSelectedLesson(loadedLessons[0]);
     }
@@ -494,10 +506,10 @@ export default function AIAgentPage() {
   };
 
   const handleBotChange = (botId: string) => {
-    if (!settings) return;
-    const updatedSettings = { ...settings, telegramBotId: botId };
-    db.saveBotSettings(updatedSettings);
-    setSettings(updatedSettings);
+    const loadedSettings = db.getBotSettings(botId);
+    loadedSettings.telegramBotId = botId;
+    setSettings(loadedSettings);
+    db.saveBotSettings(loadedSettings, botId);
 
     const channels = db.getChannels();
     const ch = channels.find(c => c.id === botId);
@@ -511,19 +523,17 @@ export default function AIAgentPage() {
     showToast("Telegram bot muvaffaqiyatli bog'landi");
   };
 
-
-
   // Save changes to DB
   const handleSaveAll = async () => {
     if (!settings) return;
     try {
-      db.saveBotSettings(settings);
+      db.saveBotSettings(settings, settings.telegramBotId);
       db.saveModules(modules);
       db.saveLessons(lessons);
       
       // Sync client state with local server JSON file db.json
       await db.saveToServer();
-      showToast("Barcha o'zgarishlar muvaffaqiyatli saqlandi! 🚀");
+      showToast("Barcha o'zgarishlar muvaffaqiyatli saqlandi!");
     } catch (err) {
       console.error(err);
       showToast("Xatolik yuz berdi", "error");
@@ -2371,10 +2381,11 @@ export default function AIAgentPage() {
                 {settings.adminTelegramChatId ? (
                   <div className="flex items-center justify-between p-3.5 rounded-xl bg-green-50 border border-green-200">
                     <div className="flex flex-col gap-0.5">
-                      <span className="text-[12px] font-bold text-green-800">
-                        {"✅ Admin profil bog'langan"}
-                      </span>
-                      <span className="text-[11px] text-green-700">
+                      <div className="flex items-center gap-1.5 text-[12px] font-bold text-green-800">
+                        <CheckCircle size={14} className="text-green-600 shrink-0" />
+                        <span>{"Admin profil bog'langan"}</span>
+                      </div>
+                      <span className="text-[11px] text-green-700 mt-1">
                         Foydalanuvchi: @{settings.adminTelegramUsername} (Chat ID: {settings.adminTelegramChatId})
                       </span>
                     </div>
@@ -2391,10 +2402,11 @@ export default function AIAgentPage() {
                   </div>
                 ) : (
                   <div className="flex flex-col gap-2 p-3.5 rounded-xl bg-blue-50 border border-blue-200">
-                    <span className="text-[12px] font-bold text-blue-800">
-                      {"⚠️ Admin profil ulanmagan"}
-                    </span>
-                    <p className="text-[11px] text-blue-700 leading-relaxed">
+                    <div className="flex items-center gap-1.5 text-[12px] font-bold text-blue-800">
+                      <AlertTriangle size={14} className="text-amber-600 shrink-0" />
+                      <span>{"Admin profil ulanmagan"}</span>
+                    </div>
+                    <p className="text-[11px] text-blue-700 leading-relaxed mt-1">
                       {"Ulash uchun ulanayotgan Telegram botingizga borib, shaxsiy profilingizdan "}<strong>{"/admin"}</strong>{" buyrug'ini yuboring. Bot sizni administrator sifatida avtomatik ro'yxatga oladi."}
                     </p>
                   </div>
@@ -2695,9 +2707,10 @@ export default function AIAgentPage() {
                         {selectedLesson.pdfMaterials?.map((pdf, idx) => (
                           <span
                             key={idx}
-                            className="px-3 py-1.5 rounded-xl bg-[#F9F9F7] border border-[#E8E8E8] text-[11px] text-[#595959]"
+                            className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-[#F9F9F7] border border-[#E8E8E8] text-[11px] text-[#595959]"
                           >
-                            📄 {pdf}
+                            <FileText size={12} className="text-[#707070]" />
+                            <span>{pdf}</span>
                           </span>
                         )) || <span className="text-[11px] text-[#A0A0A0] italic">{t("pages.ai_agent.no_materials_yet")}</span>}
                       </div>

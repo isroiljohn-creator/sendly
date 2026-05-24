@@ -21,7 +21,7 @@ export function moderateMessage(text: string, restrictedTopics: string[] = []): 
     return {
       flagged: true,
       reason: "spam",
-      warningMessage: "Iltimos, xabarlarda ketma-ket harflarni ko'p takrorlamang. ⚠️",
+      warningMessage: "Iltimos, xabarlarda ketma-ket harflarni ko'p takrorlamang.",
     };
   }
 
@@ -35,7 +35,7 @@ export function moderateMessage(text: string, restrictedTopics: string[] = []): 
     return {
       flagged: true,
       reason: "ad",
-      warningMessage: "Tizimda tashqi havolalar yoki reklama tarqatish taqiqlanadi. 🚫",
+      warningMessage: "Tizimda tashqi havolalar yoki reklama tarqatish taqiqlanadi.",
     };
   }
 
@@ -45,7 +45,7 @@ export function moderateMessage(text: string, restrictedTopics: string[] = []): 
       return {
         flagged: true,
         reason: "offensive",
-        warningMessage: "Iltimos, o'zaro hurmatni saqlang va haqoratli yoki qo'pol so'zlar ishlatmang. 🤝",
+        warningMessage: "Iltimos, o'zaro hurmatni saqlang va haqoratli yoki qo'pol so'zlar ishlatmang.",
       };
     }
   }
@@ -59,7 +59,7 @@ export function moderateMessage(text: string, restrictedTopics: string[] = []): 
       return {
         flagged: true,
         reason: "off_topic",
-        warningMessage: `Suhbatimiz mavzusidan chetlashdik. Biz hozirda bu mavzuda ("${topic}") ma'lumot bera olmaymiz. Iltimos darsliklar bo'yicha savol bering. 📚`,
+        warningMessage: `Suhbatimiz mavzusidan chetlashdik. Biz hozirda bu mavzuda ("${topic}") ma'lumot bera olmaymiz. Iltimos darsliklar bo'yicha savol bering.`,
       };
     }
   }

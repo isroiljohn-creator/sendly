@@ -21,7 +21,7 @@ const LANG_NAMES: Record<Lang, string> = {
   en: "English",
 };
 
-const LANG_FLAGS: Record<Lang, string> = { uz: "🇺🇿", ru: "🇷🇺", en: "🇬🇧" };
+const LANG_FLAGS: Record<Lang, string> = { uz: "UZ", ru: "RU", en: "EN" };
 
 export function TopBar() {
   const { t, lang, setLang } = useI18n();

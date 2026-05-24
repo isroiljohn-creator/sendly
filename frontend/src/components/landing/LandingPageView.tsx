@@ -110,9 +110,9 @@ export function LandingPageView() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeFaq, setActiveFaq] = useState<number | null>(null);
   const [simMessages, setSimMessages] = useState<SimMessage[]>([
-    { sender: "bot", text: "Assalomu alaykum! 👋 Sendly botiman. Instagram shaxsiy xabarlari va izohlaringizni avtomatlashtirib beraman. Nima bilmoqchisiz?" },
+    { sender: "bot", text: "Assalomu alaykum! Sendly botiman. Instagram shaxsiy xabarlari va izohlaringizni avtomatlashtirib beraman. Nima bilmoqchisiz?" },
   ]);
-  const [simButtons, setSimButtons] = useState<string[]>(["Narxi qancha? 💰", "Qanday ishlaydi? ⚡", "Bepul sinash 🚀"]);
+  const [simButtons, setSimButtons] = useState<string[]>(["Narxi qancha?", "Qanday ishlaydi?", "Bepul sinash"]);
 
   const handleSimClick = (btnText: string) => {
     const updated: SimMessage[] = [...simMessages, { sender: "user", text: btnText }];
@@ -122,17 +122,17 @@ export function LandingPageView() {
       let reply = "";
       let next: string[] = [];
       if (btnText.includes("Narxi")) {
-        reply = "💎 Sendly tariflari:\n• PRO: 150,000 so'm/oy — 1 akkaunt\n• PREMIUM: 1,000,000 so'm/oy — 10 akkaunt\n\n7 kun bepul sinab ko'ring! Sinash uchun karta bog'lash shart.";
-        next = ["Bepul boshlash 🚀", "Boshqa savol ❓"];
+        reply = "Sendly tariflari:\n• PRO: 150,000 so'm/oy — 1 akkaunt\n• PREMIUM: 1,000,000 so'm/oy — 10 akkaunt\n\n7 kun bepul sinab ko'ring! Sinash uchun karta bog'lash shart.";
+        next = ["Bepul boshlash", "Boshqa savol"];
       } else if (btnText.includes("ishlaydi")) {
-        reply = "⚡ Juda oson:\n1️⃣ Ro'yxatdan o'ting\n2️⃣ Instagram professional akkauntingizni ulang\n3️⃣ Bot oqimlarini yarating\n\nBot 24/7 avtomatik javob beradi!";
-        next = ["Boshlash 🎯", "Boshqa savol ❓"];
+        reply = "Juda oson:\n1. Ro'yxatdan o'ting\n2. Instagram professional akkauntingizni ulang\n3. Bot oqimlarini yarating\n\nBot 24/7 avtomatik javob beradi!";
+        next = ["Boshlash", "Boshqa savol"];
       } else if (btnText.includes("Boshqa")) {
         reply = "Sizga qanday yordam bera olaman?";
-        next = ["Narxi qancha? 💰", "Qanday ishlaydi? ⚡", "Bepul sinash 🚀"];
+        next = ["Narxi qancha?", "Qanday ishlaydi?", "Bepul sinash"];
       } else {
-        reply = "Ajoyib! Hoziroq ro'yxatdan o'ting va 7 kunlik Pro versiyani bepul ishlating. 🎉";
-        next = ["Ro'yxatdan o'tish →", "Boshqa savol ❓"];
+        reply = "Ajoyib! Hoziroq ro'yxatdan o'ting va 7 kunlik Pro versiyani bepul ishlating.";
+        next = ["Ro'yxatdan o'tish →", "Boshqa savol"];
       }
       setSimMessages([...updated, { sender: "bot", text: reply }]);
       setSimButtons(next);
@@ -431,12 +431,12 @@ export function LandingPageView() {
                 {simButtons.length === 0 && (
                   <button
                     onClick={() => {
-                      setSimMessages([{ sender: "bot", text: "Assalomu alaykum! 👋 Sendly botiman. Instagram shaxsiy xabarlari va izohlaringizni avtomatlashtirib beraman. Nima bilmoqchisiz?" }]);
-                      setSimButtons(["Narxi qancha? 💰", "Qanday ishlaydi? ⚡", "Bepul sinash 🚀"]);
+                      setSimMessages([{ sender: "bot", text: "Assalomu alaykum! Sendly botiman. Instagram shaxsiy xabarlari va izohlaringizni avtomatlashtirib beraman. Nima bilmoqchisiz?" }]);
+                      setSimButtons(["Narxi qancha?", "Qanday ishlaydi?", "Bepul sinash"]);
                     }}
                     className="rounded-[12px] border border-[#C7F33C]/30 bg-[#C7F33C]/10 text-[#7CA607] px-5 py-2.5 text-[12px] font-extrabold transition-all active:scale-[0.97]"
                   >
-                    {"Qayta boshlash 🔄"}
+                    {"Qayta boshlash"}
                   </button>
                 )}
               </div>

@@ -16,7 +16,10 @@ import {
   SlidersHorizontal,
   FolderPlus,
   AlertCircle,
-  MoreVertical
+  MoreVertical,
+  Pencil,
+  Play,
+  Pause
 } from "lucide-react";
 import { Instagram } from "@/components/ui/icons";
 import { AppLayout } from "@/components/layout/AppLayout";
@@ -632,6 +635,7 @@ export default function AutomationsPage() {
                                 }}
                                 className="w-full flex items-center gap-2 px-3 py-1.5 text-[11px] text-[#333] hover:bg-[#F5F5F5] text-left font-semibold"
                               >
+                                <Pencil size={12} className="text-[#707070] shrink-0" />
                                 {t("pages.automations_page.edit_action")}
                               </button>
                               <button
@@ -641,7 +645,17 @@ export default function AutomationsPage() {
                                 }}
                                 className="w-full flex items-center gap-2 px-3 py-1.5 text-[11px] text-[#333] hover:bg-[#F5F5F5] text-left font-semibold"
                               >
-                                {a.active ? t("pages.automations_page.deactivate_action") : t("pages.automations_page.activate_action")}
+                                {a.active ? (
+                                  <>
+                                    <Pause size={12} className="text-[#707070] shrink-0" />
+                                    {t("pages.automations_page.deactivate_action")}
+                                  </>
+                                ) : (
+                                  <>
+                                    <Play size={12} className="text-[#707070] shrink-0" />
+                                    {t("pages.automations_page.activate_action")}
+                                  </>
+                                )}
                               </button>
                               
                               {/* Assign Group */}
@@ -679,6 +693,7 @@ export default function AutomationsPage() {
                                 }}
                                 className="w-full flex items-center gap-2 px-3 py-1.5 text-[11px] text-red-600 hover:bg-red-50 text-left font-semibold"
                               >
+                                <Trash2 size={12} className="text-red-500 shrink-0" />
                                 {t("pages.automations_page.delete_action")}
                               </button>
                             </div>
@@ -688,14 +703,14 @@ export default function AutomationsPage() {
                     </div>
 
                     {/* Stats Grid */}
-                    <div className="grid grid-cols-2 gap-2 text-left mt-2">
-                      <div>
-                        <span className="text-[9px] text-[#A0A0A0] uppercase font-extrabold tracking-wider">Kontaktlar</span>
-                        <p className="text-[16px] font-black text-black mt-0.5">{a.runs}</p>
+                    <div className="grid grid-cols-2 gap-2 text-left mt-3.5 bg-[#F5F5F7] border border-[#E8E8E8] rounded-xl p-2">
+                      <div className="bg-white border border-[#E8E8E8]/80 rounded-[10px] p-2">
+                        <span className="text-[8px] text-[#A0A0A0] uppercase font-bold tracking-wider block">Kontaktlar</span>
+                        <p className="text-[14px] font-black text-black mt-0.5">{a.runs}</p>
                       </div>
-                      <div>
-                        <span className="text-[9px] text-[#A0A0A0] uppercase font-extrabold tracking-wider">Konversiya</span>
-                        <p className="text-[16px] font-black text-[#16A34A] mt-0.5">{a.completion}</p>
+                      <div className="bg-white border border-[#E8E8E8]/80 rounded-[10px] p-2">
+                        <span className="text-[8px] text-[#A0A0A0] uppercase font-bold tracking-wider block">Konversiya</span>
+                        <p className="text-[14px] font-black text-[#16A34A] mt-0.5">{a.completion}</p>
                       </div>
                     </div>
 
