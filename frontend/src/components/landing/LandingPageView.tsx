@@ -587,7 +587,7 @@ export function LandingPageView() {
               <div className="grid h-5 w-5 place-items-center rounded-[6px] bg-[#C7F33C]">
                 <Zap size={11} className="fill-black text-black" />
               </div>
-              <span className="font-extrabold text-black">{"Sendly.uz"}</span>
+              <span className="font-extrabold text-black">{"Sendly"}</span>
               <span>{"© 2026. Barcha huquqlar himoyalangan."}</span>
             </div>
             <div className="flex gap-5 font-semibold text-[#707075]">

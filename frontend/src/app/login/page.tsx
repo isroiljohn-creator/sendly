@@ -304,7 +304,7 @@ export default function LoginPage() {
             </svg>
           </div>
           <h2 className="mt-4 text-[26px] font-extrabold text-black tracking-tight">
-            {"Sendly"}<span className="text-[#7CA607]">{".uz"}</span>
+            {"Sendly"}
           </h2>
           <p className="mt-1 text-[13px] text-[#515154]">
             {isVerifyingEmail ? t("pages.login_page.otp_title") : t("forms.login")}

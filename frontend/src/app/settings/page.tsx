@@ -445,7 +445,7 @@ export default function SettingsPage() {
             </div>
 
             <div className="text-[10px] text-[#a0a0a0] text-center pt-4 border-t border-[#F0F0F0]">
-              v1.0.0 · Sendly.uz
+              v1.0.0 · Sendly
             </div>
           </div>
 

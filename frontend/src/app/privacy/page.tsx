@@ -79,7 +79,7 @@ export default function PrivacyPolicy() {
         </div>
         
         <div className="mt-8 pt-6 border-t text-center text-xs text-gray-500">
-          © {new Date().getFullYear()} Sendly.uz. All rights reserved.
+          © {new Date().getFullYear()} Sendly. All rights reserved.
         </div>
       </div>
     </div>
