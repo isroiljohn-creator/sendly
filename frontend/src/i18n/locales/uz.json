@@ -273,7 +273,7 @@
       "manage_channels": "Kanal boshqarish",
       "user_details": "Foydalanuvchi ma'lumotlari",
       "user_details_desc": "Tizimdagi profilingiz ma'lumotlarini o'zgartiring",
-      "full_name": "Ism va Familiya",
+      "full_name": "Ism",
       "email": "Email manzili",
       "db_manage": "Ma'lumotlar boshqaruvi",
       "db_manage_desc": "Tizim ma'lumotlar bazasini yuklab olishingiz, boshqa akkauntga ko'chirish uchun yuklashingiz yoki butunlay tozalab tiklashingiz mumkin.",
@@ -817,7 +817,8 @@
       "error_send_otp": "Tasdiqlash kodini yuborishda xatolik yuz berdi.",
       "error_invalid_credentials": "Pochta yoki parol noto'g'ri.",
       "error_invalid_otp": "Tasdiqlash kodi noto'g'ri. Qayta urinib ko'ring.",
-      "error_connection": "Tizimga ulanishda xatolik: "
+      "error_connection": "Tizimga ulanishda xatolik: ",
+      "error_password_mismatch": "Kiritilgan parollar bir-biriga mos kelmadi."
     },
     "lessons_page": {
       "start_lesson": "Darsni boshlash",
@@ -843,7 +844,8 @@
     "register": "Ro'yxatdan o'tish",
     "no_account": "Hisobingiz yo'qmi?",
     "has_account": "Hisobingiz bormi?",
-    "full_name": "Ism va Familiya"
+    "full_name": "Ism",
+    "confirm_password": "Parolni tasdiqlash"
   },
   "toast": {
     "success": "Muvaffaqiyatli",

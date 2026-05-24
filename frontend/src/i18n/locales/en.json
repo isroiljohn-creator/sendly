@@ -273,7 +273,7 @@
       "manage_channels": "Manage channels",
       "user_details": "User Details",
       "user_details_desc": "Update your profile details in the system",
-      "full_name": "Full Name",
+      "full_name": "Name",
       "email": "Email Address",
       "db_manage": "Database Management",
       "db_manage_desc": "You can export the system database, import a backup to migrate data, or fully reset all local configurations.",
@@ -818,7 +818,8 @@
       "error_send_otp": "Failed to send verification code.",
       "error_invalid_credentials": "Incorrect email or password.",
       "error_invalid_otp": "Incorrect code. Please try again.",
-      "error_connection": "Connection error: "
+      "error_connection": "Connection error: ",
+      "error_password_mismatch": "Passwords do not match."
     },
     "lessons_page": {
       "start_lesson": "Start Lesson",
@@ -844,7 +845,8 @@
     "register": "Register",
     "no_account": "Don't have an account?",
     "has_account": "Already have an account?",
-    "full_name": "Full Name"
+    "full_name": "Name",
+    "confirm_password": "Confirm password"
   },
   "toast": {
     "success": "Success",
