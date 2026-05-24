@@ -351,7 +351,6 @@ export function LandingPageView() {
           {/* Trust badges */}
           <div className="mt-8 flex items-center gap-5 justify-center lg:justify-start text-[11.5px] text-[#707075] font-semibold">
             <span className="flex items-center gap-1.5"><Check size={12} className="text-[#7CA607]" />{"7 kun bepul"}</span>
-            <span className="flex items-center gap-1.5"><Check size={12} className="text-[#7CA607]" />{"Karta bog'lash shart"}</span>
             <span className="flex items-center gap-1.5"><Check size={12} className="text-[#7CA607]" />{"Meta API orqali"}</span>
           </div>
         </div>
