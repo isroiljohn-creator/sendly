@@ -8,7 +8,11 @@ import {
   X,
   MessageCircle,
   MessageSquare,
-  HelpCircle
+  HelpCircle,
+  User,
+  Phone,
+  Video,
+  Smile
 } from "lucide-react";
 import { db, Channel, Automation } from "@/lib/db";
 import { CustomDropdown } from "@/components/ui/CustomDropdown";
@@ -257,7 +261,7 @@ export default function QuickBotWizardPage() {
                         <span className="absolute right-3.5 top-3.5 text-[#707070] pointer-events-none text-[8px]">▼</span>
                       </div>
                       <p className="text-[10px] text-[#707070] mt-1 leading-relaxed font-medium">
-                        Agar kanal ro&apos;yxatda bo&apos;lmasa, <a href="/settings" className="text-[#2563EB] hover:underline font-bold">bot qo&apos;shish</a> ushbu Telegram kanalining administratori sifatida yoki <span className="text-[#2563EB] hover:underline font-bold cursor-pointer">ro&apos;yxatni yangilash</span>
+                        Agar kanal ro&apos;yxatda bo&apos;lmasa, <a href="/settings" className="text-black hover:underline font-bold">bot qo&apos;shish</a> ushbu Telegram kanalining administratori sifatida yoki <span className="text-black hover:underline font-bold cursor-pointer">ro&apos;yxatni yangilash</span>
                       </p>
                     </div>
                   )}
@@ -276,7 +280,7 @@ export default function QuickBotWizardPage() {
                     /* Telegram Triggers Radio Options */
                     <div className="flex flex-col gap-3 max-w-md">
                       <label 
-                        className={`border rounded-2xl p-4 flex items-center justify-between cursor-pointer transition-all ${directTriggerType === "any" ? "border-[#2563EB] bg-[#2563EB]/5 font-semibold text-black" : "border-[#E8E8E8] hover:border-black/20"}`}
+                        className={`border rounded-2xl p-4 flex items-center justify-between cursor-pointer transition-all ${directTriggerType === "any" ? "border-black bg-[#C7F33C]/10 font-semibold text-black" : "border-[#E8E8E8] hover:border-black/20"}`}
                         onClick={() => {
                           setDirectTriggerType("any");
                           setTriggerDirect(true);
@@ -284,7 +288,7 @@ export default function QuickBotWizardPage() {
                         }}
                       >
                         <div className="flex items-center gap-3">
-                          <MessageCircle size={18} className="text-[#2563EB]" />
+                          <MessageCircle size={18} className="text-black" />
                           <span className="text-[13px]">Bot&apos;ni ishga tushirish (buyruq/start)</span>
                         </div>
                         <input 
@@ -292,12 +296,12 @@ export default function QuickBotWizardPage() {
                           name="telegram_trigger" 
                           checked={directTriggerType === "any"} 
                           readOnly 
-                          className="h-4 w-4 text-[#2563EB] border-[#D8D8D8] focus:ring-[#2563EB]" 
+                          className="h-4 w-4 text-black border-[#D8D8D8] focus:ring-black" 
                         />
                       </label>
 
                       <label 
-                        className={`border rounded-2xl p-4 flex items-center justify-between cursor-pointer transition-all ${directTriggerType === "keyword" ? "border-[#2563EB] bg-[#2563EB]/5 font-semibold text-black" : "border-[#E8E8E8] hover:border-black/20"}`}
+                        className={`border rounded-2xl p-4 flex items-center justify-between cursor-pointer transition-all ${directTriggerType === "keyword" ? "border-black bg-[#C7F33C]/10 font-semibold text-black" : "border-[#E8E8E8] hover:border-black/20"}`}
                         onClick={() => {
                           setDirectTriggerType("keyword");
                           setTriggerDirect(true);
@@ -305,7 +309,7 @@ export default function QuickBotWizardPage() {
                         }}
                       >
                         <div className="flex items-center gap-3">
-                          <MessageSquare size={18} className="text-[#2563EB]" />
+                          <MessageSquare size={18} className="text-black" />
                           <span className="text-[13px]">Kalit so&apos;z bilan xabar</span>
                         </div>
                         <input 
@@ -313,7 +317,7 @@ export default function QuickBotWizardPage() {
                           name="telegram_trigger" 
                           checked={directTriggerType === "keyword"} 
                           readOnly 
-                          className="h-4 w-4 text-[#2563EB] border-[#D8D8D8] focus:ring-[#2563EB]" 
+                          className="h-4 w-4 text-black border-[#D8D8D8] focus:ring-black" 
                         />
                       </label>
 
@@ -349,41 +353,41 @@ export default function QuickBotWizardPage() {
                     <div className="flex flex-col gap-3 max-w-md">
                       {/* Trigger Direct */}
                       <div 
-                        className={`border rounded-2xl p-4 flex items-center justify-between cursor-pointer transition-all ${triggerDirect ? "border-[#2563EB] bg-[#2563EB]/5 font-semibold text-black" : "border-[#E8E8E8] hover:border-black/20"}`}
+                        className={`border rounded-2xl p-4 flex items-center justify-between cursor-pointer transition-all ${triggerDirect ? "border-black bg-[#C7F33C]/10 font-semibold text-black" : "border-[#E8E8E8] hover:border-black/20"}`}
                         onClick={() => {
                           setTriggerDirect(!triggerDirect);
                           if (!triggerDirect) setTriggerComment(false);
                         }}
                       >
                         <div className="flex items-center gap-3">
-                          <MessageCircle size={18} className="text-[#2563EB]" />
+                          <MessageCircle size={18} className="text-black" />
                           <span className="text-[13px]">Direkt&apos;ga Xabar</span>
                         </div>
                         <input 
                           type="checkbox" 
                           checked={triggerDirect} 
                           readOnly 
-                          className="rounded border-[#D8D8D8] text-[#2563EB] focus:ring-[#2563EB] h-4 w-4" 
+                          className="rounded border-[#D8D8D8] text-black focus:ring-black h-4 w-4" 
                         />
                       </div>
 
                       {/* Trigger Comment */}
                       <div 
-                        className={`border rounded-2xl p-4 flex items-center justify-between cursor-pointer transition-all ${triggerComment ? "border-[#2563EB] bg-[#2563EB]/5 font-semibold text-black" : "border-[#E8E8E8] hover:border-black/20"}`}
+                        className={`border rounded-2xl p-4 flex items-center justify-between cursor-pointer transition-all ${triggerComment ? "border-black bg-[#C7F33C]/10 font-semibold text-black" : "border-[#E8E8E8] hover:border-black/20"}`}
                         onClick={() => {
                           setTriggerComment(!triggerComment);
                           if (!triggerComment) setTriggerDirect(false);
                         }}
                       >
                         <div className="flex items-center gap-3">
-                          <MessageSquare size={18} className="text-[#2563EB]" />
+                          <MessageSquare size={18} className="text-black" />
                           <span className="text-[13px]">Reels yoki postga izoh</span>
                         </div>
                         <input 
                           type="checkbox" 
                           checked={triggerComment} 
                           readOnly 
-                          className="rounded border-[#D8D8D8] text-[#2563EB] focus:ring-[#2563EB] h-4 w-4" 
+                          className="rounded border-[#D8D8D8] text-black focus:ring-black h-4 w-4" 
                         />
                       </div>
                     </div>
@@ -400,7 +404,7 @@ export default function QuickBotWizardPage() {
                           name="direct_trigger" 
                           checked={directTriggerType === "any"} 
                           onChange={() => setDirectTriggerType("any")}
-                          className="h-4 w-4 text-[#2563EB] border-[#D8D8D8] focus:ring-[#2563EB]"
+                          className="h-4 w-4 text-black border-[#D8D8D8] focus:ring-black"
                         />
                         <span>Har qanday xabar</span>
                       </label>
@@ -410,7 +414,7 @@ export default function QuickBotWizardPage() {
                           name="direct_trigger" 
                           checked={directTriggerType === "keyword"} 
                           onChange={() => setDirectTriggerType("keyword")}
-                          className="h-4 w-4 text-[#2563EB] border-[#D8D8D8] focus:ring-[#2563EB]"
+                          className="h-4 w-4 text-black border-[#D8D8D8] focus:ring-black"
                         />
                         <span>Kalit so&apos;z bilan xabar</span>
                       </label>
@@ -447,7 +451,7 @@ export default function QuickBotWizardPage() {
                             type="checkbox" 
                             checked={exactMatch} 
                             onChange={(e) => setExactMatch(e.target.checked)}
-                            className="rounded border-[#D8D8D8] text-[#2563EB] focus:ring-[#2563EB] h-3.5 w-3.5" 
+                            className="rounded border-[#D8D8D8] text-black focus:ring-black h-3.5 w-3.5" 
                           />
                           <span>Aniq moslik</span>
                           <span title="Aniq mos kelganda chatbot ishga tushadi"><HelpCircle size={12} className="text-[#A0A0A0]" /></span>
@@ -467,7 +471,7 @@ export default function QuickBotWizardPage() {
                           name="comment_trigger" 
                           checked={commentTriggerType === "any"} 
                           onChange={() => setCommentTriggerType("any")}
-                          className="h-4 w-4 text-[#2563EB] border-[#D8D8D8] focus:ring-[#2563EB]"
+                          className="h-4 w-4 text-black border-[#D8D8D8] focus:ring-black"
                         />
                         <span>Har qanday izoh</span>
                       </label>
@@ -477,7 +481,7 @@ export default function QuickBotWizardPage() {
                           name="comment_trigger" 
                           checked={commentTriggerType === "keyword"} 
                           onChange={() => setCommentTriggerType("keyword")}
-                          className="h-4 w-4 text-[#2563EB] border-[#D8D8D8] focus:ring-[#2563EB]"
+                          className="h-4 w-4 text-black border-[#D8D8D8] focus:ring-black"
                         />
                         <span>Kalit so&apos;z bilan izoh</span>
                       </label>
@@ -514,7 +518,7 @@ export default function QuickBotWizardPage() {
                             type="checkbox" 
                             checked={exactMatch} 
                             onChange={(e) => setExactMatch(e.target.checked)}
-                            className="rounded border-[#D8D8D8] text-[#2563EB] focus:ring-[#2563EB] h-3.5 w-3.5" 
+                            className="rounded border-[#D8D8D8] text-black focus:ring-black h-3.5 w-3.5" 
                           />
                           <span>Aniq moslik</span>
                           <span title="Izoh kalit so'zga aniq mos tushgandagina bot javob yozadi"><HelpCircle size={12} className="text-[#A0A0A0]" /></span>
@@ -561,7 +565,7 @@ export default function QuickBotWizardPage() {
                     <label className="text-[11px] font-extrabold text-[#707070] uppercase tracking-wider">
                       Salomlashuv xabari
                     </label>
-                    <button type="button" className="text-[11px] font-extrabold text-[#2563EB] hover:underline flex items-center gap-1">
+                    <button type="button" className="text-[11px] font-extrabold text-[#16A34A] hover:underline flex items-center gap-1">
                       <Plus size={12} /> + Tasvir
                     </button>
                   </div>
@@ -735,7 +739,7 @@ export default function QuickBotWizardPage() {
                       onChange={(e) => setRemindLinkClick(e.target.checked)}
                       className="sr-only peer"
                     />
-                    <div className="w-11 h-6 bg-[#E8E8E8] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-[#D8D8D8] after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#2563EB]"></div>
+                    <div className="w-11 h-6 bg-[#E8E8E8] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-[#D8D8D8] after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-black"></div>
                   </label>
                 </div>
 
@@ -754,7 +758,7 @@ export default function QuickBotWizardPage() {
                       onChange={(e) => setAdditionalMessageToggle(e.target.checked)}
                       className="sr-only peer"
                     />
-                    <div className="w-11 h-6 bg-[#E8E8E8] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-[#D8D8D8] after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#2563EB]"></div>
+                    <div className="w-11 h-6 bg-[#E8E8E8] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-[#D8D8D8] after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-black"></div>
                   </label>
                 </div>
 
@@ -779,7 +783,7 @@ export default function QuickBotWizardPage() {
               <button
                 type="button"
                 onClick={() => setStep((prev) => (prev + 1) as 1 | 2 | 3)}
-                className="px-8 py-2.5 bg-[#2563EB] hover:bg-[#1d4ed8] text-white font-bold rounded-xl text-[12px] transition-all text-center active:scale-95 shadow-sm"
+                className="px-8 py-2.5 bg-black hover:bg-black/90 text-white font-bold rounded-xl text-[12px] transition-all text-center active:scale-95 shadow-sm"
               >
                 Keyin
               </button>
@@ -787,7 +791,7 @@ export default function QuickBotWizardPage() {
               <button
                 type="button"
                 onClick={handleCreateBot}
-                className="px-8 py-2.5 bg-[#2563EB] hover:bg-[#1d4ed8] text-white font-bold rounded-xl text-[12px] transition-all text-center active:scale-95 shadow-md"
+                className="px-8 py-2.5 bg-[#C7F33C] hover:bg-[#b5e02c] text-black border border-[#b2db2a] font-bold rounded-xl text-[12px] transition-all text-center active:scale-95 shadow-md"
               >
                 Yaratish
               </button>
@@ -834,7 +838,7 @@ export default function QuickBotWizardPage() {
                     <img src={selectedChannel.avatar} alt="" className="h-6 w-6 rounded-full object-cover shrink-0" />
                   ) : (
                     <div className="h-6 w-6 rounded-full bg-slate-200 flex items-center justify-center shrink-0">
-                      <span className="text-[8px] font-bold">👤</span>
+                      <User size={12} className="text-[#707070]" />
                     </div>
                   )}
                   <div className="min-w-0">
@@ -846,9 +850,9 @@ export default function QuickBotWizardPage() {
                     </p>
                   </div>
                 </div>
-                <div className="flex items-center gap-2.5 text-black shrink-0">
-                  <span className="text-[12px] cursor-pointer">📞</span>
-                  <span className="text-[12px] cursor-pointer">📹</span>
+                <div className="flex items-center gap-2.5 text-[#707070] shrink-0">
+                  <Phone size={12} className="cursor-pointer hover:text-black" />
+                  <Video size={13} className="cursor-pointer hover:text-black" />
                 </div>
               </div>
             ) : (
@@ -1162,7 +1166,7 @@ export default function QuickBotWizardPage() {
                           </div>
                           <div className="flex-1 bg-[#F5F5F5] rounded-full px-3 py-1 flex items-center justify-between text-[9px] text-[#707070] font-medium border border-[#E8E8E8]">
                             <span>{selectedChannel ? `${selectedChannel.username.replace(/^@+/, "")} uchun izoh...` : "isroil.ai uchun izoh..."}</span>
-                            <span>😀</span>
+                            <Smile size={12} className="text-[#707070]" />
                           </div>
                         </div>
                       </div>
@@ -1180,12 +1184,14 @@ export default function QuickBotWizardPage() {
                   {selectedChannel?.avatar ? (
                     <img src={selectedChannel.avatar} alt="" className="h-full w-full object-cover" />
                   ) : (
-                    <div className="h-5 w-5 rounded-full bg-slate-200 flex items-center justify-center text-[10px]">👤</div>
+                    <div className="h-5 w-5 rounded-full bg-slate-200 flex items-center justify-center shrink-0">
+                      <User size={10} className="text-[#707070]" />
+                    </div>
                   )}
                 </div>
                 <div className="flex-1 bg-[#F5F5F5] rounded-full px-3 py-1.5 flex items-center justify-between text-[9px] text-[#A0A0A0] border border-[#E8E8E8]">
                   <span>Xabar yozing...</span>
-                  <span className="text-[10px] cursor-pointer">😀</span>
+                  <Smile size={12} className="text-[#707070] cursor-pointer hover:text-black" />
                 </div>
               </div>
             )}

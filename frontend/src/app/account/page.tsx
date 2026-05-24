@@ -463,7 +463,7 @@ export default function AccountPage() {
                 <div className="flex flex-wrap items-center gap-4 py-2">
                   <button
                     onClick={() => setIsPricingOpen(true)}
-                    className="flex items-center gap-1.5 text-[#2563EB] hover:text-[#1d4ed8] hover:underline font-semibold text-[13px]"
+                    className="flex items-center gap-1.5 text-black hover:text-black/80 hover:underline font-semibold text-[13px]"
                   >
                     <CreditCard size={15} />
                     <span>{t("pages.account.billing.change_plan")}</span>
@@ -471,7 +471,7 @@ export default function AccountPage() {
                   {!currentUser?.isCardLinked && !isLinking && (
                     <button
                       onClick={() => setIsLinking(true)}
-                      className="flex items-center gap-1.5 text-[#2563EB] hover:text-[#1d4ed8] hover:underline font-semibold text-[13px] border-l border-[#E8E8E8] pl-4"
+                      className="flex items-center gap-1.5 text-black hover:text-black/80 hover:underline font-semibold text-[13px] border-l border-[#E8E8E8] pl-4"
                     >
                       <Plus size={15} />
                       <span>{"Karta bog'lash"}</span>
@@ -569,7 +569,7 @@ export default function AccountPage() {
                         >
                           {t("common.cancel")}
                         </Button>
-                        <Button type="submit" variant="accent" className="rounded-[10px] text-[12px] px-4 py-2 bg-[#2563EB] hover:bg-[#1d4ed8] text-white">
+                        <Button type="submit" className="rounded-[10px] text-[12px] px-4 py-2 bg-black hover:bg-black/90 text-white">
                           {t("common.connect")}
                         </Button>
                       </div>
@@ -602,7 +602,7 @@ export default function AccountPage() {
                         >
                           {t("common.back")}
                         </Button>
-                        <Button type="submit" variant="accent" className="rounded-[10px] text-[12px] px-4 py-2 bg-[#2563EB] hover:bg-[#1d4ed8] text-white">
+                        <Button type="submit" className="rounded-[10px] text-[12px] px-4 py-2 bg-black hover:bg-black/90 text-white">
                           {t("common.confirm")}
                         </Button>
                       </div>
@@ -610,7 +610,7 @@ export default function AccountPage() {
                   )}
 
                   <div className="text-[11px] text-[#707070] leading-relaxed bg-[#F9F9F7] p-3.5 rounded-[12px] border border-[#F0F0F0] mt-4 flex items-start gap-2">
-                    <span className="text-[#2563EB] font-bold shrink-0">ⓘ</span>
+                    <span className="text-black font-bold shrink-0">ⓘ</span>
                     <span>
                       {"Kartani bog'lash mutlaqo bepul. 7 kunlik bepul sinov muddati yakunlanmaguncha kartangizdan pul yechilmaydi. Sinov muddati tugagandan so'nggina keyingi davr uchun to'lov olinadi."}
                     </span>

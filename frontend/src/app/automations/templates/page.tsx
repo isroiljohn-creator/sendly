@@ -11,7 +11,9 @@ import {
   Zap, 
   BookOpen, 
   MessageSquare,
-  Gift
+  Gift,
+  Send,
+  Music
 } from "lucide-react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { Card, Button, AlertModal } from "@/components/ui/primitives";
@@ -331,21 +333,21 @@ export default function TemplatesPage() {
               </button>
               <button
                 onClick={() => setSelectedPlatform("instagram")}
-                className={`px-3 py-1 rounded-full text-[10px] font-bold flex items-center gap-1 transition-all ${selectedPlatform === "instagram" ? "bg-white text-black shadow-xs" : "text-[#707070] hover:text-black bg-transparent"}`}
+                className={`px-3 py-1 rounded-full text-[10px] font-bold flex items-center gap-1.5 transition-all ${selectedPlatform === "instagram" ? "bg-white text-black shadow-xs" : "text-[#707070] hover:text-black bg-transparent"}`}
               >
-                📸 Instagram
+                <Instagram size={10} /> Instagram
               </button>
               <button
                 onClick={() => setSelectedPlatform("telegram")}
-                className={`px-3 py-1 rounded-full text-[10px] font-bold flex items-center gap-1 transition-all ${selectedPlatform === "telegram" ? "bg-white text-black shadow-xs" : "text-[#707070] hover:text-black bg-transparent"}`}
+                className={`px-3 py-1 rounded-full text-[10px] font-bold flex items-center gap-1.5 transition-all ${selectedPlatform === "telegram" ? "bg-white text-black shadow-xs" : "text-[#707070] hover:text-black bg-transparent"}`}
               >
-                ✈️ Telegram
+                <Send size={10} /> Telegram
               </button>
               <button
                 onClick={() => setSelectedPlatform("tiktok")}
-                className={`px-3 py-1 rounded-full text-[10px] font-bold flex items-center gap-1 transition-all ${selectedPlatform === "tiktok" ? "bg-white text-black shadow-xs" : "text-[#707070] hover:text-black bg-transparent"}`}
+                className={`px-3 py-1 rounded-full text-[10px] font-bold flex items-center gap-1.5 transition-all ${selectedPlatform === "tiktok" ? "bg-white text-black shadow-xs" : "text-[#707070] hover:text-black bg-transparent"}`}
               >
-                🎵 TikTok
+                <Music size={10} /> TikTok
               </button>
             </div>
           </div>
@@ -397,10 +399,16 @@ export default function TemplatesPage() {
                     {/* Card Top Header */}
                     <div className="flex items-center justify-between w-full">
                       {/* Platform Icons */}
-                      <div className="flex items-center gap-1 bg-[#F5F5F7] px-2 py-1 rounded-lg border border-[#E8E8E8]">
+                      <div className="flex items-center gap-1.5 bg-[#F5F5F7] px-2.5 py-1 rounded-lg border border-[#E8E8E8] text-[#707070]">
                         {tmpl.platforms.map((p) => (
-                          <span key={p} className="text-[10px]" title={p}>
-                            {p === "instagram" ? "📸" : p === "telegram" ? "✈️" : "🎵"}
+                          <span key={p} className="flex items-center" title={p}>
+                            {p === "instagram" ? (
+                              <Instagram size={10} />
+                            ) : p === "telegram" ? (
+                              <Send size={10} />
+                            ) : (
+                              <Music size={10} />
+                            )}
                           </span>
                         ))}
                       </div>
@@ -408,7 +416,7 @@ export default function TemplatesPage() {
                       {/* Badges (Pro / Custom Badge) */}
                       <div className="flex items-center gap-1">
                         {tmpl.isPro && (
-                          <div className="bg-blue-600/10 text-blue-600 font-extrabold text-[9px] uppercase tracking-wider px-2 py-0.5 rounded-md flex items-center gap-0.5">
+                          <div className="bg-black text-[#C7F33C] font-extrabold text-[9px] uppercase tracking-wider px-2 py-0.5 rounded-md flex items-center gap-0.5">
                             <Crown size={10} strokeWidth={2.5} /> Pro
                           </div>
                         )}
@@ -422,7 +430,7 @@ export default function TemplatesPage() {
 
                     {/* Card Description */}
                     <div>
-                      <h4 className="text-[13px] font-black text-black leading-tight group-hover:text-blue-600 transition-colors">
+                      <h4 className="text-[13px] font-black text-black leading-tight group-hover:text-neutral-700 transition-colors">
                         {tmpl.name}
                       </h4>
                       <p className="text-[11px] text-[#707070] mt-1.5 leading-relaxed font-medium">

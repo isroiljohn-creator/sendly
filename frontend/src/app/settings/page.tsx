@@ -333,8 +333,8 @@ export default function SettingsPage() {
                   onClick={() => setActiveSection("general")}
                   className={`flex items-center w-full px-3 py-2 text-[12px] font-semibold rounded-[10px] transition-colors text-left ${
                     activeSection === "general"
-                      ? "bg-[#EFF2FC] text-black font-bold"
-                      : "text-[#707070] hover:bg-[#F9F9F7] hover:text-black"
+                    ? "bg-[#C7F33C]/20 text-black font-bold"
+                    : "text-[#707070] hover:bg-[#F9F9F7] hover:text-black"
                   }`}
                 >
                   {t("pages.settings_page.general")}
@@ -351,8 +351,8 @@ export default function SettingsPage() {
                   onClick={() => setActiveSection("integrations")}
                   className={`flex items-center w-full px-3 py-2 text-[12px] font-semibold rounded-[10px] transition-colors text-left ${
                     activeSection === "integrations"
-                      ? "bg-[#EFF2FC] text-black font-bold"
-                      : "text-[#707070] hover:bg-[#F9F9F7] hover:text-black"
+                    ? "bg-[#C7F33C]/20 text-black font-bold"
+                    : "text-[#707070] hover:bg-[#F9F9F7] hover:text-black"
                   }`}
                 >
                   {t("pages.settings.tab_integrations")}
@@ -361,8 +361,8 @@ export default function SettingsPage() {
                   onClick={() => setActiveSection("team")}
                   className={`flex items-center w-full px-3 py-2 text-[12px] font-semibold rounded-[10px] transition-colors text-left ${
                     activeSection === "team"
-                      ? "bg-[#EFF2FC] text-black font-bold"
-                      : "text-[#707070] hover:bg-[#F9F9F7] hover:text-black"
+                    ? "bg-[#C7F33C]/20 text-black font-bold"
+                    : "text-[#707070] hover:bg-[#F9F9F7] hover:text-black"
                   }`}
                 >
                   {t("pages.settings_page.team")}
@@ -371,8 +371,8 @@ export default function SettingsPage() {
                   onClick={() => setActiveSection("apikeys")}
                   className={`flex items-center w-full px-3 py-2 text-[12px] font-semibold rounded-[10px] transition-colors text-left ${
                     activeSection === "apikeys"
-                      ? "bg-[#EFF2FC] text-black font-bold"
-                      : "text-[#707070] hover:bg-[#F9F9F7] hover:text-black"
+                    ? "bg-[#C7F33C]/20 text-black font-bold"
+                    : "text-[#707070] hover:bg-[#F9F9F7] hover:text-black"
                   }`}
                 >
                   {t("pages.settings_page.apikeys")}
@@ -405,7 +405,7 @@ export default function SettingsPage() {
                           onClick={() => setActiveSection(ch.id)}
                           className={`flex items-center gap-2.5 w-full px-3 py-2.5 rounded-[10px] transition-colors text-left ${
                             isSelected
-                              ? "bg-[#EFF2FC] text-black font-bold"
+                              ? "bg-[#C7F33C]/20 text-black font-bold"
                               : "text-[#707070] hover:bg-[#F9F9F7] hover:text-black"
                           }`}
                         >
@@ -595,7 +595,7 @@ export default function SettingsPage() {
                   </div>
                   <button
                     type="submit"
-                    className="h-[44px] bg-[#2563EB] hover:bg-[#1D4ED8] text-white font-semibold text-[13px] px-6 rounded-[10px] transition-colors"
+                    className="h-[44px] bg-black hover:bg-black/90 text-white font-semibold text-[13px] px-6 rounded-[10px] transition-colors"
                   >
                     {t("pages.settings_page.invite_btn")}
                   </button>
@@ -773,7 +773,7 @@ export default function SettingsPage() {
                           );
                         }, 1500);
                       }}
-                      className="bg-[#1F69FF] hover:bg-[#1558E8] text-white text-[12px] font-semibold px-5 py-3 rounded-[12px] self-start transition-all active:scale-95 flex items-center gap-2 disabled:opacity-75"
+                      className="bg-black hover:bg-black/90 text-white text-[12px] font-semibold px-5 py-3 rounded-[12px] self-start transition-all active:scale-95 flex items-center gap-2 disabled:opacity-75"
                     >
                       {refreshingPermissions ? (
                         <>

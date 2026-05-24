@@ -603,7 +603,7 @@ export default function AutomationsPage() {
                     {/* Header */}
                     <div className="flex items-start justify-between">
                       <div className="flex items-center gap-2 min-w-0">
-                        <span className="text-[#10B981] font-extrabold text-[14px] shrink-0">⚡</span>
+                        <Zap size={14} className="text-[#10B981] fill-[#10B981] shrink-0" />
                         <h3 className="text-[13px] font-black text-black leading-tight truncate max-w-[170px]" title={a.name}>
                           {a.name}
                         </h3>
@@ -656,7 +656,7 @@ export default function AutomationsPage() {
                                 }}
                                 className={`w-full flex items-center gap-1.5 px-3 py-1 text-[10px] hover:bg-[#F5F5F5] text-left ${!a.groupId ? "font-bold text-black" : "text-[#707070]"}`}
                               >
-                                📂 {t("pages.automations_page.uncategorized")}
+                                <Folder size={12} className="text-[#707070] shrink-0 mr-1.5" />{t("pages.automations_page.uncategorized")}
                               </button>
                               {groups.map((g) => (
                                 <button
@@ -667,7 +667,7 @@ export default function AutomationsPage() {
                                   }}
                                   className={`w-full flex items-center gap-1.5 px-3 py-1 text-[10px] hover:bg-[#F5F5F5] text-left ${a.groupId === g.id ? "font-bold text-black" : "text-[#707070]"}`}
                                 >
-                                  📂 {g.name}
+                                  <Folder size={12} className="text-[#707070] shrink-0 mr-1.5" fill="none" />{g.name}
                                 </button>
                               ))}
 
@@ -747,7 +747,7 @@ export default function AutomationsPage() {
             <div className="flex flex-col gap-3">
               {/* Option 1: Scratch */}
               <label 
-                className={`border rounded-2xl p-4 flex items-start gap-3 cursor-pointer transition-all ${createFlowMode === "scratch" ? "border-[#2563EB] bg-[#2563EB]/5 font-semibold" : "border-[#E8E8E8] hover:border-black/20"}`}
+                className={`border rounded-2xl p-4 flex items-start gap-3 cursor-pointer transition-all ${createFlowMode === "scratch" ? "border-black bg-[#C7F33C]/10 font-semibold" : "border-[#E8E8E8] hover:border-black/20"}`}
                 onClick={() => setCreateFlowMode("scratch")}
               >
                 <input 
@@ -755,7 +755,7 @@ export default function AutomationsPage() {
                   name="create_flow_mode" 
                   checked={createFlowMode === "scratch"} 
                   readOnly 
-                  className="mt-1 h-4 w-4 text-[#2563EB] border-[#D8D8D8] focus:ring-[#2563EB] shrink-0" 
+                  className="mt-1 h-4 w-4 text-black border-[#D8D8D8] focus:ring-black shrink-0" 
                 />
                 <div className="flex flex-col">
                   <span className="text-[13px] font-bold text-black">Noldan o&apos;zingiz bajaring</span>
@@ -767,7 +767,7 @@ export default function AutomationsPage() {
 
               {/* Option 2: Template */}
               <label 
-                className={`border rounded-2xl p-4 flex items-start gap-3 cursor-pointer transition-all ${createFlowMode === "template" ? "border-[#2563EB] bg-[#2563EB]/5 font-semibold" : "border-[#E8E8E8] hover:border-black/20"}`}
+                className={`border rounded-2xl p-4 flex items-start gap-3 cursor-pointer transition-all ${createFlowMode === "template" ? "border-black bg-[#C7F33C]/10 font-semibold" : "border-[#E8E8E8] hover:border-black/20"}`}
                 onClick={() => setCreateFlowMode("template")}
               >
                 <input 
@@ -775,7 +775,7 @@ export default function AutomationsPage() {
                   name="create_flow_mode" 
                   checked={createFlowMode === "template"} 
                   readOnly 
-                  className="mt-1 h-4 w-4 text-[#2563EB] border-[#D8D8D8] focus:ring-[#2563EB] shrink-0" 
+                  className="mt-1 h-4 w-4 text-black border-[#D8D8D8] focus:ring-black shrink-0" 
                 />
                 <div className="flex flex-col">
                   <span className="text-[13px] font-bold text-black">Tayyor shablon bo&apos;yicha</span>
@@ -795,7 +795,7 @@ export default function AutomationsPage() {
                   window.location.href = "/automations/templates";
                 }
               }}
-              className="w-full py-3 bg-[#2563EB] hover:bg-[#1d4ed8] text-white font-extrabold rounded-xl text-[12px] transition-all text-center active:scale-95 shadow-sm mt-2"
+              className="w-full py-3 bg-black hover:bg-black/90 text-white font-extrabold rounded-xl text-[12px] transition-all text-center active:scale-95 shadow-sm mt-2"
             >
               Keyin
             </button>
