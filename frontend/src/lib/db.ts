@@ -821,13 +821,15 @@ export const db = {
 
   async fetchFromServer(): Promise<boolean> {
     if (!isClient) return false;
+    const currentUser = this.getCurrentUser();
+    const userId = currentUser?.id || "guest";
     try {
-      const res = await fetch("/api/db");
+      const res = await fetch(`/api/db?userId=${userId}`);
       if (!res.ok) return false;
       const data = await res.json();
       if (data && typeof data === "object") {
         Object.entries(data).forEach(([key, val]) => {
-          if (key.startsWith("replai_")) {
+          if (key.startsWith("replai_") && key !== "replai_current_user") {
             localStorage.setItem(key, typeof val === "string" ? val : JSON.stringify(val));
           }
         });
@@ -843,9 +845,11 @@ export const db = {
 
   async saveToServer(): Promise<boolean> {
     if (!isClient) return false;
+    const currentUser = this.getCurrentUser();
+    const userId = currentUser?.id || "guest";
     try {
       const data = this.exportData();
-      const res = await fetch("/api/db", {
+      const res = await fetch(`/api/db?userId=${userId}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),

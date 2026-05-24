@@ -33,20 +33,85 @@ function writeDb(data: unknown) {
   }
 }
 
-export async function GET() {
-  const data = readDb();
+export async function GET(request: Request) {
+  const { searchParams } = new URL(request.url);
+  const userId = searchParams.get("userId") || "guest";
+  
+  let dbData = readDb();
+  
+  // Migration support for old format without userData/users
+  if (dbData && !dbData.userData && !dbData.users) {
+    const users = dbData.replai_users ? JSON.parse(dbData.replai_users) : [];
+    dbData = {
+      users: users,
+      userData: {}
+    };
+    writeDb(dbData);
+  }
+  
+  // Extract user's specific data
+  const userSpecificData = dbData.userData?.[userId] || {};
+  
+  // Combine userSpecificData with global users list
+  const responseData = {
+    replai_users: JSON.stringify(dbData.users || []),
+    ...userSpecificData
+  };
+
   try {
     startTelegramBots();
   } catch (err) {
     console.error("Failed to auto-start telegram bots on db GET:", err);
   }
-  return NextResponse.json(data);
+  return NextResponse.json(responseData);
 }
 
 export async function POST(request: Request) {
   try {
-    const data = await request.json();
-    const success = writeDb(data);
+    const { searchParams } = new URL(request.url);
+    const userId = searchParams.get("userId") || "guest";
+    const payload = await request.json();
+    
+    let dbData = readDb();
+    
+    // Migration support for old format
+    if (dbData && !dbData.userData && !dbData.users) {
+      const users = dbData.replai_users ? JSON.parse(dbData.replai_users) : [];
+      dbData = {
+        users: users,
+        userData: {}
+      };
+    }
+
+    if (!dbData.userData) {
+      dbData.userData = {};
+    }
+    if (!dbData.users) {
+      dbData.users = [];
+    }
+
+    // 1. Update shared user list if present in payload
+    if (payload.replai_users) {
+      try {
+        dbData.users = JSON.parse(payload.replai_users);
+      } catch (e) {
+        console.error("Failed to parse replai_users payload:", e);
+      }
+    }
+
+    // 2. Isolate all other fields starting with replai_ under userData[userId]
+    if (!dbData.userData[userId]) {
+      dbData.userData[userId] = {};
+    }
+
+    Object.entries(payload).forEach(([key, val]) => {
+      if (key.startsWith("replai_") && key !== "replai_users" && key !== "replai_current_user") {
+        dbData.userData[userId][key] = val;
+      }
+    });
+
+    const success = writeDb(dbData);
+    
     if (success) {
       try {
         startTelegramBots();

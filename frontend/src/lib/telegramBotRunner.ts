@@ -110,9 +110,24 @@ async function runBotPollLoop(channelId: string, botState: TelegramBotState) {
         console.log(`Bot ${channelId} received message from ${chatId}: "${text}"`);
         
         await updateDbFile(async (dbData) => {
+          let context: Record<string, string> = dbData as unknown as Record<string, string>;
+
+          if (dbData.userData && typeof dbData.userData === "object") {
+            for (const userVal of Object.values(dbData.userData)) {
+              if (userVal && typeof userVal === "object") {
+                const rawUserChannels = (userVal as Record<string, string>)["replai_channels"];
+                const userChannels: Channel[] = rawUserChannels ? JSON.parse(rawUserChannels) : [];
+                if (userChannels.some(c => c.id === channelId)) {
+                  context = userVal as Record<string, string>;
+                  break;
+                }
+              }
+            }
+          }
+
           // 1. Get chats key
           const chatsKey = `replai_chats_${channelId}`;
-          const rawChats = dbData[chatsKey];
+          const rawChats = context[chatsKey];
           const chatsList: ChatThread[] = rawChats ? JSON.parse(rawChats) : [];
           
           // 2. Find or create chat
@@ -149,7 +164,7 @@ async function runBotPollLoop(channelId: string, botState: TelegramBotState) {
           // 4. Bot auto-reply if not liveTakeover
           if (!chat.liveTakeover) {
             // Load Settings
-            const rawSettings = dbData["replai_bot_settings"];
+            const rawSettings = context["replai_bot_settings"];
             const settings: BotSettings = rawSettings ? JSON.parse(rawSettings) : {
               tone: 60,
               length: 40,
@@ -170,7 +185,7 @@ async function runBotPollLoop(channelId: string, botState: TelegramBotState) {
               botReplyText = moderation.warningMessage || "Iltimos, yozish qoidalariga rioya qiling. ⚠️";
             } else {
               // 2. Check keyword automations
-              const rawAutos = dbData[`replai_automations_${channelId}`];
+              const rawAutos = context[`replai_automations_${channelId}`];
               const automations: Automation[] = rawAutos ? JSON.parse(rawAutos) : [];
               let matchedAutomation: Automation | null = null;
               let matchedKeyword = "";
@@ -197,7 +212,7 @@ async function runBotPollLoop(channelId: string, botState: TelegramBotState) {
               if (matchedAutomation) {
                 // Increment runs count
                 matchedAutomation.runs = String(parseInt(matchedAutomation.runs || "0") + 1);
-                dbData[`replai_automations_${channelId}`] = JSON.stringify(automations);
+                context[`replai_automations_${channelId}`] = JSON.stringify(automations);
                 
                 const nameLower = matchedAutomation.name.toLowerCase();
                 if (nameLower.includes("lead magnet") || matchedKeyword === "kitob" || matchedKeyword === "bonus") {
@@ -211,9 +226,9 @@ async function runBotPollLoop(channelId: string, botState: TelegramBotState) {
                 }
               } else if (settings.aiCuratorEnabled) {
                 // 3. AI Curator RAG Logic
-                const rawLessons = dbData["replai_lessons"];
+                const rawLessons = context["replai_lessons"];
                 const lessons: Lesson[] = rawLessons ? JSON.parse(rawLessons) : [];
-                const rawModules = dbData["replai_modules"];
+                const rawModules = context["replai_modules"];
                 const modules: Module[] = rawModules ? JSON.parse(rawModules) : [];
 
                 const studentName = chat.name || "Talaba";
@@ -319,8 +334,8 @@ async function runBotPollLoop(channelId: string, botState: TelegramBotState) {
             }
           }
           
-          // Save updated chats back to dbData
-          dbData[chatsKey] = JSON.stringify(chatsList);
+          // Save updated chats back to context
+          context[chatsKey] = JSON.stringify(chatsList);
         });
       }
     } catch (err) {
@@ -338,13 +353,33 @@ export function startTelegramBots() {
     }
     const dbData = JSON.parse(fs.readFileSync(DB_FILE, "utf-8"));
     
-    // Parse channels
-    const rawChannels = dbData["replai_channels"];
-    const channels: Channel[] = rawChannels ? JSON.parse(rawChannels) : [];
+    const activeTelegramChannels: Channel[] = [];
     
-    const activeTelegramChannels = channels.filter(
-      (c: Channel) => c.type === "telegram" && c.isConnected && c.telegramToken
-    );
+    // Parse channels (legacy global channels)
+    const rawChannels = dbData["replai_channels"];
+    const legacyChannels: Channel[] = rawChannels ? JSON.parse(rawChannels) : [];
+    legacyChannels.forEach((c: Channel) => {
+      if (c.type === "telegram" && c.isConnected && c.telegramToken) {
+        activeTelegramChannels.push(c);
+      }
+    });
+
+    // Scan all users' isolated channels
+    if (dbData.userData && typeof dbData.userData === "object") {
+      Object.values(dbData.userData).forEach((userVal: unknown) => {
+        if (userVal && typeof userVal === "object") {
+          const rawUserChannels = (userVal as Record<string, string>)["replai_channels"];
+          const userChannels: Channel[] = rawUserChannels ? JSON.parse(rawUserChannels) : [];
+          userChannels.forEach((c: Channel) => {
+            if (c.type === "telegram" && c.isConnected && c.telegramToken) {
+              if (!activeTelegramChannels.some(ac => ac.id === c.id)) {
+                activeTelegramChannels.push(c);
+              }
+            }
+          });
+        }
+      });
+    }
     
     const globalBots = (global as unknown as { telegramBots?: Record<string, TelegramBotState> }).telegramBots || {};
     (global as unknown as { telegramBots?: Record<string, TelegramBotState> }).telegramBots = globalBots;
