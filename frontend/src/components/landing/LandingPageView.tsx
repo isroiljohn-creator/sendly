@@ -253,15 +253,15 @@ export function LandingPageView() {
   ];
 
   return (
-    <div className="min-h-screen bg-[#F9F9F7] text-[#1D1D1F] font-sans overflow-x-hidden selection:bg-[#C7F33C] selection:text-black">
+    <div className="min-h-screen bg-[#E8E8E8] text-[#1D1D1F] font-sans overflow-x-hidden selection:bg-[#C7F33C] selection:text-black">
 
       {/* Ambient background glows */}
-      <div className="fixed top-[-15%] left-[-10%] w-[55vw] h-[55vw] rounded-full bg-[#C7F33C]/10 blur-[130px] pointer-events-none z-0" />
-      <div className="fixed top-[40%] right-[-15%] w-[50vw] h-[50vw] rounded-full bg-purple-300/10 blur-[140px] pointer-events-none z-0" />
-      <div className="fixed bottom-[0%] left-[25%] w-[45vw] h-[45vw] rounded-full bg-[#C7F33C]/8 blur-[120px] pointer-events-none z-0" />
+      <div className="fixed top-[-15%] left-[-10%] w-[55vw] h-[55vw] rounded-full bg-[#C7F33C]/8 blur-[130px] pointer-events-none z-0" />
+      <div className="fixed top-[40%] right-[-15%] w-[50vw] h-[50vw] rounded-full bg-purple-300/6 blur-[140px] pointer-events-none z-0" />
+      <div className="fixed bottom-[0%] left-[25%] w-[45vw] h-[45vw] rounded-full bg-[#C7F33C]/6 blur-[120px] pointer-events-none z-0" />
 
       {/* ─── NAVBAR ─── */}
-      <header className="sticky top-0 z-50 w-full border-b border-black/5 bg-[#F9F9F7]/85 backdrop-blur-xl">
+      <header className="sticky top-0 z-50 w-full border-b border-[#D8D8D8]/60 bg-[#E8E8E8]/85 backdrop-blur-xl">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-5 sm:px-8 py-4">
 
           {/* Logo */}
@@ -277,7 +277,7 @@ export function LandingPageView() {
           {/* Desktop nav links */}
           <nav className="hidden lg:flex items-center gap-7 text-[13px] font-semibold text-[#515154]">
             <a href="#features" className="hover:text-black transition-colors">{"Xususiyatlar"}</a>
-            <a href="#simulator" className="hover:text-black transition-colors">{"Demo"}</a>
+            <a href="#simulator" className="hover:text-black transition-colors">{"Sinab ko'rish"}</a>
             <a href="#pricing" className="hover:text-black transition-colors">{"Tariflar"}</a>
             <a href="#faq" className="hover:text-black transition-colors">{"Savol-javob"}</a>
           </nav>
@@ -310,7 +310,7 @@ export function LandingPageView() {
         {mobileMenuOpen && (
           <div className="md:hidden bg-white border-b border-black/5 px-5 py-5 flex flex-col gap-3 animate-in slide-in-from-top duration-200">
             <a href="#features" onClick={() => setMobileMenuOpen(false)} className="text-[14px] font-semibold text-[#515154] py-2 border-b border-black/5">{"Xususiyatlar"}</a>
-            <a href="#simulator" onClick={() => setMobileMenuOpen(false)} className="text-[14px] font-semibold text-[#515154] py-2 border-b border-black/5">{"Demo bot"}</a>
+            <a href="#simulator" onClick={() => setMobileMenuOpen(false)} className="text-[14px] font-semibold text-[#515154] py-2 border-b border-black/5">{"Sinab ko'rish"}</a>
             <a href="#pricing" onClick={() => setMobileMenuOpen(false)} className="text-[14px] font-semibold text-[#515154] py-2 border-b border-black/5">{"Tariflar"}</a>
             <a href="#faq" onClick={() => setMobileMenuOpen(false)} className="text-[14px] font-semibold text-[#515154] py-2 border-b border-black/5">{"Savol-javob"}</a>
             <div className="flex gap-2 mt-2">
@@ -365,7 +365,7 @@ export function LandingPageView() {
             </Link>
             <a href="#simulator">
               <button className="flex items-center gap-2 rounded-full border border-black/10 bg-white hover:bg-gray-50 px-8 py-4 text-[15px] font-bold text-black transition-all active:scale-95 shadow-[0_2px_10px_rgba(0,0,0,0.04)]">
-                <span>{"Demo ko'rish"}</span>
+                <span>{"Sinab ko'rish"}</span>
               </button>
             </a>
           </div>
@@ -385,7 +385,7 @@ export function LandingPageView() {
       </section>
 
       {/* ─── STATS BAR ─── */}
-      <div className="border-y border-black/5 bg-[#F0F0F0]/50 py-10 z-10 relative">
+      <div className="border-y border-[#D8D8D8]/60 bg-white py-10 z-10 relative">
         <div className="mx-auto max-w-5xl px-5 sm:px-8 grid grid-cols-1 sm:grid-cols-3 gap-8 text-center">
           <div>
             <p className="text-[40px] sm:text-[50px] font-[900] text-[#7CA607] leading-none tracking-tight">{"1M+"}</p>
@@ -417,7 +417,7 @@ export function LandingPageView() {
           {features.map((f, i) => (
             <div
               key={i}
-              className="rounded-[22px] border border-black/5 bg-white p-6 transition-all hover:border-[#C7F33C]/80 hover:scale-[1.015] hover:shadow-[0_10px_30px_rgba(0,0,0,0.03)] group"
+              className="rounded-[20px] border border-[#D8D8D8]/60 bg-white p-6 shadow-sm transition-all hover:border-[#C7F33C] hover:scale-[1.015] hover:shadow-md group"
             >
               <div className={`h-11 w-11 rounded-[14px] ${f.bg} ${f.color} flex items-center justify-center mb-5 transition-transform group-hover:scale-110`}>
                 <f.icon size={20} />
@@ -431,11 +431,11 @@ export function LandingPageView() {
 
       {/* ─── DEMO SIMULATOR ─── */}
       <section id="simulator" className="relative z-10 mx-auto max-w-5xl px-5 sm:px-8 py-12 sm:py-20">
-        <div className="rounded-[28px] border border-black/5 bg-white p-6 sm:p-10 shadow-[0_15px_45px_rgba(0,0,0,0.03)]">
+        <div className="rounded-[24px] border border-[#D8D8D8]/60 bg-white p-6 sm:p-10 shadow-sm">
           <div className="grid grid-cols-1 md:grid-cols-[1fr_1.15fr] gap-8 items-center">
 
             <div>
-              <span className="inline-block text-[10.5px] font-extrabold text-[#7CA607] uppercase tracking-wider px-3 py-1.5 rounded-full bg-[#C7F33C]/20 border border-[#7CA607]/20 mb-4">{"INTERAKTIV DEMO"}</span>
+              <span className="inline-block text-[10.5px] font-extrabold text-[#7CA607] uppercase tracking-wider px-3 py-1.5 rounded-full bg-[#C7F33C]/20 border border-[#7CA607]/20 mb-4">{"INTERAKTIV SINOV"}</span>
               <h3 className="text-[22px] sm:text-[28px] font-[900] text-black leading-tight">{"Bot qanday ishlashini ko'ring"}</h3>
               <p className="text-[13px] text-[#515154] mt-3 leading-relaxed">
                 {"Tugmalardan birini bosing va botning real javob tezligini tekshiring."}
@@ -466,7 +466,7 @@ export function LandingPageView() {
             </div>
 
             {/* Chat mockup */}
-            <div className="rounded-[20px] border border-black/5 bg-[#F3F3F0] p-4 flex flex-col h-[320px]">
+            <div className="rounded-[20px] border border-[#D8D8D8]/60 bg-[#E8E8E8] p-4 flex flex-col h-[320px]">
               <div className="flex items-center gap-2.5 border-b border-black/5 pb-3 mb-3">
                 <div className="h-8 w-8 rounded-full bg-[#C7F33C] flex items-center justify-center text-black text-[10px] font-extrabold font-mono">{"S"}</div>
                 <div>
@@ -508,7 +508,7 @@ export function LandingPageView() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
 
           {/* PRO */}
-          <div className="relative rounded-[28px] border border-[#C7F33C]/60 bg-white p-8 flex flex-col overflow-hidden shadow-[0_10px_35px_rgba(0,0,0,0.02)]">
+          <div className="relative rounded-[24px] border border-[#C7F33C] bg-white p-8 flex flex-col overflow-hidden shadow-sm">
             <div className="absolute top-0 right-0 bg-[#C7F33C] text-black text-[10px] font-extrabold uppercase px-4 py-1.5 rounded-bl-[16px] tracking-wider">{"MASHHUR"}</div>
             <h3 className="text-[20px] font-extrabold text-black">{"PRO"}</h3>
             <p className="text-[12px] text-[#707075] mt-1">{"Kichik va o'rta bizneslar uchun"}</p>
@@ -535,7 +535,7 @@ export function LandingPageView() {
           </div>
 
           {/* PREMIUM */}
-          <div className="rounded-[28px] border border-black/5 bg-white p-8 flex flex-col shadow-[0_10px_30px_rgba(0,0,0,0.01)]">
+          <div className="rounded-[24px] border border-[#D8D8D8]/60 bg-white p-8 flex flex-col shadow-sm">
             <h3 className="text-[20px] font-extrabold text-black">{"PREMIUM"}</h3>
             <p className="text-[12px] text-[#707075] mt-1">{"Agentliklar va katta bizneslar uchun"}</p>
             <div className="mt-5 flex items-baseline gap-1.5">
@@ -571,7 +571,7 @@ export function LandingPageView() {
         </div>
         <div className="flex flex-col gap-3">
           {faqs.map((faq, i) => (
-            <div key={i} className="rounded-[18px] border border-black/5 bg-white overflow-hidden shadow-[0_2px_15px_rgba(0,0,0,0.01)]">
+            <div key={i} className="rounded-[16px] border border-[#D8D8D8]/60 bg-white overflow-hidden shadow-sm">
               <button
                 onClick={() => setActiveFaq(activeFaq === i ? null : i)}
                 className="w-full px-5 py-4.5 flex items-center justify-between text-left font-bold text-[14px] sm:text-[15px] text-black hover:text-[#7CA607] transition-colors"
@@ -590,7 +590,7 @@ export function LandingPageView() {
       </section>
 
       {/* ─── FOOTER CTA ─── */}
-      <section className="relative z-10 border-t border-black/5 bg-[#F3F3F0] py-16 sm:py-20 text-center">
+      <section className="relative z-10 border-t border-[#D8D8D8] bg-[#DFDFDF] py-16 sm:py-20 text-center">
         <div className="mx-auto max-w-3xl px-5 sm:px-8">
           <h2 className="text-[26px] sm:text-[40px] font-[900] text-black tracking-tight">{"Instagram savdongizni bugunoq kuchaytiring"}</h2>
           <p className="text-[13.5px] text-[#515154] mt-4 max-w-xl mx-auto leading-relaxed">
