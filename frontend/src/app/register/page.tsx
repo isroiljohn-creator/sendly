@@ -418,7 +418,7 @@ export default function RegisterPage() {
                   {t("pages.login_page.google_warning")}
                 </div>
               ) : (
-                <div className="flex justify-center w-full min-h-[46px] bg-white rounded-full overflow-hidden border border-[#D8D8D8]/80 py-1 px-1">
+                <div className="flex justify-center w-full min-h-[46px] py-1">
                   <div id="google-signup-btn" className="w-full flex justify-center" />
                 </div>
               )}

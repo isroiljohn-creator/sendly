@@ -246,7 +246,7 @@ export function LandingPageView() {
               <Zap size={18} className="fill-black text-black" />
             </div>
             <span className="text-[19px] font-extrabold tracking-tight text-black">
-              {"Sendly"}<span className="text-[#7CA607]">{".uz"}</span>
+              {"Sendly"}
             </span>
           </Link>
 

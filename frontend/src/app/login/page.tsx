@@ -71,7 +71,7 @@ export default function LoginPage() {
           });
           win.google.accounts.id.renderButton(
             document.getElementById("google-signin-btn"),
-            { theme: "outline", size: "large", width: 356, shape: "pill", text: "signin_with", locale: lang }
+            { theme: "outline", size: "large", width: 356, shape: "pill", text: "signup_with", locale: lang }
           );
         }
       }
@@ -376,7 +376,7 @@ export default function LoginPage() {
                   {t("pages.login_page.google_warning")}
                 </div>
               ) : (
-                <div className="flex justify-center w-full min-h-[46px] bg-white rounded-full overflow-hidden border border-[#D8D8D8]/80 py-1 px-1">
+                <div className="flex justify-center w-full min-h-[46px] py-1">
                   <div id="google-signin-btn" className="w-full flex justify-center" />
                 </div>
               )}
