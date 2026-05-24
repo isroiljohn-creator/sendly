@@ -107,7 +107,44 @@ async function runBotPollLoop(channelId: string, botState: TelegramBotState) {
         const lastName = message.chat.last_name;
         const text = message.text;
         
-        console.log(`Bot ${channelId} received message from ${chatId}: "${text}"`);
+        // Handle curator command /admin to link admin account
+        if (text.trim() === "/admin" || text.trim().startsWith("/admin ")) {
+          await updateDbFile(async (dbData) => {
+            let context: Record<string, string> = dbData as unknown as Record<string, string>;
+            if (dbData.userData && typeof dbData.userData === "object") {
+              for (const userVal of Object.values(dbData.userData)) {
+                if (userVal && typeof userVal === "object") {
+                  const rawUserChannels = (userVal as Record<string, string>)["replai_channels"];
+                  const userChannels: Channel[] = rawUserChannels ? JSON.parse(rawUserChannels) : [];
+                  if (userChannels.some(c => c.id === channelId)) {
+                    context = userVal as Record<string, string>;
+                    break;
+                  }
+                }
+              }
+            }
+            
+            const rawSettings = context["replai_bot_settings"];
+            const settings: BotSettings = rawSettings ? JSON.parse(rawSettings) : {
+              tone: 60,
+              length: 40,
+              humor: 30,
+              systemPrompt: "",
+              topics: [],
+              autoOutreach: true,
+              outreachStart: "09:00",
+              outreachEnd: "21:00",
+              escalationRules: []
+            };
+            
+            settings.adminTelegramChatId = String(chatId);
+            settings.adminTelegramUsername = username || firstName || "Admin";
+            context["replai_bot_settings"] = JSON.stringify(settings);
+          });
+          
+          await sendTelegramMessage(botState.token, chatId, "Tabriklaymiz! Siz ushbu bot uchun kurator (admin) qilib tayinlandingiz. Mijozlar suhbatni operatorga yo'naltirishni so'rashsa, sizga xabar yuboriladi. 🔔");
+          continue;
+        }
         
         await updateDbFile(async (dbData) => {
           let context: Record<string, string> = dbData as unknown as Record<string, string>;
@@ -308,6 +345,14 @@ async function runBotPollLoop(channelId: string, botState: TelegramBotState) {
                   if (shouldEscalate) {
                     chat.liveTakeover = true;
                     botReplyText = "Kechirasiz, ushbu savolga to'g'ri va aniq javob berish uchun suhbatni inson-kuratorga yo'naltirdim. Tez orada sizga javob yozishadi. 🤝";
+                    
+                    if (settings.adminTelegramChatId) {
+                      sendTelegramMessage(
+                        botState.token,
+                        settings.adminTelegramChatId,
+                        `⚠️ Yangi murojaat (Operator kutilmoqda):\n\nFoydalanuvchi: ${chat.name} (@${chat.username || "username_yoq"})\nSavol: ${text}\n\nUshbu foydalanuvchiga javob berish uchun Sendly inbox bo'limiga kiring.`
+                      ).catch(err => console.error("Failed to notify admin on Telegram:", err));
+                    }
                   } else {
                     botReplyText = ragResult.text;
                   }

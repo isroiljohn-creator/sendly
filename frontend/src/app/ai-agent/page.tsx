@@ -2222,6 +2222,50 @@ export default function AIAgentPage() {
                   </div>
                 )}
               </div>
+
+              {/* Curator Admin Notification Settings */}
+              <div className="bg-white border border-[#E8E8E8] rounded-[24px] p-6 shadow-sm flex flex-col gap-4">
+                <div>
+                  <h3 className="text-[15px] font-bold text-black">
+                    {"Inson-kuratorni ulash (Escalation)"}
+                  </h3>
+                  <p className="text-[11px] text-[#707070] mt-1">
+                    {"AI javob bera olmagan yoki operator kutilgan holatlarda bot sizga Telegram orqali xabar yo'llashi uchun kurator (admin) profilini ulang."}
+                  </p>
+                </div>
+
+                {settings.adminTelegramChatId ? (
+                  <div className="flex items-center justify-between p-3.5 rounded-xl bg-green-50 border border-green-200">
+                    <div className="flex flex-col gap-0.5">
+                      <span className="text-[12px] font-bold text-green-800">
+                        {"✅ Admin profil bog'langan"}
+                      </span>
+                      <span className="text-[11px] text-green-700">
+                        Foydalanuvchi: @{settings.adminTelegramUsername} (Chat ID: {settings.adminTelegramChatId})
+                      </span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        handleUpdateSettings("adminTelegramChatId", "");
+                        handleUpdateSettings("adminTelegramUsername", "");
+                      }}
+                      className="text-[11px] font-bold text-red-600 hover:text-red-700 bg-white border border-red-200 px-3 py-1.5 rounded-lg shadow-sm hover:shadow active:scale-95 transition-all"
+                    >
+                      {"O'chirish"}
+                    </button>
+                  </div>
+                ) : (
+                  <div className="flex flex-col gap-2 p-3.5 rounded-xl bg-blue-50 border border-blue-200">
+                    <span className="text-[12px] font-bold text-blue-800">
+                      {"⚠️ Admin profil ulanmagan"}
+                    </span>
+                    <p className="text-[11px] text-blue-700 leading-relaxed">
+                      {"Ulash uchun ulanayotgan Telegram botingizga borib, shaxsiy profilingizdan "}<strong>{"/admin"}</strong>{" buyrug'ini yuboring. Bot sizni administrator sifatida avtomatik ro'yxatga oladi."}
+                    </p>
+                  </div>
+                )}
+              </div>
             </div>
 
             {/* Right Side: Sandbox Preview chat simulator */}

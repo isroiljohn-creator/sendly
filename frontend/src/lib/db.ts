@@ -79,6 +79,8 @@ export type BotSettings = {
   fbAgentPrompt?: string;
   fbWelcomeMessage?: string;
   fbAgentEnabled?: boolean;
+  adminTelegramChatId?: string;
+  adminTelegramUsername?: string;
 };
 
 export type Lesson = {
@@ -149,6 +151,8 @@ Kelgan ariza ma'lumotlarini (ism, telefon, foydalanuvchi yozgan savollar yoki ja
 3. Mijozning savolidan kelib chiqib, 2-3 so'zdan iborat AI izoh (saralash xulosasi) yoz.`,
   fbWelcomeMessage: "Salom {{name}}! So'rovingiz qabul qilindi. Tez orada mutaxassisimiz sizga bog'lanadi. 😊",
   fbAgentEnabled: false,
+  adminTelegramChatId: "",
+  adminTelegramUsername: "",
 };
 
 const INITIAL_MODULES: Module[] = [];
