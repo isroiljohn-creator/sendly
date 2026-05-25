@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { 
   ArrowLeft, 
@@ -35,10 +35,23 @@ export default function QuickBotWizardPage() {
   const [commentTriggerType, setCommentTriggerType] = useState<"any" | "keyword">("keyword");
   
   const [keywordsInput, setKeywordsInput] = useState("");
-  const [keywords, setKeywords] = useState<string[]>(["test"]);
+  const [keywords, setKeywords] = useState<string[]>([]);
   const [exactMatch, setExactMatch] = useState(false);
   
   const [commentPostsType, setCommentPostsType] = useState<"all" | "selected">("all");
+
+  // Welcome Image state and ref
+  const [welcomeImage, setWelcomeImage] = useState<string | null>(null);
+  const imageInputRef = useRef<HTMLInputElement>(null);
+
+  const [showExitConfirm, setShowExitConfirm] = useState(false);
+
+  // Step 3 Sub-panel fields
+  const [remindMessage, setRemindMessage] = useState(
+    "10 daqiqa o'tdi va men hali ham tugmani bosishingizni kutmoqdaman 😊 👉"
+  );
+  const [additionalMessage, setAdditionalMessage] = useState("");
+  const [additionalDelay, setAdditionalDelay] = useState("10");
 
   // Telegram Obuna tekshirish kanal selection
   const [selectedTgSubChannel, setSelectedTgSubChannel] = useState("");
@@ -48,36 +61,7 @@ export default function QuickBotWizardPage() {
   // Sync / populate Telegram channels for selected bot
   useEffect(() => {
     if (selectedChannel && selectedChannel.type === "telegram") {
-      let botChannels = selectedChannel.telegramChannels || [];
-      
-      // Generate default mock channels if empty
-      if (botChannels.length === 0) {
-        const usernameClean = selectedChannel.username.replace(/^@+/, "").replace(/_bot$/i, "");
-        const formattedName = usernameClean.charAt(0).toUpperCase() + usernameClean.slice(1);
-        
-        if (usernameClean.toLowerCase() === "sincerelyabror") {
-          botChannels = [
-            { username: "abror_channel", name: "Abror Ahmedov Kanal" },
-            { username: "marketing_uz", name: "Marketing Darslari Uz" }
-          ];
-        } else if (usernameClean.toLowerCase() === "nuvioffice") {
-          botChannels = [
-            { username: "nuvioffice_channel", name: "Nuvioffice Kanal" },
-            { username: "nuvioffice_office", name: "Nuvioffice Office" }
-          ];
-        } else {
-          botChannels = [
-            { username: `${usernameClean}_channel`, name: `${formattedName} Kanal` },
-            { username: `marketing_${usernameClean}`, name: `Marketing Uz (${formattedName})` }
-          ];
-        }
-        
-        // Save back to local storage database
-        selectedChannel.telegramChannels = botChannels;
-        const updatedChannels = channels.map(c => c.id === selectedChannel.id ? selectedChannel : c);
-        db.saveChannels(updatedChannels);
-        setChannels(updatedChannels);
-      }
+      const botChannels = selectedChannel.telegramChannels || [];
       
       const options = botChannels.map(ch => ({
         value: ch.username,
@@ -187,7 +171,10 @@ export default function QuickBotWizardPage() {
   ]);
   const [newCommentReply, setNewCommentReply] = useState("");
   const [remindLinkClick, setRemindLinkClick] = useState(false);
+  const [remindButtonText, setRemindButtonText] = useState("");
+  const [remindButtonUrl, setRemindButtonUrl] = useState("");
   const [additionalMessageToggle, setAdditionalMessageToggle] = useState(false);
+  const [showSuccessPopup, setShowSuccessPopup] = useState(false);
 
   // Phone Preview Tabs
   const [previewTab, setPreviewTab] = useState<"xabar" | "izoh">("izoh");
@@ -231,6 +218,16 @@ export default function QuickBotWizardPage() {
     setKeywords(keywords.filter((_, i) => i !== index));
   };
 
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setWelcomeImage(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   const handleRemoveCommentReply = (index: number) => {
     setCommentReplies(commentReplies.filter((_, i) => i !== index));
@@ -271,8 +268,8 @@ export default function QuickBotWizardPage() {
     autos.push(newAuto);
     db.saveChannelAutomations(selectedChannel.id, autos);
     
-    // Redirect to automations dashboard
-    window.location.href = "/automations?success=created";
+    // Show congratulate popup instead of redirecting immediately
+    setShowSuccessPopup(true);
   };
 
   const dropdownOptions = channels.map(c => ({
@@ -293,10 +290,13 @@ export default function QuickBotWizardPage() {
     <div className="min-h-screen bg-[#F9F9F7] flex flex-col font-sans text-black">
       {/* Header bar */}
       <header className="px-6 py-4 flex items-center justify-between border-b border-[#E8E8E8] bg-white">
-        <Link href="/automations" className="flex items-center gap-2 text-[13px] text-[#707070] hover:text-black font-semibold transition-colors">
+        <button 
+          onClick={() => setShowExitConfirm(true)}
+          className="flex items-center gap-2 text-[13px] text-[#707070] hover:text-black font-semibold transition-colors bg-transparent border-0 cursor-pointer"
+        >
           <ArrowLeft size={16} />
           <span>Chiqish</span>
-        </Link>
+        </button>
         <div className="flex items-center gap-2">
           <span className="text-[12px] font-bold text-[#707070]">
             {step}-qadam 3-qadamdan
@@ -713,10 +713,34 @@ export default function QuickBotWizardPage() {
                       <label className="text-[11px] font-extrabold text-[#707070] uppercase tracking-wider">
                         Salomlashuv xabari
                       </label>
-                      <button type="button" className="text-[11px] font-extrabold text-black hover:opacity-85 flex items-center gap-1">
-                        <Plus size={12} className="text-black" /> <span>+ Tasvir</span>
+                      <button 
+                        type="button" 
+                        onClick={() => imageInputRef.current?.click()}
+                        className="text-[11px] font-extrabold text-black hover:opacity-85 flex items-center gap-1 cursor-pointer"
+                      >
+                        <Plus size={12} className="text-black" /> <span>Tasvir</span>
                       </button>
+                      <input 
+                        type="file"
+                        ref={imageInputRef}
+                        onChange={handleImageChange}
+                        accept="image/*"
+                        className="hidden"
+                      />
                     </div>
+                    
+                    {welcomeImage && (
+                      <div className="relative w-full aspect-video rounded-xl overflow-hidden border border-[#E8E8E8] bg-white group mt-1">
+                        <img src={welcomeImage} alt="Welcome" className="w-full h-full object-cover" />
+                        <button
+                          type="button"
+                          onClick={() => setWelcomeImage(null)}
+                          className="absolute top-2 right-2 h-7 w-7 rounded-full bg-black/70 hover:bg-black text-white flex items-center justify-center transition-all cursor-pointer"
+                        >
+                          <X size={14} />
+                        </button>
+                      </div>
+                    )}
                     
                     <textarea
                       value={welcomeMessage}
@@ -875,41 +899,105 @@ export default function QuickBotWizardPage() {
                   )}
 
                   {/* Havolaga o'tishni eslatib qo'ying */}
-                  <div className="flex items-center justify-between p-4 bg-[#F9F9F7] border border-[#E8E8E8] rounded-2xl w-full shadow-xs">
-                    <div>
-                      <h3 className="text-[13px] font-bold text-black">Havolaga o&apos;tishni eslatib qo&apos;ying</h3>
-                      <p className="text-[11px] text-[#707070] mt-0.5">
-                        10 daqiqadan so&apos;ng eslatma yuboramiz
-                      </p>
+                  <div className="flex flex-col gap-3.5 p-4 bg-[#F9F9F7] border border-[#E8E8E8] rounded-2xl w-full shadow-xs">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h3 className="text-[13px] font-bold text-black">Havolaga o&apos;tishni eslatib qo&apos;ying</h3>
+                        <p className="text-[11px] text-[#707070] mt-0.5">
+                          10 daqiqadan so&apos;ng eslatma yuboramiz
+                        </p>
+                      </div>
+                      <label className="relative inline-flex items-center cursor-pointer shrink-0">
+                        <input
+                          type="checkbox"
+                          checked={remindLinkClick}
+                          onChange={(e) => setRemindLinkClick(e.target.checked)}
+                          className="sr-only peer"
+                        />
+                        <div className="w-11 h-6 bg-[#E8E8E8] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-[#D8D8D8] after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-black"></div>
+                      </label>
                     </div>
-                    <label className="relative inline-flex items-center cursor-pointer shrink-0">
-                      <input
-                        type="checkbox"
-                        checked={remindLinkClick}
-                        onChange={(e) => setRemindLinkClick(e.target.checked)}
-                        className="sr-only peer"
-                      />
-                      <div className="w-11 h-6 bg-[#E8E8E8] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-[#D8D8D8] after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-black"></div>
-                    </label>
+
+                    {remindLinkClick && (
+                      <div className="flex flex-col gap-2 w-full animate-in slide-in-from-top-2 duration-150">
+                        <textarea
+                          value={remindMessage}
+                          onChange={(e) => setRemindMessage(e.target.value.substring(0, 500))}
+                          className="w-full h-16 min-h-[52px] p-2.5 text-[12px] bg-white border border-[#D8D8D8] focus:border-black rounded-xl focus:outline-none resize-none font-medium leading-relaxed text-black"
+                          maxLength={500}
+                        />
+                        <div className="flex justify-between text-[10px] text-[#707070] font-semibold mt-[-3px] w-full">
+                          <span />
+                          <span>{remindMessage.length} / 500</span>
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-2 w-full mt-1.5">
+                          <input
+                            type="text"
+                            value={remindButtonText}
+                            onChange={(e) => setRemindButtonText(e.target.value)}
+                            placeholder="Tugma matni"
+                            className="w-full px-3 py-2 text-[12px] bg-white border border-[#D8D8D8] rounded-xl focus:outline-none focus:border-black font-semibold text-black"
+                          />
+                          <input
+                            type="text"
+                            value={remindButtonUrl}
+                            onChange={(e) => setRemindButtonUrl(e.target.value)}
+                            placeholder="Tugma havolasi (URL)"
+                            className="w-full px-3 py-2 text-[12px] bg-white border border-[#D8D8D8] rounded-xl focus:outline-none focus:border-black font-mono font-medium text-black"
+                          />
+                        </div>
+                      </div>
+                    )}
                   </div>
 
                   {/* Qo'shimcha xabar */}
-                  <div className="flex items-center justify-between p-4 bg-[#F9F9F7] border border-[#E8E8E8] rounded-2xl w-full shadow-xs">
-                    <div>
-                      <h3 className="text-[13px] font-bold text-black">Qo&apos;shimcha xabar</h3>
-                      <p className="text-[11px] text-[#707070] mt-0.5">
-                        Xabar belgilangan soniyalarda tugagach, ulanish
-                      </p>
+                  <div className="flex flex-col gap-3.5 p-4 bg-[#F9F9F7] border border-[#E8E8E8] rounded-2xl w-full shadow-xs">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h3 className="text-[13px] font-bold text-black">Qo&apos;shimcha xabar</h3>
+                        <p className="text-[11px] text-[#707070] mt-0.5">
+                          Xabar belgilangan soniyalarda tugagach, ulanish
+                        </p>
+                      </div>
+                      <label className="relative inline-flex items-center cursor-pointer shrink-0">
+                        <input
+                          type="checkbox"
+                          checked={additionalMessageToggle}
+                          onChange={(e) => setAdditionalMessageToggle(e.target.checked)}
+                          className="sr-only peer"
+                        />
+                        <div className="w-11 h-6 bg-[#E8E8E8] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-[#D8D8D8] after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-black"></div>
+                      </label>
                     </div>
-                    <label className="relative inline-flex items-center cursor-pointer shrink-0">
-                      <input
-                        type="checkbox"
-                        checked={additionalMessageToggle}
-                        onChange={(e) => setAdditionalMessageToggle(e.target.checked)}
-                        className="sr-only peer"
-                      />
-                      <div className="w-11 h-6 bg-[#E8E8E8] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-[#D8D8D8] after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-black"></div>
-                    </label>
+
+                    {additionalMessageToggle && (
+                      <div className="flex flex-col gap-3 w-full animate-in slide-in-from-top-2 duration-150">
+                        <div className="text-[10px] text-[#707070] leading-relaxed font-medium">
+                          Xabar belgilangan soniyalarda tugagach, tugmaga bosish va 2-shakldagi havolaga o&apos;tishdan keyin yuboriladi
+                        </div>
+                        <textarea
+                          value={additionalMessage}
+                          onChange={(e) => setAdditionalMessage(e.target.value.substring(0, 500))}
+                          placeholder="Xabar yoki havola"
+                          className="w-full h-16 min-h-[52px] p-2.5 text-[12px] bg-white border border-[#D8D8D8] focus:border-black rounded-xl focus:outline-none resize-none font-medium leading-relaxed text-black"
+                          maxLength={500}
+                        />
+                        <div className="flex justify-between text-[10px] text-[#707070] font-semibold mt-[-8px] w-full">
+                          <span />
+                          <span>{additionalMessage.length} / 500</span>
+                        </div>
+                        
+                        <div className="flex items-center gap-1.5 border border-[#D8D8D8] bg-white rounded-xl px-3 py-2 w-full max-w-[150px]">
+                          <input
+                            type="text"
+                            value={additionalDelay}
+                            onChange={(e) => setAdditionalDelay(e.target.value)}
+                            className="w-8 text-[12px] text-black font-bold bg-transparent border-0 p-0 focus:ring-0 focus:outline-none"
+                          />
+                          <span className="text-[12px] text-[#A0A0A0] font-medium">daqiqa</span>
+                        </div>
+                      </div>
+                    )}
                   </div>
 
                 </div>
@@ -918,14 +1006,15 @@ export default function QuickBotWizardPage() {
             </div>
 
             {/* Footer buttons */}
-            <div className="mt-8 pt-6 border-t border-[#F0F0F0] flex justify-center gap-4 select-none">
+            <div className="mt-8 pt-6 border-t border-[#F0F0F0] flex justify-end gap-4 select-none">
               {step === 1 ? (
-                <Link
-                  href="/automations"
-                  className="w-36 h-11 flex items-center justify-center bg-white hover:bg-[#F5F5F5] text-black border border-[#D8D8D8] font-bold rounded-xl text-[13px] transition-all active:scale-95 shadow-sm"
+                <button
+                  type="button"
+                  onClick={() => setShowExitConfirm(true)}
+                  className="w-36 h-11 flex items-center justify-center bg-white hover:bg-[#F5F5F5] text-black border border-[#D8D8D8] font-bold rounded-xl text-[13px] transition-all active:scale-95 shadow-sm cursor-pointer"
                 >
                   Ortga
-                </Link>
+                </button>
               ) : (
                 <button
                   type="button"
@@ -1055,15 +1144,22 @@ export default function QuickBotWizardPage() {
                     <div className="flex flex-col gap-3 justify-end w-full">
                       {/* User message (right, green bubble) */}
                       <div className="self-end bg-[#EFFDDE] text-black border border-[#D9ECC1] px-3.5 py-1.5 rounded-2xl rounded-tr-xs max-w-[80%] shadow-xs font-semibold leading-normal">
-                        {directTriggerType === "any" ? "/start" : (keywords[0] || "test")}
+                        {directTriggerType === "any" ? "/start" : (keywords[0] || "Kalit so'z")}
                       </div>
 
                       {/* Bot Welcome reply (left, white bubble) */}
-                      {welcomeMessage && (
+                      {(welcomeMessage || welcomeImage) && (
                         <div className="self-start flex flex-col max-w-[80%]">
-                          <div className="bg-white text-black px-3.5 py-1.5 rounded-2xl rounded-tl-xs shadow-xs font-semibold leading-normal">
-                            {welcomeMessage}
-                          </div>
+                          {welcomeImage && (
+                            <div className="mb-1 rounded-2xl overflow-hidden border border-[#E1E8ED] bg-white">
+                              <img src={welcomeImage} alt="" className="w-full max-h-[140px] object-cover" />
+                            </div>
+                          )}
+                          {welcomeMessage && (
+                            <div className="bg-white text-black px-3.5 py-1.5 rounded-2xl rounded-tl-xs shadow-xs font-semibold leading-normal">
+                              {welcomeMessage}
+                            </div>
+                          )}
                           {welcomeButton && (
                             <div className="mt-1 bg-[#F5F8FA] border border-[#E1E8ED] hover:bg-slate-100 text-black rounded-xl py-2 px-3 text-center text-[10.5px] font-bold shadow-xs select-none cursor-pointer truncate max-w-full">
                               {welcomeButton}
@@ -1112,6 +1208,20 @@ export default function QuickBotWizardPage() {
                               )}
                             </div>
                           )}
+                          
+                          {/* Reminder message preview */}
+                          {step === 3 && remindLinkClick && remindMessage && (
+                            <div className="self-start flex flex-col max-w-[80%] mt-2 animate-in fade-in duration-300">
+                              <div className="bg-white text-black px-3.5 py-1.5 rounded-2xl rounded-tl-xs shadow-xs font-semibold leading-normal">
+                                {remindMessage}
+                              </div>
+                              {remindButtonText && (
+                                <div className="mt-1 bg-[#F5F8FA] border border-[#E1E8ED] hover:bg-slate-100 text-black rounded-xl py-2 px-3 text-center text-[10.5px] font-bold shadow-xs select-none cursor-pointer truncate max-w-full">
+                                  {remindButtonText}
+                                </div>
+                              )}
+                            </div>
+                          )}
                         </>
                       )}
                     </div>
@@ -1131,13 +1241,22 @@ export default function QuickBotWizardPage() {
                       )}
 
                       {/* Step 2 Bot Welcome message */}
-                      {step >= 2 && welcomeMessage && (
+                      {step >= 2 && (welcomeMessage || welcomeImage) && (
                         <div className="self-start flex items-end gap-1.5 max-w-[80%] animate-in fade-in slide-in-from-bottom-2 duration-300 delay-100">
                           <div className="h-4 w-4 rounded-full bg-slate-200 shrink-0 overflow-hidden">
                             {selectedChannel?.avatar && <img src={selectedChannel.avatar} alt="" className="h-full w-full object-cover" />}
                           </div>
-                          <div className="bg-white border border-[#E8E8E8] text-black px-3.5 py-2 rounded-2xl rounded-bl-xs shadow-xs font-medium">
-                            {welcomeMessage}
+                          <div className="flex flex-col gap-1">
+                            {welcomeImage && (
+                              <div className="rounded-2xl overflow-hidden border border-[#E8E8E8] bg-white max-w-full">
+                                <img src={welcomeImage} alt="" className="w-full max-h-[120px] object-cover" />
+                              </div>
+                            )}
+                            {welcomeMessage && (
+                              <div className="bg-white border border-[#E8E8E8] text-black px-3.5 py-2 rounded-2xl rounded-bl-xs shadow-xs font-medium">
+                                {welcomeMessage}
+                              </div>
+                            )}
                           </div>
                         </div>
                       )}
@@ -1197,6 +1316,25 @@ export default function QuickBotWizardPage() {
                               {successButtonText}
                             </div>
                           )}
+
+                          {/* Reminder message preview */}
+                          {step === 3 && remindLinkClick && remindMessage && (
+                            <>
+                              <div className="self-start flex items-end gap-1.5 max-w-[80%] mt-2 animate-in fade-in duration-300">
+                                <div className="h-4 w-4 rounded-full bg-slate-200 shrink-0 overflow-hidden">
+                                  {selectedChannel?.avatar && <img src={selectedChannel.avatar} alt="" className="h-full w-full object-cover" />}
+                                </div>
+                                <div className="bg-white border border-[#E8E8E8] text-black px-3.5 py-2 rounded-2xl rounded-bl-xs shadow-xs font-medium">
+                                  {remindMessage}
+                                </div>
+                              </div>
+                              {remindButtonText && (
+                                <div className="self-center py-1.5 px-4 bg-white border border-[#D8D8D8] rounded-xl text-[10px] font-bold text-black shadow-xs select-none text-center max-w-[85%] truncate cursor-pointer hover:bg-slate-50 transition-colors hover:underline">
+                                  {remindButtonText}
+                                </div>
+                              )}
+                            </>
+                          )}
                         </>
                       )}
                       <div className="h-1" />
@@ -1235,7 +1373,7 @@ export default function QuickBotWizardPage() {
                               <p className="font-extrabold text-[10px] text-black">
                                 lsm <span className="font-normal text-[#909090] ml-1">Endi</span>
                               </p>
-                              <p className="text-[10.5px] mt-0.5 text-black font-medium">{keywords[0] || "test"}</p>
+                              <p className="text-[10.5px] mt-0.5 text-black font-medium">{keywords[0] || "Kalit so'z"}</p>
                               <button className="text-[9px] text-[#707070] font-bold mt-1 hover:text-black">Javob berish</button>
                             </div>
                           </div>
@@ -1271,7 +1409,7 @@ export default function QuickBotWizardPage() {
                                 <p className="font-extrabold text-[10px] text-black">
                                   anvar_m <span className="font-normal text-[#909090] ml-1">Endi</span>
                                 </p>
-                                <p className="text-[10.5px] mt-0.5 text-black font-medium">{keywords[0] || "test"}</p>
+                                <p className="text-[10.5px] mt-0.5 text-black font-medium">{keywords[0] || "Kalit so'z"}</p>
                                 <button className="text-[9px] text-[#707070] font-bold mt-1 hover:text-black">Javob berish</button>
                               </div>
                             </div>
@@ -1387,6 +1525,77 @@ export default function QuickBotWizardPage() {
         </div>
 
       </div>
+
+      {showExitConfirm && (
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[999] flex items-center justify-center p-4">
+          <div className="bg-white rounded-[28px] p-6 max-w-[400px] w-full shadow-2xl relative border border-[#E8E8E8] animate-in zoom-in-95 duration-150">
+            {/* Close Cross */}
+            <button
+              onClick={() => setShowExitConfirm(false)}
+              className="absolute right-5 top-5 grid h-8 w-8 place-items-center rounded-full hover:bg-[#F0F0F0] text-[#707070] transition-colors cursor-pointer border-0"
+            >
+              <X size={16} />
+            </button>
+
+            <h3 className="text-[18px] font-black text-black tracking-tight text-left">
+              Chiqmoqchimisiz?
+            </h3>
+            <p className="text-[12px] text-[#707070] leading-relaxed mt-2 text-left font-medium">
+              Barcha ma&apos;lumotlar avtomatik saqlandi va kelasi safar tahrirlash uchun mavjud bo&apos;ladi.
+            </p>
+
+            <div className="flex gap-3 mt-6">
+              <button
+                type="button"
+                onClick={() => setShowExitConfirm(false)}
+                className="flex-1 h-11 flex items-center justify-center bg-white hover:bg-neutral-50 text-black border border-[#D8D8D8] font-bold rounded-xl text-[13px] transition-all cursor-pointer"
+              >
+                Qolish
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  window.location.href = "/automations";
+                }}
+                className="flex-1 h-11 flex items-center justify-center bg-[#FF3B30] hover:bg-[#E0352B] text-white font-bold rounded-xl text-[13px] transition-all cursor-pointer border-0"
+              >
+                Chiqish
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showSuccessPopup && (
+        <div className="fixed inset-0 bg-black/75 backdrop-blur-md z-[999] flex items-center justify-center p-4">
+          <div className="bg-white rounded-[32px] p-8 max-w-md w-full shadow-2xl relative border border-neutral-100 flex flex-col items-center text-center overflow-hidden animate-in fade-in zoom-in-95 duration-300">
+            {/* Top decorative glow */}
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-48 h-48 bg-[#C7F33C]/20 rounded-full blur-3xl pointer-events-none" />
+
+            {/* Confetti element or cute robot icon */}
+            <div className="w-20 h-20 bg-[#C7F33C]/10 rounded-2xl flex items-center justify-center text-[40px] shadow-sm mb-4 relative z-10 animate-bounce">
+              🤖
+            </div>
+
+            <h3 className="text-[22px] font-black text-black tracking-tight mt-2 relative z-10">
+              Tabriklaymiz! 🎉
+            </h3>
+            <p className="text-[13px] text-[#505050] leading-relaxed mt-3 font-medium relative z-10">
+              Chat-botingiz muvaffaqiyatli ishga tushdi va ulanish o&apos;rnatildi!
+            </p>
+
+            <button
+              type="button"
+              onClick={() => {
+                window.location.href = "/automations";
+              }}
+              className="w-full mt-8 py-3.5 bg-black hover:bg-neutral-900 text-white font-extrabold rounded-2xl text-[13px] tracking-wide transition-all active:scale-95 shadow-lg shadow-black/10 cursor-pointer border-0"
+            >
+              Ajoyib!
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

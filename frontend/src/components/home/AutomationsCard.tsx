@@ -35,7 +35,7 @@ export function AutomationsCard() {
           </p>
         </div>
       ) : (
-        <ul className="mt-2.5 flex flex-1 flex-col justify-center divide-y divide-[#F0F0F0] shrink-0">
+        <ul className="mt-2.5 flex flex-1 flex-col justify-start divide-y divide-[#F0F0F0] shrink-0">
           {automations.map((a, i) => {
             const isKeyword = a.triggerType === "keyword";
             const Icon = isKeyword ? Zap : MessageCircle;

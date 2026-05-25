@@ -20,6 +20,12 @@ export default function BroadcastPage() {
   const [title, setTitle] = useState("");
   const [tag, setTag] = useState("Barcha faol mijozlar");
   const [message, setMessage] = useState("");
+
+  const [addUrlButton, setAddUrlButton] = useState(false);
+  const [urlButtonText, setUrlButtonText] = useState("");
+  const [urlButtonUrl, setUrlButtonUrl] = useState("");
+  const [addWorkflow, setAddWorkflow] = useState(false);
+  const [selectedWorkflowId, setSelectedWorkflowId] = useState("");
  
   useEffect(() => {
     setBroadcasts(db.getBroadcasts());
@@ -130,6 +136,89 @@ export default function BroadcastPage() {
                     onChange={(e) => setMessage(e.target.value)}
                     className="w-full rounded-[14px] bg-[#F0F0F0] px-4 py-3 text-[13px] text-black outline-none placeholder:text-[#a0a0a0] transition-colors focus:bg-[#e8e8e8] resize-none"
                   />
+                </div>
+
+                {/* URL Tugma Qo'shish */}
+                <div className="flex flex-col gap-2 p-4 bg-[#F9F9F7] border border-[#E8E8E8] rounded-2xl w-full shadow-xs">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="text-[13px] font-bold text-black">Tugma qo'shish (URL havola)</h3>
+                      <p className="text-[11px] text-[#707070] mt-0.5">Xabar tagida havola ochuvchi tugma</p>
+                    </div>
+                    <label className="relative inline-flex items-center cursor-pointer shrink-0">
+                      <input
+                        type="checkbox"
+                        checked={addUrlButton}
+                        onChange={(e) => setAddUrlButton(e.target.checked)}
+                        className="sr-only peer"
+                      />
+                      <div className="w-11 h-6 bg-[#E8E8E8] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[&apos;&apos;] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-[#D8D8D8] after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-black"></div>
+                    </label>
+                  </div>
+                  
+                  {addUrlButton && (
+                    <div className="flex flex-col gap-2 mt-2 pt-2 border-t border-[#E8E8E8] animate-in slide-in-from-top-1">
+                      <input
+                        type="text"
+                        placeholder="Tugma matni (masalan: Batafsil)"
+                        value={urlButtonText}
+                        onChange={(e) => setUrlButtonText(e.target.value)}
+                        className="w-full rounded-[12px] bg-white border border-[#D8D8D8] px-3 py-2 text-[12px] text-black outline-none focus:border-black"
+                      />
+                      <input
+                        type="url"
+                        placeholder="Havola manzili (URL)"
+                        value={urlButtonUrl}
+                        onChange={(e) => setUrlButtonUrl(e.target.value)}
+                        className="w-full rounded-[12px] bg-white border border-[#D8D8D8] px-3 py-2 text-[12px] text-black outline-none focus:border-black font-mono"
+                      />
+                    </div>
+                  )}
+                </div>
+
+                {/* Workflow Qo'shish */}
+                <div className="flex flex-col gap-2 p-4 bg-[#F9F9F7] border border-[#E8E8E8] rounded-2xl w-full shadow-xs">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="text-[13px] font-bold text-black">Workflow qo'shish (Avtomatlashtirish)</h3>
+                      <p className="text-[11px] text-[#707070] mt-0.5">Xabar tugmasi bosilganda stsenariyni ishga tushirish</p>
+                    </div>
+                    <label className="relative inline-flex items-center cursor-pointer shrink-0">
+                      <input
+                        type="checkbox"
+                        checked={addWorkflow}
+                        onChange={(e) => setAddWorkflow(e.target.checked)}
+                        className="sr-only peer"
+                      />
+                      <div className="w-11 h-6 bg-[#E8E8E8] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[&apos;&apos;] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-[#D8D8D8] after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-black"></div>
+                    </label>
+                  </div>
+                  
+                  {addWorkflow && (
+                    <div className="flex flex-col gap-2.5 mt-2 pt-2 border-t border-[#E8E8E8] animate-in slide-in-from-top-1">
+                      <CustomDropdown
+                        value={selectedWorkflowId}
+                        onChange={setSelectedWorkflowId}
+                        className="bg-white border border-[#D8D8D8] px-3 py-2 text-[12px] rounded-[12px] text-black"
+                        placeholder="Workflow tanlang"
+                        options={[
+                          { value: "wf1", label: "Havola orqali o'tish (Flow 1)" },
+                          { value: "wf2", label: "Kursga obuna bo'lish" },
+                          { value: "wf3", label: "Chegirma kuponi tarqatish" },
+                        ]}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => {
+                          window.open("/automations/builder", "_blank");
+                        }}
+                        className="w-full py-2 bg-black hover:bg-neutral-800 text-white font-bold rounded-xl text-[11px] flex items-center justify-center gap-1.5 transition-colors cursor-pointer border-0"
+                      >
+                        <Plus size={12} />
+                        <span>Yangi workflow yaratish</span>
+                      </button>
+                    </div>
+                  )}
                 </div>
 
                 <div className="mt-4 flex items-center justify-end gap-2">

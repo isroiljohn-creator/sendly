@@ -204,7 +204,7 @@ function safeParse<T>(jsonString: string | null, fallback: T): T {
 }
 
 // DB version — bump this to force-clear old localStorage data
-const DB_VERSION = "v8"; // Bump to clear potentially corrupted states
+const DB_VERSION = "v10"; // Bump to clear potentially corrupted states
 if (isClient && localStorage.getItem("replai_db_version") !== DB_VERSION) {
   localStorage.removeItem("replai_automations");
   localStorage.removeItem("replai_contacts");

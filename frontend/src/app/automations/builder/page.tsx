@@ -15,6 +15,7 @@ import ReactFlow, {
   Handle,
   Position,
   NodeProps,
+  useReactFlow,
 } from "reactflow";
 import "reactflow/dist/style.css";
 import {
@@ -63,116 +64,47 @@ interface NodeData {
 // ─────────── CUSTOM NODE COMPONENTS ────────────
 
 function TriggerNode({ data, id }: NodeProps<NodeData>) {
-  const isIg = data.triggerSource === "instagram" || true;
+  const { setNodes } = useReactFlow();
+  
   return (
-    <div className="w-[260px] bg-white border border-[#E8E8E8] rounded-[20px] shadow-[0_4px_20px_rgba(0,0,0,0.05)] overflow-hidden text-black text-left">
+    <div className="w-[230px] bg-white border border-[#E8E8E8] rounded-[20px] shadow-sm overflow-visible text-black text-left relative">
+      {/* Boshlanishi Label badge styled dynamically above the node */}
+      <div className="absolute -top-5 left-1 flex items-center gap-1.5 text-[9.5px] font-black text-[#707070] uppercase tracking-widest select-none">
+        <span>⟨ Boshlanishi ⟩</span>
+      </div>
+      
       {/* Node Header */}
-      <div className="bg-[#F5F5F7] px-4 py-2.5 border-b border-[#E8E8E8] flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <span className="w-2.5 h-2.5 rounded-full bg-[#16A34A] shrink-0" />
-          <span className="text-[10px] font-black text-[#505050] uppercase tracking-wider">Boshlanishi</span>
+      <div className="bg-[#F5F5F7] px-4 py-2 border-b border-[#E8E8E8] flex items-center justify-between rounded-t-[20px]">
+        <div className="flex items-center gap-1.5">
+          <MessageSquare size={11} className="text-[#707070]" />
+          <span className="text-[10px] font-black text-[#505050] uppercase tracking-wider">Xabar</span>
         </div>
-        <span className="text-[9px] text-[#A0A0A0] font-mono">ID: {id}</span>
+        <span className="text-[9px] text-[#A0A0A0] font-mono">0</span>
       </div>
       
       {/* Content */}
-      <div className="p-4 flex flex-col gap-3">
-        {/* Trigger Badge */}
-        <div className="bg-[#C7F33C]/10 border border-[#C7F33C]/30 text-black px-3 py-1.5 rounded-[10px] text-[11px] font-bold flex items-center gap-1.5">
-          <Zap size={11} className="text-black" />
-          <span className="truncate">Instagram: Kalit so&apos;z</span>
+      <div className="p-3 flex flex-col gap-2">
+        <div className="text-[10.5px] text-black font-semibold leading-relaxed p-2 bg-[#FAFAFA] border border-[#E8E8E8] rounded-xl whitespace-pre-wrap">
+          {data.label || "Salam, mendan dars olish uchun Telegram kanalga o'ting. Quyidagi tugmani bosing."}
         </div>
 
-        {/* Message Sub-block */}
-        <div className="border border-[#E8E8E8] rounded-[14px] bg-[#FAFAFA] overflow-hidden">
-          <div className="px-3 py-1.5 bg-[#F0F0F2] border-b border-[#E8E8E8] flex items-center gap-1.5">
-            <MessageSquare size={10} className="text-[#707070]" />
-            <span className="text-[9px] font-bold text-[#707070] uppercase">Xabar</span>
-          </div>
-          
-          {/* Mock Media Banner */}
-          <div className="h-20 bg-gradient-to-br from-[#D946EF] via-[#A855F7] to-[#6366F1] flex items-center justify-center p-2 relative">
-            <div className="text-white text-[16px] font-black tracking-tight">sendly</div>
-          </div>
-
-          <div className="p-3 flex flex-col gap-2">
-            <p className="text-[10px] text-black font-semibold leading-relaxed">
-              {data.label || "Assalomu alaykum! Bizning sahifamizga xush kelibsiz. Obuna bo'ldingizmi?"}
-            </p>
-
-            {/* Buttons list */}
-            <div className="flex flex-col gap-1.5 mt-1">
-              {(data.buttons || [
-                { id: "b1", label: "Ha, qatnashaman", type: "action" },
-                { id: "b2", label: "Yo'q, qatnashmayman", type: "action" }
-              ]).map((btn) => (
-                <div key={btn.id} className="relative">
-                  <div className="w-full text-center py-2 px-3 border border-[#E8E8E8] rounded-[10px] text-[10px] font-black bg-white hover:bg-neutral-50 text-black select-none truncate">
-                    {btn.label}
-                  </div>
-                  <Handle
-                    type="source"
-                    position={Position.Right}
-                    id={`btn-${btn.id}`}
-                    style={{
-                      top: "50%",
-                      right: -12,
-                      background: "#C7F33C",
-                      border: "1px solid black",
-                      width: 8,
-                      height: 8,
-                    }}
-                  />
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function MessageNode({ data, id }: NodeProps<NodeData>) {
-  return (
-    <div className="w-[260px] bg-white border border-[#E8E8E8] rounded-[20px] shadow-[0_4px_20px_rgba(0,0,0,0.05)] overflow-hidden text-black text-left">
-      {/* Target input handle (Left) */}
-      <Handle
-        type="target"
-        position={Position.Left}
-        style={{
-          top: 30,
-          left: -4,
-          background: "#A0A0A0",
-          border: "1px solid white",
-          width: 8,
-          height: 8,
-        }}
-      />
-
-      {/* Node Header */}
-      <div className="bg-[#F5F5F7] px-4 py-2.5 border-b border-[#E8E8E8] flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <MessageSquare size={12} className="text-[#707070]" />
-          <span className="text-[10px] font-black text-[#505050] uppercase tracking-wider">Xabar</span>
-        </div>
-        <span className="text-[9px] text-[#A0A0A0] font-mono">ID: {id}</span>
-      </div>
-
-      {/* Content */}
-      <div className="p-4 flex flex-col gap-2">
-        <div className="p-3 bg-[#F9F9F7] rounded-[14px] border border-[#E8E8E8]">
-          <p className="text-[10px] text-black font-semibold leading-relaxed">
-            {data.label || "Suhbatni davom ettirish xabari..."}
-          </p>
-        </div>
-
-        {/* Buttons */}
+        {/* Buttons list */}
         <div className="flex flex-col gap-1.5 mt-1">
           {(data.buttons || []).map((btn) => (
             <div key={btn.id} className="relative">
-              <div className="w-full text-center py-2 px-3 border border-[#E8E8E8] rounded-[10px] text-[10px] font-black bg-white hover:bg-neutral-50 text-black select-none truncate">
-                {btn.label}
+              <div className="w-full flex items-center justify-between py-1.5 px-3 border border-[#E8E8E8] rounded-xl text-[10px] font-bold bg-white hover:bg-neutral-50 text-black select-none">
+                <span className="text-[#a0a0a0] font-mono mr-1.5 font-bold">==</span>
+                <span className="flex-1 truncate text-left">{btn.label}</span>
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setNodes((nds) => nds.map((n) => n.id === id ? { ...n, data: { ...n.data, buttons: (n.data.buttons || []).filter(b => b.id !== btn.id) } } : n));
+                  }}
+                  className="w-3.5 h-3.5 rounded-full border border-red-500 text-red-500 flex items-center justify-center font-bold text-[8px] cursor-pointer hover:bg-red-50 shrink-0 ml-1.5 bg-transparent p-0 border-0"
+                >
+                  o
+                </button>
               </div>
               <Handle
                 type="source"
@@ -180,7 +112,7 @@ function MessageNode({ data, id }: NodeProps<NodeData>) {
                 id={`btn-${btn.id}`}
                 style={{
                   top: "50%",
-                  right: -12,
+                  right: -10,
                   background: "#C7F33C",
                   border: "1px solid black",
                   width: 8,
@@ -189,6 +121,126 @@ function MessageNode({ data, id }: NodeProps<NodeData>) {
               />
             </div>
           ))}
+
+          {/* Add button triggers */}
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              const newBtn = { id: `btn-${Date.now()}`, label: "Darsni olish", type: "action" as const };
+              setNodes((nds) => nds.map((n) => n.id === id ? { ...n, data: { ...n.data, buttons: [...(n.data.buttons || []), newBtn] } } : n));
+            }}
+            className="w-full text-center py-2 border border-dashed border-[#D8D8D8] hover:border-black rounded-xl text-[9.5px] font-bold text-black flex items-center justify-center gap-1 transition-all bg-white cursor-pointer"
+          >
+            <span>+ tugmasini qo&apos;shish</span>
+          </button>
+          
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              alert("Yangi stsenariy kontenti muvaffaqiyatli qo'shildi!");
+            }}
+            className="w-full text-center py-2 border border-dashed border-[#D8D8D8] hover:border-black rounded-xl text-[9.5px] font-bold text-black flex items-center justify-center gap-1 transition-all bg-white cursor-pointer"
+          >
+            <span>+ kontent qo&apos;shish</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function MessageNode({ data, id }: NodeProps<NodeData>) {
+  const { setNodes } = useReactFlow();
+  
+  return (
+    <div className="w-[230px] bg-white border border-[#E8E8E8] rounded-[20px] shadow-sm overflow-visible text-black text-left relative">
+      <Handle
+        type="target"
+        position={Position.Left}
+        style={{
+          top: 24,
+          left: -4,
+          background: "#A0A0A0",
+          border: "1px solid white",
+          width: 8,
+          height: 8,
+        }}
+      />
+      
+      {/* Node Header */}
+      <div className="bg-[#F5F5F7] px-4 py-2 border-b border-[#E8E8E8] flex items-center justify-between rounded-t-[20px]">
+        <div className="flex items-center gap-1.5">
+          <MessageSquare size={11} className="text-[#707070]" />
+          <span className="text-[10px] font-black text-[#505050] uppercase tracking-wider">Xabar</span>
+        </div>
+        <span className="text-[9px] text-[#A0A0A0] font-mono">0</span>
+      </div>
+      
+      {/* Content */}
+      <div className="p-3 flex flex-col gap-2">
+        <div className="text-[10.5px] text-black font-semibold leading-relaxed p-2 bg-[#FAFAFA] border border-[#E8E8E8] rounded-xl whitespace-pre-wrap">
+          {data.label || "Suhbatni davom ettirish xabari..."}
+        </div>
+
+        {/* Buttons list */}
+        <div className="flex flex-col gap-1.5 mt-1">
+          {(data.buttons || []).map((btn) => (
+            <div key={btn.id} className="relative">
+              <div className="w-full flex items-center justify-between py-1.5 px-3 border border-[#E8E8E8] rounded-xl text-[10px] font-bold bg-white hover:bg-neutral-50 text-black select-none">
+                <span className="text-[#a0a0a0] font-mono mr-1.5 font-bold">==</span>
+                <span className="flex-1 truncate text-left">{btn.label}</span>
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setNodes((nds) => nds.map((n) => n.id === id ? { ...n, data: { ...n.data, buttons: (n.data.buttons || []).filter(b => b.id !== btn.id) } } : n));
+                  }}
+                  className="w-3.5 h-3.5 rounded-full border border-red-500 text-red-500 flex items-center justify-center font-bold text-[8px] cursor-pointer hover:bg-red-50 shrink-0 ml-1.5 bg-transparent p-0 border-0"
+                >
+                  o
+                </button>
+              </div>
+              <Handle
+                type="source"
+                position={Position.Right}
+                id={`btn-${btn.id}`}
+                style={{
+                  top: "50%",
+                  right: -10,
+                  background: "#C7F33C",
+                  border: "1px solid black",
+                  width: 8,
+                  height: 8,
+                }}
+              />
+            </div>
+          ))}
+
+          {/* Add button triggers */}
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              const newBtn = { id: `btn-${Date.now()}`, label: "Tugma", type: "action" as const };
+              setNodes((nds) => nds.map((n) => n.id === id ? { ...n, data: { ...n.data, buttons: [...(n.data.buttons || []), newBtn] } } : n));
+            }}
+            className="w-full text-center py-2 border border-dashed border-[#D8D8D8] hover:border-black rounded-xl text-[9.5px] font-bold text-black flex items-center justify-center gap-1 transition-all bg-white cursor-pointer"
+          >
+            <span>+ tugmasini qo&apos;shish</span>
+          </button>
+          
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              alert("Yangi stsenariy kontenti muvaffaqiyatli qo'shildi!");
+            }}
+            className="w-full text-center py-2 border border-dashed border-[#D8D8D8] hover:border-black rounded-xl text-[9.5px] font-bold text-black flex items-center justify-center gap-1 transition-all bg-white cursor-pointer"
+          >
+            <span>+ kontent qo&apos;shish</span>
+          </button>
         </div>
       </div>
     </div>
@@ -197,8 +249,7 @@ function MessageNode({ data, id }: NodeProps<NodeData>) {
 
 function ActionNode({ data, id }: NodeProps<NodeData>) {
   return (
-    <div className="w-[260px] bg-white border border-[#E8E8E8] rounded-[20px] shadow-[0_4px_20px_rgba(0,0,0,0.05)] overflow-hidden text-black text-left">
-      {/* Target input handle (Left) */}
+    <div className="w-[220px] bg-white border border-[#E8E8E8] rounded-[20px] shadow-sm overflow-hidden text-black text-left">
       <Handle
         type="target"
         position={Position.Left}
@@ -213,27 +264,24 @@ function ActionNode({ data, id }: NodeProps<NodeData>) {
       />
 
       {/* Node Header */}
-      <div className="bg-[#F5F5F7] px-4 py-2.5 border-b border-[#E8E8E8] flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <div className="w-4 h-4 rounded-full bg-[#C7F33C]/20 flex items-center justify-center shrink-0">
-            <Zap size={9} className="text-black" />
-          </div>
+      <div className="bg-[#F5F5F7] px-4 py-2 border-b border-[#E8E8E8] flex items-center justify-between">
+        <div className="flex items-center gap-1.5">
+          <Zap size={11} className="text-black" />
           <span className="text-[10px] font-black text-[#505050] uppercase tracking-wider">Harakat</span>
         </div>
-        <span className="text-[9px] text-[#A0A0A0] font-mono">ID: {id}</span>
+        <span className="text-[9px] text-[#A0A0A0] font-mono">0</span>
       </div>
 
       {/* Content */}
-      <div className="p-4">
-        <div className="p-3 bg-[#F9F9F7] rounded-[14px] border border-[#E8E8E8] flex flex-col gap-1">
-          <p className="text-[9px] font-black text-[#707070] uppercase">Bajariladigan ish</p>
-          <p className="text-[11px] text-black font-bold leading-tight">
-            {data.label || "Tezkor javoblar tugmasiga kirdi"}
+      <div className="p-3">
+        <div className="p-2.5 bg-[#FAFAFA] border border-[#E8E8E8] rounded-xl flex flex-col gap-0.5">
+          <p className="text-[8px] font-black text-[#707070] uppercase">Kutish</p>
+          <p className="text-[11px] text-black font-semibold">
+            {data.label || "5 Daqiqalar"}
           </p>
         </div>
       </div>
 
-      {/* Source output handle (Right) */}
       <Handle
         type="source"
         position={Position.Right}
@@ -252,8 +300,7 @@ function ActionNode({ data, id }: NodeProps<NodeData>) {
 
 function ConditionNode({ data, id }: NodeProps<NodeData>) {
   return (
-    <div className="w-[260px] bg-white border border-[#E8E8E8] rounded-[20px] shadow-[0_4px_20px_rgba(0,0,0,0.05)] overflow-hidden text-black text-left">
-      {/* Target input handle (Left) */}
+    <div className="w-[220px] bg-white border border-[#E8E8E8] rounded-[20px] shadow-sm overflow-hidden text-black text-left">
       <Handle
         type="target"
         position={Position.Left}
@@ -268,33 +315,37 @@ function ConditionNode({ data, id }: NodeProps<NodeData>) {
       />
 
       {/* Node Header */}
-      <div className="bg-[#F5F5F7] px-4 py-2.5 border-b border-[#E8E8E8] flex items-center justify-between">
-        <div className="flex items-center gap-2">
+      <div className="bg-[#F5F5F7] px-4 py-2 border-b border-[#E8E8E8] flex items-center justify-between">
+        <div className="flex items-center gap-1.5">
           <span className="text-[10px] font-black text-[#505050] uppercase tracking-wider">Shart</span>
         </div>
-        <span className="text-[9px] text-[#A0A0A0] font-mono">ID: {id}</span>
+        <span className="text-[9px] text-[#A0A0A0] font-mono">0</span>
       </div>
 
       {/* Content */}
-      <div className="p-4 flex flex-col gap-3">
-        <div className="p-3 bg-[#F9F9F7] rounded-[14px] border border-[#E8E8E8]">
-          <p className="text-[9px] font-black text-[#707070] uppercase">Tekshirish sharti</p>
-          <p className="text-[11px] text-black font-bold mt-0.5">
-            {data.label || "Obuna bo'lganligi"}
+      <div className="p-3 flex flex-col gap-2">
+        <div className="border border-[#E8E8E8] rounded-xl p-2.5 bg-[#FAFAFA]">
+          <p className="text-[8px] font-black text-[#707070] uppercase">Tekshirish sharti</p>
+          <p className="text-[11px] text-black font-semibold mt-0.5">
+            {data.label || "Belgilangan teglar"}
           </p>
         </div>
 
-        {/* Branching options with handles */}
-        <div className="flex flex-col gap-2">
-          <div className="relative flex items-center justify-between p-2 rounded-[10px] border border-[#16A34A]/20 bg-[#16A34A]/5">
-            <span className="text-[10px] font-bold text-[#16A34A]">Obuna bo&apos;lingan</span>
+        <button type="button" className="w-full text-center py-1.5 border border-dashed border-[#D8D8D8] rounded-xl text-[9.5px] font-bold text-black bg-white hover:bg-neutral-50 cursor-pointer">
+          + Shart qo&apos;shish
+        </button>
+
+        {/* Yes/No Handles outcome */}
+        <div className="flex flex-col gap-2 mt-2 pt-2 border-t border-[#F0F0F0]">
+          <div className="relative flex items-center justify-between p-1.5 rounded-[10px] border border-[#16A34A]/20 bg-[#16A34A]/5">
+            <span className="text-[9.5px] font-bold text-[#16A34A]">Shart to&apos;g&apos;ri kelsa</span>
             <Handle
               type="source"
               position={Position.Right}
               id="yes"
               style={{
                 top: "50%",
-                right: -12,
+                right: -10,
                 background: "#16A34A",
                 border: "1px solid black",
                 width: 8,
@@ -303,15 +354,15 @@ function ConditionNode({ data, id }: NodeProps<NodeData>) {
             />
           </div>
 
-          <div className="relative flex items-center justify-between p-2 rounded-[10px] border border-[#DC2626]/20 bg-[#DC2626]/5">
-            <span className="text-[10px] font-bold text-[#DC2626]">Obuna bo&apos;linmagan</span>
+          <div className="relative flex items-center justify-between p-1.5 rounded-[10px] border border-[#DC2626]/20 bg-[#DC2626]/5">
+            <span className="text-[9.5px] font-bold text-[#DC2626]">Shartlarga mos emas</span>
             <Handle
               type="source"
               position={Position.Right}
               id="no"
               style={{
                 top: "50%",
-                right: -12,
+                right: -10,
                 background: "#DC2626",
                 border: "1px solid black",
                 width: 8,
@@ -327,8 +378,7 @@ function ConditionNode({ data, id }: NodeProps<NodeData>) {
 
 function WaitNode({ data, id }: NodeProps<NodeData>) {
   return (
-    <div className="w-[260px] bg-white border border-[#E8E8E8] rounded-[20px] shadow-[0_4px_20px_rgba(0,0,0,0.05)] overflow-hidden text-black text-left">
-      {/* Target input handle (Left) */}
+    <div className="w-[220px] bg-white border border-[#E8E8E8] rounded-[20px] shadow-sm overflow-hidden text-black text-left">
       <Handle
         type="target"
         position={Position.Left}
@@ -343,25 +393,24 @@ function WaitNode({ data, id }: NodeProps<NodeData>) {
       />
 
       {/* Node Header */}
-      <div className="bg-[#F5F5F7] px-4 py-2.5 border-b border-[#E8E8E8] flex items-center justify-between">
-        <div className="flex items-center gap-2">
+      <div className="bg-[#F5F5F7] px-4 py-2 border-b border-[#E8E8E8] flex items-center justify-between">
+        <div className="flex items-center gap-1.5">
           <Clock size={12} className="text-[#707070]" />
           <span className="text-[10px] font-black text-[#505050] uppercase tracking-wider">Kutish</span>
         </div>
-        <span className="text-[9px] text-[#A0A0A0] font-mono">ID: {id}</span>
+        <span className="text-[9px] text-[#A0A0A0] font-mono">0</span>
       </div>
 
       {/* Content */}
-      <div className="p-4">
-        <div className="p-3 bg-[#F9F9F7] rounded-[14px] border border-[#E8E8E8] flex flex-col gap-1">
-          <p className="text-[9px] font-black text-[#707070] uppercase">Muddati</p>
-          <p className="text-[11px] text-black font-bold">
-            {data.label || "Kutish: 15 Daqiqalar"}
+      <div className="p-3">
+        <div className="p-2.5 bg-[#FAFAFA] border border-[#E8E8E8] rounded-xl flex flex-col gap-0.5">
+          <p className="text-[8px] font-black text-[#707070] uppercase">Muddati</p>
+          <p className="text-[11px] text-black font-semibold">
+            {data.label || "Kutish: 5 Daqiqalar"}
           </p>
         </div>
       </div>
 
-      {/* Source output handle (Right) */}
       <Handle
         type="source"
         position={Position.Right}
@@ -495,6 +544,16 @@ export default function BuilderPage() {
   const [inspAiPrompt, setInspAiPrompt] = useState("");
   const [inspAiOutputVar, setInspAiOutputVar] = useState("ai_response");
   const [inspButtons, setInspButtons] = useState<ButtonItem[]>([]);
+
+  const [isRichEditorOpen, setIsRichEditorOpen] = useState(false);
+  const [showRichEmojiList, setShowRichEmojiList] = useState(false);
+
+  // Trigger modal state fields
+  const [isTriggerModalOpen, setIsTriggerModalOpen] = useState(false);
+  const [multiTriggers, setMultiTriggers] = useState(false);
+  const [selectedTriggerSource, setSelectedTriggerSource] = useState("dm");
+  const [triggerMatchType, setTriggerMatchType] = useState("is");
+  const [triggerKeywordsVal, setTriggerKeywordsVal] = useState("");
 
   useEffect(() => {
     const user = db.getCurrentUser();
@@ -636,6 +695,38 @@ export default function BuilderPage() {
     setTimeout(() => { window.location.href = "/automations"; }, 1500);
   };
 
+  const handleInsertFormat = (type: "bold" | "italic" | "underline" | "variable" | "emoji", val?: string) => {
+    const textarea = document.getElementById("rich-textarea") as HTMLTextAreaElement;
+    if (!textarea) return;
+
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const text = inspLabel;
+    const selected = text.substring(start, end);
+
+    let replacement = "";
+    if (type === "bold") {
+      replacement = `**${selected || "matn"}**`;
+    } else if (type === "italic") {
+      replacement = `*${selected || "matn"}*`;
+    } else if (type === "underline") {
+      replacement = `<u>${selected || "matn"}</u>`;
+    } else if (type === "variable") {
+      replacement = `{{user_name}}`;
+    } else if (type === "emoji" && val) {
+      replacement = val;
+    }
+
+    const newText = text.substring(0, start) + replacement + text.substring(end);
+    setInspLabel(newText);
+    
+    setTimeout(() => {
+      textarea.focus();
+      const newCursorPos = start + replacement.length;
+      textarea.setSelectionRange(newCursorPos, newCursorPos);
+    }, 50);
+  };
+
   const addNewNode = (type: NodeType) => {
     const id = `node-${nodes.length + 1}`;
     const configs: Record<NodeType, { label: string; data: Partial<NodeData> }> = {
@@ -705,7 +796,18 @@ export default function BuilderPage() {
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <button className="flex items-center gap-1.5 px-4 h-9 text-[11px] font-extrabold bg-[#FAFAFA] border border-[#E8E8E8] rounded-full hover:bg-[#F0F0F0] text-black shrink-0 transition-colors">
+            <button 
+              onClick={() => {
+                const triggerNode = nodes.find((n) => n.data.nodeType === "trigger");
+                if (triggerNode) {
+                  setSelectedTriggerSource(triggerNode.data.triggerSource || "dm");
+                  setTriggerMatchType(triggerNode.data.triggerMatch || "is");
+                  setTriggerKeywordsVal(triggerNode.data.triggerKeywords || "");
+                }
+                setIsTriggerModalOpen(true);
+              }}
+              className="flex items-center gap-1.5 px-4 h-9 text-[11px] font-extrabold bg-[#FAFAFA] border border-[#E8E8E8] rounded-full hover:bg-[#F0F0F0] text-black shrink-0 transition-colors cursor-pointer"
+            >
               <Settings size={12} />
               <span>Ishga tushirish triggerlari</span>
             </button>
@@ -930,6 +1032,13 @@ export default function BuilderPage() {
                           className="w-full min-h-[130px] rounded-[12px] bg-[#F0F0F0] px-4 py-3 text-[12px] text-black outline-none resize-none focus:bg-[#e8e8e8] transition-colors leading-relaxed animate-none"
                           placeholder={t("pages.builder.placeholder_msg")}
                         />
+                        <button
+                          type="button"
+                          onClick={() => setIsRichEditorOpen(true)}
+                          className="w-full py-2 bg-[#FAFAFA] border border-[#E8E8E8] hover:border-black rounded-xl text-[10.5px] font-bold text-black flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                        >
+                          <span>Kengaytirilgan muharrir (Formatlash)</span>
+                        </button>
                       </div>
 
                       {/* Buttons section */}
@@ -1176,6 +1285,297 @@ export default function BuilderPage() {
           </aside>
         </div>
       </div>
+
+      {isRichEditorOpen && (
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[999] flex items-center justify-center p-4">
+          <div className="bg-white rounded-[28px] p-6 max-w-[480px] w-full shadow-2xl relative border border-[#E8E8E8] animate-in zoom-in-95 duration-150 text-black">
+            {/* Close button */}
+            <button
+              type="button"
+              onClick={() => setIsRichEditorOpen(false)}
+              className="absolute right-5 top-5 grid h-8 w-8 place-items-center rounded-full hover:bg-[#F0F0F0] text-[#707070] transition-colors cursor-pointer border-0"
+            >
+              <X size={16} />
+            </button>
+
+            <h3 className="text-[18px] font-black text-black tracking-tight text-left">
+              Xabar qo&apos;shish
+            </h3>
+            <p className="text-[11px] text-[#707070] mt-1 text-left font-medium">
+              Tanlangan blok uchun xabar matnini ko&apos;rsating
+            </p>
+
+            <div className="mt-4 border border-[#E8E8E8] rounded-2xl overflow-hidden focus-within:border-black focus-within:ring-1 focus-within:ring-black transition-all bg-white">
+              <textarea
+                id="rich-textarea"
+                value={inspLabel}
+                onChange={(e) => setInspLabel(e.target.value.substring(0, 500))}
+                className="w-full h-40 p-4 text-[12px] bg-white border-0 outline-none resize-none leading-relaxed text-black focus:ring-0 focus:outline-none"
+                maxLength={500}
+                placeholder="Xabarni yozing..."
+              />
+              
+              {/* Rich toolbar */}
+              <div className="bg-[#F9F9F7] border-t border-[#E8E8E8] px-3 py-2.5 flex items-center justify-between select-none">
+                <div className="flex items-center gap-2 relative">
+                  {/* Smiley emoji selector */}
+                  <button
+                    type="button"
+                    onClick={() => setShowRichEmojiList(!showRichEmojiList)}
+                    className="text-[#707070] hover:text-black transition-colors font-bold text-[13px] h-6 px-1.5 hover:bg-[#F0F0F0] rounded cursor-pointer border-0 bg-transparent"
+                    title="Emoji qo'shish"
+                  >
+                    😊
+                  </button>
+                  {showRichEmojiList && (
+                    <div className="absolute bottom-8 left-0 bg-white border border-[#E8E8E8] rounded-xl p-2 shadow-lg flex gap-1 z-50 animate-in fade-in slide-in-from-bottom-1">
+                      {["😊", "🚀", "🔥", "🎉", "✅", "👇", "👉"].map((emoji) => (
+                        <button
+                          key={emoji}
+                          type="button"
+                          onClick={() => {
+                            handleInsertFormat("emoji", emoji);
+                            setShowRichEmojiList(false);
+                          }}
+                          className="h-7 w-7 flex items-center justify-center hover:bg-slate-100 rounded text-[14px] cursor-pointer border-0 bg-transparent"
+                        >
+                          {emoji}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Variables {...} button */}
+                  <button
+                    type="button"
+                    onClick={() => handleInsertFormat("variable")}
+                    className="text-[#707070] hover:text-black font-extrabold text-[12px] h-6 px-1.5 hover:bg-[#F0F0F0] rounded font-mono cursor-pointer border-0 bg-transparent"
+                    title="O'zgaruvchi qo'shish"
+                  >
+                    {`{...}`}
+                  </button>
+
+                  <div className="h-4 w-[1px] bg-[#E8E8E8]" />
+
+                  {/* Bold (B) */}
+                  <button
+                    type="button"
+                    onClick={() => handleInsertFormat("bold")}
+                    className="text-[#707070] hover:text-black font-black text-[12px] h-6 w-6 hover:bg-[#F0F0F0] rounded cursor-pointer border-0 bg-transparent"
+                    title="Qalin (Bold)"
+                  >
+                    B
+                  </button>
+
+                  {/* Italic (I) */}
+                  <button
+                    type="button"
+                    onClick={() => handleInsertFormat("italic")}
+                    className="text-[#707070] hover:text-black italic font-bold text-[12px] h-6 w-6 hover:bg-[#F0F0F0] rounded cursor-pointer border-0 bg-transparent"
+                    title="Kursiv (Italic)"
+                  >
+                    I
+                  </button>
+
+                  {/* Underline (U) */}
+                  <button
+                    type="button"
+                    onClick={() => handleInsertFormat("underline")}
+                    className="text-[#707070] hover:text-black underline font-bold text-[12px] h-6 w-6 hover:bg-[#F0F0F0] rounded cursor-pointer border-0 bg-transparent"
+                    title="Ostiga chizilgan (Underline)"
+                  >
+                    U
+                  </button>
+                </div>
+                
+                <span className="text-[10px] text-[#707070] font-semibold">
+                  {inspLabel.length} / 500
+                </span>
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-3 mt-6">
+              <button
+                type="button"
+                onClick={() => setIsRichEditorOpen(false)}
+                className="px-5 py-2.5 bg-white border border-[#D8D8D8] text-black font-bold rounded-xl text-[12px] hover:bg-[#F5F5F5] transition-all cursor-pointer"
+              >
+                Bekor qilish
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  handleSaveNodeDetails();
+                  setIsRichEditorOpen(false);
+                }}
+                className="px-5 py-2.5 bg-black text-white font-bold rounded-xl text-[12px] hover:bg-neutral-800 transition-all cursor-pointer border-0"
+              >
+                Saqlash
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {isTriggerModalOpen && (
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[999] flex items-center justify-center p-4">
+          <div className="bg-white rounded-[28px] p-6 max-w-[560px] w-full shadow-2xl relative border border-[#E8E8E8] animate-in zoom-in-95 duration-150 text-black max-h-[90vh] overflow-y-auto">
+            {/* Close button */}
+            <button
+              type="button"
+              onClick={() => setIsTriggerModalOpen(false)}
+              className="absolute right-5 top-5 grid h-8 w-8 place-items-center rounded-full hover:bg-[#F0F0F0] text-[#707070] transition-colors cursor-pointer border-0"
+            >
+              <X size={16} />
+            </button>
+
+            <h3 className="text-[18px] font-black text-black tracking-tight text-left">
+              Ishga tushirish triggeri
+            </h3>
+
+            {/* Multiple triggers toggle */}
+            <div className="flex items-center justify-between p-4 bg-[#F9F9F7] border border-[#E8E8E8] rounded-2xl w-full mt-4 select-none">
+              <span className="text-[12.5px] font-bold text-black">Bir nechta triggerlar</span>
+              <label className="relative inline-flex items-center cursor-pointer shrink-0">
+                <input
+                  type="checkbox"
+                  checked={multiTriggers}
+                  onChange={(e) => setMultiTriggers(e.target.checked)}
+                  className="sr-only peer"
+                />
+                <div className="w-11 h-6 bg-[#E8E8E8] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-[#D8D8D8] after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-black"></div>
+              </label>
+            </div>
+
+            {/* Grid of triggers */}
+            <div className="grid grid-cols-2 gap-3 mt-4">
+              {[
+                { id: "read", label: "Xabarlarni aniqlash", icon: "👁️" },
+                { id: "dm", label: "Direkt'ga Xabar", icon: "💬" },
+                { id: "comment", label: "Publikatsiyalarga izohlar", icon: "📝" },
+                { id: "live_comment", label: "Jonli efirda izohlar", icon: "📡" },
+                { id: "story_reaction", label: "Storis'ga Reaksiyalar", icon: "🔥" },
+                { id: "story_reply", label: "Storis'ga javoblar", icon: "↩️" },
+                { id: "story_mention", label: "Storis'da belgilar", icon: "🏷️" },
+                { id: "payment", label: "Muvaffaqiyatli to'lov", icon: "💳" },
+              ].map((trigger) => {
+                const isSelected = selectedTriggerSource === trigger.id;
+                return (
+                  <div
+                    key={trigger.id}
+                    onClick={() => setSelectedTriggerSource(trigger.id)}
+                    className={`border rounded-2xl p-3.5 flex items-center justify-between cursor-pointer transition-all select-none ${
+                      isSelected
+                        ? "border-black bg-[#C7F33C]/10 font-bold text-black"
+                        : "border-[#E8E8E8] hover:border-black/20 bg-white"
+                    }`}
+                  >
+                    <div className="flex items-center gap-2.5 truncate">
+                      <span className="text-[16px]">{trigger.icon}</span>
+                      <span className="text-[11.5px] truncate">{trigger.label}</span>
+                    </div>
+                    
+                    {/* radio checkcircle */}
+                    <div className={`w-4 h-4 rounded-full border flex items-center justify-center shrink-0 transition-all ${
+                      isSelected ? "border-black bg-black" : "border-[#D8D8D8]"
+                    }`}>
+                      {isSelected && (
+                        <div className="w-1.5 h-1.5 rounded-full bg-[#C7F33C]" />
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Trigger Match Rules */}
+            <div className="mt-5 text-left">
+              <h4 className="text-[11px] font-black text-[#707070] uppercase tracking-wider mb-2.5">
+                da ishga tushish
+              </h4>
+              
+              <div className="flex flex-col gap-2.5">
+                {[
+                  { id: "any", label: "Har qanday xabar" },
+                  { id: "is", label: "Malum bir xabar" },
+                  { id: "contains", label: "o'z ichiga olgan xabar" },
+                ].map((rule) => {
+                  const isChecked = triggerMatchType === rule.id;
+                  return (
+                    <label
+                      key={rule.id}
+                      className="flex items-center gap-2.5 cursor-pointer text-[12px] font-bold select-none text-black"
+                      onClick={() => setTriggerMatchType(rule.id)}
+                    >
+                      <div className={`w-4.5 h-4.5 rounded-full border flex items-center justify-center shrink-0 transition-all ${
+                        isChecked ? "border-black bg-black text-[#C7F33C]" : "border-[#D8D8D8]"
+                      }`}>
+                        {isChecked && (
+                          <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="4">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                          </svg>
+                        )}
+                      </div>
+                      <span>{rule.label}</span>
+                    </label>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Keyword tags list */}
+            {triggerMatchType !== "any" && (
+              <div className="mt-4 text-left animate-in slide-in-from-top-1">
+                <input
+                  type="text"
+                  placeholder="Kalit so'zlarni yozing..."
+                  value={triggerKeywordsVal}
+                  onChange={(e) => setTriggerKeywordsVal(e.target.value)}
+                  className="w-full rounded-[14px] bg-[#F0F0F0] px-4 py-3 text-[12.5px] text-black outline-none placeholder:text-[#a0a0a0] focus:bg-[#e8e8e8] transition-colors"
+                />
+              </div>
+            )}
+
+            <div className="flex justify-end gap-3 mt-6 select-none">
+              <button
+                type="button"
+                onClick={() => setIsTriggerModalOpen(false)}
+                className="px-5 py-2.5 bg-white border border-[#D8D8D8] text-black font-bold rounded-xl text-[12px] hover:bg-[#F5F5F5] transition-all cursor-pointer"
+              >
+                Bekor qilish
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  const srcLabel = TRIGGER_SOURCES.find((s) => s.value === selectedTriggerSource)?.label || selectedTriggerSource;
+                  const newLabel = `Ishga tushish: ${srcLabel} – ${triggerKeywordsVal || "Har qanday xabar"}`;
+                  
+                  setNodes((nds) =>
+                    nds.map((n) =>
+                      n.id === "n1"
+                        ? {
+                            ...n,
+                            data: {
+                              ...n.data,
+                              label: newLabel,
+                              triggerSource: selectedTriggerSource,
+                              triggerMatch: triggerMatchType,
+                              triggerKeywords: triggerKeywordsVal,
+                            },
+                          }
+                        : n
+                    )
+                  );
+                  setIsTriggerModalOpen(false);
+                }}
+                className="px-5 py-2.5 bg-[#C7F33C] text-black border border-[#b2db2a] font-bold rounded-xl text-[12px] hover:bg-[#b5e02c] transition-all cursor-pointer border-0"
+              >
+                Saqlash
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

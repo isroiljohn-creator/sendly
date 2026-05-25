@@ -235,14 +235,16 @@ export default function ChatsPage() {
           }
 
           const nameLower = (matchedAutomation as any).name.toLowerCase();
-          if (nameLower.includes("lead magnet") || matchedKeyword === "kitob" || matchedKeyword === "bonus") {
+          if ((matchedAutomation as any).replyText) {
+            botReplyText = (matchedAutomation as any).replyText;
+          } else if (nameLower.includes("lead magnet") || matchedKeyword === "kitob" || matchedKeyword === "bonus") {
             botReplyText = "Bepul qo'llanma havolasi: https://sendly.uz/book. Obunangiz uchun rahmat!";
           } else if (matchedKeyword === "/start" || matchedKeyword === "boshlash") {
             botReplyText = "Assalomu alaykum! Sendly chatbot xizmatining inbox simulyatoriga xush kelibsiz. Tizimimiz muvaffaqiyatli ulangan!";
           } else if (matchedKeyword === "narxi" || matchedKeyword === "tarif" || matchedKeyword === "kurs") {
             botReplyText = "Bizning tariflarimiz: \n• Pro: 150,000 so'm/oy (1ta akkaunt)\n• Premium: 1,000,000 so'm/oy (10ta akkaunt)\n\nBatafsil ma'lumot olish yoki ulanish uchun operatorimiz tez orada javob yozadi.";
           } else {
-            botReplyText = (matchedAutomation as any).replyText || matchedKeyword;
+            botReplyText = matchedKeyword;
           }
         } else {
           botReplyText = "Murojaatingiz uchun rahmat! Tez orada operatorimiz sizga bog'lanadi.";

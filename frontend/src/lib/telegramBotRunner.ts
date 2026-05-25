@@ -71,6 +71,16 @@ async function updateDbFile(updater: (dbData: Record<string, string>) => Promise
 
 async function runBotPollLoop(channelId: string, botState: TelegramBotState) {
   console.log(`Starting poll loop for bot channel ${channelId}`);
+  
+  // Clear any existing webhook to ensure getUpdates works without conflict
+  try {
+    const deleteWebhookUrl = `https://api.telegram.org/bot${botState.token}/deleteWebhook?drop_pending_updates=true`;
+    await fetch(deleteWebhookUrl);
+    console.log(`Deleted webhook successfully for bot channel ${channelId}`);
+  } catch (err) {
+    console.error(`Error deleting webhook for bot channel ${channelId}:`, err);
+  }
+
   while (botState.active) {
     try {
       const url = `https://api.telegram.org/bot${botState.token}/getUpdates?offset=${botState.offset}&timeout=10`;
@@ -320,16 +330,18 @@ async function runBotPollLoop(channelId: string, botState: TelegramBotState) {
                  
                  context[`replai_automations_${channelId}`] = JSON.stringify(automations);
                 
-                const nameLower = matchedAutomation.name.toLowerCase();
-                if (nameLower.includes("lead magnet") || matchedKeyword === "kitob" || matchedKeyword === "bonus") {
-                  botReplyText = "Bepul qo'llanma havolasi: https://sendly.uz/book. Obunangiz uchun rahmat!";
-                } else if (matchedKeyword === "/start" || matchedKeyword === "boshlash") {
-                  botReplyText = "Assalomu alaykum! Sendly chatbot xizmatiga xush kelibsiz. Tizimimiz muvaffaqiyatli ulangan.";
-                } else if (matchedKeyword === "narxi" || matchedKeyword === "tarif" || matchedKeyword === "kurs") {
-                  botReplyText = "Bizning tariflarimiz: \n• Pro: 150,000 so'm/oy (1ta akkaunt)\n• Premium: 1,000,000 so'm/oy (10ta akkaunt)\n\nBatafsil ma'lumot olish yoki ulanish uchun operatorimiz tez orada javob yozadi.";
-                } else {
-                  botReplyText = matchedAutomation.replyText || matchedKeyword;
-                }
+                 const nameLower = matchedAutomation.name.toLowerCase();
+                 if (matchedAutomation.replyText) {
+                   botReplyText = matchedAutomation.replyText;
+                 } else if (nameLower.includes("lead magnet") || matchedKeyword === "kitob" || matchedKeyword === "bonus") {
+                   botReplyText = "Bepul qo'llanma havolasi: https://sendly.uz/book. Obunangiz uchun rahmat!";
+                 } else if (matchedKeyword === "/start" || matchedKeyword === "boshlash") {
+                   botReplyText = "Assalomu alaykum! Sendly chatbot xizmatiga xush kelibsiz. Tizimimiz muvaffaqiyatli ulangan.";
+                 } else if (matchedKeyword === "narxi" || matchedKeyword === "tarif" || matchedKeyword === "kurs") {
+                   botReplyText = "Bizning tariflarimiz: \n• Pro: 150,000 so'm/oy (1ta akkaunt)\n• Premium: 1,000,000 so'm/oy (10ta akkaunt)\n\nBatafsil ma'lumot olish yoki ulanish uchun operatorimiz tez orada javob yozadi.";
+                 } else {
+                   botReplyText = matchedKeyword;
+                 }
               } else if (settings.aiCuratorEnabled && settings.telegramBotId === channelId) {
                 // 3. AI Curator RAG Logic
                 const rawLessons = context["replai_lessons"];

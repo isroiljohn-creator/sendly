@@ -686,7 +686,7 @@ export default function AutomationsPage() {
                     <div className="flex items-start justify-between">
                       <div className="flex items-center gap-2 min-w-0">
                         <Zap size={14} className="text-[#10B981] fill-[#10B981] shrink-0" />
-                        <h3 className="text-[13px] font-black text-black leading-tight truncate max-w-[170px]" title={a.name}>
+                        <h3 className="text-[13px] font-black text-black leading-tight line-clamp-2 break-words flex-1" title={a.name}>
                           {a.name}
                         </h3>
                       </div>
