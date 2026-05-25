@@ -16,7 +16,7 @@ import {
   SlidersHorizontal,
   FolderPlus,
   AlertCircle,
-  MoreVertical,
+  MoreHorizontal,
   Pencil,
   Play,
   Pause
@@ -658,20 +658,20 @@ export default function AutomationsPage() {
                 {/* 1. Promotional Quick Bot Card (First Card) */}
                 <Link 
                   href="/automations/quick-bot" 
-                  className="bg-black hover:bg-neutral-900 border border-neutral-800 rounded-[24px] p-5 flex flex-col justify-between gap-6 shadow-sm hover:shadow-md transition-all relative group cursor-pointer text-left"
+                  className="bg-white border border-[#E8E8E8] hover:border-black rounded-[24px] p-5 flex flex-col justify-between shadow-sm hover:shadow-md transition-all relative group cursor-pointer text-left h-[160px]"
                 >
                   <div className="flex justify-between items-start w-full">
-                    <div className="bg-[#C7F33C] text-black font-extrabold text-[10px] uppercase tracking-wider px-2.5 py-1 rounded-lg">
-                      Tezkor bot sozlash
+                    <div className="bg-[#C7F33C] text-black font-black text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-[6px] select-none">
+                      Quick
                     </div>
-                    <span className="text-[16px] text-[#C7F33C] group-hover:translate-x-1 transition-transform font-extrabold">→</span>
+                    <span className="text-[16px] text-black group-hover:translate-x-1 transition-transform font-extrabold">→</span>
                   </div>
                   <div>
-                    <h3 className="text-[14px] font-black text-white leading-tight mt-2">
-                      Kalit so&apos;zli chat-bot
+                    <h3 className="text-[14px] font-black text-black leading-tight">
+                      Keyword Chatbot
                     </h3>
-                    <p className="text-[11px] text-[#A0A0A0] mt-1 leading-normal font-medium">
-                      Har qanday qurilmadan, konstruktorsiz avtomatlashtirish yaratishning yangi usuli
+                    <p className="text-[11px] text-[#8E8E93] mt-1 leading-normal font-medium line-clamp-2">
+                      A new way to create automation without a builder, from any device
                     </p>
                   </div>
                 </Link>
@@ -681,13 +681,23 @@ export default function AutomationsPage() {
                   <div
                     key={a.id}
                     onClick={() => handleEditClick(a.id, a.channelId)}
-                    className="bg-white border border-[#E8E8E8] hover:border-black rounded-[24px] p-5 flex flex-col justify-between gap-4 shadow-sm hover:shadow-md transition-all relative group cursor-pointer text-left font-sans"
+                    className="bg-white border border-[#E8E8E8] hover:border-black rounded-[24px] p-5 flex flex-col justify-between shadow-sm hover:shadow-md transition-all relative group cursor-pointer text-left font-sans h-[160px]"
                   >
                     {/* Header */}
-                    <div className="flex items-start justify-between">
-                      <div className="flex items-center gap-2 min-w-0">
-                        <Zap size={14} className="text-[#10B981] fill-[#10B981] shrink-0" />
-                        <h3 className="text-[13px] font-black text-black leading-tight line-clamp-2 break-words flex-1" title={a.name}>
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="flex items-center gap-2 min-w-0 flex-1">
+                        {a.id.startsWith("quick") ? (
+                          <Zap size={14} className="text-[#34C759] fill-[#34C759] shrink-0" />
+                        ) : (
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="text-[#34C759] shrink-0">
+                            <rect x="3" y="3" width="6" height="6" rx="1.5" />
+                            <rect x="15" y="3" width="6" height="6" rx="1.5" />
+                            <rect x="3" y="15" width="6" height="6" rx="1.5" />
+                            <rect x="15" y="15" width="6" height="6" rx="1.5" />
+                            <path d="M9 6h6M6 9v6" strokeDasharray="2 2" />
+                          </svg>
+                        )}
+                        <h3 className="text-[14px] font-black text-black leading-tight truncate flex-1" title={a.name}>
                           {a.name}
                         </h3>
                       </div>
@@ -701,7 +711,7 @@ export default function AutomationsPage() {
                           }}
                           className="h-7 w-7 rounded-full hover:bg-[#F5F5F5] flex items-center justify-center text-[#707070] hover:text-black transition-colors"
                         >
-                          <MoreVertical size={14} />
+                          <MoreHorizontal size={14} />
                         </button>
                         
                         {activeCardMenuId === a.id && (
@@ -786,27 +796,27 @@ export default function AutomationsPage() {
                     </div>
 
                     {/* Stats Grid */}
-                    <div className="grid grid-cols-2 gap-2 text-left mt-3.5 bg-[#F5F5F7] border border-[#E8E8E8] rounded-xl p-2">
-                      <div className="bg-white border border-[#E8E8E8]/80 rounded-[10px] p-2">
-                        <span className="text-[8px] text-[#A0A0A0] uppercase font-bold tracking-wider block">Kontaktlar</span>
-                        <p className="text-[14px] font-black text-black mt-0.5">{a.runs}</p>
+                    <div className="grid grid-cols-2 gap-x-4 text-left">
+                      <div>
+                        <span className="text-[9px] text-[#A0A0A0] uppercase font-bold tracking-wider block">Kontaktlar</span>
+                        <p className="text-[17px] font-black text-black leading-none mt-0.5">{a.runs}</p>
                       </div>
-                      <div className="bg-white border border-[#E8E8E8]/80 rounded-[10px] p-2">
-                        <span className="text-[8px] text-[#A0A0A0] uppercase font-bold tracking-wider block">Konversiya</span>
-                        <p className="text-[14px] font-black text-[#16A34A] mt-0.5">{a.completion}</p>
+                      <div>
+                        <span className="text-[9px] text-[#A0A0A0] uppercase font-bold tracking-wider block">Konversiya</span>
+                        <p className="text-[17px] font-black text-[#16A34A] leading-none mt-0.5">{a.completion}</p>
                       </div>
                     </div>
 
                     {/* Footer Owner Profile */}
-                    <div className="flex items-center gap-2 mt-2 pt-2 border-t border-[#F5F5F5] min-w-0">
+                    <div className="flex items-center gap-1.5 min-w-0">
                       {a.channel?.avatar ? (
-                        <img src={a.channel.avatar} alt="" className="h-5 w-5 rounded-full object-cover shrink-0" />
+                        <img src={a.channel.avatar} alt="" className="h-4.5 w-4.5 rounded-full object-cover shrink-0" />
                       ) : (
-                        <div className="h-5 w-5 rounded-full bg-slate-200 flex items-center justify-center shrink-0 text-[10px] font-bold">
+                        <div className="h-4.5 w-4.5 rounded-full bg-slate-200 flex items-center justify-center shrink-0 text-[9px] font-bold text-[#8E8E93]">
                           {a.channel?.name ? a.channel.name.charAt(0).toUpperCase() : "?"}
                         </div>
                       )}
-                      <span className="text-[10px] text-[#707070] font-bold truncate">
+                      <span className="text-[10.5px] text-[#707070] font-bold truncate">
                         @{a.channel?.username.replace(/^@+/, "") || "isroil.ai"}
                       </span>
                     </div>
