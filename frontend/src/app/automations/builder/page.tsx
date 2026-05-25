@@ -44,7 +44,7 @@ import { Instagram } from "@/components/ui/icons";
 // ─────────── TYPES ────────────
 type NodeType = "trigger" | "message" | "wait" | "condition" | "action" | "ai";
 
-type ButtonItem = { id: string; label: string; type: "action" | "link"; url?: string };
+type ButtonItem = { id: string; label: string; type: "action" | "link" | "payment"; url?: string; multipleClick?: boolean };
 
 interface NodeData {
   label: string;
@@ -67,14 +67,14 @@ function TriggerNode({ data, id }: NodeProps<NodeData>) {
   const { setNodes } = useReactFlow();
   
   return (
-    <div className="w-[230px] bg-white border border-[#E8E8E8] rounded-[20px] shadow-sm overflow-visible text-black text-left relative">
+    <div className="w-[260px] bg-white border border-[#E8E8E8] rounded-2xl shadow-sm overflow-visible text-black text-left relative">
       {/* Boshlanishi Label badge styled dynamically above the node */}
       <div className="absolute -top-5 left-1 flex items-center gap-1.5 text-[9.5px] font-black text-[#707070] uppercase tracking-widest select-none">
         <span>⟨ Boshlanishi ⟩</span>
       </div>
       
       {/* Node Header */}
-      <div className="bg-[#F5F5F7] px-4 py-2 border-b border-[#E8E8E8] flex items-center justify-between rounded-t-[20px]">
+      <div className="bg-[#F5F5F7] px-4 py-2.5 border-b border-[#E8E8E8] flex items-center justify-between rounded-t-2xl">
         <div className="flex items-center gap-1.5">
           <MessageSquare size={11} className="text-[#707070]" />
           <span className="text-[10px] font-black text-[#505050] uppercase tracking-wider">Xabar</span>
@@ -84,7 +84,31 @@ function TriggerNode({ data, id }: NodeProps<NodeData>) {
       
       {/* Content */}
       <div className="p-3 flex flex-col gap-2">
-        <div className="text-[10.5px] text-black font-semibold leading-relaxed p-2 bg-[#FAFAFA] border border-[#E8E8E8] rounded-xl whitespace-pre-wrap">
+        {data.imageUrl && (
+          <div className="w-full h-[120px] rounded-xl overflow-hidden bg-gradient-to-tr from-[#9B51E0] to-[#2F80ED] flex items-center justify-center relative mb-2 shadow-sm select-none animate-in fade-in duration-300">
+            {/* Sendly lightning bolt logo inside */}
+            <div className="w-11 h-11 rounded-2xl bg-white/10 backdrop-blur-md flex items-center justify-center border border-white/20 shadow-sm">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                <path
+                  d="M13.5 2c.3 3.5-1.5 5.2-3 6.8C9 10.5 7.5 12 8 14.5 8.4 16.7 10 18 12 18c0-2 .8-3 2-4.2 1.4-1.4 3-3 2.6-6C16.2 5 14.8 3.3 13.5 2Z"
+                  fill="#C7F33C"
+                />
+                <path
+                  d="M9.5 14c-.6 1-1 2-1 3 0 2.5 1.6 4 3.5 4s3.5-1.5 3.5-4c0-1-.4-2-1-3-.3 1.5-1.2 2.3-2.5 2.3S9.8 15.5 9.5 14Z"
+                  fill="#9BC92E"
+                />
+              </svg>
+            </div>
+          </div>
+        )}
+
+        <div
+          onClick={(e) => {
+            e.stopPropagation();
+            window.dispatchEvent(new CustomEvent("edit-node-text", { detail: { nodeId: id } }));
+          }}
+          className="text-[10.5px] text-black font-semibold leading-relaxed p-2 bg-[#FAFAFA] border border-[#E8E8E8] hover:border-black/50 cursor-pointer rounded-xl whitespace-pre-wrap select-none transition-all"
+        >
           {data.label || "Salam, mendan dars olish uchun Telegram kanalga o'ting. Quyidagi tugmani bosing."}
         </div>
 
@@ -92,7 +116,13 @@ function TriggerNode({ data, id }: NodeProps<NodeData>) {
         <div className="flex flex-col gap-1.5 mt-1">
           {(data.buttons || []).map((btn) => (
             <div key={btn.id} className="relative">
-              <div className="w-full flex items-center justify-between py-1.5 px-3 border border-[#E8E8E8] rounded-xl text-[10px] font-bold bg-white hover:bg-neutral-50 text-black select-none">
+              <div
+                onClick={(e) => {
+                  e.stopPropagation();
+                  window.dispatchEvent(new CustomEvent("edit-button", { detail: { nodeId: id, buttonId: btn.id } }));
+                }}
+                className="w-full flex items-center justify-between py-1.5 px-3 border border-[#E8E8E8] hover:border-black rounded-xl text-[10px] font-bold bg-white hover:bg-neutral-50 text-black select-none cursor-pointer transition-all"
+              >
                 <span className="text-[#a0a0a0] font-mono mr-1.5 font-bold">==</span>
                 <span className="flex-1 truncate text-left">{btn.label}</span>
                 <button
@@ -127,8 +157,10 @@ function TriggerNode({ data, id }: NodeProps<NodeData>) {
             type="button"
             onClick={(e) => {
               e.stopPropagation();
-              const newBtn = { id: `btn-${Date.now()}`, label: "Darsni olish", type: "action" as const };
+              const newId = `btn-${Date.now()}`;
+              const newBtn = { id: newId, label: "Darsni olish", type: "action" as const };
               setNodes((nds) => nds.map((n) => n.id === id ? { ...n, data: { ...n.data, buttons: [...(n.data.buttons || []), newBtn] } } : n));
+              window.dispatchEvent(new CustomEvent("edit-button", { detail: { nodeId: id, buttonId: newId } }));
             }}
             className="w-full text-center py-2 border border-dashed border-[#D8D8D8] hover:border-black rounded-xl text-[9.5px] font-bold text-black flex items-center justify-center gap-1 transition-all bg-white cursor-pointer"
           >
@@ -155,7 +187,7 @@ function MessageNode({ data, id }: NodeProps<NodeData>) {
   const { setNodes } = useReactFlow();
   
   return (
-    <div className="w-[230px] bg-white border border-[#E8E8E8] rounded-[20px] shadow-sm overflow-visible text-black text-left relative">
+    <div className="w-[260px] bg-white border border-[#E8E8E8] rounded-2xl shadow-sm overflow-visible text-black text-left relative">
       <Handle
         type="target"
         position={Position.Left}
@@ -170,7 +202,7 @@ function MessageNode({ data, id }: NodeProps<NodeData>) {
       />
       
       {/* Node Header */}
-      <div className="bg-[#F5F5F7] px-4 py-2 border-b border-[#E8E8E8] flex items-center justify-between rounded-t-[20px]">
+      <div className="bg-[#F5F5F7] px-4 py-2.5 border-b border-[#E8E8E8] flex items-center justify-between rounded-t-2xl">
         <div className="flex items-center gap-1.5">
           <MessageSquare size={11} className="text-[#707070]" />
           <span className="text-[10px] font-black text-[#505050] uppercase tracking-wider">Xabar</span>
@@ -180,7 +212,31 @@ function MessageNode({ data, id }: NodeProps<NodeData>) {
       
       {/* Content */}
       <div className="p-3 flex flex-col gap-2">
-        <div className="text-[10.5px] text-black font-semibold leading-relaxed p-2 bg-[#FAFAFA] border border-[#E8E8E8] rounded-xl whitespace-pre-wrap">
+        {data.imageUrl && (
+          <div className="w-full h-[120px] rounded-xl overflow-hidden bg-gradient-to-tr from-[#9B51E0] to-[#2F80ED] flex items-center justify-center relative mb-2 shadow-sm select-none animate-in fade-in duration-300">
+            {/* Sendly lightning bolt logo inside */}
+            <div className="w-11 h-11 rounded-2xl bg-white/10 backdrop-blur-md flex items-center justify-center border border-white/20 shadow-sm">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                <path
+                  d="M13.5 2c.3 3.5-1.5 5.2-3 6.8C9 10.5 7.5 12 8 14.5 8.4 16.7 10 18 12 18c0-2 .8-3 2-4.2 1.4-1.4 3-3 2.6-6C16.2 5 14.8 3.3 13.5 2Z"
+                  fill="#C7F33C"
+                />
+                <path
+                  d="M9.5 14c-.6 1-1 2-1 3 0 2.5 1.6 4 3.5 4s3.5-1.5 3.5-4c0-1-.4-2-1-3-.3 1.5-1.2 2.3-2.5 2.3S9.8 15.5 9.5 14Z"
+                  fill="#9BC92E"
+                />
+              </svg>
+            </div>
+          </div>
+        )}
+
+        <div
+          onClick={(e) => {
+            e.stopPropagation();
+            window.dispatchEvent(new CustomEvent("edit-node-text", { detail: { nodeId: id } }));
+          }}
+          className="text-[10.5px] text-black font-semibold leading-relaxed p-2 bg-[#FAFAFA] border border-[#E8E8E8] hover:border-black/50 cursor-pointer rounded-xl whitespace-pre-wrap select-none transition-all"
+        >
           {data.label || "Suhbatni davom ettirish xabari..."}
         </div>
 
@@ -188,7 +244,13 @@ function MessageNode({ data, id }: NodeProps<NodeData>) {
         <div className="flex flex-col gap-1.5 mt-1">
           {(data.buttons || []).map((btn) => (
             <div key={btn.id} className="relative">
-              <div className="w-full flex items-center justify-between py-1.5 px-3 border border-[#E8E8E8] rounded-xl text-[10px] font-bold bg-white hover:bg-neutral-50 text-black select-none">
+              <div
+                onClick={(e) => {
+                  e.stopPropagation();
+                  window.dispatchEvent(new CustomEvent("edit-button", { detail: { nodeId: id, buttonId: btn.id } }));
+                }}
+                className="w-full flex items-center justify-between py-1.5 px-3 border border-[#E8E8E8] hover:border-black rounded-xl text-[10px] font-bold bg-white hover:bg-neutral-50 text-black select-none cursor-pointer transition-all"
+              >
                 <span className="text-[#a0a0a0] font-mono mr-1.5 font-bold">==</span>
                 <span className="flex-1 truncate text-left">{btn.label}</span>
                 <button
@@ -223,8 +285,10 @@ function MessageNode({ data, id }: NodeProps<NodeData>) {
             type="button"
             onClick={(e) => {
               e.stopPropagation();
-              const newBtn = { id: `btn-${Date.now()}`, label: "Tugma", type: "action" as const };
+              const newId = `btn-${Date.now()}`;
+              const newBtn = { id: newId, label: "Tugma", type: "action" as const };
               setNodes((nds) => nds.map((n) => n.id === id ? { ...n, data: { ...n.data, buttons: [...(n.data.buttons || []), newBtn] } } : n));
+              window.dispatchEvent(new CustomEvent("edit-button", { detail: { nodeId: id, buttonId: newId } }));
             }}
             className="w-full text-center py-2 border border-dashed border-[#D8D8D8] hover:border-black rounded-xl text-[9.5px] font-bold text-black flex items-center justify-center gap-1 transition-all bg-white cursor-pointer"
           >
@@ -249,7 +313,7 @@ function MessageNode({ data, id }: NodeProps<NodeData>) {
 
 function ActionNode({ data, id }: NodeProps<NodeData>) {
   return (
-    <div className="w-[220px] bg-white border border-[#E8E8E8] rounded-[20px] shadow-sm overflow-hidden text-black text-left">
+    <div className="w-[260px] bg-white border border-[#E8E8E8] rounded-2xl shadow-sm overflow-hidden text-black text-left">
       <Handle
         type="target"
         position={Position.Left}
@@ -264,7 +328,7 @@ function ActionNode({ data, id }: NodeProps<NodeData>) {
       />
 
       {/* Node Header */}
-      <div className="bg-[#F5F5F7] px-4 py-2 border-b border-[#E8E8E8] flex items-center justify-between">
+      <div className="bg-[#F5F5F7] px-4 py-2.5 border-b border-[#E8E8E8] flex items-center justify-between">
         <div className="flex items-center gap-1.5">
           <Zap size={11} className="text-black" />
           <span className="text-[10px] font-black text-[#505050] uppercase tracking-wider">Harakat</span>
@@ -274,11 +338,17 @@ function ActionNode({ data, id }: NodeProps<NodeData>) {
 
       {/* Content */}
       <div className="p-3">
-        <div className="p-2.5 bg-[#FAFAFA] border border-[#E8E8E8] rounded-xl flex flex-col gap-0.5">
-          <p className="text-[8px] font-black text-[#707070] uppercase">Kutish</p>
-          <p className="text-[11px] text-black font-semibold">
-            {data.label || "5 Daqiqalar"}
-          </p>
+        <div className="p-2.5 bg-[#F6F7F9] border border-[#E8E8E8] rounded-xl flex items-center justify-between shadow-sm">
+          <div className="flex flex-col gap-0.5 min-w-0">
+            <p className="text-[8px] font-black text-[#707070] uppercase">Harakat turi</p>
+            <p className="text-[11px] text-black font-extrabold truncate">
+              {data.label || "Teg qo'shish"}
+            </p>
+          </div>
+          {/* Pencil Edit Icon */}
+          <svg className="w-3.5 h-3.5 text-[#707070] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+          </svg>
         </div>
       </div>
 
@@ -300,7 +370,7 @@ function ActionNode({ data, id }: NodeProps<NodeData>) {
 
 function ConditionNode({ data, id }: NodeProps<NodeData>) {
   return (
-    <div className="w-[220px] bg-white border border-[#E8E8E8] rounded-[20px] shadow-sm overflow-hidden text-black text-left">
+    <div className="w-[260px] bg-white border border-[#E8E8E8] rounded-2xl shadow-sm overflow-hidden text-black text-left">
       <Handle
         type="target"
         position={Position.Left}
@@ -315,7 +385,7 @@ function ConditionNode({ data, id }: NodeProps<NodeData>) {
       />
 
       {/* Node Header */}
-      <div className="bg-[#F5F5F7] px-4 py-2 border-b border-[#E8E8E8] flex items-center justify-between">
+      <div className="bg-[#F5F5F7] px-4 py-2.5 border-b border-[#E8E8E8] flex items-center justify-between">
         <div className="flex items-center gap-1.5">
           <span className="text-[10px] font-black text-[#505050] uppercase tracking-wider">Shart</span>
         </div>
@@ -378,7 +448,7 @@ function ConditionNode({ data, id }: NodeProps<NodeData>) {
 
 function WaitNode({ data, id }: NodeProps<NodeData>) {
   return (
-    <div className="w-[220px] bg-white border border-[#E8E8E8] rounded-[20px] shadow-sm overflow-hidden text-black text-left">
+    <div className="w-[260px] bg-white border border-[#E8E8E8] rounded-2xl shadow-sm overflow-hidden text-black text-left">
       <Handle
         type="target"
         position={Position.Left}
@@ -393,7 +463,7 @@ function WaitNode({ data, id }: NodeProps<NodeData>) {
       />
 
       {/* Node Header */}
-      <div className="bg-[#F5F5F7] px-4 py-2 border-b border-[#E8E8E8] flex items-center justify-between">
+      <div className="bg-[#F5F5F7] px-4 py-2.5 border-b border-[#E8E8E8] flex items-center justify-between">
         <div className="flex items-center gap-1.5">
           <Clock size={12} className="text-[#707070]" />
           <span className="text-[10px] font-black text-[#505050] uppercase tracking-wider">Kutish</span>
@@ -403,11 +473,17 @@ function WaitNode({ data, id }: NodeProps<NodeData>) {
 
       {/* Content */}
       <div className="p-3">
-        <div className="p-2.5 bg-[#FAFAFA] border border-[#E8E8E8] rounded-xl flex flex-col gap-0.5">
-          <p className="text-[8px] font-black text-[#707070] uppercase">Muddati</p>
-          <p className="text-[11px] text-black font-semibold">
-            {data.label || "Kutish: 5 Daqiqalar"}
-          </p>
+        <div className="p-2.5 bg-[#F6F7F9] border border-[#E8E8E8] rounded-xl flex items-center justify-between shadow-sm">
+          <div className="flex flex-col gap-0.5 min-w-0">
+            <p className="text-[8px] font-black text-[#707070] uppercase">Muddati</p>
+            <p className="text-[11px] text-black font-extrabold truncate">
+              {data.label || "Kutish: 5 Daqiqalar"}
+            </p>
+          </div>
+          {/* Clock icon */}
+          <svg className="w-3.5 h-3.5 text-[#707070] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
         </div>
       </div>
 
@@ -434,13 +510,13 @@ export default function BuilderPage() {
   const TEMPLATE_FLOWS: Record<string, { nodes: Node<NodeData>[]; edges: Edge[] }> = {
     lead_magnet: {
       nodes: [
-        { id: "n1", type: "trigger", data: { label: "Instagram'da obunani tekshirish", nodeType: "trigger", triggerSource: "dm", triggerMatch: "contains", triggerKeywords: "kitob, kurs, bonus", buttons: [{ id: "b1", label: "Ha, qatnashaman", type: "action" }, { id: "b2", label: "Yo'q, qatnashmayman", type: "action" }] }, position: { x: 50, y: 150 } },
-        { id: "n2", type: "action", data: { label: "Tezkor javoblar: 'Qatnashaman' tugmasiga kirdi", nodeType: "action" }, position: { x: 380, y: 120 } },
-        { id: "n3", type: "condition", data: { label: "Obuna bo'linganligi", nodeType: "condition", conditionType: "is_follower" }, position: { x: 700, y: 120 } },
+        { id: "n1", type: "trigger", data: { label: "Hi, want to get a lesson on setting up automation in Direct with a subscription check and lead magnet delivery?", nodeType: "trigger", triggerSource: "dm", triggerMatch: "contains", triggerKeywords: "kitob, kurs, bonus", imageUrl: "/logo.svg", buttons: [{ id: "b1", label: "Yes, I do!🤩", type: "action" }, { id: "b2", label: "Nomini kiriting", type: "action" }] }, position: { x: 50, y: 150 } },
+        { id: "n2", type: "action", data: { label: "clicked the button scheme", nodeType: "action" }, position: { x: 380, y: 120 } },
+        { id: "n3", type: "condition", data: { label: "Obuna", nodeType: "condition", conditionType: "is_follower" }, position: { x: 700, y: 120 } },
         { id: "n4", type: "message", data: { label: "Yaxshi! Obuna bo'lganingiz uchun rahmat. Mana kitob havolasi: https://t.me/yourusername", nodeType: "message", buttons: [{ id: "b3", label: "Yuklab olish", type: "link", url: "https://example.com" }] }, position: { x: 1050, y: 50 } },
         { id: "n5", type: "message", data: { label: "Afsuski, siz hali obuna bo'lmagansiz. Iltimos obuna bo'ling va keyin 'Tekshirish' tugmasini bosing.", nodeType: "message", buttons: [{ id: "b4", label: "Obunani tekshirish", type: "action" }] }, position: { x: 1050, y: 250 } },
-        { id: "n6", type: "wait", data: { label: "Kutish: 15 Daqiqalar", nodeType: "wait" }, position: { x: 380, y: 450 } },
-        { id: "n7", type: "condition", data: { label: "Obuna bo'linganligi (Eslatma)", nodeType: "condition", conditionType: "is_follower" }, position: { x: 700, y: 450 } },
+        { id: "n6", type: "wait", data: { label: "10 Daqiqalar", nodeType: "wait" }, position: { x: 380, y: 450 } },
+        { id: "n7", type: "condition", data: { label: "Obuna (Eslatma)", nodeType: "condition", conditionType: "is_follower" }, position: { x: 700, y: 450 } },
         { id: "n8", type: "message", data: { label: "Siz hali obuna bo'lmagansiz, bonusni olish uchun obuna bo'lishingiz kerak.", nodeType: "message" }, position: { x: 1050, y: 480 } },
       ],
       edges: [
@@ -526,6 +602,7 @@ export default function BuilderPage() {
   const [nodes, setNodes, onNodesChange] = useNodesState<NodeData>([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
   const [selectedNode, setSelectedNode] = useState<Node<NodeData> | null>(null);
+  const [selectedButton, setSelectedButton] = useState<{ nodeId: string; buttonId: string } | null>(null);
 
   // Collapsible block palette and react-flow instance hooks
   const [isPaletteOpen, setIsPaletteOpen] = useState(false);
@@ -605,8 +682,65 @@ export default function BuilderPage() {
     [setEdges]
   );
 
+  useEffect(() => {
+    const handleEditButton = (e: Event) => {
+      const { nodeId, buttonId } = (e as CustomEvent).detail;
+      const node = nodes.find((n) => n.id === nodeId);
+      if (node) {
+        setSelectedNode(node);
+        setSelectedButton({ nodeId, buttonId });
+        setInspButtons(node.data.buttons || []);
+      }
+    };
+
+    const handleEditNodeText = (e: Event) => {
+      const { nodeId } = (e as CustomEvent).detail;
+      const node = nodes.find((n) => n.id === nodeId);
+      if (node) {
+        syncInspector(node);
+        setIsRichEditorOpen(true);
+      }
+    };
+
+    window.addEventListener("edit-button", handleEditButton);
+    window.addEventListener("edit-node-text", handleEditNodeText);
+    return () => {
+      window.removeEventListener("edit-button", handleEditButton);
+      window.removeEventListener("edit-node-text", handleEditNodeText);
+    };
+  }, [nodes]);
+
+  const handleUpdateButtonDetail = (key: keyof ButtonItem, value: any) => {
+    if (!selectedButton || !selectedNode) return;
+    
+    // Update local inspector state
+    setInspButtons((prev) =>
+      prev.map((btn) => (btn.id === selectedButton.buttonId ? { ...btn, [key]: value } : btn))
+    );
+    
+    // Update global node state immediately
+    setNodes((nds) =>
+      nds.map((node) => {
+        if (node.id === selectedButton.nodeId) {
+          const updatedButtons = (node.data.buttons || []).map((btn) =>
+            btn.id === selectedButton.buttonId ? { ...btn, [key]: value } : btn
+          );
+          return {
+            ...node,
+            data: {
+              ...node.data,
+              buttons: updatedButtons,
+            },
+          };
+        }
+        return node;
+      })
+    );
+  };
+
   const syncInspector = (node: Node<NodeData>) => {
     setSelectedNode(node);
+    setSelectedButton(null);
     setInspLabel(node.data.label || "");
     setInspTriggerSource(node.data.triggerSource || "dm");
     setInspTriggerMatch(node.data.triggerMatch || "contains");
@@ -744,13 +878,22 @@ export default function BuilderPage() {
   };
 
   const addButton = () => {
-    const btn: ButtonItem = { id: `btn-${Date.now()}`, label: t("pages.builder.btn_placeholder"), type: "action" };
+    const newId = `btn-${Date.now()}`;
+    const btn: ButtonItem = { id: newId, label: t("pages.builder.btn_placeholder"), type: "action" };
     setInspButtons((prev) => [...prev, btn]);
+    if (selectedNode) {
+      setSelectedButton({ nodeId: selectedNode.id, buttonId: newId });
+    }
   };
 
-  const removeButton = (id: string) => setInspButtons((prev) => prev.filter((b) => b.id !== id));
+  const removeButton = (id: string) => {
+    setInspButtons((prev) => prev.filter((b) => b.id !== id));
+    if (selectedButton?.buttonId === id) {
+      setSelectedButton(null);
+    }
+  };
 
-  const updateButton = (id: string, key: keyof ButtonItem, value: string) => {
+  const updateButton = (id: string, key: keyof ButtonItem, value: any) => {
     setInspButtons((prev) => prev.map((b) => b.id === id ? { ...b, [key]: value } : b));
   };
 
@@ -761,6 +904,14 @@ export default function BuilderPage() {
     action: ActionNode,
     wait: WaitNode,
   }), []);
+
+  const currentButton = useMemo(() => {
+    if (!selectedButton || !selectedNode) return null;
+    const node = nodes.find((n) => n.id === selectedButton.nodeId);
+    if (!node) return null;
+    return (node.data.buttons || []).find((b) => b.id === selectedButton.buttonId) || null;
+  }, [selectedButton, selectedNode, nodes]);
+
 
   if (!mounted) return <div className="flex h-screen items-center justify-center bg-[#E8E8E8] text-black text-[13px]">{t("common.loading")}</div>;
 
@@ -923,7 +1074,139 @@ export default function BuilderPage() {
 
           {/* Right Inspector */}
           <aside className="w-[300px] shrink-0 border-l border-[#E8E8E8] bg-white overflow-y-auto">
-            {selectedNode ? (
+            {selectedButton && currentButton ? (
+              <div className="flex flex-col">
+                {/* Button Inspector Header */}
+                <div className="px-5 pt-5 pb-4 border-b border-[#F0F0F0] flex items-center justify-between">
+                  <div className="flex items-center gap-2.5">
+                    <button
+                      onClick={() => setSelectedButton(null)}
+                      className="p-1 rounded-full hover:bg-neutral-100 text-[#707070] hover:text-black transition-colors"
+                      title="Orqaga"
+                    >
+                      <ArrowLeft size={16} strokeWidth={2.5} />
+                    </button>
+                    <h3 className="text-[13px] font-black text-black leading-none truncate max-w-[170px]">
+                      {currentButton.label || "Tugma sozlamalari"}
+                    </h3>
+                  </div>
+                  <button
+                    onClick={() => {
+                      setSelectedButton(null);
+                      setSelectedNode(null);
+                    }}
+                    className="p-1 rounded-full hover:bg-neutral-100 text-[#707070] hover:text-black transition-colors"
+                    title="Yopish"
+                  >
+                    <X size={16} />
+                  </button>
+                </div>
+
+                <div className="px-4 py-4 flex flex-col gap-5 text-left text-black">
+                  {/* Button text input */}
+                  <div className="flex flex-col gap-2">
+                    <p className="text-[10px] font-bold text-[#707070] uppercase tracking-widest px-0.5">Tugma matni</p>
+                    <input
+                      type="text"
+                      value={currentButton.label || ""}
+                      onChange={(e) => handleUpdateButtonDetail("label", e.target.value)}
+                      placeholder="Masalan: Ha, darsni boshlash!"
+                      className="w-full rounded-[12px] bg-[#F0F0F0] px-4 py-3 text-[12px] text-black outline-none focus:bg-[#e8e8e8] transition-colors font-medium border border-transparent focus:border-black/10"
+                    />
+                  </div>
+
+                  {/* Action on button (Tugma ustidagi amal) */}
+                  <div className="flex flex-col gap-2.5">
+                    <p className="text-[10px] font-bold text-[#707070] uppercase tracking-widest px-0.5">Tugma ustidagi amal</p>
+                    
+                    <div className="flex flex-col gap-2">
+                      {[
+                        {
+                          id: "action",
+                          title: "Keyingi qadamga o'tish",
+                          desc: "Navbatdagi blokga yo'naltirish (Canvas bog'lanishi)",
+                        },
+                        {
+                          id: "link",
+                          title: "Veb-saytni ochish",
+                          desc: "Havola orqali tashqi saytga o'tkazish",
+                        },
+                        {
+                          id: "payment",
+                          title: "To'lovga o'tish",
+                          desc: "To'lov sahifasiga yo'naltirish havola orqali",
+                        },
+                      ].map((opt) => {
+                        const isSelected = currentButton.type === opt.id;
+                        return (
+                          <div
+                            key={opt.id}
+                            onClick={() => handleUpdateButtonDetail("type", opt.id as any)}
+                            className={`border rounded-2xl p-3 flex items-start gap-3 cursor-pointer transition-all select-none hover:border-black/30 ${
+                              isSelected
+                                ? "border-black bg-black/[0.02]"
+                                : "border-[#E8E8E8] bg-white"
+                            }`}
+                          >
+                            {/* Custom Radio Button */}
+                            <div className={`w-4 h-4 rounded-full border flex items-center justify-center shrink-0 mt-0.5 transition-all ${
+                              isSelected ? "border-black bg-black" : "border-[#D8D8D8]"
+                            }`}>
+                              {isSelected && (
+                                <div className="w-1.5 h-1.5 rounded-full bg-[#C7F33C]" />
+                              )}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-[11.5px] font-extrabold text-black leading-tight">{opt.title}</p>
+                              <p className="text-[9.5px] text-[#707070] mt-0.5 leading-tight">{opt.desc}</p>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Conditional URL Input */}
+                  {(currentButton.type === "link" || currentButton.type === "payment") && (
+                    <div className="flex flex-col gap-2 animate-in slide-in-from-top-1">
+                      <p className="text-[10px] font-bold text-[#707070] uppercase tracking-widest px-0.5">Veb-sayt havolasi (URL)</p>
+                      <input
+                        type="text"
+                        value={currentButton.url || ""}
+                        onChange={(e) => handleUpdateButtonDetail("url", e.target.value)}
+                        placeholder="https://example.com"
+                        className="w-full rounded-[12px] bg-[#F0F0F0] px-4 py-3 text-[12px] text-black outline-none focus:bg-[#e8e8e8] transition-colors font-mono"
+                      />
+                    </div>
+                  )}
+
+                  {/* Toggle: Multiple button click */}
+                  <div className="flex items-center justify-between p-4 bg-[#F9F9F7] border border-[#E8E8E8] rounded-2xl w-full select-none mt-1">
+                    <div className="flex flex-col gap-0.5 text-left">
+                      <span className="text-[12px] font-extrabold text-black leading-tight">Bir nechta bosish</span>
+                      <span className="text-[9px] text-[#707070] leading-none">Tugmani bir necha bor bosish imkoni</span>
+                    </div>
+                    <label className="relative inline-flex items-center cursor-pointer shrink-0">
+                      <input
+                        type="checkbox"
+                        checked={!!currentButton.multipleClick}
+                        onChange={(e) => handleUpdateButtonDetail("multipleClick", e.target.checked)}
+                        className="sr-only peer"
+                      />
+                      <div className="w-11 h-6 bg-[#E8E8E8] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-[#D8D8D8] after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#C7F33C]"></div>
+                    </label>
+                  </div>
+
+                  {/* Done button */}
+                  <button
+                    onClick={() => setSelectedButton(null)}
+                    className="w-full py-3 rounded-full bg-black text-white text-[12px] font-semibold hover:bg-black/80 active:scale-[0.98] transition-all mt-2 cursor-pointer border-none"
+                  >
+                    Tayyor
+                  </button>
+                </div>
+              </div>
+            ) : selectedNode ? (
               <div className="flex flex-col">
                 {/* Inspector Header */}
                 <div className="px-5 pt-5 pb-4 border-b border-[#F0F0F0] flex items-center gap-3">
@@ -1060,43 +1343,30 @@ export default function BuilderPage() {
                         )}
 
                         {inspButtons.map((btn, idx) => (
-                          <div key={btn.id} className="rounded-[12px] border border-[#E8E8E8] bg-[#FAFAFA] overflow-hidden">
-                            <div className="flex items-center gap-2 px-3 pt-3 pb-2">
-                              <span className="text-[10px] font-bold text-[#a0a0a0] shrink-0">#{idx + 1}</span>
-                              <input
-                                value={btn.label}
-                                onChange={(e) => updateButton(btn.id, "label", e.target.value)}
-                                className="flex-1 text-[12px] font-medium bg-transparent outline-none text-black"
-                                placeholder={t("pages.builder.btn_placeholder")}
-                              />
-                              <button onClick={() => removeButton(btn.id)} className="text-[#DC2626] hover:opacity-70 shrink-0">
+                          <div
+                            key={btn.id}
+                            onClick={() => setSelectedButton({ nodeId: selectedNode.id, buttonId: btn.id })}
+                            className="flex items-center justify-between p-3 border border-[#E8E8E8] hover:border-black rounded-xl text-[11px] font-bold bg-white hover:bg-neutral-50 text-black select-none cursor-pointer transition-all"
+                          >
+                            <div className="flex items-center gap-2 truncate">
+                              <span className="text-[#a0a0a0] font-mono font-bold">==</span>
+                              <span className="truncate">{btn.label || t("pages.builder.btn_placeholder")}</span>
+                            </div>
+                            <div className="flex items-center gap-1.5">
+                              <span className="text-[9px] uppercase tracking-wider text-[#707070] font-semibold bg-[#F5F5F7] px-2 py-0.5 rounded-md">
+                                {btn.type === "action" ? "Qadam" : btn.type === "payment" ? "To'lov" : "Sayt"}
+                              </span>
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  removeButton(btn.id);
+                                }}
+                                className="text-[#DC2626] hover:opacity-70 shrink-0 p-1 rounded hover:bg-red-50"
+                              >
                                 <X size={14} />
                               </button>
                             </div>
-                            <div className="flex border-t border-[#F0F0F0]">
-                              <button
-                                onClick={() => updateButton(btn.id, "type", "action")}
-                                className={`flex-1 flex items-center justify-center gap-1.5 py-2 text-[11px] font-medium transition-all ${btn.type === "action" ? "bg-black text-white" : "text-[#707070] hover:bg-[#F0F0F0]"}`}
-                              >
-                                <MousePointerClick size={11} /> {t("pages.builder.btn_action")}
-                              </button>
-                              <button
-                                onClick={() => updateButton(btn.id, "type", "link")}
-                                className={`flex-1 flex items-center justify-center gap-1.5 py-2 text-[11px] font-medium transition-all border-l border-[#F0F0F0] ${btn.type === "link" ? "bg-black text-white" : "text-[#707070] hover:bg-[#F0F0F0]"}`}
-                              >
-                                <LinkIcon size={11} /> {t("pages.builder.btn_link")}
-                              </button>
-                            </div>
-                            {btn.type === "link" && (
-                              <div className="border-t border-[#F0F0F0] px-3 py-2">
-                                <input
-                                  value={btn.url || ""}
-                                  onChange={(e) => updateButton(btn.id, "url", e.target.value)}
-                                  className="w-full text-[11px] bg-[#F0F0F0] rounded-[8px] px-3 py-1.5 outline-none text-black"
-                                  placeholder={t("pages.builder.btn_url_placeholder")}
-                                />
-                              </div>
-                            )}
                           </div>
                         ))}
                       </div>
