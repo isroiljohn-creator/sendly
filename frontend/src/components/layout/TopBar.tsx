@@ -201,22 +201,6 @@ export function TopBar() {
           )}
         </div>
 
-        {/* Contact list shortcut avatars */}
-        <Link href="/contacts" className="flex items-center hover:opacity-90 transition-opacity">
-          {["#FCA5A5", "#FCD34D", "#93C5FD"].map((c, i) => (
-            <div
-              key={i}
-              className="h-[34px] w-[34px] rounded-full ring-2 ring-[#E8E8E8]"
-              style={{ background: c, marginLeft: i === 0 ? 0 : -10 }}
-            />
-          ))}
-          <div
-            className="grid h-[34px] w-[34px] place-items-center rounded-full bg-black text-[11px] font-medium text-white ring-2 ring-[#E8E8E8] shrink-0"
-            style={{ marginLeft: -10 }}
-          >
-            +5
-          </div>
-        </Link>
 
         {/* Notifications Bell */}
         <div className="relative" ref={notifRef}>
