@@ -680,7 +680,8 @@ export default function AutomationsPage() {
                 {filteredAutomations.map((a) => (
                   <div
                     key={a.id}
-                    className="bg-white border border-[#E8E8E8] hover:border-black rounded-[24px] p-5 flex flex-col justify-between gap-4 shadow-sm hover:shadow-md transition-all relative group"
+                    onClick={() => handleEditClick(a.id, a.channelId)}
+                    className="bg-white border border-[#E8E8E8] hover:border-black rounded-[24px] p-5 flex flex-col justify-between gap-4 shadow-sm hover:shadow-md transition-all relative group cursor-pointer text-left font-sans"
                   >
                     {/* Header */}
                     <div className="flex items-start justify-between">
@@ -692,9 +693,12 @@ export default function AutomationsPage() {
                       </div>
 
                       {/* Card Menu */}
-                      <div className="relative shrink-0">
+                      <div className="relative shrink-0" onClick={(e) => e.stopPropagation()}>
                         <button
-                          onClick={() => setActiveCardMenuId(activeCardMenuId === a.id ? null : a.id)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setActiveCardMenuId(activeCardMenuId === a.id ? null : a.id);
+                          }}
                           className="h-7 w-7 rounded-full hover:bg-[#F5F5F5] flex items-center justify-center text-[#707070] hover:text-black transition-colors"
                         >
                           <MoreVertical size={14} />

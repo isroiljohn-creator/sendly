@@ -18,6 +18,7 @@ import ReactFlow, {
   useReactFlow,
   getBezierPath,
   EdgeProps,
+  useEdges,
 } from "reactflow";
 import "reactflow/dist/style.css";
 import {
@@ -35,9 +36,17 @@ import {
   MousePointerClick,
   Tag,
   Settings,
-  Layers,
   Trash2,
   Copy,
+  MessageCircle,
+  Layers,
+  Eye,
+  Flame,
+  Send,
+  AtSign,
+  CreditCard,
+  Radio,
+  Filter,
 } from "lucide-react";
 import { useI18n } from "@/i18n/I18nProvider";
 import { Button } from "@/components/ui/primitives";
@@ -56,6 +65,7 @@ interface NodeData {
   triggerSource?: string;
   triggerMatch?: string;
   triggerKeywords?: string;
+  prohibitRestart?: boolean;
   conditionType?: string;
   conditionValue?: string;
   actionType?: string;
@@ -128,19 +138,31 @@ function ButtonEdge({
 
 function TriggerNode({ data, id }: NodeProps<NodeData>) {
   const { setNodes, setEdges } = useReactFlow();
-  
+
+  const sourceLabels: Record<string, string> = {
+    message_recognition: "Message recognition",
+    dm: "Direct Message",
+    comment: "Post Comment",
+    live_comment: "Live Stream Comment",
+    story_reaction: "Story Reaction",
+    story_reply: "Story Reply",
+    story_mention: "Story Mention",
+    payment: "Successful Payment",
+  };
+
+  const sourceLabel = sourceLabels[data.triggerSource || "dm"] || "Direct Message";
+
   return (
     <div className="w-[260px] bg-white border border-[#E8E8E8] rounded-2xl shadow-sm overflow-visible text-black text-left relative">
-      {/* Boshlanishi Label badge styled dynamically above the node */}
       <div className="absolute -top-5 left-1 flex items-center gap-1.5 text-[9.5px] font-black text-[#707070] uppercase tracking-widest select-none">
         <span>⟨ Boshlanishi ⟩</span>
       </div>
       
       {/* Node Header */}
-      <div className="bg-[#F5F5F7] px-4 py-2.5 border-b border-[#E8E8E8] flex items-center justify-between rounded-t-2xl">
+      <div className="bg-[#F8FAE5] border-b border-[#E5EDBD] px-4 py-3 flex items-center justify-between rounded-t-2xl h-[45px]">
         <div className="flex items-center gap-1.5">
-          <MessageSquare size={11} className="text-[#707070]" />
-          <span className="text-[10px] font-black text-[#505050] uppercase tracking-wider">Xabar</span>
+          <Zap size={13} className="text-black" />
+          <span className="text-[12px] font-bold text-black uppercase tracking-wider">Start Trigger</span>
         </div>
         <button
           type="button"
@@ -156,139 +178,69 @@ function TriggerNode({ data, id }: NodeProps<NodeData>) {
         </button>
       </div>
       
-      {/* Content */}
-      <div className="p-3 flex flex-col gap-2">
-        {data.imageUrl && (
-          <div className="w-full h-[120px] rounded-xl overflow-hidden bg-gradient-to-tr from-[#9B51E0] to-[#2F80ED] flex items-center justify-center relative mb-2 shadow-sm select-none animate-in fade-in duration-300">
-            {/* Sendly lightning bolt logo inside */}
-            <div className="w-11 h-11 rounded-2xl bg-white/10 backdrop-blur-md flex items-center justify-center border border-white/20 shadow-sm">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                <path
-                  d="M13.5 2c.3 3.5-1.5 5.2-3 6.8C9 10.5 7.5 12 8 14.5 8.4 16.7 10 18 12 18c0-2 .8-3 2-4.2 1.4-1.4 3-3 2.6-6C16.2 5 14.8 3.3 13.5 2Z"
-                  fill="#C7F33C"
-                />
-                <path
-                  d="M9.5 14c-.6 1-1 2-1 3 0 2.5 1.6 4 3.5 4s3.5-1.5 3.5-4c0-1-.4-2-1-3-.3 1.5-1.2 2.3-2.5 2.3S9.8 15.5 9.5 14Z"
-                  fill="#9BC92E"
-                />
-              </svg>
-            </div>
+      {/* Trigger Criteria Details */}
+      <div className="p-4 flex flex-col gap-2 bg-white rounded-b-2xl">
+        <div className="flex flex-col gap-0.5">
+          <span className="text-[9px] text-[#707070] font-bold uppercase tracking-wider">Trigger manbasi</span>
+          <span className="text-[12px] font-bold text-black">{sourceLabel}</span>
+        </div>
+        
+        {(data.triggerSource === "dm" || data.triggerSource === "comment" || data.triggerSource === "message_recognition") && (
+          <div className="flex flex-col gap-0.5 border-t border-[#F0F0F0] pt-2 mt-1">
+            <span className="text-[9px] text-[#707070] font-bold uppercase tracking-wider">Qoida</span>
+            <span className="text-[11px] font-medium text-black">
+              {data.triggerMatch === "any" ? "Har qanday xabar" :
+               data.triggerMatch === "is" ? `Xabar mos kelsa: "${data.triggerKeywords || ''}"` :
+               `Xabarda bo'lsa: "${data.triggerKeywords || ''}"`}
+            </span>
           </div>
         )}
 
-        <div
-          onClick={(e) => {
-            e.stopPropagation();
-            window.dispatchEvent(new CustomEvent("edit-node-text", { detail: { nodeId: id } }));
-          }}
-          className="text-[10.5px] text-black font-semibold leading-relaxed p-2 bg-[#FAFAFA] border border-[#E8E8E8] hover:border-black/50 cursor-pointer rounded-xl whitespace-pre-wrap select-none transition-all"
-        >
-          {data.label || "Salam, mendan dars olish uchun Telegram kanalga o'ting. Quyidagi tugmani bosing."}
-        </div>
-
-        {/* Buttons list */}
-        <div className="flex flex-col gap-1.5 mt-1">
-          {(data.buttons || []).map((btn) => (
-            <div key={btn.id} className="relative group">
-              <div
-                onClick={(e) => {
-                  e.stopPropagation();
-                  window.dispatchEvent(new CustomEvent("edit-button", { detail: { nodeId: id, buttonId: btn.id } }));
-                }}
-                className="w-full flex items-center justify-between py-1.5 px-2.5 border border-[#E8E8E8] hover:border-black rounded-xl text-[10px] font-bold bg-white hover:bg-neutral-50 text-black select-none cursor-pointer transition-all"
-              >
-                <div className="flex items-center gap-1.5 min-w-0 flex-1">
-                  <span className="text-[#a0a0a0] font-mono font-bold shrink-0">==</span>
-                  <span className="truncate text-left">{btn.label}</span>
-                </div>
-                
-                {/* Hover reveal controls */}
-                <div className="flex items-center gap-1 shrink-0 ml-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      const newId = `btn-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
-                      const duplicatedBtn = { ...btn, id: newId, label: `${btn.label} (Nusxa)` };
-                      setNodes((nds) => nds.map((n) => n.id === id ? { ...n, data: { ...n.data, buttons: [...(n.data.buttons || []), duplicatedBtn] } } : n));
-                    }}
-                    className="p-0.5 rounded hover:bg-neutral-100 text-[#707070] hover:text-black transition-colors"
-                    title="Nusxalash"
-                  >
-                    <Copy size={10} />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setNodes((nds) => nds.map((n) => n.id === id ? { ...n, data: { ...n.data, buttons: (n.data.buttons || []).filter(b => b.id !== btn.id) } } : n));
-                    }}
-                    className="p-0.5 rounded hover:bg-red-50 text-[#707070] hover:text-red-500 transition-colors"
-                    title="O'chirish"
-                  >
-                    <Trash2 size={10} />
-                  </button>
-                </div>
-              </div>
-              <Handle
-                type="source"
-                position={Position.Right}
-                id={`btn-${btn.id}`}
-                style={{
-                  top: "50%",
-                  right: -10,
-                  background: "#C7F33C",
-                  border: "1px solid black",
-                  width: 8,
-                  height: 8,
-                }}
-              />
-            </div>
-          ))}
-
-          {/* Add button triggers */}
-          <button
-            type="button"
-            onClick={(e) => {
-              e.stopPropagation();
-              const newId = `btn-${Date.now()}`;
-              const newBtn = { id: newId, label: "Darsni olish", type: "action" as const };
-              setNodes((nds) => nds.map((n) => n.id === id ? { ...n, data: { ...n.data, buttons: [...(n.data.buttons || []), newBtn] } } : n));
-              window.dispatchEvent(new CustomEvent("edit-button", { detail: { nodeId: id, buttonId: newId } }));
-            }}
-            className="w-full text-center py-2 border border-dashed border-[#D8D8D8] hover:border-black rounded-xl text-[9.5px] font-bold text-black flex items-center justify-center gap-1 transition-all bg-white cursor-pointer"
-          >
-            <span>+ tugmasini qo&apos;shish</span>
-          </button>
-          
-          <button
-            type="button"
-            onClick={(e) => {
-              e.stopPropagation();
-              alert("Yangi stsenariy kontenti muvaffaqiyatli qo'shildi!");
-            }}
-            className="w-full text-center py-2 border border-dashed border-[#D8D8D8] hover:border-black rounded-xl text-[9.5px] font-bold text-black flex items-center justify-center gap-1 transition-all bg-white cursor-pointer"
-          >
-            <span>+ kontent qo&apos;shish</span>
-          </button>
-        </div>
+        {data.prohibitRestart && (
+          <div className="flex items-center gap-1 border-t border-[#F0F0F0] pt-2 mt-1 text-red-500 text-[10px] font-bold">
+            <span>🚫 Prohibit restart faol</span>
+          </div>
+        )}
       </div>
+
+      {/* Connection output handle at the bottom (id='btn-b1' for backwards-compatibility) */}
+      <Handle
+        type="source"
+        position={Position.Bottom}
+        id="btn-b1"
+        style={{ background: "#9296AD", width: 8, height: 8, border: "2px solid white", bottom: -4 }}
+      />
     </div>
   );
 }
 
 function MessageNode({ data, id }: NodeProps<NodeData>) {
   const { setNodes, setEdges } = useReactFlow();
+  const edges = useEdges();
+  const [showAddMenu, setShowAddMenu] = useState(false);
+
+  const isEntryPoint = edges.some((e) => e.source === "n1" && e.target === id);
   
   return (
-    <div className="w-[260px] bg-white border border-[#E8E8E8] rounded-2xl shadow-sm overflow-visible text-black text-left relative">
+    <div className="w-[280px] bg-white border border-[#F2F2F7] rounded-lg shadow-sm overflow-visible text-black text-left relative">
+      {isEntryPoint && (
+        <div className="absolute -top-[34px] left-0 flex items-center gap-1.5 px-3 py-1 bg-white border border-[#E5E5EA] rounded-full shadow-sm text-[10px] font-bold text-black select-none z-10 animate-in fade-in slide-in-from-bottom-1">
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="text-[#3B82F6] shrink-0">
+            <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" />
+            <polyline points="10 17 15 12 10 7" />
+            <line x1="15" y1="12" x2="3" y2="12" />
+          </svg>
+          <span>Entry point</span>
+        </div>
+      )}
+
       <Handle
         type="target"
         position={Position.Left}
         style={{
           top: 24,
           left: -4,
-          background: "#A0A0A0",
+          background: "#9296AD",
           border: "1px solid white",
           width: 8,
           height: 8,
@@ -296,142 +248,287 @@ function MessageNode({ data, id }: NodeProps<NodeData>) {
       />
       
       {/* Node Header */}
-      <div className="bg-[#F5F5F7] px-4 py-2.5 border-b border-[#E8E8E8] flex items-center justify-between rounded-t-2xl">
-        <div className="flex items-center gap-1.5">
-          <MessageSquare size={11} className="text-[#707070]" />
-          <span className="text-[10px] font-black text-[#505050] uppercase tracking-wider">Xabar</span>
+      <div className="bg-white px-4 py-3 border-b border-[#F2F2F7] flex items-center justify-between rounded-t-lg h-[45px]">
+        <div className="flex items-center gap-2">
+          <MessageCircle size={15} className="text-[#3B82F6]" strokeWidth={2.5} />
+          <span className="text-[13px] font-bold text-black tracking-wide">Message</span>
         </div>
-        <button
-          type="button"
-          onClick={(e) => {
-            e.stopPropagation();
-            setNodes((nds) => nds.filter((n) => n.id !== id));
-            setEdges((eds) => eds.filter((edge) => edge.source !== id && edge.target !== id));
-          }}
-          className="p-1 rounded-full hover:bg-red-50 text-[#707070] hover:text-red-500 transition-colors cursor-pointer"
-          title="Blokni o'chirish"
-        >
-          <Trash2 size={11} />
-        </button>
+        <div className="flex items-center gap-3">
+          <span className="text-[11px] font-bold text-[#8E8E93] flex items-center gap-1">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="text-[#8E8E93]">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+              <circle cx="12" cy="7" r="4" />
+            </svg>
+            0
+          </span>
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              setNodes((nds) => nds.filter((n) => n.id !== id));
+              setEdges((eds) => eds.filter((edge) => edge.source !== id && edge.target !== id));
+            }}
+            className="p-1 rounded-full hover:bg-red-50 text-[#707070] hover:text-red-500 transition-colors cursor-pointer"
+            title="Blokni o'chirish"
+          >
+            <Trash2 size={12} />
+          </button>
+        </div>
       </div>
       
-      {/* Content */}
-      <div className="p-3 flex flex-col gap-2">
+      {/* Content Stack */}
+      <div className="p-3 flex flex-col gap-3 overflow-visible">
+        {/* Image Block */}
         {data.imageUrl && (
-          <div className="w-full h-[120px] rounded-xl overflow-hidden bg-gradient-to-tr from-[#9B51E0] to-[#2F80ED] flex items-center justify-center relative mb-2 shadow-sm select-none animate-in fade-in duration-300">
-            {/* Sendly lightning bolt logo inside */}
-            <div className="w-11 h-11 rounded-2xl bg-white/10 backdrop-blur-md flex items-center justify-center border border-white/20 shadow-sm">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                <path
-                  d="M13.5 2c.3 3.5-1.5 5.2-3 6.8C9 10.5 7.5 12 8 14.5 8.4 16.7 10 18 12 18c0-2 .8-3 2-4.2 1.4-1.4 3-3 2.6-6C16.2 5 14.8 3.3 13.5 2Z"
-                  fill="#C7F33C"
-                />
-                <path
-                  d="M9.5 14c-.6 1-1 2-1 3 0 2.5 1.6 4 3.5 4s3.5-1.5 3.5-4c0-1-.4-2-1-3-.3 1.5-1.2 2.3-2.5 2.3S9.8 15.5 9.5 14Z"
-                  fill="#9BC92E"
-                />
-              </svg>
+          <div className="relative group/image">
+            {/* Left-floating delete button */}
+            <div className="absolute -left-[48px] top-1/2 -translate-y-1/2 z-10">
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setNodes((nds) => nds.map((n) => n.id === id ? { ...n, data: { ...n.data, imageUrl: undefined } } : n));
+                }}
+                className="w-8 h-8 bg-white border border-[#E8E8E8] text-[#707070] hover:text-red-500 hover:border-red-200 rounded-lg flex items-center justify-center cursor-pointer shadow-sm transition-all hover:scale-105 active:scale-95"
+                title="Rasm blokini o'chirish"
+              >
+                <Trash2 size={13} />
+              </button>
+            </div>
+            
+            {/* Image Card Container */}
+            <div className="w-full h-[120px] rounded-lg overflow-hidden border border-[#E5E5EA] bg-[#FAFAFA] flex items-center justify-center relative shadow-sm select-none p-1">
+              <div className="w-full h-full rounded-md overflow-hidden bg-gradient-to-tr from-[#9B51E0] to-[#2F80ED] flex items-center justify-center relative">
+                {/* Sendly lightning bolt logo inside */}
+                <div className="w-11 h-11 rounded-2xl bg-white/10 backdrop-blur-md flex items-center justify-center border border-white/20 shadow-sm">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                    <path
+                      d="M13.5 2c.3 3.5-1.5 5.2-3 6.8C9 10.5 7.5 12 8 14.5 8.4 16.7 10 18 12 18c0-2 .8-3 2-4.2 1.4-1.4 3-3 2.6-6C16.2 5 14.8 3.3 13.5 2Z"
+                      fill="#C7F33C"
+                    />
+                    <path
+                      d="M9.5 14c-.6 1-1 2-1 3 0 2.5 1.6 4 3.5 4s3.5-1.5 3.5-4c0-1-.4-2-1-3-.3 1.5-1.2 2.3-2.5 2.3S9.8 15.5 9.5 14Z"
+                      fill="#9BC92E"
+                    />
+                  </svg>
+                </div>
+              </div>
             </div>
           </div>
         )}
 
-        <div
-          onClick={(e) => {
-            e.stopPropagation();
-            window.dispatchEvent(new CustomEvent("edit-node-text", { detail: { nodeId: id } }));
-          }}
-          className="text-[10.5px] text-black font-semibold leading-relaxed p-2 bg-[#FAFAFA] border border-[#E8E8E8] hover:border-black/50 cursor-pointer rounded-xl whitespace-pre-wrap select-none transition-all"
-        >
-          {data.label || "Suhbatni davom ettirish xabari..."}
-        </div>
-
-        {/* Buttons list */}
-        <div className="flex flex-col gap-1.5 mt-1">
-          {(data.buttons || []).map((btn) => (
-            <div key={btn.id} className="relative group">
-              <div
+        {/* Text Block */}
+        {data.label !== "" && data.label !== undefined && (
+          <div className="relative group/text">
+            {/* Left-floating delete button */}
+            <div className="absolute -left-[48px] top-1/2 -translate-y-1/2 z-10">
+              <button
+                type="button"
                 onClick={(e) => {
                   e.stopPropagation();
-                  window.dispatchEvent(new CustomEvent("edit-button", { detail: { nodeId: id, buttonId: btn.id } }));
+                  setNodes((nds) => nds.map((n) => n.id === id ? { ...n, data: { ...n.data, label: "" } } : n));
                 }}
-                className="w-full flex items-center justify-between py-1.5 px-2.5 border border-[#E8E8E8] hover:border-black rounded-xl text-[10px] font-bold bg-white hover:bg-neutral-50 text-black select-none cursor-pointer transition-all"
+                className="w-8 h-8 bg-white border border-[#E8E8E8] text-[#707070] hover:text-red-500 hover:border-red-200 rounded-lg flex items-center justify-center cursor-pointer shadow-sm transition-all hover:scale-105 active:scale-95"
+                title="Matn blokini o'chirish"
               >
-                <div className="flex items-center gap-1.5 min-w-0 flex-1">
-                  <span className="text-[#a0a0a0] font-mono font-bold shrink-0">==</span>
-                  <span className="truncate text-left">{btn.label}</span>
-                </div>
-                
-                {/* Hover reveal controls */}
-                <div className="flex items-center gap-1 shrink-0 ml-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      const newId = `btn-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
-                      const duplicatedBtn = { ...btn, id: newId, label: `${btn.label} (Nusxa)` };
-                      setNodes((nds) => nds.map((n) => n.id === id ? { ...n, data: { ...n.data, buttons: [...(n.data.buttons || []), duplicatedBtn] } } : n));
-                    }}
-                    className="p-0.5 rounded hover:bg-neutral-100 text-[#707070] hover:text-black transition-colors"
-                    title="Nusxalash"
-                  >
-                    <Copy size={10} />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setNodes((nds) => nds.map((n) => n.id === id ? { ...n, data: { ...n.data, buttons: (n.data.buttons || []).filter(b => b.id !== btn.id) } } : n));
-                    }}
-                    className="p-0.5 rounded hover:bg-red-50 text-[#707070] hover:text-red-500 transition-colors"
-                    title="O'chirish"
-                  >
-                    <Trash2 size={10} />
-                  </button>
-                </div>
-              </div>
-              <Handle
-                type="source"
-                position={Position.Right}
-                id={`btn-${btn.id}`}
-                style={{
-                  top: "50%",
-                  right: -10,
-                  background: "#C7F33C",
-                  border: "1px solid black",
-                  width: 8,
-                  height: 8,
-                }}
-              />
+                <Trash2 size={13} />
+              </button>
             </div>
-          ))}
 
-          {/* Add button triggers */}
+            {/* Text bubble */}
+            <div
+              onClick={(e) => {
+                e.stopPropagation();
+                window.dispatchEvent(new CustomEvent("edit-node-text", { detail: { nodeId: id } }));
+              }}
+              className="text-[12px] text-black font-medium leading-relaxed p-3.5 border border-[#E5E5EA] bg-white rounded-xl shadow-sm cursor-pointer whitespace-pre-wrap select-none hover:border-black/20 hover:bg-neutral-50/30 transition-all"
+            >
+              {data.label || "Suhbatni davom ettirish xabari..."}
+            </div>
+          </div>
+        )}
+
+        {/* Buttons Block */}
+        {data.buttons && data.buttons.length > 0 && (
+          <div className="relative group/buttons">
+            {/* Left-floating delete button */}
+            <div className="absolute -left-[48px] top-1/2 -translate-y-1/2 z-10">
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setNodes((nds) => nds.map((n) => n.id === id ? { ...n, data: { ...n.data, buttons: [] } } : n));
+                }}
+                className="w-8 h-8 bg-white border border-[#E8E8E8] text-[#707070] hover:text-red-500 hover:border-red-200 rounded-lg flex items-center justify-center cursor-pointer shadow-sm transition-all hover:scale-105 active:scale-95"
+                title="Tugmalar blokini o'chirish"
+              >
+                <Trash2 size={13} />
+              </button>
+            </div>
+
+            {/* Buttons list container */}
+            <div className="flex flex-col gap-2 p-2 border border-[#E5E5EA] rounded-xl bg-white shadow-sm overflow-visible">
+              {data.buttons.map((btn) => (
+                <div key={btn.id} className="relative group/btn-item overflow-visible">
+                  <div
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      window.dispatchEvent(new CustomEvent("edit-button", { detail: { nodeId: id, buttonId: btn.id } }));
+                    }}
+                    className="w-full flex items-center justify-between py-2.5 px-4 border border-[#E5E5EA] hover:border-black rounded-lg text-[11px] font-bold bg-white text-black select-none cursor-pointer transition-all shadow-sm"
+                  >
+                    <div className="flex items-center gap-2 min-w-0 flex-1">
+                      <span className="truncate text-left">{btn.label}</span>
+                    </div>
+                    
+                    {/* Hover reveal controls */}
+                    <div className="flex items-center gap-1 shrink-0 ml-1.5 opacity-0 group-hover/btn-item:opacity-100 transition-opacity">
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          const newId = `btn-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+                          const duplicatedBtn = { ...btn, id: newId, label: `${btn.label} (Nusxa)` };
+                          setNodes((nds) => nds.map((n) => n.id === id ? { ...n, data: { ...n.data, buttons: [...(n.data.buttons || []), duplicatedBtn] } } : n));
+                        }}
+                        className="p-0.5 rounded hover:bg-neutral-100 text-[#707070] hover:text-black transition-colors"
+                        title="Nusxalash"
+                      >
+                        <Copy size={10} />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setNodes((nds) => nds.map((n) => n.id === id ? { ...n, data: { ...n.data, buttons: (n.data.buttons || []).filter(b => b.id !== btn.id) } } : n));
+                        }}
+                        className="p-0.5 rounded hover:bg-red-50 text-[#707070] hover:text-red-500 transition-colors"
+                        title="O'chirish"
+                      >
+                        <Trash2 size={10} />
+                      </button>
+                    </div>
+                  </div>
+                  <Handle
+                    type="source"
+                    position={Position.Right}
+                    id={`btn-${btn.id}`}
+                    style={{
+                      top: "50%",
+                      right: -14,
+                      background: "#9296AD",
+                      border: "1px solid white",
+                      width: 8,
+                      height: 8,
+                    }}
+                  />
+                </div>
+              ))}
+
+              {/* Inner + Add button */}
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  const newId = `btn-${Date.now()}`;
+                  const newBtn = { id: newId, label: "Tugma", type: "action" as const };
+                  setNodes((nds) => nds.map((n) => n.id === id ? { ...n, data: { ...n.data, buttons: [...(n.data.buttons || []), newBtn] } } : n));
+                  window.dispatchEvent(new CustomEvent("edit-button", { detail: { nodeId: id, buttonId: newId } }));
+                }}
+                className="w-full text-center py-2.5 border border-dashed border-[#E5E5EA] hover:border-black/30 rounded-lg text-[10.5px] font-extrabold text-[#707070] hover:text-black flex items-center justify-center gap-1 transition-all bg-white cursor-pointer"
+              >
+                <span>+ Add button</span>
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Add Content Trigger / Dropdown Menu */}
+        {showAddMenu ? (
+          <div className="border border-dashed border-[#E5E5EA] rounded-xl p-3 bg-[#FAFAFA] flex flex-col gap-1.5 animate-in fade-in slide-in-from-bottom-2 duration-150 shadow-sm relative overflow-visible">
+            <div className="text-[9px] font-bold text-[#707070] uppercase tracking-wider mb-1 px-1">Kontent turi:</div>
+            <div className="grid grid-cols-2 gap-1.5">
+              {!data.imageUrl && (
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setNodes((nds) => nds.map((n) => n.id === id ? { ...n, data: { ...n.data, imageUrl: "/logo.svg" } } : n));
+                    setShowAddMenu(false);
+                  }}
+                  className="flex items-center gap-1.5 px-3 py-2 bg-white border border-[#E5E5EA] hover:border-black/20 rounded-lg text-[10.5px] font-bold text-black cursor-pointer transition-all hover:scale-102 shadow-sm"
+                >
+                  <span>🖼️ Rasm</span>
+                </button>
+              )}
+              {(data.label === "" || !data.label) && (
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setNodes((nds) => nds.map((n) => n.id === id ? { ...n, data: { ...n.data, label: "Yangi matn xabari..." } } : n));
+                    setShowAddMenu(false);
+                  }}
+                  className="flex items-center gap-1.5 px-3 py-2 bg-white border border-[#E5E5EA] hover:border-black/20 rounded-lg text-[10.5px] font-bold text-black cursor-pointer transition-all hover:scale-102 shadow-sm"
+                >
+                  <span>✍️ Matn</span>
+                </button>
+              )}
+              {(!data.buttons || data.buttons.length === 0) && (
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    const newBtn = { id: `btn-${Date.now()}`, label: "Tugma", type: "action" as const };
+                    setNodes((nds) => nds.map((n) => n.id === id ? { ...n, data: { ...n.data, buttons: [newBtn] } } : n));
+                    setShowAddMenu(false);
+                  }}
+                  className="flex items-center gap-1.5 px-3 py-2 bg-white border border-[#E5E5EA] hover:border-black/20 rounded-lg text-[10.5px] font-bold text-black cursor-pointer transition-all hover:scale-102 shadow-sm col-span-2 justify-center"
+                >
+                  <span>🔘 Tugmalar bloki</span>
+                </button>
+              )}
+            </div>
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                setShowAddMenu(false);
+              }}
+              className="w-full text-center py-1 text-red-500 hover:text-red-600 rounded-lg text-[9px] font-extrabold transition-all cursor-pointer mt-1 border-none bg-transparent"
+            >
+              Yopish
+            </button>
+          </div>
+        ) : (
           <button
             type="button"
             onClick={(e) => {
               e.stopPropagation();
-              const newId = `btn-${Date.now()}`;
-              const newBtn = { id: newId, label: "Tugma", type: "action" as const };
-              setNodes((nds) => nds.map((n) => n.id === id ? { ...n, data: { ...n.data, buttons: [...(n.data.buttons || []), newBtn] } } : n));
-              window.dispatchEvent(new CustomEvent("edit-button", { detail: { nodeId: id, buttonId: newId } }));
+              setShowAddMenu(true);
             }}
-            className="w-full text-center py-2 border border-dashed border-[#D8D8D8] hover:border-black rounded-xl text-[9.5px] font-bold text-black flex items-center justify-center gap-1 transition-all bg-white cursor-pointer"
-          >
-            <span>+ tugmasini qo&apos;shish</span>
-          </button>
-          
-          <button
-            type="button"
-            onClick={(e) => {
-              e.stopPropagation();
-              alert("Yangi stsenariy kontenti muvaffaqiyatli qo'shildi!");
-            }}
-            className="w-full text-center py-2 border border-dashed border-[#D8D8D8] hover:border-black rounded-xl text-[9.5px] font-bold text-black flex items-center justify-center gap-1 transition-all bg-white cursor-pointer"
+            className="w-full text-center py-2.5 border border-dashed border-[#D8D8D8] hover:border-black/20 hover:bg-[#FAFAFA] rounded-lg text-[10.5px] font-extrabold text-[#707070] hover:text-black flex items-center justify-center gap-1 transition-all bg-white cursor-pointer shadow-sm"
           >
             <span>+ kontent qo&apos;shish</span>
           </button>
-        </div>
+        )}
       </div>
+
+      {/* Default bottom-right output handle */}
+      <Handle
+        type="source"
+        position={Position.Right}
+        id="default"
+        style={{
+          bottom: 24,
+          top: "auto",
+          right: -4,
+          background: "#9296AD",
+          border: "1px solid white",
+          width: 8,
+          height: 8,
+        }}
+      />
     </div>
   );
 }
@@ -440,14 +537,14 @@ function ActionNode({ data, id }: NodeProps<NodeData>) {
   const { setNodes, setEdges } = useReactFlow();
 
   return (
-    <div className="w-[260px] bg-white border border-[#E8E8E8] rounded-2xl shadow-sm overflow-hidden text-black text-left">
+    <div className="w-[280px] bg-white border border-[#F2F2F7] rounded-lg shadow-sm overflow-visible text-black text-left relative">
       <Handle
         type="target"
         position={Position.Left}
         style={{
           top: "50%",
           left: -4,
-          background: "#A0A0A0",
+          background: "#9296AD",
           border: "1px solid white",
           width: 8,
           height: 8,
@@ -455,10 +552,10 @@ function ActionNode({ data, id }: NodeProps<NodeData>) {
       />
 
       {/* Node Header */}
-      <div className="bg-[#F5F5F7] px-4 py-2.5 border-b border-[#E8E8E8] flex items-center justify-between">
+      <div className="bg-white px-4 py-3 border-b border-[#F2F2F7] flex items-center justify-between rounded-t-lg h-[45px]">
         <div className="flex items-center gap-1.5">
           <Zap size={11} className="text-black" />
-          <span className="text-[10px] font-black text-[#505050] uppercase tracking-wider">Harakat</span>
+          <span className="text-[12px] font-bold text-black uppercase tracking-wider">Harakat</span>
         </div>
         <button
           type="button"
@@ -476,15 +573,17 @@ function ActionNode({ data, id }: NodeProps<NodeData>) {
 
       {/* Content */}
       <div className="p-3">
-        <div className="p-2.5 bg-[#F6F7F9] border border-[#E8E8E8] rounded-xl flex items-center justify-between shadow-sm">
-          <div className="flex flex-col gap-0.5 min-w-0">
-            <p className="text-[8px] font-black text-[#707070] uppercase">Harakat turi</p>
-            <p className="text-[11px] text-black font-extrabold truncate">
-              {data.label || "Teg qo'shish"}
+        <div className="bg-[#FAFAFA] border border-[#E5E5EA] rounded-xl p-2.5 flex items-center justify-between shadow-sm">
+          <div className="flex flex-col gap-0.5 min-w-0 flex-1">
+            <p className="text-[9px] font-bold text-[#707070] uppercase">
+              {data.actionType === "add_tag" ? "Teg qo'shish" : data.actionType === "remove_tag" ? "Tegni olib tashlash" : data.actionType === "webhook" ? "Vebxuk yuborish" : data.actionType === "notify_telegram" ? "Telegram xabarnomasi" : "Harakat turi"}
+            </p>
+            <p className="text-[11px] text-black font-extrabold truncate mt-0.5">
+              {data.actionValue || "Tanlanmagan"}
             </p>
           </div>
           {/* Pencil Edit Icon */}
-          <svg className="w-3.5 h-3.5 text-[#707070] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+          <svg className="w-3.5 h-3.5 text-[#707070] shrink-0 ml-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
             <path strokeLinecap="round" strokeLinejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
           </svg>
         </div>
@@ -496,8 +595,8 @@ function ActionNode({ data, id }: NodeProps<NodeData>) {
         style={{
           top: "50%",
           right: -4,
-          background: "#C7F33C",
-          border: "1px solid black",
+          background: "#9296AD",
+          border: "1px solid white",
           width: 8,
           height: 8,
         }}
@@ -510,14 +609,14 @@ function ConditionNode({ data, id }: NodeProps<NodeData>) {
   const { setNodes, setEdges } = useReactFlow();
 
   return (
-    <div className="w-[260px] bg-white border border-[#E8E8E8] rounded-2xl shadow-sm overflow-hidden text-black text-left">
+    <div className="w-[280px] bg-white border border-[#F2F2F7] rounded-lg shadow-sm overflow-visible text-black text-left relative">
       <Handle
         type="target"
         position={Position.Left}
         style={{
           top: 30,
           left: -4,
-          background: "#A0A0A0",
+          background: "#9296AD",
           border: "1px solid white",
           width: 8,
           height: 8,
@@ -525,9 +624,10 @@ function ConditionNode({ data, id }: NodeProps<NodeData>) {
       />
 
       {/* Node Header */}
-      <div className="bg-[#F5F5F7] px-4 py-2.5 border-b border-[#E8E8E8] flex items-center justify-between">
+      <div className="bg-white px-4 py-3 border-b border-[#F2F2F7] flex items-center justify-between rounded-t-lg h-[45px]">
         <div className="flex items-center gap-1.5">
-          <span className="text-[10px] font-black text-[#505050] uppercase tracking-wider">Shart</span>
+          <ShieldAlert size={12} className="text-black" />
+          <span className="text-[12px] font-bold text-black uppercase tracking-wider">Shart</span>
         </div>
         <button
           type="button"
@@ -545,52 +645,47 @@ function ConditionNode({ data, id }: NodeProps<NodeData>) {
 
       {/* Content */}
       <div className="p-3 flex flex-col gap-2">
-        <div className="border border-[#E8E8E8] rounded-xl p-2.5 bg-[#FAFAFA]">
-          <p className="text-[8px] font-black text-[#707070] uppercase">Tekshirish sharti</p>
-          <p className="text-[11px] text-black font-semibold mt-0.5">
-            {data.label || "Belgilangan teglar"}
-          </p>
-        </div>
-
-        <button type="button" className="w-full text-center py-1.5 border border-dashed border-[#D8D8D8] rounded-xl text-[9.5px] font-bold text-black bg-white hover:bg-neutral-50 cursor-pointer">
-          + Shart qo&apos;shish
-        </button>
-
-        {/* Yes/No Handles outcome */}
-        <div className="flex flex-col gap-2 mt-2 pt-2 border-t border-[#F0F0F0]">
-          <div className="relative flex items-center justify-between p-1.5 rounded-[10px] border border-[#16A34A]/20 bg-[#16A34A]/5">
-            <span className="text-[9.5px] font-bold text-[#16A34A]">Shart to&apos;g&apos;ri kelsa</span>
+        <div className="bg-[#FAFAFA] border border-[#E5E5EA] rounded-xl p-2.5 flex flex-col gap-2 overflow-visible">
+          {/* Condition Row */}
+          <div className="relative flex items-center justify-between py-1.5 px-2 bg-white border border-[#E5E5EA] rounded-lg text-[10.5px] font-bold text-black">
+            <span>{data.label || "Obuna"}</span>
             <Handle
               type="source"
               position={Position.Right}
               id="yes"
               style={{
                 top: "50%",
-                right: -10,
-                background: "#16A34A",
-                border: "1px solid black",
+                right: -14,
+                background: "#9296AD",
+                border: "1px solid white",
                 width: 8,
                 height: 8,
               }}
             />
           </div>
 
-          <div className="relative flex items-center justify-between p-1.5 rounded-[10px] border border-[#DC2626]/20 bg-[#DC2626]/5">
-            <span className="text-[9.5px] font-bold text-[#DC2626]">Shartlarga mos emas</span>
-            <Handle
-              type="source"
-              position={Position.Right}
-              id="no"
-              style={{
-                top: "50%",
-                right: -10,
-                background: "#DC2626",
-                border: "1px solid black",
-                width: 8,
-                height: 8,
-              }}
-            />
-          </div>
+          <button type="button" className="w-full text-center py-2 border border-dashed border-[#D8D8D8] rounded-lg text-[10px] font-bold text-black bg-white hover:bg-neutral-50 cursor-pointer">
+            + Shart qo&apos;shish
+          </button>
+        </div>
+
+        {/* Fallback output at bottom-right */}
+        <div className="relative flex items-center justify-end pr-2 pt-1">
+          <span className="text-[9.5px] text-[#707070] font-semibold">Shartlarga mos emas</span>
+          <Handle
+            type="source"
+            position={Position.Right}
+            id="no"
+            style={{
+              bottom: 8,
+              top: "auto",
+              right: -4,
+              background: "#9296AD",
+              border: "1px solid white",
+              width: 8,
+              height: 8,
+            }}
+          />
         </div>
       </div>
     </div>
@@ -601,14 +696,14 @@ function WaitNode({ data, id }: NodeProps<NodeData>) {
   const { setNodes, setEdges } = useReactFlow();
 
   return (
-    <div className="w-[260px] bg-white border border-[#E8E8E8] rounded-2xl shadow-sm overflow-hidden text-black text-left">
+    <div className="w-[280px] bg-white border border-[#F2F2F7] rounded-lg shadow-sm overflow-visible text-black text-left relative">
       <Handle
         type="target"
         position={Position.Left}
         style={{
           top: "50%",
           left: -4,
-          background: "#A0A0A0",
+          background: "#9296AD",
           border: "1px solid white",
           width: 8,
           height: 8,
@@ -616,10 +711,10 @@ function WaitNode({ data, id }: NodeProps<NodeData>) {
       />
 
       {/* Node Header */}
-      <div className="bg-[#F5F5F7] px-4 py-2.5 border-b border-[#E8E8E8] flex items-center justify-between">
+      <div className="bg-white px-4 py-3 border-b border-[#F2F2F7] flex items-center justify-between rounded-t-lg h-[45px]">
         <div className="flex items-center gap-1.5">
-          <Clock size={12} className="text-[#707070]" />
-          <span className="text-[10px] font-black text-[#505050] uppercase tracking-wider">Kutish</span>
+          <Zap size={11} className="text-black" />
+          <span className="text-[12px] font-bold text-black uppercase tracking-wider">Harakat</span>
         </div>
         <button
           type="button"
@@ -637,17 +732,14 @@ function WaitNode({ data, id }: NodeProps<NodeData>) {
 
       {/* Content */}
       <div className="p-3">
-        <div className="p-2.5 bg-[#F6F7F9] border border-[#E8E8E8] rounded-xl flex items-center justify-between shadow-sm">
-          <div className="flex flex-col gap-0.5 min-w-0">
-            <p className="text-[8px] font-black text-[#707070] uppercase">Muddati</p>
-            <p className="text-[11px] text-black font-extrabold truncate">
-              {data.label || "Kutish: 5 Daqiqalar"}
+        <div className="bg-[#FAFAFA] border border-[#E5E5EA] rounded-xl p-2.5 flex items-center justify-between shadow-sm">
+          <div className="flex flex-col gap-0.5 min-w-0 flex-1">
+            <p className="text-[9px] font-bold text-[#707070] uppercase">Kechikish</p>
+            <p className="text-[11px] text-black font-extrabold truncate mt-0.5">
+              {data.label || "15 Daqiqalar"}
             </p>
           </div>
-          {/* Clock icon */}
-          <svg className="w-3.5 h-3.5 text-[#707070] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
+          <Clock size={13} className="text-[#707070] shrink-0 ml-1.5" />
         </div>
       </div>
 
@@ -657,8 +749,8 @@ function WaitNode({ data, id }: NodeProps<NodeData>) {
         style={{
           top: "50%",
           right: -4,
-          background: "#C7F33C",
-          border: "1px solid black",
+          background: "#9296AD",
+          border: "1px solid white",
           width: 8,
           height: 8,
         }}
@@ -674,74 +766,79 @@ export default function BuilderPage() {
   const TEMPLATE_FLOWS: Record<string, { nodes: Node<NodeData>[]; edges: Edge[] }> = {
     lead_magnet: {
       nodes: [
-        { id: "n1", type: "trigger", data: { label: "Hi, want to get a lesson on setting up automation in Direct with a subscription check and lead magnet delivery?", nodeType: "trigger", triggerSource: "dm", triggerMatch: "contains", triggerKeywords: "kitob, kurs, bonus", imageUrl: "/logo.svg", buttons: [{ id: "b1", label: "Yes, I do!🤩", type: "action" }, { id: "b2", label: "Nomini kiriting", type: "action" }] }, position: { x: 50, y: 150 } },
-        { id: "n2", type: "action", data: { label: "clicked the button scheme", nodeType: "action" }, position: { x: 380, y: 120 } },
-        { id: "n3", type: "condition", data: { label: "Obuna", nodeType: "condition", conditionType: "is_follower" }, position: { x: 700, y: 120 } },
-        { id: "n4", type: "message", data: { label: "Yaxshi! Obuna bo'lganingiz uchun rahmat. Mana kitob havolasi: https://t.me/yourusername", nodeType: "message", buttons: [{ id: "b3", label: "Yuklab olish", type: "link", url: "https://example.com" }] }, position: { x: 1050, y: 50 } },
-        { id: "n5", type: "message", data: { label: "Afsuski, siz hali obuna bo'lmagansiz. Iltimos obuna bo'ling va keyin 'Tekshirish' tugmasini bosing.", nodeType: "message", buttons: [{ id: "b4", label: "Obunani tekshirish", type: "action" }] }, position: { x: 1050, y: 250 } },
-        { id: "n6", type: "wait", data: { label: "10 Daqiqalar", nodeType: "wait" }, position: { x: 380, y: 450 } },
-        { id: "n7", type: "condition", data: { label: "Obuna (Eslatma)", nodeType: "condition", conditionType: "is_follower" }, position: { x: 700, y: 450 } },
-        { id: "n8", type: "message", data: { label: "Siz hali obuna bo'lmagansiz, bonusni olish uchun obuna bo'lishingiz kerak.", nodeType: "message" }, position: { x: 1050, y: 480 } },
+        { id: "n1", type: "trigger", data: { label: "Trigger: DM – kitob, kurs, bonus", nodeType: "trigger", triggerSource: "dm", triggerMatch: "contains", triggerKeywords: "kitob, kurs, bonus" }, position: { x: 50, y: 150 } },
+        { id: "n_welcome", type: "message", data: { label: "Hi, want to get a lesson on setting up automation in Direct with a subscription check and lead magnet delivery?", nodeType: "message", imageUrl: "/logo.svg", buttons: [{ id: "b1", label: "Yes, I do!🤩", type: "action" }, { id: "b2", label: "Nomini kiriting", type: "action" }] }, position: { x: 350, y: 150 } },
+        { id: "n2", type: "action", data: { label: "clicked the button scheme", nodeType: "action" }, position: { x: 680, y: 120 } },
+        { id: "n3", type: "condition", data: { label: "Obuna", nodeType: "condition", conditionType: "is_follower" }, position: { x: 1000, y: 120 } },
+        { id: "n4", type: "message", data: { label: "Yaxshi! Obuna bo'lganingiz uchun rahmat. Mana kitob havolasi: https://t.me/yourusername", nodeType: "message", buttons: [{ id: "b3", label: "Yuklab olish", type: "link", url: "https://example.com" }] }, position: { x: 1350, y: 50 } },
+        { id: "n5", type: "message", data: { label: "Afsuski, siz hali obuna bo'lmagansiz. Iltimos obuna bo'ling va keyin 'Tekshirish' tugmasini bosing.", nodeType: "message", buttons: [{ id: "b4", label: "Obunani tekshirish", type: "action" }] }, position: { x: 1350, y: 250 } },
+        { id: "n6", type: "wait", data: { label: "10 Daqiqalar", nodeType: "wait" }, position: { x: 680, y: 450 } },
+        { id: "n7", type: "condition", data: { label: "Obuna (Eslatma)", nodeType: "condition", conditionType: "is_follower" }, position: { x: 1000, y: 450 } },
+        { id: "n8", type: "message", data: { label: "Siz hali obuna bo'lmagansiz, bonusni olish uchun obuna bo'lishingiz kerak.", nodeType: "message" }, position: { x: 1350, y: 480 } },
       ],
       edges: [
-        { id: "e1", source: "n1", sourceHandle: "btn-b1", target: "n2", animated: true, style: { stroke: "#000", strokeWidth: 1.5 }, markerEnd: { type: MarkerType.ArrowClosed, color: "#000" } },
-        { id: "e2", source: "n2", target: "n3", animated: true, style: { stroke: "#000", strokeWidth: 1.5 }, markerEnd: { type: MarkerType.ArrowClosed, color: "#000" } },
-        { id: "e3", source: "n3", sourceHandle: "yes", target: "n4", animated: true, style: { stroke: "#16A34A", strokeWidth: 1.5 }, markerEnd: { type: MarkerType.ArrowClosed, color: "#16A34A" } },
-        { id: "e4", source: "n3", sourceHandle: "no", target: "n5", animated: true, style: { stroke: "#DC2626", strokeWidth: 1.5 }, markerEnd: { type: MarkerType.ArrowClosed, color: "#DC2626" } },
-        { id: "e5", source: "n1", sourceHandle: "btn-b2", target: "n6", animated: true, style: { stroke: "#000", strokeWidth: 1.5 }, markerEnd: { type: MarkerType.ArrowClosed, color: "#000" } },
-        { id: "e6", source: "n6", target: "n7", animated: true, style: { stroke: "#000", strokeWidth: 1.5 }, markerEnd: { type: MarkerType.ArrowClosed, color: "#000" } },
-        { id: "e7", source: "n7", sourceHandle: "no", target: "n8", animated: true, style: { stroke: "#DC2626", strokeWidth: 1.5 }, markerEnd: { type: MarkerType.ArrowClosed, color: "#DC2626" } },
+        { id: "e1", source: "n1", target: "n_welcome", animated: true, style: { stroke: "#9296AD", strokeWidth: 1.5 }, markerEnd: { type: MarkerType.ArrowClosed, color: "#9296AD" } },
+        { id: "e2", source: "n_welcome", sourceHandle: "btn-b1", target: "n2", animated: true, style: { stroke: "#9296AD", strokeWidth: 1.5 }, markerEnd: { type: MarkerType.ArrowClosed, color: "#9296AD" } },
+        { id: "e3", source: "n2", target: "n3", animated: true, style: { stroke: "#9296AD", strokeWidth: 1.5 }, markerEnd: { type: MarkerType.ArrowClosed, color: "#9296AD" } },
+        { id: "e4", source: "n3", sourceHandle: "yes", target: "n4", animated: true, style: { stroke: "#16A34A", strokeWidth: 1.5 }, markerEnd: { type: MarkerType.ArrowClosed, color: "#16A34A" } },
+        { id: "e5", source: "n3", sourceHandle: "no", target: "n5", animated: true, style: { stroke: "#DC2626", strokeWidth: 1.5 }, markerEnd: { type: MarkerType.ArrowClosed, color: "#DC2626" } },
+        { id: "e6", source: "n_welcome", sourceHandle: "btn-b2", target: "n6", animated: true, style: { stroke: "#9296AD", strokeWidth: 1.5 }, markerEnd: { type: MarkerType.ArrowClosed, color: "#9296AD" } },
+        { id: "e7", source: "n6", target: "n7", animated: true, style: { stroke: "#9296AD", strokeWidth: 1.5 }, markerEnd: { type: MarkerType.ArrowClosed, color: "#9296AD" } },
+        { id: "e8", source: "n7", sourceHandle: "no", target: "n8", animated: true, style: { stroke: "#DC2626", strokeWidth: 1.5 }, markerEnd: { type: MarkerType.ArrowClosed, color: "#DC2626" } },
       ],
     },
     story_coupon: {
       nodes: [
-        { id: "n1", type: "trigger", data: { label: t("pages.builder.tmpl_story_trigger_label"), nodeType: "trigger", triggerSource: "story_mention", triggerMatch: "any", buttons: [{ id: "b1", label: "Kuponni olish", type: "action" }] }, position: { x: 50, y: 150 } },
+        { id: "n1", type: "trigger", data: { label: "Trigger: Story Mention", nodeType: "trigger", triggerSource: "story_mention", triggerMatch: "any" }, position: { x: 50, y: 150 } },
         { id: "n2", type: "message", data: { label: t("pages.builder.tmpl_story_msg_label"), nodeType: "message", buttons: [{ id: "b2", label: t("pages.builder.tmpl_story_msg_btn"), type: "link", url: "https://t.me/yourusername" }] }, position: { x: 380, y: 150 } },
         { id: "n3", type: "action", data: { label: t("pages.builder.tmpl_story_act_label"), nodeType: "action", actionType: "add_tag", actionValue: "story_user" }, position: { x: 700, y: 150 } },
       ],
       edges: [
-        { id: "e1", source: "n1", sourceHandle: "btn-b1", target: "n2", animated: true, style: { stroke: "#000", strokeWidth: 1.5 }, markerEnd: { type: MarkerType.ArrowClosed, color: "#000" } },
-        { id: "e2", source: "n2", sourceHandle: "btn-b2", target: "n3", animated: true, style: { stroke: "#000", strokeWidth: 1.5 }, markerEnd: { type: MarkerType.ArrowClosed, color: "#000" } },
+        { id: "e1", source: "n1", target: "n2", animated: true, style: { stroke: "#9296AD", strokeWidth: 1.5 }, markerEnd: { type: MarkerType.ArrowClosed, color: "#9296AD" } },
+        { id: "e2", source: "n2", sourceHandle: "btn-b2", target: "n3", animated: true, style: { stroke: "#9296AD", strokeWidth: 1.5 }, markerEnd: { type: MarkerType.ArrowClosed, color: "#9296AD" } },
       ],
     },
     comment_dm: {
       nodes: [
-        { id: "n1", type: "trigger", data: { label: t("pages.builder.tmpl_comment_trigger_label"), nodeType: "trigger", triggerSource: "comment", triggerMatch: "contains", triggerKeywords: "narxi, batafsil, link", buttons: [{ id: "b1", label: "Batafsil ma'lumot", type: "action" }] }, position: { x: 50, y: 150 } },
+        { id: "n1", type: "trigger", data: { label: "Trigger: Izoh – narxi, batafsil", nodeType: "trigger", triggerSource: "comment", triggerMatch: "contains", triggerKeywords: "narxi, batafsil, link" }, position: { x: 50, y: 150 } },
         { id: "n2", type: "message", data: { label: t("pages.builder.tmpl_comment_msg1_label"), nodeType: "message", buttons: [] }, position: { x: 380, y: 150 } },
         { id: "n3", type: "message", data: { label: t("pages.builder.tmpl_comment_msg2_label"), nodeType: "message", buttons: [{ id: "b2", label: t("pages.builder.tmpl_comment_msg2_btn1"), type: "link", url: "https://t.me/yourusername" }] }, position: { x: 700, y: 150 } },
       ],
       edges: [
-        { id: "e1", source: "n1", sourceHandle: "btn-b1", target: "n2", animated: true, style: { stroke: "#000", strokeWidth: 1.5 }, markerEnd: { type: MarkerType.ArrowClosed, color: "#000" } },
-        { id: "e2", source: "n2", target: "n3", animated: true, style: { stroke: "#000", strokeWidth: 1.5 }, markerEnd: { type: MarkerType.ArrowClosed, color: "#000" } },
+        { id: "e1", source: "n1", target: "n2", animated: true, style: { stroke: "#9296AD", strokeWidth: 1.5 }, markerEnd: { type: MarkerType.ArrowClosed, color: "#9296AD" } },
+        { id: "e2", source: "n2", target: "n3", animated: true, style: { stroke: "#9296AD", strokeWidth: 1.5 }, markerEnd: { type: MarkerType.ArrowClosed, color: "#9296AD" } },
       ],
     },
     welcome_faq: {
       nodes: [
-        { id: "n1", type: "trigger", data: { label: t("pages.builder.tmpl_welcome_trigger_label"), nodeType: "trigger", triggerSource: "dm", triggerMatch: "contains", triggerKeywords: "salom, start, boshlash", buttons: [{ id: "b1", label: "Boshlash", type: "action" }] }, position: { x: 50, y: 150 } },
+        { id: "n1", type: "trigger", data: { label: "Trigger: DM – salom, start, boshlash", nodeType: "trigger", triggerSource: "dm", triggerMatch: "contains", triggerKeywords: "salom, start, boshlash" }, position: { x: 50, y: 150 } },
         { id: "n2", type: "message", data: { label: t("pages.builder.tmpl_welcome_msg1_label"), nodeType: "message", buttons: [{ id: "b2", label: "Savol berish", type: "action" }, { id: "b3", label: "Kurslar haqida", type: "action" }] }, position: { x: 380, y: 150 } },
         { id: "n3", type: "message", data: { label: t("pages.builder.tmpl_welcome_msg2_label"), nodeType: "message", buttons: [] }, position: { x: 700, y: 50 } },
         { id: "n4", type: "message", data: { label: t("pages.builder.tmpl_welcome_msg3_label"), nodeType: "message", buttons: [] }, position: { x: 700, y: 250 } },
       ],
       edges: [
-        { id: "e1", source: "n1", sourceHandle: "btn-b1", target: "n2", animated: true, style: { stroke: "#000", strokeWidth: 1.5 }, markerEnd: { type: MarkerType.ArrowClosed, color: "#000" } },
-        { id: "e2", source: "n2", sourceHandle: "btn-b2", target: "n3", animated: true, style: { stroke: "#000", strokeWidth: 1.5 }, markerEnd: { type: MarkerType.ArrowClosed, color: "#000" } },
-        { id: "e3", source: "n2", sourceHandle: "btn-b3", target: "n4", animated: true, style: { stroke: "#000", strokeWidth: 1.5 }, markerEnd: { type: MarkerType.ArrowClosed, color: "#000" } },
+        { id: "e1", source: "n1", target: "n2", animated: true, style: { stroke: "#9296AD", strokeWidth: 1.5 }, markerEnd: { type: MarkerType.ArrowClosed, color: "#9296AD" } },
+        { id: "e2", source: "n2", sourceHandle: "btn-b2", target: "n3", animated: true, style: { stroke: "#9296AD", strokeWidth: 1.5 }, markerEnd: { type: MarkerType.ArrowClosed, color: "#9296AD" } },
+        { id: "e3", source: "n2", sourceHandle: "btn-b3", target: "n4", animated: true, style: { stroke: "#9296AD", strokeWidth: 1.5 }, markerEnd: { type: MarkerType.ArrowClosed, color: "#9296AD" } },
       ],
     },
   };
 
   const TRIGGER_SOURCES = [
-    { value: "dm", label: t("pages.builder.trigger_dm") },
-    { value: "comment", label: t("pages.builder.trigger_comment") },
-    { value: "story_mention", label: t("pages.builder.trigger_story_mention") },
-    { value: "story_reply", label: t("pages.builder.trigger_story_reply") },
-    { value: "live_comment", label: t("pages.builder.trigger_live_comment") },
+    { value: "message_recognition", label: "Message recognition", icon: Eye },
+    { value: "dm", label: "Direct Message", icon: MessageCircle },
+    { value: "comment", label: "Post Comment", icon: MessageSquare },
+    { value: "live_comment", label: "Live Stream Comment", icon: Radio },
+    { value: "story_reaction", label: "Story Reaction", icon: Flame },
+    { value: "story_reply", label: "Story Reply", icon: Send },
+    { value: "story_mention", label: "Story Mention", icon: AtSign },
+    { value: "payment", label: "Successful Payment", icon: CreditCard },
   ];
 
   const TRIGGER_MATCHES = [
-    { value: "any", label: t("pages.builder.match_any") },
-    { value: "contains", label: t("pages.builder.match_contains") },
-    { value: "is", label: t("pages.builder.match_is") },
+    { value: "any", label: "Any message" },
+    { value: "is", label: "Message is" },
+    { value: "contains", label: "Message contains" },
   ];
 
   const CONDITION_TYPES = [
@@ -778,6 +875,7 @@ export default function BuilderPage() {
   const [inspTriggerSource, setInspTriggerSource] = useState("dm");
   const [inspTriggerMatch, setInspTriggerMatch] = useState("contains");
   const [inspTriggerKeywords, setInspTriggerKeywords] = useState("");
+  const [inspProhibitRestart, setInspProhibitRestart] = useState(false);
   const [inspConditionType, setInspConditionType] = useState("is_follower");
   const [inspConditionValue, setInspConditionValue] = useState("");
   const [inspActionType, setInspActionType] = useState("add_tag");
@@ -788,13 +886,6 @@ export default function BuilderPage() {
 
   const [isRichEditorOpen, setIsRichEditorOpen] = useState(false);
   const [showRichEmojiList, setShowRichEmojiList] = useState(false);
-
-  // Trigger modal state fields
-  const [isTriggerModalOpen, setIsTriggerModalOpen] = useState(false);
-  const [multiTriggers, setMultiTriggers] = useState(false);
-  const [selectedTriggerSource, setSelectedTriggerSource] = useState("dm");
-  const [triggerMatchType, setTriggerMatchType] = useState("is");
-  const [triggerKeywordsVal, setTriggerKeywordsVal] = useState("");
 
   useEffect(() => {
     const user = db.getCurrentUser();
@@ -828,7 +919,7 @@ export default function BuilderPage() {
           { id: "n1", type: "trigger", data: { label: found.triggerDetails || "Instagram'da obunani tekshirish", nodeType: "trigger", triggerSource: found.triggerType === "story" ? "story_mention" : "dm", triggerMatch: "contains", triggerKeywords: found.triggerDetails }, position: { x: 50, y: 150 } },
           { id: "n2", type: "message", data: { label: found.replyText || t("pages.builder.initial_msg_connected"), nodeType: "message", buttons: [] }, position: { x: 380, y: 150 } },
         ]);
-        setEdges([{ id: "e1", source: "n1", target: "n2", animated: true, style: { stroke: "#000", strokeWidth: 1.5 }, markerEnd: { type: MarkerType.ArrowClosed, color: "#000" } }]);
+        setEdges([{ id: "e1", source: "n1", target: "n2", animated: true, style: { stroke: "#9296AD", strokeWidth: 1.5 }, markerEnd: { type: MarkerType.ArrowClosed, color: "#9296AD" } }]);
       }
     } else {
       setBotName(t("pages.builder.new_flow"));
@@ -836,13 +927,13 @@ export default function BuilderPage() {
         { id: "n1", type: "trigger", data: { label: t("pages.builder.initial_trigger_kw"), nodeType: "trigger", triggerSource: "dm", triggerMatch: "contains", triggerKeywords: "salom, narx" }, position: { x: 50, y: 150 } },
         { id: "n2", type: "message", data: { label: t("pages.builder.initial_msg_how_help"), nodeType: "message", buttons: [] }, position: { x: 380, y: 150 } },
       ]);
-      setEdges([{ id: "e1", source: "n1", target: "n2", animated: true, style: { stroke: "#000", strokeWidth: 1.5 }, markerEnd: { type: MarkerType.ArrowClosed, color: "#000" } }]);
+      setEdges([{ id: "e1", source: "n1", target: "n2", animated: true, style: { stroke: "#9296AD", strokeWidth: 1.5 }, markerEnd: { type: MarkerType.ArrowClosed, color: "#9296AD" } }]);
     }
   }, [setNodes, setEdges, t]);
 
   const onConnect = useCallback(
     (params: Edge | Connection) =>
-      setEdges((eds) => addEdge({ ...params, animated: true, style: { stroke: "#000", strokeWidth: 1.5 }, markerEnd: { type: MarkerType.ArrowClosed, color: "#000" } }, eds)),
+      setEdges((eds) => addEdge({ ...params, animated: true, style: { stroke: "#9296AD", strokeWidth: 1.5 }, markerEnd: { type: MarkerType.ArrowClosed, color: "#9296AD" } }, eds)),
     [setEdges]
   );
 
@@ -925,6 +1016,7 @@ export default function BuilderPage() {
     setInspTriggerSource(node.data.triggerSource || "dm");
     setInspTriggerMatch(node.data.triggerMatch || "contains");
     setInspTriggerKeywords(node.data.triggerKeywords || "");
+    setInspProhibitRestart(node.data.prohibitRestart || false);
     setInspConditionType(node.data.conditionType || "is_follower");
     setInspConditionValue(node.data.conditionValue || "");
     setInspActionType(node.data.actionType || "add_tag");
@@ -938,10 +1030,9 @@ export default function BuilderPage() {
 
   const handleSaveNodeDetails = () => {
     if (!selectedNode) return;
-    const srcLabel = TRIGGER_SOURCES.find(s => s.value === inspTriggerSource)?.label || inspTriggerSource;
     const newLabel =
       selectedNode.data.nodeType === "trigger"
-        ? `${t("pages.builder.trigger_prefix")}: ${srcLabel} – ${inspTriggerKeywords || t("pages.builder.any_keywords")}`
+        ? inspLabel
         : selectedNode.data.nodeType === "condition"
         ? `${t("pages.builder.condition_prefix")}: ${CONDITION_TYPES.find(c => c.value === inspConditionType)?.label || ""}`
         : selectedNode.data.nodeType === "action"
@@ -953,7 +1044,7 @@ export default function BuilderPage() {
     setNodes((nds) =>
       nds.map((n) =>
         n.id === selectedNode.id
-          ? { ...n, data: { ...n.data, label: newLabel, triggerSource: inspTriggerSource, triggerMatch: inspTriggerMatch, triggerKeywords: inspTriggerKeywords, conditionType: inspConditionType, conditionValue: inspConditionValue, actionType: inspActionType, actionValue: inspActionValue, aiPrompt: inspAiPrompt, aiOutputVar: inspAiOutputVar, buttons: inspButtons } }
+          ? { ...n, data: { ...n.data, label: newLabel, triggerSource: inspTriggerSource, triggerMatch: inspTriggerMatch, triggerKeywords: inspTriggerKeywords, prohibitRestart: inspProhibitRestart, conditionType: inspConditionType, conditionValue: inspConditionValue, actionType: inspActionType, actionValue: inspActionValue, aiPrompt: inspAiPrompt, aiOutputVar: inspAiOutputVar, buttons: inspButtons } }
           : n
       )
     );
@@ -966,7 +1057,7 @@ export default function BuilderPage() {
     const list = activeCh ? db.getChannelAutomations(activeCh.id) : db.getAutomations();
     const triggerNode = nodes.find((n) => n.data.nodeType === "trigger");
     const messageNode = nodes.find((n) => n.data.nodeType === "message");
-    const replyText = messageNode?.data.label || "";
+    const replyText = triggerNode?.data.label || messageNode?.data.label || "";
     const src = triggerNode?.data.triggerSource || "dm";
     const isStory = src.includes("story");
     let savedMsg = t("pages.builder.saved_toast");
@@ -1135,11 +1226,8 @@ export default function BuilderPage() {
               onClick={() => {
                 const triggerNode = nodes.find((n) => n.data.nodeType === "trigger");
                 if (triggerNode) {
-                  setSelectedTriggerSource(triggerNode.data.triggerSource || "dm");
-                  setTriggerMatchType(triggerNode.data.triggerMatch || "is");
-                  setTriggerKeywordsVal(triggerNode.data.triggerKeywords || "");
+                  syncInspector(triggerNode);
                 }
-                setIsTriggerModalOpen(true);
               }}
               className="flex items-center gap-1.5 px-4 h-9 text-[11px] font-extrabold bg-[#FAFAFA] border border-[#E8E8E8] rounded-full hover:bg-[#F0F0F0] text-black shrink-0 transition-colors cursor-pointer"
             >
@@ -1156,71 +1244,61 @@ export default function BuilderPage() {
         {/* Workspace */}
         <div className="flex flex-1 overflow-hidden relative">
           
-          {/* Collapsible Left Palette */}
+          {/* Floating Add Block Popup */}
           {isPaletteOpen && (
-            <aside className="w-[240px] shrink-0 border-r border-[#E8E8E8] bg-white p-4 flex flex-col gap-3 overflow-y-auto z-20 shadow-md">
-              <div className="flex items-center justify-between px-1 pb-2 border-b border-[#F0F0F0] mb-1">
-                <p className="text-[10px] font-black text-[#A0A0A0] uppercase tracking-wider">{t("pages.builder.blocks_title")}</p>
-                <button onClick={() => setIsPaletteOpen(false)} className="text-[#A0A0A0] hover:text-black transition-colors">
-                  <X size={14} />
-                </button>
-              </div>
+            <div className="absolute top-16 left-4 z-40 bg-white rounded-2xl shadow-xl border border-[#E8E8E8] p-2 w-[180px] flex flex-col gap-0.5 animate-in fade-in slide-in-from-top-2 duration-150 text-black">
               {([
-                { type: "trigger" as NodeType, icon: <Zap size={13} />, label: t("pages.builder.block_trigger"), sub: t("pages.builder.block_trigger_sub"), cls: "bg-[#C7F33C]/10 text-black border border-[#C7F33C]/35 hover:bg-[#C7F33C]/20" },
-                { type: "message" as NodeType, icon: <MessageSquare size={13} className="text-[#707070]" />, label: t("pages.builder.block_message"), sub: t("pages.builder.block_message_sub"), cls: "bg-white text-black border border-[#E8E8E8] hover:bg-[#F9F9F7]" },
-                { type: "condition" as NodeType, icon: <ShieldAlert size={13} className="text-black" />, label: t("pages.builder.block_condition"), sub: t("pages.builder.block_condition_sub"), cls: "bg-black text-white hover:bg-black/90" },
-                { type: "action" as NodeType, icon: <Tag size={13} className="text-[#707070]" />, label: t("pages.builder.block_action"), sub: t("pages.builder.block_action_sub"), cls: "bg-[#F0F0F0] text-black border border-[#dcdcdc] hover:bg-[#e4e4e4]" },
-                { type: "wait" as NodeType, icon: <Clock size={13} className="text-[#707070]" />, label: t("pages.builder.block_wait"), sub: t("pages.builder.block_wait_sub"), cls: "bg-[#F0F0F0] text-black border border-[#dcdcdc] hover:bg-[#e4e4e4]" },
-              ]).map(({ type, icon, label, sub, cls }) => (
-                <button key={type} onClick={() => addNewNode(type)} className={`flex w-full items-center gap-3 rounded-[12px] p-3 text-left transition-colors ${cls}`}>
-                  {icon}
-                  <div>
-                    <div className="text-[11px] font-bold leading-none">{label}</div>
-                    <div className="text-[9px] opacity-60 mt-1 leading-none">{sub}</div>
-                  </div>
+                { type: "message" as NodeType, label: "Message", icon: <MessageCircle size={16} strokeWidth={2.5} className="text-[#3B82F6]" /> },
+                { type: "condition" as NodeType, label: "Condition", icon: <Filter size={16} strokeWidth={2.5} className="text-[#22C55E]" /> },
+                { type: "action" as NodeType, label: "Action", icon: <Zap size={16} strokeWidth={2.5} className="text-[#EAB308]" /> },
+                { type: "wait" as NodeType, label: "Wait", icon: <Clock size={16} strokeWidth={2.5} className="text-[#A855F7]" /> },
+              ]).map((item) => (
+                <button
+                  key={item.type}
+                  type="button"
+                  onClick={() => {
+                    addNewNode(item.type);
+                    setIsPaletteOpen(false);
+                  }}
+                  className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left hover:bg-[#F5F5F7] transition-all cursor-pointer border-none bg-white text-black font-semibold text-[12.5px] select-none"
+                >
+                  <div className="shrink-0 flex items-center justify-center">{item.icon}</div>
+                  <span>{item.label}</span>
                 </button>
               ))}
-            </aside>
+            </div>
           )}
 
           {/* Canvas area */}
           <main className="flex-1 relative bg-[#F5F5F7]">
-            {/* Palette Trigger stack layers icon button */}
+            {/* Add Block trigger plus icon button */}
             <button
               onClick={() => setIsPaletteOpen(!isPaletteOpen)}
-              className="absolute top-4 left-4 z-30 w-10 h-10 bg-white border border-[#E8E8E8] rounded-xl flex items-center justify-center shadow-sm text-[#707070] hover:text-black hover:border-black transition-colors"
-              title="Palitrani ochish/yopish"
+              className="absolute top-4 left-4 z-35 w-10 h-10 bg-white border border-[#E8E8E8] rounded-xl flex items-center justify-center shadow-sm text-black hover:border-black hover:scale-105 active:scale-95 transition-all cursor-pointer"
+              title="Blok qo'shish"
             >
-              <Layers size={16} />
+              <Plus size={18} strokeWidth={3} />
             </button>
 
-            {/* Canvas control panel right */}
-            <div className="absolute right-4 top-1/2 -translate-y-1/2 z-30 flex flex-col gap-1.5 bg-white/80 backdrop-blur-md p-1 border border-[#E8E8E8] rounded-2xl shadow-sm">
-              <button
-                onClick={() => setIsPaletteOpen(!isPaletteOpen)}
-                className="w-8 h-8 rounded-[10px] flex items-center justify-center text-[#707070] hover:text-black hover:bg-[#F5F5F5] transition-all"
-                title="Blok qo'shish"
-              >
-                <Plus size={14} />
-              </button>
-              <div className="h-[1px] bg-[#E8E8E8] mx-1" />
+            {/* Canvas control panel left */}
+            <div className="absolute left-4 top-1/2 -translate-y-1/2 z-30 flex flex-col gap-1.5 bg-white/80 backdrop-blur-md p-1 border border-[#E8E8E8] rounded-2xl shadow-sm">
               <button
                 onClick={() => reactFlowInstance?.zoomIn()}
-                className="w-8 h-8 rounded-[10px] flex items-center justify-center text-black hover:bg-[#F5F5F5] transition-all font-bold text-[14px]"
+                className="w-8 h-8 rounded-[10px] flex items-center justify-center text-black hover:bg-[#F5F5F5] transition-all font-bold text-[14px] cursor-pointer"
                 title="Yaqinlashtirish"
               >
                 +
               </button>
               <button
                 onClick={() => reactFlowInstance?.zoomOut()}
-                className="w-8 h-8 rounded-[10px] flex items-center justify-center text-black hover:bg-[#F5F5F5] transition-all font-bold text-[14px]"
+                className="w-8 h-8 rounded-[10px] flex items-center justify-center text-black hover:bg-[#F5F5F5] transition-all font-bold text-[14px] cursor-pointer"
                 title="Uzoqlashtirish"
               >
                 −
               </button>
               <button
                 onClick={() => reactFlowInstance?.fitView()}
-                className="w-8 h-8 rounded-[10px] flex items-center justify-center text-[#707070] hover:text-black hover:bg-[#F5F5F5] transition-all"
+                className="w-8 h-8 rounded-[10px] flex items-center justify-center text-[#707070] hover:text-black hover:bg-[#F5F5F5] transition-all cursor-pointer"
                 title="Ekranga moslash"
               >
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
@@ -1229,15 +1307,17 @@ export default function BuilderPage() {
               </button>
             </div>
 
-            {/* Bottom-right AI Improvement widgets */}
+            {/* Bottom-right Support Widget */}
             <div className="absolute bottom-6 right-6 z-30 flex items-center gap-3">
-              <button className="h-10 bg-black hover:bg-neutral-900 text-white rounded-full px-5 flex items-center gap-2 text-[11px] font-black shadow-lg transition-all active:scale-[0.98]">
-                <Zap size={11} className="text-[#C7F33C] fill-[#C7F33C]" />
-                <span>AI bilan ssenariylarni yaxshilash</span>
-              </button>
-              <div className="w-10 h-10 rounded-full bg-[#1F69FF] hover:bg-blue-600 flex items-center justify-center text-white shadow-lg cursor-pointer transition-all active:scale-[0.98]">
-                <MessageSquare size={14} />
-              </div>
+              <a
+                href="https://t.me/sendly_support_bot"
+                target="_blank"
+                rel="noreferrer"
+                className="w-10 h-10 rounded-full bg-[#24A1DE] hover:bg-[#1f8fc4] flex items-center justify-center text-white shadow-lg cursor-pointer transition-all active:scale-[0.98]"
+                title="Qo'llab-quvvatlash"
+              >
+                <MessageCircle size={16} />
+              </a>
             </div>
 
             {/* ReactFlow Canvas */}
@@ -1248,17 +1328,24 @@ export default function BuilderPage() {
               onEdgesChange={onEdgesChange}
               onConnect={onConnect}
               onNodeClick={onNodeClick}
+              onPaneClick={() => {
+                setSelectedNode(null);
+                setSelectedButton(null);
+              }}
               nodeTypes={nodeTypes}
               edgeTypes={edgeTypes}
               onInit={setReactFlowInstance}
+              connectionLineStyle={{ stroke: "#9296AD", strokeWidth: 1.5 }}
+              proOptions={{ hideAttribution: true }}
               fitView
             >
-              <Background color="#000" gap={16} size={1} style={{ opacity: 0.05 }} />
+              <Background color="#9296AD" variant="dots" gap={20} size={1.5} style={{ opacity: 0.15 }} />
             </ReactFlow>
           </main>
 
           {/* Right Inspector */}
-          <aside className="w-[300px] shrink-0 border-l border-[#E8E8E8] bg-white overflow-y-auto">
+          {(selectedNode || (selectedButton && currentButton)) && (
+            <aside className="w-[320px] shrink-0 border-l border-[#E8E8E8] bg-white overflow-y-auto">
             {selectedButton && currentButton ? (
               <div className="flex flex-col">
                 {/* Button Inspector Header */}
@@ -1468,68 +1555,109 @@ export default function BuilderPage() {
                     <>
                       {/* Trigger Source Cards */}
                       <div className="flex flex-col gap-2">
-                        <p className="text-[10px] font-bold text-[#707070] uppercase tracking-widest px-0.5">{t("pages.builder.trigger_source")}</p>
-                        <div className="flex flex-col gap-1.5">
-                          {TRIGGER_SOURCES.map((s) => (
-                            <button
-                              key={s.value}
-                              onClick={() => setInspTriggerSource(s.value)}
-                              className={`flex items-center gap-3 w-full px-3 py-2.5 rounded-[12px] text-left transition-all border ${
-                                inspTriggerSource === s.value
-                                  ? "bg-black text-white border-black"
-                                  : "bg-[#F9F9F7] text-[#333] border-[#E8E8E8] hover:border-[#ccc]"
-                              }`}
-                            >
-                              <span className={`w-2 h-2 rounded-full shrink-0 ${inspTriggerSource === s.value ? "bg-[#C7F33C]" : "bg-[#D8D8D8]"}`} />
-                              <span className="text-[12px] font-medium">{s.label}</span>
-                            </button>
-                          ))}
+                        <p className="text-[10px] font-bold text-[#707070] uppercase tracking-widest px-0.5">Trigger turi</p>
+                        <div className="grid grid-cols-3 gap-2">
+                          {TRIGGER_SOURCES.map((s) => {
+                            const IconComponent = s.icon;
+                            const isSelected = inspTriggerSource === s.value;
+                            return (
+                              <button
+                                key={s.value}
+                                type="button"
+                                onClick={() => setInspTriggerSource(s.value)}
+                                className={`flex flex-col p-3 rounded-2xl h-[92px] text-left transition-all relative border cursor-pointer select-none ${
+                                  isSelected
+                                    ? "border-2 border-[#1A73E8] bg-white shadow-sm"
+                                    : "border border-[#E8E8E8] bg-white hover:border-[#ccc]"
+                                }`}
+                              >
+                                <div className="flex justify-between items-start w-full">
+                                  <IconComponent size={20} className={isSelected ? "text-[#1A73E8]" : "text-[#707070]"} />
+                                  <span className={`w-4 h-4 rounded-full border flex items-center justify-center shrink-0 transition-colors ${
+                                    isSelected ? "border-[#1A73E8] border-2" : "border-[#D8D8D8]"
+                                  }`}>
+                                    {isSelected && <span className="w-1.5 h-1.5 rounded-full bg-[#1A73E8]" />}
+                                  </span>
+                                </div>
+                                <span className="text-[10.5px] font-bold text-black leading-tight mt-auto">
+                                  {s.label}
+                                </span>
+                              </button>
+                            );
+                          })}
                         </div>
                       </div>
 
-                      {/* Keyword match type — only for DM / Comment */}
-                      {(inspTriggerSource === "dm" || inspTriggerSource === "comment") && (
-                        <div className="flex flex-col gap-2">
-                          <p className="text-[10px] font-bold text-[#707070] uppercase tracking-widest px-0.5">{t("pages.builder.trigger_match")}</p>
-                          <div className="flex gap-2 flex-wrap">
-                            {TRIGGER_MATCHES.map((m) => (
-                              <button
-                                key={m.value}
-                                onClick={() => setInspTriggerMatch(m.value)}
-                                className={`px-3 py-1.5 rounded-full text-[11px] font-medium border transition-all ${
-                                  inspTriggerMatch === m.value
-                                    ? "bg-black text-white border-black"
-                                    : "bg-white text-[#707070] border-[#E8E8E8] hover:border-black hover:text-black"
-                                }`}
-                              >
-                                {m.label}
-                              </button>
-                            ))}
+                      {/* Keyword match type — only for text triggers (dm, comment, message_recognition) */}
+                      {(inspTriggerSource === "dm" || inspTriggerSource === "comment" || inspTriggerSource === "message_recognition") && (
+                        <div className="flex flex-col gap-3 border-t border-[#F0F0F0] pt-4 mt-2">
+                          <h4 className="text-[13px] font-extrabold text-black">Trigger on</h4>
+                          <div className="flex flex-col gap-3">
+                            {TRIGGER_MATCHES.map((m) => {
+                              const isActive = inspTriggerMatch === m.value;
+                              return (
+                                <button
+                                  key={m.value}
+                                  type="button"
+                                  onClick={() => setInspTriggerMatch(m.value)}
+                                  className="flex items-center gap-3 w-full text-left cursor-pointer group"
+                                >
+                                  <span className={`w-5 h-5 rounded-full border flex items-center justify-center shrink-0 transition-all ${
+                                    isActive ? "border-[#1A73E8] border-2" : "border-[#D8D8D8] group-hover:border-[#ccc]"
+                                  }`}>
+                                    {isActive && <span className="w-2.5 h-2.5 rounded-full bg-[#1A73E8]" />}
+                                  </span>
+                                  <span className="text-[12px] font-bold text-black">{m.label}</span>
+                                </button>
+                              );
+                            })}
                           </div>
                         </div>
                       )}
 
                       {/* Keywords input */}
-                      {inspTriggerMatch !== "any" && (inspTriggerSource === "dm" || inspTriggerSource === "comment") && (
-                        <div className="flex flex-col gap-2">
-                          <p className="text-[10px] font-bold text-[#707070] uppercase tracking-widest px-0.5">{t("pages.builder.trigger_keywords")}</p>
+                      {inspTriggerMatch !== "any" && (inspTriggerSource === "dm" || inspTriggerSource === "comment" || inspTriggerSource === "message_recognition") && (
+                        <div className="flex flex-col gap-2 mt-1">
+                          <p className="text-[10px] font-bold text-[#707070] uppercase tracking-widest px-0.5">Kalit so'zlar (vergul bilan ajrating)</p>
                           <input
                             value={inspTriggerKeywords}
                             onChange={(e) => setInspTriggerKeywords(e.target.value)}
-                            placeholder={t("pages.builder.trigger_keywords_placeholder")}
+                            placeholder="masalan: narx, o'qish, chegirma"
                             className="w-full rounded-[12px] bg-[#F0F0F0] px-4 py-3 text-[12px] text-black outline-none focus:bg-[#e8e8e8] transition-colors"
                           />
-                          <p className="text-[10px] text-[#a0a0a0] px-0.5">{t("pages.builder.trigger_keywords")}</p>
                         </div>
                       )}
 
                       {/* Story / Live info banner */}
-                      {(inspTriggerSource === "story_mention" || inspTriggerSource === "story_reply" || inspTriggerSource === "live_comment") && (
-                        <div className="flex items-start gap-2.5 p-3 rounded-[12px] bg-[#F9F9F7] border border-[#E8E8E8]">
+                      {(inspTriggerSource === "story_mention" || inspTriggerSource === "story_reply" || inspTriggerSource === "story_reaction" || inspTriggerSource === "live_comment") && (
+                        <div className="flex items-start gap-2.5 p-3 rounded-[12px] bg-[#F9F9F7] border border-[#E8E8E8] mt-2">
                           <Zap size={14} className="text-black shrink-0 mt-0.5" />
-                          <p className="text-[11px] text-[#505050] leading-relaxed">{t("pages.builder.trigger_desc_no_kw")}</p>
+                          <p className="text-[11px] text-[#505050] leading-relaxed">
+                            Ushbu trigger uchun kalit so'zlar talab qilinmaydi. Foydalanuvchi har safar story/live faolligi ko'rsatganda trigger ishga tushadi.
+                          </p>
                         </div>
                       )}
+
+                      {/* Prohibit restart Toggle */}
+                      <div className="flex items-center justify-between border-t border-[#F0F0F0] pt-4 mt-2">
+                        <div className="flex flex-col gap-0.5 max-w-[210px] text-left">
+                          <span className="text-[12px] font-extrabold text-black">Prohibit restart</span>
+                          <span className="text-[10px] text-[#707070] leading-normal">
+                            During the specified time the automation can be started only once. All another restarts will be ignored and skipped.
+                          </span>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => setInspProhibitRestart(!inspProhibitRestart)}
+                          className={`w-11 h-6 rounded-full transition-colors relative shrink-0 cursor-pointer ${
+                            inspProhibitRestart ? "bg-[#1A73E8]" : "bg-[#D8D8D8]"
+                          }`}
+                        >
+                          <span className={`absolute top-0.5 w-5 h-5 rounded-full bg-white transition-all shadow-sm ${
+                            inspProhibitRestart ? "left-[21px]" : "left-0.5"
+                          }`} />
+                        </button>
+                      </div>
                     </>
                   )}
 
@@ -1764,24 +1892,9 @@ export default function BuilderPage() {
                   </button>
                 </div>
               </div>
-            ) : (
-              <div className="h-full flex flex-col items-center justify-center text-center gap-4 p-6 text-black">
-                <div className="grid h-14 w-14 place-items-center rounded-[18px] bg-[#F0F0F0]">
-                  <Zap size={22} className="opacity-30 text-black" />
-                </div>
-                <div>
-                  <p className="text-[13px] font-semibold text-black">{t("pages.builder.unselected_block")}</p>
-                  <p className="text-[11px] text-[#707070] mt-1 max-w-[190px] leading-relaxed">{t("pages.builder.unselected_block_desc")}</p>
-                </div>
-                <div className="w-full p-3.5 rounded-[14px] bg-[#F9F9F7] border border-[#E8E8E8] text-left">
-                  <p className="text-[10px] font-bold text-[#707070] uppercase tracking-widest mb-2.5">{t("pages.builder.variables")}</p>
-                  {["{{user_name}}", "{{user_points}}"].map((v) => (
-                    <code key={v} className="block text-[11px] text-black py-1 border-b border-[#F0F0F0] last:border-0">{v}</code>
-                  ))}
-                </div>
-              </div>
-            )}
+            ) : null}
           </aside>
+        )}
         </div>
       </div>
 
@@ -1916,165 +2029,6 @@ export default function BuilderPage() {
         </div>
       )}
 
-      {isTriggerModalOpen && (
-        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[999] flex items-center justify-center p-4">
-          <div className="bg-white rounded-[28px] p-6 max-w-[560px] w-full shadow-2xl relative border border-[#E8E8E8] animate-in zoom-in-95 duration-150 text-black max-h-[90vh] overflow-y-auto">
-            {/* Close button */}
-            <button
-              type="button"
-              onClick={() => setIsTriggerModalOpen(false)}
-              className="absolute right-5 top-5 grid h-8 w-8 place-items-center rounded-full hover:bg-[#F0F0F0] text-[#707070] transition-colors cursor-pointer border-0"
-            >
-              <X size={16} />
-            </button>
-
-            <h3 className="text-[18px] font-black text-black tracking-tight text-left">
-              Ishga tushirish triggeri
-            </h3>
-
-            {/* Multiple triggers toggle */}
-            <div className="flex items-center justify-between p-4 bg-[#F9F9F7] border border-[#E8E8E8] rounded-2xl w-full mt-4 select-none">
-              <span className="text-[12.5px] font-bold text-black">Bir nechta triggerlar</span>
-              <label className="relative inline-flex items-center cursor-pointer shrink-0">
-                <input
-                  type="checkbox"
-                  checked={multiTriggers}
-                  onChange={(e) => setMultiTriggers(e.target.checked)}
-                  className="sr-only peer"
-                />
-                <div className="w-11 h-6 bg-[#E8E8E8] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-[#D8D8D8] after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-black"></div>
-              </label>
-            </div>
-
-            {/* Grid of triggers */}
-            <div className="grid grid-cols-2 gap-3 mt-4">
-              {[
-                { id: "read", label: "Xabarlarni aniqlash", icon: "👁️" },
-                { id: "dm", label: "Direkt'ga Xabar", icon: "💬" },
-                { id: "comment", label: "Publikatsiyalarga izohlar", icon: "📝" },
-                { id: "live_comment", label: "Jonli efirda izohlar", icon: "📡" },
-                { id: "story_reaction", label: "Storis'ga Reaksiyalar", icon: "🔥" },
-                { id: "story_reply", label: "Storis'ga javoblar", icon: "↩️" },
-                { id: "story_mention", label: "Storis'da belgilar", icon: "🏷️" },
-                { id: "payment", label: "Muvaffaqiyatli to'lov", icon: "💳" },
-              ].map((trigger) => {
-                const isSelected = selectedTriggerSource === trigger.id;
-                return (
-                  <div
-                    key={trigger.id}
-                    onClick={() => setSelectedTriggerSource(trigger.id)}
-                    className={`border rounded-2xl p-3.5 flex items-center justify-between cursor-pointer transition-all select-none ${
-                      isSelected
-                        ? "border-black bg-[#C7F33C]/10 font-bold text-black"
-                        : "border-[#E8E8E8] hover:border-black/20 bg-white"
-                    }`}
-                  >
-                    <div className="flex items-center gap-2.5 truncate">
-                      <span className="text-[16px]">{trigger.icon}</span>
-                      <span className="text-[11.5px] truncate">{trigger.label}</span>
-                    </div>
-                    
-                    {/* radio checkcircle */}
-                    <div className={`w-4 h-4 rounded-full border flex items-center justify-center shrink-0 transition-all ${
-                      isSelected ? "border-black bg-black" : "border-[#D8D8D8]"
-                    }`}>
-                      {isSelected && (
-                        <div className="w-1.5 h-1.5 rounded-full bg-[#C7F33C]" />
-                      )}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-
-            {/* Trigger Match Rules */}
-            <div className="mt-5 text-left">
-              <h4 className="text-[11px] font-black text-[#707070] uppercase tracking-wider mb-2.5">
-                da ishga tushish
-              </h4>
-              
-              <div className="flex flex-col gap-2.5">
-                {[
-                  { id: "any", label: "Har qanday xabar" },
-                  { id: "is", label: "Malum bir xabar" },
-                  { id: "contains", label: "o'z ichiga olgan xabar" },
-                ].map((rule) => {
-                  const isChecked = triggerMatchType === rule.id;
-                  return (
-                    <label
-                      key={rule.id}
-                      className="flex items-center gap-2.5 cursor-pointer text-[12px] font-bold select-none text-black"
-                      onClick={() => setTriggerMatchType(rule.id)}
-                    >
-                      <div className={`w-4.5 h-4.5 rounded-full border flex items-center justify-center shrink-0 transition-all ${
-                        isChecked ? "border-black bg-black text-[#C7F33C]" : "border-[#D8D8D8]"
-                      }`}>
-                        {isChecked && (
-                          <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="4">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                          </svg>
-                        )}
-                      </div>
-                      <span>{rule.label}</span>
-                    </label>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* Keyword tags list */}
-            {triggerMatchType !== "any" && (
-              <div className="mt-4 text-left animate-in slide-in-from-top-1">
-                <input
-                  type="text"
-                  placeholder="Kalit so'zlarni yozing..."
-                  value={triggerKeywordsVal}
-                  onChange={(e) => setTriggerKeywordsVal(e.target.value)}
-                  className="w-full rounded-[14px] bg-[#F0F0F0] px-4 py-3 text-[12.5px] text-black outline-none placeholder:text-[#a0a0a0] focus:bg-[#e8e8e8] transition-colors"
-                />
-              </div>
-            )}
-
-            <div className="flex justify-end gap-3 mt-6 select-none">
-              <button
-                type="button"
-                onClick={() => setIsTriggerModalOpen(false)}
-                className="px-5 py-2.5 bg-white border border-[#D8D8D8] text-black font-bold rounded-xl text-[12px] hover:bg-[#F5F5F5] transition-all cursor-pointer"
-              >
-                Bekor qilish
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  const srcLabel = TRIGGER_SOURCES.find((s) => s.value === selectedTriggerSource)?.label || selectedTriggerSource;
-                  const newLabel = `Ishga tushish: ${srcLabel} – ${triggerKeywordsVal || "Har qanday xabar"}`;
-                  
-                  setNodes((nds) =>
-                    nds.map((n) =>
-                      n.id === "n1"
-                        ? {
-                            ...n,
-                            data: {
-                              ...n.data,
-                              label: newLabel,
-                              triggerSource: selectedTriggerSource,
-                              triggerMatch: triggerMatchType,
-                              triggerKeywords: triggerKeywordsVal,
-                            },
-                          }
-                        : n
-                    )
-                  );
-                  setIsTriggerModalOpen(false);
-                }}
-                className="px-5 py-2.5 bg-[#C7F33C] text-black border border-[#b2db2a] font-bold rounded-xl text-[12px] hover:bg-[#b5e02c] transition-all cursor-pointer border-0"
-              >
-                Saqlash
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
