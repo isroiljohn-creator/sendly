@@ -16,6 +16,8 @@ import ReactFlow, {
   Position,
   NodeProps,
   useReactFlow,
+  getBezierPath,
+  EdgeProps,
 } from "reactflow";
 import "reactflow/dist/style.css";
 import {
@@ -34,6 +36,8 @@ import {
   Tag,
   Settings,
   Layers,
+  Trash2,
+  Copy,
 } from "lucide-react";
 import { useI18n } from "@/i18n/I18nProvider";
 import { Button } from "@/components/ui/primitives";
@@ -61,10 +65,69 @@ interface NodeData {
   buttons?: ButtonItem[];
 }
 
+// ─────────── CUSTOM EDGE COMPONENT ────────────
+
+function ButtonEdge({
+  id,
+  sourceX,
+  sourceY,
+  targetX,
+  targetY,
+  sourcePosition,
+  targetPosition,
+  style = {},
+  markerEnd,
+}: EdgeProps) {
+  const [edgePath, labelX, labelY] = getBezierPath({
+    sourceX,
+    sourceY,
+    sourcePosition,
+    targetX,
+    targetY,
+    targetPosition,
+  });
+
+  const { setEdges } = useReactFlow();
+
+  const onEdgeClick = (evt: React.MouseEvent) => {
+    evt.stopPropagation();
+    setEdges((eds) => eds.filter((edge) => edge.id !== id));
+  };
+
+  return (
+    <>
+      <path
+        id={id}
+        style={{ ...style, strokeWidth: 2, stroke: style.stroke || "#A0A0A0" }}
+        className="react-flow__edge-path"
+        d={edgePath}
+        markerEnd={markerEnd}
+      />
+      <foreignObject
+        width={20}
+        height={20}
+        x={labelX - 10}
+        y={labelY - 10}
+        className="overflow-visible"
+        requiredExtensions="http://www.w3.org/1999/xhtml"
+      >
+        <button
+          className="w-5 h-5 bg-white border border-[#E8E8E8] text-[#707070] hover:text-red-500 hover:border-red-200 rounded-full flex items-center justify-center cursor-pointer shadow-sm transition-all hover:scale-110 active:scale-95 p-0"
+          onClick={onEdgeClick}
+          title="Ulanishni o'chirish"
+          type="button"
+        >
+          <X size={10} strokeWidth={3} />
+        </button>
+      </foreignObject>
+    </>
+  );
+}
+
 // ─────────── CUSTOM NODE COMPONENTS ────────────
 
 function TriggerNode({ data, id }: NodeProps<NodeData>) {
-  const { setNodes } = useReactFlow();
+  const { setNodes, setEdges } = useReactFlow();
   
   return (
     <div className="w-[260px] bg-white border border-[#E8E8E8] rounded-2xl shadow-sm overflow-visible text-black text-left relative">
@@ -79,7 +142,18 @@ function TriggerNode({ data, id }: NodeProps<NodeData>) {
           <MessageSquare size={11} className="text-[#707070]" />
           <span className="text-[10px] font-black text-[#505050] uppercase tracking-wider">Xabar</span>
         </div>
-        <span className="text-[9px] text-[#A0A0A0] font-mono">0</span>
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            setNodes((nds) => nds.filter((n) => n.id !== id));
+            setEdges((eds) => eds.filter((edge) => edge.source !== id && edge.target !== id));
+          }}
+          className="p-1 rounded-full hover:bg-red-50 text-[#707070] hover:text-red-500 transition-colors cursor-pointer"
+          title="Blokni o'chirish"
+        >
+          <Trash2 size={11} />
+        </button>
       </div>
       
       {/* Content */}
@@ -115,26 +189,46 @@ function TriggerNode({ data, id }: NodeProps<NodeData>) {
         {/* Buttons list */}
         <div className="flex flex-col gap-1.5 mt-1">
           {(data.buttons || []).map((btn) => (
-            <div key={btn.id} className="relative">
+            <div key={btn.id} className="relative group">
               <div
                 onClick={(e) => {
                   e.stopPropagation();
                   window.dispatchEvent(new CustomEvent("edit-button", { detail: { nodeId: id, buttonId: btn.id } }));
                 }}
-                className="w-full flex items-center justify-between py-1.5 px-3 border border-[#E8E8E8] hover:border-black rounded-xl text-[10px] font-bold bg-white hover:bg-neutral-50 text-black select-none cursor-pointer transition-all"
+                className="w-full flex items-center justify-between py-1.5 px-2.5 border border-[#E8E8E8] hover:border-black rounded-xl text-[10px] font-bold bg-white hover:bg-neutral-50 text-black select-none cursor-pointer transition-all"
               >
-                <span className="text-[#a0a0a0] font-mono mr-1.5 font-bold">==</span>
-                <span className="flex-1 truncate text-left">{btn.label}</span>
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setNodes((nds) => nds.map((n) => n.id === id ? { ...n, data: { ...n.data, buttons: (n.data.buttons || []).filter(b => b.id !== btn.id) } } : n));
-                  }}
-                  className="w-3.5 h-3.5 rounded-full border border-red-500 text-red-500 flex items-center justify-center font-bold text-[8px] cursor-pointer hover:bg-red-50 shrink-0 ml-1.5 bg-transparent p-0 border-0"
-                >
-                  o
-                </button>
+                <div className="flex items-center gap-1.5 min-w-0 flex-1">
+                  <span className="text-[#a0a0a0] font-mono font-bold shrink-0">==</span>
+                  <span className="truncate text-left">{btn.label}</span>
+                </div>
+                
+                {/* Hover reveal controls */}
+                <div className="flex items-center gap-1 shrink-0 ml-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      const newId = `btn-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+                      const duplicatedBtn = { ...btn, id: newId, label: `${btn.label} (Nusxa)` };
+                      setNodes((nds) => nds.map((n) => n.id === id ? { ...n, data: { ...n.data, buttons: [...(n.data.buttons || []), duplicatedBtn] } } : n));
+                    }}
+                    className="p-0.5 rounded hover:bg-neutral-100 text-[#707070] hover:text-black transition-colors"
+                    title="Nusxalash"
+                  >
+                    <Copy size={10} />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setNodes((nds) => nds.map((n) => n.id === id ? { ...n, data: { ...n.data, buttons: (n.data.buttons || []).filter(b => b.id !== btn.id) } } : n));
+                    }}
+                    className="p-0.5 rounded hover:bg-red-50 text-[#707070] hover:text-red-500 transition-colors"
+                    title="O'chirish"
+                  >
+                    <Trash2 size={10} />
+                  </button>
+                </div>
               </div>
               <Handle
                 type="source"
@@ -184,7 +278,7 @@ function TriggerNode({ data, id }: NodeProps<NodeData>) {
 }
 
 function MessageNode({ data, id }: NodeProps<NodeData>) {
-  const { setNodes } = useReactFlow();
+  const { setNodes, setEdges } = useReactFlow();
   
   return (
     <div className="w-[260px] bg-white border border-[#E8E8E8] rounded-2xl shadow-sm overflow-visible text-black text-left relative">
@@ -207,7 +301,18 @@ function MessageNode({ data, id }: NodeProps<NodeData>) {
           <MessageSquare size={11} className="text-[#707070]" />
           <span className="text-[10px] font-black text-[#505050] uppercase tracking-wider">Xabar</span>
         </div>
-        <span className="text-[9px] text-[#A0A0A0] font-mono">0</span>
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            setNodes((nds) => nds.filter((n) => n.id !== id));
+            setEdges((eds) => eds.filter((edge) => edge.source !== id && edge.target !== id));
+          }}
+          className="p-1 rounded-full hover:bg-red-50 text-[#707070] hover:text-red-500 transition-colors cursor-pointer"
+          title="Blokni o'chirish"
+        >
+          <Trash2 size={11} />
+        </button>
       </div>
       
       {/* Content */}
@@ -243,26 +348,46 @@ function MessageNode({ data, id }: NodeProps<NodeData>) {
         {/* Buttons list */}
         <div className="flex flex-col gap-1.5 mt-1">
           {(data.buttons || []).map((btn) => (
-            <div key={btn.id} className="relative">
+            <div key={btn.id} className="relative group">
               <div
                 onClick={(e) => {
                   e.stopPropagation();
                   window.dispatchEvent(new CustomEvent("edit-button", { detail: { nodeId: id, buttonId: btn.id } }));
                 }}
-                className="w-full flex items-center justify-between py-1.5 px-3 border border-[#E8E8E8] hover:border-black rounded-xl text-[10px] font-bold bg-white hover:bg-neutral-50 text-black select-none cursor-pointer transition-all"
+                className="w-full flex items-center justify-between py-1.5 px-2.5 border border-[#E8E8E8] hover:border-black rounded-xl text-[10px] font-bold bg-white hover:bg-neutral-50 text-black select-none cursor-pointer transition-all"
               >
-                <span className="text-[#a0a0a0] font-mono mr-1.5 font-bold">==</span>
-                <span className="flex-1 truncate text-left">{btn.label}</span>
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setNodes((nds) => nds.map((n) => n.id === id ? { ...n, data: { ...n.data, buttons: (n.data.buttons || []).filter(b => b.id !== btn.id) } } : n));
-                  }}
-                  className="w-3.5 h-3.5 rounded-full border border-red-500 text-red-500 flex items-center justify-center font-bold text-[8px] cursor-pointer hover:bg-red-50 shrink-0 ml-1.5 bg-transparent p-0 border-0"
-                >
-                  o
-                </button>
+                <div className="flex items-center gap-1.5 min-w-0 flex-1">
+                  <span className="text-[#a0a0a0] font-mono font-bold shrink-0">==</span>
+                  <span className="truncate text-left">{btn.label}</span>
+                </div>
+                
+                {/* Hover reveal controls */}
+                <div className="flex items-center gap-1 shrink-0 ml-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      const newId = `btn-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+                      const duplicatedBtn = { ...btn, id: newId, label: `${btn.label} (Nusxa)` };
+                      setNodes((nds) => nds.map((n) => n.id === id ? { ...n, data: { ...n.data, buttons: [...(n.data.buttons || []), duplicatedBtn] } } : n));
+                    }}
+                    className="p-0.5 rounded hover:bg-neutral-100 text-[#707070] hover:text-black transition-colors"
+                    title="Nusxalash"
+                  >
+                    <Copy size={10} />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setNodes((nds) => nds.map((n) => n.id === id ? { ...n, data: { ...n.data, buttons: (n.data.buttons || []).filter(b => b.id !== btn.id) } } : n));
+                    }}
+                    className="p-0.5 rounded hover:bg-red-50 text-[#707070] hover:text-red-500 transition-colors"
+                    title="O'chirish"
+                  >
+                    <Trash2 size={10} />
+                  </button>
+                </div>
               </div>
               <Handle
                 type="source"
@@ -312,6 +437,8 @@ function MessageNode({ data, id }: NodeProps<NodeData>) {
 }
 
 function ActionNode({ data, id }: NodeProps<NodeData>) {
+  const { setNodes, setEdges } = useReactFlow();
+
   return (
     <div className="w-[260px] bg-white border border-[#E8E8E8] rounded-2xl shadow-sm overflow-hidden text-black text-left">
       <Handle
@@ -333,7 +460,18 @@ function ActionNode({ data, id }: NodeProps<NodeData>) {
           <Zap size={11} className="text-black" />
           <span className="text-[10px] font-black text-[#505050] uppercase tracking-wider">Harakat</span>
         </div>
-        <span className="text-[9px] text-[#A0A0A0] font-mono">0</span>
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            setNodes((nds) => nds.filter((n) => n.id !== id));
+            setEdges((eds) => eds.filter((edge) => edge.source !== id && edge.target !== id));
+          }}
+          className="p-1 rounded-full hover:bg-red-50 text-[#707070] hover:text-red-500 transition-colors cursor-pointer"
+          title="Blokni o'chirish"
+        >
+          <Trash2 size={11} />
+        </button>
       </div>
 
       {/* Content */}
@@ -369,6 +507,8 @@ function ActionNode({ data, id }: NodeProps<NodeData>) {
 }
 
 function ConditionNode({ data, id }: NodeProps<NodeData>) {
+  const { setNodes, setEdges } = useReactFlow();
+
   return (
     <div className="w-[260px] bg-white border border-[#E8E8E8] rounded-2xl shadow-sm overflow-hidden text-black text-left">
       <Handle
@@ -389,7 +529,18 @@ function ConditionNode({ data, id }: NodeProps<NodeData>) {
         <div className="flex items-center gap-1.5">
           <span className="text-[10px] font-black text-[#505050] uppercase tracking-wider">Shart</span>
         </div>
-        <span className="text-[9px] text-[#A0A0A0] font-mono">0</span>
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            setNodes((nds) => nds.filter((n) => n.id !== id));
+            setEdges((eds) => eds.filter((edge) => edge.source !== id && edge.target !== id));
+          }}
+          className="p-1 rounded-full hover:bg-red-50 text-[#707070] hover:text-red-500 transition-colors cursor-pointer"
+          title="Blokni o'chirish"
+        >
+          <Trash2 size={11} />
+        </button>
       </div>
 
       {/* Content */}
@@ -447,6 +598,8 @@ function ConditionNode({ data, id }: NodeProps<NodeData>) {
 }
 
 function WaitNode({ data, id }: NodeProps<NodeData>) {
+  const { setNodes, setEdges } = useReactFlow();
+
   return (
     <div className="w-[260px] bg-white border border-[#E8E8E8] rounded-2xl shadow-sm overflow-hidden text-black text-left">
       <Handle
@@ -468,7 +621,18 @@ function WaitNode({ data, id }: NodeProps<NodeData>) {
           <Clock size={12} className="text-[#707070]" />
           <span className="text-[10px] font-black text-[#505050] uppercase tracking-wider">Kutish</span>
         </div>
-        <span className="text-[9px] text-[#A0A0A0] font-mono">0</span>
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            setNodes((nds) => nds.filter((n) => n.id !== id));
+            setEdges((eds) => eds.filter((edge) => edge.source !== id && edge.target !== id));
+          }}
+          className="p-1 rounded-full hover:bg-red-50 text-[#707070] hover:text-red-500 transition-colors cursor-pointer"
+          title="Blokni o'chirish"
+        >
+          <Trash2 size={11} />
+        </button>
       </div>
 
       {/* Content */}
@@ -710,6 +874,22 @@ export default function BuilderPage() {
     };
   }, [nodes]);
 
+  useEffect(() => {
+    if (selectedNode) {
+      const nodeExists = nodes.some((n) => n.id === selectedNode.id);
+      if (!nodeExists) {
+        setSelectedNode(null);
+        setSelectedButton(null);
+      } else if (selectedButton) {
+        const node = nodes.find((n) => n.id === selectedNode.id);
+        const buttonExists = (node?.data.buttons || []).some((b) => b.id === selectedButton.buttonId);
+        if (!buttonExists) {
+          setSelectedButton(null);
+        }
+      }
+    }
+  }, [nodes, selectedNode, selectedButton]);
+
   const handleUpdateButtonDetail = (key: keyof ButtonItem, value: any) => {
     if (!selectedButton || !selectedNode) return;
     
@@ -905,6 +1085,10 @@ export default function BuilderPage() {
     wait: WaitNode,
   }), []);
 
+  const edgeTypes = useMemo(() => ({
+    default: ButtonEdge,
+  }), []);
+
   const currentButton = useMemo(() => {
     if (!selectedButton || !selectedNode) return null;
     const node = nodes.find((n) => n.id === selectedButton.nodeId);
@@ -1065,6 +1249,7 @@ export default function BuilderPage() {
               onConnect={onConnect}
               onNodeClick={onNodeClick}
               nodeTypes={nodeTypes}
+              edgeTypes={edgeTypes}
               onInit={setReactFlowInstance}
               fitView
             >
@@ -1195,6 +1380,50 @@ export default function BuilderPage() {
                       />
                       <div className="w-11 h-6 bg-[#E8E8E8] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-[#D8D8D8] after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#C7F33C]"></div>
                     </label>
+                  </div>
+
+                  {/* Duplicate and Delete Actions in Inspector */}
+                  <div className="flex gap-2 mt-1">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (selectedNode && currentButton) {
+                          const newId = `btn-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+                          const duplicatedBtn = { ...currentButton, id: newId, label: `${currentButton.label} (Nusxa)` };
+                          
+                          setNodes((nds) => nds.map((n) => n.id === selectedNode.id ? { ...n, data: { ...n.data, buttons: [...(n.data.buttons || []), duplicatedBtn] } } : n));
+                          setSelectedButton({ nodeId: selectedNode.id, buttonId: newId });
+                          setInspButtons((prev) => [...prev, duplicatedBtn]);
+                          
+                          setToastMsg("Tugma nusxalandi!");
+                          setShowToast(true);
+                          setTimeout(() => setShowToast(false), 2000);
+                        }
+                      }}
+                      className="flex-1 py-2.5 rounded-xl border border-[#E8E8E8] hover:border-black text-[11px] font-black text-black bg-white hover:bg-neutral-50 active:scale-[0.98] transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                    >
+                      <Copy size={12} />
+                      <span>Nusxalash</span>
+                    </button>
+                    
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (selectedNode && currentButton) {
+                          setNodes((nds) => nds.map((n) => n.id === selectedNode.id ? { ...n, data: { ...n.data, buttons: (n.data.buttons || []).filter(b => b.id !== currentButton.id) } } : n));
+                          setInspButtons((prev) => prev.filter((b) => b.id !== currentButton.id));
+                          setSelectedButton(null);
+                          
+                          setToastMsg("Tugma o'chirildi");
+                          setShowToast(true);
+                          setTimeout(() => setShowToast(false), 2000);
+                        }
+                      }}
+                      className="flex-1 py-2.5 rounded-xl border border-red-200 hover:border-red-500 hover:bg-red-50/50 text-[11px] font-black text-red-500 bg-white active:scale-[0.98] transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                    >
+                      <Trash2 size={12} />
+                      <span>O'chirish</span>
+                    </button>
                   </div>
 
                   {/* Done button */}
