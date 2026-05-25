@@ -62,6 +62,8 @@ type ButtonItem = { id: string; label: string; type: "action" | "link" | "paymen
 interface NodeData {
   label: string;
   nodeType?: NodeType;
+  isEntryPoint?: boolean;
+  imageUrl?: string;
   triggerSource?: string;
   triggerMatch?: string;
   triggerKeywords?: string;
@@ -140,10 +142,9 @@ function ButtonEdge({
 
 function MessageNode({ data, id }: NodeProps<NodeData>) {
   const { setNodes, setEdges } = useReactFlow();
-  const edges = useEdges();
   const [showAddMenu, setShowAddMenu] = useState(false);
 
-  const isEntryPoint = edges.some((e) => e.source === "n1" && e.target === id);
+  const isEntryPoint = data.isEntryPoint;
   
   return (
     <div className="w-[280px] bg-white border border-[#F2F2F7] rounded-lg shadow-sm overflow-visible text-black text-left relative">
@@ -462,6 +463,16 @@ function ActionNode({ data, id }: NodeProps<NodeData>) {
 
   return (
     <div className="w-[280px] bg-white border border-[#F2F2F7] rounded-lg shadow-sm overflow-visible text-black text-left relative">
+      {data.isEntryPoint && (
+        <div className="absolute -top-[34px] left-0 flex items-center gap-1.5 px-3 py-1 bg-white border border-[#E5E5EA] rounded-full shadow-sm text-[10px] font-bold text-black select-none z-10 animate-in fade-in slide-in-from-bottom-1">
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="text-[#3B82F6] shrink-0">
+            <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" />
+            <polyline points="10 17 15 12 10 7" />
+            <line x1="15" y1="12" x2="3" y2="12" />
+          </svg>
+          <span>Entry point</span>
+        </div>
+      )}
       <Handle
         type="target"
         position={Position.Left}
@@ -534,6 +545,16 @@ function ConditionNode({ data, id }: NodeProps<NodeData>) {
 
   return (
     <div className="w-[280px] bg-white border border-[#F2F2F7] rounded-lg shadow-sm overflow-visible text-black text-left relative">
+      {data.isEntryPoint && (
+        <div className="absolute -top-[34px] left-0 flex items-center gap-1.5 px-3 py-1 bg-white border border-[#E5E5EA] rounded-full shadow-sm text-[10px] font-bold text-black select-none z-10 animate-in fade-in slide-in-from-bottom-1">
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="text-[#3B82F6] shrink-0">
+            <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" />
+            <polyline points="10 17 15 12 10 7" />
+            <line x1="15" y1="12" x2="3" y2="12" />
+          </svg>
+          <span>Entry point</span>
+        </div>
+      )}
       <Handle
         type="target"
         position={Position.Left}
@@ -621,6 +642,16 @@ function WaitNode({ data, id }: NodeProps<NodeData>) {
 
   return (
     <div className="w-[280px] bg-white border border-[#F2F2F7] rounded-lg shadow-sm overflow-visible text-black text-left relative">
+      {data.isEntryPoint && (
+        <div className="absolute -top-[34px] left-0 flex items-center gap-1.5 px-3 py-1 bg-white border border-[#E5E5EA] rounded-full shadow-sm text-[10px] font-bold text-black select-none z-10 animate-in fade-in slide-in-from-bottom-1">
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="text-[#3B82F6] shrink-0">
+            <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" />
+            <polyline points="10 17 15 12 10 7" />
+            <line x1="15" y1="12" x2="3" y2="12" />
+          </svg>
+          <span>Entry point</span>
+        </div>
+      )}
       <Handle
         type="target"
         position={Position.Left}
@@ -2068,6 +2099,29 @@ export default function BuilderPage() {
                       </div>
                     </>
                   )}
+
+                  {/* Entry Point Setting */}
+                  <div className="flex items-center justify-between p-4 bg-[#F9F9F7] border border-[#E8E8E8] rounded-2xl w-full select-none mb-4 mt-2">
+                    <div className="flex flex-col gap-0.5 text-left">
+                      <span className="text-[12px] font-extrabold text-black leading-tight">Boshlanish bloki (Entry point)</span>
+                      <span className="text-[9px] text-[#707070] leading-normal">Ushbu blokdan avtomatlashtirish suhbati boshlanadi</span>
+                    </div>
+                    {selectedNode.id === entryPointId ? (
+                      <span className="text-[10.5px] font-extrabold text-green-600 bg-green-50 px-3 py-1 rounded-full border border-green-200">
+                        Faol
+                      </span>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          window.dispatchEvent(new CustomEvent("set-entry-point", { detail: { nodeId: selectedNode.id } }));
+                        }}
+                        className="px-3.5 py-2 bg-black hover:bg-neutral-800 text-white rounded-xl text-[10px] font-bold cursor-pointer transition-all active:scale-95 border-none font-sans"
+                      >
+                        Belgilash
+                      </button>
+                    )}
+                  </div>
 
                   {/* Save Button */}
                   <button
