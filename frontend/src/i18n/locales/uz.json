@@ -480,6 +480,8 @@
       "block_action_sub": "Teg, webhook, xabar",
       "block_wait": "Kutish",
       "block_wait_sub": "Tanaffus vaqti",
+      "block_note": "Note (Eslatma)",
+      "block_note_sub": "Izoh yoki eslatma yozish",
       "wait_duration": "Kutish muddati",
       "variables": "O'zgaruvchilar",
       "unselected_block": "Blok tanlanmagan",

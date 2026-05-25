@@ -481,6 +481,8 @@
       "block_action_sub": "Тег, webhook, сообщение",
       "block_wait": "Задержка",
       "block_wait_sub": "Время паузы",
+      "block_note": "Заметка",
+      "block_note_sub": "Добавить заметку или комментарий",
       "wait_duration": "Время ожидания",
       "variables": "Переменные",
       "unselected_block": "Блок не выбран",

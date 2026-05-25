@@ -300,9 +300,9 @@ export default function AutomationsPage() {
       <div className="flex flex-col lg:flex-row gap-6 items-start w-full">
         
         {/* ================= LEFT SUB-SIDEBAR ================= */}
-        <div className="w-full lg:w-[280px] shrink-0 flex flex-col gap-6 bg-white border border-[#E8E8E8] rounded-[24px] p-5 shadow-sm">
+        <div className="w-full lg:w-[280px] shrink-0 flex flex-col gap-4 bg-white border border-[#E8E8E8] rounded-[24px] p-5 shadow-sm">
           {/* Header */}
-          <div className="flex items-center justify-between pb-3 border-b border-[#F0F0F0]">
+          <div className="flex items-center justify-between pb-2 border-b border-[#F0F0F0]">
             <h2 className="text-[16px] font-extrabold text-black tracking-tight">{t("pages.automations.title")}</h2>
           </div>
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import Link from "next/link";
 import ReactFlow, {
   Background,
@@ -47,6 +47,8 @@ import {
   CreditCard,
   Radio,
   Filter,
+  LogIn,
+  FileText,
 } from "lucide-react";
 import { useI18n } from "@/i18n/I18nProvider";
 import { Button } from "@/components/ui/primitives";
@@ -55,7 +57,7 @@ import { Sidebar } from "@/components/layout/Sidebar";
 import { Instagram } from "@/components/ui/icons";
 
 // ─────────── TYPES ────────────
-type NodeType = "trigger" | "message" | "wait" | "condition" | "action" | "ai";
+type NodeType = "trigger" | "message" | "wait" | "condition" | "action" | "ai" | "note";
 
 type ButtonItem = { id: string; label: string; type: "action" | "link" | "payment"; url?: string; multipleClick?: boolean };
 
@@ -141,23 +143,99 @@ function ButtonEdge({
 // TriggerNode has been removed. Triggers are now managed at flow-level.
 
 function MessageNode({ data, id }: NodeProps<NodeData>) {
-  const { setNodes, setEdges } = useReactFlow();
+  const { setNodes, setEdges, getNodes, addNodes } = useReactFlow();
   const [showAddMenu, setShowAddMenu] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const duplicateNode = (nodeId: string) => {
+    const nodes = getNodes();
+    const targetNode = nodes.find((n) => n.id === nodeId);
+    if (!targetNode) return;
+
+    const newId = `node-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+    const duplicatedNode = {
+      ...targetNode,
+      id: newId,
+      position: {
+        x: targetNode.position.x + 50,
+        y: targetNode.position.y + 50,
+      },
+      data: {
+        ...targetNode.data,
+        isEntryPoint: false,
+      },
+      selected: false,
+    };
+    addNodes(duplicatedNode);
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const base64String = reader.result as string;
+        setNodes((nds) =>
+          nds.map((n) =>
+            n.id === id ? { ...n, data: { ...n.data, imageUrl: base64String } } : n
+          )
+        );
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   const isEntryPoint = data.isEntryPoint;
   
   return (
-    <div className="w-[280px] bg-white border border-[#F2F2F7] rounded-lg shadow-sm overflow-visible text-black text-left relative">
-      {isEntryPoint && (
-        <div className="absolute -top-[34px] left-0 flex items-center gap-1.5 px-3 py-1 bg-white border border-[#E5E5EA] rounded-full shadow-sm text-[10px] font-bold text-black select-none z-10 animate-in fade-in slide-in-from-bottom-1">
-          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="text-[#3B82F6] shrink-0">
-            <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" />
-            <polyline points="10 17 15 12 10 7" />
-            <line x1="15" y1="12" x2="3" y2="12" />
-          </svg>
-          <span>Entry point</span>
-        </div>
-      )}
+    <div className="w-[280px] bg-white border border-[#F2F2F7] rounded-lg shadow-sm overflow-visible text-black text-left relative group">
+      {/* Floating Toolbar */}
+      <div className={`absolute -top-[36px] left-0 flex items-center gap-2 px-2.5 py-1 bg-white border border-[#E5E5EA] rounded-xl shadow-sm z-10 nodrag transition-opacity ${
+        isEntryPoint ? "opacity-100" : "opacity-0 group-hover:opacity-100"
+      }`}>
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            if (isEntryPoint) {
+              // already entry point
+            } else {
+              window.dispatchEvent(new CustomEvent("set-entry-point", { detail: { nodeId: id } }));
+            }
+          }}
+          className={`p-1 transition-colors cursor-pointer rounded hover:bg-neutral-100 ${
+            isEntryPoint ? "text-black" : "text-[#C7C7CC] hover:text-black"
+          }`}
+          title={isEntryPoint ? "Boshlanish bloki (Faol)" : "Boshlanish bloki qilish"}
+        >
+          <LogIn size={14} strokeWidth={2.5} />
+        </button>
+        <div className="w-[1px] h-3.5 bg-[#F2F2F7]" />
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            duplicateNode(id);
+          }}
+          className="p-1 text-[#C7C7CC] hover:text-black hover:bg-neutral-100 rounded transition-colors cursor-pointer"
+          title="Nusxalash"
+        >
+          <Copy size={13} />
+        </button>
+        <div className="w-[1px] h-3.5 bg-[#F2F2F7]" />
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            setNodes((nds) => nds.filter((n) => n.id !== id));
+            setEdges((eds) => eds.filter((edge) => edge.source !== id && edge.target !== id));
+          }}
+          className="p-1 text-[#C7C7CC] hover:text-red-500 hover:bg-red-50 rounded transition-colors cursor-pointer"
+          title="O'chirish"
+        >
+          <Trash2 size={13} />
+        </button>
+      </div>
 
       <Handle
         type="target"
@@ -186,18 +264,6 @@ function MessageNode({ data, id }: NodeProps<NodeData>) {
             </svg>
             0
           </span>
-          <button
-            type="button"
-            onClick={(e) => {
-              e.stopPropagation();
-              setNodes((nds) => nds.filter((n) => n.id !== id));
-              setEdges((eds) => eds.filter((edge) => edge.source !== id && edge.target !== id));
-            }}
-            className="p-1 rounded-full hover:bg-red-50 text-[#707070] hover:text-red-500 transition-colors cursor-pointer"
-            title="Blokni o'chirish"
-          >
-            <Trash2 size={12} />
-          </button>
         </div>
       </div>
       
@@ -223,21 +289,25 @@ function MessageNode({ data, id }: NodeProps<NodeData>) {
             
             {/* Image Card Container */}
             <div className="w-full h-[120px] rounded-lg overflow-hidden border border-[#E5E5EA] bg-[#FAFAFA] flex items-center justify-center relative shadow-sm select-none p-1">
-              <div className="w-full h-full rounded-md overflow-hidden bg-gradient-to-tr from-[#9B51E0] to-[#2F80ED] flex items-center justify-center relative">
-                {/* Sendly lightning bolt logo inside */}
-                <div className="w-11 h-11 rounded-2xl bg-white/10 backdrop-blur-md flex items-center justify-center border border-white/20 shadow-sm">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                    <path
-                      d="M13.5 2c.3 3.5-1.5 5.2-3 6.8C9 10.5 7.5 12 8 14.5 8.4 16.7 10 18 12 18c0-2 .8-3 2-4.2 1.4-1.4 3-3 2.6-6C16.2 5 14.8 3.3 13.5 2Z"
-                      fill="#C7F33C"
-                    />
-                    <path
-                      d="M9.5 14c-.6 1-1 2-1 3 0 2.5 1.6 4 3.5 4s3.5-1.5 3.5-4c0-1-.4-2-1-3-.3 1.5-1.2 2.3-2.5 2.3S9.8 15.5 9.5 14Z"
-                      fill="#9BC92E"
-                    />
-                  </svg>
+              {data.imageUrl && data.imageUrl !== "/logo.svg" ? (
+                <img src={data.imageUrl} className="w-full h-full object-cover rounded-md" alt="Uploaded" />
+              ) : (
+                <div className="w-full h-full rounded-md overflow-hidden bg-gradient-to-tr from-[#9B51E0] to-[#2F80ED] flex items-center justify-center relative">
+                  {/* Sendly lightning bolt logo inside */}
+                  <div className="w-11 h-11 rounded-2xl bg-white/10 backdrop-blur-md flex items-center justify-center border border-white/20 shadow-sm">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                      <path
+                        d="M13.5 2c.3 3.5-1.5 5.2-3 6.8C9 10.5 7.5 12 8 14.5 8.4 16.7 10 18 12 18c0-2 .8-3 2-4.2 1.4-1.4 3-3 2.6-6C16.2 5 14.8 3.3 13.5 2Z"
+                        fill="#C7F33C"
+                      />
+                      <path
+                        d="M9.5 14c-.6 1-1 2-1 3 0 2.5 1.6 4 3.5 4s3.5-1.5 3.5-4c0-1-.4-2-1-3-.3 1.5-1.2 2.3-2.5 2.3S9.8 15.5 9.5 14Z"
+                        fill="#9BC92E"
+                      />
+                    </svg>
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
           </div>
         )}
@@ -300,7 +370,8 @@ function MessageNode({ data, id }: NodeProps<NodeData>) {
                       e.stopPropagation();
                       window.dispatchEvent(new CustomEvent("edit-button", { detail: { nodeId: id, buttonId: btn.id } }));
                     }}
-                    className="w-full flex items-center justify-between py-2.5 px-4 border border-[#E5E5EA] hover:border-black rounded-lg text-[11px] font-bold bg-white text-black select-none cursor-pointer transition-all shadow-sm"
+                    data-is-button="true"
+                    className="w-full flex items-center justify-between py-2.5 px-4 border border-[#E5E5EA] hover:border-black rounded-lg text-[11px] font-bold bg-white text-black select-none cursor-pointer transition-all shadow-sm nodrag canvas-btn-item"
                   >
                     <div className="flex items-center gap-2 min-w-0 flex-1">
                       <span className="truncate text-left">{btn.label}</span>
@@ -360,7 +431,8 @@ function MessageNode({ data, id }: NodeProps<NodeData>) {
                   setNodes((nds) => nds.map((n) => n.id === id ? { ...n, data: { ...n.data, buttons: [...(n.data.buttons || []), newBtn] } } : n));
                   window.dispatchEvent(new CustomEvent("edit-button", { detail: { nodeId: id, buttonId: newId } }));
                 }}
-                className="w-full text-center py-2.5 border border-dashed border-[#E5E5EA] hover:border-black/30 rounded-lg text-[10.5px] font-extrabold text-[#707070] hover:text-black flex items-center justify-center gap-1 transition-all bg-white cursor-pointer"
+                data-is-button="true"
+                className="w-full text-center py-2.5 border border-dashed border-[#E5E5EA] hover:border-black/30 rounded-lg text-[10.5px] font-extrabold text-[#707070] hover:text-black flex items-center justify-center gap-1 transition-all bg-white cursor-pointer nodrag canvas-btn-item"
               >
                 <span>+ Add button</span>
               </button>
@@ -368,75 +440,63 @@ function MessageNode({ data, id }: NodeProps<NodeData>) {
           </div>
         )}
 
-        {/* Add Content Trigger / Dropdown Menu */}
-        {showAddMenu ? (
-          <div className="border border-dashed border-[#E5E5EA] rounded-xl p-3 bg-[#FAFAFA] flex flex-col gap-1.5 animate-in fade-in slide-in-from-bottom-2 duration-150 shadow-sm relative overflow-visible">
-            <div className="text-[9px] font-bold text-[#707070] uppercase tracking-wider mb-1 px-1">Kontent turi:</div>
-            <div className="grid grid-cols-2 gap-1.5">
-              {!data.imageUrl && (
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setNodes((nds) => nds.map((n) => n.id === id ? { ...n, data: { ...n.data, imageUrl: "/logo.svg" } } : n));
-                    setShowAddMenu(false);
-                  }}
-                  className="flex items-center gap-1.5 px-3 py-2 bg-white border border-[#E5E5EA] hover:border-black/20 rounded-lg text-[10.5px] font-bold text-black cursor-pointer transition-all hover:scale-102 shadow-sm"
-                >
-                  <span>🖼️ Rasm</span>
-                </button>
-              )}
-              {(data.label === "" || !data.label) && (
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setNodes((nds) => nds.map((n) => n.id === id ? { ...n, data: { ...n.data, label: "Yangi matn xabari..." } } : n));
-                    setShowAddMenu(false);
-                  }}
-                  className="flex items-center gap-1.5 px-3 py-2 bg-white border border-[#E5E5EA] hover:border-black/20 rounded-lg text-[10.5px] font-bold text-black cursor-pointer transition-all hover:scale-102 shadow-sm"
-                >
-                  <span>✍️ Matn</span>
-                </button>
-              )}
-              {(!data.buttons || data.buttons.length === 0) && (
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    const newBtn = { id: `btn-${Date.now()}`, label: "Tugma", type: "action" as const };
-                    setNodes((nds) => nds.map((n) => n.id === id ? { ...n, data: { ...n.data, buttons: [newBtn] } } : n));
-                    setShowAddMenu(false);
-                  }}
-                  className="flex items-center gap-1.5 px-3 py-2 bg-white border border-[#E5E5EA] hover:border-black/20 rounded-lg text-[10.5px] font-bold text-black cursor-pointer transition-all hover:scale-102 shadow-sm col-span-2 justify-center"
-                >
-                  <span>🔘 Tugmalar bloki</span>
-                </button>
-              )}
-            </div>
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                setShowAddMenu(false);
-              }}
-              className="w-full text-center py-1 text-red-500 hover:text-red-600 rounded-lg text-[9px] font-extrabold transition-all cursor-pointer mt-1 border-none bg-transparent"
-            >
-              Yopish
-            </button>
-          </div>
-        ) : (
+        {/* Tugma qo'shish button (if no buttons exist yet) */}
+        {(!data.buttons || data.buttons.length === 0) && (
           <button
             type="button"
             onClick={(e) => {
               e.stopPropagation();
-              setShowAddMenu(true);
+              const newId = `btn-${Date.now()}`;
+              const newBtn = { id: newId, label: "Tugma", type: "action" as const };
+              setNodes((nds) => nds.map((n) => n.id === id ? { ...n, data: { ...n.data, buttons: [newBtn] } } : n));
+              window.dispatchEvent(new CustomEvent("edit-button", { detail: { nodeId: id, buttonId: newId } }));
             }}
-            className="w-full text-center py-2.5 border border-dashed border-[#D8D8D8] hover:border-black/20 hover:bg-[#FAFAFA] rounded-lg text-[10.5px] font-extrabold text-[#707070] hover:text-black flex items-center justify-center gap-1 transition-all bg-white cursor-pointer shadow-sm"
+            data-is-button="true"
+            className="w-full text-center py-2.5 border border-dashed border-[#D8D8D8] hover:border-black/20 hover:bg-[#FAFAFA] rounded-lg text-[10.5px] font-extrabold text-[#707070] hover:text-black flex items-center justify-center gap-1 transition-all bg-white cursor-pointer shadow-sm mb-2 nodrag canvas-btn-item"
           >
-            <span>+ kontent qo&apos;shish</span>
+            <span>+ Tugma qo&apos;shish</span>
           </button>
         )}
+
+        {/* Direct Content Addition Buttons */}
+        <div className="flex flex-col gap-2">
+          {!data.imageUrl && (
+            <div>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleFileChange}
+                ref={fileInputRef}
+                className="hidden"
+              />
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  fileInputRef.current?.click();
+                }}
+                data-is-button="true"
+                className="w-full text-center py-2.5 border border-dashed border-[#D8D8D8] hover:border-black/20 hover:bg-[#FAFAFA] rounded-lg text-[10.5px] font-extrabold text-[#707070] hover:text-black flex items-center justify-center gap-1 transition-all bg-white cursor-pointer shadow-sm nodrag canvas-btn-item"
+              >
+                <span>+ Surat qo&apos;shish</span>
+              </button>
+            </div>
+          )}
+
+          {(data.label === "" || !data.label) && (
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                setNodes((nds) => nds.map((n) => n.id === id ? { ...n, data: { ...n.data, label: "Yangi matn xabari..." } } : n));
+              }}
+              data-is-button="true"
+              className="w-full text-center py-2.5 border border-dashed border-[#D8D8D8] hover:border-black/20 hover:bg-[#FAFAFA] rounded-lg text-[10.5px] font-extrabold text-[#707070] hover:text-black flex items-center justify-center gap-1 transition-all bg-white cursor-pointer shadow-sm nodrag canvas-btn-item"
+            >
+              <span>+ Matn qo&apos;shish</span>
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Default bottom-right output handle */}
@@ -459,25 +519,88 @@ function MessageNode({ data, id }: NodeProps<NodeData>) {
 }
 
 function ActionNode({ data, id }: NodeProps<NodeData>) {
-  const { setNodes, setEdges } = useReactFlow();
+  const { setNodes, setEdges, getNodes, addNodes } = useReactFlow();
+
+  const hasAction = !!data.actionType;
+
+  const duplicateNode = (nodeId: string) => {
+    const nodes = getNodes();
+    const targetNode = nodes.find((n) => n.id === nodeId);
+    if (!targetNode) return;
+
+    const newId = `node-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+    const duplicatedNode = {
+      ...targetNode,
+      id: newId,
+      position: {
+        x: targetNode.position.x + 50,
+        y: targetNode.position.y + 50,
+      },
+      data: {
+        ...targetNode.data,
+        isEntryPoint: false,
+      },
+      selected: false,
+    };
+    addNodes(duplicatedNode);
+  };
+
+  const isEntryPoint = data.isEntryPoint;
 
   return (
-    <div className="w-[280px] bg-white border border-[#F2F2F7] rounded-lg shadow-sm overflow-visible text-black text-left relative">
-      {data.isEntryPoint && (
-        <div className="absolute -top-[34px] left-0 flex items-center gap-1.5 px-3 py-1 bg-white border border-[#E5E5EA] rounded-full shadow-sm text-[10px] font-bold text-black select-none z-10 animate-in fade-in slide-in-from-bottom-1">
-          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="text-[#3B82F6] shrink-0">
-            <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" />
-            <polyline points="10 17 15 12 10 7" />
-            <line x1="15" y1="12" x2="3" y2="12" />
-          </svg>
-          <span>Entry point</span>
-        </div>
-      )}
+    <div className="w-[280px] bg-white border border-[#F2F2F7] rounded-lg shadow-sm overflow-visible text-black text-left relative group">
+      {/* Floating Toolbar */}
+      <div className={`absolute -top-[36px] left-0 flex items-center gap-2 px-2.5 py-1 bg-white border border-[#E5E5EA] rounded-xl shadow-sm z-10 nodrag transition-opacity ${
+        isEntryPoint ? "opacity-100" : "opacity-0 group-hover:opacity-100"
+      }`}>
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            if (isEntryPoint) {
+              // already entry point
+            } else {
+              window.dispatchEvent(new CustomEvent("set-entry-point", { detail: { nodeId: id } }));
+            }
+          }}
+          className={`p-1 transition-colors cursor-pointer rounded hover:bg-neutral-100 ${
+            isEntryPoint ? "text-black" : "text-[#C7C7CC] hover:text-black"
+          }`}
+          title={isEntryPoint ? "Boshlanish bloki (Faol)" : "Boshlanish bloki qilish"}
+        >
+          <LogIn size={14} strokeWidth={2.5} />
+        </button>
+        <div className="w-[1px] h-3.5 bg-[#F2F2F7]" />
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            duplicateNode(id);
+          }}
+          className="p-1 text-[#C7C7CC] hover:text-black hover:bg-neutral-100 rounded transition-colors cursor-pointer"
+          title="Nusxalash"
+        >
+          <Copy size={13} />
+        </button>
+        <div className="w-[1px] h-3.5 bg-[#F2F2F7]" />
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            setNodes((nds) => nds.filter((n) => n.id !== id));
+            setEdges((eds) => eds.filter((edge) => edge.source !== id && edge.target !== id));
+          }}
+          className="p-1 text-[#C7C7CC] hover:text-red-500 hover:bg-red-50 rounded transition-colors cursor-pointer"
+          title="O'chirish"
+        >
+          <Trash2 size={13} />
+        </button>
+      </div>
       <Handle
         type="target"
         position={Position.Left}
         style={{
-          top: "50%",
+          top: 24,
           left: -4,
           background: "#9296AD",
           border: "1px solid white",
@@ -488,40 +611,55 @@ function ActionNode({ data, id }: NodeProps<NodeData>) {
 
       {/* Node Header */}
       <div className="bg-white px-4 py-3 border-b border-[#F2F2F7] flex items-center justify-between rounded-t-lg h-[45px]">
-        <div className="flex items-center gap-1.5">
-          <Zap size={11} className="text-black" />
-          <span className="text-[12px] font-bold text-black uppercase tracking-wider">Harakat</span>
+        <div className="flex items-center gap-2">
+          <Zap size={14} className="text-[#FF9500] fill-[#FF9500]" strokeWidth={2.5} />
+          <span className="text-[13px] font-bold text-black tracking-wide">Action</span>
         </div>
-        <button
-          type="button"
-          onClick={(e) => {
-            e.stopPropagation();
-            setNodes((nds) => nds.filter((n) => n.id !== id));
-            setEdges((eds) => eds.filter((edge) => edge.source !== id && edge.target !== id));
-          }}
-          className="p-1 rounded-full hover:bg-red-50 text-[#707070] hover:text-red-500 transition-colors cursor-pointer"
-          title="Blokni o'chirish"
-        >
-          <Trash2 size={11} />
-        </button>
+        <div className="flex items-center gap-3">
+          <span className="text-[11px] font-bold text-[#8E8E93] flex items-center gap-1">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="text-[#8E8E93]">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+              <circle cx="12" cy="7" r="4" />
+            </svg>
+            0
+          </span>
+        </div>
       </div>
 
       {/* Content */}
       <div className="p-3">
-        <div className="bg-[#FAFAFA] border border-[#E5E5EA] rounded-xl p-2.5 flex items-center justify-between shadow-sm">
-          <div className="flex flex-col gap-0.5 min-w-0 flex-1">
-            <p className="text-[9px] font-bold text-[#707070] uppercase">
-              {data.actionType === "add_tag" ? "Teg qo'shish" : data.actionType === "remove_tag" ? "Tegni olib tashlash" : data.actionType === "webhook" ? "Vebxuk yuborish" : data.actionType === "notify_telegram" ? "Telegram xabarnomasi" : "Harakat turi"}
-            </p>
-            <p className="text-[11px] text-black font-extrabold truncate mt-0.5">
-              {data.actionValue || "Tanlanmagan"}
-            </p>
+        {hasAction ? (
+          <div
+            onClick={(e) => {
+              e.stopPropagation();
+              window.dispatchEvent(new CustomEvent("select-node", { detail: { nodeId: id } }));
+            }}
+            className="bg-[#FAFAFA] border border-[#E5E5EA] rounded-xl p-2.5 flex items-center justify-between shadow-sm cursor-pointer hover:border-black/20 transition-all select-none nodrag"
+          >
+            <div className="flex flex-col gap-0.5 min-w-0 flex-1">
+              <p className="text-[9px] font-bold text-[#707070] uppercase">
+                {data.actionType === "add_tag" ? "Teg qo'shish" : data.actionType === "remove_tag" ? "Tegni olib tashlash" : data.actionType === "webhook" ? "Vebxuk yuborish" : data.actionType === "notify_telegram" ? "Telegram xabarnomasi" : "Harakat turi"}
+              </p>
+              <p className="text-[11px] text-black font-extrabold truncate mt-0.5">
+                {data.actionValue || "Tanlanmagan"}
+              </p>
+            </div>
+            {/* Pencil Edit Icon */}
+            <svg className="w-3.5 h-3.5 text-[#707070] shrink-0 ml-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+            </svg>
           </div>
-          {/* Pencil Edit Icon */}
-          <svg className="w-3.5 h-3.5 text-[#707070] shrink-0 ml-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-          </svg>
-        </div>
+        ) : (
+          <div
+            onClick={(e) => {
+              e.stopPropagation();
+              window.dispatchEvent(new CustomEvent("select-node", { detail: { nodeId: id } }));
+            }}
+            className="bg-white border border-[#FF9500]/40 rounded-xl p-3 flex items-center justify-center shadow-sm cursor-pointer hover:bg-neutral-50/30 transition-all select-none nodrag"
+          >
+            <span className="text-[11px] text-[#707070] font-bold">Click to add an action</span>
+          </div>
+        )}
       </div>
 
       <Handle
@@ -541,25 +679,88 @@ function ActionNode({ data, id }: NodeProps<NodeData>) {
 }
 
 function ConditionNode({ data, id }: NodeProps<NodeData>) {
-  const { setNodes, setEdges } = useReactFlow();
+  const { setNodes, setEdges, getNodes, addNodes } = useReactFlow();
+
+  const hasCondition = !!data.conditionType;
+
+  const duplicateNode = (nodeId: string) => {
+    const nodes = getNodes();
+    const targetNode = nodes.find((n) => n.id === nodeId);
+    if (!targetNode) return;
+
+    const newId = `node-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+    const duplicatedNode = {
+      ...targetNode,
+      id: newId,
+      position: {
+        x: targetNode.position.x + 50,
+        y: targetNode.position.y + 50,
+      },
+      data: {
+        ...targetNode.data,
+        isEntryPoint: false,
+      },
+      selected: false,
+    };
+    addNodes(duplicatedNode);
+  };
+
+  const isEntryPoint = data.isEntryPoint;
 
   return (
-    <div className="w-[280px] bg-white border border-[#F2F2F7] rounded-lg shadow-sm overflow-visible text-black text-left relative">
-      {data.isEntryPoint && (
-        <div className="absolute -top-[34px] left-0 flex items-center gap-1.5 px-3 py-1 bg-white border border-[#E5E5EA] rounded-full shadow-sm text-[10px] font-bold text-black select-none z-10 animate-in fade-in slide-in-from-bottom-1">
-          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="text-[#3B82F6] shrink-0">
-            <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" />
-            <polyline points="10 17 15 12 10 7" />
-            <line x1="15" y1="12" x2="3" y2="12" />
-          </svg>
-          <span>Entry point</span>
-        </div>
-      )}
+    <div className="w-[280px] bg-white border border-[#F2F2F7] rounded-lg shadow-sm overflow-visible text-black text-left relative group">
+      {/* Floating Toolbar */}
+      <div className={`absolute -top-[36px] left-0 flex items-center gap-2 px-2.5 py-1 bg-white border border-[#E5E5EA] rounded-xl shadow-sm z-10 nodrag transition-opacity ${
+        isEntryPoint ? "opacity-100" : "opacity-0 group-hover:opacity-100"
+      }`}>
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            if (isEntryPoint) {
+              // already entry point
+            } else {
+              window.dispatchEvent(new CustomEvent("set-entry-point", { detail: { nodeId: id } }));
+            }
+          }}
+          className={`p-1 transition-colors cursor-pointer rounded hover:bg-neutral-100 ${
+            isEntryPoint ? "text-black" : "text-[#C7C7CC] hover:text-black"
+          }`}
+          title={isEntryPoint ? "Boshlanish bloki (Faol)" : "Boshlanish bloki qilish"}
+        >
+          <LogIn size={14} strokeWidth={2.5} />
+        </button>
+        <div className="w-[1px] h-3.5 bg-[#F2F2F7]" />
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            duplicateNode(id);
+          }}
+          className="p-1 text-[#C7C7CC] hover:text-black hover:bg-neutral-100 rounded transition-colors cursor-pointer"
+          title="Nusxalash"
+        >
+          <Copy size={13} />
+        </button>
+        <div className="w-[1px] h-3.5 bg-[#F2F2F7]" />
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            setNodes((nds) => nds.filter((n) => n.id !== id));
+            setEdges((eds) => eds.filter((edge) => edge.source !== id && edge.target !== id));
+          }}
+          className="p-1 text-[#C7C7CC] hover:text-red-500 hover:bg-red-50 rounded transition-colors cursor-pointer"
+          title="O'chirish"
+        >
+          <Trash2 size={13} />
+        </button>
+      </div>
       <Handle
         type="target"
         position={Position.Left}
         style={{
-          top: 30,
+          top: 24,
           left: -4,
           background: "#9296AD",
           border: "1px solid white",
@@ -570,61 +771,91 @@ function ConditionNode({ data, id }: NodeProps<NodeData>) {
 
       {/* Node Header */}
       <div className="bg-white px-4 py-3 border-b border-[#F2F2F7] flex items-center justify-between rounded-t-lg h-[45px]">
-        <div className="flex items-center gap-1.5">
-          <ShieldAlert size={12} className="text-black" />
-          <span className="text-[12px] font-bold text-black uppercase tracking-wider">Shart</span>
+        <div className="flex items-center gap-2">
+          <Filter size={14} className="text-[#34C759]" strokeWidth={2.5} />
+          <span className="text-[13px] font-bold text-black tracking-wide">Condition</span>
         </div>
+        <div className="flex items-center gap-3">
+          <span className="text-[11px] font-bold text-[#8E8E93] flex items-center gap-1">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="text-[#8E8E93]">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+              <circle cx="12" cy="7" r="4" />
+            </svg>
+            0
+          </span>
+        </div>
+      </div>
+
+      {/* Content */}
+      <div className="p-3 flex flex-col gap-2.5">
+        <div className="relative group/cond-item overflow-visible">
+          {hasCondition ? (
+            <div
+              onClick={(e) => {
+                e.stopPropagation();
+                window.dispatchEvent(new CustomEvent("select-node", { detail: { nodeId: id } }));
+              }}
+              className="w-full flex items-center justify-between py-2.5 px-4 border border-[#34C759]/40 bg-white rounded-xl text-[11px] font-bold text-black select-none shadow-sm cursor-pointer hover:border-black/20 transition-all nodrag"
+            >
+              <span className="truncate text-left">
+                {data.conditionType === "is_follower" ? "Obunachimi?" : data.conditionType === "has_tag" ? `Teg bor: ${data.conditionValue}` : data.conditionType === "variable_check" ? `O'zgaruvchi: ${data.conditionValue}` : data.label}
+              </span>
+            </div>
+          ) : (
+            <div
+              onClick={(e) => {
+                e.stopPropagation();
+                window.dispatchEvent(new CustomEvent("select-node", { detail: { nodeId: id } }));
+              }}
+              className="w-full flex items-center justify-center py-2.5 border border-[#34C759]/40 bg-white rounded-xl text-[11px] font-bold text-[#707070] select-none shadow-sm cursor-pointer hover:bg-neutral-50/30 transition-all nodrag"
+            >
+              <span>Condition is not set</span>
+            </div>
+          )}
+          
+          <Handle
+            type="source"
+            position={Position.Right}
+            id="yes"
+            style={{
+              top: "50%",
+              right: -14,
+              background: "#9296AD",
+              border: "1px solid white",
+              width: 8,
+              height: 8,
+            }}
+          />
+        </div>
+
+        {/* Add condition button */}
         <button
           type="button"
           onClick={(e) => {
             e.stopPropagation();
-            setNodes((nds) => nds.filter((n) => n.id !== id));
-            setEdges((eds) => eds.filter((edge) => edge.source !== id && edge.target !== id));
+            window.dispatchEvent(new CustomEvent("select-node", { detail: { nodeId: id } }));
           }}
-          className="p-1 rounded-full hover:bg-red-50 text-[#707070] hover:text-red-500 transition-colors cursor-pointer"
-          title="Blokni o'chirish"
+          className="w-full text-center py-2 border border-dashed border-[#D8D8D8] hover:border-black/20 hover:bg-[#FAFAFA] rounded-lg text-[10.5px] font-extrabold text-[#707070] hover:text-black flex items-center justify-center gap-1 transition-all bg-white cursor-pointer shadow-sm nodrag"
         >
-          <Trash2 size={11} />
+          <span>+ Add condition</span>
         </button>
-      </div>
-
-      {/* Content */}
-      <div className="p-3 flex flex-col gap-2">
-        <div className="bg-[#FAFAFA] border border-[#E5E5EA] rounded-xl p-2.5 flex flex-col gap-2 overflow-visible">
-          {/* Condition Row */}
-          <div className="relative flex items-center justify-between py-1.5 px-2 bg-white border border-[#E5E5EA] rounded-lg text-[10.5px] font-bold text-black">
-            <span>{data.label || "Obuna"}</span>
-            <Handle
-              type="source"
-              position={Position.Right}
-              id="yes"
-              style={{
-                top: "50%",
-                right: -14,
-                background: "#9296AD",
-                border: "1px solid white",
-                width: 8,
-                height: 8,
-              }}
-            />
-          </div>
-
-          <button type="button" className="w-full text-center py-2 border border-dashed border-[#D8D8D8] rounded-lg text-[10px] font-bold text-black bg-white hover:bg-neutral-50 cursor-pointer">
-            + Shart qo&apos;shish
-          </button>
-        </div>
 
         {/* Fallback output at bottom-right */}
-        <div className="relative flex items-center justify-end pr-2 pt-1">
-          <span className="text-[9.5px] text-[#707070] font-semibold">Shartlarga mos emas</span>
+        <div
+          onClick={(e) => {
+            e.stopPropagation();
+            window.dispatchEvent(new CustomEvent("select-node", { detail: { nodeId: id } }));
+          }}
+          className="relative flex items-center justify-between pt-1 pb-0.5 px-1.5 overflow-visible nodrag cursor-pointer"
+        >
+          <span className="text-[10px] text-[#8E8E93] font-bold">Don&apos;t match any conditions</span>
           <Handle
             type="source"
             position={Position.Right}
             id="no"
             style={{
-              bottom: 8,
-              top: "auto",
-              right: -4,
+              top: "50%",
+              right: -14,
               background: "#9296AD",
               border: "1px solid white",
               width: 8,
@@ -637,40 +868,47 @@ function ConditionNode({ data, id }: NodeProps<NodeData>) {
   );
 }
 
-function WaitNode({ data, id }: NodeProps<NodeData>) {
-  const { setNodes, setEdges } = useReactFlow();
+function NoteNode({ data, id }: NodeProps<NodeData>) {
+  const { setNodes, setEdges, getNodes, addNodes } = useReactFlow();
+
+  const duplicateNode = (nodeId: string) => {
+    const nodes = getNodes();
+    const targetNode = nodes.find((n) => n.id === nodeId);
+    if (!targetNode) return;
+
+    const newId = `node-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+    const duplicatedNode = {
+      ...targetNode,
+      id: newId,
+      position: {
+        x: targetNode.position.x + 50,
+        y: targetNode.position.y + 50,
+      },
+      data: {
+        ...targetNode.data,
+        isEntryPoint: false,
+      },
+      selected: false,
+    };
+    addNodes(duplicatedNode);
+  };
 
   return (
-    <div className="w-[280px] bg-white border border-[#F2F2F7] rounded-lg shadow-sm overflow-visible text-black text-left relative">
-      {data.isEntryPoint && (
-        <div className="absolute -top-[34px] left-0 flex items-center gap-1.5 px-3 py-1 bg-white border border-[#E5E5EA] rounded-full shadow-sm text-[10px] font-bold text-black select-none z-10 animate-in fade-in slide-in-from-bottom-1">
-          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" className="text-[#3B82F6] shrink-0">
-            <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" />
-            <polyline points="10 17 15 12 10 7" />
-            <line x1="15" y1="12" x2="3" y2="12" />
-          </svg>
-          <span>Entry point</span>
-        </div>
-      )}
-      <Handle
-        type="target"
-        position={Position.Left}
-        style={{
-          top: "50%",
-          left: -4,
-          background: "#9296AD",
-          border: "1px solid white",
-          width: 8,
-          height: 8,
-        }}
-      />
-
-      {/* Node Header */}
-      <div className="bg-white px-4 py-3 border-b border-[#F2F2F7] flex items-center justify-between rounded-t-lg h-[45px]">
-        <div className="flex items-center gap-1.5">
-          <Zap size={11} className="text-black" />
-          <span className="text-[12px] font-bold text-black uppercase tracking-wider">Harakat</span>
-        </div>
+    <div className="w-[280px] bg-[#E8F0FE] border border-[#ADCCF9] rounded-2xl p-4 shadow-sm overflow-visible text-black text-left relative group">
+      {/* Floating Toolbar */}
+      <div className="absolute -top-[36px] left-0 opacity-0 group-hover:opacity-100 flex items-center gap-2 px-2.5 py-1 bg-white border border-[#E5E5EA] rounded-xl shadow-sm z-10 nodrag transition-opacity">
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            duplicateNode(id);
+          }}
+          className="p-1 text-[#C7C7CC] hover:text-black hover:bg-neutral-100 rounded transition-colors cursor-pointer"
+          title="Nusxalash"
+        >
+          <Copy size={13} />
+        </button>
+        <div className="w-[1px] h-3.5 bg-[#F2F2F7]" />
         <button
           type="button"
           onClick={(e) => {
@@ -678,37 +916,24 @@ function WaitNode({ data, id }: NodeProps<NodeData>) {
             setNodes((nds) => nds.filter((n) => n.id !== id));
             setEdges((eds) => eds.filter((edge) => edge.source !== id && edge.target !== id));
           }}
-          className="p-1 rounded-full hover:bg-red-50 text-[#707070] hover:text-red-500 transition-colors cursor-pointer"
-          title="Blokni o'chirish"
+          className="p-1 text-[#C7C7CC] hover:text-red-500 hover:bg-red-50 rounded transition-colors cursor-pointer"
+          title="O'chirish"
         >
-          <Trash2 size={11} />
+          <Trash2 size={13} />
         </button>
       </div>
 
-      {/* Content */}
-      <div className="p-3">
-        <div className="bg-[#FAFAFA] border border-[#E5E5EA] rounded-xl p-2.5 flex items-center justify-between shadow-sm">
-          <div className="flex flex-col gap-0.5 min-w-0 flex-1">
-            <p className="text-[9px] font-bold text-[#707070] uppercase">Kechikish</p>
-            <p className="text-[11px] text-black font-extrabold truncate mt-0.5">
-              {data.label || "15 Daqiqalar"}
-            </p>
-          </div>
-          <Clock size={13} className="text-[#707070] shrink-0 ml-1.5" />
-        </div>
-      </div>
-
-      <Handle
-        type="source"
-        position={Position.Right}
-        style={{
-          top: "50%",
-          right: -4,
-          background: "#9296AD",
-          border: "1px solid white",
-          width: 8,
-          height: 8,
+      <textarea
+        value={data.label || "Enter message"}
+        onChange={(e) => {
+          const val = e.target.value;
+          setNodes((nds) =>
+            nds.map((n) => (n.id === id ? { ...n, data: { ...n.data, label: val } } : n))
+          );
         }}
+        className="w-full bg-transparent resize-none border-none outline-none text-[12px] text-[#1A73E8] leading-normal font-medium nodrag placeholder-[#1A73E8]/50"
+        rows={4}
+        placeholder="Enter message"
       />
     </div>
   );
@@ -726,7 +951,6 @@ export default function BuilderPage() {
         { id: "n3", type: "condition", data: { label: "Obuna", nodeType: "condition", conditionType: "is_follower" }, position: { x: 770, y: 120 } },
         { id: "n4", type: "message", data: { label: "Yaxshi! Obuna bo'lganingiz uchun rahmat. Mana kitob havolasi: https://t.me/yourusername", nodeType: "message", buttons: [{ id: "b3", label: "Yuklab olish", type: "link", url: "https://example.com" }] }, position: { x: 1120, y: 50 } },
         { id: "n5", type: "message", data: { label: "Afsuski, siz hali obuna bo'lmagansiz. Iltimos obuna bo'ling va keyin 'Tekshirish' tugmasini bosing.", nodeType: "message", buttons: [{ id: "b4", label: "Obunani tekshirish", type: "action" }] }, position: { x: 1120, y: 250 } },
-        { id: "n6", type: "wait", data: { label: "10 Daqiqalar", nodeType: "wait" }, position: { x: 450, y: 450 } },
         { id: "n7", type: "condition", data: { label: "Obuna (Eslatma)", nodeType: "condition", conditionType: "is_follower" }, position: { x: 770, y: 450 } },
         { id: "n8", type: "message", data: { label: "Siz hali obuna bo'lmagansiz, bonusni olish uchun obuna bo'lishingiz kerak.", nodeType: "message" }, position: { x: 1120, y: 480 } },
       ],
@@ -735,8 +959,7 @@ export default function BuilderPage() {
         { id: "e3", source: "n2", target: "n3", animated: true, style: { stroke: "#9296AD", strokeWidth: 1.5 }, markerEnd: { type: MarkerType.ArrowClosed, color: "#9296AD" } },
         { id: "e4", source: "n3", sourceHandle: "yes", target: "n4", animated: true, style: { stroke: "#16A34A", strokeWidth: 1.5 }, markerEnd: { type: MarkerType.ArrowClosed, color: "#16A34A" } },
         { id: "e5", source: "n3", sourceHandle: "no", target: "n5", animated: true, style: { stroke: "#DC2626", strokeWidth: 1.5 }, markerEnd: { type: MarkerType.ArrowClosed, color: "#DC2626" } },
-        { id: "e6", source: "n1", sourceHandle: "btn-b2", target: "n6", animated: true, style: { stroke: "#9296AD", strokeWidth: 1.5 }, markerEnd: { type: MarkerType.ArrowClosed, color: "#9296AD" } },
-        { id: "e7", source: "n6", target: "n7", animated: true, style: { stroke: "#9296AD", strokeWidth: 1.5 }, markerEnd: { type: MarkerType.ArrowClosed, color: "#9296AD" } },
+        { id: "e6", source: "n1", sourceHandle: "btn-b2", target: "n7", animated: true, style: { stroke: "#9296AD", strokeWidth: 1.5 }, markerEnd: { type: MarkerType.ArrowClosed, color: "#9296AD" } },
         { id: "e8", source: "n7", sourceHandle: "no", target: "n8", animated: true, style: { stroke: "#DC2626", strokeWidth: 1.5 }, markerEnd: { type: MarkerType.ArrowClosed, color: "#DC2626" } },
       ],
     },
@@ -841,6 +1064,62 @@ export default function BuilderPage() {
   const [flowProhibitRestart, setFlowProhibitRestart] = useState(false);
   const [isEditingTrigger, setIsEditingTrigger] = useState(false);
 
+  const [newKeywordInput, setNewKeywordInput] = useState("");
+
+  const getKeywordsList = (keywordsStr: string): string[] => {
+    if (!keywordsStr) return [];
+    return keywordsStr
+      .split(",")
+      .map((k) => k.trim())
+      .filter((k) => k.length > 0);
+  };
+
+  const addKeyword = (keyword: string) => {
+    const trimmed = keyword.trim().replace(/,$/, "").trim();
+    if (!trimmed) return;
+    const currentTags = getKeywordsList(inspTriggerKeywords);
+    if (!currentTags.includes(trimmed)) {
+      const updated = [...currentTags, trimmed].join(", ");
+      setInspTriggerKeywords(updated);
+    }
+    setNewKeywordInput("");
+  };
+
+  const removeKeyword = (tagToRemove: string) => {
+    const currentTags = getKeywordsList(inspTriggerKeywords);
+    const updated = currentTags.filter((t) => t !== tagToRemove).join(", ");
+    setInspTriggerKeywords(updated);
+  };
+
+  const handleKeywordKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter" || e.key === "," || e.key === "Tab") {
+      e.preventDefault();
+      addKeyword(newKeywordInput);
+    } else if (e.key === "Backspace" && newKeywordInput === "") {
+      e.preventDefault();
+      const currentTags = getKeywordsList(inspTriggerKeywords);
+      if (currentTags.length > 0) {
+        removeKeyword(currentTags[currentTags.length - 1]);
+      }
+    }
+  };
+
+  const handleKeywordPaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
+    e.preventDefault();
+    const pastedText = e.clipboardData.getData("text");
+    const items = pastedText.split(/[\n,]+/).map(item => item.trim()).filter(Boolean);
+    if (items.length > 0) {
+      const currentTags = getKeywordsList(inspTriggerKeywords);
+      const newTags = [...currentTags];
+      items.forEach(item => {
+        if (!newTags.includes(item)) {
+          newTags.push(item);
+        }
+      });
+      setInspTriggerKeywords(newTags.join(", "));
+    }
+  };
+
   const openTriggerSettings = () => {
     setIsEditingTrigger(true);
     setSelectedNode(null);
@@ -849,12 +1128,24 @@ export default function BuilderPage() {
     setInspTriggerMatch(flowTriggerMatch);
     setInspTriggerKeywords(flowTriggerKeywords);
     setInspProhibitRestart(flowProhibitRestart);
+    setNewKeywordInput("");
   };
 
   const handleSaveTriggerDetails = () => {
+    let finalKeywords = inspTriggerKeywords;
+    if (newKeywordInput.trim()) {
+      const trimmed = newKeywordInput.trim().replace(/,$/, "").trim();
+      const currentTags = getKeywordsList(inspTriggerKeywords);
+      if (!currentTags.includes(trimmed)) {
+        finalKeywords = [...currentTags, trimmed].join(", ");
+        setInspTriggerKeywords(finalKeywords);
+      }
+      setNewKeywordInput("");
+    }
+
     setFlowTriggerSource(inspTriggerSource);
     setFlowTriggerMatch(inspTriggerMatch);
-    setFlowTriggerKeywords(inspTriggerKeywords);
+    setFlowTriggerKeywords(finalKeywords);
     setFlowProhibitRestart(inspProhibitRestart);
     setIsEditingTrigger(false);
     
@@ -876,16 +1167,27 @@ export default function BuilderPage() {
   }, []);
 
   useEffect(() => {
+    const handleOpenTriggerSettings = () => {
+      openTriggerSettings();
+    };
+    window.addEventListener("open-trigger-settings", handleOpenTriggerSettings);
+    return () => window.removeEventListener("open-trigger-settings", handleOpenTriggerSettings);
+  }, [openTriggerSettings]);
+
+  useEffect(() => {
     setNodes((nds) =>
       nds.map((n) => ({
         ...n,
         data: {
           ...n.data,
           isEntryPoint: n.id === entryPointId,
+          flowTriggerSource: n.id === entryPointId ? flowTriggerSource : n.data.flowTriggerSource,
+          flowTriggerMatch: n.id === entryPointId ? flowTriggerMatch : n.data.flowTriggerMatch,
+          flowTriggerKeywords: n.id === entryPointId ? flowTriggerKeywords : n.data.flowTriggerKeywords,
         },
       }))
     );
-  }, [entryPointId, setNodes]);
+  }, [entryPointId, flowTriggerSource, flowTriggerMatch, flowTriggerKeywords, setNodes]);
 
   useEffect(() => {
     const user = db.getCurrentUser();
@@ -907,7 +1209,10 @@ export default function BuilderPage() {
       if (found) {
         setBotName(found.name);
 
-        const savedDiagram = localStorage.getItem(`flow_diagram_${paramId}`);
+        let savedDiagram = localStorage.getItem(`replai_flow_diagram_${paramId}`);
+        if (!savedDiagram) {
+          savedDiagram = localStorage.getItem(`flow_diagram_${paramId}`);
+        }
         if (savedDiagram) {
           try {
             const parsed = JSON.parse(savedDiagram);
@@ -1017,6 +1322,14 @@ export default function BuilderPage() {
       }
     };
 
+    const handleSelectNode = (e: Event) => {
+      const { nodeId } = (e as CustomEvent).detail;
+      const node = nodes.find((n) => n.id === nodeId);
+      if (node) {
+        syncInspector(node);
+      }
+    };
+
     const handleEditNodeText = (e: Event) => {
       const { nodeId } = (e as CustomEvent).detail;
       const node = nodes.find((n) => n.id === nodeId);
@@ -1026,9 +1339,11 @@ export default function BuilderPage() {
       }
     };
 
+    window.addEventListener("select-node", handleSelectNode);
     window.addEventListener("edit-button", handleEditButton);
     window.addEventListener("edit-node-text", handleEditNodeText);
     return () => {
+      window.removeEventListener("select-node", handleSelectNode);
       window.removeEventListener("edit-button", handleEditButton);
       window.removeEventListener("edit-node-text", handleEditNodeText);
     };
@@ -1119,17 +1434,83 @@ export default function BuilderPage() {
     );
   };
 
-  const handleSaveFlow = () => {
+  const handleSaveFlow = async () => {
+    // 1. If currently editing trigger settings, commit them first
+    let finalTriggerSource = flowTriggerSource;
+    let finalTriggerMatch = flowTriggerMatch;
+    let finalTriggerKeywords = flowTriggerKeywords;
+    let finalProhibitRestart = flowProhibitRestart;
+
+    if (isEditingTrigger) {
+      let finalKeywords = inspTriggerKeywords;
+      if (newKeywordInput.trim()) {
+        const trimmed = newKeywordInput.trim().replace(/,$/, "").trim();
+        const currentTags = getKeywordsList(inspTriggerKeywords);
+        if (!currentTags.includes(trimmed)) {
+          finalKeywords = [...currentTags, trimmed].join(", ");
+          setInspTriggerKeywords(finalKeywords);
+        }
+        setNewKeywordInput("");
+      }
+      finalTriggerSource = inspTriggerSource;
+      finalTriggerMatch = inspTriggerMatch;
+      finalTriggerKeywords = finalKeywords;
+      finalProhibitRestart = inspProhibitRestart;
+
+      setFlowTriggerSource(inspTriggerSource);
+      setFlowTriggerMatch(inspTriggerMatch);
+      setFlowTriggerKeywords(finalKeywords);
+      setFlowProhibitRestart(inspProhibitRestart);
+    }
+
+    // 2. If currently editing a node, commit its details first
+    let latestNodes = nodes;
+    if (selectedNode) {
+      const newLabel =
+        selectedNode.data.nodeType === "trigger"
+          ? inspLabel
+          : selectedNode.data.nodeType === "condition"
+          ? `${t("pages.builder.condition_prefix")}: ${CONDITION_TYPES.find(c => c.value === inspConditionType)?.label || ""}`
+          : selectedNode.data.nodeType === "action"
+          ? `${t("pages.builder.action_prefix")}: ${ACTION_TYPES.find(a => a.value === inspActionType)?.label || ""} – ${inspActionValue}`
+          : selectedNode.data.nodeType === "ai"
+          ? `${t("pages.builder.ai_prefix")}: ${inspAiPrompt.substring(0, 40)}...`
+          : inspLabel;
+
+      latestNodes = nodes.map((n) =>
+        n.id === selectedNode.id
+          ? { ...n, data: { ...n.data, label: newLabel, triggerSource: inspTriggerSource, triggerMatch: inspTriggerMatch, triggerKeywords: inspTriggerKeywords, prohibitRestart: inspProhibitRestart, conditionType: inspConditionType, conditionValue: inspConditionValue, actionType: inspActionType, actionValue: inspActionValue, aiPrompt: inspAiPrompt, aiOutputVar: inspAiOutputVar, buttons: inspButtons } }
+          : n
+      );
+      setNodes(latestNodes);
+    }
+
+    // Ensure the entry point node has the updated trigger details in its data
+    latestNodes = latestNodes.map((n) =>
+      n.id === entryPointId
+        ? {
+            ...n,
+            data: {
+              ...n.data,
+              isEntryPoint: true,
+              flowTriggerSource: finalTriggerSource,
+              flowTriggerMatch: finalTriggerMatch,
+              flowTriggerKeywords: finalTriggerKeywords,
+            },
+          }
+        : n
+    );
+
     const sp = new URLSearchParams(window.location.search);
     const paramId = sp.get("id");
     const activeCh = db.getActiveChannel();
     const list = activeCh ? db.getChannelAutomations(activeCh.id) : db.getAutomations();
     
     // Find the designated entry point message node
-    const entryNode = nodes.find((n) => n.id === entryPointId) || nodes.find((n) => n.data.nodeType === "message") || nodes[0];
+    const entryNode = latestNodes.find((n) => n.id === entryPointId) || latestNodes.find((n) => n.data.nodeType === "message") || latestNodes[0];
     const replyText = entryNode?.data.label || "";
     
-    const src = flowTriggerSource || "dm";
+    const src = finalTriggerSource || "dm";
     const isStory = src.includes("story");
     let savedMsg = t("pages.builder.saved_toast");
 
@@ -1140,12 +1521,12 @@ export default function BuilderPage() {
           ...list[idx], 
           name: botName, 
           triggerType: isStory ? "story" : "keyword", 
-          triggerDetails: flowTriggerKeywords || src, 
+          triggerDetails: finalTriggerKeywords || src, 
           replyText 
         };
       }
-      // Save canvas diagram
-      localStorage.setItem(`flow_diagram_${paramId}`, JSON.stringify({ nodes, edges, entryPointId, flowTriggerSource, flowTriggerMatch, flowTriggerKeywords, flowProhibitRestart }));
+      // Save canvas diagram with the syncable replai_ prefix
+      localStorage.setItem(`replai_flow_diagram_${paramId}`, JSON.stringify({ nodes: latestNodes, edges, entryPointId, flowTriggerSource: finalTriggerSource, flowTriggerMatch: finalTriggerMatch, flowTriggerKeywords: finalTriggerKeywords, flowProhibitRestart: finalProhibitRestart }));
     } else {
       const user = db.getCurrentUser();
       const plan = user?.plan || "free";
@@ -1158,14 +1539,14 @@ export default function BuilderPage() {
         id: newId, 
         name: botName, 
         triggerType: isStory ? "story" : "keyword", 
-        triggerDetails: flowTriggerKeywords || src, 
+        triggerDetails: finalTriggerKeywords || src, 
         runs: "0", 
         completion: "0%", 
         active: shouldBeActive,
         replyText
       });
-      // Save canvas diagram
-      localStorage.setItem(`flow_diagram_${newId}`, JSON.stringify({ nodes, edges, entryPointId, flowTriggerSource, flowTriggerMatch, flowTriggerKeywords, flowProhibitRestart }));
+      // Save canvas diagram with the syncable replai_ prefix
+      localStorage.setItem(`replai_flow_diagram_${newId}`, JSON.stringify({ nodes: latestNodes, edges, entryPointId, flowTriggerSource: finalTriggerSource, flowTriggerMatch: finalTriggerMatch, flowTriggerKeywords: finalTriggerKeywords, flowProhibitRestart: finalProhibitRestart }));
 
       if (!shouldBeActive) {
         savedMsg = t("pages.builder.limit_toast");
@@ -1177,8 +1558,25 @@ export default function BuilderPage() {
     } else {
       db.saveAutomations(list);
     }
-    setToastMsg(savedMsg);
+
+    setToastMsg("Serverga saqlanmoqda...");
     setShowToast(true);
+
+    try {
+      const syncRes = await db.saveToServer();
+      if (!syncRes.success) {
+        setToastMsg(syncRes.error || "Serverga saqlashda xatolik yuz berdi");
+        setTimeout(() => setShowToast(false), 3000);
+        return;
+      }
+    } catch (e) {
+      console.error("Sync error:", e);
+      setToastMsg("Server bilan bog'lanishda xatolik yuz berdi");
+      setTimeout(() => setShowToast(false), 3000);
+      return;
+    }
+
+    setToastMsg(savedMsg);
     setTimeout(() => { window.location.href = "/automations"; }, 1500);
   };
 
@@ -1220,8 +1618,9 @@ export default function BuilderPage() {
       trigger: { label: t("pages.builder.block_trigger"), data: { nodeType: "trigger", triggerSource: "dm", triggerMatch: "contains", triggerKeywords: "", buttons: [] } },
       message: { label: t("pages.builder.block_message"), data: { nodeType: "message", buttons: [] } },
       wait: { label: "Kutish: 15 Daqiqalar", data: { nodeType: "wait" } },
-      condition: { label: "Obuna bo'linganligi", data: { nodeType: "condition", conditionType: "is_follower", conditionValue: "" } },
-      action: { label: "Tezkor javoblar tugmasiga kirdi", data: { nodeType: "action", actionType: "add_tag", actionValue: "" } },
+      note: { label: "Enter message", data: { nodeType: "note" } },
+      condition: { label: "Condition is not set", data: { nodeType: "condition", conditionType: "", conditionValue: "" } },
+      action: { label: "Click to add an action", data: { nodeType: "action", actionType: "", actionValue: "" } },
       ai: { label: t("pages.builder.ai_request_title"), data: { nodeType: "ai", aiPrompt: "", aiOutputVar: "ai_response" } },
     };
     const cfg = configs[type];
@@ -1254,7 +1653,8 @@ export default function BuilderPage() {
     message: MessageNode,
     condition: ConditionNode,
     action: ActionNode,
-    wait: WaitNode,
+    wait: NoteNode,
+    note: NoteNode,
   }), []);
 
   const edgeTypes = useMemo(() => ({
@@ -1305,7 +1705,7 @@ export default function BuilderPage() {
           <div className="flex items-center gap-2">
             <button 
               onClick={openTriggerSettings}
-              className="flex items-center gap-1.5 px-4 h-9 text-[11px] font-extrabold bg-[#FAFAFA] border border-[#E8E8E8] rounded-full hover:bg-[#F0F0F0] text-black shrink-0 transition-colors cursor-pointer"
+              className="flex items-center gap-1.5 px-4 h-9 text-[11px] font-extrabold bg-[#C7F33C] border border-[#b2db2a] rounded-full hover:bg-[#b5e02c] text-black shrink-0 transition-colors cursor-pointer"
             >
               <Settings size={12} />
               <span>Ishga tushirish triggerlari</span>
@@ -1330,6 +1730,10 @@ export default function BuilderPage() {
               onEdgesChange={onEdgesChange}
               onConnect={onConnect}
               onNodeClick={(_e, node) => {
+                const target = _e.target as HTMLElement;
+                if (target.closest(".canvas-btn-item") || target.closest("[data-is-button]")) {
+                  return;
+                }
                 setIsEditingTrigger(false);
                 onNodeClick(_e, node);
               }}
@@ -1365,7 +1769,7 @@ export default function BuilderPage() {
                   { type: "message" as NodeType, label: "Message", icon: <MessageCircle size={16} strokeWidth={2.5} className="text-[#3B82F6]" /> },
                   { type: "condition" as NodeType, label: "Condition", icon: <Filter size={16} strokeWidth={2.5} className="text-[#22C55E]" /> },
                   { type: "action" as NodeType, label: "Action", icon: <Zap size={16} strokeWidth={2.5} className="text-[#EAB308]" /> },
-                  { type: "wait" as NodeType, label: "Wait", icon: <Clock size={16} strokeWidth={2.5} className="text-[#A855F7]" /> },
+                  { type: "note" as NodeType, label: "Note", icon: <FileText size={16} strokeWidth={2.5} className="text-[#1A73E8]" /> },
                 ]).map((item) => (
                   <button
                     key={item.type}
@@ -1513,13 +1917,36 @@ export default function BuilderPage() {
                   {/* Keywords input */}
                   {inspTriggerMatch !== "any" && (inspTriggerSource === "dm" || inspTriggerSource === "comment" || inspTriggerSource === "message_recognition") && (
                     <div className="flex flex-col gap-2 mt-1">
-                      <p className="text-[10px] font-bold text-[#707070] uppercase tracking-widest px-0.5">Kalit so'zlar (vergul bilan ajrating)</p>
-                      <input
-                        value={inspTriggerKeywords}
-                        onChange={(e) => setInspTriggerKeywords(e.target.value)}
-                        placeholder="masalan: narx, o'qish, chegirma"
-                        className="w-full rounded-[12px] bg-[#F0F0F0] px-4 py-3 text-[12px] text-black outline-none focus:bg-[#e8e8e8] transition-colors"
-                      />
+                      <p className="text-[10px] font-bold text-[#707070] uppercase tracking-widest px-0.5">Kalit so'zlar (Enter bosib ajrating)</p>
+                      <div className="w-full rounded-[12px] bg-[#F0F0F0] p-2 flex flex-wrap gap-1.5 border border-transparent focus-within:border-black/10 focus-within:bg-[#EAEAEA] transition-all min-h-[48px]">
+                        {getKeywordsList(inspTriggerKeywords).map((tag, idx) => (
+                          <span
+                            key={`${tag}-${idx}`}
+                            className="flex items-center gap-1.5 pl-2.5 pr-1.5 py-1 bg-white text-black text-[12px] font-semibold rounded-lg shadow-sm border border-[#E5E5EA] select-none animate-in scale-in duration-100"
+                          >
+                            <span>{tag}</span>
+                            <button
+                              type="button"
+                              onClick={() => removeKeyword(tag)}
+                              className="w-4.5 h-4.5 rounded-md hover:bg-neutral-100 flex items-center justify-center text-[#707070] hover:text-black transition-colors cursor-pointer border-none bg-transparent"
+                            >
+                              <X size={10} strokeWidth={3} />
+                            </button>
+                          </span>
+                        ))}
+                        <input
+                          type="text"
+                          value={newKeywordInput}
+                          onChange={(e) => setNewKeywordInput(e.target.value)}
+                          onKeyDown={handleKeywordKeyDown}
+                          onPaste={handleKeywordPaste}
+                          onBlur={() => {
+                            if (newKeywordInput) addKeyword(newKeywordInput);
+                          }}
+                          placeholder={getKeywordsList(inspTriggerKeywords).length === 0 ? "masalan: narx, o'qish, chegirma" : ""}
+                          className="flex-1 bg-transparent min-w-[80px] outline-none text-[12px] text-black px-1.5 py-1"
+                        />
+                      </div>
                     </div>
                   )}
 
@@ -1748,7 +2175,8 @@ export default function BuilderPage() {
                     nodeType === "message" ? "bg-[#F0F0F0]" :
                     nodeType === "condition" ? "bg-black" :
                     nodeType === "action" ? "bg-[#F0F0F0]" :
-                    nodeType === "ai" ? "bg-black" : "bg-[#F0F0F0]"
+                    nodeType === "ai" ? "bg-black" :
+                    nodeType === "note" ? "bg-[#E8F0FE]" : "bg-[#F0F0F0]"
                   }`}>
                     {nodeType === "trigger" && <Zap size={16} className="text-[#1A2906]" />}
                     {nodeType === "message" && <MessageSquare size={16} className="text-[#707070]" />}
@@ -1756,10 +2184,11 @@ export default function BuilderPage() {
                     {nodeType === "action" && <Tag size={16} className="text-[#707070]" />}
                     {nodeType === "ai" && <Bot size={16} className="text-[#C7F33C]" />}
                     {nodeType === "wait" && <Clock size={16} className="text-[#707070]" />}
+                    {nodeType === "note" && <FileText size={16} className="text-[#1A73E8]" />}
                   </div>
                   <div>
                     <h3 className="text-[13px] font-semibold text-black leading-none">
-                      {nodeType === "trigger" ? t("pages.builder.block_trigger") : nodeType === "message" ? t("pages.builder.block_message") : nodeType === "condition" ? t("pages.builder.block_condition") : nodeType === "action" ? t("pages.builder.block_action") : nodeType === "ai" ? t("pages.builder.ai_request_title") : t("pages.builder.block_wait")}
+                      {nodeType === "trigger" ? t("pages.builder.block_trigger") : nodeType === "message" ? t("pages.builder.block_message") : nodeType === "condition" ? t("pages.builder.block_condition") : nodeType === "action" ? t("pages.builder.block_action") : nodeType === "ai" ? t("pages.builder.ai_request_title") : nodeType === "note" ? t("pages.builder.block_note") : t("pages.builder.block_wait")}
                     </h3>
                     <p className="text-[10px] text-[#707070] mt-0.5">ID: {selectedNode.id}</p>
                   </div>
@@ -1835,13 +2264,36 @@ export default function BuilderPage() {
                       {/* Keywords input */}
                       {inspTriggerMatch !== "any" && (inspTriggerSource === "dm" || inspTriggerSource === "comment" || inspTriggerSource === "message_recognition") && (
                         <div className="flex flex-col gap-2 mt-1">
-                          <p className="text-[10px] font-bold text-[#707070] uppercase tracking-widest px-0.5">Kalit so'zlar (vergul bilan ajrating)</p>
-                          <input
-                            value={inspTriggerKeywords}
-                            onChange={(e) => setInspTriggerKeywords(e.target.value)}
-                            placeholder="masalan: narx, o'qish, chegirma"
-                            className="w-full rounded-[12px] bg-[#F0F0F0] px-4 py-3 text-[12px] text-black outline-none focus:bg-[#e8e8e8] transition-colors"
-                          />
+                          <p className="text-[10px] font-bold text-[#707070] uppercase tracking-widest px-0.5">Kalit so'zlar (Enter bosib ajrating)</p>
+                          <div className="w-full rounded-[12px] bg-[#F0F0F0] p-2 flex flex-wrap gap-1.5 border border-transparent focus-within:border-black/10 focus-within:bg-[#EAEAEA] transition-all min-h-[48px]">
+                            {getKeywordsList(inspTriggerKeywords).map((tag, idx) => (
+                              <span
+                                key={`${tag}-${idx}`}
+                                className="flex items-center gap-1.5 pl-2.5 pr-1.5 py-1 bg-white text-black text-[12px] font-semibold rounded-lg shadow-sm border border-[#E5E5EA] select-none animate-in scale-in duration-100"
+                              >
+                                <span>{tag}</span>
+                                <button
+                                  type="button"
+                                  onClick={() => removeKeyword(tag)}
+                                  className="w-4.5 h-4.5 rounded-md hover:bg-neutral-100 flex items-center justify-center text-[#707070] hover:text-black transition-colors cursor-pointer border-none bg-transparent"
+                                >
+                                  <X size={10} strokeWidth={3} />
+                                </button>
+                              </span>
+                            ))}
+                            <input
+                              type="text"
+                              value={newKeywordInput}
+                              onChange={(e) => setNewKeywordInput(e.target.value)}
+                              onKeyDown={handleKeywordKeyDown}
+                              onPaste={handleKeywordPaste}
+                              onBlur={() => {
+                                if (newKeywordInput) addKeyword(newKeywordInput);
+                              }}
+                              placeholder={getKeywordsList(inspTriggerKeywords).length === 0 ? "masalan: narx, o'qish, chegirma" : ""}
+                              className="flex-1 bg-transparent min-w-[80px] outline-none text-[12px] text-black px-1.5 py-1"
+                            />
+                          </div>
                         </div>
                       )}
 
@@ -2039,33 +2491,17 @@ export default function BuilderPage() {
                     </>
                   )}
 
-                  {/* ── WAIT INSPECTOR ── */}
-                  {nodeType === "wait" && (
+                  {/* ── NOTE INSPECTOR ── */}
+                  {(nodeType === "note" || nodeType === "wait") && (
                     <div className="flex flex-col gap-2">
-                      <p className="text-[10px] font-bold text-[#707070] uppercase tracking-widest px-0.5">{t("pages.builder.wait_duration")}</p>
-                      <input
+                      <p className="text-[10px] font-bold text-[#707070] uppercase tracking-widest px-0.5">Eslatma matni (Note text)</p>
+                      <textarea
                         value={inspLabel}
                         onChange={(e) => setInspLabel(e.target.value)}
-                        placeholder={t("pages.builder.wait_15m")}
-                        className="w-full rounded-[12px] bg-[#F0F0F0] px-4 py-3 text-[12px] text-black outline-none focus:bg-[#e8e8e8] transition-colors"
+                        placeholder="Enter message"
+                        className="w-full rounded-[12px] bg-[#F0F0F0] px-4 py-3 text-[12px] text-black outline-none focus:bg-[#e8e8e8] transition-colors resize-none"
+                        rows={6}
                       />
-                      <div className="flex gap-2 flex-wrap text-black">
-                        {[
-                          { label: t("pages.builder.wait_1m"), val: `Kutish: ${t("pages.builder.wait_1m")}` },
-                          { label: t("pages.builder.wait_5m"), val: `Kutish: ${t("pages.builder.wait_5m")}` },
-                          { label: t("pages.builder.wait_15m"), val: `Kutish: ${t("pages.builder.wait_15m")}` },
-                          { label: t("pages.builder.wait_1h"), val: `Kutish: ${t("pages.builder.wait_1h")}` },
-                          { label: t("pages.builder.wait_24h"), val: `Kutish: ${t("pages.builder.wait_24h")}` },
-                        ].map((preset) => (
-                          <button
-                            key={preset.label}
-                            onClick={() => setInspLabel(preset.val)}
-                            className="px-2.5 py-1 rounded-full text-[10px] font-medium bg-[#F0F0F0] text-[#707070] hover:bg-black hover:text-white transition-all border border-[#E8E8E8]"
-                          >
-                            {preset.label}
-                          </button>
-                        ))}
-                      </div>
                     </div>
                   )}
 
@@ -2101,26 +2537,33 @@ export default function BuilderPage() {
                   )}
 
                   {/* Entry Point Setting */}
-                  <div className="flex items-center justify-between p-4 bg-[#F9F9F7] border border-[#E8E8E8] rounded-2xl w-full select-none mb-4 mt-2">
-                    <div className="flex flex-col gap-0.5 text-left">
-                      <span className="text-[12px] font-extrabold text-black leading-tight">Boshlanish bloki (Entry point)</span>
-                      <span className="text-[9px] text-[#707070] leading-normal">Ushbu blokdan avtomatlashtirish suhbati boshlanadi</span>
-                    </div>
-                    {selectedNode.id === entryPointId ? (
-                      <span className="text-[10.5px] font-extrabold text-green-600 bg-green-50 px-3 py-1 rounded-full border border-green-200">
-                        Faol
+                  <div className="flex items-center justify-between border-t border-[#F0F0F0] pt-4 mt-3 mb-4 select-none">
+                    <div className="flex flex-col gap-0.5 max-w-[210px] text-left">
+                      <span className="text-[12px] font-extrabold text-black">Boshlanish bloki (Entry point)</span>
+                      <span className="text-[10px] text-[#707070] leading-normal">
+                        Ushbu blokdan avtomatlashtirish suhbati boshlanadi
                       </span>
-                    ) : (
-                      <button
-                        type="button"
-                        onClick={() => {
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const isCurrentlyEntry = selectedNode.id === entryPointId;
+                        if (isCurrentlyEntry) {
+                          setToastMsg("Kamida bitta boshlanish bloki bo'lishi shart.");
+                          setShowToast(true);
+                          setTimeout(() => setShowToast(false), 2000);
+                        } else {
                           window.dispatchEvent(new CustomEvent("set-entry-point", { detail: { nodeId: selectedNode.id } }));
-                        }}
-                        className="px-3.5 py-2 bg-black hover:bg-neutral-800 text-white rounded-xl text-[10px] font-bold cursor-pointer transition-all active:scale-95 border-none font-sans"
-                      >
-                        Belgilash
-                      </button>
-                    )}
+                        }
+                      }}
+                      className={`w-11 h-6 rounded-full transition-colors relative shrink-0 cursor-pointer ${
+                        selectedNode.id === entryPointId ? "bg-[#1A73E8]" : "bg-[#D8D8D8]"
+                      }`}
+                    >
+                      <span className={`absolute top-0.5 w-5 h-5 rounded-full bg-white transition-all shadow-sm ${
+                        selectedNode.id === entryPointId ? "left-[21px]" : "left-0.5"
+                      }`} />
+                    </button>
                   </div>
 
                   {/* Save Button */}

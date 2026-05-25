@@ -481,6 +481,8 @@
       "block_action_sub": "Tag, webhook, message",
       "block_wait": "Wait Delay",
       "block_wait_sub": "Break duration",
+      "block_note": "Note",
+      "block_note_sub": "Write comments or notes",
       "wait_duration": "Wait duration",
       "variables": "Variables",
       "unselected_block": "Block not selected",
