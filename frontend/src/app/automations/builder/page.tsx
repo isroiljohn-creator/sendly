@@ -49,6 +49,8 @@ import {
   Filter,
   LogIn,
   FileText,
+  Cloud,
+  Loader2,
 } from "lucide-react";
 import { useI18n } from "@/i18n/I18nProvider";
 import { Button } from "@/components/ui/primitives";
@@ -1065,6 +1067,8 @@ export default function BuilderPage() {
   const [isEditingTrigger, setIsEditingTrigger] = useState(false);
 
   const [newKeywordInput, setNewKeywordInput] = useState("");
+  const [saveStatus, setSaveStatus] = useState<"saved" | "saving" | "error" | null>(null);
+  const isInitialMount = useRef(true);
 
   const getKeywordsList = (keywordsStr: string): string[] => {
     if (!keywordsStr) return [];
@@ -1188,6 +1192,181 @@ export default function BuilderPage() {
       }))
     );
   }, [entryPointId, flowTriggerSource, flowTriggerMatch, flowTriggerKeywords, setNodes]);
+
+  // 1. Auto-sync inspector inputs to selectedNode data in nodes array in real-time
+  useEffect(() => {
+    if (!selectedNode) return;
+
+    const currentNodeInList = nodes.find((n) => n.id === selectedNode.id);
+    if (!currentNodeInList) return;
+
+    const newLabel =
+      selectedNode.data.nodeType === "trigger"
+        ? inspLabel
+        : selectedNode.data.nodeType === "condition"
+        ? `${t("pages.builder.condition_prefix")}: ${CONDITION_TYPES.find(c => c.value === inspConditionType)?.label || ""}`
+        : selectedNode.data.nodeType === "action"
+        ? `${t("pages.builder.action_prefix")}: ${ACTION_TYPES.find(a => a.value === inspActionType)?.label || ""} – ${inspActionValue}`
+        : selectedNode.data.nodeType === "ai"
+        ? `${t("pages.builder.ai_prefix")}: ${inspAiPrompt.substring(0, 40)}...`
+        : inspLabel;
+
+    const d = currentNodeInList.data;
+    const hasChanged =
+      d.label !== newLabel ||
+      d.triggerSource !== inspTriggerSource ||
+      d.triggerMatch !== inspTriggerMatch ||
+      d.triggerKeywords !== inspTriggerKeywords ||
+      d.prohibitRestart !== inspProhibitRestart ||
+      d.conditionType !== inspConditionType ||
+      d.conditionValue !== inspConditionValue ||
+      d.actionType !== inspActionType ||
+      d.actionValue !== inspActionValue ||
+      d.aiPrompt !== inspAiPrompt ||
+      d.aiOutputVar !== inspAiOutputVar ||
+      JSON.stringify(d.buttons || []) !== JSON.stringify(inspButtons);
+
+    if (hasChanged) {
+      setNodes((nds) =>
+        nds.map((n) =>
+          n.id === selectedNode.id
+            ? {
+                ...n,
+                data: {
+                  ...n.data,
+                  label: newLabel,
+                  triggerSource: inspTriggerSource,
+                  triggerMatch: inspTriggerMatch,
+                  triggerKeywords: inspTriggerKeywords,
+                  prohibitRestart: inspProhibitRestart,
+                  conditionType: inspConditionType,
+                  conditionValue: inspConditionValue,
+                  actionType: inspActionType,
+                  actionValue: inspActionValue,
+                  aiPrompt: inspAiPrompt,
+                  aiOutputVar: inspAiOutputVar,
+                  buttons: inspButtons,
+                },
+              }
+            : n
+        )
+      );
+    }
+  }, [
+    selectedNode?.id,
+    inspLabel,
+    inspTriggerSource,
+    inspTriggerMatch,
+    inspTriggerKeywords,
+    inspProhibitRestart,
+    inspConditionType,
+    inspConditionValue,
+    inspActionType,
+    inspActionValue,
+    inspAiPrompt,
+    inspAiOutputVar,
+    inspButtons,
+    nodes,
+    t,
+    setNodes,
+  ]);
+
+  // 2. Auto-sync trigger inspector states to flowTrigger states in real-time
+  useEffect(() => {
+    if (isEditingTrigger) {
+      setFlowTriggerSource(inspTriggerSource);
+      setFlowTriggerMatch(inspTriggerMatch);
+      setFlowTriggerKeywords(inspTriggerKeywords);
+      setFlowProhibitRestart(inspProhibitRestart);
+    }
+  }, [isEditingTrigger, inspTriggerSource, inspTriggerMatch, inspTriggerKeywords, inspProhibitRestart]);
+
+  // 3. Debounced background auto-save effect
+  useEffect(() => {
+    if (!mounted) return;
+
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      return;
+    }
+
+    setSaveStatus("saving");
+
+    const timer = setTimeout(async () => {
+      try {
+        const sp = new URLSearchParams(window.location.search);
+        const paramId = sp.get("id");
+        const activeCh = db.getActiveChannel();
+        const list = activeCh ? db.getChannelAutomations(activeCh.id) : db.getAutomations();
+        
+        const entryNode = nodes.find((n) => n.id === entryPointId) || nodes.find((n) => n.data.nodeType === "message") || nodes[0];
+        const replyText = entryNode?.data.label || "";
+        
+        const src = flowTriggerSource || "dm";
+        const isStory = src.includes("story");
+
+        if (paramId) {
+          const idx = list.findIndex((a) => a.id === paramId);
+          if (idx > -1) {
+            list[idx] = { 
+              ...list[idx], 
+              name: botName, 
+              triggerType: isStory ? "story" : "keyword", 
+              triggerDetails: flowTriggerKeywords || src, 
+              replyText 
+            };
+          }
+          localStorage.setItem(`replai_flow_diagram_${paramId}`, JSON.stringify({ nodes, edges, entryPointId, flowTriggerSource, flowTriggerMatch, flowTriggerKeywords, flowProhibitRestart }));
+        } else {
+          const user = db.getCurrentUser();
+          const plan = user?.plan || "free";
+          const maxAutos = plan === "premium" ? 500 : plan === "pro" ? 50 : 2;
+          const currentActiveCount = db.getAllAutomations().filter((a) => a.active).length;
+          const shouldBeActive = currentActiveCount < maxAutos;
+
+          const newId = String(list.length + 1);
+          list.push({ 
+            id: newId, 
+            name: botName, 
+            triggerType: isStory ? "story" : "keyword", 
+            triggerDetails: flowTriggerKeywords || src, 
+            runs: "0", 
+            completion: "0%", 
+            active: shouldBeActive,
+            replyText
+          });
+          localStorage.setItem(`replai_flow_diagram_${newId}`, JSON.stringify({ nodes, edges, entryPointId, flowTriggerSource, flowTriggerMatch, flowTriggerKeywords, flowProhibitRestart }));
+          
+          const newUrl = `${window.location.pathname}?id=${newId}`;
+          window.history.replaceState(null, "", newUrl);
+        }
+
+        if (activeCh) {
+          db.saveChannelAutomations(activeCh.id, list);
+        } else {
+          db.saveAutomations(list);
+        }
+
+        await db.saveToServer();
+        setSaveStatus("saved");
+      } catch (error) {
+        console.error("Auto-save error:", error);
+        setSaveStatus("error");
+      }
+    }, 1000);
+
+    return () => clearTimeout(timer);
+  }, [
+    mounted,
+    nodes,
+    edges,
+    entryPointId,
+    flowTriggerSource,
+    flowTriggerMatch,
+    flowTriggerKeywords,
+    flowProhibitRestart,
+    botName,
+  ]);
 
   useEffect(() => {
     const user = db.getCurrentUser();
@@ -1710,10 +1889,24 @@ export default function BuilderPage() {
               <Settings size={12} />
               <span>Ishga tushirish triggerlari</span>
             </button>
-            <button className="flex items-center gap-1.5 px-5 h-9 text-[11px] font-extrabold bg-black text-white rounded-full hover:bg-neutral-800 shrink-0 transition-all active:scale-[0.98]" onClick={handleSaveFlow}>
-              <Save size={12} />
-              <span>Saqlash</span>
-            </button>
+            {saveStatus === "saving" && (
+              <div className="flex items-center gap-1.5 px-4 h-9 text-[11px] font-extrabold bg-[#F5F5F7] border border-[#E8E8E8] rounded-full text-[#707070] shrink-0 select-none">
+                <Loader2 size={12} className="animate-spin text-[#707070]" />
+                <span>Saqlanmoqda...</span>
+              </div>
+            )}
+            {(saveStatus === "saved" || !saveStatus) && (
+              <div className="flex items-center gap-1.5 px-4 h-9 text-[11px] font-extrabold bg-[#34C759]/10 border border-[#34C759]/20 rounded-full text-[#34C759] shrink-0 select-none animate-in fade-in duration-200">
+                <CheckCircle size={12} className="text-[#34C759]" />
+                <span>Saqlandi</span>
+              </div>
+            )}
+            {saveStatus === "error" && (
+              <div className="flex items-center gap-1.5 px-4 h-9 text-[11px] font-extrabold bg-red-50 border border-red-200 rounded-full text-red-500 shrink-0 select-none">
+                <ShieldAlert size={12} className="text-red-500" />
+                <span>Xatolik</span>
+              </div>
+            )}
           </div>
         </header>
 
@@ -1986,7 +2179,7 @@ export default function BuilderPage() {
                     onClick={handleSaveTriggerDetails}
                     className="w-full py-3 rounded-full bg-black text-white text-[12px] font-semibold hover:bg-black/80 active:scale-[0.98] transition-all mt-4 border-none cursor-pointer"
                   >
-                    Saqlash
+                    Tayyor
                   </button>
                 </div>
               </div>
@@ -2566,12 +2759,15 @@ export default function BuilderPage() {
                     </button>
                   </div>
 
-                  {/* Save Button */}
+                  {/* Done Button */}
                   <button
-                    onClick={handleSaveNodeDetails}
-                    className="w-full py-3 rounded-full bg-black text-white text-[12px] font-semibold hover:bg-black/80 active:scale-[0.98] transition-all mt-1"
+                    onClick={() => {
+                      setSelectedNode(null);
+                      setSelectedButton(null);
+                    }}
+                    className="w-full py-3 rounded-full bg-black text-white text-[12px] font-semibold hover:bg-black/80 active:scale-[0.98] transition-all mt-1 border-none cursor-pointer"
                   >
-                    {t("pages.builder.save_btn")}
+                    Tayyor
                   </button>
                 </div>
               </div>
@@ -2705,7 +2901,7 @@ export default function BuilderPage() {
                 }}
                 className="px-5 py-2.5 bg-black text-white font-bold rounded-xl text-[12px] hover:bg-neutral-800 transition-all cursor-pointer border-0"
               >
-                Saqlash
+                Tayyor
               </button>
             </div>
           </div>
