@@ -658,19 +658,19 @@ export default function AutomationsPage() {
                 {/* 1. Promotional Quick Bot Card (First Card) */}
                 <Link 
                   href="/automations/quick-bot" 
-                  className="bg-white border border-[#E8E8E8] hover:border-black rounded-[24px] p-5 flex flex-col justify-between gap-6 shadow-sm hover:shadow-md transition-all relative group cursor-pointer bg-gradient-to-br from-[#FDFDFD] to-[#F9F9F7]"
+                  className="bg-black hover:bg-neutral-900 border border-neutral-800 rounded-[24px] p-5 flex flex-col justify-between gap-6 shadow-sm hover:shadow-md transition-all relative group cursor-pointer text-left"
                 >
                   <div className="flex justify-between items-start w-full">
-                    <div className="bg-[#C7F33C]/20 border border-[#b2db2a]/30 text-black font-extrabold text-[10px] uppercase tracking-wider px-2.5 py-1 rounded-lg">
-                      Tez
+                    <div className="bg-[#C7F33C] text-black font-extrabold text-[10px] uppercase tracking-wider px-2.5 py-1 rounded-lg">
+                      Tezkor bot sozlash
                     </div>
-                    <span className="text-[16px] text-slate-400 group-hover:text-black transition-colors font-extrabold">→</span>
+                    <span className="text-[16px] text-[#C7F33C] group-hover:translate-x-1 transition-transform font-extrabold">→</span>
                   </div>
                   <div>
-                    <h3 className="text-[14px] font-black text-black leading-tight mt-2">
+                    <h3 className="text-[14px] font-black text-white leading-tight mt-2">
                       Kalit so&apos;zli chat-bot
                     </h3>
-                    <p className="text-[11px] text-[#707070] mt-1 leading-normal font-medium">
+                    <p className="text-[11px] text-[#A0A0A0] mt-1 leading-normal font-medium">
                       Har qanday qurilmadan, konstruktorsiz avtomatlashtirish yaratishning yangi usuli
                     </p>
                   </div>
