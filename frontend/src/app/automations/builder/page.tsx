@@ -136,83 +136,7 @@ function ButtonEdge({
 
 // ─────────── CUSTOM NODE COMPONENTS ────────────
 
-function TriggerNode({ data, id }: NodeProps<NodeData>) {
-  const { setNodes, setEdges } = useReactFlow();
-
-  const sourceLabels: Record<string, string> = {
-    message_recognition: "Message recognition",
-    dm: "Direct Message",
-    comment: "Post Comment",
-    live_comment: "Live Stream Comment",
-    story_reaction: "Story Reaction",
-    story_reply: "Story Reply",
-    story_mention: "Story Mention",
-    payment: "Successful Payment",
-  };
-
-  const sourceLabel = sourceLabels[data.triggerSource || "dm"] || "Direct Message";
-
-  return (
-    <div className="w-[260px] bg-white border border-[#E8E8E8] rounded-2xl shadow-sm overflow-visible text-black text-left relative">
-      <div className="absolute -top-5 left-1 flex items-center gap-1.5 text-[9.5px] font-black text-[#707070] uppercase tracking-widest select-none">
-        <span>⟨ Boshlanishi ⟩</span>
-      </div>
-      
-      {/* Node Header */}
-      <div className="bg-[#F8FAE5] border-b border-[#E5EDBD] px-4 py-3 flex items-center justify-between rounded-t-2xl h-[45px]">
-        <div className="flex items-center gap-1.5">
-          <Zap size={13} className="text-black" />
-          <span className="text-[12px] font-bold text-black uppercase tracking-wider">Start Trigger</span>
-        </div>
-        <button
-          type="button"
-          onClick={(e) => {
-            e.stopPropagation();
-            setNodes((nds) => nds.filter((n) => n.id !== id));
-            setEdges((eds) => eds.filter((edge) => edge.source !== id && edge.target !== id));
-          }}
-          className="p-1 rounded-full hover:bg-red-50 text-[#707070] hover:text-red-500 transition-colors cursor-pointer"
-          title="Blokni o'chirish"
-        >
-          <Trash2 size={11} />
-        </button>
-      </div>
-      
-      {/* Trigger Criteria Details */}
-      <div className="p-4 flex flex-col gap-2 bg-white rounded-b-2xl">
-        <div className="flex flex-col gap-0.5">
-          <span className="text-[9px] text-[#707070] font-bold uppercase tracking-wider">Trigger manbasi</span>
-          <span className="text-[12px] font-bold text-black">{sourceLabel}</span>
-        </div>
-        
-        {(data.triggerSource === "dm" || data.triggerSource === "comment" || data.triggerSource === "message_recognition") && (
-          <div className="flex flex-col gap-0.5 border-t border-[#F0F0F0] pt-2 mt-1">
-            <span className="text-[9px] text-[#707070] font-bold uppercase tracking-wider">Qoida</span>
-            <span className="text-[11px] font-medium text-black">
-              {data.triggerMatch === "any" ? "Har qanday xabar" :
-               data.triggerMatch === "is" ? `Xabar mos kelsa: "${data.triggerKeywords || ''}"` :
-               `Xabarda bo'lsa: "${data.triggerKeywords || ''}"`}
-            </span>
-          </div>
-        )}
-
-        {data.prohibitRestart && (
-          <div className="flex items-center gap-1 border-t border-[#F0F0F0] pt-2 mt-1 text-red-500 text-[10px] font-bold">
-            <span>🚫 Prohibit restart faol</span>
-          </div>
-        )}
-      </div>
-
-      {/* Connection output handle at the bottom (id='btn-b1' for backwards-compatibility) */}
-      <Handle
-        type="source"
-        position={Position.Bottom}
-        id="btn-b1"
-        style={{ background: "#9296AD", width: 8, height: 8, border: "2px solid white", bottom: -4 }}
-      />
-    </div>
-  );
-}
+// TriggerNode has been removed. Triggers are now managed at flow-level.
 
 function MessageNode({ data, id }: NodeProps<NodeData>) {
   const { setNodes, setEdges } = useReactFlow();
@@ -766,60 +690,52 @@ export default function BuilderPage() {
   const TEMPLATE_FLOWS: Record<string, { nodes: Node<NodeData>[]; edges: Edge[] }> = {
     lead_magnet: {
       nodes: [
-        { id: "n1", type: "trigger", data: { label: "Trigger: DM – kitob, kurs, bonus", nodeType: "trigger", triggerSource: "dm", triggerMatch: "contains", triggerKeywords: "kitob, kurs, bonus" }, position: { x: 50, y: 150 } },
-        { id: "n_welcome", type: "message", data: { label: "Hi, want to get a lesson on setting up automation in Direct with a subscription check and lead magnet delivery?", nodeType: "message", imageUrl: "/logo.svg", buttons: [{ id: "b1", label: "Yes, I do!🤩", type: "action" }, { id: "b2", label: "Nomini kiriting", type: "action" }] }, position: { x: 350, y: 150 } },
-        { id: "n2", type: "action", data: { label: "clicked the button scheme", nodeType: "action" }, position: { x: 680, y: 120 } },
-        { id: "n3", type: "condition", data: { label: "Obuna", nodeType: "condition", conditionType: "is_follower" }, position: { x: 1000, y: 120 } },
-        { id: "n4", type: "message", data: { label: "Yaxshi! Obuna bo'lganingiz uchun rahmat. Mana kitob havolasi: https://t.me/yourusername", nodeType: "message", buttons: [{ id: "b3", label: "Yuklab olish", type: "link", url: "https://example.com" }] }, position: { x: 1350, y: 50 } },
-        { id: "n5", type: "message", data: { label: "Afsuski, siz hali obuna bo'lmagansiz. Iltimos obuna bo'ling va keyin 'Tekshirish' tugmasini bosing.", nodeType: "message", buttons: [{ id: "b4", label: "Obunani tekshirish", type: "action" }] }, position: { x: 1350, y: 250 } },
-        { id: "n6", type: "wait", data: { label: "10 Daqiqalar", nodeType: "wait" }, position: { x: 680, y: 450 } },
-        { id: "n7", type: "condition", data: { label: "Obuna (Eslatma)", nodeType: "condition", conditionType: "is_follower" }, position: { x: 1000, y: 450 } },
-        { id: "n8", type: "message", data: { label: "Siz hali obuna bo'lmagansiz, bonusni olish uchun obuna bo'lishingiz kerak.", nodeType: "message" }, position: { x: 1350, y: 480 } },
+        { id: "n1", type: "message", data: { label: "Hi, want to get a lesson on setting up automation in Direct with a subscription check and lead magnet delivery?", nodeType: "message", imageUrl: "/logo.svg", isEntryPoint: true, buttons: [{ id: "b1", label: "Yes, I do!🤩", type: "action" }, { id: "b2", label: "Nomini kiriting", type: "action" }] }, position: { x: 100, y: 150 } },
+        { id: "n2", type: "action", data: { label: "clicked the button scheme", nodeType: "action" }, position: { x: 450, y: 120 } },
+        { id: "n3", type: "condition", data: { label: "Obuna", nodeType: "condition", conditionType: "is_follower" }, position: { x: 770, y: 120 } },
+        { id: "n4", type: "message", data: { label: "Yaxshi! Obuna bo'lganingiz uchun rahmat. Mana kitob havolasi: https://t.me/yourusername", nodeType: "message", buttons: [{ id: "b3", label: "Yuklab olish", type: "link", url: "https://example.com" }] }, position: { x: 1120, y: 50 } },
+        { id: "n5", type: "message", data: { label: "Afsuski, siz hali obuna bo'lmagansiz. Iltimos obuna bo'ling va keyin 'Tekshirish' tugmasini bosing.", nodeType: "message", buttons: [{ id: "b4", label: "Obunani tekshirish", type: "action" }] }, position: { x: 1120, y: 250 } },
+        { id: "n6", type: "wait", data: { label: "10 Daqiqalar", nodeType: "wait" }, position: { x: 450, y: 450 } },
+        { id: "n7", type: "condition", data: { label: "Obuna (Eslatma)", nodeType: "condition", conditionType: "is_follower" }, position: { x: 770, y: 450 } },
+        { id: "n8", type: "message", data: { label: "Siz hali obuna bo'lmagansiz, bonusni olish uchun obuna bo'lishingiz kerak.", nodeType: "message" }, position: { x: 1120, y: 480 } },
       ],
       edges: [
-        { id: "e1", source: "n1", target: "n_welcome", animated: true, style: { stroke: "#9296AD", strokeWidth: 1.5 }, markerEnd: { type: MarkerType.ArrowClosed, color: "#9296AD" } },
-        { id: "e2", source: "n_welcome", sourceHandle: "btn-b1", target: "n2", animated: true, style: { stroke: "#9296AD", strokeWidth: 1.5 }, markerEnd: { type: MarkerType.ArrowClosed, color: "#9296AD" } },
+        { id: "e2", source: "n1", sourceHandle: "btn-b1", target: "n2", animated: true, style: { stroke: "#9296AD", strokeWidth: 1.5 }, markerEnd: { type: MarkerType.ArrowClosed, color: "#9296AD" } },
         { id: "e3", source: "n2", target: "n3", animated: true, style: { stroke: "#9296AD", strokeWidth: 1.5 }, markerEnd: { type: MarkerType.ArrowClosed, color: "#9296AD" } },
         { id: "e4", source: "n3", sourceHandle: "yes", target: "n4", animated: true, style: { stroke: "#16A34A", strokeWidth: 1.5 }, markerEnd: { type: MarkerType.ArrowClosed, color: "#16A34A" } },
         { id: "e5", source: "n3", sourceHandle: "no", target: "n5", animated: true, style: { stroke: "#DC2626", strokeWidth: 1.5 }, markerEnd: { type: MarkerType.ArrowClosed, color: "#DC2626" } },
-        { id: "e6", source: "n_welcome", sourceHandle: "btn-b2", target: "n6", animated: true, style: { stroke: "#9296AD", strokeWidth: 1.5 }, markerEnd: { type: MarkerType.ArrowClosed, color: "#9296AD" } },
+        { id: "e6", source: "n1", sourceHandle: "btn-b2", target: "n6", animated: true, style: { stroke: "#9296AD", strokeWidth: 1.5 }, markerEnd: { type: MarkerType.ArrowClosed, color: "#9296AD" } },
         { id: "e7", source: "n6", target: "n7", animated: true, style: { stroke: "#9296AD", strokeWidth: 1.5 }, markerEnd: { type: MarkerType.ArrowClosed, color: "#9296AD" } },
         { id: "e8", source: "n7", sourceHandle: "no", target: "n8", animated: true, style: { stroke: "#DC2626", strokeWidth: 1.5 }, markerEnd: { type: MarkerType.ArrowClosed, color: "#DC2626" } },
       ],
     },
     story_coupon: {
       nodes: [
-        { id: "n1", type: "trigger", data: { label: "Trigger: Story Mention", nodeType: "trigger", triggerSource: "story_mention", triggerMatch: "any" }, position: { x: 50, y: 150 } },
-        { id: "n2", type: "message", data: { label: t("pages.builder.tmpl_story_msg_label"), nodeType: "message", buttons: [{ id: "b2", label: t("pages.builder.tmpl_story_msg_btn"), type: "link", url: "https://t.me/yourusername" }] }, position: { x: 380, y: 150 } },
-        { id: "n3", type: "action", data: { label: t("pages.builder.tmpl_story_act_label"), nodeType: "action", actionType: "add_tag", actionValue: "story_user" }, position: { x: 700, y: 150 } },
+        { id: "n1", type: "message", data: { label: t("pages.builder.tmpl_story_msg_label"), nodeType: "message", isEntryPoint: true, buttons: [{ id: "b2", label: t("pages.builder.tmpl_story_msg_btn"), type: "link", url: "https://t.me/yourusername" }] }, position: { x: 100, y: 150 } },
+        { id: "n2", type: "action", data: { label: t("pages.builder.tmpl_story_act_label"), nodeType: "action", actionType: "add_tag", actionValue: "story_user" }, position: { x: 450, y: 150 } },
       ],
       edges: [
-        { id: "e1", source: "n1", target: "n2", animated: true, style: { stroke: "#9296AD", strokeWidth: 1.5 }, markerEnd: { type: MarkerType.ArrowClosed, color: "#9296AD" } },
-        { id: "e2", source: "n2", sourceHandle: "btn-b2", target: "n3", animated: true, style: { stroke: "#9296AD", strokeWidth: 1.5 }, markerEnd: { type: MarkerType.ArrowClosed, color: "#9296AD" } },
+        { id: "e2", source: "n1", sourceHandle: "btn-b2", target: "n2", animated: true, style: { stroke: "#9296AD", strokeWidth: 1.5 }, markerEnd: { type: MarkerType.ArrowClosed, color: "#9296AD" } },
       ],
     },
     comment_dm: {
       nodes: [
-        { id: "n1", type: "trigger", data: { label: "Trigger: Izoh – narxi, batafsil", nodeType: "trigger", triggerSource: "comment", triggerMatch: "contains", triggerKeywords: "narxi, batafsil, link" }, position: { x: 50, y: 150 } },
-        { id: "n2", type: "message", data: { label: t("pages.builder.tmpl_comment_msg1_label"), nodeType: "message", buttons: [] }, position: { x: 380, y: 150 } },
-        { id: "n3", type: "message", data: { label: t("pages.builder.tmpl_comment_msg2_label"), nodeType: "message", buttons: [{ id: "b2", label: t("pages.builder.tmpl_comment_msg2_btn1"), type: "link", url: "https://t.me/yourusername" }] }, position: { x: 700, y: 150 } },
+        { id: "n1", type: "message", data: { label: t("pages.builder.tmpl_comment_msg1_label"), nodeType: "message", isEntryPoint: true, buttons: [] }, position: { x: 100, y: 150 } },
+        { id: "n2", type: "message", data: { label: t("pages.builder.tmpl_comment_msg2_label"), nodeType: "message", buttons: [{ id: "b2", label: t("pages.builder.tmpl_comment_msg2_btn1"), type: "link", url: "https://t.me/yourusername" }] }, position: { x: 450, y: 150 } },
       ],
       edges: [
-        { id: "e1", source: "n1", target: "n2", animated: true, style: { stroke: "#9296AD", strokeWidth: 1.5 }, markerEnd: { type: MarkerType.ArrowClosed, color: "#9296AD" } },
-        { id: "e2", source: "n2", target: "n3", animated: true, style: { stroke: "#9296AD", strokeWidth: 1.5 }, markerEnd: { type: MarkerType.ArrowClosed, color: "#9296AD" } },
+        { id: "e2", source: "n1", target: "n2", animated: true, style: { stroke: "#9296AD", strokeWidth: 1.5 }, markerEnd: { type: MarkerType.ArrowClosed, color: "#9296AD" } },
       ],
     },
     welcome_faq: {
       nodes: [
-        { id: "n1", type: "trigger", data: { label: "Trigger: DM – salom, start, boshlash", nodeType: "trigger", triggerSource: "dm", triggerMatch: "contains", triggerKeywords: "salom, start, boshlash" }, position: { x: 50, y: 150 } },
-        { id: "n2", type: "message", data: { label: t("pages.builder.tmpl_welcome_msg1_label"), nodeType: "message", buttons: [{ id: "b2", label: "Savol berish", type: "action" }, { id: "b3", label: "Kurslar haqida", type: "action" }] }, position: { x: 380, y: 150 } },
-        { id: "n3", type: "message", data: { label: t("pages.builder.tmpl_welcome_msg2_label"), nodeType: "message", buttons: [] }, position: { x: 700, y: 50 } },
-        { id: "n4", type: "message", data: { label: t("pages.builder.tmpl_welcome_msg3_label"), nodeType: "message", buttons: [] }, position: { x: 700, y: 250 } },
+        { id: "n1", type: "message", data: { label: t("pages.builder.tmpl_welcome_msg1_label"), nodeType: "message", isEntryPoint: true, buttons: [{ id: "b2", label: "Savol berish", type: "action" }, { id: "b3", label: "Kurslar haqida", type: "action" }] }, position: { x: 100, y: 150 } },
+        { id: "n2", type: "message", data: { label: t("pages.builder.tmpl_welcome_msg2_label"), nodeType: "message", buttons: [] }, position: { x: 450, y: 50 } },
+        { id: "n3", type: "message", data: { label: t("pages.builder.tmpl_welcome_msg3_label"), nodeType: "message", buttons: [] }, position: { x: 450, y: 250 } },
       ],
       edges: [
-        { id: "e1", source: "n1", target: "n2", animated: true, style: { stroke: "#9296AD", strokeWidth: 1.5 }, markerEnd: { type: MarkerType.ArrowClosed, color: "#9296AD" } },
-        { id: "e2", source: "n2", sourceHandle: "btn-b2", target: "n3", animated: true, style: { stroke: "#9296AD", strokeWidth: 1.5 }, markerEnd: { type: MarkerType.ArrowClosed, color: "#9296AD" } },
-        { id: "e3", source: "n2", sourceHandle: "btn-b3", target: "n4", animated: true, style: { stroke: "#9296AD", strokeWidth: 1.5 }, markerEnd: { type: MarkerType.ArrowClosed, color: "#9296AD" } },
+        { id: "e2", source: "n1", sourceHandle: "btn-b2", target: "n2", animated: true, style: { stroke: "#9296AD", strokeWidth: 1.5 }, markerEnd: { type: MarkerType.ArrowClosed, color: "#9296AD" } },
+        { id: "e3", source: "n1", sourceHandle: "btn-b3", target: "n3", animated: true, style: { stroke: "#9296AD", strokeWidth: 1.5 }, markerEnd: { type: MarkerType.ArrowClosed, color: "#9296AD" } },
       ],
     },
   };
@@ -887,6 +803,59 @@ export default function BuilderPage() {
   const [isRichEditorOpen, setIsRichEditorOpen] = useState(false);
   const [showRichEmojiList, setShowRichEmojiList] = useState(false);
 
+  const [entryPointId, setEntryPointId] = useState<string>("n1");
+  const [flowTriggerSource, setFlowTriggerSource] = useState("dm");
+  const [flowTriggerMatch, setFlowTriggerMatch] = useState("contains");
+  const [flowTriggerKeywords, setFlowTriggerKeywords] = useState("");
+  const [flowProhibitRestart, setFlowProhibitRestart] = useState(false);
+  const [isEditingTrigger, setIsEditingTrigger] = useState(false);
+
+  const openTriggerSettings = () => {
+    setIsEditingTrigger(true);
+    setSelectedNode(null);
+    setSelectedButton(null);
+    setInspTriggerSource(flowTriggerSource);
+    setInspTriggerMatch(flowTriggerMatch);
+    setInspTriggerKeywords(flowTriggerKeywords);
+    setInspProhibitRestart(flowProhibitRestart);
+  };
+
+  const handleSaveTriggerDetails = () => {
+    setFlowTriggerSource(inspTriggerSource);
+    setFlowTriggerMatch(inspTriggerMatch);
+    setFlowTriggerKeywords(inspTriggerKeywords);
+    setFlowProhibitRestart(inspProhibitRestart);
+    setIsEditingTrigger(false);
+    
+    setToastMsg("Trigger sozlamalari muvaffaqiyatli saqlandi!");
+    setShowToast(true);
+    setTimeout(() => setShowToast(false), 2000);
+  };
+
+  useEffect(() => {
+    const handleSetEntryPoint = (e: Event) => {
+      const { nodeId } = (e as CustomEvent).detail;
+      setEntryPointId(nodeId);
+      setToastMsg("Boshlanish bloki (Entry point) belgilandi!");
+      setShowToast(true);
+      setTimeout(() => setShowToast(false), 2000);
+    };
+    window.addEventListener("set-entry-point", handleSetEntryPoint);
+    return () => window.removeEventListener("set-entry-point", handleSetEntryPoint);
+  }, []);
+
+  useEffect(() => {
+    setNodes((nds) =>
+      nds.map((n) => ({
+        ...n,
+        data: {
+          ...n.data,
+          isEntryPoint: n.id === entryPointId,
+        },
+      }))
+    );
+  }, [entryPointId, setNodes]);
+
   useEffect(() => {
     const user = db.getCurrentUser();
     if (!user) { window.location.href = "/login"; return; }
@@ -900,34 +869,103 @@ export default function BuilderPage() {
       setActiveChannelName(activeCh.username.startsWith("@") ? activeCh.username : `@${activeCh.username}`);
     }
 
-    if (paramTemplate && TEMPLATE_FLOWS[paramTemplate]) {
-      const tflow = TEMPLATE_FLOWS[paramTemplate];
-      setNodes(tflow.nodes);
-      setEdges(tflow.edges);
-      const found = activeCh
-        ? db.getChannelAutomations(activeCh.id).find((a) => a.id === paramId)
-        : db.getAutomations().find((a) => a.id === paramId);
-      if (found) setBotName(found.name);
-      else setBotName(paramTemplate === "lead_magnet" ? "Instagram'da obunani tekshirish" : t("pages.builder.new_flow"));
-    } else if (paramId) {
+    if (paramId) {
       const found = activeCh
         ? db.getChannelAutomations(activeCh.id).find((a) => a.id === paramId)
         : db.getAutomations().find((a) => a.id === paramId);
       if (found) {
         setBotName(found.name);
-        setNodes([
-          { id: "n1", type: "trigger", data: { label: found.triggerDetails || "Instagram'da obunani tekshirish", nodeType: "trigger", triggerSource: found.triggerType === "story" ? "story_mention" : "dm", triggerMatch: "contains", triggerKeywords: found.triggerDetails }, position: { x: 50, y: 150 } },
-          { id: "n2", type: "message", data: { label: found.replyText || t("pages.builder.initial_msg_connected"), nodeType: "message", buttons: [] }, position: { x: 380, y: 150 } },
-        ]);
-        setEdges([{ id: "e1", source: "n1", target: "n2", animated: true, style: { stroke: "#9296AD", strokeWidth: 1.5 }, markerEnd: { type: MarkerType.ArrowClosed, color: "#9296AD" } }]);
+
+        const savedDiagram = localStorage.getItem(`flow_diagram_${paramId}`);
+        if (savedDiagram) {
+          try {
+            const parsed = JSON.parse(savedDiagram);
+            let loadedNodes: Node<NodeData>[] = parsed.nodes || [];
+            let loadedEdges: Edge[] = parsed.edges || [];
+            let entryId = parsed.entryPointId || "n1";
+            let tSource = parsed.flowTriggerSource || "dm";
+            let tMatch = parsed.flowTriggerMatch || "contains";
+            let tKeywords = parsed.flowTriggerKeywords || "";
+            let tProhibitRestart = parsed.flowProhibitRestart || false;
+
+            // Automatically migrate legacy visual trigger nodes
+            const triggerNode = loadedNodes.find((n) => n.type === "trigger" || n.data?.nodeType === "trigger");
+            if (triggerNode) {
+              tSource = triggerNode.data?.triggerSource || tSource;
+              tMatch = triggerNode.data?.triggerMatch || tMatch;
+              tKeywords = triggerNode.data?.triggerKeywords || tKeywords;
+              tProhibitRestart = triggerNode.data?.prohibitRestart || tProhibitRestart;
+
+              const outgoingEdge = loadedEdges.find((e) => e.source === triggerNode.id);
+              if (outgoingEdge) {
+                entryId = outgoingEdge.target;
+              }
+
+              loadedNodes = loadedNodes.filter((n) => n.id !== triggerNode.id);
+              loadedEdges = loadedEdges.filter((e) => e.source !== triggerNode.id && e.target !== triggerNode.id);
+            }
+
+            setNodes(loadedNodes);
+            setEdges(loadedEdges);
+            setEntryPointId(entryId);
+            setFlowTriggerSource(tSource);
+            setFlowTriggerMatch(tMatch);
+            setFlowTriggerKeywords(tKeywords);
+            setFlowProhibitRestart(tProhibitRestart);
+          } catch (e) {
+            console.error("Failed to load flow diagram", e);
+          }
+        } else {
+          // Backward compatibility fallback: load single starting node
+          const src = found.triggerType === "story" ? "story_mention" : "dm";
+          setNodes([
+            { id: "n1", type: "message", data: { label: found.replyText || t("pages.builder.initial_msg_how_help"), nodeType: "message", isEntryPoint: true, buttons: [] }, position: { x: 100, y: 150 } }
+          ]);
+          setEntryPointId("n1");
+          setFlowTriggerSource(src);
+          setFlowTriggerMatch("contains");
+          setFlowTriggerKeywords(found.triggerDetails || "");
+        }
       }
+    } else if (paramTemplate && TEMPLATE_FLOWS[paramTemplate]) {
+      const tflow = TEMPLATE_FLOWS[paramTemplate];
+      // Set nodes & edges from template
+      setNodes(tflow.nodes);
+      setEdges(tflow.edges);
+      
+      // Select template entryPointId
+      setEntryPointId("n1");
+
+      // Set flow triggers depending on template type
+      if (paramTemplate === "lead_magnet") {
+        setFlowTriggerSource("dm");
+        setFlowTriggerMatch("contains");
+        setFlowTriggerKeywords("kitob, kurs, bonus");
+      } else if (paramTemplate === "story_coupon") {
+        setFlowTriggerSource("story_mention");
+        setFlowTriggerMatch("any");
+        setFlowTriggerKeywords("");
+      } else if (paramTemplate === "comment_dm") {
+        setFlowTriggerSource("comment");
+        setFlowTriggerMatch("contains");
+        setFlowTriggerKeywords("narxi, batafsil, link");
+      } else if (paramTemplate === "welcome_faq") {
+        setFlowTriggerSource("dm");
+        setFlowTriggerMatch("contains");
+        setFlowTriggerKeywords("salom, start, boshlash");
+      }
+      
+      setBotName(paramTemplate === "lead_magnet" ? "Instagram'da obunani tekshirish" : t("pages.builder.new_flow"));
     } else {
       setBotName(t("pages.builder.new_flow"));
       setNodes([
-        { id: "n1", type: "trigger", data: { label: t("pages.builder.initial_trigger_kw"), nodeType: "trigger", triggerSource: "dm", triggerMatch: "contains", triggerKeywords: "salom, narx" }, position: { x: 50, y: 150 } },
-        { id: "n2", type: "message", data: { label: t("pages.builder.initial_msg_how_help"), nodeType: "message", buttons: [] }, position: { x: 380, y: 150 } },
+        { id: "n1", type: "message", data: { label: t("pages.builder.initial_msg_how_help"), nodeType: "message", isEntryPoint: true, buttons: [] }, position: { x: 100, y: 150 } }
       ]);
-      setEdges([{ id: "e1", source: "n1", target: "n2", animated: true, style: { stroke: "#9296AD", strokeWidth: 1.5 }, markerEnd: { type: MarkerType.ArrowClosed, color: "#9296AD" } }]);
+      setEntryPointId("n1");
+      setFlowTriggerSource("dm");
+      setFlowTriggerMatch("contains");
+      setFlowTriggerKeywords("salom, narx");
+      setFlowProhibitRestart(false);
     }
   }, [setNodes, setEdges, t]);
 
@@ -1055,18 +1093,28 @@ export default function BuilderPage() {
     const paramId = sp.get("id");
     const activeCh = db.getActiveChannel();
     const list = activeCh ? db.getChannelAutomations(activeCh.id) : db.getAutomations();
-    const triggerNode = nodes.find((n) => n.data.nodeType === "trigger");
-    const messageNode = nodes.find((n) => n.data.nodeType === "message");
-    const replyText = triggerNode?.data.label || messageNode?.data.label || "";
-    const src = triggerNode?.data.triggerSource || "dm";
+    
+    // Find the designated entry point message node
+    const entryNode = nodes.find((n) => n.id === entryPointId) || nodes.find((n) => n.data.nodeType === "message") || nodes[0];
+    const replyText = entryNode?.data.label || "";
+    
+    const src = flowTriggerSource || "dm";
     const isStory = src.includes("story");
     let savedMsg = t("pages.builder.saved_toast");
 
     if (paramId) {
       const idx = list.findIndex((a) => a.id === paramId);
       if (idx > -1) {
-        list[idx] = { ...list[idx], name: botName, triggerType: isStory ? "story" : "keyword", triggerDetails: triggerNode?.data.triggerKeywords || src, replyText };
+        list[idx] = { 
+          ...list[idx], 
+          name: botName, 
+          triggerType: isStory ? "story" : "keyword", 
+          triggerDetails: flowTriggerKeywords || src, 
+          replyText 
+        };
       }
+      // Save canvas diagram
+      localStorage.setItem(`flow_diagram_${paramId}`, JSON.stringify({ nodes, edges, entryPointId, flowTriggerSource, flowTriggerMatch, flowTriggerKeywords, flowProhibitRestart }));
     } else {
       const user = db.getCurrentUser();
       const plan = user?.plan || "free";
@@ -1074,16 +1122,19 @@ export default function BuilderPage() {
       const currentActiveCount = db.getAllAutomations().filter((a) => a.active).length;
       const shouldBeActive = currentActiveCount < maxAutos;
 
+      const newId = String(list.length + 1);
       list.push({ 
-        id: String(list.length + 1), 
+        id: newId, 
         name: botName, 
         triggerType: isStory ? "story" : "keyword", 
-        triggerDetails: triggerNode?.data.triggerKeywords || src, 
+        triggerDetails: flowTriggerKeywords || src, 
         runs: "0", 
         completion: "0%", 
         active: shouldBeActive,
         replyText
       });
+      // Save canvas diagram
+      localStorage.setItem(`flow_diagram_${newId}`, JSON.stringify({ nodes, edges, entryPointId, flowTriggerSource, flowTriggerMatch, flowTriggerKeywords, flowProhibitRestart }));
 
       if (!shouldBeActive) {
         savedMsg = t("pages.builder.limit_toast");
@@ -1133,7 +1184,7 @@ export default function BuilderPage() {
   };
 
   const addNewNode = (type: NodeType) => {
-    const id = `node-${nodes.length + 1}`;
+    const id = `node-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
     const configs: Record<NodeType, { label: string; data: Partial<NodeData> }> = {
       trigger: { label: t("pages.builder.block_trigger"), data: { nodeType: "trigger", triggerSource: "dm", triggerMatch: "contains", triggerKeywords: "", buttons: [] } },
       message: { label: t("pages.builder.block_message"), data: { nodeType: "message", buttons: [] } },
@@ -1169,7 +1220,6 @@ export default function BuilderPage() {
   };
 
   const nodeTypes = useMemo(() => ({
-    trigger: TriggerNode,
     message: MessageNode,
     condition: ConditionNode,
     action: ActionNode,
@@ -1223,12 +1273,7 @@ export default function BuilderPage() {
           </div>
           <div className="flex items-center gap-2">
             <button 
-              onClick={() => {
-                const triggerNode = nodes.find((n) => n.data.nodeType === "trigger");
-                if (triggerNode) {
-                  syncInspector(triggerNode);
-                }
-              }}
+              onClick={openTriggerSettings}
               className="flex items-center gap-1.5 px-4 h-9 text-[11px] font-extrabold bg-[#FAFAFA] border border-[#E8E8E8] rounded-full hover:bg-[#F0F0F0] text-black shrink-0 transition-colors cursor-pointer"
             >
               <Settings size={12} />
@@ -1244,41 +1289,68 @@ export default function BuilderPage() {
         {/* Workspace */}
         <div className="flex flex-1 overflow-hidden relative">
           
-          {/* Floating Add Block Popup */}
-          {isPaletteOpen && (
-            <div className="absolute top-16 left-4 z-40 bg-white rounded-2xl shadow-xl border border-[#E8E8E8] p-2 w-[180px] flex flex-col gap-0.5 animate-in fade-in slide-in-from-top-2 duration-150 text-black">
-              {([
-                { type: "message" as NodeType, label: "Message", icon: <MessageCircle size={16} strokeWidth={2.5} className="text-[#3B82F6]" /> },
-                { type: "condition" as NodeType, label: "Condition", icon: <Filter size={16} strokeWidth={2.5} className="text-[#22C55E]" /> },
-                { type: "action" as NodeType, label: "Action", icon: <Zap size={16} strokeWidth={2.5} className="text-[#EAB308]" /> },
-                { type: "wait" as NodeType, label: "Wait", icon: <Clock size={16} strokeWidth={2.5} className="text-[#A855F7]" /> },
-              ]).map((item) => (
-                <button
-                  key={item.type}
-                  type="button"
-                  onClick={() => {
-                    addNewNode(item.type);
-                    setIsPaletteOpen(false);
-                  }}
-                  className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left hover:bg-[#F5F5F7] transition-all cursor-pointer border-none bg-white text-black font-semibold text-[12.5px] select-none"
-                >
-                  <div className="shrink-0 flex items-center justify-center">{item.icon}</div>
-                  <span>{item.label}</span>
-                </button>
-              ))}
-            </div>
-          )}
-
           {/* Canvas area */}
           <main className="flex-1 relative bg-[#F5F5F7]">
+            {/* ReactFlow Canvas */}
+            <ReactFlow
+              nodes={nodes}
+              edges={edges}
+              onNodesChange={onNodesChange}
+              onEdgesChange={onEdgesChange}
+              onConnect={onConnect}
+              onNodeClick={(_e, node) => {
+                setIsEditingTrigger(false);
+                onNodeClick(_e, node);
+              }}
+              onPaneClick={() => {
+                setSelectedNode(null);
+                setSelectedButton(null);
+                setIsEditingTrigger(false);
+              }}
+              nodeTypes={nodeTypes}
+              edgeTypes={edgeTypes}
+              onInit={setReactFlowInstance}
+              connectionLineStyle={{ stroke: "#9296AD", strokeWidth: 1.5 }}
+              proOptions={{ hideAttribution: true }}
+              fitView
+            >
+              <Background color="#9296AD" variant="dots" gap={20} size={1.5} style={{ opacity: 0.15 }} />
+            </ReactFlow>
+
+            {/* Overlay controls rendered after ReactFlow to avoid stacking capture issues */}
             {/* Add Block trigger plus icon button */}
             <button
               onClick={() => setIsPaletteOpen(!isPaletteOpen)}
-              className="absolute top-4 left-4 z-35 w-10 h-10 bg-white border border-[#E8E8E8] rounded-xl flex items-center justify-center shadow-sm text-black hover:border-black hover:scale-105 active:scale-95 transition-all cursor-pointer"
+              className="absolute top-4 left-4 z-[50] w-10 h-10 bg-white border border-[#E8E8E8] rounded-xl flex items-center justify-center shadow-sm text-black hover:border-black hover:scale-105 active:scale-[0.97] transition-all cursor-pointer"
               title="Blok qo'shish"
             >
               <Plus size={18} strokeWidth={3} />
             </button>
+
+            {/* Floating Add Block Popup */}
+            {isPaletteOpen && (
+              <div className="absolute top-16 left-4 z-[50] bg-white rounded-2xl shadow-xl border border-[#E8E8E8] p-2 w-[180px] flex flex-col gap-0.5 animate-in fade-in slide-in-from-top-2 duration-150 text-black">
+                {([
+                  { type: "message" as NodeType, label: "Message", icon: <MessageCircle size={16} strokeWidth={2.5} className="text-[#3B82F6]" /> },
+                  { type: "condition" as NodeType, label: "Condition", icon: <Filter size={16} strokeWidth={2.5} className="text-[#22C55E]" /> },
+                  { type: "action" as NodeType, label: "Action", icon: <Zap size={16} strokeWidth={2.5} className="text-[#EAB308]" /> },
+                  { type: "wait" as NodeType, label: "Wait", icon: <Clock size={16} strokeWidth={2.5} className="text-[#A855F7]" /> },
+                ]).map((item) => (
+                  <button
+                    key={item.type}
+                    type="button"
+                    onClick={() => {
+                      addNewNode(item.type);
+                      setIsPaletteOpen(false);
+                    }}
+                    className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left hover:bg-[#F5F5F7] transition-all cursor-pointer border-none bg-white text-black font-semibold text-[12.5px] select-none"
+                  >
+                    <div className="shrink-0 flex items-center justify-center">{item.icon}</div>
+                    <span>{item.label}</span>
+                  </button>
+                ))}
+              </div>
+            )}
 
             {/* Canvas control panel left */}
             <div className="absolute left-4 top-1/2 -translate-y-1/2 z-30 flex flex-col gap-1.5 bg-white/80 backdrop-blur-md p-1 border border-[#E8E8E8] rounded-2xl shadow-sm">
@@ -1319,34 +1391,148 @@ export default function BuilderPage() {
                 <MessageCircle size={16} />
               </a>
             </div>
-
-            {/* ReactFlow Canvas */}
-            <ReactFlow
-              nodes={nodes}
-              edges={edges}
-              onNodesChange={onNodesChange}
-              onEdgesChange={onEdgesChange}
-              onConnect={onConnect}
-              onNodeClick={onNodeClick}
-              onPaneClick={() => {
-                setSelectedNode(null);
-                setSelectedButton(null);
-              }}
-              nodeTypes={nodeTypes}
-              edgeTypes={edgeTypes}
-              onInit={setReactFlowInstance}
-              connectionLineStyle={{ stroke: "#9296AD", strokeWidth: 1.5 }}
-              proOptions={{ hideAttribution: true }}
-              fitView
-            >
-              <Background color="#9296AD" variant="dots" gap={20} size={1.5} style={{ opacity: 0.15 }} />
-            </ReactFlow>
           </main>
 
           {/* Right Inspector */}
-          {(selectedNode || (selectedButton && currentButton)) && (
+          {(selectedNode || (selectedButton && currentButton) || isEditingTrigger) && (
             <aside className="w-[320px] shrink-0 border-l border-[#E8E8E8] bg-white overflow-y-auto">
-            {selectedButton && currentButton ? (
+            {isEditingTrigger ? (
+              <div className="flex flex-col">
+                {/* Trigger Inspector Header */}
+                <div className="px-5 pt-5 pb-4 border-b border-[#F0F0F0] flex items-center justify-between">
+                  <div className="flex items-center gap-2.5">
+                    <h3 className="text-[13px] font-black text-black leading-none">
+                      Ishga tushirish triggerlari
+                    </h3>
+                  </div>
+                  <button
+                    onClick={() => {
+                      setIsEditingTrigger(false);
+                    }}
+                    className="p-1 rounded-full hover:bg-neutral-100 text-[#707070] hover:text-black transition-colors"
+                    title="Yopish"
+                  >
+                    <X size={16} />
+                  </button>
+                </div>
+
+                <div className="px-4 py-4 flex flex-col gap-5 text-left text-black">
+                  {/* Trigger Source Cards */}
+                  <div className="flex flex-col gap-2">
+                    <p className="text-[10px] font-bold text-[#707070] uppercase tracking-widest px-0.5">Trigger turi</p>
+                    <div className="grid grid-cols-3 gap-2">
+                      {TRIGGER_SOURCES.map((s) => {
+                        const IconComponent = s.icon;
+                        const isSelected = inspTriggerSource === s.value;
+                        return (
+                          <button
+                            key={s.value}
+                            type="button"
+                            onClick={() => setInspTriggerSource(s.value)}
+                            className={`flex flex-col p-3 rounded-2xl h-[92px] text-left transition-all relative border cursor-pointer select-none ${
+                              isSelected
+                                ? "border-2 border-[#1A73E8] bg-white shadow-sm"
+                                : "border border-[#E8E8E8] bg-white hover:border-[#ccc]"
+                            }`}
+                          >
+                            <div className="flex justify-between items-start w-full">
+                              <IconComponent size={20} className={isSelected ? "text-[#1A73E8]" : "text-[#707070]"} />
+                              <span className={`w-4 h-4 rounded-full border flex items-center justify-center shrink-0 transition-colors ${
+                                isSelected ? "border-[#1A73E8] border-2" : "border-[#D8D8D8]"
+                              }`}>
+                                {isSelected && <span className="w-1.5 h-1.5 rounded-full bg-[#1A73E8]" />}
+                              </span>
+                            </div>
+                            <span className="text-[10.5px] font-bold text-black leading-tight mt-auto">
+                              {s.label}
+                            </span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Keyword match type — only for text triggers (dm, comment, message_recognition) */}
+                  {(inspTriggerSource === "dm" || inspTriggerSource === "comment" || inspTriggerSource === "message_recognition") && (
+                    <div className="flex flex-col gap-3 border-t border-[#F0F0F0] pt-4 mt-2">
+                      <h4 className="text-[13px] font-extrabold text-black">Trigger on</h4>
+                      <div className="flex flex-col gap-3">
+                        {TRIGGER_MATCHES.map((m) => {
+                          const isActive = inspTriggerMatch === m.value;
+                          return (
+                            <button
+                              key={m.value}
+                              type="button"
+                              onClick={() => setInspTriggerMatch(m.value)}
+                              className="flex items-center gap-3 w-full text-left cursor-pointer group border-none bg-transparent"
+                            >
+                              <span className={`w-5 h-5 rounded-full border flex items-center justify-center shrink-0 transition-all ${
+                                isActive ? "border-[#1A73E8] border-2" : "border-[#D8D8D8] group-hover:border-[#ccc]"
+                              }`}>
+                                {isActive && <span className="w-2.5 h-2.5 rounded-full bg-[#1A73E8]" />}
+                              </span>
+                              <span className="text-[12px] font-bold text-black">{m.label}</span>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Keywords input */}
+                  {inspTriggerMatch !== "any" && (inspTriggerSource === "dm" || inspTriggerSource === "comment" || inspTriggerSource === "message_recognition") && (
+                    <div className="flex flex-col gap-2 mt-1">
+                      <p className="text-[10px] font-bold text-[#707070] uppercase tracking-widest px-0.5">Kalit so'zlar (vergul bilan ajrating)</p>
+                      <input
+                        value={inspTriggerKeywords}
+                        onChange={(e) => setInspTriggerKeywords(e.target.value)}
+                        placeholder="masalan: narx, o'qish, chegirma"
+                        className="w-full rounded-[12px] bg-[#F0F0F0] px-4 py-3 text-[12px] text-black outline-none focus:bg-[#e8e8e8] transition-colors"
+                      />
+                    </div>
+                  )}
+
+                  {/* Story / Live info banner */}
+                  {(inspTriggerSource === "story_mention" || inspTriggerSource === "story_reply" || inspTriggerSource === "story_reaction" || inspTriggerSource === "live_comment") && (
+                    <div className="flex items-start gap-2.5 p-3 rounded-[12px] bg-[#F9F9F7] border border-[#E8E8E8] mt-2">
+                      <Zap size={14} className="text-black shrink-0 mt-0.5" />
+                      <p className="text-[11px] text-[#505050] leading-relaxed">
+                        Ushbu trigger uchun kalit so'zlar talab qilinmaydi. Foydalanuvchi har safar story/live faolligi ko'rsatganda trigger ishga tushadi.
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Prohibit restart Toggle */}
+                  <div className="flex items-center justify-between border-t border-[#F0F0F0] pt-4 mt-2">
+                    <div className="flex flex-col gap-0.5 max-w-[210px] text-left">
+                      <span className="text-[12px] font-extrabold text-black">Prohibit restart</span>
+                      <span className="text-[10px] text-[#707070] leading-normal">
+                        During the specified time the automation can be started only once. All another restarts will be ignored and skipped.
+                      </span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setInspProhibitRestart(!inspProhibitRestart)}
+                      className={`w-11 h-6 rounded-full transition-colors relative shrink-0 cursor-pointer ${
+                        inspProhibitRestart ? "bg-[#1A73E8]" : "bg-[#D8D8D8]"
+                      }`}
+                    >
+                      <span className={`absolute top-0.5 w-5 h-5 rounded-full bg-white transition-all shadow-sm ${
+                        inspProhibitRestart ? "left-[21px]" : "left-0.5"
+                      }`} />
+                    </button>
+                  </div>
+
+                  {/* Save Trigger Details Button */}
+                  <button
+                    onClick={handleSaveTriggerDetails}
+                    className="w-full py-3 rounded-full bg-black text-white text-[12px] font-semibold hover:bg-black/80 active:scale-[0.98] transition-all mt-4 border-none cursor-pointer"
+                  >
+                    Saqlash
+                  </button>
+                </div>
+              </div>
+            ) : selectedButton && currentButton ? (
               <div className="flex flex-col">
                 {/* Button Inspector Header */}
                 <div className="px-5 pt-5 pb-4 border-b border-[#F0F0F0] flex items-center justify-between">
