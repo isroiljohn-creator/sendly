@@ -554,17 +554,17 @@ export default function AutomationsPage() {
                   className="bg-black hover:bg-neutral-900 border border-neutral-800 rounded-[24px] p-6 flex flex-col justify-between gap-6 shadow-md hover:shadow-xl transition-all relative group cursor-pointer text-left"
                 >
                   <div className="flex justify-between items-start w-full">
-                    <div className="bg-[#C7F33C] text-black font-extrabold text-[10px] uppercase tracking-wider px-2.5 py-1 rounded-lg">
-                      Tezkor bot sozlash
+                    <div className="bg-[#C7F33C] text-black font-black text-[10px] uppercase tracking-wider px-2.5 py-1 rounded-[6px]">
+                      QUICK
                     </div>
                     <span className="text-[16px] text-[#C7F33C] group-hover:translate-x-1 transition-transform font-extrabold">→</span>
                   </div>
                   <div>
                     <h3 className="text-[16px] font-black text-white leading-tight mt-2">
-                      Tezkor bot sozlash (Kalit so&apos;zli chat-bot)
+                      Kalit so&apos;zli chat-bot
                     </h3>
                     <p className="text-[12px] text-[#A0A0A0] mt-1.5 leading-relaxed font-medium">
-                      Har qanday qurilmadan, murakkab bloklar va konstruktorsiz avtomatlashtirish yaratishning eng oson va tezkor usuli. Kalit so&apos;zni kiriting va javob matnini sozlang!
+                      Har qanday qurilmadan, konstruktorsiz avtomatlashtirish yaratishning yangi usuli
                     </p>
                   </div>
                 </Link>
@@ -658,20 +658,20 @@ export default function AutomationsPage() {
                 {/* 1. Promotional Quick Bot Card (First Card) */}
                 <Link 
                   href="/automations/quick-bot" 
-                  className="bg-white border border-[#E8E8E8] hover:border-black rounded-[24px] p-5 flex flex-col justify-between shadow-sm hover:shadow-md transition-all relative group cursor-pointer text-left h-[160px]"
+                  className="bg-black hover:bg-neutral-900 border border-neutral-800 rounded-[24px] p-5 flex flex-col justify-between shadow-sm hover:shadow-md transition-all relative group cursor-pointer text-left h-[160px]"
                 >
                   <div className="flex justify-between items-start w-full">
                     <div className="bg-[#C7F33C] text-black font-black text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-[6px] select-none">
-                      Quick
+                      QUICK
                     </div>
-                    <span className="text-[16px] text-black group-hover:translate-x-1 transition-transform font-extrabold">→</span>
+                    <span className="text-[16px] text-[#C7F33C] group-hover:translate-x-1 transition-transform font-extrabold">→</span>
                   </div>
                   <div>
-                    <h3 className="text-[14px] font-black text-black leading-tight">
-                      Keyword Chatbot
+                    <h3 className="text-[14px] font-black text-white leading-tight">
+                      Kalit so&apos;zli chat-bot
                     </h3>
-                    <p className="text-[11px] text-[#8E8E93] mt-1 leading-normal font-medium line-clamp-2">
-                      A new way to create automation without a builder, from any device
+                    <p className="text-[11px] text-[#A0A0A0] mt-1 leading-normal font-medium line-clamp-2">
+                      Har qanday qurilmadan, konstruktorsiz avtomatlashtirish yaratishning yangi usuli
                     </p>
                   </div>
                 </Link>
