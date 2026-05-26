@@ -204,7 +204,7 @@ function safeParse<T>(jsonString: string | null, fallback: T): T {
 }
 
 // DB version — bump this to force-clear old localStorage data
-const DB_VERSION = "v10"; // Bump to clear potentially corrupted states
+const DB_VERSION = "v11"; // Bump to clear potentially corrupted states
 if (isClient && localStorage.getItem("replai_db_version") !== DB_VERSION) {
   localStorage.removeItem("replai_automations");
   localStorage.removeItem("replai_contacts");
@@ -215,6 +215,9 @@ if (isClient && localStorage.getItem("replai_db_version") !== DB_VERSION) {
   localStorage.removeItem("replai_lessons");
   localStorage.removeItem("replai_bot_settings");
   localStorage.removeItem("replai_groups");
+  localStorage.removeItem("replai_users");
+  localStorage.removeItem("replai_current_user");
+  localStorage.removeItem("replai_admin_impersonator");
   
   const keys = Object.keys(localStorage);
   keys.forEach((key) => {

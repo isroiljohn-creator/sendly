@@ -1,1 +1,54 @@
-{}
+{
+  "promoCodes": [
+    {
+      "code": "SENDLY10",
+      "amount": 10000,
+      "maxUses": 1000,
+      "usedCount": 142,
+      "restrictedToEmail": "",
+      "createdAt": "15-may, 2026"
+    },
+    {
+      "code": "WELCOME",
+      "amount": 5000,
+      "maxUses": 1000,
+      "usedCount": 521,
+      "restrictedToEmail": "",
+      "createdAt": "10-may, 2026"
+    },
+    {
+      "code": "PROMO50",
+      "amount": 50000,
+      "maxUses": 50,
+      "usedCount": 12,
+      "restrictedToEmail": "",
+      "createdAt": "20-may, 2026"
+    }
+  ],
+  "auditLogs": [
+    {
+      "id": "l-1",
+      "user": "admin@sendly.uz",
+      "action": "Tizim sozlamalari yangilandi",
+      "date": "26-May, 20:10"
+    },
+    {
+      "id": "l-2",
+      "user": "ali@test.com",
+      "action": "SENDLY10 promokodini faollashtirdi",
+      "date": "26-May, 19:42"
+    },
+    {
+      "id": "l-3",
+      "user": "nodir@test.com",
+      "action": "PRO obunaga bog'landi (UzCard)",
+      "date": "26-May, 18:15"
+    },
+    {
+      "id": "l-4",
+      "user": "shavkat@test.com",
+      "action": "Yangi telegram ulanishini yaratdi",
+      "date": "26-May, 15:30"
+    }
+  ]
+}

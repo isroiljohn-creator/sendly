@@ -1,8 +1,9 @@
 import { NextResponse } from "next/server";
 import fs from "fs";
 import path from "path";
+import { createClient } from "@supabase/supabase-js";
 
-const DB_FILE = path.join(process.cwd(), "db.json");
+const DB_FILE = process.env.DB_FILE_PATH || path.join(process.cwd(), "db.json");
 
 function readDb() {
   try {
@@ -27,38 +28,131 @@ function writeDb(data: unknown) {
   }
 }
 
+function isValidUuid(id: string): boolean {
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  return uuidRegex.test(id);
+}
+
 export async function GET(request: Request) {
   try {
-    const dbData = readDb();
-    
-    // Ensure lists exist
-    const usersList = dbData.users || [];
-    
-    if (!dbData.promoCodes) {
-      dbData.promoCodes = [
-        { code: "SENDLY10", amount: 10000, maxUses: 1000, usedCount: 142, restrictedToEmail: "", createdAt: "15-may, 2026" },
-        { code: "WELCOME", amount: 5000, maxUses: 1000, usedCount: 521, restrictedToEmail: "", createdAt: "10-may, 2026" },
-        { code: "PROMO50", amount: 50000, maxUses: 50, usedCount: 12, restrictedToEmail: "", createdAt: "20-may, 2026" }
-      ];
-      writeDb(dbData);
+    let usersList: any[] = [];
+    let userDataMap: Record<string, any> = {};
+    let promoCodes: any[] = [];
+    let auditLogs: any[] = [];
+    let systemAnnouncement = "";
+
+    // 1. Try Supabase first if credentials are set
+    if (process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY) {
+      try {
+        const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY);
+        const { data: allRows, error: fetchErr } = await supabase
+          .from("instagram_accounts")
+          .select("*");
+
+        if (fetchErr) throw fetchErr;
+
+        if (allRows) {
+          // Parse global users
+          const globalUsersRow = allRows.find(r => r.instagram_page_id === "global_users");
+          if (globalUsersRow && globalUsersRow.fb_field_mappings) {
+            usersList = typeof globalUsersRow.fb_field_mappings === "string"
+              ? JSON.parse(globalUsersRow.fb_field_mappings)
+              : globalUsersRow.fb_field_mappings;
+          }
+
+          // Parse global admin data
+          const globalAdminRow = allRows.find(r => r.instagram_page_id === "global_admin_data");
+          if (globalAdminRow && globalAdminRow.fb_field_mappings) {
+            const adminData = typeof globalAdminRow.fb_field_mappings === "string"
+              ? JSON.parse(globalAdminRow.fb_field_mappings)
+              : globalAdminRow.fb_field_mappings;
+            
+            promoCodes = adminData.promoCodes || [];
+            auditLogs = adminData.auditLogs || [];
+            systemAnnouncement = adminData.systemAnnouncement || "";
+          }
+
+          // Parse user specific settings
+          allRows.forEach(row => {
+            if (row.instagram_page_id && row.instagram_page_id.startsWith("global_settings_")) {
+              const uid = row.instagram_page_id.replace("global_settings_", "");
+              try {
+                userDataMap[uid] = typeof row.fb_field_mappings === "string"
+                  ? JSON.parse(row.fb_field_mappings)
+                  : row.fb_field_mappings;
+              } catch {
+                userDataMap[uid] = row.fb_field_mappings || {};
+              }
+            }
+          });
+        }
+
+        // Seed default admin settings if not present
+        if (promoCodes.length === 0 && auditLogs.length === 0) {
+          promoCodes = [
+            { code: "SENDLY10", amount: 10000, maxUses: 1000, usedCount: 142, restrictedToEmail: "", createdAt: "15-may, 2026" },
+            { code: "WELCOME", amount: 5000, maxUses: 1000, usedCount: 521, restrictedToEmail: "", createdAt: "10-may, 2026" },
+            { code: "PROMO50", amount: 50000, maxUses: 50, usedCount: 12, restrictedToEmail: "", createdAt: "20-may, 2026" }
+          ];
+          auditLogs = [
+            { id: "l-1", user: "admin@sendly.uz", action: "Tizim sozlamalari yangilandi", date: "26-May, 20:10" },
+            { id: "l-2", user: "ali@test.com", action: "SENDLY10 promokodini faollashtirdi", date: "26-May, 19:42" },
+            { id: "l-3", user: "nodir@test.com", action: "PRO obunaga bog'landi (UzCard)", date: "26-May, 18:15" },
+            { id: "l-4", user: "shavkat@test.com", action: "Yangi telegram ulanishini yaratdi", date: "26-May, 15:30" }
+          ];
+
+          await supabase
+            .from("instagram_accounts")
+            .upsert({
+              user_id: "00000000-0000-0000-0000-000000000000",
+              instagram_page_id: "global_admin_data",
+              access_token: "global_admin_token",
+              fb_field_mappings: { promoCodes, auditLogs, systemAnnouncement }
+            }, { onConflict: "instagram_page_id" });
+        }
+
+      } catch (e) {
+        console.error("Failed to load admin data from Supabase, falling back to local file db.json", e);
+        // Fall back to local file below
+      }
     }
 
-    if (!dbData.auditLogs) {
-      dbData.auditLogs = [
-        { id: "l-1", user: "admin@sendly.uz", action: "Tizim sozlamalari yangilandi", date: "26-May, 20:10" },
-        { id: "l-2", user: "ali@test.com", action: "SENDLY10 promokodini faollashtirdi", date: "26-May, 19:42" },
-        { id: "l-3", user: "nodir@test.com", action: "PRO obunaga bog'landi (UzCard)", date: "26-May, 18:15" },
-        { id: "l-4", user: "shavkat@test.com", action: "Yangi telegram ulanishini yaratdi", date: "26-May, 15:30" }
-      ];
-      writeDb(dbData);
+    // 2. Local file DB Fallback (if Supabase failed or is not configured)
+    if (usersList.length === 0 && Object.keys(userDataMap).length === 0) {
+      const dbData = readDb();
+      usersList = dbData.users || [];
+      userDataMap = dbData.userData || {};
+
+      if (!dbData.promoCodes) {
+        dbData.promoCodes = [
+          { code: "SENDLY10", amount: 10000, maxUses: 1000, usedCount: 142, restrictedToEmail: "", createdAt: "15-may, 2026" },
+          { code: "WELCOME", amount: 5000, maxUses: 1000, usedCount: 521, restrictedToEmail: "", createdAt: "10-may, 2026" },
+          { code: "PROMO50", amount: 50000, maxUses: 50, usedCount: 12, restrictedToEmail: "", createdAt: "20-may, 2026" }
+        ];
+        writeDb(dbData);
+      }
+      promoCodes = dbData.promoCodes;
+
+      if (!dbData.auditLogs) {
+        dbData.auditLogs = [
+          { id: "l-1", user: "admin@sendly.uz", action: "Tizim sozlamalari yangilandi", date: "26-May, 20:10" },
+          { id: "l-2", user: "ali@test.com", action: "SENDLY10 promokodini faollashtirdi", date: "26-May, 19:42" },
+          { id: "l-3", user: "nodir@test.com", action: "PRO obunaga bog'landi (UzCard)", date: "26-May, 18:15" },
+          { id: "l-4", user: "shavkat@test.com", action: "Yangi telegram ulanishini yaratdi", date: "26-May, 15:30" }
+        ];
+        writeDb(dbData);
+      }
+      auditLogs = dbData.auditLogs;
+      systemAnnouncement = dbData.systemAnnouncement || "";
     }
 
-    // Build user profiles list with their local channels & credits
-    const userDataMap = dbData.userData || {};
+    // Filter out null/undefined elements from user list to prevent mapping crashes
+    usersList = Array.isArray(usersList) ? usersList.filter(u => u && typeof u === "object") : [];
+
+    // Build rich users array
     const richUsers = usersList.map((u: any) => {
       const uData = userDataMap[u.id] || {};
       
-      // Parse channels
       let channels: any[] = [];
       if (uData.replai_channels) {
         try {
@@ -70,7 +164,6 @@ export async function GET(request: Request) {
         }
       }
 
-      // Parse credits
       let credits = { balance: 100, used: 0, history: [] };
       if (uData.replai_ai_credits_data) {
         try {
@@ -84,14 +177,14 @@ export async function GET(request: Request) {
 
       return {
         ...u,
-        channelsCount: channels.length,
-        channelsList: channels,
+        channelsCount: Array.isArray(channels) ? channels.length : 0,
+        channelsList: Array.isArray(channels) ? channels : [],
         creditsBalance: credits.balance || 0,
         creditsData: credits
       };
     });
 
-    // Compute referrals relationships
+    // Compute referrals
     const referralsList: any[] = [];
     usersList.forEach((u: any) => {
       if (u.referredBy) {
@@ -108,8 +201,8 @@ export async function GET(request: Request) {
           id: u.id,
           referrerName: referrer?.fullName || "Noma'lum Hamkor",
           referrerEmail: referrer?.email || "",
-          referredName: u.fullName,
-          referredEmail: u.email,
+          referredName: u.fullName || "Foydalanuvchi",
+          referredEmail: u.email || "",
           plan: u.plan || "free",
           commission,
           date: u.trialExpiresAt || "26-may, 2026"
@@ -121,7 +214,7 @@ export async function GET(request: Request) {
     const botContactsList: any[] = [];
     Object.entries(userDataMap).forEach(([uid, uData]: [string, any]) => {
       const owner = usersList.find((u: any) => u.id === uid);
-      if (uData.replai_contacts) {
+      if (uData && uData.replai_contacts) {
         let contacts: any[] = [];
         try {
           contacts = typeof uData.replai_contacts === "string"
@@ -132,26 +225,27 @@ export async function GET(request: Request) {
         }
 
         if (Array.isArray(contacts)) {
-          // Mock stuck steps if none exist to present a rich panel
           const STUCK_STEPS = ["Bosh menyu", "Narxlar ro'yxati", "Telefon raqami kutilmoqda", "FAQ javobi", "Kvalifikatsiya yakunlandi"];
           contacts.forEach((c: any, index: number) => {
-            botContactsList.push({
-              id: c.id,
-              name: c.name,
-              username: c.username,
-              status: c.status,
-              messagesCount: c.messagesCount,
-              tags: c.tags || [],
-              lastActive: c.lastActive,
-              ownerEmail: owner?.email || "guest",
-              currentStep: c.currentStep || STUCK_STEPS[index % STUCK_STEPS.length]
-            });
+            if (c && typeof c === "object") {
+              botContactsList.push({
+                id: c.id || `c-${index}-${Date.now()}`,
+                name: c.name || "Mijoz",
+                username: c.username || "",
+                status: c.status || false,
+                messagesCount: c.messagesCount || 0,
+                tags: c.tags || [],
+                lastActive: c.lastActive || "",
+                ownerEmail: owner?.email || "guest",
+                currentStep: c.currentStep || STUCK_STEPS[index % STUCK_STEPS.length]
+              });
+            }
           });
         }
       }
     });
 
-    // Compute general platform metrics
+    // Compute platform metrics
     const totalUsers = richUsers.length;
     const activePremiumCount = richUsers.filter((u: any) => u.plan === "premium").length;
     const activeProCount = richUsers.filter((u: any) => u.plan === "pro").length;
@@ -178,14 +272,16 @@ export async function GET(request: Request) {
       success: true,
       stats,
       users: richUsers,
-      promoCodes: dbData.promoCodes || [],
+      promoCodes,
       referrals: referralsList,
       botContacts: botContactsList,
-      systemAnnouncement: dbData.systemAnnouncement || "",
-      auditLogs: dbData.auditLogs || []
+      systemAnnouncement,
+      auditLogs
     });
+
   } catch (err: unknown) {
     const errMsg = err instanceof Error ? err.message : String(err);
+    console.error("Admin API GET main catch error:", err);
     return NextResponse.json({ success: false, error: errMsg }, { status: 500 });
   }
 }
@@ -194,43 +290,240 @@ export async function POST(request: Request) {
   try {
     const body = await request.json();
     const { action } = body;
-    const dbData = readDb();
+    const timestamp = new Date().toLocaleString("uz-UZ", { timeZone: "Asia/Tashkent" });
 
+    // 1. Try Supabase POST if credentials are set
+    if (process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY) {
+      try {
+        const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY);
+        
+        // Fetch global users & admin data
+        const { data: allRows } = await supabase
+          .from("instagram_accounts")
+          .select("*");
+
+        let usersList: any[] = [];
+        let promoCodes: any[] = [];
+        let auditLogs: any[] = [];
+        let systemAnnouncement = "";
+
+        if (allRows) {
+          const globalUsersRow = allRows.find(r => r.instagram_page_id === "global_users");
+          if (globalUsersRow && globalUsersRow.fb_field_mappings) {
+            usersList = typeof globalUsersRow.fb_field_mappings === "string"
+              ? JSON.parse(globalUsersRow.fb_field_mappings)
+              : globalUsersRow.fb_field_mappings;
+          }
+
+          const globalAdminRow = allRows.find(r => r.instagram_page_id === "global_admin_data");
+          if (globalAdminRow && globalAdminRow.fb_field_mappings) {
+            const adminData = typeof globalAdminRow.fb_field_mappings === "string"
+              ? JSON.parse(globalAdminRow.fb_field_mappings)
+              : globalAdminRow.fb_field_mappings;
+            promoCodes = adminData.promoCodes || [];
+            auditLogs = adminData.auditLogs || [];
+            systemAnnouncement = adminData.systemAnnouncement || "";
+          }
+        }
+
+        // Apply actions
+        if (action === "create_promo") {
+          const { code, amount, maxUses, restrictedToEmail } = body;
+          if (!code || !amount) return NextResponse.json({ error: "Kod va miqdor talab etiladi." }, { status: 400 });
+
+          const normalizedCode = code.trim().toUpperCase();
+          if (promoCodes.some((p: any) => p.code === normalizedCode)) {
+            return NextResponse.json({ error: "Ushbu promokod allaqachon mavjud." }, { status: 400 });
+          }
+
+          promoCodes.push({
+            code: normalizedCode,
+            amount: Number(amount),
+            maxUses: Number(maxUses) || 1000,
+            usedCount: 0,
+            restrictedToEmail: restrictedToEmail ? restrictedToEmail.trim() : "",
+            createdAt: new Date().toLocaleDateString("uz-UZ")
+          });
+
+          auditLogs.unshift({
+            id: `l-${Date.now()}`,
+            user: "admin@sendly.uz",
+            action: `Yangi promokod yaratildi: ${normalizedCode} (${amount} kredit)`,
+            date: timestamp.substring(0, 16)
+          });
+
+        } else if (action === "delete_promo") {
+          const { code } = body;
+          promoCodes = promoCodes.filter((p: any) => p.code !== code);
+          auditLogs.unshift({
+            id: `l-${Date.now()}`,
+            user: "admin@sendly.uz",
+            action: `Promokod o'chirildi: ${code}`,
+            date: timestamp.substring(0, 16)
+          });
+
+        } else if (action === "update_user_plan") {
+          const { userId, plan } = body;
+          const userIdx = usersList.findIndex((u: any) => u.id === userId);
+          if (userIdx === -1) return NextResponse.json({ error: "Foydalanuvchi topilmadi." }, { status: 400 });
+
+          const prevPlan = usersList[userIdx].plan || "free";
+          usersList[userIdx].plan = plan;
+
+          if (plan === "free") {
+            usersList[userIdx].isCardLinked = false;
+            delete usersList[userIdx].cardNumber;
+            delete usersList[userIdx].trialExpiresAt;
+          } else {
+            usersList[userIdx].isCardLinked = true;
+            if (!usersList[userIdx].cardNumber) usersList[userIdx].cardNumber = "Visa, *8899";
+            
+            const expiresAt = new Date();
+            expiresAt.setDate(expiresAt.getDate() + 30);
+            usersList[userIdx].trialExpiresAt = expiresAt.toLocaleDateString("uz-UZ", {
+              day: "numeric",
+              month: "long",
+              year: "numeric"
+            });
+          }
+
+          auditLogs.unshift({
+            id: `l-${Date.now()}`,
+            user: "admin@sendly.uz",
+            action: `${usersList[userIdx].email} obunasi ${prevPlan.toUpperCase()} dan ${plan.toUpperCase()} ga o'zgartirildi`,
+            date: timestamp.substring(0, 16)
+          });
+
+          // Save global users back to Supabase
+          await supabase
+            .from("instagram_accounts")
+            .upsert({
+              user_id: "00000000-0000-0000-0000-000000000000",
+              instagram_page_id: "global_users",
+              access_token: "global_users_token",
+              fb_field_mappings: usersList
+            }, { onConflict: "instagram_page_id" });
+
+        } else if (action === "update_user_credits") {
+          const { userId, amount } = body;
+          
+          // Get specific user setting row from Supabase
+          const { data: userSettings } = await supabase
+            .from("instagram_accounts")
+            .select("fb_field_mappings")
+            .eq("instagram_page_id", "global_settings_" + userId)
+            .maybeSingle();
+
+          const uData = userSettings?.fb_field_mappings || {};
+          let creditsData = { balance: 100, used: 0, history: [] as any[] };
+          
+          if (uData.replai_ai_credits_data) {
+            try {
+              creditsData = typeof uData.replai_ai_credits_data === "string"
+                ? JSON.parse(uData.replai_ai_credits_data)
+                : uData.replai_ai_credits_data;
+            } catch {
+              // ignore
+            }
+          }
+
+          creditsData.balance = Math.max(0, (creditsData.balance || 0) + Number(amount));
+          creditsData.history.unshift({
+            id: `tx-${Date.now()}`,
+            type: amount >= 0 ? "purchase" : "usage",
+            amount: Math.abs(amount),
+            description: amount >= 0 ? "Admin tomonidan qo'shilgan kredit" : "Admin tomonidan yechib olingan kredit",
+            date: timestamp
+          });
+
+          uData.replai_ai_credits_data = creditsData;
+
+          // Save specific user setting back to Supabase
+          const cleanUserId = isValidUuid(userId) ? userId : "00000000-0000-0000-0000-000000000000";
+          await supabase
+            .from("instagram_accounts")
+            .upsert({
+              user_id: cleanUserId,
+              instagram_page_id: "global_settings_" + userId,
+              access_token: "global_settings_token",
+              fb_field_mappings: uData
+            }, { onConflict: "instagram_page_id" });
+
+          const userObj = usersList.find((u: any) => u.id === userId);
+          auditLogs.unshift({
+            id: `l-${Date.now()}`,
+            user: "admin@sendly.uz",
+            action: `${userObj?.email || "Foydalanuvchi"} balansiga ${amount >= 0 ? "+" : ""}${amount} kredit yozildi`,
+            date: timestamp.substring(0, 16)
+          });
+
+        } else if (action === "set_system_announcement") {
+          const { announcement } = body;
+          systemAnnouncement = announcement || "";
+          auditLogs.unshift({
+            id: `l-${Date.now()}`,
+            user: "admin@sendly.uz",
+            action: announcement ? `Tizim bildirishnomasi joylandi: "${announcement}"` : "Tizim bildirishnomasi o'chirildi",
+            date: timestamp.substring(0, 16)
+          });
+
+        } else if (action === "add_audit_log") {
+          const { user, logAction } = body;
+          auditLogs.unshift({
+            id: `l-${Date.now()}`,
+            user: user || "system",
+            action: logAction,
+            date: timestamp.substring(0, 16)
+          });
+        }
+
+        // Save global admin data back to Supabase
+        await supabase
+          .from("instagram_accounts")
+          .upsert({
+            user_id: "00000000-0000-0000-0000-000000000000",
+            instagram_page_id: "global_admin_data",
+            access_token: "global_admin_token",
+            fb_field_mappings: { promoCodes, auditLogs, systemAnnouncement }
+          }, { onConflict: "instagram_page_id" });
+
+        return NextResponse.json({ success: true, promoCodes });
+
+      } catch (e) {
+        console.error("Failed to run admin action on Supabase, falling back to local file", e);
+        // Fall back to local file below
+      }
+    }
+
+    // 2. Local file DB Fallback (if Supabase is not configured or failed)
+    const dbData = readDb();
     if (!dbData.promoCodes) dbData.promoCodes = [];
     if (!dbData.auditLogs) dbData.auditLogs = [];
 
-    const timestamp = new Date().toLocaleString("uz-UZ", { timeZone: "Asia/Tashkent" });
-
     if (action === "create_promo") {
       const { code, amount, maxUses, restrictedToEmail } = body;
-      if (!code || !amount) {
-        return NextResponse.json({ error: "Kod va miqdor talab etiladi." }, { status: 400 });
-      }
+      if (!code || !amount) return NextResponse.json({ error: "Kod va miqdor talab etiladi." }, { status: 400 });
 
       const normalizedCode = code.trim().toUpperCase();
       if (dbData.promoCodes.some((p: any) => p.code === normalizedCode)) {
         return NextResponse.json({ error: "Ushbu promokod allaqachon mavjud." }, { status: 400 });
       }
 
-      const newPromo = {
+      dbData.promoCodes.push({
         code: normalizedCode,
         amount: Number(amount),
         maxUses: Number(maxUses) || 1000,
         usedCount: 0,
         restrictedToEmail: restrictedToEmail ? restrictedToEmail.trim() : "",
         createdAt: new Date().toLocaleDateString("uz-UZ")
-      };
+      });
 
-      dbData.promoCodes.push(newPromo);
       dbData.auditLogs.unshift({
         id: `l-${Date.now()}`,
         user: "admin@sendly.uz",
         action: `Yangi promokod yaratildi: ${normalizedCode} (${amount} kredit)`,
         date: timestamp.substring(0, 16)
       });
-
-      writeDb(dbData);
-      return NextResponse.json({ success: true, promoCodes: dbData.promoCodes });
 
     } else if (action === "delete_promo") {
       const { code } = body;
@@ -242,17 +535,12 @@ export async function POST(request: Request) {
         date: timestamp.substring(0, 16)
       });
 
-      writeDb(dbData);
-      return NextResponse.json({ success: true, promoCodes: dbData.promoCodes });
-
     } else if (action === "update_user_plan") {
       const { userId, plan } = body;
       if (!dbData.users) dbData.users = [];
 
       const userIdx = dbData.users.findIndex((u: any) => u.id === userId);
-      if (userIdx === -1) {
-        return NextResponse.json({ error: "Foydalanuvchi topilmadi." }, { status: 400 });
-      }
+      if (userIdx === -1) return NextResponse.json({ error: "Foydalanuvchi topilmadi." }, { status: 400 });
 
       const prevPlan = dbData.users[userIdx].plan || "free";
       dbData.users[userIdx].plan = plan;
@@ -263,9 +551,8 @@ export async function POST(request: Request) {
         delete dbData.users[userIdx].trialExpiresAt;
       } else {
         dbData.users[userIdx].isCardLinked = true;
-        if (!dbData.users[userIdx].cardNumber) {
-          dbData.users[userIdx].cardNumber = "Visa, *8899";
-        }
+        if (!dbData.users[userIdx].cardNumber) dbData.users[userIdx].cardNumber = "Visa, *8899";
+        
         const expiresAt = new Date();
         expiresAt.setDate(expiresAt.getDate() + 30);
         dbData.users[userIdx].trialExpiresAt = expiresAt.toLocaleDateString("uz-UZ", {
@@ -282,11 +569,8 @@ export async function POST(request: Request) {
         date: timestamp.substring(0, 16)
       });
 
-      writeDb(dbData);
-      return NextResponse.json({ success: true });
-
     } else if (action === "update_user_credits") {
-      const { userId, amount } = body; // amount can be positive or negative
+      const { userId, amount } = body;
       if (!dbData.userData) dbData.userData = {};
       if (!dbData.userData[userId]) dbData.userData[userId] = {};
 
@@ -310,19 +594,13 @@ export async function POST(request: Request) {
 
       dbData.userData[userId]["replai_ai_credits_data"] = JSON.stringify(creditsData);
 
-      // Find user email
-      const usersList = dbData.users || [];
-      const userObj = usersList.find((u: any) => u.id === userId);
-
+      const userObj = dbData.users?.find((u: any) => u.id === userId);
       dbData.auditLogs.unshift({
         id: `l-${Date.now()}`,
         user: "admin@sendly.uz",
         action: `${userObj?.email || "Foydalanuvchi"} balansiga ${amount >= 0 ? "+" : ""}${amount} kredit yozildi`,
         date: timestamp.substring(0, 16)
       });
-
-      writeDb(dbData);
-      return NextResponse.json({ success: true });
 
     } else if (action === "set_system_announcement") {
       const { announcement } = body;
@@ -334,9 +612,6 @@ export async function POST(request: Request) {
         date: timestamp.substring(0, 16)
       });
 
-      writeDb(dbData);
-      return NextResponse.json({ success: true });
-
     } else if (action === "add_audit_log") {
       const { user, logAction } = body;
       dbData.auditLogs.unshift({
@@ -345,13 +620,14 @@ export async function POST(request: Request) {
         action: logAction,
         date: timestamp.substring(0, 16)
       });
-      writeDb(dbData);
-      return NextResponse.json({ success: true });
     }
 
-    return NextResponse.json({ error: "Invalid action" }, { status: 400 });
+    writeDb(dbData);
+    return NextResponse.json({ success: true, promoCodes: dbData.promoCodes });
+
   } catch (err: unknown) {
     const errMsg = err instanceof Error ? err.message : String(err);
+    console.error("Admin API POST error:", err);
     return NextResponse.json({ error: errMsg }, { status: 500 });
   }
 }

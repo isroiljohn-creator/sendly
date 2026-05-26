@@ -977,7 +977,15 @@
       "error_invalid_credentials": "Pochta yoki parol noto'g'ri.",
       "error_invalid_otp": "Tasdiqlash kodi noto'g'ri. Qayta urinib ko'ring.",
       "error_connection": "Tizimga ulanishda xatolik:",
-      "error_password_mismatch": "Kiritilgan parollar bir-biriga mos kelmadi."
+      "error_password_mismatch": "Kiritilgan parollar bir-biriga mos kelmadi.",
+      "recovery_title": "Parolni tiklash",
+      "recovery_desc": "Profilingiz parolini tiklash uchun tizimdagi email manzilingizni kiriting.",
+      "recovery_otp_desc": "Profilingiz parolini tiklash uchun kiritgan email manzilingizga tasdiqlash kodi yuborildi.",
+      "recovery_new_password_title": "Yangi parol o'rnatish",
+      "recovery_new_password_desc": "Profilingiz uchun xavfsiz va yangi parol kiriting.",
+      "recovery_success": "Parolingiz muvaffaqiyatli yangilandi! Endi yangi parol bilan tizimga kirishingiz mumkin.",
+      "error_email_not_found": "Ushbu email manzili bilan foydalanuvchi topilmadi.",
+      "error_passwords_dont_match": "Kiritilgan parollar mos kelmadi."
     },
     "lessons_page": {
       "start_lesson": "Darsni boshlash",
@@ -1004,7 +1012,12 @@
     "no_account": "Hisobingiz yo'qmi?",
     "has_account": "Hisobingiz bormi?",
     "full_name": "Ism",
-    "confirm_password": "Parolni tasdiqlash"
+    "confirm_password": "Parolni tasdiqlash",
+    "forgot_password": "Parolni unutdingizmi?",
+    "back_to_login": "Kirish oynasiga qaytish",
+    "reset_password": "Parolni tiklash",
+    "new_password": "Yangi parol",
+    "confirm_new_password": "Yangi parolni tasdiqlash"
   },
   "toast": {
     "success": "Muvaffaqiyatli",

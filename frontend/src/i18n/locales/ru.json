@@ -978,7 +978,15 @@
       "error_invalid_credentials": "Неверная почта или пароль.",
       "error_invalid_otp": "Неверный код. Попробуйте еще раз.",
       "error_connection": "Ошибка подключения к системе:",
-      "error_password_mismatch": "Введенные пароли не совпадают."
+      "error_password_mismatch": "Введенные пароли не совпадают.",
+      "recovery_title": "Восстановление пароля",
+      "recovery_desc": "Введите email, привязанный к вашему аккаунту, для восстановления пароля.",
+      "recovery_otp_desc": "Код восстановления был отправлен на введенный вами адрес электронной почты.",
+      "recovery_new_password_title": "Установка нового пароля",
+      "recovery_new_password_desc": "Введите надежный новый пароль для вашего аккаунта.",
+      "recovery_success": "Ваш пароль был успешно изменен! Теперь вы можете войти с новым паролем.",
+      "error_email_not_found": "Пользователь с таким email не найден.",
+      "error_passwords_dont_match": "Пароли не совпадают."
     },
     "lessons_page": {
       "start_lesson": "Начать урок",
@@ -1005,7 +1013,12 @@
     "no_account": "Нет аккаунта?",
     "has_account": "Уже есть аккаунт?",
     "full_name": "Имя",
-    "confirm_password": "Подтвердите пароль"
+    "confirm_password": "Подтвердите пароль",
+    "forgot_password": "Забыли пароль?",
+    "back_to_login": "Вернуться к входу",
+    "reset_password": "Восстановить пароль",
+    "new_password": "Новый пароль",
+    "confirm_new_password": "Подтвердите новый пароль"
   },
   "toast": {
     "success": "Успешно",

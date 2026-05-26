@@ -5,7 +5,7 @@ import { useState, useEffect } from "react";
 import { Card, Button } from "@/components/ui/primitives";
 import { useI18n } from "@/i18n/I18nProvider";
 import type { Lang } from "@/i18n/I18nProvider";
-import { ChevronDown, AlertCircle, Mail, Lock, Sparkles } from "lucide-react";
+import { ChevronDown, AlertCircle, Mail, Lock, Sparkles, Check } from "lucide-react";
 import { db } from "@/lib/db";
 
 export default function LoginPage() {
@@ -21,6 +21,17 @@ export default function LoginPage() {
   const [countdown, setCountdown] = useState(120); // 2 minutes
   const [showNotification, setShowNotification] = useState(false);
   const [isFallbackMode, setIsFallbackMode] = useState(false);
+
+  // Password Recovery States
+  const [isRecovering, setIsRecovering] = useState(false);
+  const [recoveryStep, setRecoveryStep] = useState<1 | 2 | 3>(1);
+  const [recoveryEmail, setRecoveryEmail] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmNewPassword, setConfirmNewPassword] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
+  const [recoveryOtpCode, setRecoveryOtpCode] = useState("");
+  const [recoveryEnteredOtp, setRecoveryEnteredOtp] = useState(["", "", "", ""]);
+  const [recoveryCountdown, setRecoveryCountdown] = useState(120);
 
   // Google Login States
   const [hasGoogleClientId, setHasGoogleClientId] = useState(true);
@@ -42,6 +53,16 @@ export default function LoginPage() {
     }
     return () => clearInterval(timer);
   }, [isVerifyingEmail, countdown]);
+
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+    if (isRecovering && recoveryStep === 2 && recoveryCountdown > 0) {
+      timer = setInterval(() => {
+        setRecoveryCountdown((prev) => prev - 1);
+      }, 1000);
+    }
+    return () => clearInterval(timer);
+  }, [isRecovering, recoveryStep, recoveryCountdown]);
 
   // Initialize Google Sign-In SDK
   useEffect(() => {
@@ -217,6 +238,135 @@ export default function LoginPage() {
     }
   };
 
+  const handleRecoveryEmailSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+    setSuccessMessage("");
+    setIsFallbackMode(false);
+
+    const users = db.getUsers();
+    const userExists = users.some(u => u.email.toLowerCase() === recoveryEmail.toLowerCase());
+
+    if (!userExists) {
+      setError(t("pages.login_page.error_email_not_found"));
+      return;
+    }
+
+    const code = db.generateOtp(recoveryEmail);
+    setRecoveryOtpCode(code);
+
+    try {
+      const mailRes = await fetch("/api/auth/send-otp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: recoveryEmail, otp: code }),
+      });
+
+      const mailData = await mailRes.json();
+
+      if (mailRes.ok && mailData.success) {
+        setRecoveryStep(2);
+        setRecoveryCountdown(120);
+        setRecoveryEnteredOtp(["", "", "", ""]);
+        setShowNotification(false);
+      } else {
+        if (mailRes.status === 501) {
+          setIsFallbackMode(true);
+          setRecoveryStep(2);
+          setRecoveryCountdown(120);
+          setRecoveryEnteredOtp(["", "", "", ""]);
+          setShowNotification(true);
+          setTimeout(() => setShowNotification(false), 15000);
+        } else {
+          setError(mailData.error || t("pages.login_page.error_send_otp"));
+        }
+      }
+    } catch (err: unknown) {
+      const errMsg = err instanceof Error ? err.message : String(err);
+      setError(t("pages.login_page.error_connection") + errMsg);
+    }
+  };
+
+  const handleRecoveryOtpVerify = (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+    const codeString = recoveryEnteredOtp.join("");
+
+    if (db.verifyOtp(recoveryEmail, codeString)) {
+      setRecoveryStep(3);
+      setNewPassword("");
+      setConfirmNewPassword("");
+    } else {
+      setError(t("pages.login_page.error_invalid_otp"));
+    }
+  };
+
+  const handleResendRecoveryOtp = async () => {
+    setError("");
+    setIsFallbackMode(false);
+    const code = db.generateOtp(recoveryEmail);
+    setRecoveryOtpCode(code);
+
+    try {
+      const mailRes = await fetch("/api/auth/send-otp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: recoveryEmail, otp: code }),
+      });
+
+      const mailData = await mailRes.json();
+
+      if (mailRes.ok && mailData.success) {
+        setRecoveryCountdown(120);
+        setRecoveryEnteredOtp(["", "", "", ""]);
+        setShowNotification(false);
+      } else {
+        if (mailRes.status === 501) {
+          setIsFallbackMode(true);
+          setRecoveryCountdown(120);
+          setRecoveryEnteredOtp(["", "", "", ""]);
+          setShowNotification(true);
+        } else {
+          setError(mailData.error || t("pages.login_page.error_send_otp"));
+        }
+      }
+    } catch (err: unknown) {
+      const errMsg = err instanceof Error ? err.message : String(err);
+      setError(t("pages.login_page.error_connection") + errMsg);
+    }
+  };
+
+  const handlePasswordResetSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+
+    if (newPassword !== confirmNewPassword) {
+      setError(t("pages.login_page.error_passwords_dont_match"));
+      return;
+    }
+
+    const users = db.getUsers();
+    const idx = users.findIndex((u) => u.email.toLowerCase() === recoveryEmail.toLowerCase());
+    if (idx > -1) {
+      users[idx].password = newPassword;
+      localStorage.setItem("replai_users", JSON.stringify(users));
+
+      const saveRes = await db.saveToServer();
+      if (saveRes && !saveRes.success && saveRes.error) {
+        setError(saveRes.error);
+        return;
+      }
+
+      setSuccessMessage(t("pages.login_page.recovery_success"));
+      setIsRecovering(false);
+      setRecoveryStep(1);
+      setEmail(recoveryEmail);
+      setPassword("");
+    } else {
+      setError(t("pages.login_page.error_email_not_found"));
+    }
+  };
+
   const formatTime = (seconds: number) => {
     const m = Math.floor(seconds / 60);
     const s = seconds % 60;
@@ -262,12 +412,14 @@ export default function LoginPage() {
                 {t("pages.login_page.smtp_warning_desc")}
               </p>
               <div className="mt-3 flex items-center justify-between bg-[#F5F5F3] px-3.5 py-2 rounded-xl border border-[#E8E8E8]">
-                <span className="text-[16px] font-mono font-bold tracking-widest text-[#1A2906]">{otpCode}</span>
+                <span className="text-[16px] font-mono font-bold tracking-widest text-[#1A2906]">{isRecovering ? recoveryOtpCode : otpCode}</span>
                 <button 
                   onClick={() => {
-                    navigator.clipboard.writeText(otpCode);
+                    const activeCode = isRecovering ? recoveryOtpCode : otpCode;
+                    navigator.clipboard.writeText(activeCode);
                     setShowNotification(false);
                   }}
+                  type="button"
                   className="text-[11px] font-semibold text-[#1A2906] hover:underline"
                 >
                   {t("pages.login_page.copy_code")}
@@ -308,7 +460,10 @@ export default function LoginPage() {
             {"Sendly"}
           </h2>
           <p className="mt-1 text-[13px] text-[#515154]">
-            {isVerifyingEmail ? t("pages.login_page.otp_title") : t("forms.login")}
+            {isRecovering 
+              ? (recoveryStep === 3 ? t("pages.login_page.recovery_new_password_title") : t("pages.login_page.recovery_title"))
+              : (isVerifyingEmail ? t("pages.login_page.otp_title") : t("forms.login"))
+            }
           </p>
         </div>
 
@@ -319,8 +474,15 @@ export default function LoginPage() {
           </div>
         )}
 
+        {successMessage && !error && (
+          <div className="mt-5 flex items-center gap-2 rounded-2xl bg-[#C7F33C]/20 border border-[#C7F33C]/40 p-3.5 text-[12px] text-black">
+            <Check size={16} className="shrink-0 text-black" />
+            <span className="text-left font-semibold">{successMessage}</span>
+          </div>
+        )}
+
         {/* STEP 1: Enter email & password */}
-        {!isVerifyingEmail && (
+        {!isVerifyingEmail && !isRecovering && (
           <>
             <form onSubmit={handleEmailSubmit} className="mt-6 flex flex-col gap-4">
               <div className="flex flex-col gap-1.5">
@@ -354,6 +516,21 @@ export default function LoginPage() {
                     className="w-full rounded-[14px] bg-white border border-[#D8D8D8]/80 pl-11 pr-4 py-3 text-[13px] text-black outline-none placeholder:text-[#A0A0A5] transition-all focus:border-black focus:bg-white"
                     placeholder="••••••••"
                   />
+                </div>
+                <div className="flex justify-end px-1 mt-1">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsRecovering(true);
+                      setRecoveryStep(1);
+                      setRecoveryEmail(email);
+                      setSuccessMessage("");
+                      setError("");
+                    }}
+                    className="text-[11px] font-semibold text-[#707075] hover:text-black transition-colors"
+                  >
+                    {t("forms.forgot_password")}
+                  </button>
                 </div>
               </div>
 
@@ -393,7 +570,7 @@ export default function LoginPage() {
         )}
 
         {/* STEP 2: Verify OTP code */}
-        {isVerifyingEmail && (
+        {isVerifyingEmail && !isRecovering && (
           <form onSubmit={handleOtpVerify} className="mt-6 flex flex-col gap-6">
             <div className="text-center">
               <p className="text-[12px] text-[#515154] leading-relaxed">
@@ -451,6 +628,182 @@ export default function LoginPage() {
               </button>
             </div>
           </form>
+        )}
+
+        {/* PASSWORD RECOVERY STEP 1: Enter email */}
+        {isRecovering && recoveryStep === 1 && (
+          <>
+            <p className="text-[12px] text-[#515154] leading-relaxed text-center mt-3">
+              {t("pages.login_page.recovery_desc")}
+            </p>
+            <form onSubmit={handleRecoveryEmailSubmit} className="mt-6 flex flex-col gap-4">
+              <div className="flex flex-col gap-1.5">
+                <label className="text-[11px] font-semibold text-[#515154] px-1 text-left">
+                  {t("forms.email")}
+                </label>
+                <div className="relative">
+                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[#707075]"><Mail size={16} /></span>
+                  <input
+                    type="email"
+                    value={recoveryEmail}
+                    onChange={(e) => setRecoveryEmail(e.target.value)}
+                    required
+                    className="w-full rounded-[14px] bg-white border border-[#D8D8D8]/80 pl-11 pr-4 py-3 text-[13px] text-black outline-none placeholder:text-[#A0A0A5] transition-all focus:border-black focus:bg-white"
+                    placeholder="example@mail.com"
+                  />
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                className="mt-3 w-full rounded-full bg-[#C7F33C] text-black font-bold py-3.5 text-[13.5px] transition-all active:scale-[0.98] hover:bg-[#b5e02f]"
+              >
+                {t("forms.reset_password")}
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setIsRecovering(false);
+                  setError("");
+                }}
+                className="mt-1 text-[12px] text-[#707075] hover:text-black transition-all font-semibold"
+              >
+                {t("forms.back_to_login")}
+              </button>
+            </form>
+          </>
+        )}
+
+        {/* PASSWORD RECOVERY STEP 2: Verify OTP */}
+        {isRecovering && recoveryStep === 2 && (
+          <form onSubmit={handleRecoveryOtpVerify} className="mt-6 flex flex-col gap-6">
+            <div className="text-center">
+              <p className="text-[12px] text-[#515154] leading-relaxed">
+                {t("pages.login_page.recovery_otp_desc")} <br />
+                <span className="font-semibold text-black text-[13px]">{recoveryEmail}</span>
+              </p>
+            </div>
+
+            {/* OTP Input Fields */}
+            <div className="flex justify-center gap-3">
+              {recoveryEnteredOtp.map((digit, idx) => (
+                <input
+                  key={idx}
+                  id={`recovery-otp-input-${idx}`}
+                  type="text"
+                  pattern="[0-9]*"
+                  inputMode="numeric"
+                  required
+                  value={digit}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    const cleanVal = val.length > 1 ? val.charAt(val.length - 1) : val;
+                    const newOtp = [...recoveryEnteredOtp];
+                    newOtp[idx] = cleanVal;
+                    setRecoveryEnteredOtp(newOtp);
+
+                    if (cleanVal && idx < 3) {
+                      const nextInput = document.getElementById(`recovery-otp-input-${idx + 1}`);
+                      nextInput?.focus();
+                    }
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === "Backspace" && !recoveryEnteredOtp[idx] && idx > 0) {
+                      const prevInput = document.getElementById(`recovery-otp-input-${idx - 1}`);
+                      prevInput?.focus();
+                    }
+                  }}
+                  className="h-14 w-12 rounded-[14px] bg-white border border-[#D8D8D8]/80 text-center text-[20px] font-bold text-black outline-none focus:border-black focus:bg-white transition-all"
+                />
+              ))}
+            </div>
+
+            <div className="flex flex-col items-center gap-4">
+              <button
+                type="submit"
+                className="w-full rounded-full bg-[#C7F33C] text-black font-bold py-3.5 text-[13.5px] transition-all active:scale-[0.98] hover:bg-[#b5e02f]"
+              >
+                {t("pages.login_page.otp_verify_btn")}
+              </button>
+
+              <div className="text-[12px] text-[#515154]">
+                {recoveryCountdown > 0 ? (
+                  <span>{t("pages.login_page.otp_resend_label")}<span className="text-[#7CA607] font-mono">{formatTime(recoveryCountdown)}</span></span>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={handleResendRecoveryOtp}
+                    className="font-bold text-[#7CA607] hover:underline transition-all"
+                  >
+                    {t("pages.login_page.otp_resend_btn")}
+                  </button>
+                )}
+              </div>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setRecoveryStep(1);
+                  setError("");
+                }}
+                className="text-[12px] text-[#707075] hover:text-black transition-all font-medium"
+              >
+                {t("pages.login_page.otp_change_email")}
+              </button>
+            </div>
+          </form>
+        )}
+
+        {/* PASSWORD RECOVERY STEP 3: Enter new password */}
+        {isRecovering && recoveryStep === 3 && (
+          <>
+            <p className="text-[12px] text-[#515154] leading-relaxed text-center mt-3">
+              {t("pages.login_page.recovery_new_password_desc")}
+            </p>
+            <form onSubmit={handlePasswordResetSubmit} className="mt-6 flex flex-col gap-4">
+              <div className="flex flex-col gap-1.5">
+                <label className="text-[11px] font-semibold text-[#515154] px-1 text-left">
+                  {t("forms.new_password")}
+                </label>
+                <div className="relative">
+                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[#707075]"><Lock size={16} /></span>
+                  <input
+                    type="password"
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    required
+                    className="w-full rounded-[14px] bg-white border border-[#D8D8D8]/80 pl-11 pr-4 py-3 text-[13px] text-black outline-none placeholder:text-[#A0A0A5] transition-all focus:border-black focus:bg-white"
+                    placeholder="••••••••"
+                  />
+                </div>
+              </div>
+
+              <div className="flex flex-col gap-1.5">
+                <label className="text-[11px] font-semibold text-[#515154] px-1 text-left">
+                  {t("forms.confirm_new_password")}
+                </label>
+                <div className="relative">
+                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[#707075]"><Lock size={16} /></span>
+                  <input
+                    type="password"
+                    value={confirmNewPassword}
+                    onChange={(e) => setConfirmNewPassword(e.target.value)}
+                    required
+                    className="w-full rounded-[14px] bg-white border border-[#D8D8D8]/80 pl-11 pr-4 py-3 text-[13px] text-black outline-none placeholder:text-[#A0A0A5] transition-all focus:border-black focus:bg-white"
+                    placeholder="••••••••"
+                  />
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                className="mt-3 w-full rounded-full bg-[#C7F33C] text-black font-bold py-3.5 text-[13.5px] transition-all active:scale-[0.98] hover:bg-[#b5e02f]"
+              >
+                {t("forms.reset_password")}
+              </button>
+            </form>
+          </>
         )}
 
       </Card>

@@ -256,8 +256,8 @@ export default function AdminPage() {
   // User search
   const [userQuery, setUserQuery] = useState("");
   const filteredUsers = users.filter(u => 
-    u.fullName.toLowerCase().includes(userQuery.toLowerCase()) || 
-    u.email.toLowerCase().includes(userQuery.toLowerCase())
+    (u.fullName || "").toLowerCase().includes(userQuery.toLowerCase()) || 
+    (u.email || "").toLowerCase().includes(userQuery.toLowerCase())
   );
 
   return (
