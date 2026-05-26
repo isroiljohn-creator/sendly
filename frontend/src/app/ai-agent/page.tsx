@@ -27,7 +27,9 @@ import {
   History,
   RefreshCw,
   AlertTriangle,
-  FileText
+  FileText,
+  BarChart2,
+  TrendingUp
 } from "lucide-react";
 
 const Facebook = ({ size = 24, className, ...props }: React.SVGProps<SVGSVGElement> & { size?: number }) => (
@@ -234,7 +236,95 @@ const MOCK_FB_FORMS = [
 export default function AIAgentPage() {
   const { t } = useI18n();
   const [selectedAgentType, setSelectedAgentType] = useState<"kurator" | "fb-leads" | null>(null);
-  const [activeTab, setActiveTab] = useState<"settings" | "knowledge">("settings");
+  const [activeTab, setActiveTab] = useState<"settings" | "knowledge" | "analytics">("settings");
+  
+  // Curator Analyzed Messages for CustDev Analytics
+  const [analyzedMessages, setAnalyzedMessages] = useState<Array<{
+    id: string;
+    username: string;
+    message: string;
+    response: string;
+    intent: string;
+    sentiment: "positive" | "neutral" | "negative";
+    confidence: number;
+    date: string;
+    painPoint: string;
+  }>>([]);
+
+  const classifyIntentForCustDev = (text: string): string => {
+    const msg = text.toLowerCase();
+    if (
+      msg.includes("pul") ||
+      msg.includes("narx") ||
+      msg.includes("to'lov") ||
+      msg.includes("dollar") ||
+      msg.includes("click") ||
+      msg.includes("payme") ||
+      msg.includes("karta") ||
+      msg.includes("obuna") ||
+      msg.includes("tarif")
+    ) {
+      return "To'lov / Billing";
+    }
+    if (
+      msg.includes("bot") ||
+      msg.includes("telegram") ||
+      msg.includes("kanal") ||
+      msg.includes("token") ||
+      msg.includes("ulash") ||
+      msg.includes("xatolik") ||
+      msg.includes("muammo") ||
+      msg.includes("ishlamayapti")
+    ) {
+      return "Texnik muammo / Support";
+    }
+    if (
+      msg.includes("dars") ||
+      msg.includes("modul") ||
+      msg.includes("kirish") ||
+      msg.includes("o'qish") ||
+      msg.includes("kurs") ||
+      msg.includes("dastur")
+    ) {
+      return "Darslik savoli / FAQ";
+    }
+    if (
+      msg.includes("hamkor") ||
+      msg.includes("referal") ||
+      msg.includes("pul ishlash") ||
+      msg.includes("komissiya")
+    ) {
+      return "Hamkorlik / Affiliate";
+    }
+    return "Umumiy qiziqish";
+  };
+
+  const detectSentiment = (text: string): "positive" | "neutral" | "negative" => {
+    const msg = text.toLowerCase();
+    if (msg.includes("yaxshi") || msg.includes("zo'r") || msg.includes("rahmat") || msg.includes("ajoyib") || msg.includes("muvaffaqiyat") || msg.includes("😊") || msg.includes("👍")) {
+      return "positive";
+    }
+    if (msg.includes("xatolik") || msg.includes("ishlamadi") || msg.includes("muammo") || msg.includes("afsus") || msg.includes("yomon") || msg.includes("tushunmadim") || msg.includes("qiyin") || msg.includes("😡") || msg.includes("👎")) {
+      return "negative";
+    }
+    return "neutral";
+  };
+
+  const extractPainPoint = (text: string, intent: string): string => {
+    if (intent === "To'lov / Billing") {
+      return "To'lov usullari yoki kartani bog'lash jarayonidagi qiyinchiliklar";
+    }
+    if (intent === "Texnik muammo / Support") {
+      return "Platformani ijtimoiy tarmoqlar yoki Telegram botga bog'lashdagi texnik muammolar";
+    }
+    if (intent === "Darslik savoli / FAQ") {
+      return "Dars transkriptlari ichidan kerakli mavzuni mustaqil topa olmaslik";
+    }
+    if (intent === "Hamkorlik / Affiliate") {
+      return "Hamkorlik komissiyalari va taklif etish havolasi ishlash qoidalarini aniqlashtirish";
+    }
+    return "Platformaning ishlash imkoniyatlari haqida qo'shimcha ma'lumot olish";
+  };
   
   // Database States
   const [settings, setSettings] = useState<BotSettings | null>(null);
@@ -258,6 +348,11 @@ export default function AIAgentPage() {
 
   // Toast notification state
   const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
+
+  // Curator Analytics UI States
+  const [analyticsSearch, setAnalyticsSearch] = useState("");
+  const [analyticsFilter, setAnalyticsFilter] = useState("All");
+  const [isRefreshingAnalysis, setIsRefreshingAnalysis] = useState(false);
 
   // Telegram Bot Verification States
   const [isTelegramLinked, setIsTelegramLinked] = useState(false);
@@ -418,6 +513,80 @@ export default function AIAgentPage() {
       window.removeEventListener("replai-db-update", handleUpdate);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Initialize analyzed messages
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const stored = localStorage.getItem("replai_curator_analyzed_messages");
+      if (stored) {
+        try {
+          setAnalyzedMessages(JSON.parse(stored));
+        } catch (e) {
+          console.error(e);
+        }
+      } else {
+        const initialSamples = [
+          {
+            id: "cur-msg-1",
+            username: "dilshod_marketing",
+            message: "Uzcard orqali to'lov qilsam bo'ladimi? Karta ulab bo'lmadi.",
+            response: "Ha, Uzcard/Humo orqali to'lov qilsangiz bo'ladi. Akkaunt bo'limida kartani bog'lang.",
+            intent: "To'lov / Billing",
+            sentiment: "negative" as const,
+            confidence: 92,
+            date: "Bugun, 14:20",
+            painPoint: "To'lov kartasini bog'lashda Uzcard/Humo tizimidagi nosozliklar"
+          },
+          {
+            id: "cur-msg-2",
+            username: "umid_kod",
+            message: "Telegram bot yaratish uchun tokeni qayerdan olaman?",
+            response: "Telegramda @BotFather orqali /newbot buyrug'ini yuboring va tokeni oling.",
+            intent: "Texnik muammo / Support",
+            sentiment: "neutral" as const,
+            confidence: 95,
+            date: "Bugun, 12:05",
+            painPoint: "@BotFather orqali bot yaratish va token olish jarayonini bilmaslik"
+          },
+          {
+            id: "cur-msg-3",
+            username: "sarvar_brand",
+            message: "Sotuvlarni avtomatlashtirish darsini qaysi modulda o'rganamiz?",
+            response: "Ushbu dars 2-Modulda joylashgan, unda Direct orqali avtomatik zanjir sozlash o'rgatiladi.",
+            intent: "Darslik savoli / FAQ",
+            sentiment: "positive" as const,
+            confidence: 88,
+            date: "Kecha, 18:40",
+            painPoint: "Kerakli dars yoki modulni qidirib topishdagi qiyinchilik"
+          },
+          {
+            id: "cur-msg-4",
+            username: "nodira_yusupova",
+            message: "Referal havola orqali necha foiz komissiya beriladi?",
+            response: "Hamkorlarimiz uchun har bir obunachining premium to'lovidan 30% hamkorlik komissiyasi taqdim etiladi.",
+            intent: "Hamkorlik / Affiliate",
+            sentiment: "positive" as const,
+            confidence: 90,
+            date: "Kecha, 15:30",
+            painPoint: "Hamkorlik tizimi komissiyasi va shartlarini aniqlashtirish"
+          },
+          {
+            id: "cur-msg-5",
+            username: "malika_ig",
+            message: "Instagram professional akkauntini ulashda xatolik beryapti, shaxsiy profil bo'lsa bo'ladimi?",
+            response: "Kechirasiz, faqat Professional (Business yoki Creator) hisoblarni bog'lash mumkin, shaxsiy hisoblar qo'llab-quvvatlanmaydi.",
+            intent: "Texnik muammo / Support",
+            sentiment: "negative" as const,
+            confidence: 85,
+            date: "24 May, 10:15",
+            painPoint: "Shaxsiy profil bilan Instagram API cheklovlariga duch kelish"
+          }
+        ];
+        localStorage.setItem("replai_curator_analyzed_messages", JSON.stringify(initialSamples));
+        setAnalyzedMessages(initialSamples);
+      }
+    }
   }, []);
 
   useEffect(() => {
@@ -752,6 +921,37 @@ export default function AIAgentPage() {
           sources: ragResult.sources
         }
       ]);
+
+      // Classify the message for CustDev
+      const detectedIntent = classifyIntentForCustDev(userText);
+      const sentiment = detectSentiment(userText);
+      const painPoint = extractPainPoint(userText, detectedIntent);
+      
+      const randomUsernames = [
+        "umid_growth", "kamola_smm", "shoxrux_biz", "dilnoza_ad", 
+        "anvar_sales", "malika_creatives", "bekzod_seo", "feruza_targeting"
+      ];
+      const randomUser = randomUsernames[Math.floor(Math.random() * randomUsernames.length)];
+
+      const newAnalyzedMsg = {
+        id: `cur-msg-${Date.now()}`,
+        username: randomUser,
+        message: userText,
+        response: ragResult.text,
+        intent: detectedIntent,
+        sentiment: sentiment,
+        confidence: ragResult.confidence || 75,
+        date: "Hozir",
+        painPoint: painPoint
+      };
+
+      setAnalyzedMessages(prev => {
+        const updated = [newAnalyzedMsg, ...prev];
+        if (typeof window !== "undefined") {
+          localStorage.setItem("replai_curator_analyzed_messages", JSON.stringify(updated));
+        }
+        return updated;
+      });
     } catch (err) {
       console.error(err);
       setChatMessages(prev => [
@@ -2073,6 +2273,18 @@ export default function AIAgentPage() {
             <span>{t("pages.ai_agent.knowledge_base_tab")}</span>
             {activeTab === "knowledge" && <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-black" />}
           </button>
+          <button
+            onClick={() => setActiveTab("analytics")}
+            className={`flex items-center gap-2 pb-4 text-[14px] font-bold border-b-2 transition-colors relative ${
+              activeTab === "analytics"
+                ? "border-black text-black"
+                : "border-transparent text-[#707070] hover:text-black"
+            }`}
+          >
+            <BarChart2 size={16} />
+            <span>{t("pages.ai_agent.curator_analytics_tab")}</span>
+            {activeTab === "analytics" && <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-black" />}
+          </button>
         </div>
 
         {/* Main Workspace */}
@@ -2768,6 +2980,281 @@ export default function AIAgentPage() {
                   </p>
                 </div>
               )}
+            </div>
+          </div>
+        )}
+
+        {/* Analytics Workspace */}
+        {activeTab === "analytics" && (
+          <div className="flex flex-col gap-6 animate-in fade-in slide-in-from-bottom-2 duration-200">
+            {/* Summary metrics row */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="bg-white border border-[#E8E8E8] rounded-[24px] p-5 shadow-sm flex flex-col gap-1.5 relative overflow-hidden">
+                <div className="absolute right-4 top-4 text-[#7CA607]/20">
+                  <BarChart2 size={36} />
+                </div>
+                <span className="text-[10px] font-extrabold text-[#707070] uppercase tracking-wider">{t("pages.ai_agent.total_analyzed")}</span>
+                <span className="text-[24px] font-extrabold text-black">{analyzedMessages.length}</span>
+                <span className="text-[10px] text-[#A0A0A0] mt-1">Haqiqiy vaqt rejimida yangilandi</span>
+              </div>
+
+              <div className="bg-white border border-[#E8E8E8] rounded-[24px] p-5 shadow-sm flex flex-col gap-1.5 relative overflow-hidden">
+                <div className="absolute right-4 top-4 text-blue-500/20">
+                  <TrendingUp size={36} />
+                </div>
+                <span className="text-[10px] font-extrabold text-[#707070] uppercase tracking-wider">{t("pages.ai_agent.unique_users")}</span>
+                <span className="text-[24px] font-extrabold text-black">
+                  {new Set(analyzedMessages.map(m => m.username)).size}
+                </span>
+                <span className="text-[10px] text-green-600 font-semibold mt-1">Faol muloqot qiluvchilar</span>
+              </div>
+
+              <div className="bg-white border border-[#E8E8E8] rounded-[24px] p-5 shadow-sm flex flex-col gap-1.5 relative overflow-hidden">
+                <div className="absolute right-4 top-4 text-amber-500/20">
+                  <Sparkles size={36} />
+                </div>
+                <span className="text-[10px] font-extrabold text-[#707070] uppercase tracking-wider">{t("pages.ai_agent.avg_confidence")}</span>
+                <span className="text-[24px] font-extrabold text-black">
+                  {analyzedMessages.length > 0 
+                    ? Math.round(analyzedMessages.reduce((acc, curr) => acc + curr.confidence, 0) / analyzedMessages.length) 
+                    : 0}%
+                </span>
+                <span className="text-[10px] text-[#A0A0A0] mt-1">AI javoblari ishonch darajasi</span>
+              </div>
+
+              <div className="bg-white border border-[#E8E8E8] rounded-[24px] p-5 shadow-sm flex flex-col gap-1.5 relative overflow-hidden">
+                <span className="text-[10px] font-extrabold text-[#707070] uppercase tracking-wider">{t("pages.ai_agent.customer_sentiment")}</span>
+                <div className="flex flex-col gap-1 mt-1">
+                  {(() => {
+                    const pos = analyzedMessages.filter(m => m.sentiment === "positive").length;
+                    const neu = analyzedMessages.filter(m => m.sentiment === "neutral").length;
+                    const neg = analyzedMessages.filter(m => m.sentiment === "negative").length;
+                    const total = analyzedMessages.length || 1;
+                    return (
+                      <div className="flex flex-col gap-1 text-[11px] font-semibold text-black">
+                        <div className="flex justify-between items-center">
+                          <span className="text-green-600">{t("pages.ai_agent.sentiment_positive")}</span>
+                          <span>{Math.round((pos/total)*100)}%</span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span className="text-gray-500">{t("pages.ai_agent.sentiment_neutral")}</span>
+                          <span>{Math.round((neu/total)*100)}%</span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span className="text-red-500">{t("pages.ai_agent.sentiment_negative")}</span>
+                          <span>{Math.round((neg/total)*100)}%</span>
+                        </div>
+                      </div>
+                    );
+                  })()}
+                </div>
+              </div>
+            </div>
+
+            {/* Split Grid for intent stats and paint points */}
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+              {/* Intent breakdown */}
+              <div className="lg:col-span-6 bg-white border border-[#E8E8E8] rounded-[24px] p-6 shadow-sm flex flex-col gap-4">
+                <h3 className="text-[14px] font-extrabold text-black border-b border-[#F0F0F0] pb-3">
+                  {t("pages.ai_agent.topics_distribution")}
+                </h3>
+                {analyzedMessages.length === 0 ? (
+                  <p className="text-[11px] text-[#A0A0A0] italic text-center py-6">{t("pages.ai_agent.no_analytics_yet")}</p>
+                ) : (
+                  <div className="flex flex-col gap-4">
+                    {(() => {
+                      const intents = ["To'lov / Billing", "Texnik muammo / Support", "Darslik savoli / FAQ", "Hamkorlik / Affiliate", "Umumiy qiziqish"];
+                      return intents.map(intent => {
+                        const count = analyzedMessages.filter(m => m.intent === intent).length;
+                        const percentage = analyzedMessages.length > 0 ? Math.round((count / analyzedMessages.length) * 100) : 0;
+                        return (
+                          <div key={intent} className="flex flex-col gap-1 text-[11px]">
+                            <div className="flex justify-between font-bold text-black">
+                              <span>{intent}</span>
+                              <span>{count} ta ({percentage}%)</span>
+                            </div>
+                            <div className="w-full h-2 bg-[#F5F5F3] rounded-full overflow-hidden">
+                              <div 
+                                className={`h-full rounded-full transition-all duration-500 ${
+                                  intent.includes("To'lov") ? "bg-black" :
+                                  intent.includes("Texnik") ? "bg-blue-600" :
+                                  intent.includes("Darslik") ? "bg-green-600" :
+                                  intent.includes("Hamkorlik") ? "bg-purple-600" : "bg-gray-400"
+                                }`}
+                                style={{ width: `${percentage}%` }}
+                              />
+                            </div>
+                          </div>
+                        );
+                      });
+                    })()}
+                  </div>
+                )}
+              </div>
+
+              {/* Pain points list */}
+              <div className="lg:col-span-6 bg-white border border-[#E8E8E8] rounded-[24px] p-6 shadow-sm flex flex-col gap-4">
+                <div className="flex justify-between items-center border-b border-[#F0F0F0] pb-3">
+                  <h3 className="text-[14px] font-extrabold text-black">
+                    {t("pages.ai_agent.pain_points_suggestions")}
+                  </h3>
+                  <button
+                    onClick={() => {
+                      setIsRefreshingAnalysis(true);
+                      setTimeout(() => {
+                        setIsRefreshingAnalysis(false);
+                        showToast("AI CustDev tahlillari muvaffaqiyatli yangilandi! 🚀");
+                      }, 1200);
+                    }}
+                    className="text-[10px] bg-black hover:bg-black/90 text-[#C7F33C] px-3 py-1.5 rounded-full font-bold flex items-center gap-1.5 transition-all"
+                  >
+                    <RefreshCw size={11} className={isRefreshingAnalysis ? "animate-spin" : ""} />
+                    <span>{t("pages.ai_agent.update_analysis")}</span>
+                  </button>
+                </div>
+                {analyzedMessages.length === 0 ? (
+                  <p className="text-[11px] text-[#A0A0A0] italic text-center py-6">{t("pages.ai_agent.no_analytics_yet")}</p>
+                ) : (
+                  <div className="flex flex-col gap-4 max-h-[300px] overflow-y-auto pr-1">
+                    {(() => {
+                      // Group by intent and get pain points
+                      const uniqueIntents = Array.from(new Set(analyzedMessages.map(m => m.intent)));
+                      return uniqueIntents.map(intent => {
+                        const msgs = analyzedMessages.filter(m => m.intent === intent);
+                        const sampleMsg = msgs[0];
+                        
+                        let solution = "Tavsif yoki qo'llanmaga qo'shimcha ma'lumotlar qo'shish.";
+                        if (intent === "To'lov / Billing") solution = "Uzcard/Humo kartalarini ulash bo'yicha bosqichma-bosqich rasm/video qo'llanma qo'shish va to'lov xatoliklari bo'yicha ogohlantirish.";
+                        if (intent === "Texnik muammo / Support") solution = "@BotFather orqali token olish qismini darslikning 1-modulida visual animatsiyalar bilan boyitish.";
+                        if (intent === "Darslik savoli / FAQ") solution = "Darslik bilimlar bazasiga (RAG) o'quvchilar tomonidan eng ko'p so'ralgan FAQ javoblarni yangi modul sifatida kiritish.";
+                        if (intent === "Hamkorlik / Affiliate") solution = "Hamkor kabineti sahifasiga komissiya yechib olish va referal tizim shartlari bo'yicha FAQ bo'limini qo'shish.";
+
+                        return (
+                          <div key={intent} className="p-3.5 bg-[#F9F9F7] rounded-2xl border border-[#E8E8E8] flex flex-col gap-2 text-[11px]">
+                            <div className="flex items-center justify-between border-b border-[#F0F0F0] pb-1.5">
+                              <span className="font-bold text-black">{intent}</span>
+                              <span className="text-[9px] bg-black text-[#C7F33C] px-2 py-0.5 rounded-full font-bold">CustDev</span>
+                            </div>
+                            <div>
+                              <span className="font-bold text-black block mb-0.5">{t("pages.ai_agent.custdev_pain_point")}</span>
+                              <span className="text-[#595959] leading-relaxed">{sampleMsg.painPoint}</span>
+                            </div>
+                            <div className="bg-[#C7F33C]/10 border border-[#b2db2a]/30 p-2.5 rounded-xl mt-1">
+                              <span className="font-bold text-[#7CA607] block mb-0.5">{t("pages.ai_agent.custdev_solution")}</span>
+                              <span className="text-[#595959] leading-relaxed">{solution}</span>
+                            </div>
+                          </div>
+                        );
+                      });
+                    })()}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* List of Messages */}
+            <div className="bg-white border border-[#E8E8E8] rounded-[24px] p-6 shadow-sm flex flex-col gap-4">
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-[#F0F0F0] pb-4">
+                <h3 className="text-[14px] font-extrabold text-black">
+                  {t("pages.ai_agent.analyzed_logs")}
+                </h3>
+                
+                {/* Search & Filter row */}
+                <div className="flex flex-wrap gap-2.5 items-center w-full sm:w-auto">
+                  <input
+                    type="text"
+                    value={analyticsSearch}
+                    onChange={(e) => setAnalyticsSearch(e.target.value)}
+                    placeholder={t("pages.ai_agent.search_placeholder")}
+                    className="px-3.5 py-2 text-[11px] bg-[#F9F9F7] border border-[#E8E8E8] rounded-xl focus:outline-none focus:border-black text-black w-full sm:w-[180px]"
+                  />
+                  <CustomDropdown
+                    value={analyticsFilter}
+                    onChange={(val) => setAnalyticsFilter(val)}
+                    options={[
+                      { value: "All", label: t("pages.ai_agent.all_categories") },
+                      { value: "To'lov / Billing", label: "To'lov / Billing" },
+                      { value: "Texnik muammo / Support", label: "Texnik muammo / Support" },
+                      { value: "Darslik savoli / FAQ", label: "Darslik savoli / FAQ" },
+                      { value: "Hamkorlik / Affiliate", label: "Hamkorlik / Affiliate" },
+                      { value: "Umumiy qiziqish", label: "Umumiy qiziqish" }
+                    ]}
+                    className="w-full sm:w-[160px]"
+                  />
+                </div>
+              </div>
+
+              {/* Table */}
+              <div className="border border-[#E8E8E8] rounded-xl overflow-hidden">
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left border-collapse text-[11px]">
+                    <thead>
+                      <tr className="bg-[#F9F9F7] border-b border-[#E8E8E8] text-black font-bold">
+                        <th className="p-3 w-[120px]">Foydalanuvchi</th>
+                        <th className="p-3">{t("pages.ai_agent.raw_message")}</th>
+                        <th className="p-3">{t("pages.ai_agent.ai_response_msg")}</th>
+                        <th className="p-3 w-[130px]">{t("pages.ai_agent.custdev_tag")}</th>
+                        <th className="p-3 w-[60px] text-center">Kayfiyat</th>
+                        <th className="p-3 w-[65px] text-center">{t("pages.ai_agent.confidence_level")}</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {(() => {
+                        const filtered = analyzedMessages.filter(m => {
+                          const matchesFilter = analyticsFilter === "All" || m.intent === analyticsFilter;
+                          const matchesSearch = analyticsSearch.trim() === "" || 
+                            m.username.toLowerCase().includes(analyticsSearch.toLowerCase()) ||
+                            m.message.toLowerCase().includes(analyticsSearch.toLowerCase());
+                          return matchesFilter && matchesSearch;
+                        });
+
+                        if (filtered.length === 0) {
+                          return (
+                            <tr>
+                              <td colSpan={6} className="p-6 text-center text-[#A0A0A0] italic">
+                                Ma&apos;lumot topilmadi.
+                              </td>
+                            </tr>
+                          );
+                        }
+
+                        return filtered.map((m) => (
+                          <tr key={m.id} className="border-b border-[#E8E8E8] hover:bg-[#F9F9F7]/30 transition-colors last:border-0">
+                            <td className="p-3 font-semibold text-black">
+                              @{m.username}
+                            </td>
+                            <td className="p-3 text-[#595959] max-w-[200px] truncate" title={m.message}>
+                              {m.message}
+                            </td>
+                            <td className="p-3 text-[#707070] max-w-[220px] truncate" title={m.response}>
+                              {m.response}
+                            </td>
+                            <td className="p-3">
+                              <span className={`px-2 py-0.5 rounded-full text-[9px] font-extrabold uppercase tracking-wide border ${
+                                m.intent.includes("To'lov") ? "bg-black/5 border-black/10 text-black" :
+                                m.intent.includes("Texnik") ? "bg-blue-50 border-blue-100 text-blue-600" :
+                                m.intent.includes("Darslik") ? "bg-green-50 border-green-100 text-green-600" :
+                                m.intent.includes("Hamkorlik") ? "bg-purple-50 border-purple-100 text-purple-600" :
+                                "bg-gray-50 border-gray-100 text-gray-500"
+                              }`}>
+                                {m.intent}
+                              </span>
+                            </td>
+                            <td className="p-3 text-center">
+                              <span className={`text-[12px]`} title={m.sentiment}>
+                                {m.sentiment === "positive" ? "🟢" : m.sentiment === "negative" ? "🔴" : "🟡"}
+                              </span>
+                            </td>
+                            <td className="p-3 text-center font-bold text-black">
+                              {m.confidence}%
+                            </td>
+                          </tr>
+                        ));
+                      })()}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
             </div>
           </div>
         )}
