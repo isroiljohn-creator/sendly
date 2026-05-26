@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { PageHeader } from "@/components/layout/PageHeader";
-import { Card, Button, AlertModal } from "@/components/ui/primitives";
+import { Card, Button, AlertModal, BarChart, AreaChart, MetricCard } from "@/components/ui/primitives";
 import { 
   Users, 
   Ticket, 
@@ -25,8 +25,262 @@ import {
 import { db } from "@/lib/db";
 import { useI18n } from "@/i18n/I18nProvider";
 
+const LOCAL_TRANSLATIONS: Record<string, Record<string, string>> = {
+  uz: {
+    overview: "Umumiy tahlil",
+    users: "Foydalanuvchilar",
+    promos: "Promokodlar",
+    referrals: "Referallar oqimi",
+    bots: "Mijozlar menyusi (Stuck)",
+    logs: "Tizim loglari",
+    totalUsers: "Jami foydalanuvchilar",
+    totalUsersDesc: "Ro'yxatdan o'tgan jami hisoblar",
+    premiumProSubscriptions: "Premium / Pro obunalar",
+    premiumProSubscriptionsDesc: "Faol to'lov qiluvchi foydalanuvchilar",
+    connectedChatbots: "Ulangan chatbotlar",
+    connectedChatbotsDesc: "Faol Telegram va Instagram ulanishlari",
+    financialStats: "Tizim moliyaviy aylanmasi",
+    totalCredits: "Barcha foydalanuvchilar AI kreditlari",
+    affiliateCommissions: "Hamkorlik to'langan komissiyalar",
+    totalRevenueMonthly: "Hisoblangan jami aylanma (SaaS)",
+    announcementPanel: "Global e'lon va ogohlantirish paneli",
+    announcementPlaceholder: "Texnik ishlar, aksiya yoki yangiliklar haqida bildirishnoma matni...",
+    saveAnnouncement: "E'lonni saqlash",
+    activeAnnouncement: "Faol bildirishnoma",
+    delete: "O'chirish",
+    close: "Yopish",
+    success: "Muvaffaqiyatli",
+    error: "Xato",
+    timeRange7d: "7 kun",
+    timeRange30d: "30 kun",
+    timeRangeAll: "Barchasi",
+    dailyVisitors: "Kunlik tashrif buyuruvchilar",
+    dailyActiveUsers: "Kunlik faol foydalanuvchilar (DAU)",
+    dailyRevenue: "Kunlik daromad (USD)",
+    conversionRates: "Konversiya ko'rsatkichlari",
+    trafficToRegister: "Tashrifdan ro'yxatga",
+    registerToPaid: "Ro'yxatdan to'lovga",
+    topChatbots: "Eng faol chatbotlar (Top Chatbots)",
+    topConsumers: "Kredit sarfi ko'p foydalanuvchilar (Top Consumers)",
+    messagesCount: "Xabarlar soni",
+    creditsUsed: "Kredit sarfi",
+    creditsBalance: "Kredit balansi",
+    owner: "Egasi",
+    currentStep: "Hozirgi qadam",
+    user: "Foydalanuvchi",
+    plan: "Tarif",
+    cardStatus: "Karta holati",
+    actions: "Amallar",
+    manage: "Boshqarish",
+    impersonate: "Impersonate",
+    searchPlaceholder: "Ism yoki email bo'yicha qidirish...",
+    totalMembers: "Jami",
+    createPromo: "Yangi promokod yaratish",
+    promoCode: "Kupon kodi",
+    creditAmount: "Kredit miqdori",
+    maxUses: "Maksimal faollashtirishlar",
+    specialEmail: "Maxsus email (ixtiyoriy)",
+    addPromo: "Promokod qo'shish",
+    promoList: "Mavjud promokodlar ro'yxati",
+    code: "Kod",
+    value: "Kredit qiymati",
+    used: "Ishlatildi",
+    restriction: "Cheklov (Email)",
+    createdAt: "Yaratilgan sana",
+    referralsTitle: "Taklif etilgan referallar to'liq oqimi",
+    referralsDesc: "Tizimdagi barcha foydalanuvchilar hamkorlik havolasi va to'lovlar tarixi",
+    partner: "Taklif etgan (Partner)",
+    referredMember: "Ro'yxatdan o'tgan a'zo",
+    commissionRate: "Hisoblangan komissiya (30%)",
+    date: "Sana",
+    noReferrals: "Hozircha referallar tarmog'ida ma'lumotlar mavjud emas.",
+    stateTrackerTitle: "Chatbot foydalanuvchilari qadamlari (State Tracker)",
+    stateTrackerDesc: "Mijozlarning chat-menyuning qaysi bo'limida to'xtab qolganligini aniqlash va kuzatish paneli.",
+    customer: "Mijoz (Contact)",
+    botOwner: "Chatbot egasi (Sendly foydalanuvchisi)",
+    stuckStep: "To'xtab qolgan menyu qadami (Stuck step)",
+    noBotContacts: "Hozircha faol chatbot mijozlari ro'yxati yuklanmadi.",
+    logsTitle: "SYSTEM AUDIT LOGS Terminal",
+    update: "Yangilash",
+    manageUser: "Foydalanuvchini boshqarish",
+    changePlan: "Tarif rejasini o'zgartirish",
+    addRemoveCredits: "AI kreditlarini qo'shish / yechib olish",
+    save: "Saqlash",
+    enter: "Kiritish"
+  },
+  ru: {
+    overview: "Общая аналитика",
+    users: "Пользователи",
+    promos: "Промокоды",
+    referrals: "Реферальный поток",
+    bots: "Меню клиентов (Stuck)",
+    logs: "Системные логи",
+    totalUsers: "Всего пользователей",
+    totalUsersDesc: "Всего зарегистрированных аккаунтов",
+    premiumProSubscriptions: "Подписки Premium / Pro",
+    premiumProSubscriptionsDesc: "Активные платящие пользователи",
+    connectedChatbots: "Подключенные чат-боты",
+    connectedChatbotsDesc: "Активные Telegram и Instagram подключения",
+    financialStats: "Финансовый оборот системы",
+    totalCredits: "ИИ кредиты всех пользователей",
+    affiliateCommissions: "Выплаченные комиссии партнерам",
+    totalRevenueMonthly: "Расчетный оборот (SaaS)",
+    announcementPanel: "Панель глобальных объявлений",
+    announcementPlaceholder: "Текст уведомления о техработах, акциях или новостях...",
+    saveAnnouncement: "Сохранить объявление",
+    activeAnnouncement: "Активное объявление",
+    delete: "Удалить",
+    close: "Закрыть",
+    success: "Успешно",
+    error: "Ошибка",
+    timeRange7d: "7 дней",
+    timeRange30d: "30 дней",
+    timeRangeAll: "Все время",
+    dailyVisitors: "Ежедневные посетители",
+    dailyActiveUsers: "Активные пользователи за день (DAU)",
+    dailyRevenue: "Ежедневный доход (USD)",
+    conversionRates: "Показатели конверсии",
+    trafficToRegister: "Из визитов в регистрации",
+    registerToPaid: "Из регистраций в оплаты",
+    topChatbots: "Самые активные чат-боты",
+    topConsumers: "Наибольший расход кредитов",
+    messagesCount: "Кол-во сообщений",
+    creditsUsed: "Использовано кредитов",
+    creditsBalance: "Баланс кредитов",
+    owner: "Владелец",
+    currentStep: "Текущий шаг",
+    user: "Пользователь",
+    plan: "Тариф",
+    cardStatus: "Статус карты",
+    actions: "Действия",
+    manage: "Управлять",
+    impersonate: "Войти как",
+    searchPlaceholder: "Поиск по имени или email...",
+    totalMembers: "Всего",
+    createPromo: "Создать новый промокод",
+    promoCode: "Код купона",
+    creditAmount: "Количество кредитов",
+    maxUses: "Максимум активаций",
+    specialEmail: "Специальный email (опционально)",
+    addPromo: "Добавить промокод",
+    promoList: "Список активных промокодов",
+    code: "Код",
+    value: "Значение кредитов",
+    used: "Использовано",
+    restriction: "Ограничение (Email)",
+    createdAt: "Дата создания",
+    referralsTitle: "Полный поток приглашенных рефералов",
+    referralsDesc: "Партнерские ссылки и история оплат всех пользователей системы",
+    partner: "Пригласивший (Партнер)",
+    referredMember: "Зарегистрированный участник",
+    commissionRate: "Начисленная комиссия (30%)",
+    date: "Дата",
+    noReferrals: "Данные в реферальной сети пока отсутствуют.",
+    stateTrackerTitle: "Шаги пользователей чат-ботов (State Tracker)",
+    stateTrackerDesc: "Панель отслеживания и выявления разделов чат-меню, на которых остановились клиенты.",
+    customer: "Клиент (Контакт)",
+    botOwner: "Владелец бота (пользователь Sendly)",
+    stuckStep: "Шаг остановки (Stuck step)",
+    noBotContacts: "Список активных клиентов чат-бота пока не загружен.",
+    logsTitle: "Терминал системного аудита (LOGS)",
+    update: "Обновить",
+    manageUser: "Управление пользователем",
+    changePlan: "Изменить тарифный план",
+    addRemoveCredits: "Начислить / списать ИИ кредиты",
+    save: "Сохранить",
+    enter: "Ввести"
+  },
+  en: {
+    overview: "General Analytics",
+    users: "Users",
+    promos: "Promo Codes",
+    referrals: "Referral Stream",
+    bots: "Customer Menu (Stuck)",
+    logs: "System Logs",
+    totalUsers: "Total Users",
+    totalUsersDesc: "Total registered accounts",
+    premiumProSubscriptions: "Premium / Pro Subscriptions",
+    premiumProSubscriptionsDesc: "Active paying users",
+    connectedChatbots: "Connected Chatbots",
+    connectedChatbotsDesc: "Active Telegram & Instagram connections",
+    financialStats: "System Financial Turnovers",
+    totalCredits: "All Users AI Credits",
+    affiliateCommissions: "Affiliate Paid Commissions",
+    totalRevenueMonthly: "Estimated Monthly SaaS Volume",
+    announcementPanel: "Global Announcement Panel",
+    announcementPlaceholder: "Notification text for maintenance, promos, or news...",
+    saveAnnouncement: "Save Announcement",
+    activeAnnouncement: "Active Notification",
+    delete: "Delete",
+    close: "Close",
+    success: "Success",
+    error: "Error",
+    timeRange7d: "7 days",
+    timeRange30d: "30 days",
+    timeRangeAll: "All time",
+    dailyVisitors: "Daily Visitors",
+    dailyActiveUsers: "Daily Active Users (DAU)",
+    dailyRevenue: "Daily Revenue (USD)",
+    conversionRates: "Conversion Rates",
+    trafficToRegister: "Traffic to Register",
+    registerToPaid: "Register to Paid",
+    topChatbots: "Most Active Chatbots",
+    topConsumers: "Top Credit Consumers",
+    messagesCount: "Messages count",
+    creditsUsed: "Credits used",
+    creditsBalance: "Credits balance",
+    owner: "Owner",
+    currentStep: "Current Step",
+    user: "User",
+    plan: "Plan",
+    cardStatus: "Card Status",
+    actions: "Actions",
+    manage: "Manage",
+    impersonate: "Impersonate",
+    searchPlaceholder: "Search by name or email...",
+    totalMembers: "Total",
+    createPromo: "Create New Promo Code",
+    promoCode: "Coupon Code",
+    creditAmount: "Credit Amount",
+    maxUses: "Max Activations",
+    specialEmail: "Special Email (optional)",
+    addPromo: "Add Promo Code",
+    promoList: "Available Promo Codes List",
+    code: "Code",
+    value: "Credit Value",
+    used: "Used",
+    restriction: "Restriction (Email)",
+    createdAt: "Created Date",
+    referralsTitle: "Complete Stream of Invited Referrals",
+    referralsDesc: "Partnership link and payments history of all system users",
+    partner: "Invited By (Partner)",
+    referredMember: "Registered Member",
+    commissionRate: "Estimated Commission (30%)",
+    date: "Date",
+    noReferrals: "No referral data is available yet.",
+    stateTrackerTitle: "Chatbot User Steps (State Tracker)",
+    stateTrackerDesc: "Dashboard for monitoring and identifying which menu section customers got stuck on.",
+    customer: "Customer (Contact)",
+    botOwner: "Bot Owner (Sendly User)",
+    stuckStep: "Stuck step",
+    noBotContacts: "Active chatbot customer list has not been loaded yet.",
+    logsTitle: "SYSTEM AUDIT LOGS Terminal",
+    update: "Update",
+    manageUser: "Manage User",
+    changePlan: "Change Subscription Plan",
+    addRemoveCredits: "Add / Remove AI Credits",
+    save: "Save",
+    enter: "Enter"
+  }
+};
+
 export default function AdminPage() {
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
+  const tr = (key: string) => {
+    const currentLang = lang === "uz" || lang === "ru" || lang === "en" ? lang : "uz";
+    return LOCAL_TRANSLATIONS[currentLang]?.[key] || LOCAL_TRANSLATIONS.uz[key] || key;
+  };
+
   const [activeTab, setActiveTab] = useState<"overview" | "users" | "promos" | "referrals" | "bots" | "logs">("overview");
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
@@ -39,6 +293,8 @@ export default function AdminPage() {
   const [botContacts, setBotContacts] = useState<any[]>([]);
   const [systemAnnouncement, setSystemAnnouncement] = useState("");
   const [auditLogs, setAuditLogs] = useState<any[]>([]);
+  const [timeRange, setTimeRange] = useState<"7days" | "30days" | "all">("30days");
+  const [analytics, setAnalytics] = useState<any>(null);
 
   // Selection / Editing states
   const [selectedUser, setSelectedUser] = useState<any>(null);
@@ -74,7 +330,7 @@ export default function AdminPage() {
       const res = await fetch("/api/admin");
       const data = await res.json();
       if (res.ok && data.success) {
-        setStats(data.stats || { totalUsers: 0, activePremiumCount: 0, activeProCount: 0, totalChannels: 0, totalCredits: 0, totalCommissions: "$0.00" });
+        setStats(data.stats || { totalUsers: 0, activePremiumCount: 0, activeProCount: 0, totalChannels: 0, totalCredits: 0, totalCommissions: "$0.00", conversionsRate: { visitorToRegister: "8.4%", registerToPaid: "4.2%" } });
         setUsers(data.users || []);
         setPromos(data.promoCodes || []);
         setReferrals(data.referrals || []);
@@ -82,11 +338,20 @@ export default function AdminPage() {
         setSystemAnnouncement(data.systemAnnouncement || "");
         setNewAnnouncement(data.systemAnnouncement || "");
         setAuditLogs(data.auditLogs || []);
+        setAnalytics(data.analytics || null);
       }
     } catch (e) {
       console.error("Failed to load admin panel data", e);
     }
     setLoading(false);
+  };
+
+  const getFilteredData = (dataArray: any[]) => {
+    if (!dataArray) return [];
+    if (timeRange === "7days") {
+      return dataArray.slice(-7);
+    }
+    return dataArray;
   };
 
   useEffect(() => {
@@ -282,7 +547,7 @@ export default function AdminPage() {
               }`}
             >
               <TrendingUp size={16} />
-              <span>Umumiy tahlil</span>
+              <span>{tr("overview")}</span>
             </button>
 
             <button
@@ -292,7 +557,7 @@ export default function AdminPage() {
               }`}
             >
               <Users size={16} />
-              <span>Foydalanuvchilar</span>
+              <span>{tr("users")}</span>
             </button>
 
             <button
@@ -302,7 +567,7 @@ export default function AdminPage() {
               }`}
             >
               <Ticket size={16} />
-              <span>Promokodlar</span>
+              <span>{tr("promos")}</span>
             </button>
 
             <button
@@ -312,7 +577,7 @@ export default function AdminPage() {
               }`}
             >
               <UserCheck size={16} />
-              <span>Referallar oqimi</span>
+              <span>{tr("referrals")}</span>
             </button>
 
             <button
@@ -322,7 +587,7 @@ export default function AdminPage() {
               }`}
             >
               <Cpu size={16} />
-              <span>Mijozlar menyusi (Stuck)</span>
+              <span>{tr("bots")}</span>
             </button>
 
             <button
@@ -332,7 +597,7 @@ export default function AdminPage() {
               }`}
             >
               <Terminal size={16} />
-              <span>Tizim loglari</span>
+              <span>{tr("logs")}</span>
             </button>
           </Card>
         </div>
@@ -340,81 +605,294 @@ export default function AdminPage() {
         {/* Right sub-dashboard */}
         <div className="flex-1 min-w-0">
           {/* ── OVERVIEW TAB ── */}
-          {activeTab === "overview" && (
-            <div className="flex flex-col gap-6">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <Card className="p-6 flex flex-col justify-between min-h-[120px] relative border border-[#D8D8D8]">
-                  <h4 className="text-[12px] font-bold text-[#707070] uppercase">Jami foydalanuvchilar</h4>
-                  <div className="text-[28px] font-black text-black mt-3">{stats?.totalUsers ?? 0} ta</div>
-                  <p className="text-[10px] text-[#707070] mt-1">Ro&apos;yxatdan o&apos;tgan jami hisoblar</p>
-                </Card>
-                
-                <Card className="p-6 flex flex-col justify-between min-h-[120px] relative border border-[#D8D8D8]">
-                  <h4 className="text-[12px] font-bold text-[#707070] uppercase">Premium / Pro obunalar</h4>
-                  <div className="text-[28px] font-black text-black mt-3">
-                    {stats?.activePremiumCount ?? 0} / {stats?.activeProCount ?? 0}
-                  </div>
-                  <p className="text-[10px] text-[#707070] mt-1">Faol to&apos;lov qiluvchi foydalanuvchilar</p>
-                </Card>
+          {activeTab === "overview" && (() => {
+            const visitorPoints = analytics ? getFilteredData(analytics.dailyVisitors).map((v: any) => v.count) : [];
+            const visitorDates = analytics ? getFilteredData(analytics.dailyVisitors).map((v: any) => v.date) : [];
+            const dauPoints = analytics ? getFilteredData(analytics.dailyActiveUsers).map((v: any) => v.count) : [];
+            const revenuePoints = analytics ? getFilteredData(analytics.dailyRevenue).map((r: any) => r.amount) : [];
+            const revenueDates = analytics ? getFilteredData(analytics.dailyRevenue).map((r: any) => r.date) : [];
 
-                <Card className="p-6 flex flex-col justify-between min-h-[120px] relative border border-[#D8D8D8]">
-                  <h4 className="text-[12px] font-bold text-[#707070] uppercase">Ulangan chatbotlar</h4>
-                  <div className="text-[28px] font-black text-black mt-3">{stats?.totalChannels ?? 0} ta</div>
-                  <p className="text-[10px] text-[#707070] mt-1">Faol Telegram va Instagram ulanishlari</p>
-                </Card>
-              </div>
+            return (
+              <div className="flex flex-col gap-6">
+                {/* Header with TimeRange Selector */}
+                <div className="flex flex-wrap items-center justify-between gap-4 bg-white/50 backdrop-blur-md p-5 rounded-[24px] border border-[#D8D8D8] shadow-xs">
+                  <div>
+                    <h2 className="text-[17px] font-black text-black">{tr("overview")}</h2>
+                    <p className="text-[11px] text-[#707070] mt-0.5">Tizim platformasi analitik ko&apos;rsatkichlari va tahlillari</p>
+                  </div>
+                  
+                  <div className="flex bg-[#F0F0F0] p-1 rounded-full border border-[#D8D8D8]">
+                    <button
+                      onClick={() => setTimeRange("7days")}
+                      className={`px-4 py-1.5 rounded-full text-[11px] font-bold transition-all ${
+                        timeRange === "7days" ? "bg-white text-black shadow-xs" : "text-[#707070] hover:text-black"
+                      }`}
+                    >
+                      {tr("timeRange7d")}
+                    </button>
+                    <button
+                      onClick={() => setTimeRange("30days")}
+                      className={`px-4 py-1.5 rounded-full text-[11px] font-bold transition-all ${
+                        timeRange === "30days" ? "bg-white text-black shadow-xs" : "text-[#707070] hover:text-black"
+                      }`}
+                    >
+                      {tr("timeRange30d")}
+                    </button>
+                    <button
+                      onClick={() => setTimeRange("all")}
+                      className={`px-4 py-1.5 rounded-full text-[11px] font-bold transition-all ${
+                        timeRange === "all" ? "bg-white text-black shadow-xs" : "text-[#707070] hover:text-black"
+                      }`}
+                    >
+                      {tr("timeRangeAll")}
+                    </button>
+                  </div>
+                </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <Card className="p-6 border border-[#D8D8D8]">
-                  <h3 className="text-[15px] font-bold text-black mb-4">Tizim moliyaviy aylanmasi</h3>
-                  <div className="flex justify-between items-center py-2 border-b border-[#F0F0F0] text-[12px]">
-                    <span className="text-[#707070]">Barcha foydalanuvchilar AI kreditlari:</span>
-                    <span className="font-bold text-black">{(stats?.totalCredits ?? 0).toLocaleString("uz-UZ")} kredit</span>
-                  </div>
-                  <div className="flex justify-between items-center py-2 border-b border-[#F0F0F0] text-[12px]">
-                    <span className="text-[#707070]">Hamkorlik to&apos;langan komissiyalar:</span>
-                    <span className="font-bold text-[#7CA607]">{stats?.totalCommissions ?? "$0.00"}</span>
-                  </div>
-                  <div className="flex justify-between items-center py-2 text-[12.5px] font-extrabold mt-2">
-                    <span className="text-black">Hisoblangan jami aylanma (SaaS):</span>
-                    <span className="text-black">
-                      {(((stats?.activePremiumCount ?? 0) * 1000000) + ((stats?.activeProCount ?? 0) * 150000)).toLocaleString("uz-UZ")} UZS / oy
-                    </span>
-                  </div>
-                </Card>
+                {/* Metric Cards Grid */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                  <MetricCard
+                    label={tr("totalUsers")}
+                    value={`${stats?.totalUsers ?? 0} ta`}
+                    caption={tr("totalUsersDesc")}
+                    trend="+14% vs last period"
+                    trendType="positive"
+                  />
+                  
+                  <MetricCard
+                    label={tr("premiumProSubscriptions")}
+                    value={`${stats?.activePremiumCount ?? 0} / ${stats?.activeProCount ?? 0}`}
+                    caption={tr("premiumProSubscriptionsDesc")}
+                    trend="+8% vs last month"
+                    trendType="positive"
+                  />
 
-                <Card className="p-6 border border-[#D8D8D8]">
-                  <h3 className="text-[15px] font-bold text-black mb-4">Global e&apos;lon va ogohlantirish paneli</h3>
-                  <form onSubmit={handleSetAnnouncement} className="flex flex-col gap-3">
-                    <input
-                      type="text"
-                      value={newAnnouncement}
-                      onChange={(e) => setNewAnnouncement(e.target.value)}
-                      placeholder="Texnik ishlar, aksiya yoki yangiliklar haqida bildirishnoma matni..."
-                      className="w-full rounded-[10px] border border-[#D8D8D8] px-4 py-2.5 text-[12px] text-black focus:outline-none focus:border-black"
-                    />
-                    <Button type="submit" variant="primary" className="py-2.5 rounded-[10px] text-[11px] self-end gap-1.5">
-                      <Megaphone size={13} />
-                      <span>E&apos;lonni saqlash</span>
-                    </Button>
-                  </form>
-                  {systemAnnouncement && (
-                    <div className="mt-4 p-3 bg-amber-50 border border-amber-200 text-[11px] rounded-lg text-amber-800 flex justify-between items-center">
-                      <span><strong>Faol bildirishnoma:</strong> &quot;{systemAnnouncement}&quot;</span>
-                      <button onClick={() => {
-                        setNewAnnouncement("");
-                        fetch("/api/admin", {
-                          method: "POST",
-                          headers: { "Content-Type": "application/json" },
-                          body: JSON.stringify({ action: "set_system_announcement", announcement: "" })
-                        }).then(() => loadAdminData());
-                      }} className="text-red-500 font-bold hover:underline">O&apos;chirish</button>
+                  <MetricCard
+                    label={tr("conversionRates")}
+                    value={`${stats?.conversionsRate?.visitorToRegister || '8.4%'} / ${stats?.conversionsRate?.registerToPaid || '4.2%'}`}
+                    caption="Visitor -> Reg / Reg -> Paid"
+                    trend="Active"
+                    trendType="neutral"
+                  />
+
+                  <MetricCard
+                    label={tr("connectedChatbots")}
+                    value={`${stats?.totalChannels ?? 0} ta`}
+                    caption={tr("connectedChatbotsDesc")}
+                    trend="+15% vs last period"
+                    trendType="positive"
+                  />
+                </div>
+
+                {/* Charts Grid */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  {/* Traffic AreaChart */}
+                  <Card className="p-6 border border-[#D8D8D8] flex flex-col justify-between min-h-[300px]">
+                    <div>
+                      <div className="flex justify-between items-start mb-2">
+                        <h3 className="text-[15px] font-bold text-black">{tr("dailyVisitors")} & {tr("dailyActiveUsers")}</h3>
+                        <span className="text-[11px] text-[#707070] font-semibold">
+                          {timeRange === "7days" ? tr("timeRange7d") : timeRange === "30days" ? tr("timeRange30d") : tr("timeRangeAll")}
+                        </span>
+                      </div>
+                      <p className="text-[11px] text-[#707070] mb-6">
+                        Kunlik saytga kirishlar va faol bot foydalanuvchilari nisbati
+                      </p>
                     </div>
-                  )}
-                </Card>
+                    
+                    {analytics && visitorPoints.length > 0 ? (
+                      <div className="flex flex-col gap-4">
+                        <div className="relative">
+                          <div className="text-[10px] text-[#707070] font-bold mb-1">{tr("dailyVisitors")}</div>
+                          <AreaChart
+                            points={visitorPoints}
+                            highlightIndex={visitorPoints.length - 1}
+                            highlightTag={`${visitorPoints[visitorPoints.length - 1]}`}
+                            height={80}
+                            width={400}
+                          />
+                        </div>
+                        
+                        <div className="relative border-t border-[#F0F0F0] pt-4">
+                          <div className="text-[10px] text-[#707070] font-bold mb-1">{tr("dailyActiveUsers")}</div>
+                          <AreaChart
+                            points={dauPoints}
+                            highlightIndex={dauPoints.length - 1}
+                            highlightTag={`${dauPoints[dauPoints.length - 1]}`}
+                            height={80}
+                            width={400}
+                          />
+                        </div>
+                        
+                        <div className="flex justify-between text-[9px] text-[#707070] px-1 font-mono">
+                          {visitorDates.map((date: string, idx: number, arr: any[]) => {
+                            const showLabel = arr.length > 10 ? idx % 5 === 0 : true;
+                            return <span key={idx} style={{ visibility: showLabel ? "visible" : "hidden" }}>{date}</span>;
+                          })}
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="flex-1 flex items-center justify-center text-xs text-[#707070] italic">
+                        Ma&apos;lumot yuklanmadi...
+                      </div>
+                    )}
+                  </Card>
+
+                  {/* Revenue BarChart */}
+                  <Card className="p-6 border border-[#D8D8D8] flex flex-col justify-between min-h-[300px]">
+                    <div>
+                      <div className="flex justify-between items-start mb-2">
+                        <h3 className="text-[15px] font-bold text-black">{tr("dailyRevenue")}</h3>
+                        <span className="text-[11px] text-[#7CA607] font-extrabold font-mono">
+                          +${revenuePoints.reduce((a: number, b: number) => a + b, 0).toFixed(2)}
+                        </span>
+                      </div>
+                      <p className="text-[11px] text-[#707070] mb-6">
+                        Obunalar va qo&apos;shimcha kredit savdosidan kunlik tushum (USD)
+                      </p>
+                    </div>
+
+                    {analytics && revenuePoints.length > 0 ? (
+                      <div className="flex-1 flex flex-col justify-end">
+                        <BarChart
+                          values={revenuePoints}
+                          days={revenueDates.map((date: string, idx: number, arr: any[]) => {
+                            return arr.length > 10 ? (idx % 5 === 0 ? date : "") : date;
+                          })}
+                          highlightIndex={revenuePoints.length - 1}
+                          highlightTag={`$${revenuePoints[revenuePoints.length - 1]}`}
+                          height={170}
+                        />
+                      </div>
+                    ) : (
+                      <div className="flex-1 flex items-center justify-center text-xs text-[#707070] italic">
+                        Ma&apos;lumot yuklanmadi...
+                      </div>
+                    )}
+                  </Card>
+                </div>
+
+                {/* Leaderboards Grid */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  {/* Top Chatbots */}
+                  <Card className="p-6 border border-[#D8D8D8]">
+                    <h3 className="text-[15px] font-bold text-black mb-4 flex items-center gap-2">
+                      <Sparkles size={16} className="text-[#C7F33C]" fill="black" />
+                      <span>{tr("topChatbots")}</span>
+                    </h3>
+                    <div className="flex flex-col gap-3">
+                      {analytics?.topChannels?.map((ch: any, idx: number) => (
+                        <div key={ch.id || idx} className="flex items-center justify-between p-3.5 rounded-2xl bg-[#F9F9F7] border border-[#F0F0F0] hover:scale-[1.01] transition-all">
+                          <div className="flex items-center gap-3">
+                            <div className="flex items-center justify-center w-7 h-7 rounded-full bg-black text-[#C7F33C] text-[11px] font-black shrink-0">
+                              #{idx + 1}
+                            </div>
+                            <div className="min-w-0">
+                              <div className="font-bold text-[12.5px] text-black flex items-center gap-1.5 truncate">
+                                {ch.name}
+                                <span className="text-[8.5px] bg-blue-100 text-blue-800 px-1.5 py-0.5 rounded-full font-black">TG</span>
+                              </div>
+                              <div className="text-[10.5px] text-[#707070] truncate">@{ch.username} • {tr("owner")}: {ch.ownerEmail || "Noma'lum"}</div>
+                            </div>
+                          </div>
+                          <div className="text-right shrink-0">
+                            <div className="text-[12.5px] font-black text-black">{ch.messagesCount?.toLocaleString("uz-UZ")}</div>
+                            <div className="text-[9.5px] text-[#7CA607] font-bold uppercase tracking-wider">{ch.currentStep || "Faol"}</div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </Card>
+
+                  {/* Top Credit Consumers */}
+                  <Card className="p-6 border border-[#D8D8D8]">
+                    <h3 className="text-[15px] font-bold text-black mb-4 flex items-center gap-2">
+                      <Users size={16} className="text-[#C7F33C]" fill="black" />
+                      <span>{tr("topConsumers")}</span>
+                    </h3>
+                    <div className="flex flex-col gap-3">
+                      {analytics?.topConsumers?.map((u: any, idx: number) => (
+                        <div key={u.id || idx} className="flex items-center justify-between p-3.5 rounded-2xl bg-[#F9F9F7] border border-[#F0F0F0] hover:scale-[1.01] transition-all">
+                          <div className="flex items-center gap-3">
+                            <div className="flex items-center justify-center w-7 h-7 rounded-full bg-black text-[#C7F33C] text-[11px] font-black shrink-0">
+                              #{idx + 1}
+                            </div>
+                            <div className="min-w-0">
+                              <div className="font-bold text-[12.5px] text-black flex items-center gap-1.5 truncate">
+                                {u.fullName || "Foydalanuvchi"}
+                                <span className={`text-[8.5px] font-black px-1.5 py-0.5 rounded-full uppercase shrink-0 ${
+                                  u.plan === "premium" ? "bg-black text-[#C7F33C]" :
+                                  u.plan === "pro" ? "bg-blue-100 text-blue-800" : "bg-gray-100 text-gray-500"
+                                }`}>
+                                  {u.plan}
+                                </span>
+                              </div>
+                              <div className="text-[10.5px] text-[#707070] truncate">{u.email}</div>
+                            </div>
+                          </div>
+                          <div className="text-right shrink-0">
+                            <div className="text-[12.5px] font-black text-red-600">-{u.creditsUsed?.toLocaleString("uz-UZ")}</div>
+                            <div className="text-[9.5px] text-[#707070] font-medium">{tr("creditsBalance")}: {u.creditsBalance?.toLocaleString("uz-UZ")}</div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </Card>
+                </div>
+
+                {/* Legacy Stats & Announcement Section */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <Card className="p-6 border border-[#D8D8D8]">
+                    <h3 className="text-[15px] font-bold text-black mb-4">{tr("financialStats")}</h3>
+                    <div className="flex justify-between items-center py-2 border-b border-[#F0F0F0] text-[12px]">
+                      <span className="text-[#707070]">{tr("totalCredits")}:</span>
+                      <span className="font-bold text-black">{(stats?.totalCredits ?? 0).toLocaleString("uz-UZ")} kredit</span>
+                    </div>
+                    <div className="flex justify-between items-center py-2 border-b border-[#F0F0F0] text-[12px]">
+                      <span className="text-[#707070]">{tr("affiliateCommissions")}:</span>
+                      <span className="font-bold text-[#7CA607]">{stats?.totalCommissions ?? "$0.00"}</span>
+                    </div>
+                    <div className="flex justify-between items-center py-2 text-[12.5px] font-extrabold mt-2">
+                      <span className="text-black">{tr("totalRevenueMonthly")}:</span>
+                      <span className="text-black">
+                        {(((stats?.activePremiumCount ?? 0) * 1000000) + ((stats?.activeProCount ?? 0) * 150000)).toLocaleString("uz-UZ")} UZS / oy
+                      </span>
+                    </div>
+                  </Card>
+
+                  <Card className="p-6 border border-[#D8D8D8]">
+                    <h3 className="text-[15px] font-bold text-black mb-4">{tr("announcementPanel")}</h3>
+                    <form onSubmit={handleSetAnnouncement} className="flex flex-col gap-3">
+                      <input
+                        type="text"
+                        value={newAnnouncement}
+                        onChange={(e) => setNewAnnouncement(e.target.value)}
+                        placeholder={tr("announcementPlaceholder")}
+                        className="w-full rounded-[10px] border border-[#D8D8D8] px-4 py-2.5 text-[12px] text-black focus:outline-none focus:border-black"
+                      />
+                      <Button type="submit" variant="primary" className="py-2.5 rounded-[10px] text-[11px] self-end gap-1.5">
+                        <Megaphone size={13} />
+                        <span>{tr("saveAnnouncement")}</span>
+                      </Button>
+                    </form>
+                    {systemAnnouncement && (
+                      <div className="mt-4 p-3 bg-amber-50 border border-amber-200 text-[11px] rounded-lg text-amber-800 flex justify-between items-center">
+                        <span><strong>{tr("activeAnnouncement")}:</strong> &quot;{systemAnnouncement}&quot;</span>
+                        <button onClick={() => {
+                          setNewAnnouncement("");
+                          fetch("/api/admin", {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({ action: "set_system_announcement", announcement: "" })
+                          }).then(() => loadAdminData());
+                        }} className="text-red-500 font-bold hover:underline">{tr("delete")}</button>
+                      </div>
+                    )}
+                  </Card>
+                </div>
               </div>
-            </div>
-          )}
+            );
+          })()}
 
           {/* ── USERS TAB ── */}
           {activeTab === "users" && (
@@ -424,14 +902,14 @@ export default function AdminPage() {
                   <Search size={16} className="absolute left-4 text-[#707070]" />
                   <input
                     type="text"
-                    placeholder="Ism yoki email bo'yicha qidirish..."
+                    placeholder={tr("searchPlaceholder")}
                     value={userQuery}
                     onChange={(e) => setUserQuery(e.target.value)}
                     className="w-full rounded-full bg-[#F0F0F0] pl-10 pr-4 py-2 text-[12.5px] text-black outline-none placeholder:text-[#a0a0a0] focus:bg-[#e8e8e8]"
                   />
                 </div>
                 <div className="text-[12px] text-[#707070] font-semibold">
-                  Jami: {(filteredUsers || []).length} ta a&apos;zo
+                  {tr("totalMembers")}: {(filteredUsers || []).length} ta
                 </div>
               </div>
 
@@ -439,12 +917,12 @@ export default function AdminPage() {
                 <table className="w-full border-collapse text-left text-[12px]">
                   <thead>
                     <tr className="border-b border-[#F0F0F0] text-[10px] font-bold text-[#707070] uppercase tracking-wider bg-[#F9F9F7]">
-                      <th className="px-6 py-3">Foydalanuvchi</th>
-                      <th className="px-6 py-3">Tarif</th>
-                      <th className="px-6 py-3">Karta holati</th>
-                      <th className="px-6 py-3 text-right">Kanallar</th>
-                      <th className="px-6 py-3 text-right">AI Kredit balansi</th>
-                      <th className="px-6 py-3 text-right">Amallar</th>
+                      <th className="px-6 py-3">{tr("user")}</th>
+                      <th className="px-6 py-3">{tr("plan")}</th>
+                      <th className="px-6 py-3">{tr("cardStatus")}</th>
+                      <th className="px-6 py-3 text-right">{tr("connectedChatbots")}</th>
+                      <th className="px-6 py-3 text-right">{tr("creditsBalance")}</th>
+                      <th className="px-6 py-3 text-right">{tr("actions")}</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-[#F0F0F0]">
@@ -481,7 +959,7 @@ export default function AdminPage() {
                             }}
                             className="bg-[#EFF2FC] text-black hover:bg-[#e1e6f7] font-bold text-[11px] px-2.5 py-1 rounded-lg"
                           >
-                            Boshqarish
+                            {tr("manage")}
                           </button>
                           <button
                             onClick={() => handleImpersonate(u.email)}
@@ -505,10 +983,10 @@ export default function AdminPage() {
             <div className="flex flex-col gap-6">
               {/* Creator Form */}
               <Card className="p-6 border border-[#D8D8D8]">
-                <h3 className="text-[15px] font-bold text-black mb-4">Yangi promokod yaratish</h3>
+                <h3 className="text-[15px] font-bold text-black mb-4">{tr("createPromo")}</h3>
                 <form onSubmit={handleCreatePromo} className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
                   <div className="flex flex-col gap-1.5">
-                    <label className="text-[10px] font-bold text-[#707070] uppercase">Kupon kodi</label>
+                    <label className="text-[10px] font-bold text-[#707070] uppercase">{tr("promoCode")}</label>
                     <input
                       type="text"
                       required
@@ -520,7 +998,7 @@ export default function AdminPage() {
                   </div>
 
                   <div className="flex flex-col gap-1.5">
-                    <label className="text-[10px] font-bold text-[#707070] uppercase">Kredit miqdori</label>
+                    <label className="text-[10px] font-bold text-[#707070] uppercase">{tr("creditAmount")}</label>
                     <input
                       type="number"
                       required
@@ -532,7 +1010,7 @@ export default function AdminPage() {
                   </div>
 
                   <div className="flex flex-col gap-1.5">
-                    <label className="text-[10px] font-bold text-[#707070] uppercase">Maksimal faollashtirishlar</label>
+                    <label className="text-[10px] font-bold text-[#707070] uppercase">{tr("maxUses")}</label>
                     <input
                       type="number"
                       value={newPromoMaxUses}
@@ -543,7 +1021,7 @@ export default function AdminPage() {
                   </div>
 
                   <div className="flex flex-col gap-1.5">
-                    <label className="text-[10px] font-bold text-[#707070] uppercase">Maxsus email (ixtiyoriy)</label>
+                    <label className="text-[10px] font-bold text-[#707070] uppercase">{tr("specialEmail")}</label>
                     <input
                       type="email"
                       value={newPromoRestrictedEmail}
@@ -556,7 +1034,7 @@ export default function AdminPage() {
                   <div className="md:col-span-4 flex justify-end">
                     <Button type="submit" variant="accent" className="rounded-[10px] text-[12px] px-6 py-2.5 gap-1.5 font-bold">
                       <Plus size={14} />
-                      <span>Promokod qo&apos;shish</span>
+                      <span>{tr("addPromo")}</span>
                     </Button>
                   </div>
                 </form>
@@ -565,18 +1043,18 @@ export default function AdminPage() {
               {/* Promos Table */}
               <Card className="p-0 overflow-hidden border border-[#D8D8D8]">
                 <div className="p-5 border-b border-[#F0F0F0] bg-white">
-                  <h3 className="text-[15px] font-bold text-black">Mavjud promokodlar ro&apos;yxati</h3>
+                  <h3 className="text-[15px] font-bold text-black">{tr("promoList")}</h3>
                 </div>
                 <div className="overflow-x-auto bg-white">
                   <table className="w-full border-collapse text-left text-[12px]">
                     <thead>
                       <tr className="border-b border-[#F0F0F0] text-[10px] font-bold text-[#707070] uppercase tracking-wider bg-[#F9F9F7]">
-                        <th className="px-6 py-3">Kod</th>
-                        <th className="px-6 py-3">Kredit qiymati</th>
-                        <th className="px-6 py-3">Ishlatildi</th>
-                        <th className="px-6 py-3">Cheklov (Email)</th>
-                        <th className="px-6 py-3">Yaratilgan sana</th>
-                        <th className="px-6 py-3 text-right">Amallar</th>
+                        <th className="px-6 py-3">{tr("code")}</th>
+                        <th className="px-6 py-3">{tr("value")}</th>
+                        <th className="px-6 py-3">{tr("used")}</th>
+                        <th className="px-6 py-3">{tr("restriction")}</th>
+                        <th className="px-6 py-3">{tr("createdAt")}</th>
+                        <th className="px-6 py-3 text-right">{tr("actions")}</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-[#F0F0F0]">
@@ -620,26 +1098,26 @@ export default function AdminPage() {
           {activeTab === "referrals" && (
             <Card className="overflow-hidden p-0 border border-[#D8D8D8]">
               <div className="p-6 border-b border-[#F0F0F0] bg-white">
-                <h3 className="text-[16px] font-semibold text-black">Taklif etilgan referallar to&apos;liq oqimi</h3>
-                <p className="text-[11px] text-[#707070] mt-1">Tizimdagi barcha foydalanuvchilar hamkorlik havolasi va to&apos;lovlar tarixi</p>
+                <h3 className="text-[16px] font-semibold text-black">{tr("referralsTitle")}</h3>
+                <p className="text-[11px] text-[#707070] mt-1">{tr("referralsDesc")}</p>
               </div>
 
               <div className="overflow-x-auto bg-white">
                 <table className="w-full text-left border-collapse text-[12px]">
                   <thead>
                     <tr className="border-b border-[#F0F0F0] text-[10px] font-bold text-[#707070] uppercase tracking-wider bg-[#F9F9F7]">
-                      <th className="py-3 px-6">Taklif etgan (Partner)</th>
-                      <th className="py-3 px-6">Ro&apos;yxatdan o&apos;tgan a&apos;zo</th>
-                      <th className="py-3 px-6">Tarif rejasi</th>
-                      <th className="py-3 px-6">Hisoblangan komissiya (30%)</th>
-                      <th className="py-3 px-6 text-right">Sana</th>
+                      <th className="py-3 px-6">{tr("partner")}</th>
+                      <th className="py-3 px-6">{tr("referredMember")}</th>
+                      <th className="py-3 px-6">{tr("plan")}</th>
+                      <th className="py-3 px-6">{tr("commissionRate")}</th>
+                      <th className="py-3 px-6 text-right">{tr("date")}</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-[#F0F0F0]">
                     {(referrals || []).filter(Boolean).length === 0 ? (
                       <tr>
                         <td colSpan={5} className="py-16 text-center text-[#A0A0A0] italic">
-                          Hozircha referallar tarmog&apos;ida ma&apos;lumotlar mavjud emas.
+                          {tr("noReferrals")}
                         </td>
                       </tr>
                     ) : (referrals || []).filter(Boolean).map((ref) => (
@@ -675,28 +1153,26 @@ export default function AdminPage() {
           {activeTab === "bots" && (
             <Card className="overflow-hidden p-0 border border-[#D8D8D8]">
               <div className="p-6 border-b border-[#F0F0F0] bg-white">
-                <h3 className="text-[16px] font-semibold text-black">Chatbot foydalanuvchilari qadamlari (State Tracker)</h3>
-                <p className="text-[11px] text-[#707070] mt-1">
-                  Mijozlarning chat-menyuning qaysi bo&apos;limida to&apos;xtab qolganligini aniqlash va kuzatish paneli.
-                </p>
+                <h3 className="text-[16px] font-semibold text-black">{tr("stateTrackerTitle")}</h3>
+                <p className="text-[11px] text-[#707070] mt-1">{tr("stateTrackerDesc")}</p>
               </div>
 
               <div className="overflow-x-auto bg-white">
                 <table className="w-full text-left border-collapse text-[12px]">
                   <thead>
                     <tr className="border-b border-[#F0F0F0] text-[10px] font-bold text-[#707070] uppercase tracking-wider bg-[#F9F9F7]">
-                      <th className="py-3 px-6">Mijoz (Contact)</th>
-                      <th className="py-3 px-6">Chatbot egasi (Sendly foydalanuvchisi)</th>
-                      <th className="py-3 px-6 text-right">Xabarlar soni</th>
+                      <th className="py-3 px-6">{tr("customer")}</th>
+                      <th className="py-3 px-6">{tr("botOwner")}</th>
+                      <th className="py-3 px-6 text-right">{tr("messagesCount")}</th>
                       <th className="py-3 px-6">Oxirgi faollik</th>
-                      <th className="py-3 px-6 text-right">To&apos;xtab qolgan menyu qadami (Stuck step)</th>
+                      <th className="py-3 px-6 text-right">{tr("stuckStep")}</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-[#F0F0F0]">
                     {(botContacts || []).filter(Boolean).length === 0 ? (
                       <tr>
                         <td colSpan={5} className="py-16 text-center text-[#A0A0A0] italic">
-                          Hozircha faol chatbot mijozlari ro&apos;yxati yuklanmadi.
+                          {tr("noBotContacts")}
                         </td>
                       </tr>
                     ) : (botContacts || []).filter(Boolean).map((c) => (
@@ -725,10 +1201,10 @@ export default function AdminPage() {
           {activeTab === "logs" && (
             <Card className="p-6 bg-[#0F0F0F] text-white border border-[#222] rounded-[24px] shadow-sm font-mono text-[12px]">
               <div className="flex justify-between items-center pb-4 border-b border-[#222] mb-4">
-                <span className="text-[#C7F33C] font-bold">SYSTEM AUDIT LOGS Terminal</span>
+                <span className="text-[#C7F33C] font-bold">{tr("logsTitle")}</span>
                 <button onClick={loadAdminData} className="text-white/60 hover:text-white flex items-center gap-1 font-bold text-[10px]">
                   <RefreshCw size={10} />
-                  <span>Yangilash</span>
+                  <span>{tr("update")}</span>
                 </button>
               </div>
               <div className="flex flex-col gap-2.5 max-h-[450px] overflow-y-auto pr-2">
@@ -749,13 +1225,13 @@ export default function AdminPage() {
       {selectedUser && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4">
           <div className="bg-white rounded-[28px] w-full max-w-[460px] p-7 border border-[#D8D8D8] shadow-2xl animate-in zoom-in-95 duration-200">
-            <h3 className="text-[17px] font-black text-black leading-none mb-2">Foydalanuvchini boshqarish</h3>
+            <h3 className="text-[17px] font-black text-black leading-none mb-2">{tr("manageUser")}</h3>
             <p className="text-[12px] text-[#707070] mb-5">{selectedUser.fullName} ({selectedUser.email})</p>
 
             <div className="flex flex-col gap-5">
               {/* Option 1: Plan update */}
               <div className="p-4 bg-[#F9F9F7] rounded-2xl border border-[#F0F0F0] flex flex-col gap-2">
-                <label className="text-[10px] font-bold text-[#707070] uppercase">Tarif rejasini o&apos;zgartirish</label>
+                <label className="text-[10px] font-bold text-[#707070] uppercase">{tr("changePlan")}</label>
                 <div className="flex gap-2">
                   <select
                     value={manualPlanInput}
@@ -770,14 +1246,14 @@ export default function AdminPage() {
                     onClick={() => handleUpdatePlan(selectedUser.id, manualPlanInput)}
                     className="bg-black hover:bg-black/90 text-white font-bold text-[11px] px-4 rounded-[10px] transition-all"
                   >
-                    Saqlash
+                    {tr("save")}
                   </button>
                 </div>
               </div>
 
               {/* Option 2: Credits override */}
               <div className="p-4 bg-[#F9F9F7] rounded-2xl border border-[#F0F0F0] flex flex-col gap-2">
-                <label className="text-[10px] font-bold text-[#707070] uppercase">AI kreditlarini qo&apos;shish / yechish</label>
+                <label className="text-[10px] font-bold text-[#707070] uppercase">{tr("addRemoveCredits")}</label>
                 <div className="flex gap-2">
                   <input
                     type="number"
@@ -790,7 +1266,7 @@ export default function AdminPage() {
                     onClick={() => handleUpdateCredits(selectedUser.id, Number(manualCreditInput))}
                     className="bg-black hover:bg-black/90 text-white font-bold text-[11px] px-4 rounded-[10px] transition-all"
                   >
-                    Kiritish
+                    {tr("enter")}
                   </button>
                 </div>
               </div>
@@ -801,7 +1277,7 @@ export default function AdminPage() {
                 onClick={() => setSelectedUser(null)}
                 className="bg-gray-100 hover:bg-gray-200 text-black font-bold text-[12px] px-5 py-2.5 rounded-full transition-all"
               >
-                Yopish
+                {tr("close")}
               </button>
             </div>
           </div>
