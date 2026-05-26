@@ -71,14 +71,14 @@ export default function AdminPage() {
       const res = await fetch("/api/admin");
       const data = await res.json();
       if (res.ok && data.success) {
-        setStats(data.stats);
-        setUsers(data.users);
-        setPromos(data.promoCodes);
-        setReferrals(data.referrals);
-        setBotContacts(data.botContacts);
-        setSystemAnnouncement(data.systemAnnouncement);
-        setNewAnnouncement(data.systemAnnouncement);
-        setAuditLogs(data.auditLogs);
+        setStats(data.stats || { totalUsers: 0, activePremiumCount: 0, activeProCount: 0, totalChannels: 0, totalCredits: 0, totalCommissions: "$0.00" });
+        setUsers(data.users || []);
+        setPromos(data.promoCodes || []);
+        setReferrals(data.referrals || []);
+        setBotContacts(data.botContacts || []);
+        setSystemAnnouncement(data.systemAnnouncement || "");
+        setNewAnnouncement(data.systemAnnouncement || "");
+        setAuditLogs(data.auditLogs || []);
       }
     } catch (e) {
       console.error("Failed to load admin panel data", e);
@@ -255,9 +255,11 @@ export default function AdminPage() {
 
   // User search
   const [userQuery, setUserQuery] = useState("");
-  const filteredUsers = users.filter(u => 
-    (u.fullName || "").toLowerCase().includes(userQuery.toLowerCase()) || 
-    (u.email || "").toLowerCase().includes(userQuery.toLowerCase())
+  const filteredUsers = (users || []).filter(u => 
+    u && (
+      (u.fullName || "").toLowerCase().includes(userQuery.toLowerCase()) || 
+      (u.email || "").toLowerCase().includes(userQuery.toLowerCase())
+    )
   );
 
   return (
@@ -341,21 +343,21 @@ export default function AdminPage() {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <Card className="p-6 flex flex-col justify-between min-h-[120px] relative border border-[#D8D8D8]">
                   <h4 className="text-[12px] font-bold text-[#707070] uppercase">Jami foydalanuvchilar</h4>
-                  <div className="text-[28px] font-black text-black mt-3">{stats.totalUsers} ta</div>
+                  <div className="text-[28px] font-black text-black mt-3">{stats?.totalUsers ?? 0} ta</div>
                   <p className="text-[10px] text-[#707070] mt-1">Ro&apos;yxatdan o&apos;tgan jami hisoblar</p>
                 </Card>
                 
                 <Card className="p-6 flex flex-col justify-between min-h-[120px] relative border border-[#D8D8D8]">
                   <h4 className="text-[12px] font-bold text-[#707070] uppercase">Premium / Pro obunalar</h4>
                   <div className="text-[28px] font-black text-black mt-3">
-                    {stats.activePremiumCount} / {stats.activeProCount}
+                    {stats?.activePremiumCount ?? 0} / {stats?.activeProCount ?? 0}
                   </div>
                   <p className="text-[10px] text-[#707070] mt-1">Faol to&apos;lov qiluvchi foydalanuvchilar</p>
                 </Card>
 
                 <Card className="p-6 flex flex-col justify-between min-h-[120px] relative border border-[#D8D8D8]">
                   <h4 className="text-[12px] font-bold text-[#707070] uppercase">Ulangan chatbotlar</h4>
-                  <div className="text-[28px] font-black text-black mt-3">{stats.totalChannels} ta</div>
+                  <div className="text-[28px] font-black text-black mt-3">{stats?.totalChannels ?? 0} ta</div>
                   <p className="text-[10px] text-[#707070] mt-1">Faol Telegram va Instagram ulanishlari</p>
                 </Card>
               </div>
@@ -365,16 +367,16 @@ export default function AdminPage() {
                   <h3 className="text-[15px] font-bold text-black mb-4">Tizim moliyaviy aylanmasi</h3>
                   <div className="flex justify-between items-center py-2 border-b border-[#F0F0F0] text-[12px]">
                     <span className="text-[#707070]">Barcha foydalanuvchilar AI kreditlari:</span>
-                    <span className="font-bold text-black">{(stats.totalCredits || 0).toLocaleString("uz-UZ")} kredit</span>
+                    <span className="font-bold text-black">{(stats?.totalCredits ?? 0).toLocaleString("uz-UZ")} kredit</span>
                   </div>
                   <div className="flex justify-between items-center py-2 border-b border-[#F0F0F0] text-[12px]">
                     <span className="text-[#707070]">Hamkorlik to&apos;langan komissiyalar:</span>
-                    <span className="font-bold text-[#7CA607]">{stats.totalCommissions || "$0.00"}</span>
+                    <span className="font-bold text-[#7CA607]">{stats?.totalCommissions ?? "$0.00"}</span>
                   </div>
                   <div className="flex justify-between items-center py-2 text-[12.5px] font-extrabold mt-2">
                     <span className="text-black">Hisoblangan jami aylanma (SaaS):</span>
                     <span className="text-black">
-                      {(((stats.activePremiumCount || 0) * 1000000) + ((stats.activeProCount || 0) * 150000)).toLocaleString("uz-UZ")} UZS / oy
+                      {(((stats?.activePremiumCount ?? 0) * 1000000) + ((stats?.activeProCount ?? 0) * 150000)).toLocaleString("uz-UZ")} UZS / oy
                     </span>
                   </div>
                 </Card>
@@ -427,7 +429,7 @@ export default function AdminPage() {
                   />
                 </div>
                 <div className="text-[12px] text-[#707070] font-semibold">
-                  Jami: {filteredUsers.length} ta a&apos;zo
+                  Jami: {(filteredUsers || []).length} ta a&apos;zo
                 </div>
               </div>
 
@@ -444,7 +446,7 @@ export default function AdminPage() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-[#F0F0F0]">
-                    {filteredUsers.filter(Boolean).map((u) => (
+                    {(filteredUsers || []).filter(Boolean).map((u) => (
                       <tr key={u.id} className="hover:bg-[#F9F9F7]/50 transition-colors">
                         <td className="px-6 py-3.5">
                           <div className="font-bold text-black">{u.fullName || "Foydalanuvchi"}</div>
@@ -576,14 +578,14 @@ export default function AdminPage() {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-[#F0F0F0]">
-                      {promos.filter(Boolean).map((p) => (
+                      {(promos || []).filter(Boolean).map((p) => (
                         <tr key={p.code} className="hover:bg-[#F9F9F7]/50 transition-colors">
                           <td className="px-6 py-3.5 font-black text-black tracking-wider">{p.code}</td>
                           <td className="px-6 py-3.5 font-extrabold text-[#7CA607]">{(p.amount || 0).toLocaleString("uz-UZ")}</td>
                           <td className="px-6 py-3.5">
                             <span className="font-semibold">{p.usedCount || 0}</span> / <span className="text-[#707070]">{p.maxUses || 0}</span>
                             <div className="w-24 bg-gray-200 h-1.5 rounded-full overflow-hidden mt-1">
-                              <div className="bg-[#7CA607] h-full" style={{ width: `${Math.min(100, (((p.usedCount || 0) / (p.maxUses || 1)) * 100))}%` }} />
+                              <div className="bg-[#7CA607] h-full" style={{ width: `${Math.min(100, Math.max(0, (((Number(p.usedCount) || 0) / (Number(p.maxUses) || 1)) * 100)))}%` }} />
                             </div>
                           </td>
                           <td className="px-6 py-3.5 text-[#505050]">
@@ -632,13 +634,13 @@ export default function AdminPage() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-[#F0F0F0]">
-                    {referrals.filter(Boolean).length === 0 ? (
+                    {(referrals || []).filter(Boolean).length === 0 ? (
                       <tr>
                         <td colSpan={5} className="py-16 text-center text-[#A0A0A0] italic">
                           Hozircha referallar tarmog&apos;ida ma&apos;lumotlar mavjud emas.
                         </td>
                       </tr>
-                    ) : referrals.filter(Boolean).map((ref) => (
+                    ) : (referrals || []).filter(Boolean).map((ref) => (
                       <tr key={ref.id} className="hover:bg-[#FDFDFD] text-[12px] text-black transition-colors">
                         <td className="py-3.5 px-6">
                           <div className="font-bold">{ref.referrerName}</div>
@@ -689,13 +691,13 @@ export default function AdminPage() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-[#F0F0F0]">
-                    {botContacts.filter(Boolean).length === 0 ? (
+                    {(botContacts || []).filter(Boolean).length === 0 ? (
                       <tr>
                         <td colSpan={5} className="py-16 text-center text-[#A0A0A0] italic">
                           Hozircha faol chatbot mijozlari ro&apos;yxati yuklanmadi.
                         </td>
                       </tr>
-                    ) : botContacts.filter(Boolean).map((c) => (
+                    ) : (botContacts || []).filter(Boolean).map((c) => (
                       <tr key={c.id} className="hover:bg-[#FDFDFD] text-[12px] text-black transition-colors">
                         <td className="py-3.5 px-6">
                           <div className="font-bold">{c.name}</div>
@@ -728,7 +730,7 @@ export default function AdminPage() {
                 </button>
               </div>
               <div className="flex flex-col gap-2.5 max-h-[450px] overflow-y-auto pr-2">
-                {auditLogs.filter(Boolean).map((log) => (
+                {(auditLogs || []).filter(Boolean).map((log) => (
                   <div key={log.id} className="flex items-start gap-4 hover:bg-white/5 p-1 rounded transition-colors">
                     <span className="text-[#707070] shrink-0 select-none">{log.date}</span>
                     <span className="text-blue-400 shrink-0 font-bold">&lt;{log.user}&gt;</span>
