@@ -18,8 +18,312 @@ import {
 } from "lucide-react";
 import { db, Channel, Automation } from "@/lib/db";
 import { CustomDropdown } from "@/components/ui/CustomDropdown";
+import { useI18n } from "@/i18n/I18nProvider";
+
+
+const LOCAL_TRANSLATIONS = {
+  uz: {
+    exit: "Chiqish",
+    step_of: "{step}-qadam 3-qadamdan",
+    title: "Kalit so'zli chat-bot",
+    select_account: "Akkauntni tanlash",
+    no_channels: "Ulagan kanallaringiz mavjud emas. Iltimos, sozlamalar bo'limiga o'ting.",
+    tg_check_sub: "Telegram kanaliga obunani tekshiring",
+    check_sub: "Obunani tekshirish",
+    sub_desc: "Chat-bot akkauntga obuna bo'lishni tekshiradi",
+    select_channel: "Kanal tanlang",
+    channel_not_in_list: "Agar kanal ro'yxatda bo'lmasa,",
+    add_bot: "bot qo'shish",
+    as_tg_admin: "ushbu Telegram kanalining administratori sifatida yoki",
+    refresh_list: "ro'yxatni yangilash",
+    refreshing: "yangilanmoqda...",
+    tg_channels_loaded: "Yangi Telegram kanallari muvaffaqiyatli yuklandi! 🎉",
+    tg_channels_not_found: "Yangi kanallar topilmadi. Bot ushbu kanalga administrator sifatida qo'shilganiga va unda yangi harakat bo'lganiga ishonch hosil qiling.",
+    tg_api_invalid: "Telegram getUpdates so'rovidan noto'g'ri javob olindi.",
+    tg_api_error: "Telegram API bilan bog'lanishda xatolik yuz berdi. Bot tokeni to'g'riligini tekshiring.",
+    error_occurred: "Xatolik yuz berdi: ",
+    trigger_conditions: "Ishga tushirish shartlari",
+    trigger_action_desc: "Qaysi harakat chat-bot'ni ishga tushiradi?",
+    start_bot_command: "Bot'ni ishga tushirish (buyruq/start)",
+    msg_with_keyword: "Kalit so'z bilan xabar",
+    keyword_placeholder: "Masalan: kirish, xohish, narx",
+    keyword_comment_placeholder: "Masalan: test, bonus, dars",
+    keyword_desc: "Kalit so'zlarni ajratish uchun 'Enter' yoki vergulni bosing",
+    direct_msg: "Direkt'ga Xabar",
+    comment_reels_post: "Reels yoki postga izoh",
+    any_msg: "Har qanday xabar",
+    exact_match: "Aniq moslik",
+    exact_match_tooltip: "Aniq mos kelganda chatbot ishga tushadi",
+    any_comment: "Har qanday izoh",
+    comment_with_keyword: "Kalit so'z bilan izoh",
+    exact_match_comment_tooltip: "Izoh kalit so'zga aniq mos tushgandagina bot javob yozadi",
+    all_publications: "Barcha publikatsiyalar",
+    selected: "Tanlangan",
+    comment_all_desc: "Avtomatlashtirish barcha postlar ostidagi izohlarni kuzatib boradi",
+    welcome_message: "Salomlashuv xabari",
+    image: "Tasvir",
+    max_chars: "Maksimal 500 ta belgi",
+    button_text_placeholder: "Tugma matni (masalan: Olish)",
+    if_not_subscribed: "Agar obuna bo'lmasa",
+    after_subscribed: "Obuna bo'lgandan so'ng",
+    btn_text: "Tugma matni",
+    btn_url: "Tugma havolasi (URL)",
+    comment_auto_replies: "Izohlarga avtomatik javoblar",
+    comment_replies_desc: "Ularni tasodifiy tartibda ishlatamiz",
+    add_auto_reply: "Avtomatik javob qo'shish",
+    comment_bubble_desc: "Post yoki Reels ostida izoh qoldirgan mijozga ushbu javoblardan biri tasodifiy ravishda yuboriladi va unga shaxsiy xabar ham jo'natiladi.",
+    remind_link_visit: "Havolaga o'tishni eslatib qo'ying",
+    remind_desc: "10 daqiqadan so'ng eslatma yuboramiz",
+    additional_msg: "Qo'shimcha xabar",
+    additional_desc: "Xabar belgilangan soniyalarda tugagach, ulanish",
+    additional_flow_desc: "Xabar belgilangan soniyalarda tugagach, tugmaga bosish va 2-shakldagi havolaga o'tishdan keyin yuboriladi",
+    message_or_link: "Xabar yoki havola",
+    minutes: "daqiqa",
+    back: "Ortga",
+    next: "Keyin",
+    create: "Yaratish",
+    live_preview: "Jonli Telefon Prevyusi",
+    exit_title: "Chiqmoqchimisiz?",
+    exit_desc: "Barcha ma'lumotlar avtomatik saqlandi va kelasi safar tahrirlash uchun mavjud bo'ladi.",
+    stay: "Qolish",
+    congrats_title: "Tabriklaymiz! 🎉",
+    congrats_desc: "Chat-botingiz muvaffaqiyatli ishga tushdi va ulanish o'rnatildi!",
+    awesome: "Ajoyib!",
+    demo_preview_desc: "Bu yerda chat-bot mijoz bilan qanday muloqot qilishini ko'rsatamiz",
+    type_message_placeholder: "Xabar yozing...",
+    demo_message_tab: "Xabar",
+    demo_comment_tab: "Izoh",
+    posts: "Nashrlar",
+    comments: "Izohlar",
+    reply: "Javob berish",
+    now: "Endi",
+    comment_for: " uchun izoh...",
+    alert_select_account: "Iltimos, avval akkauntni tanlang.",
+    alert_ig_warning: "Iltimos, avval bot tokeni mavjud bo'lgan Telegram akkauntini tanlang."
+  },
+  ru: {
+    exit: "Выйти",
+    step_of: "Шаг {step} из 3",
+    title: "Чат-бот по ключевым словам",
+    select_account: "Выбрать аккаунт",
+    no_channels: "У вас нет подключенных каналов. Пожалуйста, перейдите в настройки.",
+    tg_check_sub: "Проверить подписку на Telegram канал",
+    check_sub: "Проверить подписку",
+    sub_desc: "Шаг проверки подписки чат-ботом",
+    select_channel: "Выберите канал",
+    channel_not_in_list: "Если канала нет в списке,",
+    add_bot: "добавить бота",
+    as_tg_admin: "в качестве администратора этого Telegram канала или",
+    refresh_list: "обновить список",
+    refreshing: "обновление...",
+    tg_channels_loaded: "Новые Telegram каналы успешно загружены! 🎉",
+    tg_channels_not_found: "Новые каналы не найдены. Убедитесь, что бот добавлен как администратор в этот канал и там была новая активность.",
+    tg_api_invalid: "Неверный ответ от запроса Telegram getUpdates.",
+    tg_api_error: "Ошибка связи с Telegram API. Проверьте токен бота.",
+    error_occurred: "Произошла ошибка: ",
+    trigger_conditions: "Условия запуска",
+    trigger_action_desc: "Какое действие запустит чат-бота?",
+    start_bot_command: "Запустить бота (команда/start)",
+    msg_with_keyword: "Сообщение с ключевым словом",
+    keyword_placeholder: "Например: инфо, цена, старт",
+    keyword_comment_placeholder: "Например: тест, бонус, урок",
+    keyword_desc: "Нажмите 'Enter' или запятую для разделения ключевых слов",
+    direct_msg: "Сообщение в Директ",
+    comment_reels_post: "Комментарий к Reels или посту",
+    any_msg: "Любое сообщение",
+    exact_match: "Точное соответствие",
+    exact_match_tooltip: "Чат-бот запустится только при точном соответствии",
+    any_comment: "Любой комментарий",
+    comment_with_keyword: "Комментарий с ключевым словом",
+    exact_match_comment_tooltip: "Бот ответит только при точном соответствии комментария ключевому слову",
+    all_publications: "Все публикации",
+    selected: "Выбранные",
+    comment_all_desc: "Автоматизация будет отслеживать комментарии под всеми постами",
+    welcome_message: "Приветственное сообщение",
+    image: "Изображение",
+    max_chars: "Максимум 500 символов",
+    button_text_placeholder: "Текст кнопки (например: Получить)",
+    if_not_subscribed: "Если не подписан",
+    after_subscribed: "После подписки",
+    btn_text: "Текст кнопки",
+    btn_url: "Ссылка кнопки (URL)",
+    comment_auto_replies: "Автоответы на комментарии",
+    comment_replies_desc: "Мы используем их в случайном порядке",
+    add_auto_reply: "Добавить автоответ",
+    comment_bubble_desc: "Один из этих ответов будет случайно отправлен клиенту, оставившему комментарий под постом/Reels, а также будет отправлено личное сообщение.",
+    remind_link_visit: "Напомнить перейти по ссылке",
+    remind_desc: "Отправим напоминание через 10 минут",
+    additional_msg: "Дополнительное сообщение",
+    additional_desc: "Отправить сообщение после указанной задержки",
+    additional_flow_desc: "Отправляется после указанной задержки по завершении приветственного потока",
+    message_or_link: "Сообщение или ссылка",
+    minutes: "минут",
+    back: "Назад",
+    next: "Далее",
+    create: "Создать",
+    live_preview: "Предпросмотр телефона",
+    exit_title: "Хотите выйти?",
+    exit_desc: "Все данные сохранены автоматически и будут доступны для редактирования.",
+    stay: "Остаться",
+    congrats_title: "Поздравляем! 🎉",
+    congrats_desc: "Ваш чат-бот успешно запущен и соединение установлено!",
+    awesome: "Отлично!",
+    demo_preview_desc: "Здесь мы показываем, как чат-бот будет общаться с клиентом",
+    type_message_placeholder: "Напишите сообщение...",
+    demo_message_tab: "Сообщение",
+    demo_comment_tab: "Коммент",
+    posts: "Публикации",
+    comments: "Комментарии",
+    reply: "Ответить",
+    now: "Сейчас",
+    comment_for: "комментарий для...",
+    alert_select_account: "Пожалуйста, сначала выберите аккаунт.",
+    alert_ig_warning: "Пожалуйста, сначала выберите аккаунт Telegram с валидным токеном бота."
+  },
+  en: {
+    exit: "Exit",
+    step_of: "Step {step} of 3",
+    title: "Keyword Chatbot",
+    select_account: "Select Account",
+    no_channels: "You have no connected channels. Please go to settings.",
+    tg_check_sub: "Check Telegram Channel Subscription",
+    check_sub: "Check Subscription",
+    sub_desc: "Chatbot will check if the user is subscribed",
+    select_channel: "Select Channel",
+    channel_not_in_list: "If the channel is not in the list,",
+    add_bot: "add bot",
+    as_tg_admin: "as an admin of this Telegram channel or",
+    refresh_list: "refresh list",
+    refreshing: "updating...",
+    tg_channels_loaded: "New Telegram channels successfully loaded! 🎉",
+    tg_channels_not_found: "New channels not found. Make sure the bot is added as an administrator to this channel and there was a new activity.",
+    tg_api_invalid: "Invalid response from Telegram getUpdates request.",
+    tg_api_error: "Error connecting with Telegram API. Verify bot token.",
+    error_occurred: "An error occurred: ",
+    trigger_conditions: "Trigger Conditions",
+    trigger_action_desc: "Which action triggers the chatbot?",
+    start_bot_command: "Start the bot (command/start)",
+    msg_with_keyword: "Message with keyword",
+    keyword_placeholder: "e.g.: info, price, start",
+    keyword_comment_placeholder: "e.g.: test, bonus, lesson",
+    keyword_desc: "Press 'Enter' or comma to separate keywords",
+    direct_msg: "Message to Direct",
+    comment_reels_post: "Comment on Reels or post",
+    any_msg: "Any message",
+    exact_match: "Exact match",
+    exact_match_tooltip: "Chatbot triggers only on exact match",
+    any_comment: "Any comment",
+    comment_with_keyword: "Comment with keyword",
+    exact_match_comment_tooltip: "Bot replies only if comment exactly matches keyword",
+    all_publications: "All publications",
+    selected: "Selected",
+    comment_all_desc: "Automation will track comments under all posts",
+    welcome_message: "Welcome Message",
+    image: "Image",
+    max_chars: "Max 500 characters",
+    button_text_placeholder: "Button text (e.g.: Get)",
+    if_not_subscribed: "If not subscribed",
+    after_subscribed: "After subscribed",
+    btn_text: "Button text",
+    btn_url: "Button link (URL)",
+    comment_auto_replies: "Auto replies to comments",
+    comment_replies_desc: "We use them in random order",
+    add_auto_reply: "Add auto reply",
+    comment_bubble_desc: "One of these replies will be randomly sent to a customer commenting under a post/Reels, and a private message will also be sent.",
+    remind_link_visit: "Remind to visit link",
+    remind_desc: "We will send a reminder after 10 minutes",
+    additional_msg: "Additional message",
+    additional_desc: "Send message after specified delay",
+    additional_flow_desc: "Sent after specified delay when welcome message flow ends",
+    message_or_link: "Message or link",
+    minutes: "minutes",
+    back: "Back",
+    next: "Next",
+    create: "Create",
+    live_preview: "Phone Preview",
+    exit_title: "Do you want to exit?",
+    exit_desc: "All data is auto-saved and will be available for next editing.",
+    stay: "Stay",
+    congrats_title: "Congratulations! 🎉",
+    congrats_desc: "Your chatbot is successfully running and the connection is established!",
+    awesome: "Awesome!",
+    demo_preview_desc: "Here we show how the chatbot will interact with the customer",
+    type_message_placeholder: "Type a message...",
+    demo_message_tab: "Message",
+    demo_comment_tab: "Comment",
+    posts: "Posts",
+    comments: "Comments",
+    reply: "Reply",
+    now: "now",
+    comment_for: "comment for...",
+    alert_select_account: "Please select an account first.",
+    alert_ig_warning: "Please select a Telegram account with a valid bot token first."
+  }
+};
+
+const DEFAULT_TEMPLATES = {
+  uz: {
+    welcomeMessage: "Salom 👋 Chat-bot'larni sozlash darsini olishni xohlaysizmi? @isroil.ai akkauntiga obuna bo'ling va tugmani bosing",
+    welcomeButton: "Olish",
+    noSubMessage: "Obunani ko'rmayapman 😔 Darslarni olish uchun obuna bo'ling",
+    noSubButton: "✅ Tugallandi",
+    successMessage: "Zo'r! Quyidagi tugmani bosing va darslarni tomosha qilishni boshlang 👇",
+    successButtonText: "🔻 Darslarni ko'rish",
+    remindMessage: "10 daqiqa o'tdi va men hali ham tugmani bosishingizni kutmoqdaman 😊 👉",
+    commentReplies: [
+      "Barcha ma'lumotlar tepadagi xabarda 😊",
+      "Yuborilgan ✅",
+      "Endi xabarlarni ko'rib chiqing 👌",
+      "Zo'r! PM-ingizni tekshiring - hammasi shu yerda! ✉️",
+      "Javob yuborildi, PM-da qidiring! 🚀"
+    ]
+  },
+  ru: {
+    welcomeMessage: "Привет 👋 Хотите получить урок по настройке чат-ботов? Подпишитесь на аккаунт @isroil.ai и нажмите кнопку",
+    welcomeButton: "Получить",
+    noSubMessage: "Я не вижу подписку 😔 Подпишитесь, чтобы получить уроки",
+    noSubButton: "✅ Готово",
+    successMessage: "Отлично! Нажмите кнопку ниже и начните смотреть уроки 👇",
+    successButtonText: "🔻 Смотреть уроки",
+    remindMessage: "Прошло 10 минут, а я все еще жду, пока вы нажмете на кнопку 😊 👉",
+    commentReplies: [
+      "Вся информация в сообщении выше 😊",
+      "Отправлено ✅",
+      "Проверьте ваши сообщения 👌",
+      "Отлично! Проверьте личку — все там! ✉️",
+      "Ответ отправлен в ЛС! 🚀"
+    ]
+  },
+  en: {
+    welcomeMessage: "Hello 👋 Want to get the chatbot setup lesson? Subscribe to @isroil.ai and press the button",
+    welcomeButton: "Get",
+    noSubMessage: "I don't see the subscription 😔 Subscribe to get the lessons",
+    noSubButton: "✅ Done",
+    successMessage: "Great! Press the button below to start watching the lessons 👇",
+    successButtonText: "🔻 Watch lessons",
+    remindMessage: "10 minutes have passed and I'm still waiting for you to press the button 😊 👉",
+    commentReplies: [
+      "All info is in the message above 😊",
+      "Sent ✅",
+      "Check your messages now 👌",
+      "Awesome! Check your PM — everything is there! ✉️",
+      "Reply sent, check PM! 🚀"
+    ]
+  }
+};
 
 export default function QuickBotWizardPage() {
+  const { lang } = useI18n();
+  const tr = (key: keyof typeof LOCAL_TRANSLATIONS.uz, replacements?: Record<string, string>): string => {
+    let val = LOCAL_TRANSLATIONS[lang]?.[key] || LOCAL_TRANSLATIONS.uz[key];
+    if (replacements) {
+      Object.entries(replacements).forEach(([k, v]) => {
+        val = val.replace(`{${k}}`, v);
+      });
+    }
+    return val;
+  };
+
   const [channels, setChannels] = useState<Channel[]>([]);
   const [selectedChannel, setSelectedChannel] = useState<Channel | null>(null);
   
@@ -46,10 +350,8 @@ export default function QuickBotWizardPage() {
 
   const [showExitConfirm, setShowExitConfirm] = useState(false);
 
-  // Step 3 Sub-panel fields
-  const [remindMessage, setRemindMessage] = useState(
-    "10 daqiqa o'tdi va men hali ham tugmani bosishingizni kutmoqdaman 😊 👉"
-  );
+  // States initialized dynamically below
+  const [remindMessage, setRemindMessage] = useState("");
   const [additionalMessage, setAdditionalMessage] = useState("");
   const [additionalDelay, setAdditionalDelay] = useState("10");
 
@@ -57,6 +359,51 @@ export default function QuickBotWizardPage() {
   const [selectedTgSubChannel, setSelectedTgSubChannel] = useState("");
   const [tgSubChannels, setTgSubChannels] = useState<{ value: string; label: string; icon: React.ReactNode }[]>([]);
   const [refreshingTg, setRefreshingTg] = useState(false);
+
+  // STEP 2 FIELDS (Message Settings)
+  const [welcomeMessage, setWelcomeMessage] = useState("");
+  const [welcomeButton, setWelcomeButton] = useState("");
+  const [noSubMessage, setNoSubMessage] = useState("");
+  const [noSubButton, setNoSubButton] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
+  const [successButtonText, setSuccessButtonText] = useState("");
+  const [successButtonUrl, setSuccessButtonUrl] = useState("https://chatplace.io");
+
+  // STEP 3 FIELDS (Additional Settings)
+  const [autoCommentReplies, setAutoCommentReplies] = useState(true);
+  const [commentReplies, setCommentReplies] = useState<string[]>([]);
+  const [newCommentReply, setNewCommentReply] = useState("");
+  const [remindLinkClick, setRemindLinkClick] = useState(false);
+  const [remindButtonText, setRemindButtonText] = useState("");
+  const [remindButtonUrl, setRemindButtonUrl] = useState("");
+  const [additionalMessageToggle, setAdditionalMessageToggle] = useState(false);
+  const [showSuccessPopup, setShowSuccessPopup] = useState(false);
+
+  // Phone Preview Tabs
+  const [previewTab, setPreviewTab] = useState<"xabar" | "izoh">("izoh");
+
+  // Track user edits
+  const isInitialOrLangDefault = useRef(true);
+
+  // Effect to load translations when lang changes
+  useEffect(() => {
+    if (isInitialOrLangDefault.current) {
+      const defaults = DEFAULT_TEMPLATES[lang] || DEFAULT_TEMPLATES.uz;
+      setWelcomeMessage(defaults.welcomeMessage);
+      setWelcomeButton(defaults.welcomeButton);
+      setNoSubMessage(defaults.noSubMessage);
+      setNoSubButton(defaults.noSubButton);
+      setSuccessMessage(defaults.successMessage);
+      setSuccessButtonText(defaults.successButtonText);
+      setRemindMessage(defaults.remindMessage);
+      setCommentReplies(defaults.commentReplies);
+    }
+  }, [lang]);
+
+  // Disable language-driven sync when user starts editing values manually
+  const markAsUserModified = () => {
+    isInitialOrLangDefault.current = false;
+  };
 
   // Sync / populate Telegram channels for selected bot
   useEffect(() => {
@@ -143,41 +490,7 @@ export default function QuickBotWizardPage() {
     }
   };
 
-  // STEP 2 FIELDS (Message Settings)
-  const [welcomeMessage, setWelcomeMessage] = useState(
-    "Salom 👋 Chat-bot'larni sozlash darsini olishni xohlaysizmi? @isroil.ai akkauntiga obuna bo'ling va tugmani bosing"
-  );
-  const [welcomeButton, setWelcomeButton] = useState("Olish");
-  
-  const [noSubMessage, setNoSubMessage] = useState(
-    "Obunani ko'rmayapman 😔 Darslarni olish uchun obuna bo'ling"
-  );
-  const [noSubButton, setNoSubButton] = useState("✅ Tugallandi");
-  
-  const [successMessage, setSuccessMessage] = useState(
-    "Zo'r! Quyidagi tugmani bosing va darslarni tomosha qilishni boshlang 👇"
-  );
-  const [successButtonText, setSuccessButtonText] = useState("🔻 Darslarni ko'rish");
-  const [successButtonUrl, setSuccessButtonUrl] = useState("https://chatplace.io");
 
-  // STEP 3 FIELDS (Additional Settings)
-  const [autoCommentReplies, setAutoCommentReplies] = useState(true);
-  const [commentReplies, setCommentReplies] = useState<string[]>([
-    "Barcha ma'lumotlar tepadagi xabarda 😊",
-    "Yuborilgan ✅",
-    "Endi xabarlarni ko'rib chiqing 👌",
-    "Zo'r! PM-ingizni tekshiring - hammasi shu yerda! ✉️",
-    "Javob yuborildi, PM-da qidiring! 🚀"
-  ]);
-  const [newCommentReply, setNewCommentReply] = useState("");
-  const [remindLinkClick, setRemindLinkClick] = useState(false);
-  const [remindButtonText, setRemindButtonText] = useState("");
-  const [remindButtonUrl, setRemindButtonUrl] = useState("");
-  const [additionalMessageToggle, setAdditionalMessageToggle] = useState(false);
-  const [showSuccessPopup, setShowSuccessPopup] = useState(false);
-
-  // Phone Preview Tabs
-  const [previewTab, setPreviewTab] = useState<"xabar" | "izoh">("izoh");
 
   useEffect(() => {
     const chs = db.getChannels();
@@ -245,8 +558,8 @@ export default function QuickBotWizardPage() {
     const triggerDetails = selectedChannel.type === "telegram"
       ? (directTriggerType === "any" ? "/start" : keywords.join(", "))
       : (triggerDirect 
-        ? (directTriggerType === "any" ? "Har qanday xabar" : keywords.join(", "))
-        : (commentTriggerType === "any" ? "Har qanday izoh" : keywords.join(", ")));
+        ? (directTriggerType === "any" ? tr("any_msg") : keywords.join(", "))
+        : (commentTriggerType === "any" ? tr("any_comment") : keywords.join(", ")));
 
     const name = selectedChannel.type === "telegram"
       ? `Tezkor Telegram Bot: ${directTriggerType === "any" ? "/start" : (keywords[0] || "direct")}`
@@ -295,11 +608,11 @@ export default function QuickBotWizardPage() {
           className="flex items-center gap-2 text-[13px] text-[#707070] hover:text-black font-semibold transition-colors bg-transparent border-0 cursor-pointer"
         >
           <ArrowLeft size={16} />
-          <span>Chiqish</span>
+          <span>{tr("exit")}</span>
         </button>
         <div className="flex items-center gap-2">
           <span className="text-[12px] font-bold text-[#707070]">
-            {step}-qadam 3-qadamdan
+            {tr("step_of", { step: String(step) })}
           </span>
         </div>
       </header>
@@ -312,7 +625,7 @@ export default function QuickBotWizardPage() {
           <div className="max-w-xl w-full flex-1 flex flex-col justify-between">
             <div>
               <h1 className="text-[24px] font-extrabold text-black tracking-tight mb-6">
-                Kalit so&apos;zli chat-bot
+                {tr("title")}
               </h1>
 
               {/* STEP 1 */}
@@ -322,7 +635,7 @@ export default function QuickBotWizardPage() {
                   {/* Akkaunt tanlash */}
                   <div className="flex flex-col gap-2 w-full">
                     <label className="text-[11px] font-extrabold text-[#707070] uppercase tracking-wider">
-                      Akkauntni tanlash
+                      {tr("select_account")}
                     </label>
                     {channels.length > 0 ? (
                       <CustomDropdown
@@ -336,7 +649,7 @@ export default function QuickBotWizardPage() {
                       />
                     ) : (
                       <div className="text-[12px] text-red-500 font-semibold bg-red-50 p-3.5 rounded-xl border border-red-100 w-full">
-                        Ulagan kanallaringiz mavjud emas. Iltimos, sozlamalar bo&apos;limiga o&apos;ting.
+                        {tr("no_channels")}
                       </div>
                     )}
                   </div>
@@ -346,10 +659,10 @@ export default function QuickBotWizardPage() {
                     <div className="flex items-center justify-between">
                       <div>
                         <h3 className="text-[13px] font-bold text-black">
-                          {selectedChannel?.type === "telegram" ? "Telegram kanaliga obunani tekshiring" : "Obunani tekshirish"}
+                          {selectedChannel?.type === "telegram" ? tr("tg_check_sub") : tr("check_sub")}
                         </h3>
                         <p className="text-[11px] text-[#707070] mt-0.5">
-                          Chat-bot akkauntga obuna bo&apos;lishni tekshiradi
+                          {tr("sub_desc")}
                         </p>
                       </div>
                       <label className="relative inline-flex items-center cursor-pointer shrink-0">
@@ -366,7 +679,7 @@ export default function QuickBotWizardPage() {
                     {/* Telegram Channel Selector Dropdown */}
                     {selectedChannel?.type === "telegram" && checkSubscription && (
                       <div className="flex flex-col gap-2 border-t border-[#E8E8E8] pt-3 animate-in slide-in-from-top-1 duration-150 w-full">
-                        <label className="text-[10px] font-extrabold text-[#707070] uppercase tracking-wider">Kanal tanlang</label>
+                        <label className="text-[10px] font-extrabold text-[#707070] uppercase tracking-wider">{tr("select_channel")}</label>
                         <CustomDropdown
                           value={selectedTgSubChannel}
                           onChange={(val) => setSelectedTgSubChannel(val)}
@@ -374,20 +687,20 @@ export default function QuickBotWizardPage() {
                           className="w-full"
                         />
                         <p className="text-[10px] text-[#707070] mt-1 leading-relaxed font-medium">
-                          Agar kanal ro&apos;yxatda bo&apos;lmasa, <a href="/settings" className="text-black hover:underline font-bold">bot qo&apos;shish</a> ushbu Telegram kanalining administratori sifatida yoki <span onClick={handleRefreshTgChannels} className={`text-black hover:underline font-bold cursor-pointer ${refreshingTg ? "opacity-50 pointer-events-none" : ""}`}>
-                            {refreshingTg ? "yangilanmoqda..." : "ro'yxatni yangilash"}
+                          {tr("channel_not_in_list")} <a href="/settings" className="text-black hover:underline font-bold">{tr("add_bot")}</a> {tr("as_tg_admin")} <span onClick={handleRefreshTgChannels} className={`text-black hover:underline font-bold cursor-pointer ${refreshingTg ? "opacity-50 pointer-events-none" : ""}`}>
+                            {refreshingTg ? tr("refreshing") : tr("refresh_list")}
                           </span>
                         </p>
                       </div>
                     )}
                   </div>
 
-                  {/* Ishga tushirish shartlari */}
+                  {/* {tr("trigger_conditions")} */}
                   <div className="flex flex-col gap-3 w-full">
                     <div>
-                      <h3 className="text-[13px] font-extrabold text-black">Ishga tushirish shartlari</h3>
+                      <h3 className="text-[13px] font-extrabold text-black">{tr("trigger_conditions")}</h3>
                       <p className="text-[11px] text-[#707070] mt-0.5">
-                        Qaysi harakat chat-bot&apos;ni ishga tushiradi?
+                        {tr("trigger_action_desc")}
                       </p>
                     </div>
 
@@ -404,7 +717,7 @@ export default function QuickBotWizardPage() {
                         >
                           <div className="flex items-center gap-3">
                             <MessageCircle size={18} className="text-black" />
-                            <span className="text-[13px]">Bot&apos;ni ishga tushirish (buyruq/start)</span>
+                            <span className="text-[13px]">{tr("start_bot_command")}</span>
                           </div>
                           {/* Custom Radio Button */}
                           <div className={`w-4 h-4 rounded-full border flex items-center justify-center shrink-0 transition-all ${directTriggerType === "any" ? "border-black bg-black" : "border-[#D8D8D8]"}`}>
@@ -424,7 +737,7 @@ export default function QuickBotWizardPage() {
                         >
                           <div className="flex items-center gap-3">
                             <MessageSquare size={18} className="text-black" />
-                            <span className="text-[13px]">Kalit so&apos;z bilan xabar</span>
+                            <span className="text-[13px]">{tr("msg_with_keyword")}</span>
                           </div>
                           {/* Custom Radio Button */}
                           <div className={`w-4 h-4 rounded-full border flex items-center justify-center shrink-0 transition-all ${directTriggerType === "keyword" ? "border-black bg-black" : "border-[#D8D8D8]"}`}>
@@ -451,12 +764,12 @@ export default function QuickBotWizardPage() {
                                 value={keywordsInput}
                                 onChange={(e) => setKeywordsInput(e.target.value)}
                                 onKeyDown={handleAddKeyword}
-                                placeholder="Masalan: kirish, xohish, narx"
+                                placeholder={tr("keyword_placeholder")}
                                 className="flex-1 min-w-[120px] text-[12px] bg-transparent border-0 focus:ring-0 focus:outline-none p-0.5 text-black"
                               />
                             </div>
                             <p className="text-[9px] text-[#707070] font-semibold mt-0.5">
-                              Kalit so&apos;zlarni ajratish uchun &apos;Enter&apos; yoki vergulni bosing
+                              {tr("keyword_desc")}
                             </p>
                           </div>
                         )}
@@ -474,7 +787,7 @@ export default function QuickBotWizardPage() {
                         >
                           <div className="flex items-center gap-3">
                             <MessageCircle size={18} className="text-black" />
-                            <span className="text-[13px]">Direkt&apos;ga Xabar</span>
+                            <span className="text-[13px]">{tr("direct_msg")}</span>
                           </div>
                           {/* Custom Checkbox */}
                           <div className={`w-4 h-4 rounded border flex items-center justify-center shrink-0 transition-all ${triggerDirect ? "border-black bg-black" : "border-[#D8D8D8]"}`}>
@@ -496,7 +809,7 @@ export default function QuickBotWizardPage() {
                         >
                           <div className="flex items-center gap-3">
                             <MessageSquare size={18} className="text-black" />
-                            <span className="text-[13px]">Reels yoki postga izoh</span>
+                            <span className="text-[13px]">{tr("comment_reels_post")}</span>
                           </div>
                           {/* Custom Checkbox */}
                           <div className={`w-4 h-4 rounded border flex items-center justify-center shrink-0 transition-all ${triggerComment ? "border-black bg-black" : "border-[#D8D8D8]"}`}>
@@ -528,7 +841,7 @@ export default function QuickBotWizardPage() {
                               <div className="w-1.5 h-1.5 rounded-full bg-[#C7F33C]" />
                             )}
                           </div>
-                          <span>Har qanday xabar</span>
+                          <span>{tr("any_msg")}</span>
                         </label>
                         <label className="flex items-center gap-2 text-[12px] text-black font-semibold cursor-pointer select-none">
                           <input 
@@ -543,7 +856,7 @@ export default function QuickBotWizardPage() {
                               <div className="w-1.5 h-1.5 rounded-full bg-[#C7F33C]" />
                             )}
                           </div>
-                          <span>Kalit so&apos;z bilan xabar</span>
+                          <span>{tr("msg_with_keyword")}</span>
                         </label>
                       </div>
 
@@ -564,12 +877,12 @@ export default function QuickBotWizardPage() {
                               value={keywordsInput}
                               onChange={(e) => setKeywordsInput(e.target.value)}
                               onKeyDown={handleAddKeyword}
-                              placeholder="Masalan: kirish, xohish, narx"
+                              placeholder={tr("keyword_placeholder")}
                               className="flex-1 min-w-[120px] text-[12px] bg-transparent border-0 focus:ring-0 focus:outline-none p-0.5 text-black"
                             />
                           </div>
                           <p className="text-[9px] text-[#707070] font-semibold mt-0.5">
-                            Kalit so&apos;zlarni ajratish uchun &apos;Enter&apos; yoki vergulni bosing
+                            {tr("keyword_desc")}
                           </p>
 
                           {/* Exact match checkbox */}
@@ -587,8 +900,8 @@ export default function QuickBotWizardPage() {
                                 </svg>
                               )}
                             </div>
-                            <span>Aniq moslik</span>
-                            <span title="Aniq mos kelganda chatbot ishga tushadi"><HelpCircle size={12} className="text-[#A0A0A0]" /></span>
+                            <span>{tr("exact_match")}</span>
+                            <span title={tr("exact_match_tooltip")}><HelpCircle size={12} className="text-[#A0A0A0]" /></span>
                           </label>
                         </div>
                       )}
@@ -612,7 +925,7 @@ export default function QuickBotWizardPage() {
                               <div className="w-1.5 h-1.5 rounded-full bg-[#C7F33C]" />
                             )}
                           </div>
-                          <span>Har qanday izoh</span>
+                          <span>{tr("any_comment")}</span>
                         </label>
                         <label className="flex items-center gap-2 text-[12px] text-black font-semibold cursor-pointer select-none">
                           <input 
@@ -627,7 +940,7 @@ export default function QuickBotWizardPage() {
                               <div className="w-1.5 h-1.5 rounded-full bg-[#C7F33C]" />
                             )}
                           </div>
-                          <span>Kalit so&apos;z bilan izoh</span>
+                          <span>{tr("comment_with_keyword")}</span>
                         </label>
                       </div>
 
@@ -648,12 +961,12 @@ export default function QuickBotWizardPage() {
                               value={keywordsInput}
                               onChange={(e) => setKeywordsInput(e.target.value)}
                               onKeyDown={handleAddKeyword}
-                              placeholder="Masalan: test, bonus, dars"
+                              placeholder={tr("keyword_comment_placeholder")}
                               className="flex-1 min-w-[120px] text-[12px] bg-transparent border-0 focus:ring-0 focus:outline-none p-0.5 text-black"
                             />
                           </div>
                           <p className="text-[9px] text-[#707070] font-semibold mt-0.5">
-                            Kalit so&apos;zlarni ajratish uchun &apos;Enter&apos; yoki vergulni bosing
+                            {tr("keyword_desc")}
                           </p>
 
                           {/* Exact match checkbox */}
@@ -671,8 +984,8 @@ export default function QuickBotWizardPage() {
                                 </svg>
                               )}
                             </div>
-                            <span>Aniq moslik</span>
-                            <span title="Izoh kalit so'zga aniq mos tushgandagina bot javob yozadi"><HelpCircle size={12} className="text-[#A0A0A0]" /></span>
+                            <span>{tr("exact_match")}</span>
+                            <span title={tr("exact_match_comment_tooltip")}><HelpCircle size={12} className="text-[#A0A0A0]" /></span>
                           </label>
 
                           {/* Publications options */}
@@ -682,18 +995,18 @@ export default function QuickBotWizardPage() {
                               onClick={() => setCommentPostsType("all")}
                               className={`px-4 py-1 rounded-lg text-[11px] font-bold transition-all ${commentPostsType === "all" ? "bg-white text-black shadow-sm" : "text-[#707070] hover:text-black"}`}
                             >
-                              Barcha publikatsiyalar
+                              {tr("all_publications")}
                             </button>
                             <button
                               type="button"
                               onClick={() => setCommentPostsType("selected")}
                               className={`px-4 py-1 rounded-lg text-[11px] font-bold transition-all ${commentPostsType === "selected" ? "bg-white text-black shadow-sm" : "text-[#707070] hover:text-black"}`}
                             >
-                              Tanlangan
+                              {tr("selected")}
                             </button>
                           </div>
                           <div className="p-3 bg-[#F9F9F7] border border-[#E8E8E8] rounded-xl text-[10px] text-[#707070] leading-relaxed mt-2 text-center font-medium w-full">
-                            Avtomatlashtirish barcha postlar ostidagi izohlarni kuzatib boradi
+                            {tr("comment_all_desc")}
                           </div>
                         </div>
                       )}
@@ -707,18 +1020,18 @@ export default function QuickBotWizardPage() {
               {step === 2 && (
                 <div className="w-full flex flex-col gap-5 animate-in fade-in slide-in-from-bottom-2 duration-200">
                   
-                  {/* Salomlashuv xabari Card */}
+                  {/* {tr("welcome_message")} Card */}
                   <div className="flex flex-col gap-3.5 p-4 bg-[#F9F9F7] border border-[#E8E8E8] rounded-2xl w-full shadow-xs">
                     <div className="flex justify-between items-center w-full">
                       <label className="text-[11px] font-extrabold text-[#707070] uppercase tracking-wider">
-                        Salomlashuv xabari
+                        {tr("welcome_message")}
                       </label>
                       <button 
                         type="button" 
                         onClick={() => imageInputRef.current?.click()}
                         className="text-[11px] font-extrabold text-black hover:opacity-85 flex items-center gap-1 cursor-pointer"
                       >
-                        <Plus size={12} className="text-black" /> <span>Tasvir</span>
+                        <Plus size={12} className="text-black" /> <span>{tr("image")}</span>
                       </button>
                       <input 
                         type="file"
@@ -744,20 +1057,20 @@ export default function QuickBotWizardPage() {
                     
                     <textarea
                       value={welcomeMessage}
-                      onChange={(e) => setWelcomeMessage(e.target.value.substring(0, 500))}
+                      onChange={(e) => { markAsUserModified(); setWelcomeMessage(e.target.value.substring(0, 500)); }}
                       className="w-full h-16 min-h-[52px] p-2.5 text-[12px] bg-white border border-[#D8D8D8] focus:border-black rounded-xl focus:outline-none resize-none font-medium leading-relaxed text-black"
                       maxLength={500}
                     />
                     <div className="flex justify-between text-[10px] text-[#707070] font-semibold mt-[-3px] w-full">
-                      <span>Maksimal 500 ta belgi</span>
+                      <span>{tr("max_chars")}</span>
                       <span>{welcomeMessage.length} / 500</span>
                     </div>
 
                     <input
                       type="text"
                       value={welcomeButton}
-                      onChange={(e) => setWelcomeButton(e.target.value)}
-                      placeholder="Tugma matni (masalan: Olish)"
+                      onChange={(e) => { markAsUserModified(); setWelcomeButton(e.target.value); }}
+                      placeholder={tr("button_text_placeholder")}
                       className="w-full px-3 py-2 text-[12px] bg-white border border-[#D8D8D8] rounded-xl focus:outline-none focus:border-black font-semibold text-black"
                     />
                   </div>
@@ -768,24 +1081,24 @@ export default function QuickBotWizardPage() {
                       {/* Agar obuna bo'lmasa Card */}
                       <div className="flex flex-col gap-3.5 p-4 bg-[#F9F9F7] border border-[#E8E8E8] rounded-2xl w-full shadow-xs">
                         <label className="text-[11px] font-extrabold text-[#707070] uppercase tracking-wider">
-                          Agar obuna bo&apos;lmasa
+                          {tr("if_not_subscribed")}
                         </label>
                         
                         <textarea
                           value={noSubMessage}
-                          onChange={(e) => setNoSubMessage(e.target.value.substring(0, 500))}
+                          onChange={(e) => { markAsUserModified(); setNoSubMessage(e.target.value.substring(0, 500)); }}
                           className="w-full h-16 min-h-[52px] p-2.5 text-[12px] bg-white border border-[#D8D8D8] focus:border-black rounded-xl focus:outline-none resize-none font-medium leading-relaxed text-black"
                           maxLength={500}
                         />
                         <div className="flex justify-between text-[10px] text-[#707070] font-semibold mt-[-3px] w-full">
-                          <span>Maksimal 500 ta belgi</span>
+                          <span>{tr("max_chars")}</span>
                           <span>{noSubMessage.length} / 500</span>
                         </div>
 
                         <input
                           type="text"
                           value={noSubButton}
-                          onChange={(e) => setNoSubButton(e.target.value)}
+                          onChange={(e) => { markAsUserModified(); setNoSubButton(e.target.value); }}
                           placeholder="Tugma matni (masalan: ✅ Tugallandi)"
                           className="w-full px-3 py-2 text-[12px] bg-white border border-[#D8D8D8] rounded-xl focus:outline-none focus:border-black font-semibold text-black"
                         />
@@ -794,17 +1107,17 @@ export default function QuickBotWizardPage() {
                       {/* Obuna bo'lgandan so'ng Card */}
                       <div className="flex flex-col gap-3.5 p-4 bg-[#F9F9F7] border border-[#E8E8E8] rounded-2xl w-full shadow-xs">
                         <label className="text-[11px] font-extrabold text-[#707070] uppercase tracking-wider">
-                          Obuna bo&apos;lgandan so&apos;ng
+                          {tr("after_subscribed")}
                         </label>
                         
                         <textarea
                           value={successMessage}
-                          onChange={(e) => setSuccessMessage(e.target.value.substring(0, 500))}
+                          onChange={(e) => { markAsUserModified(); setSuccessMessage(e.target.value.substring(0, 500)); }}
                           className="w-full h-16 min-h-[52px] p-2.5 text-[12px] bg-white border border-[#D8D8D8] focus:border-black rounded-xl focus:outline-none resize-none font-medium leading-relaxed text-black"
                           maxLength={500}
                         />
                         <div className="flex justify-between text-[10px] text-[#707070] font-semibold mt-[-3px] w-full">
-                          <span>Maksimal 500 ta belgi</span>
+                          <span>{tr("max_chars")}</span>
                           <span>{successMessage.length} / 500</span>
                         </div>
 
@@ -812,15 +1125,15 @@ export default function QuickBotWizardPage() {
                           <input
                             type="text"
                             value={successButtonText}
-                            onChange={(e) => setSuccessButtonText(e.target.value)}
-                            placeholder="Tugma matni"
+                            onChange={(e) => { markAsUserModified(); setSuccessButtonText(e.target.value); }}
+                            placeholder={tr("btn_text")}
                             className="w-full px-3 py-2 text-[12px] bg-white border border-[#D8D8D8] rounded-xl focus:outline-none focus:border-black font-semibold text-black"
                           />
                           <input
                             type="text"
                             value={successButtonUrl}
                             onChange={(e) => setSuccessButtonUrl(e.target.value)}
-                            placeholder="Tugma havolasi (URL)"
+                            placeholder={tr("btn_url")}
                             className="w-full px-3 py-2 text-[12px] bg-white border border-[#D8D8D8] rounded-xl focus:outline-none focus:border-black font-mono font-medium text-black"
                           />
                         </div>
@@ -834,14 +1147,14 @@ export default function QuickBotWizardPage() {
               {step === 3 && (
                 <div className="w-full flex flex-col gap-5 animate-in fade-in slide-in-from-bottom-2 duration-200">
                   
-                  {/* Izohlarga avtomatik javoblar (Only for Instagram!) */}
+                  {/* {tr("comment_auto_replies")} (Only for Instagram!) */}
                   {selectedChannel?.type !== "telegram" && (
                     <div className="flex flex-col gap-3.5 p-4 bg-[#F9F9F7] border border-[#E8E8E8] rounded-2xl w-full shadow-xs">
                       <div className="flex items-center justify-between">
                         <div>
-                          <h3 className="text-[13px] font-bold text-black">Izohlarga avtomatik javoblar</h3>
+                          <h3 className="text-[13px] font-bold text-black">{tr("comment_auto_replies")}</h3>
                           <p className="text-[11px] text-[#707070] mt-0.5">
-                            Ularni tasodifiy tartibda ishlatamiz
+                            {tr("comment_replies_desc")}
                           </p>
                         </div>
                         <label className="relative inline-flex items-center cursor-pointer shrink-0">
@@ -885,13 +1198,13 @@ export default function QuickBotWizardPage() {
                               className="w-full py-2 border border-dashed border-[#D8D8D8] hover:border-black rounded-xl text-[12px] font-bold text-black flex items-center justify-center gap-1.5 transition-all bg-white active:scale-95 mt-1"
                             >
                               <Plus size={14} />
-                              <span>Avtomatik javob qo&apos;shish</span>
+                              <span>{tr("add_auto_reply")}</span>
                             </button>
                           )}
                           
                           <div className="p-3 bg-white border border-[#E8E8E8] rounded-xl text-[10px] text-[#707070] leading-normal flex items-start gap-1.5 mt-1">
                             <span className="text-black font-extrabold">✓</span>
-                            <span>Post yoki Reels ostida izoh qoldirgan mijozga ushbu javoblardan biri tasodifiy ravishda yuboriladi va unga shaxsiy xabar ham jo&apos;natiladi.</span>
+                            <span>{tr("comment_bubble_desc")}</span>
                           </div>
                         </div>
                       )}
@@ -902,9 +1215,9 @@ export default function QuickBotWizardPage() {
                   <div className="flex flex-col gap-3.5 p-4 bg-[#F9F9F7] border border-[#E8E8E8] rounded-2xl w-full shadow-xs">
                     <div className="flex items-center justify-between">
                       <div>
-                        <h3 className="text-[13px] font-bold text-black">Havolaga o&apos;tishni eslatib qo&apos;ying</h3>
+                        <h3 className="text-[13px] font-bold text-black">{tr("remind_link_visit")}</h3>
                         <p className="text-[11px] text-[#707070] mt-0.5">
-                          10 daqiqadan so&apos;ng eslatma yuboramiz
+                          {tr("remind_desc")}
                         </p>
                       </div>
                       <label className="relative inline-flex items-center cursor-pointer shrink-0">
@@ -922,7 +1235,7 @@ export default function QuickBotWizardPage() {
                       <div className="flex flex-col gap-2 w-full animate-in slide-in-from-top-2 duration-150">
                         <textarea
                           value={remindMessage}
-                          onChange={(e) => setRemindMessage(e.target.value.substring(0, 500))}
+                          onChange={(e) => { markAsUserModified(); setRemindMessage(e.target.value.substring(0, 500)); }}
                           className="w-full h-16 min-h-[52px] p-2.5 text-[12px] bg-white border border-[#D8D8D8] focus:border-black rounded-xl focus:outline-none resize-none font-medium leading-relaxed text-black"
                           maxLength={500}
                         />
@@ -935,14 +1248,14 @@ export default function QuickBotWizardPage() {
                             type="text"
                             value={remindButtonText}
                             onChange={(e) => setRemindButtonText(e.target.value)}
-                            placeholder="Tugma matni"
+                            placeholder={tr("btn_text")}
                             className="w-full px-3 py-2 text-[12px] bg-white border border-[#D8D8D8] rounded-xl focus:outline-none focus:border-black font-semibold text-black"
                           />
                           <input
                             type="text"
                             value={remindButtonUrl}
                             onChange={(e) => setRemindButtonUrl(e.target.value)}
-                            placeholder="Tugma havolasi (URL)"
+                            placeholder={tr("btn_url")}
                             className="w-full px-3 py-2 text-[12px] bg-white border border-[#D8D8D8] rounded-xl focus:outline-none focus:border-black font-mono font-medium text-black"
                           />
                         </div>
@@ -954,9 +1267,9 @@ export default function QuickBotWizardPage() {
                   <div className="flex flex-col gap-3.5 p-4 bg-[#F9F9F7] border border-[#E8E8E8] rounded-2xl w-full shadow-xs">
                     <div className="flex items-center justify-between">
                       <div>
-                        <h3 className="text-[13px] font-bold text-black">Qo&apos;shimcha xabar</h3>
+                        <h3 className="text-[13px] font-bold text-black">{tr("additional_msg")}</h3>
                         <p className="text-[11px] text-[#707070] mt-0.5">
-                          Xabar belgilangan soniyalarda tugagach, ulanish
+                          {tr("additional_desc")}
                         </p>
                       </div>
                       <label className="relative inline-flex items-center cursor-pointer shrink-0">
@@ -973,12 +1286,12 @@ export default function QuickBotWizardPage() {
                     {additionalMessageToggle && (
                       <div className="flex flex-col gap-3 w-full animate-in slide-in-from-top-2 duration-150">
                         <div className="text-[10px] text-[#707070] leading-relaxed font-medium">
-                          Xabar belgilangan soniyalarda tugagach, tugmaga bosish va 2-shakldagi havolaga o&apos;tishdan keyin yuboriladi
+                          {tr("additional_flow_desc")}
                         </div>
                         <textarea
                           value={additionalMessage}
                           onChange={(e) => setAdditionalMessage(e.target.value.substring(0, 500))}
-                          placeholder="Xabar yoki havola"
+                          placeholder={tr("message_or_link")}
                           className="w-full h-16 min-h-[52px] p-2.5 text-[12px] bg-white border border-[#D8D8D8] focus:border-black rounded-xl focus:outline-none resize-none font-medium leading-relaxed text-black"
                           maxLength={500}
                         />
@@ -994,7 +1307,7 @@ export default function QuickBotWizardPage() {
                             onChange={(e) => setAdditionalDelay(e.target.value)}
                             className="w-8 text-[12px] text-black font-bold bg-transparent border-0 p-0 focus:ring-0 focus:outline-none"
                           />
-                          <span className="text-[12px] text-[#A0A0A0] font-medium">daqiqa</span>
+                          <span className="text-[12px] text-[#A0A0A0] font-medium">{tr("minutes")}</span>
                         </div>
                       </div>
                     )}
@@ -1120,7 +1433,7 @@ export default function QuickBotWizardPage() {
                     </span>
                   </div>
                   <div className="text-center flex-1 pr-6">
-                    <p className="text-[9px] font-extrabold text-black tracking-tight">Nashrlar</p>
+                    <p className="text-[9px] font-extrabold text-black tracking-tight">{tr("posts")}</p>
                   </div>
                 </div>
               </div>
@@ -1135,7 +1448,7 @@ export default function QuickBotWizardPage() {
                   {/* Step 1 centered card */}
                   {step === 1 && (
                     <div className="my-auto bg-[#D0D7DE]/60 border border-[#B0BEC5]/30 text-[#37474F] rounded-[16px] p-4 text-center max-w-[85%] mx-auto font-semibold shadow-xs">
-                      Bu yerda chat-bot mijoz bilan qanday muloqot qilishini ko&apos;rsatamiz
+                      {tr("demo_preview_desc")}
                     </div>
                   )}
 
@@ -1360,7 +1673,7 @@ export default function QuickBotWizardPage() {
                         
                         {/* Drawer Title */}
                         <div className="text-[10px] text-black text-center font-extrabold pb-2 border-b border-[#F5F5F5] uppercase tracking-wider shrink-0">
-                          Izohlar
+                          {tr("comments")}
                         </div>
 
                         {/* Scrollable comments list */}
@@ -1371,10 +1684,10 @@ export default function QuickBotWizardPage() {
                             <div className="h-5 w-5 rounded-full bg-[#F0F0F0] shrink-0 flex items-center justify-center font-bold text-[8px] text-black">L</div>
                             <div className="flex-1">
                               <p className="font-extrabold text-[10px] text-black">
-                                lsm <span className="font-normal text-[#909090] ml-1">Endi</span>
+                                lsm <span className="font-normal text-[#909090] ml-1">{tr("now")}</span>
                               </p>
                               <p className="text-[10.5px] mt-0.5 text-black font-medium">{keywords[0] || "Kalit so'z"}</p>
-                              <button className="text-[9px] text-[#707070] font-bold mt-1 hover:text-black">Javob berish</button>
+                              <button className="text-[9px] text-[#707070] font-bold mt-1 hover:text-black">{tr("reply")}</button>
                             </div>
                           </div>
 
@@ -1391,12 +1704,12 @@ export default function QuickBotWizardPage() {
                               <div className="flex-1">
                                 <p className="font-extrabold text-[10px] text-black">
                                   {selectedChannel?.username.replace(/^@+/, "") || "isroil.ai"}
-                                  <span className="font-normal text-[#909090] ml-1">Endi</span>
+                                  <span className="font-normal text-[#909090] ml-1">{tr("now")}</span>
                                 </p>
                                 <p className="text-[10.5px] mt-0.5 text-black font-semibold bg-slate-50 p-1.5 rounded-lg border border-[#F0F0F0]">
                                   {commentReplies[0]}
                                 </p>
-                                <button className="text-[9px] text-[#707070] font-bold mt-1 hover:text-black">Javob berish</button>
+                                <button className="text-[9px] text-[#707070] font-bold mt-1 hover:text-black">{tr("reply")}</button>
                               </div>
                             </div>
                           )}
@@ -1407,10 +1720,10 @@ export default function QuickBotWizardPage() {
                               <div className="h-5 w-5 rounded-full bg-[#F0F0F0] shrink-0 flex items-center justify-center font-bold text-[8px] text-black">A</div>
                               <div className="flex-1">
                                 <p className="font-extrabold text-[10px] text-black">
-                                  anvar_m <span className="font-normal text-[#909090] ml-1">Endi</span>
+                                  anvar_m <span className="font-normal text-[#909090] ml-1">{tr("now")}</span>
                                 </p>
                                 <p className="text-[10.5px] mt-0.5 text-black font-medium">{keywords[0] || "Kalit so'z"}</p>
-                                <button className="text-[9px] text-[#707070] font-bold mt-1 hover:text-black">Javob berish</button>
+                                <button className="text-[9px] text-[#707070] font-bold mt-1 hover:text-black">{tr("reply")}</button>
                               </div>
                             </div>
                           )}
@@ -1428,12 +1741,12 @@ export default function QuickBotWizardPage() {
                               <div className="flex-1">
                                 <p className="font-extrabold text-[10px] text-black">
                                   {selectedChannel?.username.replace(/^@+/, "") || "isroil.ai"}
-                                  <span className="font-normal text-[#909090] ml-1">Endi</span>
+                                  <span className="font-normal text-[#909090] ml-1">{tr("now")}</span>
                                 </p>
                                 <p className="text-[10.5px] mt-0.5 text-black font-semibold bg-slate-50 p-1.5 rounded-lg border border-[#F0F0F0]">
                                   {commentReplies[1]}
                                 </p>
-                                <button className="text-[9px] text-[#707070] font-bold mt-1 hover:text-black">Javob berish</button>
+                                <button className="text-[9px] text-[#707070] font-bold mt-1 hover:text-black">{tr("reply")}</button>
                               </div>
                             </div>
                           )}
@@ -1461,7 +1774,7 @@ export default function QuickBotWizardPage() {
                             )}
                           </div>
                           <div className="flex-1 bg-[#F5F5F5] rounded-full px-3 py-1 flex items-center justify-between text-[9px] text-[#707070] font-medium border border-[#E8E8E8]">
-                            <span>{selectedChannel ? `${selectedChannel.username.replace(/^@+/, "")} uchun izoh...` : "isroil.ai uchun izoh..."}</span>
+                            <span>{selectedChannel ? `${selectedChannel.username.replace(/^@+/, "")} ${tr("comment_for")}` : `isroil.ai ${tr("comment_for")}`}</span>
                             <Smile size={12} className="text-[#707070]" />
                           </div>
                         </div>
@@ -1486,7 +1799,7 @@ export default function QuickBotWizardPage() {
                   )}
                 </div>
                 <div className="flex-1 bg-[#F5F5F5] rounded-full px-3 py-1.5 flex items-center justify-between text-[9px] text-[#A0A0A0] border border-[#E8E8E8]">
-                  <span>Xabar yozing...</span>
+                  <span>{tr("type_message_placeholder")}</span>
                   <Smile size={12} className="text-[#707070] cursor-pointer hover:text-black" />
                 </div>
               </div>
@@ -1504,21 +1817,21 @@ export default function QuickBotWizardPage() {
                 onClick={() => setPreviewTab("xabar")}
                 className={`flex-1 py-1.5 rounded-lg text-[10px] font-bold text-center transition-all ${previewTab === "xabar" ? "bg-white text-black shadow-xs border border-[#E0E0E0]/30" : "text-[#707070] hover:text-black bg-transparent"}`}
               >
-                Xabar
+                {tr("demo_message_tab")}
               </button>
               <button
                 type="button"
                 onClick={() => setPreviewTab("izoh")}
                 className={`flex-1 py-1.5 rounded-lg text-[10px] font-bold text-center transition-all ${previewTab === "izoh" ? "bg-white text-black shadow-xs border border-[#E0E0E0]/30" : "text-[#707070] hover:text-black bg-transparent"}`}
               >
-                Izoh
+                {tr("demo_comment_tab")}
               </button>
             </div>
           )}
 
           <div className="mt-2 text-center">
             <span className="text-[9px] text-[#A0A0A0] uppercase font-bold tracking-wider">
-              Jonli Telefon Prevyusi
+              {tr("live_preview")}
             </span>
           </div>
 
@@ -1538,10 +1851,10 @@ export default function QuickBotWizardPage() {
             </button>
 
             <h3 className="text-[18px] font-black text-black tracking-tight text-left">
-              Chiqmoqchimisiz?
+              {tr("exit_title")}
             </h3>
             <p className="text-[12px] text-[#707070] leading-relaxed mt-2 text-left font-medium">
-              Barcha ma&apos;lumotlar avtomatik saqlandi va kelasi safar tahrirlash uchun mavjud bo&apos;ladi.
+              {tr("exit_desc")}
             </p>
 
             <div className="flex gap-3 mt-6">
@@ -1578,10 +1891,10 @@ export default function QuickBotWizardPage() {
             </div>
 
             <h3 className="text-[22px] font-black text-black tracking-tight mt-2 relative z-10">
-              Tabriklaymiz! 🎉
+              {tr("congrats_title")}
             </h3>
             <p className="text-[13px] text-[#505050] leading-relaxed mt-3 font-medium relative z-10">
-              Chat-botingiz muvaffaqiyatli ishga tushdi va ulanish o&apos;rnatildi!
+              {tr("congrats_desc")}
             </p>
 
             <button
@@ -1591,7 +1904,7 @@ export default function QuickBotWizardPage() {
               }}
               className="w-full mt-8 py-3.5 bg-black hover:bg-neutral-900 text-white font-extrabold rounded-2xl text-[13px] tracking-wide transition-all active:scale-95 shadow-lg shadow-black/10 cursor-pointer border-0"
             >
-              Ajoyib!
+              {tr("awesome")}
             </button>
           </div>
         </div>

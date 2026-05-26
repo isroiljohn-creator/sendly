@@ -12,8 +12,44 @@ import type { User, Channel } from "@/lib/db";
 
 type ModalType = "instagram" | "telegram" | "choose" | null;
 
+const LOCAL_TRANSLATIONS = {
+  uz: {
+    ig_direct_api: "Instagram Direct Api",
+    webhook_api: "Webhooks va API",
+    api_keys: "API kalitlari",
+    new_key_title: "Yangi kalit yaratildi",
+    new_key_desc: "Yangi API kalit muvaffaqiyatli yaratildi va saqlandi.",
+    copied_title: "Nusxalandi",
+    copied_desc: "API kalit buferga muvaffaqiyatli nusxalandi.",
+    regenerate_btn: "Yangi API kalit yaratish",
+  },
+  ru: {
+    ig_direct_api: "Instagram Direct API",
+    webhook_api: "Webhooks и API",
+    api_keys: "API ключи",
+    new_key_title: "Новый ключ создан",
+    new_key_desc: "Новый API ключ успешно создан и сохранен.",
+    copied_title: "Скопировано",
+    copied_desc: "API ключ успешно скопирован в буфер обмена.",
+    regenerate_btn: "Создать новый API ключ",
+  },
+  en: {
+    ig_direct_api: "Instagram Direct API",
+    webhook_api: "Webhooks & API",
+    api_keys: "API Keys",
+    new_key_title: "New key created",
+    new_key_desc: "New API key successfully created and saved.",
+    copied_title: "Copied",
+    copied_desc: "API key successfully copied to clipboard.",
+    regenerate_btn: "Generate new API key",
+  }
+};
+
 export default function SettingsPage() {
-  const { t } = useI18n();
+  const { lang, t } = useI18n();
+  const tr = (key: keyof typeof LOCAL_TRANSLATIONS.uz): string => {
+    return LOCAL_TRANSLATIONS[lang]?.[key] || LOCAL_TRANSLATIONS.uz[key];
+  };
   const [activeSection, setActiveSection] = useState<string>("general");
 
   // User state
@@ -217,14 +253,14 @@ export default function SettingsPage() {
     localStorage.setItem("replai_api_key", newKey);
     setApiKey(newKey);
     db.saveToServer();
-    showAlert("Yangi kalit yaratildi", "Yangi API kalit muvaffaqiyatli yaratildi va saqlandi.");
+    showAlert(tr("new_key_title"), tr("new_key_desc"));
   };
 
   const handleCopyKey = () => {
     navigator.clipboard.writeText(apiKey);
     setCopiedKey(true);
     setTimeout(() => setCopiedKey(false), 2000);
-    showAlert("Nusxalandi", "API kalit buferga muvaffaqiyatli nusxalandi.");
+    showAlert(tr("copied_title"), tr("copied_desc"));
   };
 
   const handleSave = (e: React.FormEvent) => {
@@ -675,7 +711,7 @@ export default function SettingsPage() {
                       </div>
                       <div>
                         <div className="flex items-center gap-2">
-                          <h3 className="text-[16px] font-medium text-black">Instagram Direct Api</h3>
+                          <h3 className="text-[16px] font-medium text-black">{tr("ig_direct_api")}</h3>
                           <StatusPill status={isIgConnected} activeText={t("common.active")} inactiveText={t("common.inactive")} />
                         </div>
                         <p className="mt-1 text-[12px] text-[#707070]">
@@ -696,7 +732,7 @@ export default function SettingsPage() {
                     <div>
                       <div className="flex items-center gap-1.5">
                         <Database size={16} className="text-black" />
-                        <h3 className="text-[15px] font-medium text-black">Webhooks & API</h3>
+                        <h3 className="text-[15px] font-medium text-black">{tr("webhook_api")}</h3>
                       </div>
                       <p className="text-[12px] text-[#707070] mt-0.5">
                         {t("pages.settings_page.webhook_desc")}
@@ -732,7 +768,7 @@ export default function SettingsPage() {
             {activeSection === "apikeys" && (
               <div className="max-w-[640px] flex flex-col gap-6 animate-in fade-in duration-200">
                 <div>
-                  <h3 className="text-[28px] font-bold text-black">API Keys</h3>
+                  <h3 className="text-[28px] font-bold text-black">{tr("api_keys")}</h3>
                   <p className="text-[13px] text-[#707070] mt-1.5">{t("pages.settings_page.api_keys_desc")}</p>
                 </div>
 
@@ -772,7 +808,7 @@ export default function SettingsPage() {
                       className="text-[11px] font-bold text-red-600 hover:text-red-700 hover:underline flex items-center gap-1 transition-colors"
                     >
                       <RefreshCw size={12} />
-                      <span>Yangi API kalit yaratish</span>
+                      <span>{tr("regenerate_btn")}</span>
                     </button>
                   </div>
                 </div>

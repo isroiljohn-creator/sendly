@@ -2,8 +2,12 @@ import Queue from "bull";
 import { env } from "../config/env";
 import { supabase } from "../config/db";
 import { executeSessionStep } from "./interpreter";
+import { sendInstagramMessage } from "../utils/meta";
+
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 let queue: Queue.Queue | null = null;
+let broadcastsQueue: Queue.Queue | null = null;
 
 try {
   queue = new Queue("instagram-chatbot-delays", env.REDIS_URL, {
@@ -25,6 +29,23 @@ try {
 } catch (err) {
   console.error("[Queue] Failed to initialize Bull queue:", err);
   queue = null;
+}
+
+try {
+  broadcastsQueue = new Queue("broadcasts-queue", env.REDIS_URL);
+
+  broadcastsQueue.process(async (job) => {
+    const { broadcastId, userId } = job.data;
+    console.log(`[Broadcast Queue Processor] Processing job for broadcast ${broadcastId}, user ${userId}`);
+    await processBroadcastJob(broadcastId, userId);
+  });
+
+  broadcastsQueue.on("error", (err) => {
+    console.error("[Broadcast Queue] Bull queue error:", err);
+  });
+} catch (err) {
+  console.error("[Broadcast Queue] Failed to initialize Bull broadcasts queue:", err);
+  broadcastsQueue = null;
 }
 
 /**
@@ -153,7 +174,6 @@ export async function recoverStuckSessions(): Promise<void> {
   }
 }
 
-
 /**
  * Schedules a delayed execution step for a session.
  */
@@ -205,5 +225,223 @@ export async function cancelSessionDelay(sessionId: string): Promise<void> {
     } catch (err) {
       console.error(`[Queue] Error cancelling Bull job for session ${sessionId}:`, err);
     }
+  }
+}
+
+/**
+ * Processes a broadcast job in the Bull queue.
+ */
+async function processBroadcastJob(broadcastId: string, userId: string): Promise<void> {
+  console.log(`[Broadcast Worker] Starting broadcast ID: ${broadcastId}`);
+
+  try {
+    // 1. Fetch broadcast configuration
+    const { data: broadcast, error: fetchErr } = await supabase
+      .from("broadcasts")
+      .select("*")
+      .eq("id", broadcastId)
+      .eq("user_id", userId)
+      .maybeSingle();
+
+    if (fetchErr || !broadcast) {
+      console.error(`[Broadcast Worker] Broadcast ${broadcastId} not found.`);
+      return;
+    }
+
+    // Update status to 'sending'
+    await supabase
+      .from("broadcasts")
+      .update({ status: "sending" })
+      .eq("id", broadcastId);
+
+    // 2. Fetch contact count to get total_count
+    const { count: totalCount, error: countErr } = await supabase
+      .from("contacts")
+      .select("*", { count: "exact", head: true })
+      .eq("account_id", broadcast.account_id)
+      .eq("user_id", userId);
+
+    if (countErr) {
+      console.error(`[Broadcast Worker] Contacts count fetch failed:`, countErr);
+      await supabase
+        .from("broadcasts")
+        .update({ status: "failed" })
+        .eq("id", broadcastId);
+      return;
+    }
+
+    const total = totalCount || 0;
+    await supabase
+      .from("broadcasts")
+      .update({ total_count: total })
+      .eq("id", broadcastId);
+
+    if (total === 0) {
+      console.log(`[Broadcast Worker] No contacts found for broadcast ${broadcastId}`);
+      await supabase
+        .from("broadcasts")
+        .update({ status: "completed" })
+        .eq("id", broadcastId);
+      return;
+    }
+
+    // 3. Fetch Instagram page token
+    const { data: account, error: accErr } = await supabase
+      .from("instagram_accounts")
+      .select("access_token")
+      .eq("id", broadcast.account_id)
+      .maybeSingle();
+
+    if (accErr || !account) {
+      console.error(`[Broadcast Worker] Instagram account access token not found.`);
+      await supabase
+        .from("broadcasts")
+        .update({ status: "failed" })
+        .eq("id", broadcastId);
+      return;
+    }
+
+    let sent = broadcast.sent_count || 0;
+    let failed = broadcast.failed_count || 0;
+    const pageSize = 50;
+    let hasMore = true;
+
+    // 4. Send messages sequentially in paginated chunks, resuming where left off
+    while (hasMore) {
+      const startIndex = sent + failed;
+      if (startIndex >= total) {
+        hasMore = false;
+        break;
+      }
+
+      const { data: contacts, error: contactsErr } = await supabase
+        .from("contacts")
+        .select("*")
+        .eq("account_id", broadcast.account_id)
+        .eq("user_id", userId)
+        .order("created_at", { ascending: true })
+        .range(startIndex, startIndex + pageSize - 1);
+
+      if (contactsErr || !contacts || contacts.length === 0) {
+        hasMore = false;
+        break;
+      }
+
+      for (let i = 0; i < contacts.length; i++) {
+        const contact = contacts[i];
+
+        // Double-check status in database to allow cancellation
+        const { data: currentBroadcast } = await supabase
+          .from("broadcasts")
+          .select("status")
+          .eq("id", broadcastId)
+          .maybeSingle();
+
+        if (currentBroadcast && currentBroadcast.status !== "sending") {
+          console.log(`[Broadcast Worker] Broadcast ${broadcastId} stopped/cancelled externally.`);
+          return;
+        }
+
+        const currentIndex = startIndex + i + 1;
+        console.log(`[Broadcast Worker] Sending broadcast ${currentIndex}/${total} to contact ${contact.id}`);
+
+        // Call Meta Graph API client
+        const sendRes = await sendInstagramMessage(account.access_token, {
+          recipientId: contact.instagram_user_id,
+          text: broadcast.message_text,
+        });
+
+        if (sendRes.success) {
+          sent++;
+          // Log outbound message
+          try {
+            await supabase.from("messages").insert({
+              contact_id: contact.id,
+              direction: "outbound",
+              content: broadcast.message_text,
+              message_type: "text",
+              instagram_message_id: sendRes.messageId,
+            });
+          } catch (logErr) {
+            console.error("[Broadcast Worker] Message log entry insertion failed:", logErr);
+          }
+        } else {
+          failed++;
+        }
+
+        // Update progress in database
+        await supabase
+          .from("broadcasts")
+          .update({
+            sent_count: sent,
+            failed_count: failed,
+          })
+          .eq("id", broadcastId);
+
+        // Throttling: 1 second sleep between sends (except for the last contact)
+        if (currentIndex < total) {
+          await sleep(1000);
+        }
+      }
+    }
+
+    // Set final status to completed
+    await supabase
+      .from("broadcasts")
+      .update({ status: "completed" })
+      .eq("id", broadcastId);
+
+    console.log(`[Broadcast Worker] Completed broadcast ${broadcastId}. Sent: ${sent}, Failed: ${failed}`);
+  } catch (error) {
+    console.error(`[Broadcast Worker] Fatal error running broadcast ${broadcastId}:`, error);
+    await supabase
+      .from("broadcasts")
+      .update({ status: "failed" })
+      .eq("id", broadcastId);
+  }
+}
+
+/**
+ * Adds a broadcast to the Bull queue.
+ */
+export async function addBroadcastToQueue(broadcastId: string, userId: string): Promise<void> {
+  console.log(`[Queue] Adding broadcast ${broadcastId} for user ${userId} to queue...`);
+  if (broadcastsQueue) {
+    const jobId = `broadcast_${broadcastId}`;
+    await broadcastsQueue.add(
+      { broadcastId, userId },
+      {
+        jobId,
+        removeOnComplete: true,
+        removeOnFail: true,
+      }
+    );
+    console.log(`[Queue] Broadcast job ${jobId} added to Bull queue`);
+  } else {
+    console.warn(`[Queue] Bull queue for broadcasts not available. Cannot add job.`);
+  }
+}
+
+/**
+ * Recovers stuck sending broadcasts from the database on startup.
+ */
+export async function recoverStuckBroadcasts(): Promise<void> {
+  console.log("[Recovery] Checking for stuck sending broadcasts...");
+  try {
+    const { data: stuckBroadcasts, error } = await supabase
+      .from("broadcasts")
+      .select("id, user_id")
+      .eq("status", "sending");
+
+    if (error) {
+      console.error("[Recovery] Failed to fetch stuck broadcasts:", error);
+    } else if (stuckBroadcasts && stuckBroadcasts.length > 0) {
+      console.log(`[Recovery] Found ${stuckBroadcasts.length} stuck broadcasts. Attempting recovery...`);
+      for (const b of stuckBroadcasts) {
+        await addBroadcastToQueue(b.id, b.user_id);
+      }
+    }
+  } catch (err) {
+    console.error("[Recovery] Unexpected error during broadcast recovery:", err);
   }
 }
