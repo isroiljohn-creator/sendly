@@ -2,187 +2,246 @@ import React from "react";
 
 export default function PrivacyPolicy() {
   return (
-    <div className="min-h-screen bg-slate-50 py-16 px-4 sm:px-6 lg:px-8 text-slate-700 font-sans">
-      <div className="max-w-4xl mx-auto bg-white border border-slate-100 shadow-xl rounded-3xl p-8 sm:p-14">
+    <div className="min-h-screen bg-[#FAFAFC] py-16 px-4 sm:px-6 lg:px-8 text-slate-800 font-sans antialiased">
+      <div className="max-w-4xl mx-auto bg-white border border-slate-200/60 shadow-xl rounded-3xl p-8 sm:p-16">
         
         {/* Header */}
-        <div className="text-center border-b border-slate-100 pb-8 mb-10">
-          <h1 className="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight mb-3">
+        <div className="text-center border-b border-slate-100 pb-10 mb-12">
+          <div className="flex items-center justify-center gap-2 mb-4">
+            <span className="h-2 w-2 rounded-full bg-indigo-600 animate-pulse"></span>
+            <span className="text-xs font-bold text-indigo-600 tracking-widest uppercase">Official Privacy Policy</span>
+          </div>
+          <h1 className="text-3xl sm:text-5xl font-black text-slate-900 tracking-tight mb-4">
             Privacy Policy
           </h1>
-          <p className="text-sm text-slate-400 font-medium uppercase tracking-widest">
+          <p className="text-sm text-slate-400 font-semibold uppercase tracking-wider">
             Last Updated: May 26, 2026
           </p>
         </div>
 
-        {/* Navigation Tabs for Languages */}
-        <div className="space-y-12">
+        {/* Introduction */}
+        <div className="prose prose-slate max-w-none text-slate-600 space-y-8 text-[15px] leading-relaxed">
           
-          {/* ========================================================================= */}
-          {/* ENGLISH VERSION (Primary for Meta Reviewers) */}
-          {/* ========================================================================= */}
-          <div className="prose prose-slate max-w-none">
-            <div className="flex items-center gap-2 mb-4">
-              <span className="text-xs font-bold bg-indigo-50 text-indigo-600 px-2.5 py-1 rounded-md uppercase">English</span>
-            </div>
-            
-            <h2 className="text-2xl font-extrabold text-slate-900 mb-4">1. Introduction & Scope</h2>
-            <p className="mb-4">
-              Welcome to <strong>Sendly</strong> (accessible via <a href="https://www.sendly.uz" className="text-indigo-600 hover:underline">https://www.sendly.uz</a>). We are committed to protecting your personal data and complying with all applicable laws, including the General Data Protection Regulation (GDPR) and the Meta Platform Terms.
+          <div className="bg-indigo-50/40 border border-indigo-100/80 rounded-2xl p-6 sm:p-8 mb-8 text-slate-700">
+            <p className="font-semibold text-slate-800 mb-2">Overview</p>
+            <p>
+              This Privacy Policy explains how <strong>Sendly</strong> (“Company,” “We,” “Us,” or “Our”) collects, uses, shares, and otherwise processes your personal data and your rights regarding your personal data. 
+              We provide you with our website <a href="https://www.sendly.uz" className="text-indigo-600 hover:underline font-medium">https://www.sendly.uz</a> as well as the services, chatbot tools, analytics, and offerings made available to you through this website (“Services”).
             </p>
-            <p className="mb-6">
-              This Privacy Policy explains how Sendly collects, processes, stores, and protects data obtained through the Meta Graph API (specifically the Instagram Graph API and Facebook Login) when you connect your Instagram Professional Accounts to our service for chatbot automation.
+            <p className="mt-4">
+              By accessing or using our Services, you agree with and accept this Privacy Policy. If you do not agree, please do not access or use our Services.
             </p>
+          </div>
 
-            <h2 className="text-2xl font-extrabold text-slate-900 mb-4">2. Data We Collect and How We Access It</h2>
-            <p className="mb-4">
-              We access and collect data solely through official Meta APIs when you authorize our application via Facebook Login. We request only the permissions strictly necessary to perform automated marketing operations:
+          {/* Section 1 */}
+          <section>
+            <h2 className="text-xl font-bold text-slate-900 mb-3 border-l-4 border-indigo-600 pl-3">
+              1. Definitions
+            </h2>
+            <ul className="list-disc pl-6 space-y-2">
+              <li>
+                <strong>“Personal Data”</strong> means information that relates to, describes, or identifies you. This includes your name, username, email, Page Access Tokens, and direct message records.
+              </li>
+              <li>
+                <strong>“You”</strong> means the individual accessing or using the Service, or the company, or other legal entity on behalf of which such individual is accessing or using the Service, as applicable.
+              </li>
+              <li>
+                <strong>“Meta Platform Data”</strong> means any information or logs retrieved through the Meta Graph APIs, including Page Access Tokens, Instagram Page IDs, message payloads, and comment texts.
+              </li>
+            </ul>
+          </section>
+
+          {/* Section 2 */}
+          <section>
+            <h2 className="text-xl font-bold text-slate-900 mb-3 border-l-4 border-indigo-600 pl-3">
+              2. Information We Collect
+            </h2>
+            
+            <h3 className="text-md font-bold text-slate-800 mt-4 mb-2">A. Information You Provide to Us</h3>
+            <p className="mb-3">
+              When you use or access the Service, create an account, or configure automation triggers, you voluntarily provide us with the following data:
             </p>
-            <ul className="list-disc pl-6 mb-6 space-y-3">
+            <ul className="list-disc pl-6 space-y-2 mb-4">
               <li>
-                <strong>Instagram Account Metadata:</strong> Includes your Instagram page name, username, ID, and profile picture url (accessed via the <code>instagram_basic</code> permission). We use this to display your connected channel in the Sendly dashboard.
+                <strong>Profile Information:</strong> Full name, email address, password, billing/payment info, and connected workspace settings.
               </li>
               <li>
-                <strong>Access Tokens:</strong> Page Access Tokens and Long-lived User Access Tokens (accessed via Facebook Login). These tokens are <strong>encrypted using AES-256-CBC</strong> before storage to secure your connection.
+                <strong>Channel Details:</strong> Personal or professional configuration details connected with your Instagram Accounts or Telegram Bots (including tokens, usernames, and profile pictures).
               </li>
               <li>
-                <strong>Direct Messages and Comment Logs:</strong> Includes content of incoming direct messages, stories mentions, mentions, and comments (accessed via the <code>instagram_manage_messages</code> and <code>instagram_manage_comments</code> permissions). This data is processed to trigger your customized chatbot automation rules.
-              </li>
-              <li>
-                <strong>Contacts & Lead Profiles:</strong> Public user profiles of your customers who interact with your automated chatbot (username, full name, profile picture) to build and show your subscriber lists.
+                <strong>Automation Media & Assets:</strong> Photos, images, buttons, templates, and reply text structures you upload to our Service.
               </li>
             </ul>
 
-            <h2 className="text-2xl font-extrabold text-slate-900 mb-4">3. Data Retention & Security Measures</h2>
-            <p className="mb-4">
-              We take the security of your data extremely seriously. We use industry-standard server architectures and cloud databases (Supabase, protected by Row Level Security) to prevent unauthorized access.
+            <h3 className="text-md font-bold text-slate-800 mt-4 mb-2">B. Information Collected automatically</h3>
+            <p className="mb-3">
+              When you visit or use our Service, we automatically track certain device and usage metrics:
             </p>
-            <p className="mb-6">
-              All Meta User Access Tokens are fully encrypted. Message contents processed during automated campaigns are stored securely in order to display analytics and chat logs on your private dashboard, and are automatically pruned or archived. We do not sell, rent, or distribute any user or platform data to advertising networks or third-party brokers.
-            </p>
+            <ul className="list-disc pl-6 space-y-2 mb-4">
+              <li>
+                <strong>Browser Data:</strong> IP address, browser type, browser language, referring/exit pages, and usage patterns.
+              </li>
+              <li>
+                <strong>Device Data:</strong> Device model, manufacturer, operating system version, and general location data.
+              </li>
+              <li>
+                <strong>Usage & Analytics:</strong> Session times, page views, click rates, features accessed, and interaction flows.
+              </li>
+            </ul>
 
-            <h2 className="text-2xl font-extrabold text-slate-900 mb-4">4. GDPR Compliance & Your Rights</h2>
-            <p className="mb-4">
-              Under the GDPR, you have the right to access, rectify, export, restrict, or erase any personal data we hold. You can review your connected accounts, contact records, and analytics directly from your user dashboard at any time.
+            <h3 className="text-md font-bold text-slate-800 mt-4 mb-2">C. Information Collected from Meta Graph APIs</h3>
+            <p className="mb-3">
+              When you authenticate with Facebook Login, we collect specific data to execute chatbot routines:
             </p>
+            <ul className="list-disc pl-6 space-y-2">
+              <li>
+                <strong>Page Access Tokens:</strong> Necessary for sending automated replies to your users. <strong>All access tokens are AES-256 encrypted</strong> prior to database persistence.
+              </li>
+              <li>
+                <strong>Conversations & Comments:</strong> Message contents, comment strings, stories mentions, and mentions sent by your audience. This data is kept in order to parse keywords and trigger automated responses.
+              </li>
+            </ul>
+          </section>
 
-            <h2 className="text-2xl font-extrabold text-slate-900 mb-4">5. User Data Deletion Instructions</h2>
-            <p className="mb-4">
-              We provide a transparent, automated way for users to request data deletion, in full compliance with the Meta Platform Policy:
+          {/* Section 3 */}
+          <section>
+            <h2 className="text-xl font-bold text-slate-900 mb-3 border-l-4 border-indigo-600 pl-3">
+              3. Purposes for Which We Use Personal Data
+            </h2>
+            <p className="mb-3">
+              We process your Personal Data for the following purposes:
             </p>
-            <div className="bg-indigo-50/50 border border-indigo-100 rounded-2xl p-6 mb-6">
-              <h4 className="font-bold text-indigo-900 mb-2">How to delete all your data:</h4>
-              <ol className="list-decimal pl-5 space-y-2 text-indigo-950">
-                <li>Log in to your Sendly Account at <a href="https://www.sendly.uz/login" className="font-semibold text-indigo-700 hover:underline">https://www.sendly.uz/login</a>.</li>
-                <li>Navigate to the <strong>Settings</strong> page.</li>
-                <li>Under the connected Instagram channel, click <strong>"Disconnect"</strong>.</li>
-                <li>Go to the bottom of the Settings page and click <strong>"Delete All Account Data"</strong>. This will permanently erase your tokens, contacts, logs, and credentials from our databases.</li>
-                <li>Alternatively, you can request manual data deletion at any time by contacting our support team at <a href="mailto:6220v1@gmail.com" className="font-semibold text-indigo-700 hover:underline">6220v1@gmail.com</a>. Your request will be fulfilled within 24 hours.</li>
+            <ul className="list-disc pl-6 space-y-2">
+              <li>To provide and maintain the Service, execute automations, and manage your account.</li>
+              <li>To improve, optimize, and debug the Service by analyzing usage patterns.</li>
+              <li>To communicate with you regarding updates, technical issues, billing, and promotions.</li>
+              <li>To protect against fraud, malicious actions, or violations of our Terms of Service.</li>
+            </ul>
+          </section>
+
+          {/* Section 4 */}
+          <section>
+            <h2 className="text-xl font-bold text-slate-900 mb-3 border-l-4 border-indigo-600 pl-3">
+              4. How We Disclose Personal Data
+            </h2>
+            <p className="mb-3">
+              We do not sell, rent, or trade your personal data. We disclose personal data only in the following limited circumstances:
+            </p>
+            <ul className="list-disc pl-6 space-y-2">
+              <li>
+                <strong>Service Providers:</strong> Standard third-party vendors who assist in hostings, databases, email delivery, or payment gateways. They are contractually bound to protect your data.
+              </li>
+              <li>
+                <strong>Legal Compliance:</strong> When required by public authorities or law enforcement orders to prevent crime or protect rights.
+              </li>
+              <li>
+                <strong>Business Transfers:</strong> In connection with a merger, acquisition, or sale of assets.
+              </li>
+            </ul>
+          </section>
+
+          {/* Section 5 */}
+          <section>
+            <h2 className="text-xl font-bold text-slate-900 mb-3 border-l-4 border-indigo-600 pl-3">
+              5. Security of Your Personal Data
+            </h2>
+            <p>
+              We implement robust technical and administrative security measures, including database level Row Level Security (RLS), SSL transport layers, and symmetric token encryption (AES-256) to prevent data loss or unauthorized access. While no system on the internet is 100% secure, we maintain reasonable precautions to safeguard your data.
+            </p>
+          </section>
+
+          {/* Section 6 */}
+          <section>
+            <h2 className="text-xl font-bold text-slate-900 mb-3 border-l-4 border-indigo-600 pl-3">
+              6. User Data Deletion Instructions (Meta Compliant)
+            </h2>
+            <p className="mb-3">
+              In accordance with Meta Platform Policy and GDPR, we provide clear instructions on how to request deletion of your platform data:
+            </p>
+            <div className="bg-slate-50 border border-slate-200/80 rounded-2xl p-6 sm:p-8 space-y-4">
+              <h4 className="font-bold text-slate-900">Follow these steps to permanently delete your data:</h4>
+              <ol className="list-decimal pl-5 space-y-2 text-slate-700">
+                <li>Log in to your Sendly Account at <a href="https://www.sendly.uz/login" className="font-semibold text-indigo-600 hover:underline">https://www.sendly.uz/login</a>.</li>
+                <li>Go to the <strong>Settings</strong> page.</li>
+                <li>Find your connected Instagram account and click <strong>"Disconnect"</strong>.</li>
+                <li>Click <strong>"Delete All Account Data"</strong> at the bottom of the page. This instantly and permanently erases your access tokens, message logs, contacts, and configurations from our cloud databases.</li>
+                <li>Alternatively, you can email our support desk at <a href="mailto:6220v1@gmail.com" className="font-semibold text-indigo-600 hover:underline">6220v1@gmail.com</a>. We will process and confirm your deletion request within 24 hours.</li>
               </ol>
             </div>
+          </section>
 
-            <h2 className="text-2xl font-extrabold text-slate-900 mb-4">6. Contact Information</h2>
-            <p className="mb-6">
-              If you have any questions, concerns, or requests regarding this Privacy Policy, please contact our Data Protection Officer (DPO) at:
+          {/* Section 7 */}
+          <section>
+            <h2 className="text-xl font-bold text-slate-900 mb-3 border-l-4 border-indigo-600 pl-3">
+              7. Personal Data Rights for European Union (GDPR)
+            </h2>
+            <p className="mb-3">
+              If you are located in the European Union (EU) or European Economic Area (EEA), you have specific rights under the General Data Protection Regulation (GDPR):
+            </p>
+            <ul className="list-disc pl-6 space-y-2 mb-4">
+              <li><strong>Data Controller:</strong> Sendly, operated in Tashkent, Uzbekistan.</li>
+              <li><strong>Legal Basis:</strong> We process your data based on your explicit consent (when linking accounts), execution of contract (providing automations), and legitimate business interests.</li>
+              <li>
+                <strong>Your Rights:</strong> Right to Access, Right to Rectification (Correct), Right to Erasure (Delete), Right to Restrict Processing, Right to Data Portability, and Right to Object.
+              </li>
+            </ul>
+            <p>
+              To exercise any of these rights, contact our Data Protection Officer at <a href="mailto:6220v1@gmail.com" className="text-indigo-600 hover:underline">6220v1@gmail.com</a>.
+            </p>
+          </section>
+
+          {/* Section 8 */}
+          <section>
+            <h2 className="text-xl font-bold text-slate-900 mb-3 border-l-4 border-indigo-600 pl-3">
+              8. California Consumer Privacy Act (CCPA) Rights
+            </h2>
+            <p className="mb-3">
+              If you are a resident of California, you have the following rights:
+            </p>
+            <ul className="list-disc pl-6 space-y-2">
+              <li>The right to request disclosure of what personal information we collect, use, and share.</li>
+              <li>The right to request the deletion of your personal information collected by us.</li>
+              <li>The right to not receive discriminatory treatment for exercising your CCPA rights.</li>
+            </ul>
+          </section>
+
+          {/* Section 9 */}
+          <section>
+            <h2 className="text-xl font-bold text-slate-900 mb-3 border-l-4 border-indigo-600 pl-3">
+              9. Children's Privacy
+            </h2>
+            <p>
+              Our Service is not directed to individuals under the age of 13. We do not knowingly collect personal data from children. If we discover we have inadvertently collected data from a child under 13 without verification of parental consent, we will delete that data immediately.
+            </p>
+          </section>
+
+          {/* Section 10 */}
+          <section>
+            <h2 className="text-xl font-bold text-slate-900 mb-3 border-l-4 border-indigo-600 pl-3">
+              10. Changes to This Policy
+            </h2>
+            <p>
+              We may update this Privacy Policy from time to time. We will notify you of any significant changes by posting the new version on this page and updating the "Last Updated" date. Your continued use of the Service constitutes your acceptance of the revised policy.
+            </p>
+          </section>
+
+          {/* Section 11 */}
+          <section className="border-t border-slate-100 pt-8">
+            <h2 className="text-xl font-bold text-slate-900 mb-3 border-l-4 border-indigo-600 pl-3">
+              11. Questions & Support
+            </h2>
+            <p>
+              If you have any questions or concerns regarding this Privacy Policy, please contact our support team at:
               <br />
               <strong>Email:</strong> <a href="mailto:6220v1@gmail.com" className="text-indigo-600 hover:underline">6220v1@gmail.com</a>
-              <br />
-              <strong>Address:</strong> Tashkent, Uzbekistan
             </p>
-          </div>
-
-          <hr className="border-slate-100" />
-
-          {/* ========================================================================= */}
-          {/* UZBEK VERSION */}
-          {/* ========================================================================= */}
-          <div className="prose prose-slate max-w-none">
-            <div className="flex items-center gap-2 mb-4">
-              <span className="text-xs font-bold bg-emerald-50 text-emerald-600 px-2.5 py-1 rounded-md uppercase">O'zbekcha</span>
-            </div>
-
-            <h2 className="text-2xl font-extrabold text-slate-900 mb-4">1. Kirish va Qo'llanish Sohasi</h2>
-            <p className="mb-4">
-              <strong>Sendly</strong> (<a href="https://www.sendly.uz" className="text-indigo-600 hover:underline">https://www.sendly.uz</a>) platformasiga xush kelibsiz. Biz sizning shaxsiy ma'lumotlaringiz xavfsizligini ta'minlashga va barcha amaldagi qonun hujjatlariga, jumladan GDPR talablari va Meta platformasi qoidalariga rioya qilishga kafolat beramiz.
-            </p>
-            <p className="mb-6">
-              Ushbu Maxfiylik Siyosati biz orqali Meta Graph API (xususan, Instagram Graph API va Facebook Login) yordamida olinadigan ma'lumotlarni qanday to'plashimiz, qayta ishlashimiz, saqlashimiz va himoya qilishimizni tushuntiradi.
-            </p>
-
-            <h2 className="text-2xl font-extrabold text-slate-900 mb-4">2. Biz To'playdigan Ma'lumotlar</h2>
-            <p className="mb-4">
-              Faqatgina siz Facebook Login orqali ruxsat berganingizdan so'ng, rasmiy Meta API orqali quyidagi ma'lumotlarga ruxsat olamiz:
-            </p>
-            <ul className="list-disc pl-6 mb-6 space-y-3">
-              <li>
-                <strong>Instagram akkaunti metama'lumotlari:</strong> Sahifa nomi, foydalanuvchi nomi, identifikatori va profil rasmi havolasi (<code>instagram_basic</code> orqali).
-              </li>
-              <li>
-                <strong>Kirish Tokenlari (Access Tokens):</strong> Facebook Login orqali taqdim etiladigan sahifa tokenlari. Barcha tokenlar ma'lumotlar bazasida saqlanishidan oldin **AES-256-CBC algoritmi yordamida shifrlanadi**.
-              </li>
-              <li>
-                <strong>Xabarlar va Izohlar jurnali:</strong> Kiruvchi xabarlar, stories muloqotlari va izohlar matnlari (<code>instagram_manage_messages</code> va <code>instagram_manage_comments</code> orqali).
-              </li>
-              <li>
-                <strong>Mijozlar profillari:</strong> Chat-bot bilan muloqot qilgan foydalanuvchilarning ommaviy profil ma'lumotlari (foydalanuvchi nomi, to'liq ism, profil rasmi).
-              </li>
-            </ul>
-
-            <h2 className="text-2xl font-extrabold text-slate-900 mb-4">3. Ma'lumotlarni O'chirish Bo'yicha Ko'rsatmalar</h2>
-            <p className="mb-4">
-              Meta platformasi talablariga mos ravishda foydalanuvchilarga o'z ma'lumotlarini to'liq o'chirish huquqini taqdim etamiz:
-            </p>
-            <div className="bg-emerald-50/50 border border-emerald-100 rounded-2xl p-6 mb-6">
-              <h4 className="font-bold text-emerald-900 mb-2">Ma'lumotlaringizni to'liq o'chirish tartibi:</h4>
-              <ol className="list-decimal pl-5 space-y-2 text-emerald-950">
-                <li>Sendly profiliga kiring: <a href="https://www.sendly.uz/login" className="font-semibold text-emerald-700 hover:underline">https://www.sendly.uz/login</a>.</li>
-                <li><strong>Sozlamalar (Settings)</strong> bo'limiga o'ting.</li>
-                <li>Ulangan Instagram sahifasi yonidagi <strong>"Disconnect" (Uzish)</strong> tugmasini bosing.</li>
-                <li>Sozlamalar oynasining quyidagi qismida <strong>"Delete All Account Data" (Barcha ma'lumotlarni o'chirish)</strong> tugmasini bosing. Bu sizning tokenlaringiz, kontaktlaringiz va jurnallaringizni bazadan butunlay yo'q qiladi.</li>
-                <li>Shuningdek, istalgan vaqtda <a href="mailto:6220v1@gmail.com" className="font-semibold text-emerald-700 hover:underline">6220v1@gmail.com</a> elektron manziliga yozma murojaat yuborib, ma'lumotlaringizni o'chirishni so'rashingiz mumkin. So'rovingiz 24 soat ichida bajariladi.</li>
-              </ol>
-            </div>
-          </div>
-
-          <hr className="border-slate-100" />
-
-          {/* ========================================================================= */}
-          {/* RUSSIAN VERSION */}
-          {/* ========================================================================= */}
-          <div className="prose prose-slate max-w-none">
-            <div className="flex items-center gap-2 mb-4">
-              <span className="text-xs font-bold bg-amber-50 text-amber-600 px-2.5 py-1 rounded-md uppercase">Русский</span>
-            </div>
-
-            <h2 className="text-2xl font-extrabold text-slate-900 mb-4">1. Введение и Область Применения</h2>
-            <p className="mb-4">
-              Добро пожаловать на платформу <strong>Sendly</strong> (<a href="https://www.sendly.uz" className="text-indigo-600 hover:underline">https://www.sendly.uz</a>). Мы стремимся защищать ваши личные данные и соблюдать все применимые законы, включая GDPR и Правила платформы Meta.
-            </p>
-            <p className="mb-6">
-              Настоящая Политика конфиденциальности объясняет, как Sendly собирает, обрабатывает, хранит и защищает данные, полученные через официальный Meta Graph API при подключении ваших профессиональных аккаунтов Instagram.
-            </p>
-
-            <h2 className="text-2xl font-extrabold text-slate-900 mb-4">2. Инструкции по удалению данных пользователей</h2>
-            <p className="mb-4">
-              Мы предоставляем простой и прозрачный способ удаления ваших данных в полном соответствии с требованиями Meta:
-            </p>
-            <div className="bg-amber-50/50 border border-amber-100 rounded-2xl p-6 mb-6">
-              <h4 className="font-bold text-amber-900 mb-2">Как полностью удалить ваши данные:</h4>
-              <ol className="list-decimal pl-5 space-y-2 text-amber-950">
-                <li>Войдите в личный кабинет Sendly: <a href="https://www.sendly.uz/login" className="font-semibold text-amber-700 hover:underline">https://www.sendly.uz/login</a>.</li>
-                <li>Перейдите в раздел <strong>Настройки (Settings)</strong>.</li>
-                <li>Нажмите кнопку <strong>"Disconnect" (Отключить)</strong> напротив вашего Instagram-аккаунта.</li>
-                <li>Внизу страницы нажмите <strong>"Delete All Account Data" (Удалить все данные аккаунта)</strong>. Все ваши токены, чат-логи и контакты будут безвозвратно удалены из базы данных.</li>
-                <li>Вы также можете направить запрос на удаление данных по электронной почте: <a href="mailto:6220v1@gmail.com" className="font-semibold text-amber-700 hover:underline">6220v1@gmail.com</a>. Запросы обрабатываются в течение 24 часов.</li>
-              </ol>
-            </div>
-          </div>
+          </section>
 
         </div>
 
         {/* Footer */}
-        <div className="mt-14 pt-8 border-t border-slate-100 text-center text-xs text-slate-400 font-medium">
-          © {new Date().getFullYear()} Sendly. All rights reserved. Registered in Tashkent, Uzbekistan.
+        <div className="mt-16 pt-8 border-t border-slate-100 text-center text-xs text-slate-400 font-medium">
+          © {new Date().getFullYear()} Sendly Inc. All rights reserved. Registered in Tashkent, Uzbekistan.
         </div>
       </div>
     </div>
