@@ -264,7 +264,7 @@ export default function AIAgentPage() {
       msg.includes("obuna") ||
       msg.includes("tarif")
     ) {
-      return "To'lov / Billing";
+      return "billing";
     }
     if (
       msg.includes("bot") ||
@@ -276,7 +276,7 @@ export default function AIAgentPage() {
       msg.includes("muammo") ||
       msg.includes("ishlamayapti")
     ) {
-      return "Texnik muammo / Support";
+      return "support";
     }
     if (
       msg.includes("dars") ||
@@ -286,7 +286,7 @@ export default function AIAgentPage() {
       msg.includes("kurs") ||
       msg.includes("dastur")
     ) {
-      return "Darslik savoli / FAQ";
+      return "faq";
     }
     if (
       msg.includes("hamkor") ||
@@ -294,9 +294,9 @@ export default function AIAgentPage() {
       msg.includes("pul ishlash") ||
       msg.includes("komissiya")
     ) {
-      return "Hamkorlik / Affiliate";
+      return "affiliate";
     }
-    return "Umumiy qiziqish";
+    return "general";
   };
 
   const detectSentiment = (text: string): "positive" | "neutral" | "negative" => {
@@ -311,16 +311,16 @@ export default function AIAgentPage() {
   };
 
   const extractPainPoint = (text: string, intent: string): string => {
-    if (intent === "To'lov / Billing") {
+    if (intent === "billing") {
       return "To'lov usullari yoki kartani bog'lash jarayonidagi qiyinchiliklar";
     }
-    if (intent === "Texnik muammo / Support") {
+    if (intent === "support") {
       return "Platformani ijtimoiy tarmoqlar yoki Telegram botga bog'lashdagi texnik muammolar";
     }
-    if (intent === "Darslik savoli / FAQ") {
+    if (intent === "faq") {
       return "Dars transkriptlari ichidan kerakli mavzuni mustaqil topa olmaslik";
     }
-    if (intent === "Hamkorlik / Affiliate") {
+    if (intent === "affiliate") {
       return "Hamkorlik komissiyalari va taklif etish havolasi ishlash qoidalarini aniqlashtirish";
     }
     return "Platformaning ishlash imkoniyatlari haqida qo'shimcha ma'lumot olish";
@@ -532,7 +532,7 @@ export default function AIAgentPage() {
             username: "dilshod_marketing",
             message: "Uzcard orqali to'lov qilsam bo'ladimi? Karta ulab bo'lmadi.",
             response: "Ha, Uzcard/Humo orqali to'lov qilsangiz bo'ladi. Akkaunt bo'limida kartani bog'lang.",
-            intent: "To'lov / Billing",
+            intent: "billing",
             sentiment: "negative" as const,
             confidence: 92,
             date: "Bugun, 14:20",
@@ -543,7 +543,7 @@ export default function AIAgentPage() {
             username: "umid_kod",
             message: "Telegram bot yaratish uchun tokeni qayerdan olaman?",
             response: "Telegramda @BotFather orqali /newbot buyrug'ini yuboring va tokeni oling.",
-            intent: "Texnik muammo / Support",
+            intent: "support",
             sentiment: "neutral" as const,
             confidence: 95,
             date: "Bugun, 12:05",
@@ -554,7 +554,7 @@ export default function AIAgentPage() {
             username: "sarvar_brand",
             message: "Sotuvlarni avtomatlashtirish darsini qaysi modulda o'rganamiz?",
             response: "Ushbu dars 2-Modulda joylashgan, unda Direct orqali avtomatik zanjir sozlash o'rgatiladi.",
-            intent: "Darslik savoli / FAQ",
+            intent: "faq",
             sentiment: "positive" as const,
             confidence: 88,
             date: "Kecha, 18:40",
@@ -565,7 +565,7 @@ export default function AIAgentPage() {
             username: "nodira_yusupova",
             message: "Referal havola orqali necha foiz komissiya beriladi?",
             response: "Hamkorlarimiz uchun har bir obunachining premium to'lovidan 30% hamkorlik komissiyasi taqdim etiladi.",
-            intent: "Hamkorlik / Affiliate",
+            intent: "affiliate",
             sentiment: "positive" as const,
             confidence: 90,
             date: "Kecha, 15:30",
@@ -576,7 +576,7 @@ export default function AIAgentPage() {
             username: "malika_ig",
             message: "Instagram professional akkauntini ulashda xatolik beryapti, shaxsiy profil bo'lsa bo'ladimi?",
             response: "Kechirasiz, faqat Professional (Business yoki Creator) hisoblarni bog'lash mumkin, shaxsiy hisoblar qo'llab-quvvatlanmaydi.",
-            intent: "Texnik muammo / Support",
+            intent: "support",
             sentiment: "negative" as const,
             confidence: 85,
             date: "24 May, 10:15",
@@ -3063,23 +3063,23 @@ export default function AIAgentPage() {
                 ) : (
                   <div className="flex flex-col gap-4">
                     {(() => {
-                      const intents = ["To'lov / Billing", "Texnik muammo / Support", "Darslik savoli / FAQ", "Hamkorlik / Affiliate", "Umumiy qiziqish"];
+                      const intents = ["billing", "support", "faq", "affiliate", "general"];
                       return intents.map(intent => {
                         const count = analyzedMessages.filter(m => m.intent === intent).length;
                         const percentage = analyzedMessages.length > 0 ? Math.round((count / analyzedMessages.length) * 100) : 0;
                         return (
                           <div key={intent} className="flex flex-col gap-1 text-[11px]">
                             <div className="flex justify-between font-bold text-black">
-                              <span>{intent}</span>
-                              <span>{count} ta ({percentage}%)</span>
+                              <span>{t("pages.ai_agent.intent_" + intent)}</span>
+                              <span>{count} {t("pages.ai_agent.count_unit")} ({percentage}%)</span>
                             </div>
                             <div className="w-full h-2 bg-[#F5F5F3] rounded-full overflow-hidden">
                               <div 
                                 className={`h-full rounded-full transition-all duration-500 ${
-                                  intent.includes("To'lov") ? "bg-black" :
-                                  intent.includes("Texnik") ? "bg-blue-600" :
-                                  intent.includes("Darslik") ? "bg-green-600" :
-                                  intent.includes("Hamkorlik") ? "bg-purple-600" : "bg-gray-400"
+                                  intent === "billing" ? "bg-black" :
+                                  intent === "support" ? "bg-blue-600" :
+                                  intent === "faq" ? "bg-green-600" :
+                                  intent === "affiliate" ? "bg-purple-600" : "bg-gray-400"
                                 }`}
                                 style={{ width: `${percentage}%` }}
                               />
@@ -3121,18 +3121,19 @@ export default function AIAgentPage() {
                       const uniqueIntents = Array.from(new Set(analyzedMessages.map(m => m.intent)));
                       return uniqueIntents.map(intent => {
                         const msgs = analyzedMessages.filter(m => m.intent === intent);
+                        if (msgs.length === 0) return null;
                         const sampleMsg = msgs[0];
                         
                         let solution = "Tavsif yoki qo'llanmaga qo'shimcha ma'lumotlar qo'shish.";
-                        if (intent === "To'lov / Billing") solution = "Uzcard/Humo kartalarini ulash bo'yicha bosqichma-bosqich rasm/video qo'llanma qo'shish va to'lov xatoliklari bo'yicha ogohlantirish.";
-                        if (intent === "Texnik muammo / Support") solution = "@BotFather orqali token olish qismini darslikning 1-modulida visual animatsiyalar bilan boyitish.";
-                        if (intent === "Darslik savoli / FAQ") solution = "Darslik bilimlar bazasiga (RAG) o'quvchilar tomonidan eng ko'p so'ralgan FAQ javoblarni yangi modul sifatida kiritish.";
-                        if (intent === "Hamkorlik / Affiliate") solution = "Hamkor kabineti sahifasiga komissiya yechib olish va referal tizim shartlari bo'yicha FAQ bo'limini qo'shish.";
+                        if (intent === "billing") solution = "Uzcard/Humo kartalarini ulash bo'yicha bosqichma-bosqich rasm/video qo'llanma qo'shish va to'lov xatoliklari bo'yicha ogohlantirish.";
+                        if (intent === "support") solution = "@BotFather orqali token olish qismini darslikning 1-modulida visual animatsiyalar bilan boyitish.";
+                        if (intent === "faq") solution = "Darslik bilimlar bazasiga (RAG) o'quvchilar tomonidan eng ko'p so'ralgan FAQ javoblarni yangi modul sifatida kiritish.";
+                        if (intent === "affiliate") solution = "Hamkor kabineti sahifasiga komissiya yechib olish va referal tizim shartlari bo'yicha FAQ bo'limini qo'shish.";
 
                         return (
                           <div key={intent} className="p-3.5 bg-[#F9F9F7] rounded-2xl border border-[#E8E8E8] flex flex-col gap-2 text-[11px]">
                             <div className="flex items-center justify-between border-b border-[#F0F0F0] pb-1.5">
-                              <span className="font-bold text-black">{intent}</span>
+                              <span className="font-bold text-black">{t("pages.ai_agent.intent_" + intent)}</span>
                               <span className="text-[9px] bg-black text-[#C7F33C] px-2 py-0.5 rounded-full font-bold">CustDev</span>
                             </div>
                             <div>
@@ -3173,11 +3174,11 @@ export default function AIAgentPage() {
                     onChange={(val) => setAnalyticsFilter(val)}
                     options={[
                       { value: "All", label: t("pages.ai_agent.all_categories") },
-                      { value: "To'lov / Billing", label: "To'lov / Billing" },
-                      { value: "Texnik muammo / Support", label: "Texnik muammo / Support" },
-                      { value: "Darslik savoli / FAQ", label: "Darslik savoli / FAQ" },
-                      { value: "Hamkorlik / Affiliate", label: "Hamkorlik / Affiliate" },
-                      { value: "Umumiy qiziqish", label: "Umumiy qiziqish" }
+                      { value: "billing", label: t("pages.ai_agent.intent_billing") },
+                      { value: "support", label: t("pages.ai_agent.intent_support") },
+                      { value: "faq", label: t("pages.ai_agent.intent_faq") },
+                      { value: "affiliate", label: t("pages.ai_agent.intent_affiliate") },
+                      { value: "general", label: t("pages.ai_agent.intent_general") }
                     ]}
                     className="w-full sm:w-[160px]"
                   />
@@ -3230,20 +3231,24 @@ export default function AIAgentPage() {
                               {m.response}
                             </td>
                             <td className="p-3">
-                              <span className={`px-2 py-0.5 rounded-full text-[9px] font-extrabold uppercase tracking-wide border ${
-                                m.intent.includes("To'lov") ? "bg-black/5 border-black/10 text-black" :
-                                m.intent.includes("Texnik") ? "bg-blue-50 border-blue-100 text-blue-600" :
-                                m.intent.includes("Darslik") ? "bg-green-50 border-green-100 text-green-600" :
-                                m.intent.includes("Hamkorlik") ? "bg-purple-50 border-purple-100 text-purple-600" :
+                              <span className={`px-2.5 py-1 rounded-full text-[9px] font-extrabold uppercase tracking-wider border whitespace-nowrap inline-block ${
+                                m.intent === "billing" ? "bg-black/5 border-black/10 text-black" :
+                                m.intent === "support" ? "bg-blue-50 border-blue-100 text-blue-600" :
+                                m.intent === "faq" ? "bg-green-50 border-green-100 text-green-600" :
+                                m.intent === "affiliate" ? "bg-purple-50 border-purple-100 text-purple-600" :
                                 "bg-gray-50 border-gray-100 text-gray-500"
                               }`}>
-                                {m.intent}
+                                {t("pages.ai_agent.intent_" + m.intent)}
                               </span>
                             </td>
                             <td className="p-3 text-center">
-                              <span className={`text-[12px]`} title={m.sentiment}>
-                                {m.sentiment === "positive" ? "🟢" : m.sentiment === "negative" ? "🔴" : "🟡"}
-                              </span>
+                              <div className="flex justify-center">
+                                <span className={`w-2.5 h-2.5 rounded-full ${
+                                  m.sentiment === "positive" ? "bg-[#34C759]" : 
+                                  m.sentiment === "negative" ? "bg-[#FF3B30]" : 
+                                  "bg-[#FFCC00]"
+                                }`} title={m.sentiment} />
+                              </div>
                             </td>
                             <td className="p-3 text-center font-bold text-black">
                               {m.confidence}%

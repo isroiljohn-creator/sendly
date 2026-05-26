@@ -874,7 +874,13 @@
       "custdev_tag": "CustDev Tegi",
       "confidence_level": "Ishonch",
       "raw_message": "Xabar matni",
-      "ai_response_msg": "AI javobi"
+      "ai_response_msg": "AI javobi",
+      "intent_billing": "To'lov",
+      "intent_support": "Texnik muammo",
+      "intent_faq": "Darslik savoli",
+      "intent_affiliate": "Hamkorlik",
+      "intent_general": "Umumiy qiziqish",
+      "count_unit": "ta"
     },
     "partner": {
       "title": "Hamkor kabineti",

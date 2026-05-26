@@ -875,7 +875,13 @@
       "custdev_tag": "CustDev Tag",
       "confidence_level": "Confidence",
       "raw_message": "Message Text",
-      "ai_response_msg": "AI Response"
+      "ai_response_msg": "AI Response",
+      "intent_billing": "Billing / Payments",
+      "intent_support": "Technical Support",
+      "intent_faq": "FAQ / Lessons",
+      "intent_affiliate": "Affiliate Program",
+      "intent_general": "General Inquiry",
+      "count_unit": "msg."
     },
     "partner": {
       "title": "Partner Dashboard",

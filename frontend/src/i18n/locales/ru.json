@@ -875,7 +875,13 @@
       "custdev_tag": "CustDev Тег",
       "confidence_level": "Уверенность",
       "raw_message": "Текст сообщения",
-      "ai_response_msg": "Ответ AI"
+      "ai_response_msg": "Ответ AI",
+      "intent_billing": "Оплата",
+      "intent_support": "Техподдержка",
+      "intent_faq": "Вопросы по курсу",
+      "intent_affiliate": "Партнерская программа",
+      "intent_general": "Общие вопросы",
+      "count_unit": "шт."
     },
     "partner": {
       "title": "Кабинет партнера",
