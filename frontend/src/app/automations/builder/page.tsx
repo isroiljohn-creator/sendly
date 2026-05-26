@@ -104,6 +104,7 @@ function ButtonEdge({
   });
 
   const { setEdges } = useReactFlow();
+  const { t } = useI18n();
 
   const onEdgeClick = (evt: React.MouseEvent) => {
     evt.stopPropagation();
@@ -130,7 +131,7 @@ function ButtonEdge({
         <button
           className="w-5 h-5 bg-white border border-[#E8E8E8] text-[#707070] hover:text-red-500 hover:border-red-200 rounded-full flex items-center justify-center cursor-pointer shadow-sm transition-all hover:scale-110 active:scale-95 p-0"
           onClick={onEdgeClick}
-          title="Ulanishni o'chirish"
+          title={t("pages.builder.delete_connection")}
           type="button"
         >
           <X size={10} strokeWidth={3} />
@@ -221,7 +222,7 @@ function MessageNode({ data, id }: NodeProps<NodeData>) {
             duplicateNode(id);
           }}
           className="p-1 text-[#C7C7CC] hover:text-black hover:bg-neutral-100 rounded transition-colors cursor-pointer"
-          title="Nusxalash"
+          title={t("pages.builder.btn_copy")}
         >
           <Copy size={13} />
         </button>
@@ -234,7 +235,7 @@ function MessageNode({ data, id }: NodeProps<NodeData>) {
             setEdges((eds) => eds.filter((edge) => edge.source !== id && edge.target !== id));
           }}
           className="p-1 text-[#C7C7CC] hover:text-red-500 hover:bg-red-50 rounded transition-colors cursor-pointer"
-          title="O'chirish"
+          title={t("pages.builder.btn_delete")}
         >
           <Trash2 size={13} />
         </button>
@@ -284,7 +285,7 @@ function MessageNode({ data, id }: NodeProps<NodeData>) {
                   setNodes((nds) => nds.map((n) => n.id === id ? { ...n, data: { ...n.data, imageUrl: undefined } } : n));
                 }}
                 className="w-8 h-8 bg-white border border-[#E8E8E8] text-[#707070] hover:text-red-500 hover:border-red-200 rounded-lg flex items-center justify-center cursor-pointer shadow-sm transition-all hover:scale-105 active:scale-95"
-                title="Rasm blokini o'chirish"
+                title={t("pages.builder.delete_image_block")}
               >
                 <Trash2 size={13} />
               </button>
@@ -327,7 +328,7 @@ function MessageNode({ data, id }: NodeProps<NodeData>) {
                   setNodes((nds) => nds.map((n) => n.id === id ? { ...n, data: { ...n.data, label: "" } } : n));
                 }}
                 className="w-8 h-8 bg-white border border-[#E8E8E8] text-[#707070] hover:text-red-500 hover:border-red-200 rounded-lg flex items-center justify-center cursor-pointer shadow-sm transition-all hover:scale-105 active:scale-95"
-                title="Matn blokini o'chirish"
+                title={t("pages.builder.delete_text_block")}
               >
                 <Trash2 size={13} />
               </button>
@@ -341,7 +342,7 @@ function MessageNode({ data, id }: NodeProps<NodeData>) {
               }}
               className="text-[12px] text-black font-medium leading-relaxed p-3.5 border border-[#E5E5EA] bg-white rounded-xl shadow-sm cursor-pointer whitespace-pre-wrap select-none hover:border-black/20 hover:bg-neutral-50/30 transition-all"
             >
-              {data.label || "Suhbatni davom ettirish xabari..."}
+              {data.label || t("pages.builder.default_text_msg")}
             </div>
           </div>
         )}
@@ -358,7 +359,7 @@ function MessageNode({ data, id }: NodeProps<NodeData>) {
                   setNodes((nds) => nds.map((n) => n.id === id ? { ...n, data: { ...n.data, buttons: [] } } : n));
                 }}
                 className="w-8 h-8 bg-white border border-[#E8E8E8] text-[#707070] hover:text-red-500 hover:border-red-200 rounded-lg flex items-center justify-center cursor-pointer shadow-sm transition-all hover:scale-105 active:scale-95"
-                title="Tugmalar blokini o'chirish"
+                title={t("pages.builder.delete_buttons_block")}
               >
                 <Trash2 size={13} />
               </button>
@@ -387,11 +388,11 @@ function MessageNode({ data, id }: NodeProps<NodeData>) {
                         onClick={(e) => {
                           e.stopPropagation();
                           const newId = `btn-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
-                          const duplicatedBtn = { ...btn, id: newId, label: `${btn.label} (Nusxa)` };
+                          const duplicatedBtn = { ...btn, id: newId, label: `${btn.label}${t("pages.builder.btn_copy_suffix")}` };
                           setNodes((nds) => nds.map((n) => n.id === id ? { ...n, data: { ...n.data, buttons: [...(n.data.buttons || []), duplicatedBtn] } } : n));
                         }}
                         className="p-0.5 rounded hover:bg-neutral-100 text-[#707070] hover:text-black transition-colors"
-                        title="Nusxalash"
+                        title={t("pages.builder.btn_copy")}
                       >
                         <Copy size={10} />
                       </button>
@@ -402,7 +403,7 @@ function MessageNode({ data, id }: NodeProps<NodeData>) {
                           setNodes((nds) => nds.map((n) => n.id === id ? { ...n, data: { ...n.data, buttons: (n.data.buttons || []).filter(b => b.id !== btn.id) } } : n));
                         }}
                         className="p-0.5 rounded hover:bg-red-50 text-[#707070] hover:text-red-500 transition-colors"
-                        title="O'chirish"
+                        title={t("pages.builder.btn_delete")}
                       >
                         <Trash2 size={10} />
                       </button>
@@ -457,7 +458,7 @@ function MessageNode({ data, id }: NodeProps<NodeData>) {
             data-is-button="true"
             className="w-full text-center py-2.5 border border-dashed border-[#D8D8D8] hover:border-black/20 hover:bg-[#FAFAFA] rounded-lg text-[10.5px] font-extrabold text-[#707070] hover:text-black flex items-center justify-center gap-1 transition-all bg-white cursor-pointer shadow-sm mb-2 nodrag canvas-btn-item"
           >
-            <span>+ Tugma qo&apos;shish</span>
+            <span>{t("pages.builder.add_button_inline")}</span>
           </button>
         )}
 
@@ -481,7 +482,7 @@ function MessageNode({ data, id }: NodeProps<NodeData>) {
                 data-is-button="true"
                 className="w-full text-center py-2.5 border border-dashed border-[#D8D8D8] hover:border-black/20 hover:bg-[#FAFAFA] rounded-lg text-[10.5px] font-extrabold text-[#707070] hover:text-black flex items-center justify-center gap-1 transition-all bg-white cursor-pointer shadow-sm nodrag canvas-btn-item"
               >
-                <span>+ Surat qo&apos;shish</span>
+                <span>{t("pages.builder.add_image_inline")}</span>
               </button>
             </div>
           )}
@@ -491,12 +492,12 @@ function MessageNode({ data, id }: NodeProps<NodeData>) {
               type="button"
               onClick={(e) => {
                 e.stopPropagation();
-                setNodes((nds) => nds.map((n) => n.id === id ? { ...n, data: { ...n.data, label: "Yangi matn xabari..." } } : n));
+                setNodes((nds) => nds.map((n) => n.id === id ? { ...n, data: { ...n.data, label: t("pages.builder.default_text_msg") } } : n));
               }}
               data-is-button="true"
               className="w-full text-center py-2.5 border border-dashed border-[#D8D8D8] hover:border-black/20 hover:bg-[#FAFAFA] rounded-lg text-[10.5px] font-extrabold text-[#707070] hover:text-black flex items-center justify-center gap-1 transition-all bg-white cursor-pointer shadow-sm nodrag canvas-btn-item"
             >
-              <span>+ Matn qo&apos;shish</span>
+              <span>{t("pages.builder.add_text_inline")}</span>
             </button>
           )}
         </div>
@@ -582,7 +583,7 @@ function ActionNode({ data, id }: NodeProps<NodeData>) {
             duplicateNode(id);
           }}
           className="p-1 text-[#C7C7CC] hover:text-black hover:bg-neutral-100 rounded transition-colors cursor-pointer"
-          title="Nusxalash"
+          title={t("pages.builder.btn_copy")}
         >
           <Copy size={13} />
         </button>
@@ -595,7 +596,7 @@ function ActionNode({ data, id }: NodeProps<NodeData>) {
             setEdges((eds) => eds.filter((edge) => edge.source !== id && edge.target !== id));
           }}
           className="p-1 text-[#C7C7CC] hover:text-red-500 hover:bg-red-50 rounded transition-colors cursor-pointer"
-          title="O'chirish"
+          title={t("pages.builder.btn_delete")}
         >
           <Trash2 size={13} />
         </button>
@@ -743,7 +744,7 @@ function ConditionNode({ data, id }: NodeProps<NodeData>) {
             duplicateNode(id);
           }}
           className="p-1 text-[#C7C7CC] hover:text-black hover:bg-neutral-100 rounded transition-colors cursor-pointer"
-          title="Nusxalash"
+          title={t("pages.builder.btn_copy")}
         >
           <Copy size={13} />
         </button>
@@ -756,7 +757,7 @@ function ConditionNode({ data, id }: NodeProps<NodeData>) {
             setEdges((eds) => eds.filter((edge) => edge.source !== id && edge.target !== id));
           }}
           className="p-1 text-[#C7C7CC] hover:text-red-500 hover:bg-red-50 rounded transition-colors cursor-pointer"
-          title="O'chirish"
+          title={t("pages.builder.btn_delete")}
         >
           <Trash2 size={13} />
         </button>
@@ -910,7 +911,7 @@ function NoteNode({ data, id }: NodeProps<NodeData>) {
             duplicateNode(id);
           }}
           className="p-1 text-[#C7C7CC] hover:text-black hover:bg-neutral-100 rounded transition-colors cursor-pointer"
-          title="Nusxalash"
+          title={t("pages.builder.btn_copy")}
         >
           <Copy size={13} />
         </button>
@@ -923,7 +924,7 @@ function NoteNode({ data, id }: NodeProps<NodeData>) {
             setEdges((eds) => eds.filter((edge) => edge.source !== id && edge.target !== id));
           }}
           className="p-1 text-[#C7C7CC] hover:text-red-500 hover:bg-red-50 rounded transition-colors cursor-pointer"
-          title="O'chirish"
+          title={t("pages.builder.btn_delete")}
         >
           <Trash2 size={13} />
         </button>
@@ -1891,24 +1892,24 @@ export default function BuilderPage() {
               className="flex items-center gap-1.5 px-4 h-9 text-[11px] font-extrabold bg-[#C7F33C] border border-[#b2db2a] rounded-full hover:bg-[#b5e02c] text-black shrink-0 transition-colors cursor-pointer"
             >
               <Settings size={12} />
-              <span>Ishga tushirish triggerlari</span>
+              <span>{t("pages.builder.trigger_settings_btn")}</span>
             </button>
             {saveStatus === "saving" && (
               <div className="flex items-center gap-1.5 px-4 h-9 text-[11px] font-extrabold bg-[#F5F5F7] border border-[#E8E8E8] rounded-full text-[#707070] shrink-0 select-none">
                 <Loader2 size={12} className="animate-spin text-[#707070]" />
-                <span>Saqlanmoqda...</span>
+                <span>{t("pages.builder.saving_to_server")}</span>
               </div>
             )}
             {(saveStatus === "saved" || !saveStatus) && (
               <div className="flex items-center gap-1.5 px-4 h-9 text-[11px] font-extrabold bg-[#34C759]/10 border border-[#34C759]/20 rounded-full text-[#34C759] shrink-0 select-none animate-in fade-in duration-200">
                 <CheckCircle size={12} className="text-[#34C759]" />
-                <span>Saqlandi</span>
+                <span>{t("pages.builder.saved")}</span>
               </div>
             )}
             {saveStatus === "error" && (
               <div className="flex items-center gap-1.5 px-4 h-9 text-[11px] font-extrabold bg-red-50 border border-red-200 rounded-full text-red-500 shrink-0 select-none">
                 <ShieldAlert size={12} className="text-red-500" />
-                <span>Xatolik</span>
+                <span>{t("pages.builder.error")}</span>
               </div>
             )}
           </div>
@@ -1954,7 +1955,7 @@ export default function BuilderPage() {
             <button
               onClick={() => setIsPaletteOpen(!isPaletteOpen)}
               className="absolute top-4 left-4 z-[50] w-10 h-10 bg-white border border-[#E8E8E8] rounded-xl flex items-center justify-center shadow-sm text-black hover:border-black hover:scale-105 active:scale-[0.97] transition-all cursor-pointer"
-              title="Blok qo'shish"
+              title={t("pages.builder.add_block_tooltip")}
             >
               <Plus size={18} strokeWidth={3} />
             </button>
@@ -1963,10 +1964,10 @@ export default function BuilderPage() {
             {isPaletteOpen && (
               <div className="absolute top-16 left-4 z-[50] bg-white rounded-2xl shadow-xl border border-[#E8E8E8] p-2 w-[180px] flex flex-col gap-0.5 animate-in fade-in slide-in-from-top-2 duration-150 text-black">
                 {([
-                  { type: "message" as NodeType, label: "Message", icon: <MessageCircle size={16} strokeWidth={2.5} className="text-[#3B82F6]" /> },
-                  { type: "condition" as NodeType, label: "Condition", icon: <Filter size={16} strokeWidth={2.5} className="text-[#22C55E]" /> },
-                  { type: "action" as NodeType, label: "Action", icon: <Zap size={16} strokeWidth={2.5} className="text-[#EAB308]" /> },
-                  { type: "note" as NodeType, label: "Note", icon: <FileText size={16} strokeWidth={2.5} className="text-[#1A73E8]" /> },
+                  { type: "message" as NodeType, label: t("pages.builder.block_message"), icon: <MessageCircle size={16} strokeWidth={2.5} className="text-[#3B82F6]" /> },
+                  { type: "condition" as NodeType, label: t("pages.builder.block_condition"), icon: <Filter size={16} strokeWidth={2.5} className="text-[#22C55E]" /> },
+                  { type: "action" as NodeType, label: t("pages.builder.block_action"), icon: <Zap size={16} strokeWidth={2.5} className="text-[#EAB308]" /> },
+                  { type: "note" as NodeType, label: t("pages.builder.block_note"), icon: <FileText size={16} strokeWidth={2.5} className="text-[#1A73E8]" /> },
                 ]).map((item) => (
                   <button
                     key={item.type}
@@ -1989,21 +1990,21 @@ export default function BuilderPage() {
               <button
                 onClick={() => reactFlowInstance?.zoomIn()}
                 className="w-8 h-8 rounded-[10px] flex items-center justify-center text-black hover:bg-[#F5F5F5] transition-all font-bold text-[14px] cursor-pointer"
-                title="Yaqinlashtirish"
+                title={t("pages.builder.zoom_in_tooltip")}
               >
                 +
               </button>
               <button
                 onClick={() => reactFlowInstance?.zoomOut()}
                 className="w-8 h-8 rounded-[10px] flex items-center justify-center text-black hover:bg-[#F5F5F5] transition-all font-bold text-[14px] cursor-pointer"
-                title="Uzoqlashtirish"
+                title={t("pages.builder.zoom_out_tooltip")}
               >
                 −
               </button>
               <button
                 onClick={() => reactFlowInstance?.fitView()}
                 className="w-8 h-8 rounded-[10px] flex items-center justify-center text-[#707070] hover:text-black hover:bg-[#F5F5F5] transition-all cursor-pointer"
-                title="Ekranga moslash"
+                title={t("pages.builder.fit_view_tooltip")}
               >
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                   <path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7" />
@@ -2018,7 +2019,7 @@ export default function BuilderPage() {
                 target="_blank"
                 rel="noreferrer"
                 className="w-10 h-10 rounded-full bg-[#24A1DE] hover:bg-[#1f8fc4] flex items-center justify-center text-white shadow-lg cursor-pointer transition-all active:scale-[0.98]"
-                title="Qo'llab-quvvatlash"
+                title={t("pages.builder.support_tooltip")}
               >
                 <MessageCircle size={16} />
               </a>
@@ -2034,7 +2035,7 @@ export default function BuilderPage() {
                 <div className="px-5 pt-5 pb-4 border-b border-[#F0F0F0] flex items-center justify-between">
                   <div className="flex items-center gap-2.5">
                     <h3 className="text-[13px] font-black text-black leading-none">
-                      Ishga tushirish triggerlari
+                      {t("pages.builder.trigger_settings_btn")}
                     </h3>
                   </div>
                   <button
@@ -2042,7 +2043,7 @@ export default function BuilderPage() {
                       setIsEditingTrigger(false);
                     }}
                     className="p-1 rounded-full hover:bg-neutral-100 text-[#707070] hover:text-black transition-colors"
-                    title="Yopish"
+                    title={t("pages.builder.close")}
                   >
                     <X size={16} />
                   </button>
@@ -2051,7 +2052,7 @@ export default function BuilderPage() {
                 <div className="px-4 py-4 flex flex-col gap-5 text-left text-black">
                   {/* Trigger Source Cards */}
                   <div className="flex flex-col gap-2">
-                    <p className="text-[10px] font-bold text-[#707070] uppercase tracking-widest px-0.5">Trigger turi</p>
+                    <p className="text-[10px] font-bold text-[#707070] uppercase tracking-widest px-0.5">{t("pages.builder.trigger_source_label")}</p>
                     <div className="grid grid-cols-3 gap-2">
                       {TRIGGER_SOURCES.map((s) => {
                         const IconComponent = s.icon;
