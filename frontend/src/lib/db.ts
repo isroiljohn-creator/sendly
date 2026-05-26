@@ -988,12 +988,34 @@ export const db = {
 
   impersonateUser(email: string): { success: boolean; error?: string } {
     if (!isClient) return { success: false };
+    const current = this.getCurrentUser();
+    if (current) {
+      localStorage.setItem("replai_admin_impersonator", current.email);
+    }
     const users = this.getUsers();
     const targetUser = users.find(u => u.email === email);
     if (!targetUser) {
       return { success: false, error: "Foydalanuvchi topilmadi." };
     }
     localStorage.setItem("replai_current_user", JSON.stringify(targetUser));
+    this._clearLocalBusinessData();
+    notifyUpdate();
+    return { success: true };
+  },
+
+  stopImpersonating(): { success: boolean; error?: string } {
+    if (!isClient) return { success: false };
+    const adminEmail = localStorage.getItem("replai_admin_impersonator");
+    if (!adminEmail) {
+      return { success: false, error: "Impersonation faol emas." };
+    }
+    const users = this.getUsers();
+    const adminUser = users.find(u => u.email === adminEmail);
+    if (!adminUser) {
+      return { success: false, error: "Admin foydalanuvchisi topilmadi." };
+    }
+    localStorage.setItem("replai_current_user", JSON.stringify(adminUser));
+    localStorage.removeItem("replai_admin_impersonator");
     this._clearLocalBusinessData();
     notifyUpdate();
     return { success: true };

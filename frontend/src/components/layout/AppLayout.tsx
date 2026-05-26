@@ -12,6 +12,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
   const [authorized, setAuthorized] = useState(false);
   const [announcement, setAnnouncement] = useState("");
   const [dismissed, setDismissed] = useState(false);
+  const [impersonatorEmail, setImpersonatorEmail] = useState("");
 
   useEffect(() => {
     const user = db.getCurrentUser();
@@ -19,6 +20,13 @@ export function AppLayout({ children }: { children: ReactNode }) {
       window.location.href = "/login";
     } else {
       setAuthorized(true);
+      
+      if (typeof window !== "undefined") {
+        const imp = localStorage.getItem("replai_admin_impersonator");
+        if (imp) {
+          setImpersonatorEmail(imp);
+        }
+      }
       
       // Fetch global announcement banner
       fetch("/api/admin")
@@ -44,6 +52,26 @@ export function AppLayout({ children }: { children: ReactNode }) {
 
   return (
     <div className="min-h-screen w-full bg-[#E8E8E8] px-6 py-4 flex flex-col gap-4">
+      {impersonatorEmail && (
+        <div className="w-full bg-blue-600 text-white px-6 py-3 rounded-[16px] flex justify-between items-center animate-in slide-in-from-top duration-300 shadow-sm relative overflow-hidden shrink-0">
+          <div className="flex items-center gap-2.5 text-[12px] font-bold">
+            <span>👤</span>
+            <span>Siz hozirda &lt;{db.getCurrentUser()?.email}&gt; nomidan tizimdadasiz.</span>
+          </div>
+          <button 
+            onClick={() => {
+              const res = db.stopImpersonating();
+              if (res.success) {
+                window.location.href = "/admin";
+              }
+            }}
+            className="bg-white text-blue-600 font-extrabold text-[11px] px-3.5 py-1.5 rounded-full hover:bg-blue-50 transition-colors"
+          >
+            Admin hisobiga qaytish
+          </button>
+        </div>
+      )}
+
       {announcement && !dismissed && (
         <div className="w-full bg-[#C7F33C] text-[#1A2906] px-6 py-3.5 rounded-[16px] border border-[#1A2906]/10 flex justify-between items-center animate-in slide-in-from-top duration-300 shadow-sm relative overflow-hidden shrink-0">
           <div className="absolute top-0 left-0 w-1.5 h-full bg-[#9BC92E]" />
