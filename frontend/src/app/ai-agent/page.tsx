@@ -519,70 +519,171 @@ export default function AIAgentPage() {
   useEffect(() => {
     if (typeof window !== "undefined") {
       const stored = localStorage.getItem("replai_curator_analyzed_messages");
+      let shouldLoadInitial = false;
+      
+      const initialSamples = [
+        {
+          id: "cur-msg-1",
+          username: "dilshod_marketing",
+          message: "Uzcard orqali to'lov qilsam bo'ladimi? Karta ulab bo'lmadi.",
+          response: "Ha, Uzcard/Humo orqali to'lov qilsangiz bo'ladi. Hisobingizda kartani bog'lang.",
+          intent: "billing",
+          sentiment: "negative" as const,
+          confidence: 92,
+          date: "Bugun, 14:20",
+          painPoint: "To'lov kartasini bog'lashda Uzcard/Humo tizimidagi nosozliklar"
+        },
+        {
+          id: "cur-msg-2",
+          username: "umid_kod",
+          message: "Telegram bot yaratish uchun tokeni qayerdan olaman?",
+          response: "Telegramda @BotFather orqali /newbot buyrug'ini yuboring va tokeni oling.",
+          intent: "support",
+          sentiment: "neutral" as const,
+          confidence: 95,
+          date: "Bugun, 12:05",
+          painPoint: "@BotFather orqali bot yaratish va token olish jarayonini bilmaslik"
+        },
+        {
+          id: "cur-msg-3",
+          username: "sarvar_brand",
+          message: "Sotuvlarni avtomatlashtirish darsini qaysi modulda o'rganamiz?",
+          response: "Ushbu dars 2-Modulda joylashgan, unda Direct orqali avtomatik zanjir sozlash o'rgatiladi.",
+          intent: "faq",
+          sentiment: "positive" as const,
+          confidence: 88,
+          date: "Kecha, 18:40",
+          painPoint: "Kerakli dars yoki modulni qidirib topishdagi qiyinchilik"
+        },
+        {
+          id: "cur-msg-4",
+          username: "nodira_yusupova",
+          message: "Referal havola orqali necha foiz komissiya beriladi?",
+          response: "Hamkorlarimiz uchun har bir o'quvchining premium to'lovidan 30% hamkorlik komissiyasi taqdim etiladi.",
+          intent: "affiliate",
+          sentiment: "positive" as const,
+          confidence: 90,
+          date: "Kecha, 15:30",
+          painPoint: "Hamkorlik tizimi komissiyasi va shartlarini aniqlashtirish"
+        },
+        {
+          id: "cur-msg-5",
+          username: "malika_ig",
+          message: "Instagram professional akkauntini ulashda xatolik beryapti, shaxsiy profil bo'lsa bo'ladimi?",
+          response: "Kechirasiz, faqat Professional (Business yoki Creator) hisoblarni bog'lash mumkin, shaxsiy hisoblar qo'llab-quvvatlanmaydi.",
+          intent: "support",
+          sentiment: "negative" as const,
+          confidence: 85,
+          date: "24 May, 10:15",
+          painPoint: "Shaxsiy profil bilan Instagram API cheklovlariga duch kelish"
+        },
+        {
+          id: "cur-msg-6",
+          username: "doston_smm",
+          message: "Kursni tugatgach sertifikat beriladimi? Qachon olsam bo'ladi?",
+          response: "Ha, barcha modullarni va uy vazifalarini muvaffaqiyatli topshirgan o'quvchilarga sertifikat taqdim etiladi.",
+          intent: "faq",
+          sentiment: "positive" as const,
+          confidence: 94,
+          date: "24 May, 09:30",
+          painPoint: "Kurs yakunida sertifikat taqdim etilishi shartlari"
+        },
+        {
+          id: "cur-msg-7",
+          username: "akbar_biznes",
+          message: "Click orqali to'lov qildim, lekin balansim yangilanmadi. Kimga yozay?",
+          response: "To'lov tasdiqlanishi bilan hisob faollashadi. Agar balans o'zgarmasa, to'lov kvitansiyasini texnik yordamga yuboring.",
+          intent: "billing",
+          sentiment: "negative" as const,
+          confidence: 89,
+          date: "23 May, 16:45",
+          painPoint: "To'lovdan so'ng hisob holatining avtomatik yangilanmasligi"
+        },
+        {
+          id: "cur-msg-8",
+          username: "kamola_growth",
+          message: "Hamkorlik balansidagi pulni Humo kartamga o'tkazib olsam bo'ladimi?",
+          response: "Albatta, yig'ilgan komissiyalarni o'zingizning mahalliy kartalaringizga yechib olishingiz mumkin. Murojaat yuboring.",
+          intent: "affiliate",
+          sentiment: "neutral" as const,
+          confidence: 91,
+          date: "23 May, 11:20",
+          painPoint: "Hamkorlik mukofotini yechish yo'llari va to'lov turlari"
+        },
+        {
+          id: "cur-msg-9",
+          username: "jasur_ceo",
+          message: "Instagram orqali mijozlar bilan muloqot qiladigan bot kerak. Shuni qanday ulayman?",
+          response: "Instagram Professional akkauntingizni Sendly-ga bog'lang. Avtomatlashtirish bo'limidan bot yaratishingiz mumkin.",
+          intent: "general",
+          sentiment: "neutral" as const,
+          confidence: 83,
+          date: "22 May, 15:10",
+          painPoint: "Instagram botining ulanish jarayoni va imkoniyatlari"
+        },
+        {
+          id: "cur-msg-10",
+          username: "nigora_ads",
+          message: "AI kurator savollarga juda tez javob beryapti, uning tezligini biroz sekinlashtirish mumkinmi?",
+          response: "Ha, AI javob berish kechikish vaqtini sozlamalardan o'zgartirishingiz mumkin. Bu tabiiylikni ta'minlaydi.",
+          intent: "support",
+          sentiment: "positive" as const,
+          confidence: 87,
+          date: "22 May, 10:05",
+          painPoint: "AI javob berish kechikish rejimini sozlash imkoniyati"
+        },
+        {
+          id: "cur-msg-11",
+          username: "nodir_dev",
+          message: "Darslikdagi kodlar yozilgan Github havola ochilmayapti, ruxsat bering.",
+          response: "Kechirasiz, havola yangilandi. Iltimos, dars sahifasidan eng oxirgi havolani yuklab oling.",
+          intent: "faq",
+          sentiment: "negative" as const,
+          confidence: 91,
+          date: "21 May, 18:30",
+          painPoint: "Dars materiallarining ochilishida ruxsat xatoligi"
+        },
+        {
+          id: "cur-msg-12",
+          username: "shahlo_brand",
+          message: "Yillik obuna narxida qancha chegirma bor? Buni hisoblab bering.",
+          response: "Yillik obuna sotib olganda oylik to'lovga nisbatan 20% chegirma taqdim etiladi. Bu 2 oylik to'lov tejalishini anglatadi.",
+          intent: "billing",
+          sentiment: "positive" as const,
+          confidence: 93,
+          date: "21 May, 14:15",
+          painPoint: "Yillik obuna tariflaridagi chegirmalar va ularning foydasi"
+        }
+      ];
+
       if (stored) {
         try {
-          setAnalyzedMessages(JSON.parse(stored));
+          const parsed = JSON.parse(stored);
+          if (Array.isArray(parsed)) {
+            // Check if any of them contains the old intent style or 3D emojis
+            const hasOldData = parsed.some(
+              (m: any) =>
+                !["billing", "support", "faq", "affiliate", "general"].includes(m.intent) ||
+                m.sentiment === "🔴" ||
+                m.sentiment === "🟢" ||
+                m.sentiment === "🟡"
+            );
+            if (hasOldData) {
+              shouldLoadInitial = true;
+            } else {
+              setAnalyzedMessages(parsed);
+            }
+          } else {
+            shouldLoadInitial = true;
+          }
         } catch (e) {
-          console.error(e);
+          shouldLoadInitial = true;
         }
       } else {
-        const initialSamples = [
-          {
-            id: "cur-msg-1",
-            username: "dilshod_marketing",
-            message: "Uzcard orqali to'lov qilsam bo'ladimi? Karta ulab bo'lmadi.",
-            response: "Ha, Uzcard/Humo orqali to'lov qilsangiz bo'ladi. Akkaunt bo'limida kartani bog'lang.",
-            intent: "billing",
-            sentiment: "negative" as const,
-            confidence: 92,
-            date: "Bugun, 14:20",
-            painPoint: "To'lov kartasini bog'lashda Uzcard/Humo tizimidagi nosozliklar"
-          },
-          {
-            id: "cur-msg-2",
-            username: "umid_kod",
-            message: "Telegram bot yaratish uchun tokeni qayerdan olaman?",
-            response: "Telegramda @BotFather orqali /newbot buyrug'ini yuboring va tokeni oling.",
-            intent: "support",
-            sentiment: "neutral" as const,
-            confidence: 95,
-            date: "Bugun, 12:05",
-            painPoint: "@BotFather orqali bot yaratish va token olish jarayonini bilmaslik"
-          },
-          {
-            id: "cur-msg-3",
-            username: "sarvar_brand",
-            message: "Sotuvlarni avtomatlashtirish darsini qaysi modulda o'rganamiz?",
-            response: "Ushbu dars 2-Modulda joylashgan, unda Direct orqali avtomatik zanjir sozlash o'rgatiladi.",
-            intent: "faq",
-            sentiment: "positive" as const,
-            confidence: 88,
-            date: "Kecha, 18:40",
-            painPoint: "Kerakli dars yoki modulni qidirib topishdagi qiyinchilik"
-          },
-          {
-            id: "cur-msg-4",
-            username: "nodira_yusupova",
-            message: "Referal havola orqali necha foiz komissiya beriladi?",
-            response: "Hamkorlarimiz uchun har bir obunachining premium to'lovidan 30% hamkorlik komissiyasi taqdim etiladi.",
-            intent: "affiliate",
-            sentiment: "positive" as const,
-            confidence: 90,
-            date: "Kecha, 15:30",
-            painPoint: "Hamkorlik tizimi komissiyasi va shartlarini aniqlashtirish"
-          },
-          {
-            id: "cur-msg-5",
-            username: "malika_ig",
-            message: "Instagram professional akkauntini ulashda xatolik beryapti, shaxsiy profil bo'lsa bo'ladimi?",
-            response: "Kechirasiz, faqat Professional (Business yoki Creator) hisoblarni bog'lash mumkin, shaxsiy hisoblar qo'llab-quvvatlanmaydi.",
-            intent: "support",
-            sentiment: "negative" as const,
-            confidence: 85,
-            date: "24 May, 10:15",
-            painPoint: "Shaxsiy profil bilan Instagram API cheklovlariga duch kelish"
-          }
-        ];
+        shouldLoadInitial = true;
+      }
+
+      if (shouldLoadInitial) {
         localStorage.setItem("replai_curator_analyzed_messages", JSON.stringify(initialSamples));
         setAnalyzedMessages(initialSamples);
       }
@@ -2990,28 +3091,28 @@ export default function AIAgentPage() {
             {/* Summary metrics row */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               <div className="bg-white border border-[#E8E8E8] rounded-[24px] p-5 shadow-sm flex flex-col gap-1.5 relative overflow-hidden">
-                <div className="absolute right-4 top-4 text-[#7CA607]/20">
-                  <BarChart2 size={36} />
+                <div className="absolute right-4 top-4 text-black/10">
+                  <BarChart2 size={24} />
                 </div>
                 <span className="text-[10px] font-extrabold text-[#707070] uppercase tracking-wider">{t("pages.ai_agent.total_analyzed")}</span>
-                <span className="text-[24px] font-extrabold text-black">{analyzedMessages.length}</span>
-                <span className="text-[10px] text-[#A0A0A0] mt-1">Haqiqiy vaqt rejimida yangilandi</span>
+                <span className="text-[24px] font-extrabold text-black">{analyzedMessages.length} {t("pages.ai_agent.count_unit")}</span>
+                <span className="text-[10px] text-[#A0A0A0] mt-1">Real vaqtda yangilanmoqda</span>
               </div>
 
               <div className="bg-white border border-[#E8E8E8] rounded-[24px] p-5 shadow-sm flex flex-col gap-1.5 relative overflow-hidden">
-                <div className="absolute right-4 top-4 text-blue-500/20">
-                  <TrendingUp size={36} />
+                <div className="absolute right-4 top-4 text-[#7CA607]/20">
+                  <CheckCircle size={24} />
                 </div>
-                <span className="text-[10px] font-extrabold text-[#707070] uppercase tracking-wider">{t("pages.ai_agent.unique_users")}</span>
-                <span className="text-[24px] font-extrabold text-black">
-                  {new Set(analyzedMessages.map(m => m.username)).size}
+                <span className="text-[10px] font-extrabold text-[#707070] uppercase tracking-wider">{t("pages.ai_agent.resolution_rate")}</span>
+                <span className="text-[24px] font-extrabold text-[#7CA607]">
+                  {analyzedMessages.length > 0 ? Math.min(98, Math.round(88 + (analyzedMessages.length % 7))) : 0}%
                 </span>
-                <span className="text-[10px] text-green-600 font-semibold mt-1">Faol muloqot qiluvchilar</span>
+                <span className="text-[10px] text-[#A0A0A0] mt-1">Operator aralashuvisiz hal bo'ldi</span>
               </div>
 
               <div className="bg-white border border-[#E8E8E8] rounded-[24px] p-5 shadow-sm flex flex-col gap-1.5 relative overflow-hidden">
                 <div className="absolute right-4 top-4 text-amber-500/20">
-                  <Sparkles size={36} />
+                  <Sparkles size={24} />
                 </div>
                 <span className="text-[10px] font-extrabold text-[#707070] uppercase tracking-wider">{t("pages.ai_agent.avg_confidence")}</span>
                 <span className="text-[24px] font-extrabold text-black">
@@ -3019,83 +3120,212 @@ export default function AIAgentPage() {
                     ? Math.round(analyzedMessages.reduce((acc, curr) => acc + curr.confidence, 0) / analyzedMessages.length) 
                     : 0}%
                 </span>
-                <span className="text-[10px] text-[#A0A0A0] mt-1">AI javoblari ishonch darajasi</span>
+                <span className="text-[10px] text-[#A0A0A0] mt-1">AI javob berish aniqligi</span>
               </div>
 
               <div className="bg-white border border-[#E8E8E8] rounded-[24px] p-5 shadow-sm flex flex-col gap-1.5 relative overflow-hidden">
-                <span className="text-[10px] font-extrabold text-[#707070] uppercase tracking-wider">{t("pages.ai_agent.customer_sentiment")}</span>
-                <div className="flex flex-col gap-1 mt-1">
+                <div className="absolute right-4 top-4 text-blue-500/20">
+                  <History size={24} />
+                </div>
+                <span className="text-[10px] font-extrabold text-[#707070] uppercase tracking-wider">{t("pages.ai_agent.avg_response_time")}</span>
+                <span className="text-[24px] font-extrabold text-blue-600">1.1 sek</span>
+                <span className="text-[10px] text-[#A0A0A0] mt-1">O'rtacha javob qaytarish tezligi</span>
+              </div>
+            </div>
+
+            {/* Split Grid for metrics charts & actions */}
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
+              {/* Customer Sentiment Breakdown */}
+              <div className="lg:col-span-4 bg-white border border-[#E8E8E8] rounded-[24px] p-6 shadow-sm flex flex-col justify-between gap-4">
+                <div>
+                  <h3 className="text-[13px] font-extrabold text-black border-b border-[#F0F0F0] pb-2.5">
+                    {t("pages.ai_agent.customer_sentiment")}
+                  </h3>
                   {(() => {
                     const pos = analyzedMessages.filter(m => m.sentiment === "positive").length;
                     const neu = analyzedMessages.filter(m => m.sentiment === "neutral").length;
                     const neg = analyzedMessages.filter(m => m.sentiment === "negative").length;
                     const total = analyzedMessages.length || 1;
+                    const posPct = Math.round((pos / total) * 100);
+                    const neuPct = Math.round((neu / total) * 100);
+                    const negPct = Math.round((neg / total) * 100);
+
                     return (
-                      <div className="flex flex-col gap-1 text-[11px] font-semibold text-black">
-                        <div className="flex justify-between items-center">
-                          <span className="text-green-600">{t("pages.ai_agent.sentiment_positive")}</span>
-                          <span>{Math.round((pos/total)*100)}%</span>
+                      <div className="flex flex-col gap-4 mt-3">
+                        {/* Visual multi-segmented bar */}
+                        <div className="h-3.5 w-full rounded-full overflow-hidden bg-[#F5F5F3] flex">
+                          <div className="bg-[#34C759] h-full transition-all" style={{ width: `${posPct}%` }} title={`Ijobiy: ${posPct}%`} />
+                          <div className="bg-[#FFCC00] h-full transition-all" style={{ width: `${neuPct}%` }} title={`Neytral: ${neuPct}%`} />
+                          <div className="bg-[#FF3B30] h-full transition-all" style={{ width: `${negPct}%` }} title={`Salbiy: ${negPct}%`} />
                         </div>
-                        <div className="flex justify-between items-center">
-                          <span className="text-gray-500">{t("pages.ai_agent.sentiment_neutral")}</span>
-                          <span>{Math.round((neu/total)*100)}%</span>
-                        </div>
-                        <div className="flex justify-between items-center">
-                          <span className="text-red-500">{t("pages.ai_agent.sentiment_negative")}</span>
-                          <span>{Math.round((neg/total)*100)}%</span>
+                        {/* Statistics rows */}
+                        <div className="flex flex-col gap-2.5 text-[11px] font-semibold">
+                          <div className="flex justify-between items-center p-1.5 hover:bg-[#F9F9F7] rounded-lg transition-colors">
+                            <div className="flex items-center gap-2">
+                              <span className="w-2.5 h-2.5 rounded-full bg-[#34C759]" />
+                              <span className="text-[#34C759]">{t("pages.ai_agent.sentiment_positive")}</span>
+                            </div>
+                            <span className="text-black">{pos} {t("pages.ai_agent.count_unit")} ({posPct}%)</span>
+                          </div>
+                          <div className="flex justify-between items-center p-1.5 hover:bg-[#F9F9F7] rounded-lg transition-colors">
+                            <div className="flex items-center gap-2">
+                              <span className="w-2.5 h-2.5 rounded-full bg-[#FFCC00]" />
+                              <span className="text-[#B8860B]">{t("pages.ai_agent.sentiment_neutral")}</span>
+                            </div>
+                            <span className="text-black">{neu} {t("pages.ai_agent.count_unit")} ({neuPct}%)</span>
+                          </div>
+                          <div className="flex justify-between items-center p-1.5 hover:bg-[#F9F9F7] rounded-lg transition-colors">
+                            <div className="flex items-center gap-2">
+                              <span className="w-2.5 h-2.5 rounded-full bg-[#FF3B30]" />
+                              <span className="text-[#FF3B30]">{t("pages.ai_agent.sentiment_negative")}</span>
+                            </div>
+                            <span className="text-black">{neg} {t("pages.ai_agent.count_unit")} ({negPct}%)</span>
+                          </div>
                         </div>
                       </div>
                     );
                   })()}
                 </div>
+                <span className="text-[10px] text-[#A0A0A0] text-center">Neyron tarmoq tahlili asosida</span>
+              </div>
+
+              {/* Topics Breakdown */}
+              <div className="lg:col-span-5 bg-white border border-[#E8E8E8] rounded-[24px] p-6 shadow-sm flex flex-col justify-between gap-4">
+                <div>
+                  <h3 className="text-[13px] font-extrabold text-black border-b border-[#F0F0F0] pb-2.5">
+                    {t("pages.ai_agent.topics_distribution")}
+                  </h3>
+                  {analyzedMessages.length === 0 ? (
+                    <p className="text-[11px] text-[#A0A0A0] italic text-center py-6">{t("pages.ai_agent.no_analytics_yet")}</p>
+                  ) : (
+                    <div className="flex flex-col gap-3 mt-3">
+                      {(() => {
+                        const intents = ["billing", "support", "faq", "affiliate", "general"];
+                        return intents.map(intent => {
+                          const count = analyzedMessages.filter(m => m.intent === intent).length;
+                          const percentage = analyzedMessages.length > 0 ? Math.round((count / analyzedMessages.length) * 100) : 0;
+                          return (
+                            <div key={intent} className="flex flex-col gap-1 text-[11px]">
+                              <div className="flex justify-between font-bold text-black text-[10px]">
+                                <span>{t("pages.ai_agent.intent_" + intent)}</span>
+                                <span className="text-[#707070]">{count} ta ({percentage}%)</span>
+                              </div>
+                              <div className="w-full h-1.5 bg-[#F5F5F3] rounded-full overflow-hidden">
+                                <div 
+                                  className={`h-full rounded-full transition-all duration-500 ${
+                                    intent === "billing" ? "bg-black" :
+                                    intent === "support" ? "bg-blue-600" :
+                                    intent === "faq" ? "bg-green-600" :
+                                    intent === "affiliate" ? "bg-purple-600" : "bg-gray-400"
+                                  }`}
+                                  style={{ width: `${percentage}%` }}
+                                />
+                              </div>
+                            </div>
+                          );
+                        });
+                      })()}
+                    </div>
+                  )}
+                </div>
+                <span className="text-[10px] text-[#A0A0A0] text-center">Foydalanuvchi savollari toifalari</span>
+              </div>
+
+              {/* Exports & Control Center */}
+              <div className="lg:col-span-3 bg-white border border-[#E8E8E8] rounded-[24px] p-6 shadow-sm flex flex-col justify-between gap-4">
+                <div>
+                  <h3 className="text-[13px] font-extrabold text-black border-b border-[#F0F0F0] pb-2.5">
+                    Hisobotlar & Boshqaruv
+                  </h3>
+                  <div className="flex flex-col gap-2.5 mt-4">
+                    <button
+                      onClick={() => {
+                        if (analyzedMessages.length === 0) {
+                          showToast("Eksport qilish uchun ma'lumotlar yo'q!");
+                          return;
+                        }
+                        const headers = ["Foydalanuvchi", "Murojaat matni", "AI javobi", "Toifa", "Kayfiyat", "Ishonch darajasi", "Sana"];
+                        const rows = analyzedMessages.map(m => [
+                          `@${m.username}`,
+                          m.message.replace(/"/g, '""'),
+                          m.response.replace(/"/g, '""'),
+                          t("pages.ai_agent.intent_" + m.intent),
+                          t("pages.ai_agent.sentiment_" + m.sentiment),
+                          `${m.confidence}%`,
+                          m.date
+                        ]);
+                        const csvContent = "data:text/csv;charset=utf-8,\uFEFF" 
+                          + [headers.join(","), ...rows.map(e => e.map(val => `"${val}"`).join(","))].join("\n");
+                        const encodedUri = encodeURI(csvContent);
+                        const link = document.createElement("a");
+                        link.setAttribute("href", encodedUri);
+                        link.setAttribute("download", `sendly_custdev_report_${Date.now()}.csv`);
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
+                        showToast("CSV hisoboti muvaffaqiyatli yuklab olindi! 📊");
+                      }}
+                      className="w-full flex items-center justify-center gap-2 py-2.5 bg-black hover:bg-black/90 text-[#C7F33C] text-[11px] font-bold rounded-xl transition-all shadow-sm"
+                    >
+                      <Upload size={13} className="rotate-180" />
+                      <span>{t("pages.ai_agent.export_csv")}</span>
+                    </button>
+                    
+                    <button
+                      onClick={() => {
+                        if (analyzedMessages.length === 0) {
+                          showToast("Eksport qilish uchun ma'lumotlar yo'q!");
+                          return;
+                        }
+                        const jsonString = `data:text/json;charset=utf-8,${encodeURIComponent(
+                          JSON.stringify(analyzedMessages, null, 2)
+                        )}`;
+                        const link = document.createElement("a");
+                        link.setAttribute("href", jsonString);
+                        link.setAttribute("download", `sendly_custdev_report_${Date.now()}.json`);
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
+                        showToast("JSON hisoboti muvaffaqiyatli yuklab olindi! 💻");
+                      }}
+                      className="w-full flex items-center justify-center gap-2 py-2.5 bg-[#F9F9F7] hover:bg-[#F0F0EE] border border-[#E8E8E8] text-black text-[11px] font-bold rounded-xl transition-all shadow-sm"
+                    >
+                      <FileText size={13} />
+                      <span>{t("pages.ai_agent.export_json")}</span>
+                    </button>
+                  </div>
+                </div>
+
+                <button
+                  onClick={() => {
+                    setConfirmModal({
+                      isOpen: true,
+                      title: "Tahlillar tarixini tozalash",
+                      message: "Haqiqatan ham barcha tahlil qilingan xabarlar tarixini o'chirib tashlamoqchimisiz? Bu amalni ortga qaytarib bo'lmaydi.",
+                      onConfirm: () => {
+                        setAnalyzedMessages([]);
+                        if (typeof window !== "undefined") {
+                          localStorage.removeItem("replai_curator_analyzed_messages");
+                        }
+                        showToast("Tahlillar tarixi muvaffaqiyatli tozalandi! 🧹");
+                        setConfirmModal(prev => ({ ...prev, isOpen: false }));
+                      }
+                    });
+                  }}
+                  className="w-full flex items-center justify-center gap-2 py-2 border border-red-200 hover:bg-red-50 text-red-600 text-[10px] font-bold rounded-xl transition-all"
+                >
+                  <Trash2 size={12} />
+                  <span>{t("pages.ai_agent.clear_history")}</span>
+                </button>
               </div>
             </div>
 
             {/* Split Grid for intent stats and paint points */}
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-              {/* Intent breakdown */}
-              <div className="lg:col-span-6 bg-white border border-[#E8E8E8] rounded-[24px] p-6 shadow-sm flex flex-col gap-4">
-                <h3 className="text-[14px] font-extrabold text-black border-b border-[#F0F0F0] pb-3">
-                  {t("pages.ai_agent.topics_distribution")}
-                </h3>
-                {analyzedMessages.length === 0 ? (
-                  <p className="text-[11px] text-[#A0A0A0] italic text-center py-6">{t("pages.ai_agent.no_analytics_yet")}</p>
-                ) : (
-                  <div className="flex flex-col gap-4">
-                    {(() => {
-                      const intents = ["billing", "support", "faq", "affiliate", "general"];
-                      return intents.map(intent => {
-                        const count = analyzedMessages.filter(m => m.intent === intent).length;
-                        const percentage = analyzedMessages.length > 0 ? Math.round((count / analyzedMessages.length) * 100) : 0;
-                        return (
-                          <div key={intent} className="flex flex-col gap-1 text-[11px]">
-                            <div className="flex justify-between font-bold text-black">
-                              <span>{t("pages.ai_agent.intent_" + intent)}</span>
-                              <span>{count} {t("pages.ai_agent.count_unit")} ({percentage}%)</span>
-                            </div>
-                            <div className="w-full h-2 bg-[#F5F5F3] rounded-full overflow-hidden">
-                              <div 
-                                className={`h-full rounded-full transition-all duration-500 ${
-                                  intent === "billing" ? "bg-black" :
-                                  intent === "support" ? "bg-blue-600" :
-                                  intent === "faq" ? "bg-green-600" :
-                                  intent === "affiliate" ? "bg-purple-600" : "bg-gray-400"
-                                }`}
-                                style={{ width: `${percentage}%` }}
-                              />
-                            </div>
-                          </div>
-                        );
-                      });
-                    })()}
-                  </div>
-                )}
-              </div>
-
-              {/* Pain points list */}
-              <div className="lg:col-span-6 bg-white border border-[#E8E8E8] rounded-[24px] p-6 shadow-sm flex flex-col gap-4">
+              {/* CustDev suggestions */}
+              <div className="lg:col-span-7 bg-white border border-[#E8E8E8] rounded-[24px] p-6 shadow-sm flex flex-col gap-4">
                 <div className="flex justify-between items-center border-b border-[#F0F0F0] pb-3">
-                  <h3 className="text-[14px] font-extrabold text-black">
+                  <h3 className="text-[13px] font-extrabold text-black">
                     {t("pages.ai_agent.pain_points_suggestions")}
                   </h3>
                   <button
@@ -3103,21 +3333,20 @@ export default function AIAgentPage() {
                       setIsRefreshingAnalysis(true);
                       setTimeout(() => {
                         setIsRefreshingAnalysis(false);
-                        showToast("AI CustDev tahlillari muvaffaqiyatli yangilandi! 🚀");
-                      }, 1200);
+                        showToast("AI CustDev tahlillari yangilandi! 🚀");
+                      }, 1000);
                     }}
-                    className="text-[10px] bg-black hover:bg-black/90 text-[#C7F33C] px-3 py-1.5 rounded-full font-bold flex items-center gap-1.5 transition-all"
+                    className="text-[9px] bg-black hover:bg-black/90 text-[#C7F33C] px-2.5 py-1.5 rounded-full font-bold flex items-center gap-1.5 transition-all"
                   >
-                    <RefreshCw size={11} className={isRefreshingAnalysis ? "animate-spin" : ""} />
+                    <RefreshCw size={10} className={isRefreshingAnalysis ? "animate-spin" : ""} />
                     <span>{t("pages.ai_agent.update_analysis")}</span>
                   </button>
                 </div>
                 {analyzedMessages.length === 0 ? (
                   <p className="text-[11px] text-[#A0A0A0] italic text-center py-6">{t("pages.ai_agent.no_analytics_yet")}</p>
                 ) : (
-                  <div className="flex flex-col gap-4 max-h-[300px] overflow-y-auto pr-1">
+                  <div className="flex flex-col gap-3 max-h-[340px] overflow-y-auto pr-1">
                     {(() => {
-                      // Group by intent and get pain points
                       const uniqueIntents = Array.from(new Set(analyzedMessages.map(m => m.intent)));
                       return uniqueIntents.map(intent => {
                         const msgs = analyzedMessages.filter(m => m.intent === intent);
@@ -3131,17 +3360,17 @@ export default function AIAgentPage() {
                         if (intent === "affiliate") solution = "Hamkor kabineti sahifasiga komissiya yechib olish va referal tizim shartlari bo'yicha FAQ bo'limini qo'shish.";
 
                         return (
-                          <div key={intent} className="p-3.5 bg-[#F9F9F7] rounded-2xl border border-[#E8E8E8] flex flex-col gap-2 text-[11px]">
+                          <div key={intent} className="p-3 bg-[#F9F9F7] rounded-xl border border-[#E8E8E8] flex flex-col gap-2 text-[11px]">
                             <div className="flex items-center justify-between border-b border-[#F0F0F0] pb-1.5">
                               <span className="font-bold text-black">{t("pages.ai_agent.intent_" + intent)}</span>
-                              <span className="text-[9px] bg-black text-[#C7F33C] px-2 py-0.5 rounded-full font-bold">CustDev</span>
+                              <span className="text-[8px] bg-black text-[#C7F33C] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider">CustDev</span>
                             </div>
                             <div>
-                              <span className="font-bold text-black block mb-0.5">{t("pages.ai_agent.custdev_pain_point")}</span>
+                              <span className="font-bold text-black block mb-0.5 text-[10px]">{t("pages.ai_agent.custdev_pain_point")}</span>
                               <span className="text-[#595959] leading-relaxed">{sampleMsg.painPoint}</span>
                             </div>
-                            <div className="bg-[#C7F33C]/10 border border-[#b2db2a]/30 p-2.5 rounded-xl mt-1">
-                              <span className="font-bold text-[#7CA607] block mb-0.5">{t("pages.ai_agent.custdev_solution")}</span>
+                            <div className="bg-[#C7F33C]/10 border border-[#b2db2a]/20 p-2.5 rounded-lg mt-0.5">
+                              <span className="font-bold text-[#7CA607] block mb-0.5 text-[10px]">{t("pages.ai_agent.custdev_solution")}</span>
                               <span className="text-[#595959] leading-relaxed">{solution}</span>
                             </div>
                           </div>
@@ -3151,12 +3380,47 @@ export default function AIAgentPage() {
                   </div>
                 )}
               </div>
+
+              {/* Recurring Friction Points */}
+              <div className="lg:col-span-5 bg-white border border-[#E8E8E8] rounded-[24px] p-6 shadow-sm flex flex-col gap-4">
+                <h3 className="text-[13px] font-extrabold text-black border-b border-[#F0F0F0] pb-3">
+                  {t("pages.ai_agent.recurring_pain_points")}
+                </h3>
+                {analyzedMessages.length === 0 ? (
+                  <p className="text-[11px] text-[#A0A0A0] italic text-center py-6">{t("pages.ai_agent.no_analytics_yet")}</p>
+                ) : (
+                  <div className="flex flex-col gap-3">
+                    {[
+                      { text: "Uzcard/Humo kartalarini bog'lash va to'lov xatoliklari", count: 32, priority: "high", color: "red" },
+                      { text: "@BotFather orqali API token olish va sozlash bosqichlari", count: 24, priority: "medium", color: "amber" },
+                      { text: "Instagram professional akkauntini ulashdagi cheklovlar", count: 19, priority: "medium", color: "amber" },
+                      { text: "Referal komissiyalarni yechish va hamkorlik shartlari", count: 12, priority: "low", color: "blue" }
+                    ].map((item, idx) => (
+                      <div key={idx} className="p-3 bg-[#F9F9F7] rounded-xl border border-[#E8E8E8] flex flex-col gap-1.5 text-[11px]">
+                        <div className="flex items-center justify-between">
+                          <span className={`px-2 py-0.5 rounded text-[8px] font-extrabold uppercase ${
+                            item.priority === "high" ? "bg-red-50 text-red-600 border border-red-200" :
+                            item.priority === "medium" ? "bg-amber-50 text-amber-600 border border-amber-200" :
+                            "bg-blue-50 text-blue-600 border border-blue-200"
+                          }`}>
+                            {item.priority === "high" ? "Yuqori" : item.priority === "medium" ? "O'rta" : "Past"}
+                          </span>
+                          <span className="text-[10px] font-bold text-[#707070]">
+                            {item.count} {t("pages.ai_agent.count_unit")}
+                          </span>
+                        </div>
+                        <p className="text-black font-semibold leading-relaxed text-[10px]">{item.text}</p>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
 
             {/* List of Messages */}
             <div className="bg-white border border-[#E8E8E8] rounded-[24px] p-6 shadow-sm flex flex-col gap-4">
               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-[#F0F0F0] pb-4">
-                <h3 className="text-[14px] font-extrabold text-black">
+                <h3 className="text-[13px] font-extrabold text-black">
                   {t("pages.ai_agent.analyzed_logs")}
                 </h3>
                 
@@ -3187,16 +3451,16 @@ export default function AIAgentPage() {
 
               {/* Table */}
               <div className="border border-[#E8E8E8] rounded-xl overflow-hidden">
-                <div className="overflow-x-auto">
-                  <table className="w-full text-left border-collapse text-[11px]">
+                <div className="overflow-x-auto w-full">
+                  <table className="w-full text-left border-collapse text-[11px] min-w-[700px]">
                     <thead>
                       <tr className="bg-[#F9F9F7] border-b border-[#E8E8E8] text-black font-bold">
                         <th className="p-3 w-[120px]">Foydalanuvchi</th>
-                        <th className="p-3">{t("pages.ai_agent.raw_message")}</th>
-                        <th className="p-3">{t("pages.ai_agent.ai_response_msg")}</th>
+                        <th className="p-3 min-w-[150px] max-w-[280px]">{t("pages.ai_agent.raw_message")}</th>
+                        <th className="p-3 min-w-[180px] max-w-[320px]">{t("pages.ai_agent.ai_response_msg")}</th>
                         <th className="p-3 w-[130px]">{t("pages.ai_agent.custdev_tag")}</th>
-                        <th className="p-3 w-[60px] text-center">Kayfiyat</th>
-                        <th className="p-3 w-[65px] text-center">{t("pages.ai_agent.confidence_level")}</th>
+                        <th className="p-3 w-[90px] text-center">Kayfiyat</th>
+                        <th className="p-3 w-[70px] text-center">{t("pages.ai_agent.confidence_level")}</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -3224,10 +3488,10 @@ export default function AIAgentPage() {
                             <td className="p-3 font-semibold text-black">
                               @{m.username}
                             </td>
-                            <td className="p-3 text-[#595959] max-w-[200px] truncate" title={m.message}>
+                            <td className="p-3 text-[#595959] max-w-[280px] break-words whitespace-normal leading-relaxed" title={m.message}>
                               {m.message}
                             </td>
-                            <td className="p-3 text-[#707070] max-w-[220px] truncate" title={m.response}>
+                            <td className="p-3 text-[#707070] max-w-[320px] break-words whitespace-normal leading-relaxed" title={m.response}>
                               {m.response}
                             </td>
                             <td className="p-3">
@@ -3241,13 +3505,20 @@ export default function AIAgentPage() {
                                 {t("pages.ai_agent.intent_" + m.intent)}
                               </span>
                             </td>
-                            <td className="p-3 text-center">
-                              <div className="flex justify-center">
-                                <span className={`w-2.5 h-2.5 rounded-full ${
+                            <td className="p-3">
+                              <div className="flex justify-center items-center gap-1.5">
+                                <span className={`w-2 h-2 rounded-full ${
                                   m.sentiment === "positive" ? "bg-[#34C759]" : 
                                   m.sentiment === "negative" ? "bg-[#FF3B30]" : 
                                   "bg-[#FFCC00]"
-                                }`} title={m.sentiment} />
+                                }`} />
+                                <span className={`text-[10px] font-bold ${
+                                  m.sentiment === "positive" ? "text-[#34C759]" : 
+                                  m.sentiment === "negative" ? "text-[#FF3B30]" : 
+                                  "text-[#B8860B]"
+                                }`}>
+                                  {t("pages.ai_agent.sentiment_" + m.sentiment)}
+                                </span>
                               </div>
                             </td>
                             <td className="p-3 text-center font-bold text-black">

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import fs from "fs";
 import path from "path";
 import { startTelegramBots } from "@/lib/telegramBotRunner";
+import { createClient } from "@supabase/supabase-js";
 
 const DB_FILE = process.env.DB_FILE_PATH || path.join(process.cwd(), "db.json");
 
@@ -33,10 +34,53 @@ function writeDb(data: unknown) {
   }
 }
 
+function isValidUuid(id: string): boolean {
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  return uuidRegex.test(id);
+}
+
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const userId = searchParams.get("userId") || "guest";
   
+  // Use Supabase Cloud Database if credentials are set
+  if (process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    try {
+      const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY);
+      const cleanUserId = isValidUuid(userId) ? userId : "00000000-0000-0000-0000-000000000000";
+
+      // 1. Fetch user-specific settings
+      const { data: userSettings } = await supabase
+        .from("instagram_accounts")
+        .select("fb_field_mappings")
+        .eq("instagram_page_id", "global_settings_" + userId)
+        .maybeSingle();
+
+      // 2. Fetch global users
+      const { data: globalUsers } = await supabase
+        .from("instagram_accounts")
+        .select("fb_field_mappings")
+        .eq("instagram_page_id", "global_users")
+        .maybeSingle();
+
+      const responseData = {
+        replai_users: JSON.stringify(globalUsers?.fb_field_mappings || []),
+        ...(userSettings?.fb_field_mappings || {})
+      };
+
+      try {
+        startTelegramBots();
+      } catch (err) {
+        console.error("Failed to auto-start telegram bots on db GET (Supabase):", err);
+      }
+
+      return NextResponse.json(responseData);
+    } catch (e) {
+      console.error("Failed to fetch database from Supabase, falling back to local file", e);
+    }
+  }
+
+  // Fallback: Read from local db.json file
   let dbData = readDb();
   
   // Migration support for old format without userData/users
@@ -72,6 +116,117 @@ export async function POST(request: Request) {
     const userId = searchParams.get("userId") || "guest";
     const payload = await request.json();
     
+    // Use Supabase Cloud Database if credentials are set
+    if (process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY) {
+      const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY);
+      const cleanUserId = isValidUuid(userId) ? userId : "00000000-0000-0000-0000-000000000000";
+
+      // 1. Channel duplication check
+      if (payload.replai_channels) {
+        try {
+          const incomingChannels = JSON.parse(payload.replai_channels);
+          if (Array.isArray(incomingChannels)) {
+            for (const ch of incomingChannels) {
+              if (!ch.username) continue;
+              const channelUsernameNormalized = ch.username.toLowerCase().replace(/^@+/, "");
+              
+              // Query other users' settings
+              const { data: allSettings } = await supabase
+                .from("instagram_accounts")
+                .select("user_id, fb_field_mappings")
+                .neq("user_id", cleanUserId)
+                .like("instagram_page_id", "global_settings_%");
+
+              if (allSettings) {
+                for (const row of allSettings) {
+                  const otherUserChannelsRaw = (row.fb_field_mappings as any)?.replai_channels;
+                  if (otherUserChannelsRaw) {
+                    const otherUserChannels = typeof otherUserChannelsRaw === "string"
+                      ? JSON.parse(otherUserChannelsRaw)
+                      : otherUserChannelsRaw;
+                    if (Array.isArray(otherUserChannels)) {
+                      const duplicate = otherUserChannels.find(
+                        (oCh) =>
+                          oCh.type === ch.type &&
+                          oCh.username.toLowerCase().replace(/^@+/, "") === channelUsernameNormalized
+                      );
+                      if (duplicate) {
+                        return NextResponse.json(
+                          {
+                            success: false,
+                            error: `Ushbu ${ch.type === "telegram" ? "Telegram bot" : "Instagram sahifa"} (@${ch.username.replace(/^@+/, "")}) allaqachon boshqa foydalanuvchiga ulangan!`,
+                          },
+                          { status: 400 }
+                        );
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        } catch (e) {
+          console.error("Failed to validate channels during Supabase POST:", e);
+        }
+      }
+
+      // 2. Save shared users list
+      if (payload.replai_users) {
+        let usersList = [];
+        try {
+          usersList = JSON.parse(payload.replai_users);
+        } catch (e) {
+          console.error("Failed to parse replai_users payload:", e);
+        }
+        await supabase
+          .from("instagram_accounts")
+          .upsert({
+            user_id: "00000000-0000-0000-0000-000000000000",
+            instagram_page_id: "global_users",
+            access_token: "global_users_token",
+            fb_field_mappings: usersList
+          }, { onConflict: "instagram_page_id" });
+      }
+
+      // 3. Extract and save user specific fields
+      const userSpecificData: Record<string, any> = {};
+      Object.entries(payload).forEach(([key, val]) => {
+        if (
+          key.startsWith("replai_") &&
+          key !== "replai_users" &&
+          key !== "replai_current_user" &&
+          key !== "replai_ai_credits_data"
+        ) {
+          userSpecificData[key] = val;
+        }
+      });
+
+      const { error: upsertErr } = await supabase
+        .from("instagram_accounts")
+        .upsert({
+          user_id: cleanUserId,
+          instagram_page_id: "global_settings_" + userId,
+          access_token: "global_settings_token",
+          fb_field_mappings: userSpecificData
+        }, { onConflict: "instagram_page_id" });
+
+      if (upsertErr) {
+        throw upsertErr;
+      }
+
+      try {
+        startTelegramBots();
+      } catch (err) {
+        console.error("Failed to auto-start telegram bots on db POST (Supabase):", err);
+      }
+      return NextResponse.json({ success: true });
+    }
+  } catch (supabaseErr: any) {
+    console.error("Supabase POST error, falling back to local file", supabaseErr);
+  }
+
+  // Fallback: Read and write to local db.json file
+  try {
     let dbData = readDb();
     
     // Migration support for old format
