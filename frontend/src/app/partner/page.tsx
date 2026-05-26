@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Card, Button, AlertModal } from "@/components/ui/primitives";
@@ -15,6 +15,7 @@ import {
   Wallet
 } from "lucide-react";
 import { useI18n } from "@/i18n/I18nProvider";
+import { db } from "@/lib/db";
 
 type ReferredUser = {
   id: string;
@@ -26,16 +27,63 @@ type ReferredUser = {
   status: "Faol" | "Kutilmoqda";
 };
 
-const REFERRALS: ReferredUser[] = [];
-
-
 export default function PartnerPage() {
   const { t } = useI18n();
   const [activeTab, setActiveTab] = useState<"home" | "referrals">("home");
   const [copied, setCopied] = useState(false);
   const [isAlertOpen, setIsAlertOpen] = useState(false);
   
-  const referralLink = "https://sendly.uz/uz/?r=9a2dd22c-beae-4381-be95-259b4e8c187f";
+  const [currentUser, setCurrentUser] = useState<any>(null);
+  const [referrals, setReferrals] = useState<ReferredUser[]>([]);
+
+  useEffect(() => {
+    // 1. Sync session state & load current user
+    const user = db.syncCurrentUserSession() || db.getCurrentUser();
+    setCurrentUser(user);
+
+    // 2. Compute referrals dynamically from the list of users
+    const allUsers = db.getUsers();
+    const myReferrals = allUsers.filter((u: any) => u.referredBy === user?.id);
+
+    const mapped = myReferrals.map((u: any) => {
+      let planLabel: "Premium" | "Trial" | "Bepul" = "Bepul";
+      let commissionVal = "$0.00";
+      let statusVal: "Faol" | "Kutilmoqda" = "Kutilmoqda";
+
+      if (u.plan === "premium") {
+        planLabel = "Premium";
+        commissionVal = "$24.00"; // 30% of $80 Premium plan
+        statusVal = "Faol";
+      } else if (u.plan === "pro") {
+        planLabel = "Trial";
+        commissionVal = "$3.60"; // 30% of $12 Pro plan
+        statusVal = "Faol";
+      }
+
+      return {
+        id: u.id || u.email,
+        name: u.fullName || u.email.split("@")[0],
+        username: u.email,
+        date: u.trialExpiresAt || new Date().toLocaleDateString("uz-UZ"),
+        plan: planLabel,
+        commission: commissionVal,
+        status: statusVal
+      };
+    });
+    setReferrals(mapped);
+  }, []);
+
+  const referralsCount = referrals.length;
+  const totalEarnedFloat = referrals.reduce((acc, r) => {
+    const val = parseFloat(r.commission.replace("$", ""));
+    return acc + (isNaN(val) ? 0 : val);
+  }, 0);
+  const totalEarned = `$${totalEarnedFloat.toFixed(2)}`;
+  const balance = totalEarned;
+
+  const referralLink = typeof window !== "undefined"
+    ? `${window.location.origin}/register?r=${currentUser?.id || "guest"}`
+    : `https://sendly.uz/register?r=guest`;
 
   const handleCopyLink = () => {
     navigator.clipboard.writeText(referralLink);
@@ -95,7 +143,7 @@ export default function PartnerPage() {
                     </div>
                   </div>
                   <div className="mt-3">
-                    <div className="text-[28px] font-semibold text-black leading-none">$0.00</div>
+                    <div className="text-[28px] font-semibold text-black leading-none">{balance}</div>
                     <div className="mt-1.5 text-[10px] text-[#707070] font-semibold flex items-center gap-1">
                       <span>{t("pages.partner.payout_available")}</span>
                     </div>
@@ -111,7 +159,7 @@ export default function PartnerPage() {
                     </div>
                   </div>
                   <div className="mt-3">
-                    <div className="text-[28px] font-semibold text-black leading-none">$0.00</div>
+                    <div className="text-[28px] font-semibold text-black leading-none">{totalEarned}</div>
                     <div className="mt-1.5 text-[10px] text-[#707070]">{t("pages.partner.total_earned_desc")}</div>
                   </div>
                 </Card>
@@ -125,7 +173,7 @@ export default function PartnerPage() {
                     </div>
                   </div>
                   <div className="mt-3">
-                    <div className="text-[28px] font-semibold text-black leading-none">0</div>
+                    <div className="text-[28px] font-semibold text-black leading-none">{referralsCount}</div>
                     <div className="mt-1.5 text-[10px] text-[#707070]">{t("pages.partner.referrals_count_desc")}</div>
                   </div>
                 </Card>
@@ -218,7 +266,7 @@ export default function PartnerPage() {
                     </tr>
                   </thead>
                   <tbody>
-                    {REFERRALS.length === 0 ? (
+                    {referrals.length === 0 ? (
                       <tr>
                         <td colSpan={5} className="py-16 text-center">
                           <div className="flex flex-col items-center gap-2">
@@ -228,7 +276,7 @@ export default function PartnerPage() {
                           </div>
                         </td>
                       </tr>
-                    ) : REFERRALS.map((ref) => (
+                    ) : referrals.map((ref) => (
                       <tr key={ref.id} className="border-b border-[#F0F0F0] hover:bg-[#FDFDFD] text-[12px] text-black transition-colors">
                         <td className="py-3.5 px-6">
                           <div className="font-semibold">{ref.name}</div>

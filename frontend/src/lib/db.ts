@@ -312,6 +312,7 @@ export const db = {
     if (users.some((u) => u.email === email)) {
       return { success: false, error: "Ushbu email bilan allaqachon ro'yxatdan o'tilgan." };
     }
+    const referrerId = localStorage.getItem("sendly_referrer_id");
     const newUser: User = { 
       id: typeof crypto !== "undefined" && crypto.randomUUID ? crypto.randomUUID() : "33333333-3333-4333-8333-333333333333",
       email, 
@@ -320,6 +321,10 @@ export const db = {
       isCardLinked: false,
       plan: "free"
     };
+    if (referrerId) {
+      (newUser as any).referredBy = referrerId;
+      localStorage.removeItem("sendly_referrer_id");
+    }
     this._clearLocalBusinessData();
     users.push(newUser);
     localStorage.setItem("replai_users", JSON.stringify(users));
@@ -372,6 +377,7 @@ export const db = {
     const users = this.getUsers();
     let user = users.find((u) => u.email === email);
     if (!user) {
+      const referrerId = localStorage.getItem("sendly_referrer_id");
       user = {
         id: typeof crypto !== "undefined" && crypto.randomUUID ? crypto.randomUUID() : "55555555-5555-5555-8555-555555555555",
         email,
@@ -379,6 +385,10 @@ export const db = {
         isCardLinked: false,
         plan: "free"
       };
+      if (referrerId) {
+        (user as any).referredBy = referrerId;
+        localStorage.removeItem("sendly_referrer_id");
+      }
       users.push(user);
       localStorage.setItem("replai_users", JSON.stringify(users));
     }
@@ -963,4 +973,29 @@ export const db = {
     }
     return null;
   },
+
+  syncCurrentUserSession(): User | null {
+    const current = this.getCurrentUser();
+    if (!current) return null;
+    const users = this.getUsers();
+    const fresh = users.find(u => u.email === current.email || (u.id && u.id === current.id));
+    if (fresh) {
+      localStorage.setItem("replai_current_user", JSON.stringify(fresh));
+      return fresh;
+    }
+    return current;
+  },
+
+  impersonateUser(email: string): { success: boolean; error?: string } {
+    if (!isClient) return { success: false };
+    const users = this.getUsers();
+    const targetUser = users.find(u => u.email === email);
+    if (!targetUser) {
+      return { success: false, error: "Foydalanuvchi topilmadi." };
+    }
+    localStorage.setItem("replai_current_user", JSON.stringify(targetUser));
+    this._clearLocalBusinessData();
+    notifyUpdate();
+    return { success: true };
+  }
 };

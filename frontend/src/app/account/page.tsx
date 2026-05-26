@@ -261,11 +261,30 @@ export default function AccountPage() {
     showAlert(t("pages.account.billing.plan_updated"), t("pages.account.billing.plan_updated_msg").replace("{plan}", plan.toUpperCase()));
   };
 
-  const handleVoucherSubmit = (e: React.FormEvent) => {
+  const handleVoucherSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!voucherCode.trim()) return;
-    showAlert(t("pages.account.bonuses.success_title"), t("pages.account.bonuses.success_msg").replace("{code}", voucherCode.toUpperCase()));
-    setVoucherCode("");
+    const code = voucherCode.trim();
+    if (!code) return;
+
+    try {
+      const res = await fetch(`/api/credits?userId=${currentUser?.id || "guest"}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "redeem_voucher", code })
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setAiCreditsData(data);
+        localStorage.setItem("replai_ai_credits_data", JSON.stringify(data));
+        window.dispatchEvent(new Event("replai-db-update"));
+        showAlert(t("pages.account.bonuses.success_title"), `"${code.toUpperCase()}" promokodi muvaffaqiyatli faollashtirildi! Hisobingizga ${data.history[0]?.amount?.toLocaleString("uz-UZ")} kredit qo'shildi.`);
+        setVoucherCode("");
+      } else {
+        showAlert(t("common.error"), data.error || "Promokodni faollashtirishda xatolik yuz berdi.");
+      }
+    } catch (err) {
+      showAlert(t("common.error"), "Tarmoq ulanishida xatolik yuz berdi.");
+    }
   };
 
   const formatTimer = (seconds: number) => {
@@ -777,6 +796,16 @@ export default function AccountPage() {
                     </div>
                     <span className="bg-[#F0F0F0] text-[#707070] text-[10px] font-bold px-2 py-0.5 rounded-full">{t("pages.settings_page.no_channel") == "Kanal ulanmagan" ? "KUTILMOQDA" : "WAITING"}</span>
                   </div>
+
+                  {aiCreditsData.usedVouchers?.map((v: string) => (
+                    <div key={v} className="flex items-center justify-between p-4 bg-[#EFF2FC] border border-[#D8D8D8] rounded-[14px] animate-in fade-in duration-200">
+                      <div>
+                        <p className="text-[13px] font-bold text-black">{v} promokodi bonusi</p>
+                        <p className="text-[10px] text-[#707070] mt-0.5">Muvaffaqiyatli faollashtirilgan</p>
+                      </div>
+                      <span className="bg-[#EFF2FC] text-black text-[10px] font-bold px-2 py-0.5 rounded-full">FAOLLASHTIRILGAN</span>
+                    </div>
+                  ))}
                 </div>
               </div>
             </div>

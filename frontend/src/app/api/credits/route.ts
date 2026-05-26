@@ -16,6 +16,7 @@ interface CreditsData {
   balance: number;
   used: number;
   history: CreditTransaction[];
+  usedVouchers?: string[];
 }
 
 function getInitialCredits(): CreditsData {
@@ -30,7 +31,8 @@ function getInitialCredits(): CreditsData {
         description: "Ro'yxatdan o'tish sovg'asi (Welcome bonus)",
         date: new Date().toLocaleString("uz-UZ", { timeZone: "Asia/Tashkent" }),
       }
-    ]
+    ],
+    usedVouchers: []
   };
 }
 
@@ -77,6 +79,9 @@ export async function GET(request: Request) {
   } else {
     try {
       creditsData = JSON.parse(dbData.userData[userId]["replai_ai_credits_data"]);
+      if (!creditsData.usedVouchers) {
+        creditsData.usedVouchers = [];
+      }
     } catch {
       creditsData = getInitialCredits();
       dbData.userData[userId]["replai_ai_credits_data"] = JSON.stringify(creditsData);
@@ -108,6 +113,9 @@ export async function POST(request: Request) {
     } else {
       try {
         creditsData = JSON.parse(dbData.userData[userId]["replai_ai_credits_data"]);
+        if (!creditsData.usedVouchers) {
+          creditsData.usedVouchers = [];
+        }
       } catch {
         creditsData = getInitialCredits();
       }
@@ -135,6 +143,65 @@ export async function POST(request: Request) {
         type: "usage",
         amount,
         description: description || "AI yordamchi javobi",
+        date: timestamp
+      });
+    } else if (action === "redeem_voucher") {
+      const code = body.code;
+      if (!code) {
+        return NextResponse.json({ error: "Kupon kodi kiritilmagan." }, { status: 400 });
+      }
+      const normalizedCode = code.trim().toUpperCase();
+
+      // Find user's email
+      const usersList = dbData.users || [];
+      const userObj = usersList.find((u: any) => u.id === userId);
+      const userEmail = userObj?.email || "";
+
+      // Initialize promoCodes database if not present
+      if (!dbData.promoCodes) {
+        dbData.promoCodes = [
+          { code: "SENDLY10", amount: 10000, maxUses: 1000, usedCount: 0, restrictedToEmail: "", createdAt: new Date().toLocaleDateString("uz-UZ") },
+          { code: "WELCOME", amount: 5000, maxUses: 1000, usedCount: 0, restrictedToEmail: "", createdAt: new Date().toLocaleDateString("uz-UZ") },
+          { code: "PROMO50", amount: 50000, maxUses: 1000, usedCount: 0, restrictedToEmail: "", createdAt: new Date().toLocaleDateString("uz-UZ") }
+        ];
+      }
+
+      const voucherInfo = dbData.promoCodes.find((v: any) => v.code === normalizedCode);
+      if (!voucherInfo) {
+        return NextResponse.json({ error: "Bunday promokod mavjud emas yoki muddati tugagan." }, { status: 400 });
+      }
+
+      if (creditsData.usedVouchers?.includes(normalizedCode)) {
+        return NextResponse.json({ error: "Ushbu promokod allaqachon faollashtirilgan!" }, { status: 400 });
+      }
+
+      // Check max uses limit
+      if (voucherInfo.usedCount >= (voucherInfo.maxUses || 1000)) {
+        return NextResponse.json({ error: "Ushbu promokodning faollashtirish limiti tugagan." }, { status: 400 });
+      }
+
+      // Check email restriction
+      if (
+        voucherInfo.restrictedToEmail && 
+        voucherInfo.restrictedToEmail.trim() !== "" && 
+        voucherInfo.restrictedToEmail.toLowerCase() !== userEmail.toLowerCase()
+      ) {
+        return NextResponse.json({ error: "Ushbu promokod faqat maxsus ruxsat berilgan email manzili uchun amal qiladi." }, { status: 400 });
+      }
+
+      // Redeem
+      voucherInfo.usedCount = (voucherInfo.usedCount || 0) + 1;
+      creditsData.balance = (creditsData.balance || 0) + voucherInfo.amount;
+      if (!creditsData.usedVouchers) {
+        creditsData.usedVouchers = [];
+      }
+      creditsData.usedVouchers.push(normalizedCode);
+
+      creditsData.history.unshift({
+        id: `tx-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+        type: "purchase",
+        amount: voucherInfo.amount,
+        description: `Promokod faollashtirildi: ${normalizedCode}`,
         date: timestamp
       });
     } else {

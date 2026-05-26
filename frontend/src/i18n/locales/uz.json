@@ -25,6 +25,7 @@
     "error": "Xatolik yuz berdi"
   },
   "nav": {
+    "admin": "Admin panel",
     "home": "Bosh sahifa",
     "automations": "Avtomatlashtirish",
     "contacts": "Mijozlar",

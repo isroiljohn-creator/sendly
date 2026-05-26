@@ -16,6 +16,17 @@ export default function RegisterPage() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
 
+  // Capture referral ID from URL
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const searchParams = new URLSearchParams(window.location.search);
+      const ref = searchParams.get("r");
+      if (ref) {
+        localStorage.setItem("sendly_referrer_id", ref);
+      }
+    }
+  }, []);
+
   // OTP Verification States
   const [isVerifyingEmail, setIsVerifyingEmail] = useState(false);
   const [otpCode, setOtpCode] = useState("");

@@ -25,6 +25,7 @@
     "error": "An error occurred"
   },
   "nav": {
+    "admin": "Admin Panel",
     "home": "Home",
     "automations": "Automations",
     "contacts": "Contacts",

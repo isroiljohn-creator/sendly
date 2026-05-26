@@ -5,7 +5,7 @@ import { AppLayout } from "@/components/layout/AppLayout";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Card, Button, StatusPill, ConfirmModal, AlertModal } from "@/components/ui/primitives";
 import { useI18n } from "@/i18n/I18nProvider";
-import { Save, Database, Trash2, Plus, Bot, X, CheckCircle, ChevronDown, Download, Upload } from "lucide-react";
+import { Save, Database, Trash2, Plus, Bot, X, CheckCircle, ChevronDown, Download, Upload, Eye, EyeOff, Copy, RefreshCw, Check } from "lucide-react";
 import { Instagram } from "@/components/ui/icons";
 import { db } from "@/lib/db";
 import type { User, Channel } from "@/lib/db";
@@ -18,6 +18,9 @@ export default function SettingsPage() {
 
   // User state
   const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [apiKey, setApiKey] = useState("");
+  const [showKey, setShowKey] = useState(false);
+  const [copiedKey, setCopiedKey] = useState(false);
 
   // Form states
   const [name, setName] = useState("");
@@ -162,7 +165,7 @@ export default function SettingsPage() {
   };
 
   useEffect(() => {
-    const user = db.getCurrentUser();
+    const user = db.syncCurrentUserSession() || db.getCurrentUser();
     if (user) {
       setCurrentUser(user);
       setName(user.fullName);
@@ -174,6 +177,19 @@ export default function SettingsPage() {
     }
 
     refreshChannels();
+
+    // Check or generate API Key
+    if (typeof window !== "undefined") {
+      const stored = localStorage.getItem("replai_api_key");
+      if (stored) {
+        setApiKey(stored);
+      } else {
+        const newKey = `sk_live_${Array.from({ length: 32 }, () => Math.floor(Math.random() * 16).toString(16)).join("")}`;
+        localStorage.setItem("replai_api_key", newKey);
+        setApiKey(newKey);
+        db.saveToServer();
+      }
+    }
 
     const searchParams = new URLSearchParams(window.location.search);
     const tabParam = searchParams.get("tab");
@@ -195,6 +211,21 @@ export default function SettingsPage() {
       window.removeEventListener("replai-db-update", refreshChannels);
     };
   }, []);
+
+  const handleRegenerateKey = () => {
+    const newKey = `sk_live_${Array.from({ length: 32 }, () => Math.floor(Math.random() * 16).toString(16)).join("")}`;
+    localStorage.setItem("replai_api_key", newKey);
+    setApiKey(newKey);
+    db.saveToServer();
+    showAlert("Yangi kalit yaratildi", "Yangi API kalit muvaffaqiyatli yaratildi va saqlandi.");
+  };
+
+  const handleCopyKey = () => {
+    navigator.clipboard.writeText(apiKey);
+    setCopiedKey(true);
+    setTimeout(() => setCopiedKey(false), 2000);
+    showAlert("Nusxalandi", "API kalit buferga muvaffaqiyatli nusxalandi.");
+  };
 
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
@@ -699,7 +730,7 @@ export default function SettingsPage() {
 
             {/* API Keys Tab */}
             {activeSection === "apikeys" && (
-              <div className="max-w-[640px] flex flex-col gap-6">
+              <div className="max-w-[640px] flex flex-col gap-6 animate-in fade-in duration-200">
                 <div>
                   <h3 className="text-[28px] font-bold text-black">API Keys</h3>
                   <p className="text-[13px] text-[#707070] mt-1.5">{t("pages.settings_page.api_keys_desc")}</p>
@@ -711,17 +742,37 @@ export default function SettingsPage() {
                     <span className="bg-[#C7F33C]/20 text-[#5A7C1E] text-[10px] font-bold px-2 py-0.5 rounded-full">{t("common.active")}</span>
                   </div>
                   <div className="flex gap-2 items-center">
-                    <input
-                      type="password"
-                      readOnly
-                      value="pk_live_51Mxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
-                      className="flex-1 rounded-[10px] border border-[#D8D8D8] px-4 py-2.5 text-[13px] text-black bg-white focus:outline-none font-mono"
-                    />
+                    <div className="relative flex-1">
+                      <input
+                        type={showKey ? "text" : "password"}
+                        readOnly
+                        value={apiKey}
+                        className="w-full rounded-[10px] border border-[#D8D8D8] pl-4 pr-10 py-2.5 text-[13px] text-black bg-white focus:outline-none font-mono focus:border-black"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowKey(!showKey)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-[#707070] hover:text-black transition-colors"
+                      >
+                        {showKey ? <EyeOff size={16} /> : <Eye size={16} />}
+                      </button>
+                    </div>
                     <button
-                      onClick={() => showAlert("Nusxalandi", "API kalit buferga nusxalandi.")}
-                      className="h-[38px] bg-black hover:bg-black/80 text-white font-semibold text-[12px] px-4 rounded-[10px] transition-colors"
+                      onClick={handleCopyKey}
+                      className="h-[38px] bg-black hover:bg-black/80 text-white font-semibold text-[12px] px-4 rounded-[10px] transition-all flex items-center gap-1.5 active:scale-95 shrink-0"
                     >
-                      {t("common.copy")}
+                      {copiedKey ? <Check size={14} /> : <Copy size={14} />}
+                      <span>{t("common.copy")}</span>
+                    </button>
+                  </div>
+                  
+                  <div className="flex justify-end mt-1">
+                    <button
+                      onClick={handleRegenerateKey}
+                      className="text-[11px] font-bold text-red-600 hover:text-red-700 hover:underline flex items-center gap-1 transition-colors"
+                    >
+                      <RefreshCw size={12} />
+                      <span>Yangi API kalit yaratish</span>
                     </button>
                   </div>
                 </div>

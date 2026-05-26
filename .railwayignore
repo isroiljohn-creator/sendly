@@ -1,0 +1,28 @@
+# Ignore node_modules
+node_modules/
+**/node_modules/
+
+# Ignore build directories
+.next/
+**/.next/
+out/
+**/out/
+dist/
+**/dist/
+
+# Ignore git folder
+.git/
+
+# Ignore local environment and DBs
+.env
+.env.*
+db.json
+**/db.json
+
+# Ignore logs
+*.log
+npm-debug.log*
+
+# Ignore system files
+.DS_Store
+*.tsbuildinfo

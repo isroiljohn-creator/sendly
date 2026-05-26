@@ -23,6 +23,7 @@ import {
   ChevronRight,
   Check,
   Sparkles,
+  Shield,
 } from "lucide-react";
 import { Instagram } from "@/components/ui/icons";
 import type { ComponentType } from "react";
@@ -111,6 +112,7 @@ export function Sidebar() {
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
   const [langMenuOpen, setLangMenuOpen] = useState(false);
   const [currentUser, setCurrentUser] = useState<DBUser | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   const dropdownRef = useRef<HTMLDivElement>(null);
   const profileRef = useRef<HTMLDivElement>(null);
@@ -119,7 +121,13 @@ export function Sidebar() {
     const load = () => {
       setChannels(db.getChannels());
       setActiveChannel(db.getActiveChannel());
-      setCurrentUser(db.getCurrentUser());
+      const user = db.getCurrentUser();
+      setCurrentUser(user);
+      if (user && (user.email === "admin@sendly.uz" || user.email === "isroiljohnabdullayev@gmail.com" || (user as any).role === "admin")) {
+        setIsAdmin(true);
+      } else {
+        setIsAdmin(false);
+      }
     };
     load();
     // re-sync when tab regains focus or local database updates
@@ -274,6 +282,12 @@ export function Sidebar() {
         {TOP_ITEMS.map((item) => (
           <NavButton key={item.to} item={item} active={isActive(item.to)} />
         ))}
+        {isAdmin && (
+          <NavButton 
+            item={{ to: "/admin", Icon: Shield, labelKey: "nav.admin" }} 
+            active={isActive("/admin")} 
+          />
+        )}
       </nav>
 
       <div className="mb-1 flex flex-col items-center gap-2">
