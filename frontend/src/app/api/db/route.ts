@@ -111,11 +111,16 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
+  const { searchParams } = new URL(request.url);
+  const userId = searchParams.get("userId") || "guest";
+  let payload: any;
   try {
-    const { searchParams } = new URL(request.url);
-    const userId = searchParams.get("userId") || "guest";
-    const payload = await request.json();
-    
+    payload = await request.json();
+  } catch (err) {
+    return NextResponse.json({ error: "Invalid JSON payload" }, { status: 400 });
+  }
+
+  try {
     // Use Supabase Cloud Database if credentials are set
     if (process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY) {
       const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY);

@@ -61,7 +61,7 @@ export default function AccountPage() {
   const [billingCycle, setBillingCycle] = useState<"monthly" | "yearly">("monthly");
 
   // AI Credits States
-  const [aiCreditsData, setAiCreditsData] = useState<{ balance: number; used: number; history: any[] }>({ balance: 0, used: 0, history: [] });
+  const [aiCreditsData, setAiCreditsData] = useState<{ balance: number; used: number; history: any[]; usedVouchers?: string[] }>({ balance: 0, used: 0, history: [] });
   const [isBuyCreditsModalOpen, setIsBuyCreditsModalOpen] = useState(false);
   const [processingPurchase, setProcessingPurchase] = useState(false);
 

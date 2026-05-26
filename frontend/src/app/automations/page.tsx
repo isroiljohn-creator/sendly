@@ -141,57 +141,7 @@ export default function AutomationsPage() {
     loadAllData();
   };
 
-  // Create Quick keyword bot
-  const handleCreateQuickBot = () => {
-    if (!quickBotChannelId) {
-      showAlert(t("common.error"), t("pages.automations_page.error_select_channel"));
-      return;
-    }
-    if (!quickBotKeywords.trim()) {
-      showAlert(t("common.error"), t("pages.automations_page.error_enter_keywords"));
-      return;
-    }
-    if (!quickBotReply.trim()) {
-      showAlert(t("common.error"), t("pages.automations_page.error_enter_reply"));
-      return;
-    }
 
-    const user = db.getCurrentUser();
-    const plan = user?.plan || "free";
-    const maxAutos = plan === "premium" ? 500 : plan === "pro" ? 50 : 2;
-    const currentActiveCount = db.getAllAutomations().filter((a) => a.active).length;
-    const shouldBeActive = currentActiveCount < maxAutos;
-
-    if (!shouldBeActive) {
-      showAlert(
-        t("pages.automations_page.quick_bot_title"),
-        t("pages.automations_page.quick_bot_created_inactive").replace("{limit}", String(maxAutos))
-      );
-    }
-
-    const current = db.getChannelAutomations(quickBotChannelId);
-    const newAuto: Automation = {
-      id: `quick_${Date.now()}`,
-      name: quickBotName.trim() || t("pages.automations_page.quick_bot"),
-      triggerType: "keyword",
-      triggerDetails: quickBotKeywords.trim(),
-      runs: "0",
-      completion: "0%",
-      active: shouldBeActive,
-      groupId: selectedGroupId !== "all" && selectedGroupId !== "none" ? selectedGroupId : undefined,
-    };
-
-    current.push(newAuto);
-    db.saveChannelAutomations(quickBotChannelId, current);
-
-    // Reset and close
-    setQuickBotName("");
-    setQuickBotKeywords("");
-    setQuickBotReply("");
-    setQuickBotChannelId("");
-    setIsQuickBotModalOpen(false);
-    loadAllData();
-  };
 
   // Add custom group
   const handleAddGroup = () => {
