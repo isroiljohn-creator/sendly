@@ -651,37 +651,69 @@ export default function AdminPage() {
 
                 {/* Metric Cards Grid */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                  <MetricCard
-                    label={tr("totalUsers")}
-                    value={`${stats?.totalUsers ?? 0} ta`}
-                    caption={tr("totalUsersDesc")}
-                    trend="+14% vs last period"
-                    trendType="positive"
-                  />
-                  
-                  <MetricCard
-                    label={tr("premiumProSubscriptions")}
-                    value={`${stats?.activePremiumCount ?? 0} / ${stats?.activeProCount ?? 0}`}
-                    caption={tr("premiumProSubscriptionsDesc")}
-                    trend="+8% vs last month"
-                    trendType="positive"
-                  />
+                  {/* Card 1: Jami foydalanuvchilar */}
+                  <Card className="flex min-h-[140px] flex-col justify-between p-6 border border-[#D8D8D8] bg-white hover:shadow-md transition-all duration-200">
+                    <div className="flex items-start justify-between gap-2">
+                      <span className="text-[12px] text-[#707070] font-bold leading-tight uppercase">{tr("totalUsers")}</span>
+                      <span className="bg-[#C7F33C] text-[#1A2906] rounded-full px-2 py-0.5 text-[10px] font-bold shrink-0 whitespace-nowrap">
+                        +14%
+                      </span>
+                    </div>
+                    <div className="mt-4">
+                      <div className="text-[28px] md:text-[32px] font-black text-black leading-none">
+                        {stats?.totalUsers ?? 0} ta
+                      </div>
+                      <div className="mt-1.5 text-[10px] text-[#707070]">{tr("totalUsersDesc")}</div>
+                    </div>
+                  </Card>
 
-                  <MetricCard
-                    label={tr("conversionRates")}
-                    value={`${stats?.conversionsRate?.visitorToRegister || '8.4%'} / ${stats?.conversionsRate?.registerToPaid || '4.2%'}`}
-                    caption="Visitor -> Reg / Reg -> Paid"
-                    trend="Active"
-                    trendType="neutral"
-                  />
+                  {/* Card 2: Premium / Pro obunalar */}
+                  <Card className="flex min-h-[140px] flex-col justify-between p-6 border border-[#D8D8D8] bg-white hover:shadow-md transition-all duration-200">
+                    <div className="flex items-start justify-between gap-2">
+                      <span className="text-[12px] text-[#707070] font-bold leading-tight uppercase">{tr("premiumProSubscriptions")}</span>
+                      <span className="bg-[#C7F33C] text-[#1A2906] rounded-full px-2 py-0.5 text-[10px] font-bold shrink-0 whitespace-nowrap">
+                        +8%
+                      </span>
+                    </div>
+                    <div className="mt-4">
+                      <div className="text-[28px] md:text-[32px] font-black text-black leading-none">
+                        {stats?.activePremiumCount ?? 0} / {stats?.activeProCount ?? 0}
+                      </div>
+                      <div className="mt-1.5 text-[10px] text-[#707070]">{tr("premiumProSubscriptionsDesc")}</div>
+                    </div>
+                  </Card>
 
-                  <MetricCard
-                    label={tr("connectedChatbots")}
-                    value={`${stats?.totalChannels ?? 0} ta`}
-                    caption={tr("connectedChatbotsDesc")}
-                    trend="+15% vs last period"
-                    trendType="positive"
-                  />
+                  {/* Card 3: Konversiya ko'rsatkichlari */}
+                  <Card className="flex min-h-[140px] flex-col justify-between p-6 border border-[#D8D8D8] bg-white hover:shadow-md transition-all duration-200">
+                    <div className="flex items-start justify-between gap-2">
+                      <span className="text-[12px] text-[#707070] font-bold leading-tight uppercase">{tr("conversionRates")}</span>
+                      <span className="bg-gray-100 text-[#707070] rounded-full px-2 py-0.5 text-[10px] font-bold shrink-0 whitespace-nowrap">
+                        Active
+                      </span>
+                    </div>
+                    <div className="mt-4">
+                      <div className="text-[20px] md:text-[22px] font-black text-black leading-none whitespace-nowrap">
+                        {stats?.conversionsRate?.visitorToRegister || '8.4%'} / {stats?.conversionsRate?.registerToPaid || '4.2%'}
+                      </div>
+                      <div className="mt-1.5 text-[10px] text-[#707070]">Traffic → Reg / Reg → Paid</div>
+                    </div>
+                  </Card>
+
+                  {/* Card 4: Ulangan chatbotlar */}
+                  <Card className="flex min-h-[140px] flex-col justify-between p-6 border border-[#D8D8D8] bg-white hover:shadow-md transition-all duration-200">
+                    <div className="flex items-start justify-between gap-2">
+                      <span className="text-[12px] text-[#707070] font-bold leading-tight uppercase">{tr("connectedChatbots")}</span>
+                      <span className="bg-[#C7F33C] text-[#1A2906] rounded-full px-2 py-0.5 text-[10px] font-bold shrink-0 whitespace-nowrap">
+                        +15%
+                      </span>
+                    </div>
+                    <div className="mt-4">
+                      <div className="text-[28px] md:text-[32px] font-black text-black leading-none">
+                        {stats?.totalChannels ?? 0} ta
+                      </div>
+                      <div className="mt-1.5 text-[10px] text-[#707070]">{tr("connectedChatbotsDesc")}</div>
+                    </div>
+                  </Card>
                 </div>
 
                 {/* Charts Grid */}
