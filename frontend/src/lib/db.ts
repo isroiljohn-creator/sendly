@@ -276,7 +276,16 @@ export const db = {
   // 1. Auth Database
   getUsers(): User[] {
     if (!isClient) return [];
-    const parsed = safeParse(localStorage.getItem("replai_users"), []);
+    const val = localStorage.getItem("replai_users");
+    if (!val) {
+      const initial: User[] = [
+        { id: "1", email: "admin@sendly.uz", password: "admin123", fullName: "Admin", isCardLinked: true, plan: "premium" },
+        { id: "2", email: "isroiljohnabdullayev@gmail.com", password: "password", fullName: "Isroiljon Abdullayev", isCardLinked: true, plan: "premium" }
+      ];
+      localStorage.setItem("replai_users", JSON.stringify(initial));
+      return initial;
+    }
+    const parsed = safeParse(val, []);
     return Array.isArray(parsed) ? parsed.filter((u: unknown): u is User => !!u && typeof u === "object" && typeof (u as Record<string, unknown>).email === "string") : [];
   },
 

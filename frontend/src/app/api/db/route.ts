@@ -92,6 +92,17 @@ export async function GET(request: Request) {
     };
     writeDb(dbData);
   }
+
+  if (!dbData.users || dbData.users.length === 0) {
+    dbData.users = [
+      { id: "1", email: "admin@sendly.uz", password: "admin123", fullName: "Admin", isCardLinked: true, plan: "premium" },
+      { id: "2", email: "isroiljohnabdullayev@gmail.com", password: "password", fullName: "Isroiljon Abdullayev", isCardLinked: true, plan: "premium" }
+    ];
+    if (!dbData.userData) {
+      dbData.userData = {};
+    }
+    writeDb(dbData);
+  }
   
   // Extract user's specific data
   const userSpecificData = dbData.userData?.[userId] || {};
