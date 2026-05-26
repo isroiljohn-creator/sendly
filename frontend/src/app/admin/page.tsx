@@ -54,6 +54,9 @@ export default function AdminPage() {
   // Announcement creator state
   const [newAnnouncement, setNewAnnouncement] = useState("");
 
+  // User search query state
+  const [userQuery, setUserQuery] = useState("");
+
   // Modals
   const [alertOpen, setAlertOpen] = useState(false);
   const [alertTitle, setAlertTitle] = useState("");
@@ -254,7 +257,6 @@ export default function AdminPage() {
   };
 
   // User search
-  const [userQuery, setUserQuery] = useState("");
   const filteredUsers = (users || []).filter(u => 
     u && (
       (u.fullName || "").toLowerCase().includes(userQuery.toLowerCase()) || 
