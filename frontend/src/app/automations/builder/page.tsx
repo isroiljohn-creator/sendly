@@ -146,6 +146,7 @@ function ButtonEdge({
 
 function MessageNode({ data, id }: NodeProps<NodeData>) {
   const { setNodes, setEdges, getNodes, addNodes } = useReactFlow();
+  const { t } = useI18n();
   const [showAddMenu, setShowAddMenu] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -208,7 +209,7 @@ function MessageNode({ data, id }: NodeProps<NodeData>) {
           className={`p-1 transition-colors cursor-pointer rounded hover:bg-neutral-100 ${
             isEntryPoint ? "text-black" : "text-[#C7C7CC] hover:text-black"
           }`}
-          title={isEntryPoint ? "Boshlanish bloki (Faol)" : "Boshlanish bloki qilish"}
+          title={isEntryPoint ? t("pages.builder.entry_point_active_tooltip") : t("pages.builder.entry_point_make_tooltip")}
         >
           <LogIn size={14} strokeWidth={2.5} />
         </button>
@@ -256,7 +257,7 @@ function MessageNode({ data, id }: NodeProps<NodeData>) {
       <div className="bg-white px-4 py-3 border-b border-[#F2F2F7] flex items-center justify-between rounded-t-lg h-[45px]">
         <div className="flex items-center gap-2">
           <MessageCircle size={15} className="text-[#3B82F6]" strokeWidth={2.5} />
-          <span className="text-[13px] font-bold text-black tracking-wide">Message</span>
+          <span className="text-[13px] font-bold text-black tracking-wide">{t("pages.builder.block_message")}</span>
         </div>
         <div className="flex items-center gap-3">
           <span className="text-[11px] font-bold text-[#8E8E93] flex items-center gap-1">
@@ -429,14 +430,14 @@ function MessageNode({ data, id }: NodeProps<NodeData>) {
                 onClick={(e) => {
                   e.stopPropagation();
                   const newId = `btn-${Date.now()}`;
-                  const newBtn = { id: newId, label: "Tugma", type: "action" as const };
+                  const newBtn = { id: newId, label: t("pages.builder.btn_placeholder"), type: "action" as const };
                   setNodes((nds) => nds.map((n) => n.id === id ? { ...n, data: { ...n.data, buttons: [...(n.data.buttons || []), newBtn] } } : n));
                   window.dispatchEvent(new CustomEvent("edit-button", { detail: { nodeId: id, buttonId: newId } }));
                 }}
                 data-is-button="true"
                 className="w-full text-center py-2.5 border border-dashed border-[#E5E5EA] hover:border-black/30 rounded-lg text-[10.5px] font-extrabold text-[#707070] hover:text-black flex items-center justify-center gap-1 transition-all bg-white cursor-pointer nodrag canvas-btn-item"
               >
-                <span>+ Add button</span>
+                <span>{t("pages.builder.add_button")}</span>
               </button>
             </div>
           </div>
@@ -449,7 +450,7 @@ function MessageNode({ data, id }: NodeProps<NodeData>) {
             onClick={(e) => {
               e.stopPropagation();
               const newId = `btn-${Date.now()}`;
-              const newBtn = { id: newId, label: "Tugma", type: "action" as const };
+              const newBtn = { id: newId, label: t("pages.builder.btn_placeholder"), type: "action" as const };
               setNodes((nds) => nds.map((n) => n.id === id ? { ...n, data: { ...n.data, buttons: [newBtn] } } : n));
               window.dispatchEvent(new CustomEvent("edit-button", { detail: { nodeId: id, buttonId: newId } }));
             }}
@@ -522,6 +523,7 @@ function MessageNode({ data, id }: NodeProps<NodeData>) {
 
 function ActionNode({ data, id }: NodeProps<NodeData>) {
   const { setNodes, setEdges, getNodes, addNodes } = useReactFlow();
+  const { t } = useI18n();
 
   const hasAction = !!data.actionType;
 
@@ -568,7 +570,7 @@ function ActionNode({ data, id }: NodeProps<NodeData>) {
           className={`p-1 transition-colors cursor-pointer rounded hover:bg-neutral-100 ${
             isEntryPoint ? "text-black" : "text-[#C7C7CC] hover:text-black"
           }`}
-          title={isEntryPoint ? "Boshlanish bloki (Faol)" : "Boshlanish bloki qilish"}
+          title={isEntryPoint ? t("pages.builder.entry_point_active_tooltip") : t("pages.builder.entry_point_make_tooltip")}
         >
           <LogIn size={14} strokeWidth={2.5} />
         </button>
@@ -615,7 +617,7 @@ function ActionNode({ data, id }: NodeProps<NodeData>) {
       <div className="bg-white px-4 py-3 border-b border-[#F2F2F7] flex items-center justify-between rounded-t-lg h-[45px]">
         <div className="flex items-center gap-2">
           <Zap size={14} className="text-[#FF9500] fill-[#FF9500]" strokeWidth={2.5} />
-          <span className="text-[13px] font-bold text-black tracking-wide">Action</span>
+          <span className="text-[13px] font-bold text-black tracking-wide">{t("pages.builder.block_action")}</span>
         </div>
         <div className="flex items-center gap-3">
           <span className="text-[11px] font-bold text-[#8E8E93] flex items-center gap-1">
@@ -659,7 +661,7 @@ function ActionNode({ data, id }: NodeProps<NodeData>) {
             }}
             className="bg-white border border-[#FF9500]/40 rounded-xl p-3 flex items-center justify-center shadow-sm cursor-pointer hover:bg-neutral-50/30 transition-all select-none nodrag"
           >
-            <span className="text-[11px] text-[#707070] font-bold">Click to add an action</span>
+            <span className="text-[11px] text-[#707070] font-bold">{t("pages.builder.click_add_action")}</span>
           </div>
         )}
       </div>
@@ -682,6 +684,7 @@ function ActionNode({ data, id }: NodeProps<NodeData>) {
 
 function ConditionNode({ data, id }: NodeProps<NodeData>) {
   const { setNodes, setEdges, getNodes, addNodes } = useReactFlow();
+  const { t } = useI18n();
 
   const hasCondition = !!data.conditionType;
 
@@ -728,7 +731,7 @@ function ConditionNode({ data, id }: NodeProps<NodeData>) {
           className={`p-1 transition-colors cursor-pointer rounded hover:bg-neutral-100 ${
             isEntryPoint ? "text-black" : "text-[#C7C7CC] hover:text-black"
           }`}
-          title={isEntryPoint ? "Boshlanish bloki (Faol)" : "Boshlanish bloki qilish"}
+          title={isEntryPoint ? t("pages.builder.entry_point_active_tooltip") : t("pages.builder.entry_point_make_tooltip")}
         >
           <LogIn size={14} strokeWidth={2.5} />
         </button>
@@ -775,7 +778,7 @@ function ConditionNode({ data, id }: NodeProps<NodeData>) {
       <div className="bg-white px-4 py-3 border-b border-[#F2F2F7] flex items-center justify-between rounded-t-lg h-[45px]">
         <div className="flex items-center gap-2">
           <Filter size={14} className="text-[#34C759]" strokeWidth={2.5} />
-          <span className="text-[13px] font-bold text-black tracking-wide">Condition</span>
+          <span className="text-[13px] font-bold text-black tracking-wide">{t("pages.builder.block_condition")}</span>
         </div>
         <div className="flex items-center gap-3">
           <span className="text-[11px] font-bold text-[#8E8E93] flex items-center gap-1">
@@ -811,7 +814,7 @@ function ConditionNode({ data, id }: NodeProps<NodeData>) {
               }}
               className="w-full flex items-center justify-center py-2.5 border border-[#34C759]/40 bg-white rounded-xl text-[11px] font-bold text-[#707070] select-none shadow-sm cursor-pointer hover:bg-neutral-50/30 transition-all nodrag"
             >
-              <span>Condition is not set</span>
+              <span>{t("pages.builder.condition_not_set")}</span>
             </div>
           )}
           
@@ -839,7 +842,7 @@ function ConditionNode({ data, id }: NodeProps<NodeData>) {
           }}
           className="w-full text-center py-2 border border-dashed border-[#D8D8D8] hover:border-black/20 hover:bg-[#FAFAFA] rounded-lg text-[10.5px] font-extrabold text-[#707070] hover:text-black flex items-center justify-center gap-1 transition-all bg-white cursor-pointer shadow-sm nodrag"
         >
-          <span>+ Add condition</span>
+          <span>{t("pages.builder.add_condition")}</span>
         </button>
 
         {/* Fallback output at bottom-right */}
@@ -850,7 +853,7 @@ function ConditionNode({ data, id }: NodeProps<NodeData>) {
           }}
           className="relative flex items-center justify-between pt-1 pb-0.5 px-1.5 overflow-visible nodrag cursor-pointer"
         >
-          <span className="text-[10px] text-[#8E8E93] font-bold">Don&apos;t match any conditions</span>
+          <span className="text-[10px] text-[#8E8E93] font-bold">{t("pages.builder.dont_match_conditions")}</span>
           <Handle
             type="source"
             position={Position.Right}
@@ -872,6 +875,7 @@ function ConditionNode({ data, id }: NodeProps<NodeData>) {
 
 function NoteNode({ data, id }: NodeProps<NodeData>) {
   const { setNodes, setEdges, getNodes, addNodes } = useReactFlow();
+  const { t } = useI18n();
 
   const duplicateNode = (nodeId: string) => {
     const nodes = getNodes();
@@ -926,7 +930,7 @@ function NoteNode({ data, id }: NodeProps<NodeData>) {
       </div>
 
       <textarea
-        value={data.label || "Enter message"}
+        value={data.label === "Enter message" ? "" : (data.label || "")}
         onChange={(e) => {
           const val = e.target.value;
           setNodes((nds) =>
@@ -935,7 +939,7 @@ function NoteNode({ data, id }: NodeProps<NodeData>) {
         }}
         className="w-full bg-transparent resize-none border-none outline-none text-[12px] text-[#1A73E8] leading-normal font-medium nodrag placeholder-[#1A73E8]/50"
         rows={4}
-        placeholder="Enter message"
+        placeholder={t("pages.builder.enter_message")}
       />
     </div>
   );
@@ -945,16 +949,16 @@ function NoteNode({ data, id }: NodeProps<NodeData>) {
 export default function BuilderPage() {
   const { t } = useI18n();
 
-  const TEMPLATE_FLOWS: Record<string, { nodes: Node<NodeData>[]; edges: Edge[] }> = {
+  const TEMPLATE_FLOWS = useMemo<Record<string, { nodes: Node<NodeData>[]; edges: Edge[] }>>(() => ({
     lead_magnet: {
       nodes: [
-        { id: "n1", type: "message", data: { label: "Hi, want to get a lesson on setting up automation in Direct with a subscription check and lead magnet delivery?", nodeType: "message", imageUrl: "/logo.svg", isEntryPoint: true, buttons: [{ id: "b1", label: "Yes, I do!🤩", type: "action" }, { id: "b2", label: "Nomini kiriting", type: "action" }] }, position: { x: 100, y: 150 } },
-        { id: "n2", type: "action", data: { label: "clicked the button scheme", nodeType: "action" }, position: { x: 450, y: 120 } },
-        { id: "n3", type: "condition", data: { label: "Obuna", nodeType: "condition", conditionType: "is_follower" }, position: { x: 770, y: 120 } },
-        { id: "n4", type: "message", data: { label: "Yaxshi! Obuna bo'lganingiz uchun rahmat. Mana kitob havolasi: https://t.me/yourusername", nodeType: "message", buttons: [{ id: "b3", label: "Yuklab olish", type: "link", url: "https://example.com" }] }, position: { x: 1120, y: 50 } },
-        { id: "n5", type: "message", data: { label: "Afsuski, siz hali obuna bo'lmagansiz. Iltimos obuna bo'ling va keyin 'Tekshirish' tugmasini bosing.", nodeType: "message", buttons: [{ id: "b4", label: "Obunani tekshirish", type: "action" }] }, position: { x: 1120, y: 250 } },
-        { id: "n7", type: "condition", data: { label: "Obuna (Eslatma)", nodeType: "condition", conditionType: "is_follower" }, position: { x: 770, y: 450 } },
-        { id: "n8", type: "message", data: { label: "Siz hali obuna bo'lmagansiz, bonusni olish uchun obuna bo'lishingiz kerak.", nodeType: "message" }, position: { x: 1120, y: 480 } },
+        { id: "n1", type: "message", data: { label: t("pages.builder.tmpl_lead_msg1_label"), nodeType: "message", imageUrl: "/logo.svg", isEntryPoint: true, buttons: [{ id: "b1", label: t("pages.builder.tmpl_lead_msg1_btn1"), type: "action" }, { id: "b2", label: t("pages.builder.tmpl_lead_msg1_btn2"), type: "action" }] }, position: { x: 100, y: 150 } },
+        { id: "n2", type: "action", data: { label: t("pages.builder.tmpl_lead_act_label"), nodeType: "action" }, position: { x: 450, y: 120 } },
+        { id: "n3", type: "condition", data: { label: t("pages.builder.tmpl_lead_cond_label"), nodeType: "condition", conditionType: "is_follower" }, position: { x: 770, y: 120 } },
+        { id: "n4", type: "message", data: { label: t("pages.builder.tmpl_lead_msg2_label"), nodeType: "message", buttons: [{ id: "b3", label: t("pages.builder.tmpl_lead_msg2_btn"), type: "link", url: "https://example.com" }] }, position: { x: 1120, y: 50 } },
+        { id: "n5", type: "message", data: { label: t("pages.builder.tmpl_lead_msg3_label"), nodeType: "message", buttons: [{ id: "b4", label: t("pages.builder.tmpl_lead_msg3_btn"), type: "action" }] }, position: { x: 1120, y: 250 } },
+        { id: "n7", type: "condition", data: { label: t("pages.builder.tmpl_lead_cond2_label"), nodeType: "condition", conditionType: "is_follower" }, position: { x: 770, y: 450 } },
+        { id: "n8", type: "message", data: { label: t("pages.builder.tmpl_lead_msg4_label"), nodeType: "message" }, position: { x: 1120, y: 480 } },
       ],
       edges: [
         { id: "e2", source: "n1", sourceHandle: "btn-b1", target: "n2", animated: true, style: { stroke: "#9296AD", strokeWidth: 1.5 }, markerEnd: { type: MarkerType.ArrowClosed, color: "#9296AD" } },
@@ -985,7 +989,7 @@ export default function BuilderPage() {
     },
     welcome_faq: {
       nodes: [
-        { id: "n1", type: "message", data: { label: t("pages.builder.tmpl_welcome_msg1_label"), nodeType: "message", isEntryPoint: true, buttons: [{ id: "b2", label: "Savol berish", type: "action" }, { id: "b3", label: "Kurslar haqida", type: "action" }] }, position: { x: 100, y: 150 } },
+        { id: "n1", type: "message", data: { label: t("pages.builder.tmpl_welcome_msg1_label"), nodeType: "message", isEntryPoint: true, buttons: [{ id: "b2", label: t("pages.builder.tmpl_welcome_btn_ask"), type: "action" }, { id: "b3", label: t("pages.builder.tmpl_welcome_btn_courses"), type: "action" }] }, position: { x: 100, y: 150 } },
         { id: "n2", type: "message", data: { label: t("pages.builder.tmpl_welcome_msg2_label"), nodeType: "message", buttons: [] }, position: { x: 450, y: 50 } },
         { id: "n3", type: "message", data: { label: t("pages.builder.tmpl_welcome_msg3_label"), nodeType: "message", buttons: [] }, position: { x: 450, y: 250 } },
       ],
@@ -994,24 +998,24 @@ export default function BuilderPage() {
         { id: "e3", source: "n1", sourceHandle: "btn-b3", target: "n3", animated: true, style: { stroke: "#9296AD", strokeWidth: 1.5 }, markerEnd: { type: MarkerType.ArrowClosed, color: "#9296AD" } },
       ],
     },
-  };
+  }), [t]);
 
-  const TRIGGER_SOURCES = [
-    { value: "message_recognition", label: "Message recognition", icon: Eye },
-    { value: "dm", label: "Direct Message", icon: MessageCircle },
-    { value: "comment", label: "Post Comment", icon: MessageSquare },
-    { value: "live_comment", label: "Live Stream Comment", icon: Radio },
-    { value: "story_reaction", label: "Story Reaction", icon: Flame },
-    { value: "story_reply", label: "Story Reply", icon: Send },
-    { value: "story_mention", label: "Story Mention", icon: AtSign },
-    { value: "payment", label: "Successful Payment", icon: CreditCard },
-  ];
+  const TRIGGER_SOURCES = useMemo(() => [
+    { value: "message_recognition", label: t("pages.builder.trigger_message_recognition"), icon: Eye },
+    { value: "dm", label: t("pages.builder.trigger_dm"), icon: MessageCircle },
+    { value: "comment", label: t("pages.builder.trigger_comment"), icon: MessageSquare },
+    { value: "live_comment", label: t("pages.builder.trigger_live_comment"), icon: Radio },
+    { value: "story_reaction", label: t("pages.builder.trigger_story_reaction"), icon: Flame },
+    { value: "story_reply", label: t("pages.builder.trigger_story_reply"), icon: Send },
+    { value: "story_mention", label: t("pages.builder.trigger_story_mention"), icon: AtSign },
+    { value: "payment", label: t("pages.builder.trigger_payment"), icon: CreditCard },
+  ], [t]);
 
-  const TRIGGER_MATCHES = [
-    { value: "any", label: "Any message" },
-    { value: "is", label: "Message is" },
-    { value: "contains", label: "Message contains" },
-  ];
+  const TRIGGER_MATCHES = useMemo(() => [
+    { value: "any", label: t("pages.builder.match_any") },
+    { value: "is", label: t("pages.builder.match_is") },
+    { value: "contains", label: t("pages.builder.match_contains") },
+  ], [t]);
 
   const CONDITION_TYPES = [
     { value: "is_follower", label: t("pages.builder.cond_follower") },
@@ -1153,7 +1157,7 @@ export default function BuilderPage() {
     setFlowProhibitRestart(inspProhibitRestart);
     setIsEditingTrigger(false);
     
-    setToastMsg("Trigger sozlamalari muvaffaqiyatli saqlandi!");
+    setToastMsg(t("pages.builder.trigger_saved_toast"));
     setShowToast(true);
     setTimeout(() => setShowToast(false), 2000);
   };
@@ -1162,7 +1166,7 @@ export default function BuilderPage() {
     const handleSetEntryPoint = (e: Event) => {
       const { nodeId } = (e as CustomEvent).detail;
       setEntryPointId(nodeId);
-      setToastMsg("Boshlanish bloki (Entry point) belgilandi!");
+      setToastMsg(t("pages.builder.entry_point_set_toast"));
       setShowToast(true);
       setTimeout(() => setShowToast(false), 2000);
     };
@@ -1738,19 +1742,19 @@ export default function BuilderPage() {
       db.saveAutomations(list);
     }
 
-    setToastMsg("Serverga saqlanmoqda...");
+    setToastMsg(t("pages.builder.saving_to_server"));
     setShowToast(true);
 
     try {
       const syncRes = await db.saveToServer();
       if (!syncRes.success) {
-        setToastMsg(syncRes.error || "Serverga saqlashda xatolik yuz berdi");
+        setToastMsg(syncRes.error || t("pages.builder.server_save_error"));
         setTimeout(() => setShowToast(false), 3000);
         return;
       }
     } catch (e) {
       console.error("Sync error:", e);
-      setToastMsg("Server bilan bog'lanishda xatolik yuz berdi");
+      setToastMsg(t("pages.builder.server_connection_error"));
       setTimeout(() => setShowToast(false), 3000);
       return;
     }
@@ -2083,7 +2087,7 @@ export default function BuilderPage() {
                   {/* Keyword match type — only for text triggers (dm, comment, message_recognition) */}
                   {(inspTriggerSource === "dm" || inspTriggerSource === "comment" || inspTriggerSource === "message_recognition") && (
                     <div className="flex flex-col gap-3 border-t border-[#F0F0F0] pt-4 mt-2">
-                      <h4 className="text-[13px] font-extrabold text-black">Trigger on</h4>
+                      <h4 className="text-[13px] font-extrabold text-black">{t("pages.builder.trigger_on")}</h4>
                       <div className="flex flex-col gap-3">
                         {TRIGGER_MATCHES.map((m) => {
                           const isActive = inspTriggerMatch === m.value;
@@ -2110,7 +2114,7 @@ export default function BuilderPage() {
                   {/* Keywords input */}
                   {inspTriggerMatch !== "any" && (inspTriggerSource === "dm" || inspTriggerSource === "comment" || inspTriggerSource === "message_recognition") && (
                     <div className="flex flex-col gap-2 mt-1">
-                      <p className="text-[10px] font-bold text-[#707070] uppercase tracking-widest px-0.5">Kalit so'zlar (Enter bosib ajrating)</p>
+                      <p className="text-[10px] font-bold text-[#707070] uppercase tracking-widest px-0.5">{t("pages.builder.trigger_keywords_input_label")}</p>
                       <div className="w-full rounded-[12px] bg-[#F0F0F0] p-2 flex flex-wrap gap-1.5 border border-transparent focus-within:border-black/10 focus-within:bg-[#EAEAEA] transition-all min-h-[48px]">
                         {getKeywordsList(inspTriggerKeywords).map((tag, idx) => (
                           <span
@@ -2136,7 +2140,7 @@ export default function BuilderPage() {
                           onBlur={() => {
                             if (newKeywordInput) addKeyword(newKeywordInput);
                           }}
-                          placeholder={getKeywordsList(inspTriggerKeywords).length === 0 ? "masalan: narx, o'qish, chegirma" : ""}
+                          placeholder={getKeywordsList(inspTriggerKeywords).length === 0 ? t("pages.builder.trigger_keywords_placeholder") : ""}
                           className="flex-1 bg-transparent min-w-[80px] outline-none text-[12px] text-black px-1.5 py-1"
                         />
                       </div>
@@ -2148,7 +2152,7 @@ export default function BuilderPage() {
                     <div className="flex items-start gap-2.5 p-3 rounded-[12px] bg-[#F9F9F7] border border-[#E8E8E8] mt-2">
                       <Zap size={14} className="text-black shrink-0 mt-0.5" />
                       <p className="text-[11px] text-[#505050] leading-relaxed">
-                        Ushbu trigger uchun kalit so'zlar talab qilinmaydi. Foydalanuvchi har safar story/live faolligi ko'rsatganda trigger ishga tushadi.
+                        {t("pages.builder.trigger_desc_no_kw_story_live")}
                       </p>
                     </div>
                   )}
@@ -2156,9 +2160,9 @@ export default function BuilderPage() {
                   {/* Prohibit restart Toggle */}
                   <div className="flex items-center justify-between border-t border-[#F0F0F0] pt-4 mt-2">
                     <div className="flex flex-col gap-0.5 max-w-[210px] text-left">
-                      <span className="text-[12px] font-extrabold text-black">Prohibit restart</span>
+                      <span className="text-[12px] font-extrabold text-black">{t("pages.builder.prohibit_restart")}</span>
                       <span className="text-[10px] text-[#707070] leading-normal">
-                        During the specified time the automation can be started only once. All another restarts will be ignored and skipped.
+                        {t("pages.builder.prohibit_restart_desc")}
                       </span>
                     </div>
                     <button
@@ -2179,7 +2183,7 @@ export default function BuilderPage() {
                     onClick={handleSaveTriggerDetails}
                     className="w-full py-3 rounded-full bg-black text-white text-[12px] font-semibold hover:bg-black/80 active:scale-[0.98] transition-all mt-4 border-none cursor-pointer"
                   >
-                    Tayyor
+                    {t("pages.builder.done")}
                   </button>
                 </div>
               </div>
@@ -2191,12 +2195,12 @@ export default function BuilderPage() {
                     <button
                       onClick={() => setSelectedButton(null)}
                       className="p-1 rounded-full hover:bg-neutral-100 text-[#707070] hover:text-black transition-colors"
-                      title="Orqaga"
+                      title={t("back")}
                     >
                       <ArrowLeft size={16} strokeWidth={2.5} />
                     </button>
                     <h3 className="text-[13px] font-black text-black leading-none truncate max-w-[170px]">
-                      {currentButton.label || "Tugma sozlamalari"}
+                      {currentButton.label || t("pages.builder.btn_settings_title")}
                     </h3>
                   </div>
                   <button
@@ -2205,7 +2209,7 @@ export default function BuilderPage() {
                       setSelectedNode(null);
                     }}
                     className="p-1 rounded-full hover:bg-neutral-100 text-[#707070] hover:text-black transition-colors"
-                    title="Yopish"
+                    title={t("pages.builder.close")}
                   >
                     <X size={16} />
                   </button>
@@ -2214,36 +2218,36 @@ export default function BuilderPage() {
                 <div className="px-4 py-4 flex flex-col gap-5 text-left text-black">
                   {/* Button text input */}
                   <div className="flex flex-col gap-2">
-                    <p className="text-[10px] font-bold text-[#707070] uppercase tracking-widest px-0.5">Tugma matni</p>
+                    <p className="text-[10px] font-bold text-[#707070] uppercase tracking-widest px-0.5">{t("pages.builder.btn_label_input")}</p>
                     <input
                       type="text"
                       value={currentButton.label || ""}
                       onChange={(e) => handleUpdateButtonDetail("label", e.target.value)}
-                      placeholder="Masalan: Ha, darsni boshlash!"
+                      placeholder={t("pages.builder.btn_placeholder")}
                       className="w-full rounded-[12px] bg-[#F0F0F0] px-4 py-3 text-[12px] text-black outline-none focus:bg-[#e8e8e8] transition-colors font-medium border border-transparent focus:border-black/10"
                     />
                   </div>
 
                   {/* Action on button (Tugma ustidagi amal) */}
                   <div className="flex flex-col gap-2.5">
-                    <p className="text-[10px] font-bold text-[#707070] uppercase tracking-widest px-0.5">Tugma ustidagi amal</p>
+                    <p className="text-[10px] font-bold text-[#707070] uppercase tracking-widest px-0.5">{t("pages.builder.btn_action_title")}</p>
                     
                     <div className="flex flex-col gap-2">
                       {[
                         {
                           id: "action",
-                          title: "Keyingi qadamga o'tish",
-                          desc: "Navbatdagi blokga yo'naltirish (Canvas bog'lanishi)",
+                          title: t("pages.builder.btn_act_title"),
+                          desc: t("pages.builder.btn_act_desc"),
                         },
                         {
                           id: "link",
-                          title: "Veb-saytni ochish",
-                          desc: "Havola orqali tashqi saytga o'tkazish",
+                          title: t("pages.builder.btn_link_title"),
+                          desc: t("pages.builder.btn_link_desc"),
                         },
                         {
                           id: "payment",
-                          title: "To'lovga o'tish",
-                          desc: "To'lov sahifasiga yo'naltirish havola orqali",
+                          title: t("pages.builder.btn_pay_title"),
+                          desc: t("pages.builder.btn_pay_desc"),
                         },
                       ].map((opt) => {
                         const isSelected = currentButton.type === opt.id;
@@ -2278,7 +2282,7 @@ export default function BuilderPage() {
                   {/* Conditional URL Input */}
                   {(currentButton.type === "link" || currentButton.type === "payment") && (
                     <div className="flex flex-col gap-2 animate-in slide-in-from-top-1">
-                      <p className="text-[10px] font-bold text-[#707070] uppercase tracking-widest px-0.5">Veb-sayt havolasi (URL)</p>
+                      <p className="text-[10px] font-bold text-[#707070] uppercase tracking-widest px-0.5">{t("pages.builder.btn_url_label")}</p>
                       <input
                         type="text"
                         value={currentButton.url || ""}
@@ -2292,8 +2296,8 @@ export default function BuilderPage() {
                   {/* Toggle: Multiple button click */}
                   <div className="flex items-center justify-between p-4 bg-[#F9F9F7] border border-[#E8E8E8] rounded-2xl w-full select-none mt-1">
                     <div className="flex flex-col gap-0.5 text-left">
-                      <span className="text-[12px] font-extrabold text-black leading-tight">Bir nechta bosish</span>
-                      <span className="text-[9px] text-[#707070] leading-none">Tugmani bir necha bor bosish imkoni</span>
+                      <span className="text-[12px] font-extrabold text-black leading-tight">{t("pages.builder.btn_multiple_click")}</span>
+                      <span className="text-[9px] text-[#707070] leading-none">{t("pages.builder.btn_multiple_click_desc")}</span>
                     </div>
                     <label className="relative inline-flex items-center cursor-pointer shrink-0">
                       <input
@@ -2313,13 +2317,13 @@ export default function BuilderPage() {
                       onClick={() => {
                         if (selectedNode && currentButton) {
                           const newId = `btn-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
-                          const duplicatedBtn = { ...currentButton, id: newId, label: `${currentButton.label} (Nusxa)` };
+                          const duplicatedBtn = { ...currentButton, id: newId, label: `${currentButton.label}${t("pages.builder.btn_copy_suffix")}` };
                           
                           setNodes((nds) => nds.map((n) => n.id === selectedNode.id ? { ...n, data: { ...n.data, buttons: [...(n.data.buttons || []), duplicatedBtn] } } : n));
                           setSelectedButton({ nodeId: selectedNode.id, buttonId: newId });
                           setInspButtons((prev) => [...prev, duplicatedBtn]);
                           
-                          setToastMsg("Tugma nusxalandi!");
+                          setToastMsg(t("pages.builder.btn_copied_toast"));
                           setShowToast(true);
                           setTimeout(() => setShowToast(false), 2000);
                         }
@@ -2327,7 +2331,7 @@ export default function BuilderPage() {
                       className="flex-1 py-2.5 rounded-xl border border-[#E8E8E8] hover:border-black text-[11px] font-black text-black bg-white hover:bg-neutral-50 active:scale-[0.98] transition-all flex items-center justify-center gap-1.5 cursor-pointer"
                     >
                       <Copy size={12} />
-                      <span>Nusxalash</span>
+                      <span>{t("pages.builder.btn_copy")}</span>
                     </button>
                     
                     <button
@@ -2338,7 +2342,7 @@ export default function BuilderPage() {
                           setInspButtons((prev) => prev.filter((b) => b.id !== currentButton.id));
                           setSelectedButton(null);
                           
-                          setToastMsg("Tugma o'chirildi");
+                          setToastMsg(t("pages.builder.btn_deleted_toast"));
                           setShowToast(true);
                           setTimeout(() => setShowToast(false), 2000);
                         }
@@ -2346,7 +2350,7 @@ export default function BuilderPage() {
                       className="flex-1 py-2.5 rounded-xl border border-red-200 hover:border-red-500 hover:bg-red-50/50 text-[11px] font-black text-red-500 bg-white active:scale-[0.98] transition-all flex items-center justify-center gap-1.5 cursor-pointer"
                     >
                       <Trash2 size={12} />
-                      <span>O'chirish</span>
+                      <span>{t("pages.builder.btn_delete")}</span>
                     </button>
                   </div>
 
@@ -2355,7 +2359,7 @@ export default function BuilderPage() {
                     onClick={() => setSelectedButton(null)}
                     className="w-full py-3 rounded-full bg-black text-white text-[12px] font-semibold hover:bg-black/80 active:scale-[0.98] transition-all mt-2 cursor-pointer border-none"
                   >
-                    Tayyor
+                    {t("pages.builder.done")}
                   </button>
                 </div>
               </div>
@@ -2394,7 +2398,7 @@ export default function BuilderPage() {
                     <>
                       {/* Trigger Source Cards */}
                       <div className="flex flex-col gap-2">
-                        <p className="text-[10px] font-bold text-[#707070] uppercase tracking-widest px-0.5">Trigger turi</p>
+                        <p className="text-[10px] font-bold text-[#707070] uppercase tracking-widest px-0.5">{t("pages.builder.trigger_source_label")}</p>
                         <div className="grid grid-cols-3 gap-2">
                           {TRIGGER_SOURCES.map((s) => {
                             const IconComponent = s.icon;
@@ -2430,7 +2434,7 @@ export default function BuilderPage() {
                       {/* Keyword match type — only for text triggers (dm, comment, message_recognition) */}
                       {(inspTriggerSource === "dm" || inspTriggerSource === "comment" || inspTriggerSource === "message_recognition") && (
                         <div className="flex flex-col gap-3 border-t border-[#F0F0F0] pt-4 mt-2">
-                          <h4 className="text-[13px] font-extrabold text-black">Trigger on</h4>
+                          <h4 className="text-[13px] font-extrabold text-black">{t("pages.builder.trigger_on")}</h4>
                           <div className="flex flex-col gap-3">
                             {TRIGGER_MATCHES.map((m) => {
                               const isActive = inspTriggerMatch === m.value;
@@ -2457,7 +2461,7 @@ export default function BuilderPage() {
                       {/* Keywords input */}
                       {inspTriggerMatch !== "any" && (inspTriggerSource === "dm" || inspTriggerSource === "comment" || inspTriggerSource === "message_recognition") && (
                         <div className="flex flex-col gap-2 mt-1">
-                          <p className="text-[10px] font-bold text-[#707070] uppercase tracking-widest px-0.5">Kalit so'zlar (Enter bosib ajrating)</p>
+                          <p className="text-[10px] font-bold text-[#707070] uppercase tracking-widest px-0.5">{t("pages.builder.trigger_keywords_input_label")}</p>
                           <div className="w-full rounded-[12px] bg-[#F0F0F0] p-2 flex flex-wrap gap-1.5 border border-transparent focus-within:border-black/10 focus-within:bg-[#EAEAEA] transition-all min-h-[48px]">
                             {getKeywordsList(inspTriggerKeywords).map((tag, idx) => (
                               <span
@@ -2483,7 +2487,7 @@ export default function BuilderPage() {
                               onBlur={() => {
                                 if (newKeywordInput) addKeyword(newKeywordInput);
                               }}
-                              placeholder={getKeywordsList(inspTriggerKeywords).length === 0 ? "masalan: narx, o'qish, chegirma" : ""}
+                              placeholder={getKeywordsList(inspTriggerKeywords).length === 0 ? t("pages.builder.trigger_keywords_placeholder") : ""}
                               className="flex-1 bg-transparent min-w-[80px] outline-none text-[12px] text-black px-1.5 py-1"
                             />
                           </div>
@@ -2495,7 +2499,7 @@ export default function BuilderPage() {
                         <div className="flex items-start gap-2.5 p-3 rounded-[12px] bg-[#F9F9F7] border border-[#E8E8E8] mt-2">
                           <Zap size={14} className="text-black shrink-0 mt-0.5" />
                           <p className="text-[11px] text-[#505050] leading-relaxed">
-                            Ushbu trigger uchun kalit so'zlar talab qilinmaydi. Foydalanuvchi har safar story/live faolligi ko'rsatganda trigger ishga tushadi.
+                            {t("pages.builder.trigger_desc_no_kw_story_live")}
                           </p>
                         </div>
                       )}
@@ -2503,9 +2507,9 @@ export default function BuilderPage() {
                       {/* Prohibit restart Toggle */}
                       <div className="flex items-center justify-between border-t border-[#F0F0F0] pt-4 mt-2">
                         <div className="flex flex-col gap-0.5 max-w-[210px] text-left">
-                          <span className="text-[12px] font-extrabold text-black">Prohibit restart</span>
+                          <span className="text-[12px] font-extrabold text-black">{t("pages.builder.prohibit_restart")}</span>
                           <span className="text-[10px] text-[#707070] leading-normal">
-                            During the specified time the automation can be started only once. All another restarts will be ignored and skipped.
+                            {t("pages.builder.prohibit_restart_desc")}
                           </span>
                         </div>
                         <button
@@ -2539,7 +2543,7 @@ export default function BuilderPage() {
                           onClick={() => setIsRichEditorOpen(true)}
                           className="w-full py-2 bg-[#FAFAFA] border border-[#E8E8E8] hover:border-black rounded-xl text-[10.5px] font-bold text-black flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
                         >
-                          <span>Kengaytirilgan muharrir (Formatlash)</span>
+                          <span>{t("pages.builder.rich_editor_btn")}</span>
                         </button>
                       </div>
 
@@ -2573,7 +2577,7 @@ export default function BuilderPage() {
                             </div>
                             <div className="flex items-center gap-1.5">
                               <span className="text-[9px] uppercase tracking-wider text-[#707070] font-semibold bg-[#F5F5F7] px-2 py-0.5 rounded-md">
-                                {btn.type === "action" ? "Qadam" : btn.type === "payment" ? "To'lov" : "Sayt"}
+                                {btn.type === "action" ? t("pages.builder.btn_badge_step") : btn.type === "payment" ? t("pages.builder.btn_badge_payment") : t("pages.builder.btn_badge_site")}
                               </span>
                               <button
                                 type="button"
@@ -2687,11 +2691,11 @@ export default function BuilderPage() {
                   {/* ── NOTE INSPECTOR ── */}
                   {(nodeType === "note" || nodeType === "wait") && (
                     <div className="flex flex-col gap-2">
-                      <p className="text-[10px] font-bold text-[#707070] uppercase tracking-widest px-0.5">Eslatma matni (Note text)</p>
+                      <p className="text-[10px] font-bold text-[#707070] uppercase tracking-widest px-0.5">{t("pages.builder.note_text_label")}</p>
                       <textarea
                         value={inspLabel}
                         onChange={(e) => setInspLabel(e.target.value)}
-                        placeholder="Enter message"
+                        placeholder={t("pages.builder.enter_message")}
                         className="w-full rounded-[12px] bg-[#F0F0F0] px-4 py-3 text-[12px] text-black outline-none focus:bg-[#e8e8e8] transition-colors resize-none"
                         rows={6}
                       />
@@ -2732,9 +2736,9 @@ export default function BuilderPage() {
                   {/* Entry Point Setting */}
                   <div className="flex items-center justify-between border-t border-[#F0F0F0] pt-4 mt-3 mb-4 select-none">
                     <div className="flex flex-col gap-0.5 max-w-[210px] text-left">
-                      <span className="text-[12px] font-extrabold text-black">Boshlanish bloki (Entry point)</span>
+                      <span className="text-[12px] font-extrabold text-black">{t("pages.builder.entry_point_label")}</span>
                       <span className="text-[10px] text-[#707070] leading-normal">
-                        Ushbu blokdan avtomatlashtirish suhbati boshlanadi
+                        {t("pages.builder.entry_point_desc")}
                       </span>
                     </div>
                     <button
@@ -2742,7 +2746,7 @@ export default function BuilderPage() {
                       onClick={() => {
                         const isCurrentlyEntry = selectedNode.id === entryPointId;
                         if (isCurrentlyEntry) {
-                          setToastMsg("Kamida bitta boshlanish bloki bo'lishi shart.");
+                          setToastMsg(t("pages.builder.entry_point_required_toast"));
                           setShowToast(true);
                           setTimeout(() => setShowToast(false), 2000);
                         } else {
@@ -2767,7 +2771,7 @@ export default function BuilderPage() {
                     }}
                     className="w-full py-3 rounded-full bg-black text-white text-[12px] font-semibold hover:bg-black/80 active:scale-[0.98] transition-all mt-1 border-none cursor-pointer"
                   >
-                    Tayyor
+                    {t("pages.builder.done")}
                   </button>
                 </div>
               </div>
@@ -2790,10 +2794,10 @@ export default function BuilderPage() {
             </button>
 
             <h3 className="text-[18px] font-black text-black tracking-tight text-left">
-              Xabar qo&apos;shish
+              {t("pages.builder.rich_editor_title")}
             </h3>
             <p className="text-[11px] text-[#707070] mt-1 text-left font-medium">
-              Tanlangan blok uchun xabar matnini ko&apos;rsating
+              {t("pages.builder.rich_editor_desc")}
             </p>
 
             <div className="mt-4 border border-[#E8E8E8] rounded-2xl overflow-hidden focus-within:border-black focus-within:ring-1 focus-within:ring-black transition-all bg-white">
@@ -2803,7 +2807,7 @@ export default function BuilderPage() {
                 onChange={(e) => setInspLabel(e.target.value.substring(0, 500))}
                 className="w-full h-40 p-4 text-[12px] bg-white border-0 outline-none resize-none leading-relaxed text-black focus:ring-0 focus:outline-none"
                 maxLength={500}
-                placeholder="Xabarni yozing..."
+                placeholder={t("pages.builder.enter_message")}
               />
               
               {/* Rich toolbar */}
@@ -2814,7 +2818,7 @@ export default function BuilderPage() {
                     type="button"
                     onClick={() => setShowRichEmojiList(!showRichEmojiList)}
                     className="text-[#707070] hover:text-black transition-colors font-bold text-[13px] h-6 px-1.5 hover:bg-[#F0F0F0] rounded cursor-pointer border-0 bg-transparent"
-                    title="Emoji qo'shish"
+                    title={t("pages.builder.tooltip_add_emoji")}
                   >
                     😊
                   </button>
@@ -2841,7 +2845,7 @@ export default function BuilderPage() {
                     type="button"
                     onClick={() => handleInsertFormat("variable")}
                     className="text-[#707070] hover:text-black font-extrabold text-[12px] h-6 px-1.5 hover:bg-[#F0F0F0] rounded font-mono cursor-pointer border-0 bg-transparent"
-                    title="O'zgaruvchi qo'shish"
+                    title={t("pages.builder.tooltip_add_variable")}
                   >
                     {`{...}`}
                   </button>
@@ -2853,7 +2857,7 @@ export default function BuilderPage() {
                     type="button"
                     onClick={() => handleInsertFormat("bold")}
                     className="text-[#707070] hover:text-black font-black text-[12px] h-6 w-6 hover:bg-[#F0F0F0] rounded cursor-pointer border-0 bg-transparent"
-                    title="Qalin (Bold)"
+                    title={t("pages.builder.tooltip_bold")}
                   >
                     B
                   </button>
@@ -2863,7 +2867,7 @@ export default function BuilderPage() {
                     type="button"
                     onClick={() => handleInsertFormat("italic")}
                     className="text-[#707070] hover:text-black italic font-bold text-[12px] h-6 w-6 hover:bg-[#F0F0F0] rounded cursor-pointer border-0 bg-transparent"
-                    title="Kursiv (Italic)"
+                    title={t("pages.builder.tooltip_italic")}
                   >
                     I
                   </button>
@@ -2873,7 +2877,7 @@ export default function BuilderPage() {
                     type="button"
                     onClick={() => handleInsertFormat("underline")}
                     className="text-[#707070] hover:text-black underline font-bold text-[12px] h-6 w-6 hover:bg-[#F0F0F0] rounded cursor-pointer border-0 bg-transparent"
-                    title="Ostiga chizilgan (Underline)"
+                    title={t("pages.builder.tooltip_underline")}
                   >
                     U
                   </button>
@@ -2891,7 +2895,7 @@ export default function BuilderPage() {
                 onClick={() => setIsRichEditorOpen(false)}
                 className="px-5 py-2.5 bg-white border border-[#D8D8D8] text-black font-bold rounded-xl text-[12px] hover:bg-[#F5F5F5] transition-all cursor-pointer"
               >
-                Bekor qilish
+                {t("pages.builder.rich_editor_cancel")}
               </button>
               <button
                 type="button"
@@ -2901,7 +2905,7 @@ export default function BuilderPage() {
                 }}
                 className="px-5 py-2.5 bg-black text-white font-bold rounded-xl text-[12px] hover:bg-neutral-800 transition-all cursor-pointer border-0"
               >
-                Tayyor
+                {t("pages.builder.done")}
               </button>
             </div>
           </div>
