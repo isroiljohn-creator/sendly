@@ -35,7 +35,10 @@ export async function GET(request: Request) {
     }
 
     // Load JWT secret matching the backend default
-    const jwtSecret = process.env.JWT_SECRET || "super_secret_jwt_secret_token_123_abc_xyz";
+    const jwtSecret = process.env.JWT_SECRET;
+    if (!jwtSecret) {
+      throw new Error("JWT_SECRET environment variable is not configured");
+    }
 
     // Create standard payload with user_id and expiration (1 hour)
     const now = Math.floor(Date.now() / 1000);

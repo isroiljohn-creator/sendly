@@ -292,13 +292,13 @@ export default function ChatsPage() {
             <div className="flex items-center gap-3">
               <Zap size={18} className="text-[#C7F33C]" />
               <div>
-                <p className="text-[13px] font-semibold">Hali kanal ulanmagan</p>
-                <p className="text-[11px] text-white/60">Chatlarni ko&apos;rish uchun avval kanal ulang.</p>
+                <p className="text-[13px] font-semibold">{t("pages.chats.no_channel_title")}</p>
+                <p className="text-[11px] text-white/60">{t("pages.chats.no_channel_desc")}</p>
               </div>
             </div>
             <Link href="/settings?connect=choose">
               <button className="bg-white text-black text-[11px] font-semibold py-2 px-4 rounded-full whitespace-nowrap hover:bg-[#F0F0F0] transition-colors">
-                Kanal ulash →
+                {t("pages.chats.connect_channel_btn")}
               </button>
             </Link>
           </div>
@@ -315,9 +315,9 @@ export default function ChatsPage() {
               <div className="w-16 h-16 rounded-2xl bg-[#E8E8E8] text-[#707070] grid place-items-center mb-4">
                 <Clock size={28} />
               </div>
-              <h3 className="text-[16px] font-bold text-black">Hozircha xabarlar yo&apos;q</h3>
+              <h3 className="text-[16px] font-bold text-black">{t("pages.chats.empty_chats_title")}</h3>
               <p className="text-[12px] text-[#707070] mt-1.5 max-w-sm leading-relaxed">
-                Kanalga xabarlar kelishi bilanoq, ular bu yerda ko&apos;rinadi. Bot triggerlarini sinash uchun simulyatordan foydalanishingiz mumkin.
+                {t("pages.chats.empty_chats_desc")}
               </p>
             </div>
           ) : (
@@ -435,7 +435,7 @@ export default function ChatsPage() {
                             {m.text}
                           </div>
                           <span className="text-[9px] text-[#707070] mt-1 px-1">
-                            {isBot ? "Bot" : isAgent ? "Siz" : "Mijoz"} • {m.timestamp}
+                            {isBot ? t("pages.chats.sender_bot") : isAgent ? t("pages.chats.sender_agent") : t("pages.chats.sender_customer")} • {m.timestamp}
                           </span>
                         </div>
                       );
@@ -450,7 +450,7 @@ export default function ChatsPage() {
                     <div className="flex items-center justify-between text-[11px] px-1">
                       <div className="flex items-center gap-1.5 text-[#707070]">
                         <Zap size={12} className={simulationSender === "user" ? "text-[#C7F33C]" : ""} />
-                        <span>Yozish rejimi (Simulyatsiya):</span>
+                        <span>{t("pages.chats.write_mode_simulation")}</span>
                       </div>
                       <div className="flex items-center bg-[#F0F0F0] p-0.5 rounded-full border border-[#E8E8E8]">
                         <button
@@ -459,7 +459,7 @@ export default function ChatsPage() {
                           className={`flex items-center gap-1 px-3 py-1 rounded-full text-[10px] font-semibold transition-all ${simulationSender === "agent" ? "bg-black text-white shadow-sm" : "text-[#707070] hover:text-black"}`}
                         >
                           <User size={12} />
-                          <span>Operator (Siz)</span>
+                          <span>{t("pages.chats.operator_you")}</span>
                         </button>
                         <button
                           type="button"
@@ -467,7 +467,7 @@ export default function ChatsPage() {
                           className={`flex items-center gap-1 px-3 py-1 rounded-full text-[10px] font-semibold transition-all ${simulationSender === "user" ? "bg-[#C7F33C] text-black shadow-sm" : "text-[#707070] hover:text-black"}`}
                         >
                           <MessageSquare size={12} />
-                          <span>Mijoz (Sinash)</span>
+                          <span>{t("pages.chats.customer_test")}</span>
                         </button>
                       </div>
                     </div>
@@ -475,7 +475,7 @@ export default function ChatsPage() {
                     <form onSubmit={handleSendMessage} className="flex items-center gap-2">
                       <input
                         type="text"
-                        placeholder={simulationSender === "user" ? "Mijoz nomidan xabar yozing (bot triggerlarini sinash)..." : "Operator sifatida javob yozing..."}
+                        placeholder={simulationSender === "user" ? t("pages.chats.placeholder_customer_simulation") : t("pages.chats.placeholder_operator")}
                         value={inputText}
                         onChange={(e) => setInputText(e.target.value)}
                         className={`flex-1 rounded-full px-5 py-3 text-[13px] outline-none transition-all ${simulationSender === "user" ? "bg-[#C7F33C]/10 text-black border border-[#C7F33C]/30 focus:bg-[#C7F33C]/15" : "bg-[#F0F0F0] text-black focus:bg-[#e8e8e8]"}`}
@@ -520,7 +520,7 @@ export default function ChatsPage() {
                   <div className="flex flex-col gap-4">
                     <div>
                       <h4 className="text-[11px] font-medium text-[#707070] uppercase tracking-wider mb-1">
-                        Muloqot kanali
+                        {t("pages.chats.channel_label")}
                       </h4>
                       {activeChannel ? (
                         <div className="flex items-center gap-1.5 text-[13px] text-black">
@@ -529,16 +529,16 @@ export default function ChatsPage() {
                           ) : (
                             <Bot size={14} className="text-[#229ED9]" />
                           )}
-                          <span>{activeChannel.type === "instagram" ? "Instagram Direct" : "Telegram Bot"}</span>
+                          <span>{activeChannel.type === "instagram" ? t("pages.chats.channel_instagram") : t("pages.chats.channel_telegram")}</span>
                         </div>
                       ) : (
-                        <div className="text-[13px] text-[#707070]">Noma&apos;lum</div>
+                        <div className="text-[13px] text-[#707070]">{t("pages.chats.unknown")}</div>
                       )}
                     </div>
 
                     <div>
                       <h4 className="text-[11px] font-medium text-[#707070] uppercase tracking-wider mb-1">
-                        Oxirgi faollik
+                        {t("pages.chats.last_activity")}
                       </h4>
                       <div className="flex items-center gap-1.5 text-[13px] text-black">
                         <Clock size={14} className="text-[#707070]" />
@@ -549,7 +549,7 @@ export default function ChatsPage() {
                     <div>
                       <div className="flex items-center justify-between mb-1">
                         <h4 className="text-[11px] font-medium text-[#707070] uppercase tracking-wider">
-                          Bot holati
+                          {t("pages.chats.bot_status")}
                         </h4>
                       </div>
                       <div className="flex items-center justify-between bg-[#F0F0F0] p-1 rounded-full mt-2">
@@ -557,13 +557,13 @@ export default function ChatsPage() {
                           onClick={() => setLiveTakeoverForChat(false)}
                           className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-full text-[10px] font-semibold transition-all ${!liveTakeover ? "bg-white text-black shadow-sm" : "text-[#707070] hover:text-black"}`}
                         >
-                          <CheckCircle size={12} className={!liveTakeover ? "text-[#16A34A]" : ""} /> Bot faol
+                          <CheckCircle size={12} className={!liveTakeover ? "text-[#16A34A]" : ""} /> {t("pages.chats.bot_active")}
                         </button>
                         <button 
                           onClick={() => setLiveTakeoverForChat(true)}
                           className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-full text-[10px] font-semibold transition-all ${liveTakeover ? "bg-black text-white shadow-sm" : "text-[#707070] hover:text-black"}`}
                         >
-                          <XCircle size={12} className={liveTakeover ? "text-[#DC2626]" : ""} /> Live operator
+                          <XCircle size={12} className={liveTakeover ? "text-[#DC2626]" : ""} /> {t("pages.chats.live_operator")}
                         </button>
                       </div>
                     </div>

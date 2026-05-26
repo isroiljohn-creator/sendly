@@ -39,13 +39,13 @@ export default function ContactsPage() {
             <div className="flex items-center gap-3">
               <Zap size={18} className="text-[#C7F33C]" />
               <div>
-                <p className="text-[13px] font-semibold">Hali kanal ulanmagan</p>
-                <p className="text-[11px] text-white/60">Kontaktlarni ko&apos;rish uchun avval kanal ulang.</p>
+                <p className="text-[13px] font-semibold">{t("pages.contacts.no_channel_title")}</p>
+                <p className="text-[11px] text-white/60">{t("pages.contacts.no_channel_desc")}</p>
               </div>
             </div>
             <Link href="/settings?connect=choose">
               <button className="bg-white text-black text-[11px] font-semibold py-2 px-4 rounded-full whitespace-nowrap hover:bg-[#F0F0F0] transition-colors">
-                Kanal ulash →
+                {t("pages.contacts.connect_channel_btn")}
               </button>
             </Link>
           </div>
@@ -73,7 +73,7 @@ export default function ContactsPage() {
             </div>
             <div className="flex items-center gap-2">
               <span className="text-[12px] text-[#707070] font-medium">
-                Jami: {displayedContacts.length} ta kontakt
+                {t("pages.contacts.total_contacts").replace("{count}", String(displayedContacts.length))}
               </span>
             </div>
           </div>
@@ -86,16 +86,16 @@ export default function ContactsPage() {
                   <Users size={20} />
                 </div>
                 <h3 className="text-[15px] font-semibold text-black">
-                  {!activeChannel ? "Kanal ulanmagan" : "Kontaktlar mavjud emas"}
+                  {!activeChannel ? t("pages.contacts.no_channel_status") : t("pages.contacts.empty_contacts_title")}
                 </h3>
                 <p className="text-[12px] text-[#707070] mt-1 max-w-[280px]">
                   {!activeChannel
-                    ? "Kontaktlar ro'yxatini ko'rish uchun avval kanal ulashingiz zarur."
-                    : "Tizimda hech qanday bog'langan foydalanuvchi topilmadi."}
+                    ? t("pages.contacts.no_channel_status_desc")
+                    : t("pages.contacts.empty_contacts_desc")}
                 </p>
                 {!activeChannel && (
                   <Link href="/settings?connect=choose" className="mt-4">
-                    <Button variant="primary">Kanal ulash</Button>
+                    <Button variant="primary">{t("pages.contacts.connect_channel")}</Button>
                   </Link>
                 )}
               </div>
@@ -128,7 +128,7 @@ export default function ContactsPage() {
                           ))}
                         </div>
                       </td>
-                      <td className="px-6 py-4 font-medium text-black">{c.messagesCount} ta</td>
+                      <td className="px-6 py-4 font-medium text-black">{t("pages.contacts.messages_count").replace("{count}", String(c.messagesCount))}</td>
                       <td className="px-6 py-4">
                         <StatusPill status={c.status} />
                       </td>
@@ -136,7 +136,7 @@ export default function ContactsPage() {
                         <Link href="/chats">
                           <Button variant="secondary" className="px-3 py-1.5 border border-[#E8E8E8] text-[12px] flex items-center gap-1.5 ml-auto">
                             <MessageSquare size={13} />
-                            <span>Yozish</span>
+                            <span>{t("pages.contacts.write")}</span>
                           </Button>
                         </Link>
                       </td>
