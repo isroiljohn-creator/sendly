@@ -47,11 +47,12 @@ export default function RegisterPage() {
 
   // Initialize Google Sign-In SDK
   useEffect(() => {
-    const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
+    const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "264359774796-evi6c5vtntv2c895go2uqbb8k4oieosl.apps.googleusercontent.com";
     if (!clientId) {
       setHasGoogleClientId(false);
       return;
     }
+    setHasGoogleClientId(true);
 
     const initGoogle = () => {
       if (typeof window !== "undefined") {

@@ -45,11 +45,12 @@ export default function LoginPage() {
 
   // Initialize Google Sign-In SDK
   useEffect(() => {
-    const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
+    const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "264359774796-evi6c5vtntv2c895go2uqbb8k4oieosl.apps.googleusercontent.com";
     if (!clientId) {
       setHasGoogleClientId(false);
       return;
     }
+    setHasGoogleClientId(true);
 
     const initGoogle = () => {
       if (typeof window !== "undefined") {
@@ -71,7 +72,7 @@ export default function LoginPage() {
           });
           win.google.accounts.id.renderButton(
             document.getElementById("google-signin-btn"),
-            { theme: "outline", size: "large", width: 356, shape: "pill", text: "signup_with", locale: lang }
+            { theme: "outline", size: "large", width: 356, shape: "pill", text: "signin_with", locale: lang }
           );
         }
       }
