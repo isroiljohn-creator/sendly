@@ -798,11 +798,11 @@ export default function AutomationsPage() {
                     {/* Stats Grid */}
                     <div className="grid grid-cols-2 gap-x-4 text-left">
                       <div>
-                        <span className="text-[9px] text-[#A0A0A0] uppercase font-bold tracking-wider block">Kontaktlar</span>
+                        <span className="text-[9px] text-[#A0A0A0] uppercase font-bold tracking-wider block">{t("nav.contacts")}</span>
                         <p className="text-[17px] font-black text-black leading-none mt-0.5">{a.runs}</p>
                       </div>
                       <div>
-                        <span className="text-[9px] text-[#A0A0A0] uppercase font-bold tracking-wider block">Konversiya</span>
+                        <span className="text-[9px] text-[#A0A0A0] uppercase font-bold tracking-wider block">{t("pages.automations_page.conversion")}</span>
                         <p className="text-[17px] font-black text-[#16A34A] leading-none mt-0.5">{a.completion}</p>
                       </div>
                     </div>
