@@ -3283,6 +3283,184 @@ function AIAgentContent() {
                   ))}
                 </div>
               </div>
+            </div>
+
+            {/* Right Side: Column */}
+            <div className="lg:col-span-5 flex flex-col gap-6">
+              {/* Sandbox Preview chat simulator */}
+              <div className="bg-[#F9F9F7] border border-[#E8E8E8] rounded-[28px] overflow-hidden flex flex-col shadow-inner h-[580px]">
+                {/* Header */}
+                <div className="bg-white border-b border-[#E8E8E8] p-4 flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-full bg-black text-[#C7F33C] grid place-items-center font-bold text-[14px]">
+                      <Sparkles size={16} />
+                    </div>
+                    <div>
+                      <h4 className="text-[12px] font-bold text-black">{t("pages.ai_agent.curator_sandbox_title")}</h4>
+                      <span className="text-[10px] text-green-600 flex items-center gap-1">
+                        <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
+                        {t("pages.ai_agent.curator_sandbox_active")}
+                      </span>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => setChatMessages([
+                      {
+                        id: `welcome-${Date.now()}`,
+                        sender: "bot",
+                        text: t("pages.ai_agent.chat_history_cleared"),
+                        time: t("common.today"),
+                        confidence: 100
+                      }
+                    ])}
+                    className="text-[10px] text-[#707070] hover:text-black font-semibold"
+                  >
+                    {t("pages.ai_agent.clear_btn")}
+                  </button>
+                </div>
+
+                {/* Message list */}
+                <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-4">
+                  {chatMessages.map((msg) => {
+                    const isUser = msg.sender === "user";
+                    const isWarning = msg.sender === "warning";
+
+                    if (isWarning) {
+                      return (
+                        <div key={msg.id} className="flex justify-center my-2 max-w-[90%] mx-auto">
+                          <div className="bg-red-50 border border-red-100 rounded-2xl p-3.5 text-[11px] text-red-700 flex gap-2.5 items-start">
+                            <ShieldAlert size={16} className="shrink-0 text-red-500 mt-0.5" />
+                            <div>
+                              <p className="font-bold">{t("pages.ai_agent.moderation_block_title")}</p>
+                              <p className="mt-1 leading-relaxed">{msg.text}</p>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    }
+
+                    return (
+                      <div
+                        key={msg.id}
+                        className={`flex flex-col max-w-[80%] ${isUser ? "ml-auto items-end" : "mr-auto items-start"}`}
+                      >
+                        <div
+                          className={`p-3.5 rounded-[20px] text-[12px] leading-relaxed ${
+                            isUser
+                              ? "bg-black text-[#C7F33C] rounded-tr-sm"
+                              : "bg-white text-black border border-[#E8E8E8] rounded-tl-sm shadow-sm"
+                          }`}
+                        >
+                          {msg.text}
+                        </div>
+
+                        <div className="flex items-center gap-1.5 mt-1 px-1 text-[9px] text-[#A0A0A0]">
+                          <span>{msg.time}</span>
+                          {!isUser && msg.confidence !== undefined && (
+                            <>
+                              <span>•</span>
+                              <span className="text-green-600 font-medium">
+                                {t("pages.ai_agent.confidence_label")} {msg.confidence}%
+                              </span>
+                            </>
+                          )}
+                        </div>
+
+                        {/* Sources ground details if any */}
+                        {!isUser && msg.sources && msg.sources.length > 0 && (
+                          <div className="mt-1 flex flex-wrap gap-1">
+                            {msg.sources.map((src, i) => (
+                              <span
+                                key={i}
+                                className="text-[8px] bg-white border border-[#E8E8E8] px-2 py-0.5 rounded text-[#707070] italic"
+                              >
+                                {t("pages.ai_agent.source_label")} {src}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+
+                  {chatLoading && (
+                    <div className="flex mr-auto items-start max-w-[80%]">
+                      <div className="bg-white text-[#707070] border border-[#E8E8E8] p-3.5 rounded-[20px] rounded-tl-sm text-[12px] shadow-sm flex items-center gap-2">
+                        <span className="w-1.5 h-1.5 bg-[#A0A0A0] rounded-full animate-bounce" />
+                        <span className="w-1.5 h-1.5 bg-[#A0A0A0] rounded-full animate-bounce [animation-delay:0.2s]" />
+                        <span className="w-1.5 h-1.5 bg-[#A0A0A0] rounded-full animate-bounce [animation-delay:0.4s]" />
+                      </div>
+                    </div>
+                  )}
+                  <div ref={chatEndRef} />
+                </div>
+
+                {/* Input Form */}
+                <form
+                  onSubmit={handleSendSimMessage}
+                  className="bg-white border-t border-[#E8E8E8] p-3 flex gap-2"
+                >
+                  <input
+                    type="text"
+                    value={chatInput}
+                    disabled={chatLoading}
+                    onChange={(e) => setChatInput(e.target.value)}
+                    placeholder={t("pages.ai_agent.student_question_placeholder")}
+                    className="flex-1 px-4 py-2.5 text-[12px] bg-[#F9F9F7] border border-[#E8E8E8] rounded-xl focus:outline-none focus:border-black"
+                  />
+                  <button
+                    type="submit"
+                    disabled={chatLoading || !chatInput.trim()}
+                    className="w-10 h-10 rounded-xl bg-black text-[#C7F33C] grid place-items-center hover:bg-black/90 disabled:opacity-50 transition-all shrink-0"
+                  >
+                    <Send size={15} />
+                  </button>
+                </form>
+              </div>
+
+              {/* Permanent Sliders Preview Card */}
+              <div className="bg-white border border-[#E8E8E8] rounded-[24px] p-6 shadow-sm flex flex-col gap-4 animate-in fade-in duration-200">
+                <div className="flex items-center gap-2 border-b border-[#F0F0F0] pb-2.5">
+                  <Sparkles size={15} className="text-black" />
+                  <h3 className="text-[13px] font-bold text-black">
+                    {"Ohang va Xarakter ta'siri (Suhbat namunasi)"}
+                  </h3>
+                </div>
+
+                {/* Render preview message */}
+                {(() => {
+                  const sliderVal = sliderPreviewType === "tone" 
+                    ? settings.tone 
+                    : sliderPreviewType === "length" 
+                    ? settings.length 
+                    : settings.humor;
+                  const content = getSliderPreviewContent(sliderPreviewType, sliderVal);
+                  return (
+                    <div className="flex flex-col gap-3">
+                      <div className="flex justify-between items-center text-[10px] font-bold text-[#707070] px-1 uppercase tracking-wider">
+                        <span>{content.title}</span>
+                        <span className="bg-black/5 px-2 py-0.5 rounded-md text-black font-extrabold">
+                          {sliderVal}%
+                        </span>
+                      </div>
+                      <div className="flex flex-col gap-2.5 pt-1 text-[11px]">
+                        {/* User Message */}
+                        <div className="flex flex-col items-end max-w-[85%] ml-auto">
+                          <div className="bg-[#F0F0F0] text-black px-3.5 py-2 rounded-[16px] rounded-tr-sm leading-relaxed text-right">
+                            {content.question}
+                          </div>
+                        </div>
+                        {/* Bot Reply */}
+                        <div className="flex flex-col items-start max-w-[85%] mr-auto">
+                          <div className="bg-black text-[#C7F33C] px-3.5 py-2 rounded-[16px] rounded-tl-sm leading-relaxed text-left">
+                            {content.reply}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })()}
+              </div>
 
               {/* Outreach Auto settings */}
               <div className="bg-white border border-[#E8E8E8] rounded-[24px] p-6 shadow-sm flex flex-col gap-4">
@@ -3474,184 +3652,6 @@ function AIAgentContent() {
                       >
                         Ulash
                       </button>
-                    </div>
-                  );
-                })()}
-              </div>
-            </div>
-
-            {/* Right Side: Column */}
-            <div className="lg:col-span-5 flex flex-col gap-6">
-              {/* Sandbox Preview chat simulator */}
-              <div className="bg-[#F9F9F7] border border-[#E8E8E8] rounded-[28px] overflow-hidden flex flex-col shadow-inner h-[580px]">
-                {/* Header */}
-                <div className="bg-white border-b border-[#E8E8E8] p-4 flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-full bg-black text-[#C7F33C] grid place-items-center font-bold text-[14px]">
-                      <Sparkles size={16} />
-                    </div>
-                    <div>
-                      <h4 className="text-[12px] font-bold text-black">{t("pages.ai_agent.curator_sandbox_title")}</h4>
-                      <span className="text-[10px] text-green-600 flex items-center gap-1">
-                        <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
-                        {t("pages.ai_agent.curator_sandbox_active")}
-                      </span>
-                    </div>
-                  </div>
-                  <button
-                    onClick={() => setChatMessages([
-                      {
-                        id: `welcome-${Date.now()}`,
-                        sender: "bot",
-                        text: t("pages.ai_agent.chat_history_cleared"),
-                        time: t("common.today"),
-                        confidence: 100
-                      }
-                    ])}
-                    className="text-[10px] text-[#707070] hover:text-black font-semibold"
-                  >
-                    {t("pages.ai_agent.clear_btn")}
-                  </button>
-                </div>
-
-                {/* Message list */}
-                <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-4">
-                  {chatMessages.map((msg) => {
-                    const isUser = msg.sender === "user";
-                    const isWarning = msg.sender === "warning";
-
-                    if (isWarning) {
-                      return (
-                        <div key={msg.id} className="flex justify-center my-2 max-w-[90%] mx-auto">
-                          <div className="bg-red-50 border border-red-100 rounded-2xl p-3.5 text-[11px] text-red-700 flex gap-2.5 items-start">
-                            <ShieldAlert size={16} className="shrink-0 text-red-500 mt-0.5" />
-                            <div>
-                              <p className="font-bold">{t("pages.ai_agent.moderation_block_title")}</p>
-                              <p className="mt-1 leading-relaxed">{msg.text}</p>
-                            </div>
-                          </div>
-                        </div>
-                      );
-                    }
-
-                    return (
-                      <div
-                        key={msg.id}
-                        className={`flex flex-col max-w-[80%] ${isUser ? "ml-auto items-end" : "mr-auto items-start"}`}
-                      >
-                        <div
-                          className={`p-3.5 rounded-[20px] text-[12px] leading-relaxed ${
-                            isUser
-                              ? "bg-black text-[#C7F33C] rounded-tr-sm"
-                              : "bg-white text-black border border-[#E8E8E8] rounded-tl-sm shadow-sm"
-                          }`}
-                        >
-                          {msg.text}
-                        </div>
-
-                        <div className="flex items-center gap-1.5 mt-1 px-1 text-[9px] text-[#A0A0A0]">
-                          <span>{msg.time}</span>
-                          {!isUser && msg.confidence !== undefined && (
-                            <>
-                              <span>•</span>
-                              <span className="text-green-600 font-medium">
-                                {t("pages.ai_agent.confidence_label")} {msg.confidence}%
-                              </span>
-                            </>
-                          )}
-                        </div>
-
-                        {/* Sources ground details if any */}
-                        {!isUser && msg.sources && msg.sources.length > 0 && (
-                          <div className="mt-1 flex flex-wrap gap-1">
-                            {msg.sources.map((src, i) => (
-                              <span
-                                key={i}
-                                className="text-[8px] bg-white border border-[#E8E8E8] px-2 py-0.5 rounded text-[#707070] italic"
-                              >
-                                {t("pages.ai_agent.source_label")} {src}
-                              </span>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                    );
-                  })}
-
-                  {chatLoading && (
-                    <div className="flex mr-auto items-start max-w-[80%]">
-                      <div className="bg-white text-[#707070] border border-[#E8E8E8] p-3.5 rounded-[20px] rounded-tl-sm text-[12px] shadow-sm flex items-center gap-2">
-                        <span className="w-1.5 h-1.5 bg-[#A0A0A0] rounded-full animate-bounce" />
-                        <span className="w-1.5 h-1.5 bg-[#A0A0A0] rounded-full animate-bounce [animation-delay:0.2s]" />
-                        <span className="w-1.5 h-1.5 bg-[#A0A0A0] rounded-full animate-bounce [animation-delay:0.4s]" />
-                      </div>
-                    </div>
-                  )}
-                  <div ref={chatEndRef} />
-                </div>
-
-                {/* Input Form */}
-                <form
-                  onSubmit={handleSendSimMessage}
-                  className="bg-white border-t border-[#E8E8E8] p-3 flex gap-2"
-                >
-                  <input
-                    type="text"
-                    value={chatInput}
-                    disabled={chatLoading}
-                    onChange={(e) => setChatInput(e.target.value)}
-                    placeholder={t("pages.ai_agent.student_question_placeholder")}
-                    className="flex-1 px-4 py-2.5 text-[12px] bg-[#F9F9F7] border border-[#E8E8E8] rounded-xl focus:outline-none focus:border-black"
-                  />
-                  <button
-                    type="submit"
-                    disabled={chatLoading || !chatInput.trim()}
-                    className="w-10 h-10 rounded-xl bg-black text-[#C7F33C] grid place-items-center hover:bg-black/90 disabled:opacity-50 transition-all shrink-0"
-                  >
-                    <Send size={15} />
-                  </button>
-                </form>
-              </div>
-
-              {/* Permanent Sliders Preview Card */}
-              <div className="bg-white border border-[#E8E8E8] rounded-[24px] p-6 shadow-sm flex flex-col gap-4 animate-in fade-in duration-200">
-                <div className="flex items-center gap-2 border-b border-[#F0F0F0] pb-2.5">
-                  <Sparkles size={15} className="text-black" />
-                  <h3 className="text-[13px] font-bold text-black">
-                    {"Ohang va Xarakter ta'siri (Suhbat namunasi)"}
-                  </h3>
-                </div>
-
-                {/* Render preview message */}
-                {(() => {
-                  const sliderVal = sliderPreviewType === "tone" 
-                    ? settings.tone 
-                    : sliderPreviewType === "length" 
-                    ? settings.length 
-                    : settings.humor;
-                  const content = getSliderPreviewContent(sliderPreviewType, sliderVal);
-                  return (
-                    <div className="flex flex-col gap-3">
-                      <div className="flex justify-between items-center text-[10px] font-bold text-[#707070] px-1 uppercase tracking-wider">
-                        <span>{content.title}</span>
-                        <span className="bg-black/5 px-2 py-0.5 rounded-md text-black font-extrabold">
-                          {sliderVal}%
-                        </span>
-                      </div>
-                      <div className="flex flex-col gap-2.5 pt-1 text-[11px]">
-                        {/* User Message */}
-                        <div className="flex flex-col items-end max-w-[85%] ml-auto">
-                          <div className="bg-[#F0F0F0] text-black px-3.5 py-2 rounded-[16px] rounded-tr-sm leading-relaxed text-right">
-                            {content.question}
-                          </div>
-                        </div>
-                        {/* Bot Reply */}
-                        <div className="flex flex-col items-start max-w-[85%] mr-auto">
-                          <div className="bg-black text-[#C7F33C] px-3.5 py-2 rounded-[16px] rounded-tl-sm leading-relaxed text-left">
-                            {content.reply}
-                          </div>
-                        </div>
-                      </div>
                     </div>
                   );
                 })()}
