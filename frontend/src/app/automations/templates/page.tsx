@@ -149,6 +149,14 @@ export default function TemplatesPage() {
       description: "Foydalanuvchi ma'lumotlarini to'playdi, murakkab so'rovni shakllantiradi va uni...",
       actionKey: "ai_agent"
     },
+    {
+      id: "tmpl_fb_leads_direct",
+      name: "Lidlarni Telegramga yo'naltirish (AIsiz)",
+      category: "ai",
+      platforms: ["telegram"],
+      description: "Facebook target arizalarini AIsiz, chiroyli ko'rinishda to'g'ridan-to'g'ri Telegram guruh yoki profilingizga yo'naltiring.",
+      actionKey: "fb_leads_direct"
+    },
 
     // Referral mexanikalari
     {
@@ -261,6 +269,14 @@ export default function TemplatesPage() {
     }
     if (selectedTemplate.actionKey === "ai_agent") {
       setIsSelectChannelModalOpen(false);
+      window.location.href = "/ai-agent";
+      return;
+    }
+    if (selectedTemplate.actionKey === "fb_leads_direct") {
+      setIsSelectChannelModalOpen(false);
+      if (typeof window !== "undefined") {
+        localStorage.setItem("sendly_selected_agent_type", "fb-leads-direct");
+      }
       window.location.href = "/ai-agent";
       return;
     }

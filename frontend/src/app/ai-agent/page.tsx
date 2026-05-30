@@ -518,6 +518,12 @@ export default function AIAgentPage() {
   // Sync state from local storage / db
   useEffect(() => {
     loadDatabase();
+    if (typeof window !== "undefined") {
+      const savedType = localStorage.getItem("sendly_selected_agent_type");
+      if (savedType === "kurator" || savedType === "fb-leads" || savedType === "fb-leads-direct") {
+        setSelectedAgentType(savedType);
+      }
+    }
 
     const handleUpdate = () => {
       loadDatabase();
