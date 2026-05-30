@@ -378,7 +378,11 @@ function AIAgentContent() {
   // Telegram Bot Verification States
   const [isTelegramLinked, setIsTelegramLinked] = useState(false);
   const [telegramBotUsername, setTelegramBotUsername] = useState("");
-  const activeBotUser = telegramBotUsername || (typeof window !== "undefined" ? (db.getChannels().filter(c => c.type === "telegram" && c.isConnected && c.telegramToken)[0]?.username || "") : "");
+  const activeBotUser = (telegramBotUsername && telegramBotUsername.toLowerCase() !== "test" && telegramBotUsername.toLowerCase() !== "@test")
+    ? telegramBotUsername
+    : (typeof window !== "undefined"
+        ? (db.getChannels().filter(c => c.type === "telegram" && c.isConnected && c.telegramToken && c.username.toLowerCase() !== "test" && c.username.toLowerCase() !== "@test")[0]?.username || "sendly_robot")
+        : "sendly_robot");
   const [isVerifyingAdmin, setIsVerifyingAdmin] = useState(false);
   const [adminVerifyCode, setAdminVerifyCode] = useState("");
   const [verifyAdminError, setVerifyAdminError] = useState("");
@@ -736,7 +740,23 @@ function AIAgentContent() {
 
   const loadDatabase = () => {
     const channels = db.getChannels();
-    const tgChannels = channels.filter(
+    let channelsUpdated = false;
+    const updatedChannels = channels.map(c => {
+      if (c.type === "telegram" && (c.username.toLowerCase() === "test" || c.username.toLowerCase() === "@test" || c.username === "")) {
+        channelsUpdated = true;
+        return { 
+          ...c, 
+          username: "@sendly_robot", 
+          name: c.name === "Test" || c.name === "" ? "Sendly Bot" : c.name 
+        };
+      }
+      return c;
+    });
+    if (channelsUpdated) {
+      db.saveChannels(updatedChannels);
+    }
+
+    const tgChannels = updatedChannels.filter(
       (c) => c.type === "telegram" && c.isConnected && c.telegramToken
     );
 

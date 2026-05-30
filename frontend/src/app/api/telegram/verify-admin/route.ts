@@ -98,8 +98,8 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Tasdiqlash kodi noto'g'ri." }, { status: 400 });
     }
 
-    // Check expiration (10 minutes)
-    if (Date.now() - (verifyData.timestamp || 0) > 10 * 60 * 1000) {
+    // Check expiration (1 minute)
+    if (Date.now() - (verifyData.timestamp || 0) > 1 * 60 * 1000) {
       return NextResponse.json({ error: "Tasdiqlash kodi muddati o'tgan. Botga qaytadan /start yuboring." }, { status: 400 });
     }
 

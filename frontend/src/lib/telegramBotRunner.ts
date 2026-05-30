@@ -71,16 +71,20 @@ export async function getDbDataFromSupabase(): Promise<any> {
   };
 }
 
-async function sendTelegramMessage(token: string, chatId: number | string, text: string) {
+async function sendTelegramMessage(token: string, chatId: number | string, text: string, parseMode?: string, replyMarkup?: any) {
   try {
     const url = `https://api.telegram.org/bot${token}/sendMessage`;
+    const payload: any = {
+      chat_id: chatId,
+      text: text,
+    };
+    if (parseMode) payload.parse_mode = parseMode;
+    if (replyMarkup) payload.reply_markup = replyMarkup;
+
     const res = await fetch(url, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        chat_id: chatId,
-        text: text,
-      }),
+      body: JSON.stringify(payload),
     });
     if (!res.ok) {
       const errText = await res.text();
@@ -159,6 +163,28 @@ async function updateDbFile(updater: (dbData: Record<string, any>) => Promise<vo
 
 export async function handleTelegramUpdate(channelId: string, token: string, update: any) {
   try {
+    // Handle inline button callback query to copy verification code
+    if (update.callback_query) {
+      const cb = update.callback_query;
+      if (cb.data === "copy_code") {
+        const msgText = cb.message?.text || "";
+        const codeMatch = msgText.match(/Sizning tasdiqlash kodingiz:\s*(\d+)/i) || msgText.match(/kodingiz:\s*(\d+)/i) || msgText.match(/:\s*(\d+)/);
+        const code = codeMatch ? codeMatch[1] : "";
+        
+        const answerUrl = `https://api.telegram.org/bot${token}/answerCallbackQuery`;
+        await fetch(answerUrl, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            callback_query_id: cb.id,
+            text: code ? `${code} kodi! Nusxalash uchun matndagi kod ustiga bosing.` : "Matndagi kod ustiga bosing!",
+            show_alert: false
+          })
+        });
+      }
+      return;
+    }
+
     // Handle bot added/updated in a channel/group
     if (update.my_chat_member) {
       const chat = update.my_chat_member.chat;
@@ -233,7 +259,8 @@ export async function handleTelegramUpdate(channelId: string, token: string, upd
     
     // Handle start command to get verification code for admin linking
     if (text.trim() === "/start" || text.trim().startsWith("/start ")) {
-      const verifyCode = Math.floor(100000 + Math.random() * 900000).toString();
+      // 5-digit verification code like Telegram
+      const verifyCode = Math.floor(10000 + Math.random() * 90000).toString();
       await updateDbFile(async (dbData) => {
         let context: Record<string, string> = dbData as unknown as Record<string, string>;
         if (dbData.userData && typeof dbData.userData === "object") {
@@ -258,7 +285,14 @@ export async function handleTelegramUpdate(channelId: string, token: string, upd
         context[`replai_tg_verify_code_${channelId}`] = JSON.stringify(verifyData);
       });
       
-      await sendTelegramMessage(token, chatId, `Assalomu alaykum! Sendly botiga xush kelibsiz.\n\nSizning tasdiqlash kodingiz: ${verifyCode}\n\nUshbu kodni Sendly platformasidagi adminni ulash oynasiga kiriting.`);
+      const messageText = `Assalomu alaykum! Sendly botiga xush kelibsiz.\n\nSizning tasdiqlash kodingiz: <code>${verifyCode}</code>\n\nUshbu kodni Sendly platformasidagi adminni ulash oynasiga kiriting (kod 1 daqiqada eskiradi).`;
+      const replyMarkup = {
+        inline_keyboard: [[
+          { text: "📋 Kodni nusxalash", callback_data: "copy_code" }
+        ]]
+      };
+      
+      await sendTelegramMessage(token, chatId, messageText, "HTML", replyMarkup);
       return;
     }
 
