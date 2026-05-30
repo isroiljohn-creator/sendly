@@ -70,13 +70,16 @@ export default function AccountPage() {
   const [alertType, setAlertType] = useState<"success" | "error">("success");
 
   // Email verification OTP states
-  const [isEmailOtpModalOpen, setIsEmailOtpModalOpen] = useState(false);
+  const [isEmailVerificationPending, setIsEmailVerificationPending] = useState(false);
+  const [isEmailOtpVerifying, setIsEmailOtpVerifying] = useState(false);
+  const [isSendingEmailOtp, setIsSendingEmailOtp] = useState(false);
   const [emailVerifyCodeState, setEmailVerifyCodeState] = useState("");
   const [pendingEmail, setPendingEmail] = useState("");
   const [pendingName, setPendingName] = useState("");
   const [pendingPassword, setPendingPassword] = useState("");
   const [emailOtpInput, setEmailOtpInput] = useState("");
   const [emailOtpError, setEmailOtpError] = useState("");
+  const [emailVerifyCountdown, setEmailVerifyCountdown] = useState(120);
 
   useEffect(() => {
     let interval: NodeJS.Timeout;
@@ -87,6 +90,16 @@ export default function AccountPage() {
     }
     return () => clearInterval(interval);
   }, [cardStep, otpTimer]);
+
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    if (isEmailVerificationPending && emailVerifyCountdown > 0) {
+      interval = setInterval(() => {
+        setEmailVerifyCountdown((prev) => prev - 1);
+      }, 1000);
+    }
+    return () => clearInterval(interval);
+  }, [isEmailVerificationPending, emailVerifyCountdown]);
 
   useEffect(() => {
     const user = db.getCurrentUser();
@@ -186,6 +199,77 @@ export default function AccountPage() {
     }, 1500);
   };
 
+  const handleCancelEmailChange = () => {
+    setIsEmailVerificationPending(false);
+    setEmailOtpInput("");
+    setEmailOtpError("");
+    if (currentUser) {
+      setEmail(currentUser.email);
+    }
+  };
+
+  const handleResendEmailOtp = async () => {
+    if (!email) return;
+    setEmailOtpError("");
+    const generatedCode = Math.floor(100000 + Math.random() * 900000).toString();
+
+    try {
+      const mailRes = await fetch("/api/auth/send-otp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: email.trim(), otp: generatedCode }),
+      });
+      
+      const mailData = await mailRes.json();
+      
+      if (mailRes.ok && mailData.success) {
+        setEmailVerifyCodeState(generatedCode);
+        setEmailVerifyCountdown(120);
+        setEmailOtpInput("");
+        showAlert(t("common.success"), "Yangi tasdiqlash kodi elektron pochtangizga yuborildi.", "success");
+      } else {
+        setEmailOtpError(mailData.error || "Email yuborishda xatolik yuz berdi.");
+      }
+    } catch (err: unknown) {
+      const errMsg = err instanceof Error ? err.message : String(err);
+      setEmailOtpError("Tarmoq ulanishida xatolik yuz berdi: " + errMsg);
+    }
+  };
+
+  const handleConfirmEmailOtpInline = async () => {
+    if (emailOtpInput !== emailVerifyCodeState) {
+      setEmailOtpError("Tasdiqlash kodi noto'g'ri. Iltimos qaytadan urinib ko'ring.");
+      return;
+    }
+
+    setIsEmailOtpVerifying(true);
+    try {
+      // Success! Update DB and states
+      const users = db.getUsers();
+      const idx = users.findIndex(u => u.email === currentUser?.email);
+      if (idx > -1) {
+        users[idx].fullName = pendingName;
+        users[idx].email = pendingEmail;
+        users[idx].password = pendingPassword;
+        localStorage.setItem("replai_users", JSON.stringify(users));
+      }
+
+      const updatedUser = { ...currentUser, fullName: pendingName, email: pendingEmail, password: pendingPassword };
+      localStorage.setItem("replai_current_user", JSON.stringify(updatedUser));
+      setCurrentUser(updatedUser as User);
+      setIsEmailVerificationPending(false);
+
+      // Persist changes to server
+      await db.saveToServer();
+
+      showAlert(t("common.success"), t("pages.account.general.success_message") || "Profil ma'lumotlari muvaffaqiyatli saqlandi!", "success");
+    } catch (err) {
+      setEmailOtpError("Ma'lumotlarni saqlashda xatolik yuz berdi.");
+    } finally {
+      setIsEmailOtpVerifying(false);
+    }
+  };
+
   const handleSaveGeneral = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!currentUser) return;
@@ -202,21 +286,37 @@ export default function AccountPage() {
         return;
       }
 
-      // Generate a mock code
+      setIsSendingEmailOtp(true);
       const generatedCode = Math.floor(100000 + Math.random() * 900000).toString();
-      setEmailVerifyCodeState(generatedCode);
-      setPendingEmail(email);
-      setPendingName(name);
-      setPendingPassword(password);
-      setEmailOtpInput("");
-      setEmailOtpError("");
-      setIsEmailOtpModalOpen(true);
       
-      showAlert(
-        t("common.success"), 
-        `Tasdiqlash kodi yangi elektron pochtangizga yuborildi. Simulyatsiya tasdiqlash kodi: ${generatedCode}`, 
-        "success"
-      );
+      try {
+        const mailRes = await fetch("/api/auth/send-otp", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email: email.trim(), otp: generatedCode }),
+        });
+        
+        const mailData = await mailRes.json();
+        
+        if (mailRes.ok && mailData.success) {
+          setEmailVerifyCodeState(generatedCode);
+          setPendingEmail(email);
+          setPendingName(name);
+          setPendingPassword(password);
+          setEmailOtpInput("");
+          setEmailOtpError("");
+          setIsEmailVerificationPending(true);
+          setEmailVerifyCountdown(120);
+          showAlert(t("common.success"), "Tasdiqlash kodi yangi elektron pochtangizga yuborildi.", "success");
+        } else {
+          showAlert(t("common.error"), mailData.error || "Email yuborishda xatolik yuz berdi.", "error");
+        }
+      } catch (err: unknown) {
+        const errMsg = err instanceof Error ? err.message : String(err);
+        showAlert(t("common.error"), "Tarmoq ulanishida xatolik yuz berdi: " + errMsg, "error");
+      } finally {
+        setIsSendingEmailOtp(false);
+      }
       return;
     }
 
@@ -236,34 +336,6 @@ export default function AccountPage() {
     // Persist changes to server
     await db.saveToServer();
     
-    showAlert(t("common.success"), t("pages.account.general.success_message") || "Profil ma'lumotlari muvaffaqiyatli saqlandi!", "success");
-  };
-
-  const handleConfirmEmailOtp = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (emailOtpInput !== emailVerifyCodeState) {
-      setEmailOtpError("Tasdiqlash kodi noto'g'ri. Iltimos qaytadan urinib ko'ring.");
-      return;
-    }
-
-    // Success! Update DB and states
-    const users = db.getUsers();
-    const idx = users.findIndex(u => u.email === currentUser?.email);
-    if (idx > -1) {
-      users[idx].fullName = pendingName;
-      users[idx].email = pendingEmail;
-      users[idx].password = pendingPassword;
-      localStorage.setItem("replai_users", JSON.stringify(users));
-    }
-
-    const updatedUser = { ...currentUser, fullName: pendingName, email: pendingEmail, password: pendingPassword };
-    localStorage.setItem("replai_current_user", JSON.stringify(updatedUser));
-    setCurrentUser(updatedUser);
-    setIsEmailOtpModalOpen(false);
-
-    // Persist changes to server
-    await db.saveToServer();
-
     showAlert(t("common.success"), t("pages.account.general.success_message") || "Profil ma'lumotlari muvaffaqiyatli saqlandi!", "success");
   };
 
@@ -459,14 +531,88 @@ export default function AccountPage() {
 
                 <div className="flex flex-col gap-1.5">
                   <label className="text-[11px] font-bold text-[#707070] uppercase tracking-wider">{t("pages.account.general.email")}</label>
-                  <input
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="w-full rounded-[10px] border border-[#D8D8D8] px-4 py-3 text-[13px] text-black focus:outline-none focus:border-black"
-                    placeholder={t("pages.account.general.email_placeholder")}
-                    required
-                  />
+                  
+                  {isEmailVerificationPending ? (
+                    <div className="flex flex-col gap-3 p-4 bg-[#F9F9F7] border border-[#E8E8E8] rounded-2xl">
+                      <div className="flex flex-col sm:flex-row gap-3">
+                        <div className="flex-1">
+                          <span className="text-[10px] font-bold text-[#707070] uppercase block mb-1">Yangi elektron pochta</span>
+                          <input
+                            type="email"
+                            value={email}
+                            disabled
+                            className="w-full rounded-[10px] border border-[#D8D8D8] px-4 py-3 text-[13px] text-[#707070] bg-[#F5F5F5]"
+                          />
+                        </div>
+                        <div className="sm:w-[180px]">
+                          <span className="text-[10px] font-bold text-[#707070] uppercase block mb-1">Tasdiqlash kodi</span>
+                          <input
+                            type="text"
+                            value={emailOtpInput}
+                            onChange={(e) => setEmailOtpInput(e.target.value.replace(/\D/g, "").substring(0, 6))}
+                            className="w-full rounded-[10px] border border-[#D8D8D8] px-4 py-3 text-[13px] text-black focus:outline-none focus:border-black text-center font-bold tracking-[2px]"
+                            placeholder="000000"
+                            required
+                          />
+                        </div>
+                      </div>
+
+                      {emailOtpError && (
+                        <p className="text-[11px] text-red-600 font-semibold">{emailOtpError}</p>
+                      )}
+
+                      <div className="flex flex-wrap items-center justify-between gap-3 mt-1 pt-2 border-t border-[#F0F0F0] text-[11px]">
+                        <div className="text-[#707070]">
+                          {emailVerifyCountdown > 0 ? (
+                            <span>Kodni qayta yuborish: <span className="font-mono text-black font-bold">{formatTimer(emailVerifyCountdown)}</span></span>
+                          ) : (
+                            <button
+                              type="button"
+                              onClick={handleResendEmailOtp}
+                              className="font-bold text-[#7CA607] hover:underline"
+                            >
+                              Kodni qayta yuborish
+                            </button>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <button
+                            type="button"
+                            onClick={handleCancelEmailChange}
+                            className="text-[#707070] hover:text-black font-semibold"
+                          >
+                            Bekor qilish
+                          </button>
+                          <button
+                            type="button"
+                            onClick={handleConfirmEmailOtpInline}
+                            disabled={emailOtpInput.length < 6 || isEmailOtpVerifying}
+                            className="px-4 py-2 bg-black hover:bg-neutral-800 text-white rounded-[10px] font-bold text-[12px] transition-all disabled:opacity-50 active:scale-95 flex items-center gap-1.5"
+                          >
+                            {isEmailOtpVerifying && <Loader2 size={12} className="animate-spin" />}
+                            <span>Tasdiqlash</span>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="relative flex items-center">
+                      <input
+                        type="email"
+                        value={email}
+                        disabled={isSendingEmailOtp}
+                        onChange={(e) => setEmail(e.target.value)}
+                        className={`w-full rounded-[10px] border border-[#D8D8D8] px-4 py-3 text-[13px] text-black focus:outline-none focus:border-black ${isSendingEmailOtp ? "bg-[#F5F5F5] text-[#707070]" : ""}`}
+                        placeholder={t("pages.account.general.email_placeholder")}
+                        required
+                      />
+                      {isSendingEmailOtp && (
+                        <div className="absolute right-3">
+                          <Loader2 size={16} className="animate-spin text-gray-500" />
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
 
                 <div className="flex flex-col gap-1.5">
@@ -474,17 +620,22 @@ export default function AccountPage() {
                   <input
                     type="password"
                     value={password}
+                    disabled={isEmailVerificationPending}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full rounded-[10px] border border-[#D8D8D8] px-4 py-3 text-[13px] text-black focus:outline-none focus:border-black bg-white"
+                    className="w-full rounded-[10px] border border-[#D8D8D8] px-4 py-3 text-[13px] text-black focus:outline-none focus:border-black bg-white disabled:bg-[#F5F5F5] disabled:text-[#707070]"
                     placeholder={t("pages.account.general.password_placeholder")}
                   />
                   <p className="text-[10px] text-[#707070] mt-0.5">{t("pages.account.general.password_desc")}</p>
                 </div>
 
                 <div className="mt-2 flex justify-start">
-                  <Button type="submit" variant="primary" className="gap-2 px-6 py-3 rounded-[10px] text-[13px]">
-                    <Save size={14} />
-                    <span>{t("common.save")}</span>
+                  <Button type="submit" variant="primary" disabled={isSendingEmailOtp || isEmailVerificationPending} className="gap-2 px-6 py-3 rounded-[10px] text-[13px]">
+                    {isSendingEmailOtp ? (
+                      <Loader2 size={14} className="animate-spin" />
+                    ) : (
+                      <Save size={14} />
+                    )}
+                    <span>{isSendingEmailOtp ? "Yuborilmoqda..." : t("common.save")}</span>
                   </Button>
                 </div>
               </form>
@@ -899,54 +1050,7 @@ export default function AccountPage() {
         type={alertType}
       />
 
-      {/* ── EMAIL VERIFICATION OTP MODAL ── */}
-      {isEmailOtpModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 overflow-y-auto">
-          <div className="bg-white rounded-[32px] w-full max-w-[400px] shadow-2xl overflow-hidden p-6 md:p-8 border border-[#D8D8D8] animate-in fade-in zoom-in-95 duration-200 text-center relative flex flex-col items-center">
-            {/* Icon */}
-            <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-blue-100 text-blue-600">
-              <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" strokeWidth="2.5" fill="none" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
-                <polyline points="22,6 12,13 2,6" />
-              </svg>
-            </div>
-            <h3 className="text-[16px] font-semibold text-black leading-tight">Pochtani tasdiqlang</h3>
-            <p className="mt-2.5 text-[12.5px] text-[#707070] leading-relaxed">
-              Yangi pochtangizga (<strong className="text-black">{pendingEmail}</strong>) tasdiqlash kodi yuborildi. Iltimos, uni quyida kiriting.
-            </p>
-            {emailOtpError && (
-              <div className="mt-3 text-[11px] font-bold text-red-600 bg-red-50 px-3 py-1.5 rounded-xl border border-red-100 w-full">
-                {emailOtpError}
-              </div>
-            )}
-            <form onSubmit={handleConfirmEmailOtp} className="mt-5 w-full flex flex-col gap-4">
-              <input
-                type="text"
-                placeholder="Tasdiqlash kodi"
-                value={emailOtpInput}
-                onChange={(e) => setEmailOtpInput(e.target.value.replace(/\D/g, "").substring(0, 6))}
-                className="w-full rounded-[12px] border border-[#D8D8D8] px-4 py-3 text-[14px] text-center font-bold tracking-[8px] text-black focus:outline-none focus:border-black"
-                required
-              />
-              <div className="flex gap-2.5 mt-2 w-full">
-                <button
-                  type="button"
-                  onClick={() => setIsEmailOtpModalOpen(false)}
-                  className="flex-1 rounded-full border border-[#D8D8D8] py-2.5 text-[12px] font-bold text-[#595959] hover:bg-[#F9F9F7] active:scale-[0.98] transition-all"
-                >
-                  Bekor qilish
-                </button>
-                <button
-                  type="submit"
-                  className="flex-1 rounded-full bg-black py-2.5 text-[12px] font-bold text-white hover:bg-black/90 active:scale-[0.98] transition-all"
-                >
-                  Tasdiqlash
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+
 
       <ConfirmModal
         isOpen={isUnlinkModalOpen}
