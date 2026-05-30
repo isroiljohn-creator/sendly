@@ -402,7 +402,7 @@ export default function SettingsPage() {
                   }}
                   className="flex items-center w-full px-3 py-2 text-[12px] font-semibold rounded-[10px] transition-colors text-[#707070] hover:bg-[#F9F9F7] hover:text-black text-left"
                 >
-                  {t("my_account")}
+                  {t("nav.my_account")}
                 </button>
                 <button
                   onClick={() => setActiveSection("general")}
