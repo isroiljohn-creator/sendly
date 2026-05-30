@@ -1605,7 +1605,7 @@ function AIAgentContent() {
   if (selectedAgentType === null) {
     return (
       <AppLayout>
-        <div className="flex flex-col gap-5 relative pb-6 items-center justify-start max-w-4xl mx-auto py-2">
+        <div className="flex flex-col gap-5 relative pb-6 items-center justify-start max-w-6xl mx-auto py-2 w-full">
           {/* Toast Alert */}
           {toast && (
             <div className="fixed top-6 right-6 z-[999] flex items-center gap-3 px-5 py-3.5 rounded-xl border bg-white shadow-lg animate-in fade-in slide-in-from-top-3 duration-250">
