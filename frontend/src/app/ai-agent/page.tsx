@@ -3013,61 +3013,544 @@ function AIAgentContent() {
         )}
 
         {activeTab === "settings" && settings && (
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-            {/* Left Side: Settings panel */}
-            <div className="lg:col-span-7 flex flex-col gap-6">
-              {/* AI Agent Status Card */}
-              <div className="bg-white border border-[#E8E8E8] rounded-[24px] p-6 shadow-sm flex flex-col gap-4 shrink-0">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className={`w-10 h-10 rounded-full flex items-center justify-center ${settings.aiCuratorEnabled ? "bg-[#C7F33C]/25 text-[#7CA607]" : "bg-gray-100 text-[#707070]"}`}>
-                      <Sparkles size={20} className={settings.aiCuratorEnabled ? "animate-pulse" : ""} />
+          <div className="flex flex-col gap-6">
+            {/* Row 1: Status & Prompts (Left) + Sandbox Preview (Right) */}
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+              {/* Left Side: Status & Prompts */}
+              <div className="lg:col-span-7 flex flex-col gap-6">
+                {/* AI Agent Status Card */}
+                <div className="bg-white border border-[#E8E8E8] rounded-[24px] p-6 shadow-sm flex flex-col gap-4 shrink-0">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className={`w-10 h-10 rounded-full flex items-center justify-center ${settings.aiCuratorEnabled ? "bg-[#C7F33C]/25 text-[#7CA607]" : "bg-gray-100 text-[#707070]"}`}>
+                        <Sparkles size={20} className={settings.aiCuratorEnabled ? "animate-pulse" : ""} />
+                      </div>
+                      <div>
+                        <h3 className="text-[14px] font-bold text-black">{t("pages.ai_agent.curator_status")}</h3>
+                        <p className="text-[11px] text-[#707070] mt-0.5">
+                          {settings.aiCuratorEnabled 
+                            ? t("pages.ai_agent.curator_active_desc") 
+                            : t("pages.ai_agent.curator_inactive_desc")}
+                        </p>
+                      </div>
                     </div>
-                    <div>
-                      <h3 className="text-[14px] font-bold text-black">{t("pages.ai_agent.curator_status")}</h3>
-                      <p className="text-[11px] text-[#707070] mt-0.5">
-                        {settings.aiCuratorEnabled 
-                          ? t("pages.ai_agent.curator_active_desc") 
-                          : t("pages.ai_agent.curator_inactive_desc")}
-                      </p>
+                    <label className="relative inline-flex items-center cursor-pointer shrink-0">
+                      <input
+                        type="checkbox"
+                        checked={settings.aiCuratorEnabled || false}
+                        onChange={(e) => handleToggleAiCurator(e.target.checked)}
+                        className="sr-only peer"
+                      />
+                      <div className="w-11 h-6 bg-[#E8E8E8] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-[#D8D8D8] after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-black"></div>
+                    </label>
+                  </div>
+                  <div className="flex flex-col gap-1.5 mt-2 pt-2 border-t border-[#F0F0F0]">
+                    <label className="text-[10px] font-extrabold text-[#707070] uppercase tracking-wider">AI Curator uchun Telegram Bot</label>
+                    {(() => {
+                      const tgChannels = db.getChannels().filter(c => c.type === "telegram" && c.isConnected && c.telegramToken);
+                      if (tgChannels.length > 0) {
+                        const botOptions = tgChannels.map(c => ({
+                          value: c.id,
+                          label: `${c.name} (@${c.username.replace(/^@+/, "")})`
+                        }));
+                        const selectedBotId = settings.telegramBotId || tgChannels[0].id;
+                        return (
+                          <div className="flex flex-col gap-2 mt-1">
+                            <CustomDropdown
+                              value={selectedBotId}
+                              onChange={handleBotChange}
+                              options={botOptions}
+                              placeholder="Telegram botni tanlang..."
+                              className="w-full"
+                            />
+                            <div className="flex items-center gap-1.5 text-[10px] text-green-700 mt-1 bg-green-50/50 p-2.5 rounded-xl border border-green-100">
+                              <CheckCircle size={12} className="text-green-500 shrink-0" />
+                              <span>AI kuratori ushbu tanlangan Telegram bot orqali savollarga javob beradi.</span>
+                            </div>
+                          </div>
+                        );
+                      } else {
+                        return (
+                          <div className="flex flex-col gap-2.5 p-4 bg-amber-50/50 border border-amber-200/50 rounded-2xl text-[11px] text-amber-800 mt-1">
+                            <div className="flex items-center gap-2">
+                              <Info size={14} className="shrink-0 text-amber-500" />
+                              <span className="font-bold">Telegram bot topilmadi</span>
+                            </div>
+                            <p className="text-[10px] text-amber-600 leading-relaxed">
+                              AI kuratordan foydalanish uchun sozlamalar sahifasida kamida 1ta Telegram bot ulangan bo&apos;lishi lozim.
+                            </p>
+                            <Link href="/settings" className="mt-1 inline-block w-fit px-4 py-2 bg-black text-[#C7F33C] rounded-full hover:bg-black/90 font-bold text-[10px] shadow-sm transition-all text-center">
+                              Sozlamalar bo&apos;limiga o&apos;tish ➔
+                            </Link>
+                          </div>
+                        );
+                      }
+                    })()}
+                  </div>
+                </div>
+
+                {/* System Prompt Settings */}
+                <div className="bg-white border border-[#E8E8E8] rounded-[24px] p-6 shadow-sm flex flex-col gap-4">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-[15px] font-bold text-black flex items-center gap-2">
+                      {t("pages.ai_agent.system_instruction_label")}
+                    </h3>
+                    <div className="flex items-center gap-1.5 text-[11px] text-[#707070]">
+                      <Info size={13} />
+                      <span>{t("pages.ai_agent.system_instruction_desc")}</span>
                     </div>
                   </div>
-                  <label className="relative inline-flex items-center cursor-pointer shrink-0">
-                    <input
-                      type="checkbox"
-                      checked={settings.aiCuratorEnabled || false}
-                      onChange={(e) => handleToggleAiCurator(e.target.checked)}
-                      className="sr-only peer"
-                    />
-                    <div className="w-11 h-6 bg-[#E8E8E8] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-[#D8D8D8] after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-black"></div>
-                  </label>
+                  <textarea
+                    value={settings.systemPrompt}
+                    onChange={(e) => handleUpdateSettings("systemPrompt", e.target.value)}
+                    className="w-full min-h-[220px] p-4 text-[12px] font-mono leading-relaxed bg-[#F9F9F7] border border-[#E8E8E8] rounded-[16px] focus:outline-none focus:border-black focus:ring-1 focus:ring-black resize-y text-black"
+                    placeholder={t("pages.ai_agent.system_instruction_placeholder")}
+                  />
                 </div>
-                <div className="flex flex-col gap-1.5 mt-2 pt-2 border-t border-[#F0F0F0]">
-                  <label className="text-[10px] font-extrabold text-[#707070] uppercase tracking-wider">AI Curator uchun Telegram Bot</label>
-                  {(() => {
-                    const tgChannels = db.getChannels().filter(c => c.type === "telegram" && c.isConnected && c.telegramToken);
-                    if (tgChannels.length > 0) {
-                      const botOptions = tgChannels.map(c => ({
-                        value: c.id,
-                        label: `${c.name} (@${c.username.replace(/^@+/, "")})`
-                      }));
-                      const selectedBotId = settings.telegramBotId || tgChannels[0].id;
-                      return (
-                        <div className="flex flex-col gap-2 mt-1">
-                          <CustomDropdown
-                            value={selectedBotId}
-                            onChange={handleBotChange}
-                            options={botOptions}
-                            placeholder="Telegram botni tanlang..."
-                            className="w-full"
-                          />
-                          <div className="flex items-center gap-1.5 text-[10px] text-green-700 mt-1 bg-green-50/50 p-2.5 rounded-xl border border-green-100">
-                            <CheckCircle size={12} className="text-green-500 shrink-0" />
-                            <span>AI kuratori ushbu tanlangan Telegram bot orqali savollarga javob beradi.</span>
+              </div>
+
+              {/* Right Side: Column */}
+              <div className="lg:col-span-5 flex flex-col gap-6">
+                {/* Sandbox Preview chat simulator */}
+                <div className="bg-[#F9F9F7] border border-[#E8E8E8] rounded-[28px] overflow-hidden flex flex-col shadow-inner h-[580px]">
+                  {/* Header */}
+                  <div className="bg-white border-b border-[#E8E8E8] p-4 flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-9 h-9 rounded-full bg-black text-[#C7F33C] grid place-items-center font-bold text-[14px]">
+                        <Sparkles size={16} />
+                      </div>
+                      <div>
+                        <h4 className="text-[12px] font-bold text-black">{t("pages.ai_agent.curator_sandbox_title")}</h4>
+                        <span className="text-[10px] text-green-600 flex items-center gap-1">
+                          <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
+                          {t("pages.ai_agent.curator_sandbox_active")}
+                        </span>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => setChatMessages([
+                        {
+                          id: `welcome-${Date.now()}`,
+                          sender: "bot",
+                          text: t("pages.ai_agent.chat_history_cleared"),
+                          time: t("common.today"),
+                          confidence: 100
+                        }
+                      ])}
+                      className="text-[10px] text-[#707070] hover:text-black font-semibold"
+                    >
+                      {t("pages.ai_agent.clear_btn")}
+                    </button>
+                  </div>
+
+                  {/* Message list */}
+                  <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-4">
+                    {chatMessages.map((msg) => {
+                      const isUser = msg.sender === "user";
+                      const isWarning = msg.sender === "warning";
+
+                      if (isWarning) {
+                        return (
+                          <div key={msg.id} className="flex justify-center my-2 max-w-[90%] mx-auto">
+                            <div className="bg-red-50 border border-red-100 rounded-2xl p-3.5 text-[11px] text-red-700 flex gap-2.5 items-start">
+                              <ShieldAlert size={16} className="shrink-0 text-red-500 mt-0.5" />
+                              <div>
+                                <p className="font-bold">{t("pages.ai_agent.moderation_block_title")}</p>
+                                <p className="mt-1 leading-relaxed">{msg.text}</p>
+                              </div>
+                            </div>
                           </div>
+                        );
+                      }
+
+                      return (
+                        <div
+                          key={msg.id}
+                          className={`flex flex-col max-w-[80%] ${isUser ? "ml-auto items-end" : "mr-auto items-start"}`}
+                        >
+                          <div
+                            className={`p-3.5 rounded-[20px] text-[12px] leading-relaxed ${
+                              isUser
+                                ? "bg-black text-[#C7F33C] rounded-tr-sm"
+                                : "bg-white text-black border border-[#E8E8E8] rounded-tl-sm shadow-sm"
+                            }`}
+                          >
+                            {msg.text}
+                          </div>
+
+                          <div className="flex items-center gap-1.5 mt-1 px-1 text-[9px] text-[#A0A0A0]">
+                            <span>{msg.time}</span>
+                            {!isUser && msg.confidence !== undefined && (
+                              <>
+                                <span>•</span>
+                                <span className="text-green-600 font-medium">
+                                  {t("pages.ai_agent.confidence_label")} {msg.confidence}%
+                                </span>
+                              </>
+                            )}
+                          </div>
+
+                          {/* Sources ground details if any */}
+                          {!isUser && msg.sources && msg.sources.length > 0 && (
+                            <div className="mt-1 flex flex-wrap gap-1">
+                              {msg.sources.map((src, i) => (
+                                <span
+                                  key={i}
+                                  className="text-[8px] bg-white border border-[#E8E8E8] px-2 py-0.5 rounded text-[#707070] italic"
+                                >
+                                  {t("pages.ai_agent.source_label")} {src}
+                                </span>
+                              ))}
+                            </div>
+                          )}
                         </div>
                       );
-                    } else {
+                    })}
+
+                    {chatLoading && (
+                      <div className="flex mr-auto items-start max-w-[80%]">
+                        <div className="bg-white text-[#707070] border border-[#E8E8E8] p-3.5 rounded-[20px] rounded-tl-sm text-[12px] shadow-sm flex items-center gap-2">
+                          <span className="w-1.5 h-1.5 bg-[#A0A0A0] rounded-full animate-bounce" />
+                          <span className="w-1.5 h-1.5 bg-[#A0A0A0] rounded-full animate-bounce [animation-delay:0.2s]" />
+                          <span className="w-1.5 h-1.5 bg-[#A0A0A0] rounded-full animate-bounce [animation-delay:0.4s]" />
+                        </div>
+                      </div>
+                    )}
+                    <div ref={chatEndRef} />
+                  </div>
+
+                  {/* Input Form */}
+                  <form
+                    onSubmit={handleSendSimMessage}
+                    className="bg-white border-t border-[#E8E8E8] p-3 flex gap-2"
+                  >
+                    <input
+                      type="text"
+                      value={chatInput}
+                      disabled={chatLoading}
+                      onChange={(e) => setChatInput(e.target.value)}
+                      placeholder={t("pages.ai_agent.student_question_placeholder")}
+                      className="flex-1 px-4 py-2.5 text-[12px] bg-[#F9F9F7] border border-[#E8E8E8] rounded-xl focus:outline-none focus:border-black"
+                    />
+                    <button
+                      type="submit"
+                      disabled={chatLoading || !chatInput.trim()}
+                      className="w-10 h-10 rounded-xl bg-black text-[#C7F33C] grid place-items-center hover:bg-black/90 disabled:opacity-50 transition-all shrink-0"
+                    >
+                      <Send size={15} />
+                    </button>
+                  </form>
+                </div>
+              </div>
+            </div>
+
+            {/* Row 2: Sliders (Left) + Sliders Preview (Right) */}
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+              {/* Left Side: Sliders */}
+              <div className="lg:col-span-7 flex flex-col gap-6">
+                {/* Sliders (Tone, Length, Humor) */}
+                <div className="relative bg-white border border-[#E8E8E8] rounded-[24px] p-6 shadow-sm flex flex-col gap-6">
+                  <h3 className="text-[15px] font-bold text-black">
+                    {t("pages.ai_agent.curator_tone_title")}
+                  </h3>
+
+                  <div className="flex flex-col gap-5">
+                    {/* Tone slider */}
+                    <div className="flex flex-col gap-2">
+                      <div className="flex justify-between text-[12px] font-bold text-black">
+                        <span>{t("pages.ai_agent.tone_label")}</span>
+                        <span className="text-[#707070]">
+                          {settings.tone > 75 ? t("pages.ai_agent.tone_formal") : settings.tone < 25 ? t("pages.ai_agent.tone_informal") : t("pages.ai_agent.tone_friendly")}
+                        </span>
+                      </div>
+                      <input
+                        type="range"
+                        min="0"
+                        max="100"
+                        value={settings.tone}
+                        onChange={(e) => handleSliderChange("tone", parseInt(e.target.value))}
+                        className="w-full accent-black h-1 bg-[#F0F0F0] rounded-lg appearance-none cursor-pointer"
+                      />
+                      <div className="flex justify-between text-[10px] text-[#A0A0A0]">
+                        <span>{t("pages.ai_agent.tone_informal_friendly_desc")}</span>
+                        <span>{t("pages.ai_agent.tone_formal_desc")}</span>
+                      </div>
+                    </div>
+
+                    {/* Length slider */}
+                    <div className="flex flex-col gap-2">
+                      <div className="flex justify-between text-[12px] font-bold text-black">
+                        <span>{t("pages.ai_agent.response_length_label")}</span>
+                        <span className="text-[#707070]">
+                          {settings.length > 75 ? t("pages.ai_agent.length_detailed") : settings.length < 25 ? t("pages.ai_agent.length_concise") : t("pages.ai_agent.length_moderate")}
+                        </span>
+                      </div>
+                      <input
+                        type="range"
+                        min="0"
+                        max="100"
+                        value={settings.length}
+                        onChange={(e) => handleSliderChange("length", parseInt(e.target.value))}
+                        className="w-full accent-black h-1 bg-[#F0F0F0] rounded-lg appearance-none cursor-pointer"
+                      />
+                      <div className="flex justify-between text-[10px] text-[#A0A0A0]">
+                        <span>{t("pages.ai_agent.length_concise_desc")}</span>
+                        <span>{t("pages.ai_agent.length_detailed_desc")}</span>
+                      </div>
+                    </div>
+
+                    {/* Humor slider */}
+                    <div className="flex flex-col gap-2">
+                      <div className="flex justify-between text-[12px] font-bold text-black">
+                        <span>{t("pages.ai_agent.humor_emojis_label")}</span>
+                        <span className="text-[#707070]">
+                          {settings.humor > 75 ? t("pages.ai_agent.humor_many") : settings.humor < 25 ? t("pages.ai_agent.humor_serious") : t("pages.ai_agent.humor_moderate")}
+                        </span>
+                      </div>
+                      <input
+                        type="range"
+                        min="0"
+                        max="100"
+                        value={settings.humor}
+                        onChange={(e) => handleSliderChange("humor", parseInt(e.target.value))}
+                        className="w-full accent-black h-1 bg-[#F0F0F0] rounded-lg appearance-none cursor-pointer"
+                      />
+                      <div className="flex justify-between text-[10px] text-[#A0A0A0]">
+                        <span>{t("pages.ai_agent.humor_serious_desc")}</span>
+                        <span>{t("pages.ai_agent.humor_funny_desc")}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Right Side: Column */}
+              <div className="lg:col-span-5 flex flex-col gap-6">
+                {/* Permanent Sliders Preview Card */}
+                <div className="bg-white border border-[#E8E8E8] rounded-[24px] p-6 shadow-sm flex flex-col gap-4 animate-in fade-in duration-200">
+                  <div className="flex items-center gap-2 border-b border-[#F0F0F0] pb-2.5">
+                    <Sparkles size={15} className="text-black" />
+                    <h3 className="text-[13px] font-bold text-black">
+                      {"Ohang va Xarakter ta'siri (Suhbat namunasi)"}
+                    </h3>
+                  </div>
+
+                  {/* Render preview message */}
+                  {(() => {
+                    const sliderVal = sliderPreviewType === "tone" 
+                      ? settings.tone 
+                      : sliderPreviewType === "length" 
+                      ? settings.length 
+                      : settings.humor;
+                    const content = getSliderPreviewContent(sliderPreviewType, sliderVal);
+                    return (
+                      <div className="flex flex-col gap-3">
+                        <div className="flex justify-between items-center text-[10px] font-bold text-[#707070] px-1 uppercase tracking-wider">
+                          <span>{content.title}</span>
+                          <span className="bg-black/5 px-2 py-0.5 rounded-md text-black font-extrabold">
+                            {sliderVal}%
+                          </span>
+                        </div>
+                        <div className="flex flex-col gap-2.5 pt-1 text-[11px]">
+                          {/* User Message */}
+                          <div className="flex flex-col items-end max-w-[85%] ml-auto">
+                            <div className="bg-[#F0F0F0] text-black px-3.5 py-2 rounded-[16px] rounded-tr-sm leading-relaxed text-right">
+                              {content.question}
+                            </div>
+                          </div>
+                          {/* Bot Reply */}
+                          <div className="flex flex-col items-start max-w-[85%] mr-auto">
+                            <div className="bg-black text-[#C7F33C] px-3.5 py-2 rounded-[16px] rounded-tl-sm leading-relaxed text-left">
+                              {content.reply}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })()}
+                </div>
+              </div>
+            </div>
+
+            {/* Row 3: Forbidden Topics (Left) + Auto Outreach settings (Right) */}
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+              {/* Left Side: Forbidden Topics */}
+              <div className="lg:col-span-7 flex flex-col gap-6">
+                {/* Dynamic Restricted Topics */}
+                <div className="bg-white border border-[#E8E8E8] rounded-[24px] p-6 shadow-sm flex flex-col gap-4">
+                  <h3 className="text-[15px] font-bold text-black flex items-center gap-2">
+                    <ShieldAlert className="text-red-500 w-4 h-4" />
+                    <span>{t("pages.ai_agent.forbidden_topics_title")}</span>
+                  </h3>
+                  <p className="text-[11px] text-[#707070] leading-relaxed">
+                    {t("pages.ai_agent.forbidden_topics_desc")}
+                  </p>
+
+                  <form onSubmit={handleAddTopic} className="flex gap-2">
+                    <input
+                      type="text"
+                      value={newTopic}
+                      onChange={(e) => setNewTopic(e.target.value)}
+                      placeholder={t("pages.ai_agent.forbidden_topic_placeholder")}
+                      className="flex-1 px-4 py-2 text-[12px] bg-[#F9F9F7] border border-[#E8E8E8] rounded-xl focus:outline-none focus:border-black"
+                    />
+                    <button
+                      type="submit"
+                      className="px-4 py-2 rounded-xl bg-black text-white hover:bg-black/90 text-[12px] font-bold transition-all"
+                    >
+                      {t("pages.ai_agent.add_btn")}
+                    </button>
+                  </form>
+
+                  <div className="flex flex-wrap gap-2 mt-2">
+                    {settings.topics.map((topic) => (
+                      <span
+                        key={topic}
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-red-50 border border-red-100 text-[11px] font-semibold text-red-700"
+                      >
+                        <span>{topic}</span>
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveTopic(topic)}
+                          className="text-red-400 hover:text-red-800 font-bold ml-1 text-[10px]"
+                        >
+                          ✕
+                        </button>
+                      </span>
+                    ))}
+                    {settings.topics.length === 0 && (
+                      <span className="text-[11px] text-[#A0A0A0] italic">{t("pages.ai_agent.no_forbidden_topics")}</span>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Right Side: Column */}
+              <div className="lg:col-span-5 flex flex-col gap-6">
+                {/* Outreach Auto settings */}
+                <div className="bg-white border border-[#E8E8E8] rounded-[24px] p-6 shadow-sm flex flex-col gap-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="text-[15px] font-bold text-black">
+                        {t("pages.ai_agent.auto_outreach_title")}
+                      </h3>
+                      <p className="text-[11px] text-[#707070] mt-1">
+                        {t("pages.ai_agent.auto_outreach_desc")}
+                      </p>
+                    </div>
+                    <label className="relative inline-flex items-center cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={settings.autoOutreach}
+                        onChange={(e) => handleUpdateSettings("autoOutreach", e.target.checked)}
+                        className="sr-only peer"
+                      />
+                      <div className="w-9 h-5 bg-[#E8E8E8] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-[#D8D8D8] after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-black"></div>
+                    </label>
+                  </div>
+
+                  {settings.autoOutreach && (
+                    <div className="grid grid-cols-2 gap-4 mt-2">
+                      <div className="flex flex-col gap-1.5">
+                        <span className="text-[11px] font-bold text-black">{t("pages.ai_agent.outreach_start_time")}</span>
+                        <input
+                          type="time"
+                          value={settings.outreachStart}
+                          onChange={(e) => handleUpdateSettings("outreachStart", e.target.value)}
+                          className="px-3 py-2 text-[12px] bg-[#F9F9F7] border border-[#E8E8E8] rounded-xl focus:outline-none focus:border-black"
+                        />
+                      </div>
+                      <div className="flex flex-col gap-1.5">
+                        <span className="text-[11px] font-bold text-black">{t("pages.ai_agent.outreach_end_time")}</span>
+                        <input
+                          type="time"
+                          value={settings.outreachEnd}
+                          onChange={(e) => handleUpdateSettings("outreachEnd", e.target.value)}
+                          className="px-3 py-2 text-[12px] bg-[#F9F9F7] border border-[#E8E8E8] rounded-xl focus:outline-none focus:border-black"
+                        />
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Row 4: Escalation Rules (Left) + Curator Admin Connection (Right) */}
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+              {/* Left Side: Escalation Rules */}
+              <div className="lg:col-span-7 flex flex-col gap-6">
+                {/* Escalation Rules */}
+                <div className="bg-white border border-[#E8E8E8] rounded-[24px] p-6 shadow-sm flex flex-col gap-4">
+                  <h3 className="text-[15px] font-bold text-black flex items-center gap-2">
+                    <ArrowRight className="text-blue-500 w-4 h-4" />
+                    <span>{t("pages.ai_agent.escalation_rules_title")}</span>
+                  </h3>
+                  <p className="text-[11px] text-[#707070]">
+                    {t("pages.ai_agent.escalation_rules_desc")}
+                  </p>
+
+                  <form onSubmit={handleAddRule} className="flex gap-2">
+                    <input
+                      type="text"
+                      value={newRule}
+                      onChange={(e) => setNewRule(e.target.value)}
+                      placeholder={t("pages.ai_agent.escalation_rule_placeholder")}
+                      className="flex-1 px-4 py-2 text-[12px] bg-[#F9F9F7] border border-[#E8E8E8] rounded-xl focus:outline-none focus:border-black"
+                    />
+                    <button
+                      type="submit"
+                      className="px-4 py-2 rounded-xl bg-black text-white hover:bg-black/90 text-[12px] font-bold transition-all"
+                    >
+                      {t("pages.ai_agent.add_btn")}
+                    </button>
+                  </form>
+
+                  <div className="flex flex-col gap-2 mt-2">
+                    {settings.escalationRules.map((rule) => (
+                      <div
+                        key={rule.id}
+                        className="flex items-center justify-between p-3 rounded-xl border border-[#E8E8E8] hover:bg-[#F9F9F7] transition-colors"
+                      >
+                        <div className="flex items-center gap-3">
+                          <input
+                            type="checkbox"
+                            checked={rule.enabled}
+                            onChange={() => handleToggleRule(rule.id)}
+                            className="w-4 h-4 accent-black cursor-pointer"
+                          />
+                          <span className={`text-[12px] font-medium ${rule.enabled ? "text-black" : "text-[#707070] line-through"}`}>
+                            {rule.text}
+                          </span>
+                        </div>
+                        <button
+                          onClick={() => handleDeleteRule(rule.id)}
+                          className="text-[#707070] hover:text-red-600 transition-colors p-1"
+                          title={t("common.delete")}
+                        >
+                          <Trash2 size={13} />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Right Side: Column */}
+              <div className="lg:col-span-5 flex flex-col gap-6">
+                {/* Curator Admin Notification Settings */}
+                <div className="bg-white border border-[#E8E8E8] rounded-[24px] p-6 shadow-sm flex flex-col gap-4">
+                  <div>
+                    <h3 className="text-[15px] font-bold text-black">
+                      {"Inson-kuratorni ulash"}
+                    </h3>
+                    <p className="text-[11px] text-[#707070] mt-1">
+                      {"AI javob bera olmagan yoki operator kutilgan holatlarda bot sizga Telegram orqali xabar yo'llashi uchun kurator (admin) profilini ulang."}
+                    </p>
+                  </div>
+
+                  {(() => {
+                    const tgChannels = db.getChannels().filter(c => c.type === "telegram" && c.isConnected && c.telegramToken);
+                    if (tgChannels.length === 0) {
                       return (
                         <div className="flex flex-col gap-2.5 p-4 bg-amber-50/50 border border-amber-200/50 rounded-2xl text-[11px] text-amber-800 mt-1">
                           <div className="flex items-center gap-2">
@@ -3075,7 +3558,7 @@ function AIAgentContent() {
                             <span className="font-bold">Telegram bot topilmadi</span>
                           </div>
                           <p className="text-[10px] text-amber-600 leading-relaxed">
-                            AI kuratordan foydalanish uchun sozlamalar sahifasida kamida 1ta Telegram bot ulangan bo&apos;lishi lozim.
+                            Ulash uchun avval sozlamalar bo&apos;limida Telegram botni ulashingiz lozim.
                           </p>
                           <Link href="/settings" className="mt-1 inline-block w-fit px-4 py-2 bg-black text-[#C7F33C] rounded-full hover:bg-black/90 font-bold text-[10px] shadow-sm transition-all text-center">
                             Sozlamalar bo&apos;limiga o&apos;tish ➔
@@ -3083,578 +3566,125 @@ function AIAgentContent() {
                         </div>
                       );
                     }
-                  })()}
-                </div>
-              </div>
 
-              {/* System Prompt Settings */}
-              <div className="bg-white border border-[#E8E8E8] rounded-[24px] p-6 shadow-sm flex flex-col gap-4">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-[15px] font-bold text-black flex items-center gap-2">
-                    {t("pages.ai_agent.system_instruction_label")}
-                  </h3>
-                  <div className="flex items-center gap-1.5 text-[11px] text-[#707070]">
-                    <Info size={13} />
-                    <span>{t("pages.ai_agent.system_instruction_desc")}</span>
-                  </div>
-                </div>
-                <textarea
-                  value={settings.systemPrompt}
-                  onChange={(e) => handleUpdateSettings("systemPrompt", e.target.value)}
-                  className="w-full min-h-[220px] p-4 text-[12px] font-mono leading-relaxed bg-[#F9F9F7] border border-[#E8E8E8] rounded-[16px] focus:outline-none focus:border-black focus:ring-1 focus:ring-black resize-y text-black"
-                  placeholder={t("pages.ai_agent.system_instruction_placeholder")}
-                />
-              </div>
-
-              {/* Sliders (Tone, Length, Humor) */}
-              <div className="relative bg-white border border-[#E8E8E8] rounded-[24px] p-6 shadow-sm flex flex-col gap-6">
-                <h3 className="text-[15px] font-bold text-black">
-                  {t("pages.ai_agent.curator_tone_title")}
-                </h3>
-
-                <div className="flex flex-col gap-5">
-                  {/* Tone slider */}
-                  <div className="flex flex-col gap-2">
-                    <div className="flex justify-between text-[12px] font-bold text-black">
-                      <span>{t("pages.ai_agent.tone_label")}</span>
-                      <span className="text-[#707070]">
-                        {settings.tone > 75 ? t("pages.ai_agent.tone_formal") : settings.tone < 25 ? t("pages.ai_agent.tone_informal") : t("pages.ai_agent.tone_friendly")}
-                      </span>
-                    </div>
-                    <input
-                      type="range"
-                      min="0"
-                      max="100"
-                      value={settings.tone}
-                      onChange={(e) => handleSliderChange("tone", parseInt(e.target.value))}
-                      className="w-full accent-black h-1 bg-[#F0F0F0] rounded-lg appearance-none cursor-pointer"
-                    />
-                    <div className="flex justify-between text-[10px] text-[#A0A0A0]">
-                      <span>{t("pages.ai_agent.tone_informal_friendly_desc")}</span>
-                      <span>{t("pages.ai_agent.tone_formal_desc")}</span>
-                    </div>
-                  </div>
-
-                  {/* Length slider */}
-                  <div className="flex flex-col gap-2">
-                    <div className="flex justify-between text-[12px] font-bold text-black">
-                      <span>{t("pages.ai_agent.response_length_label")}</span>
-                      <span className="text-[#707070]">
-                        {settings.length > 75 ? t("pages.ai_agent.length_detailed") : settings.length < 25 ? t("pages.ai_agent.length_concise") : t("pages.ai_agent.length_moderate")}
-                      </span>
-                    </div>
-                    <input
-                      type="range"
-                      min="0"
-                      max="100"
-                      value={settings.length}
-                      onChange={(e) => handleSliderChange("length", parseInt(e.target.value))}
-                      className="w-full accent-black h-1 bg-[#F0F0F0] rounded-lg appearance-none cursor-pointer"
-                    />
-                    <div className="flex justify-between text-[10px] text-[#A0A0A0]">
-                      <span>{t("pages.ai_agent.length_concise_desc")}</span>
-                      <span>{t("pages.ai_agent.length_detailed_desc")}</span>
-                    </div>
-                  </div>
-
-                  {/* Humor slider */}
-                  <div className="flex flex-col gap-2">
-                    <div className="flex justify-between text-[12px] font-bold text-black">
-                      <span>{t("pages.ai_agent.humor_emojis_label")}</span>
-                      <span className="text-[#707070]">
-                        {settings.humor > 75 ? t("pages.ai_agent.humor_many") : settings.humor < 25 ? t("pages.ai_agent.humor_serious") : t("pages.ai_agent.humor_moderate")}
-                      </span>
-                    </div>
-                    <input
-                      type="range"
-                      min="0"
-                      max="100"
-                      value={settings.humor}
-                      onChange={(e) => handleSliderChange("humor", parseInt(e.target.value))}
-                      className="w-full accent-black h-1 bg-[#F0F0F0] rounded-lg appearance-none cursor-pointer"
-                    />
-                    <div className="flex justify-between text-[10px] text-[#A0A0A0]">
-                      <span>{t("pages.ai_agent.humor_serious_desc")}</span>
-                      <span>{t("pages.ai_agent.humor_funny_desc")}</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Dynamic Restricted Topics */}
-              <div className="bg-white border border-[#E8E8E8] rounded-[24px] p-6 shadow-sm flex flex-col gap-4">
-                <h3 className="text-[15px] font-bold text-black flex items-center gap-2">
-                  <ShieldAlert className="text-red-500 w-4 h-4" />
-                  <span>{t("pages.ai_agent.forbidden_topics_title")}</span>
-                </h3>
-                <p className="text-[11px] text-[#707070] leading-relaxed">
-                  {t("pages.ai_agent.forbidden_topics_desc")}
-                </p>
-
-                <form onSubmit={handleAddTopic} className="flex gap-2">
-                  <input
-                    type="text"
-                    value={newTopic}
-                    onChange={(e) => setNewTopic(e.target.value)}
-                    placeholder={t("pages.ai_agent.forbidden_topic_placeholder")}
-                    className="flex-1 px-4 py-2 text-[12px] bg-[#F9F9F7] border border-[#E8E8E8] rounded-xl focus:outline-none focus:border-black"
-                  />
-                  <button
-                    type="submit"
-                    className="px-4 py-2 rounded-xl bg-black text-white hover:bg-black/90 text-[12px] font-bold transition-all"
-                  >
-                    {t("pages.ai_agent.add_btn")}
-                  </button>
-                </form>
-
-                <div className="flex flex-wrap gap-2 mt-2">
-                  {settings.topics.map((topic) => (
-                    <span
-                      key={topic}
-                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-red-50 border border-red-100 text-[11px] font-semibold text-red-700"
-                    >
-                      <span>{topic}</span>
-                      <button
-                        type="button"
-                        onClick={() => handleRemoveTopic(topic)}
-                        className="text-red-400 hover:text-red-800 font-bold ml-1 text-[10px]"
-                      >
-                        ✕
-                      </button>
-                    </span>
-                  ))}
-                  {settings.topics.length === 0 && (
-                    <span className="text-[11px] text-[#A0A0A0] italic">{t("pages.ai_agent.no_forbidden_topics")}</span>
-                  )}
-                </div>
-              </div>
-
-              {/* Escalation Rules */}
-              <div className="bg-white border border-[#E8E8E8] rounded-[24px] p-6 shadow-sm flex flex-col gap-4">
-                <h3 className="text-[15px] font-bold text-black flex items-center gap-2">
-                  <ArrowRight className="text-blue-500 w-4 h-4" />
-                  <span>{t("pages.ai_agent.escalation_rules_title")}</span>
-                </h3>
-                <p className="text-[11px] text-[#707070]">
-                  {t("pages.ai_agent.escalation_rules_desc")}
-                </p>
-
-                <form onSubmit={handleAddRule} className="flex gap-2">
-                  <input
-                    type="text"
-                    value={newRule}
-                    onChange={(e) => setNewRule(e.target.value)}
-                    placeholder={t("pages.ai_agent.escalation_rule_placeholder")}
-                    className="flex-1 px-4 py-2 text-[12px] bg-[#F9F9F7] border border-[#E8E8E8] rounded-xl focus:outline-none focus:border-black"
-                  />
-                  <button
-                    type="submit"
-                    className="px-4 py-2 rounded-xl bg-black text-white hover:bg-black/90 text-[12px] font-bold transition-all"
-                  >
-                    {t("pages.ai_agent.add_btn")}
-                  </button>
-                </form>
-
-                <div className="flex flex-col gap-2 mt-2">
-                  {settings.escalationRules.map((rule) => (
-                    <div
-                      key={rule.id}
-                      className="flex items-center justify-between p-3 rounded-xl border border-[#E8E8E8] hover:bg-[#F9F9F7] transition-colors"
-                    >
-                      <div className="flex items-center gap-3">
-                        <input
-                          type="checkbox"
-                          checked={rule.enabled}
-                          onChange={() => handleToggleRule(rule.id)}
-                          className="w-4 h-4 accent-black cursor-pointer"
-                        />
-                        <span className={`text-[12px] font-medium ${rule.enabled ? "text-black" : "text-[#707070] line-through"}`}>
-                          {rule.text}
-                        </span>
-                      </div>
-                      <button
-                        onClick={() => handleDeleteRule(rule.id)}
-                        className="text-[#707070] hover:text-red-600 transition-colors p-1"
-                        title={t("common.delete")}
-                      >
-                        <Trash2 size={13} />
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            {/* Right Side: Column */}
-            <div className="lg:col-span-5 flex flex-col gap-6">
-              {/* Sandbox Preview chat simulator */}
-              <div className="bg-[#F9F9F7] border border-[#E8E8E8] rounded-[28px] overflow-hidden flex flex-col shadow-inner h-[580px]">
-                {/* Header */}
-                <div className="bg-white border-b border-[#E8E8E8] p-4 flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-full bg-black text-[#C7F33C] grid place-items-center font-bold text-[14px]">
-                      <Sparkles size={16} />
-                    </div>
-                    <div>
-                      <h4 className="text-[12px] font-bold text-black">{t("pages.ai_agent.curator_sandbox_title")}</h4>
-                      <span className="text-[10px] text-green-600 flex items-center gap-1">
-                        <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
-                        {t("pages.ai_agent.curator_sandbox_active")}
-                      </span>
-                    </div>
-                  </div>
-                  <button
-                    onClick={() => setChatMessages([
-                      {
-                        id: `welcome-${Date.now()}`,
-                        sender: "bot",
-                        text: t("pages.ai_agent.chat_history_cleared"),
-                        time: t("common.today"),
-                        confidence: 100
-                      }
-                    ])}
-                    className="text-[10px] text-[#707070] hover:text-black font-semibold"
-                  >
-                    {t("pages.ai_agent.clear_btn")}
-                  </button>
-                </div>
-
-                {/* Message list */}
-                <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-4">
-                  {chatMessages.map((msg) => {
-                    const isUser = msg.sender === "user";
-                    const isWarning = msg.sender === "warning";
-
-                    if (isWarning) {
-                      return (
-                        <div key={msg.id} className="flex justify-center my-2 max-w-[90%] mx-auto">
-                          <div className="bg-red-50 border border-red-100 rounded-2xl p-3.5 text-[11px] text-red-700 flex gap-2.5 items-start">
-                            <ShieldAlert size={16} className="shrink-0 text-red-500 mt-0.5" />
-                            <div>
-                              <p className="font-bold">{t("pages.ai_agent.moderation_block_title")}</p>
-                              <p className="mt-1 leading-relaxed">{msg.text}</p>
-                            </div>
+                    return settings.adminTelegramChatId ? (
+                      <div className="flex items-center justify-between p-3.5 rounded-xl bg-green-50 border border-green-200">
+                        <div className="flex flex-col gap-0.5">
+                          <div className="flex items-center gap-1.5 text-[12px] font-bold text-green-800">
+                            <CheckCircle size={14} className="text-green-600 shrink-0" />
+                            <span>{"Admin profil bog'langan"}</span>
                           </div>
+                          <span className="text-[11px] text-green-700 mt-1">
+                            Foydalanuvchi: @{settings.adminTelegramUsername} (Chat ID: {settings.adminTelegramChatId})
+                          </span>
                         </div>
-                      );
-                    }
-
-                    return (
-                      <div
-                        key={msg.id}
-                        className={`flex flex-col max-w-[80%] ${isUser ? "ml-auto items-end" : "mr-auto items-start"}`}
-                      >
-                        <div
-                          className={`p-3.5 rounded-[20px] text-[12px] leading-relaxed ${
-                            isUser
-                              ? "bg-black text-[#C7F33C] rounded-tr-sm"
-                              : "bg-white text-black border border-[#E8E8E8] rounded-tl-sm shadow-sm"
-                          }`}
-                        >
-                          {msg.text}
-                        </div>
-
-                        <div className="flex items-center gap-1.5 mt-1 px-1 text-[9px] text-[#A0A0A0]">
-                          <span>{msg.time}</span>
-                          {!isUser && msg.confidence !== undefined && (
-                            <>
-                              <span>•</span>
-                              <span className="text-green-600 font-medium">
-                                {t("pages.ai_agent.confidence_label")} {msg.confidence}%
-                              </span>
-                            </>
-                          )}
-                        </div>
-
-                        {/* Sources ground details if any */}
-                        {!isUser && msg.sources && msg.sources.length > 0 && (
-                          <div className="mt-1 flex flex-wrap gap-1">
-                            {msg.sources.map((src, i) => (
-                              <span
-                                key={i}
-                                className="text-[8px] bg-white border border-[#E8E8E8] px-2 py-0.5 rounded text-[#707070] italic"
-                              >
-                                {t("pages.ai_agent.source_label")} {src}
-                              </span>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                    );
-                  })}
-
-                  {chatLoading && (
-                    <div className="flex mr-auto items-start max-w-[80%]">
-                      <div className="bg-white text-[#707070] border border-[#E8E8E8] p-3.5 rounded-[20px] rounded-tl-sm text-[12px] shadow-sm flex items-center gap-2">
-                        <span className="w-1.5 h-1.5 bg-[#A0A0A0] rounded-full animate-bounce" />
-                        <span className="w-1.5 h-1.5 bg-[#A0A0A0] rounded-full animate-bounce [animation-delay:0.2s]" />
-                        <span className="w-1.5 h-1.5 bg-[#A0A0A0] rounded-full animate-bounce [animation-delay:0.4s]" />
-                      </div>
-                    </div>
-                  )}
-                  <div ref={chatEndRef} />
-                </div>
-
-                {/* Input Form */}
-                <form
-                  onSubmit={handleSendSimMessage}
-                  className="bg-white border-t border-[#E8E8E8] p-3 flex gap-2"
-                >
-                  <input
-                    type="text"
-                    value={chatInput}
-                    disabled={chatLoading}
-                    onChange={(e) => setChatInput(e.target.value)}
-                    placeholder={t("pages.ai_agent.student_question_placeholder")}
-                    className="flex-1 px-4 py-2.5 text-[12px] bg-[#F9F9F7] border border-[#E8E8E8] rounded-xl focus:outline-none focus:border-black"
-                  />
-                  <button
-                    type="submit"
-                    disabled={chatLoading || !chatInput.trim()}
-                    className="w-10 h-10 rounded-xl bg-black text-[#C7F33C] grid place-items-center hover:bg-black/90 disabled:opacity-50 transition-all shrink-0"
-                  >
-                    <Send size={15} />
-                  </button>
-                </form>
-              </div>
-
-              {/* Permanent Sliders Preview Card */}
-              <div className="bg-white border border-[#E8E8E8] rounded-[24px] p-6 shadow-sm flex flex-col gap-4 animate-in fade-in duration-200">
-                <div className="flex items-center gap-2 border-b border-[#F0F0F0] pb-2.5">
-                  <Sparkles size={15} className="text-black" />
-                  <h3 className="text-[13px] font-bold text-black">
-                    {"Ohang va Xarakter ta'siri (Suhbat namunasi)"}
-                  </h3>
-                </div>
-
-                {/* Render preview message */}
-                {(() => {
-                  const sliderVal = sliderPreviewType === "tone" 
-                    ? settings.tone 
-                    : sliderPreviewType === "length" 
-                    ? settings.length 
-                    : settings.humor;
-                  const content = getSliderPreviewContent(sliderPreviewType, sliderVal);
-                  return (
-                    <div className="flex flex-col gap-3">
-                      <div className="flex justify-between items-center text-[10px] font-bold text-[#707070] px-1 uppercase tracking-wider">
-                        <span>{content.title}</span>
-                        <span className="bg-black/5 px-2 py-0.5 rounded-md text-black font-extrabold">
-                          {sliderVal}%
-                        </span>
-                      </div>
-                      <div className="flex flex-col gap-2.5 pt-1 text-[11px]">
-                        {/* User Message */}
-                        <div className="flex flex-col items-end max-w-[85%] ml-auto">
-                          <div className="bg-[#F0F0F0] text-black px-3.5 py-2 rounded-[16px] rounded-tr-sm leading-relaxed text-right">
-                            {content.question}
-                          </div>
-                        </div>
-                        {/* Bot Reply */}
-                        <div className="flex flex-col items-start max-w-[85%] mr-auto">
-                          <div className="bg-black text-[#C7F33C] px-3.5 py-2 rounded-[16px] rounded-tl-sm leading-relaxed text-left">
-                            {content.reply}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })()}
-              </div>
-
-              {/* Outreach Auto settings */}
-              <div className="bg-white border border-[#E8E8E8] rounded-[24px] p-6 shadow-sm flex flex-col gap-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h3 className="text-[15px] font-bold text-black">
-                      {t("pages.ai_agent.auto_outreach_title")}
-                    </h3>
-                    <p className="text-[11px] text-[#707070] mt-1">
-                      {t("pages.ai_agent.auto_outreach_desc")}
-                    </p>
-                  </div>
-                  <label className="relative inline-flex items-center cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={settings.autoOutreach}
-                      onChange={(e) => handleUpdateSettings("autoOutreach", e.target.checked)}
-                      className="sr-only peer"
-                    />
-                    <div className="w-9 h-5 bg-[#E8E8E8] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-[#D8D8D8] after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-black"></div>
-                  </label>
-                </div>
-
-                {settings.autoOutreach && (
-                  <div className="grid grid-cols-2 gap-4 mt-2">
-                    <div className="flex flex-col gap-1.5">
-                      <span className="text-[11px] font-bold text-black">{t("pages.ai_agent.outreach_start_time")}</span>
-                      <input
-                        type="time"
-                        value={settings.outreachStart}
-                        onChange={(e) => handleUpdateSettings("outreachStart", e.target.value)}
-                        className="px-3 py-2 text-[12px] bg-[#F9F9F7] border border-[#E8E8E8] rounded-xl focus:outline-none focus:border-black"
-                      />
-                    </div>
-                    <div className="flex flex-col gap-1.5">
-                      <span className="text-[11px] font-bold text-black">{t("pages.ai_agent.outreach_end_time")}</span>
-                      <input
-                        type="time"
-                        value={settings.outreachEnd}
-                        onChange={(e) => handleUpdateSettings("outreachEnd", e.target.value)}
-                        className="px-3 py-2 text-[12px] bg-[#F9F9F7] border border-[#E8E8E8] rounded-xl focus:outline-none focus:border-black"
-                      />
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* Curator Admin Notification Settings */}
-              <div className="bg-white border border-[#E8E8E8] rounded-[24px] p-6 shadow-sm flex flex-col gap-4">
-                <div>
-                  <h3 className="text-[15px] font-bold text-black">
-                    {"Inson-kuratorni ulash"}
-                  </h3>
-                  <p className="text-[11px] text-[#707070] mt-1">
-                    {"AI javob bera olmagan yoki operator kutilgan holatlarda bot sizga Telegram orqali xabar yo'llashi uchun kurator (admin) profilini ulang."}
-                  </p>
-                </div>
-
-                {(() => {
-                  const tgChannels = db.getChannels().filter(c => c.type === "telegram" && c.isConnected && c.telegramToken);
-                  if (tgChannels.length === 0) {
-                    return (
-                      <div className="flex flex-col gap-2.5 p-4 bg-amber-50/50 border border-amber-200/50 rounded-2xl text-[11px] text-amber-800 mt-1">
-                        <div className="flex items-center gap-2">
-                          <Info size={14} className="shrink-0 text-amber-500" />
-                          <span className="font-bold">Telegram bot topilmadi</span>
-                        </div>
-                        <p className="text-[10px] text-amber-600 leading-relaxed">
-                          Ulash uchun avval sozlamalar bo&apos;limida Telegram botni ulashingiz lozim.
-                        </p>
-                        <Link href="/settings" className="mt-1 inline-block w-fit px-4 py-2 bg-black text-[#C7F33C] rounded-full hover:bg-black/90 font-bold text-[10px] shadow-sm transition-all text-center">
-                          Sozlamalar bo&apos;limiga o&apos;tish ➔
-                        </Link>
-                      </div>
-                    );
-                  }
-
-                  return settings.adminTelegramChatId ? (
-                    <div className="flex items-center justify-between p-3.5 rounded-xl bg-green-50 border border-green-200">
-                      <div className="flex flex-col gap-0.5">
-                        <div className="flex items-center gap-1.5 text-[12px] font-bold text-green-800">
-                          <CheckCircle size={14} className="text-green-600 shrink-0" />
-                          <span>{"Admin profil bog'langan"}</span>
-                        </div>
-                        <span className="text-[11px] text-green-700 mt-1">
-                          Foydalanuvchi: @{settings.adminTelegramUsername} (Chat ID: {settings.adminTelegramChatId})
-                        </span>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          handleUpdateSettings("adminTelegramChatId", "");
-                          handleUpdateSettings("adminTelegramUsername", "");
-                        }}
-                        className="text-[11px] font-bold text-red-600 hover:text-red-700 bg-white border border-red-200 px-3 py-1.5 rounded-lg shadow-sm hover:shadow active:scale-95 transition-all"
-                      >
-                        {"O'chirish"}
-                      </button>
-                    </div>
-                  ) : isVerifyingAdmin ? (
-                    <form onSubmit={handleVerifyAdminCode} className="flex flex-col gap-3 p-3.5 rounded-xl bg-blue-50 border border-blue-200 animate-fadeIn">
-                      <div className="flex items-center gap-1.5 text-[12px] font-bold text-blue-800">
-                        <Sparkles size={14} className="text-blue-600 shrink-0 animate-pulse" />
-                        <span>{"Tasdiqlash kodini kiriting"}</span>
-                      </div>
-                      <p className="text-[11px] text-blue-700 leading-relaxed">
-                        {activeBotUser ? (
-                          <>
-                            {"Telegram-da "}
-                            <a
-                              href={`https://t.me/${activeBotUser.replace(/^@+/, "")}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="underline font-bold text-blue-900"
-                            >
-                              @{activeBotUser.replace(/^@+/, "")}
-                            </a>
-                            {" botimizga o'ting va "}<strong>{"/start"}</strong>{" buyrug'ini bosing. Bot sizga yuborgan tasdiqlash kodini quyida kiriting."}
-                          </>
-                        ) : (
-                          "Telegram botimizga o'ting va /start buyrug'ini bosing. Bot yuborgan tasdiqlash kodini quyida kiriting."
-                        )}
-                      </p>
-                      <div className="flex gap-2">
-                        <input
-                          type="text"
-                          placeholder="Kodni kiriting (masalan: 123456)"
-                          value={adminVerifyCode}
-                          onChange={(e) => setAdminVerifyCode(e.target.value)}
-                          disabled={isVerifyLoading}
-                          className="px-3 py-2 text-[12px] bg-white border border-[#E8E8E8] rounded-xl focus:outline-none focus:border-black flex-1 text-black"
-                        />
-                        {activeBotUser && (
-                          <a
-                            href={`https://t.me/${activeBotUser.replace(/^@+/, "")}?start=verify`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="px-3.5 py-2 bg-[#229ED9] hover:bg-[#1e8ec3] text-white rounded-xl text-[11px] font-bold transition-all shadow-sm active:scale-95 text-center flex items-center justify-center gap-1 shrink-0"
-                          >
-                            <Send size={12} />
-                            <span>Kodni olish</span>
-                          </a>
-                        )}
-                      </div>
-                      <div className="flex gap-2 justify-end mt-1">
-                        <button
-                          type="submit"
-                          disabled={isVerifyLoading || !adminVerifyCode.trim()}
-                          className="text-[11px] font-bold text-white bg-black hover:bg-gray-800 disabled:bg-gray-400 px-4 py-2 rounded-xl transition-all shadow-sm active:scale-95"
-                        >
-                          {isVerifyLoading ? "Tekshirilmoqda..." : "Tasdiqlash"}
-                        </button>
                         <button
                           type="button"
                           onClick={() => {
-                            setIsVerifyingAdmin(false);
-                            setVerifyAdminError("");
-                            setAdminVerifyCode("");
+                            handleUpdateSettings("adminTelegramChatId", "");
+                            handleUpdateSettings("adminTelegramUsername", "");
                           }}
-                          disabled={isVerifyLoading}
-                          className="text-[11px] font-bold text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 px-3.5 py-2 rounded-xl transition-all shadow-sm active:scale-95"
+                          className="text-[11px] font-bold text-red-600 hover:text-red-700 bg-white border border-red-200 px-3 py-1.5 rounded-lg shadow-sm hover:shadow active:scale-95 transition-all"
                         >
-                          {"Bekor qilish"}
+                          {"O'chirish"}
                         </button>
                       </div>
-                      {verifyAdminError && (
-                        <span className="text-[10px] text-red-600 font-bold mt-1">
-                          {verifyAdminError}
-                        </span>
-                      )}
-                    </form>
-                  ) : (
-                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-5 rounded-2xl bg-blue-50/60 border border-blue-200/60 shadow-sm transition-all hover:bg-blue-50">
-                      <div className="flex items-start gap-3">
-                        <div className="w-10 h-10 rounded-full bg-blue-100/80 flex items-center justify-center shrink-0 mt-0.5 text-blue-600">
-                          <AlertTriangle size={18} className="text-amber-500" />
+                    ) : isVerifyingAdmin ? (
+                      <form onSubmit={handleVerifyAdminCode} className="flex flex-col gap-3 p-3.5 rounded-xl bg-blue-50 border border-blue-200 animate-fadeIn">
+                        <div className="flex items-center gap-1.5 text-[12px] font-bold text-blue-800">
+                          <Sparkles size={14} className="text-blue-600 shrink-0 animate-pulse" />
+                          <span>{"Tasdiqlash kodini kiriting"}</span>
                         </div>
-                        <div className="flex flex-col gap-1">
-                          <h4 className="text-[13.5px] font-bold text-blue-900 leading-tight">Admin profil ulanmagan</h4>
-                          <p className="text-[11px] text-blue-700/90 leading-relaxed max-w-md font-medium">
-                            Ulash uchun Telegram botingizga borib, botni ishga tushiring (/start). Bot sizga tasdiqlash kodini yuboradi.
-                          </p>
+                        <p className="text-[11px] text-blue-700 leading-relaxed">
+                          {activeBotUser ? (
+                            <>
+                              {"Telegram-da "}
+                              <a
+                                href={`https://t.me/${activeBotUser.replace(/^@+/, "")}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="underline font-bold text-blue-900"
+                              >
+                                @{activeBotUser.replace(/^@+/, "")}
+                              </a>
+                              {" botimizga o'ting va "}<strong>{"/start"}</strong>{" buyrug'ini bosing. Bot sizga yuborgan tasdiqlash kodini quyida kiriting."}
+                            </>
+                          ) : (
+                            "Telegram botimizga o'ting va /start buyrug'ini bosing. Bot yuborgan tasdiqlash kodini quyida kiriting."
+                          )}
+                        </p>
+                        <div className="flex gap-2">
+                          <input
+                            type="text"
+                            placeholder="Kodni kiriting (masalan: 123456)"
+                            value={adminVerifyCode}
+                            onChange={(e) => setAdminVerifyCode(e.target.value)}
+                            disabled={isVerifyLoading}
+                            className="px-3 py-2 text-[12px] bg-white border border-[#E8E8E8] rounded-xl focus:outline-none focus:border-black flex-1 text-black"
+                          />
+                          {activeBotUser && (
+                            <a
+                              href={`https://t.me/${activeBotUser.replace(/^@+/, "")}?start=verify`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="px-3.5 py-2 bg-[#229ED9] hover:bg-[#1e8ec3] text-white rounded-xl text-[11px] font-bold transition-all shadow-sm active:scale-95 text-center flex items-center justify-center gap-1 shrink-0"
+                            >
+                              <Send size={12} />
+                              <span>Kodni olish</span>
+                            </a>
+                          )}
                         </div>
+                        <div className="flex gap-2 justify-end mt-1">
+                          <button
+                            type="submit"
+                            disabled={isVerifyLoading || !adminVerifyCode.trim()}
+                            className="text-[11px] font-bold text-white bg-black hover:bg-gray-800 disabled:bg-gray-400 px-4 py-2 rounded-xl transition-all shadow-sm active:scale-95"
+                          >
+                            {isVerifyLoading ? "Tekshirilmoqda..." : "Tasdiqlash"}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setIsVerifyingAdmin(false);
+                              setVerifyAdminError("");
+                              setAdminVerifyCode("");
+                            }}
+                            disabled={isVerifyLoading}
+                            className="text-[11px] font-bold text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 px-3.5 py-2 rounded-xl transition-all shadow-sm active:scale-95"
+                          >
+                            {"Bekor qilish"}
+                          </button>
+                        </div>
+                        {verifyAdminError && (
+                          <span className="text-[10px] text-red-600 font-bold mt-1">
+                            {verifyAdminError}
+                          </span>
+                        )}
+                      </form>
+                    ) : (
+                      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-5 rounded-2xl bg-blue-50/60 border border-blue-200/60 shadow-sm transition-all hover:bg-blue-50">
+                        <div className="flex items-start gap-3">
+                          <div className="w-10 h-10 rounded-full bg-blue-100/80 flex items-center justify-center shrink-0 mt-0.5 text-blue-600">
+                            <AlertTriangle size={18} className="text-amber-500" />
+                          </div>
+                          <div className="flex flex-col gap-1">
+                            <h4 className="text-[13.5px] font-bold text-blue-900 leading-tight">Admin profil ulanmagan</h4>
+                            <p className="text-[11px] text-blue-700/90 leading-relaxed max-w-md font-medium">
+                              Ulash uchun Telegram botingizga borib, botni ishga tushiring (/start). Bot sizga tasdiqlash kodini yuboradi.
+                            </p>
+                          </div>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => setIsVerifyingAdmin(true)}
+                          className="px-5 py-2.5 bg-black hover:bg-neutral-800 text-white rounded-xl text-[12px] font-bold shadow-sm active:scale-95 transition-all shrink-0 hover:shadow-md self-stretch sm:self-auto text-center"
+                        >
+                          Ulash
+                        </button>
                       </div>
-                      <button
-                        type="button"
-                        onClick={() => setIsVerifyingAdmin(true)}
-                        className="px-5 py-2.5 bg-black hover:bg-neutral-800 text-white rounded-xl text-[12px] font-bold shadow-sm active:scale-95 transition-all shrink-0 hover:shadow-md self-stretch sm:self-auto text-center"
-                      >
-                        Ulash
-                      </button>
-                    </div>
-                  );
-                })()}
+                    );
+                  })()}
+                </div>
               </div>
             </div>
           </div>
