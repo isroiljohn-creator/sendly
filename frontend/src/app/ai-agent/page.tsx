@@ -3483,7 +3483,7 @@ function AIAgentContent() {
             </div>
 
             {/* Right Side: Column */}
-            <div className="lg:col-span-5 flex flex-col gap-5">
+            <div className="lg:col-span-5 flex flex-col gap-6">
               {/* Sandbox Preview chat simulator */}
               <div className="bg-[#F9F9F7] border border-[#E8E8E8] rounded-[28px] overflow-hidden flex flex-col shadow-inner h-[580px]">
               {/* Header */}
@@ -3616,7 +3616,7 @@ function AIAgentContent() {
             </div>
 
             {/* Permanent Sliders Preview Card */}
-            <div className="bg-white border border-[#E8E8E8] rounded-[28px] p-5 shadow-sm flex flex-col gap-4 animate-in fade-in duration-200">
+            <div className="bg-white border border-[#E8E8E8] rounded-[24px] p-6 shadow-sm flex flex-col gap-4 animate-in fade-in duration-200">
               <div className="flex items-center gap-2 border-b border-[#F0F0F0] pb-2.5">
                 <Sparkles size={15} className="text-black" />
                 <h3 className="text-[13px] font-bold text-black">
