@@ -3032,6 +3032,77 @@ export default function AIAgentPage() {
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
             {/* Left Side: Settings panel */}
             <div className="lg:col-span-7 flex flex-col gap-6">
+              {/* AI Agent Status Card */}
+              <div className="bg-white border border-[#E8E8E8] rounded-[24px] p-6 shadow-sm flex flex-col gap-4 shrink-0">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className={`w-10 h-10 rounded-full flex items-center justify-center ${settings.aiCuratorEnabled ? "bg-[#C7F33C]/25 text-[#7CA607]" : "bg-gray-100 text-[#707070]"}`}>
+                      <Sparkles size={20} className={settings.aiCuratorEnabled ? "animate-pulse" : ""} />
+                    </div>
+                    <div>
+                      <h3 className="text-[14px] font-bold text-black">{t("pages.ai_agent.curator_status")}</h3>
+                      <p className="text-[11px] text-[#707070] mt-0.5">
+                        {settings.aiCuratorEnabled 
+                          ? t("pages.ai_agent.curator_active_desc") 
+                          : t("pages.ai_agent.curator_inactive_desc")}
+                      </p>
+                    </div>
+                  </div>
+                  <label className="relative inline-flex items-center cursor-pointer shrink-0">
+                    <input
+                      type="checkbox"
+                      checked={settings.aiCuratorEnabled || false}
+                      onChange={(e) => handleToggleAiCurator(e.target.checked)}
+                      className="sr-only peer"
+                    />
+                    <div className="w-11 h-6 bg-[#E8E8E8] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-[#D8D8D8] after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-black"></div>
+                  </label>
+                </div>
+                <div className="flex flex-col gap-1.5 mt-2 pt-2 border-t border-[#F0F0F0]">
+                  <label className="text-[10px] font-extrabold text-[#707070] uppercase tracking-wider">AI Curator uchun Telegram Bot</label>
+                  {(() => {
+                    const tgChannels = db.getChannels().filter(c => c.type === "telegram" && c.isConnected && c.telegramToken);
+                    if (tgChannels.length > 0) {
+                      const botOptions = tgChannels.map(c => ({
+                        value: c.id,
+                        label: `${c.name} (@${c.username.replace(/^@+/, "")})`
+                      }));
+                      const selectedBotId = settings.telegramBotId || tgChannels[0].id;
+                      return (
+                        <div className="flex flex-col gap-2 mt-1">
+                          <CustomDropdown
+                            value={selectedBotId}
+                            onChange={handleBotChange}
+                            options={botOptions}
+                            placeholder="Telegram botni tanlang..."
+                            className="w-full"
+                          />
+                          <div className="flex items-center gap-1.5 text-[10px] text-green-700 mt-1 bg-green-50/50 p-2.5 rounded-xl border border-green-100">
+                            <CheckCircle size={12} className="text-green-500 shrink-0" />
+                            <span>AI kuratori ushbu tanlangan Telegram bot orqali savollarga javob beradi.</span>
+                          </div>
+                        </div>
+                      );
+                    } else {
+                      return (
+                        <div className="flex flex-col gap-2.5 p-4 bg-amber-50/50 border border-amber-200/50 rounded-2xl text-[11px] text-amber-800 mt-1">
+                          <div className="flex items-center gap-2">
+                            <Info size={14} className="shrink-0 text-amber-500" />
+                            <span className="font-bold">Telegram bot topilmadi</span>
+                          </div>
+                          <p className="text-[10px] text-amber-600 leading-relaxed">
+                            AI kuratordan foydalanish uchun sozlamalar sahifasida kamida 1ta Telegram bot ulangan bo&apos;lishi lozim.
+                          </p>
+                          <Link href="/settings" className="mt-1 inline-block w-fit px-4 py-2 bg-black text-[#C7F33C] rounded-full hover:bg-black/90 font-bold text-[10px] shadow-sm transition-all text-center">
+                            Sozlamalar bo&apos;limiga o&apos;tish ➔
+                          </Link>
+                        </div>
+                      );
+                    }
+                  })()}
+                </div>
+              </div>
+
               {/* System Prompt Settings */}
               <div className="bg-white border border-[#E8E8E8] rounded-[24px] p-6 shadow-sm flex flex-col gap-4">
                 <div className="flex items-center justify-between">
@@ -3488,77 +3559,6 @@ export default function AIAgentPage() {
 
             {/* Right Side: Sticky column */}
             <div className="lg:col-span-5 lg:sticky lg:top-28 flex flex-col gap-5 lg:h-[calc(100vh-140px)]">
-              {/* AI Agent Status Card (Moved from Left Side) */}
-              <div className="bg-white border border-[#E8E8E8] rounded-[24px] p-6 shadow-sm flex flex-col gap-4 shrink-0">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className={`w-10 h-10 rounded-full flex items-center justify-center ${settings.aiCuratorEnabled ? "bg-[#C7F33C]/25 text-[#7CA607]" : "bg-gray-100 text-[#707070]"}`}>
-                      <Sparkles size={20} className={settings.aiCuratorEnabled ? "animate-pulse" : ""} />
-                    </div>
-                    <div>
-                      <h3 className="text-[14px] font-bold text-black">{t("pages.ai_agent.curator_status")}</h3>
-                      <p className="text-[11px] text-[#707070] mt-0.5">
-                        {settings.aiCuratorEnabled 
-                          ? t("pages.ai_agent.curator_active_desc") 
-                          : t("pages.ai_agent.curator_inactive_desc")}
-                      </p>
-                    </div>
-                  </div>
-                  <label className="relative inline-flex items-center cursor-pointer shrink-0">
-                    <input
-                      type="checkbox"
-                      checked={settings.aiCuratorEnabled || false}
-                      onChange={(e) => handleToggleAiCurator(e.target.checked)}
-                      className="sr-only peer"
-                    />
-                    <div className="w-11 h-6 bg-[#E8E8E8] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-[#D8D8D8] after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-black"></div>
-                  </label>
-                </div>
-                <div className="flex flex-col gap-1.5 mt-2 pt-2 border-t border-[#F0F0F0]">
-                  <label className="text-[10px] font-extrabold text-[#707070] uppercase tracking-wider">AI Curator uchun Telegram Bot</label>
-                  {(() => {
-                    const tgChannels = db.getChannels().filter(c => c.type === "telegram" && c.isConnected && c.telegramToken);
-                    if (tgChannels.length > 0) {
-                      const botOptions = tgChannels.map(c => ({
-                        value: c.id,
-                        label: `${c.name} (@${c.username.replace(/^@+/, "")})`
-                      }));
-                      const selectedBotId = settings.telegramBotId || tgChannels[0].id;
-                      return (
-                        <div className="flex flex-col gap-2 mt-1">
-                          <CustomDropdown
-                            value={selectedBotId}
-                            onChange={handleBotChange}
-                            options={botOptions}
-                            placeholder="Telegram botni tanlang..."
-                            className="w-full"
-                          />
-                          <div className="flex items-center gap-1.5 text-[10px] text-green-700 mt-1 bg-green-50/50 p-2.5 rounded-xl border border-green-100">
-                            <CheckCircle size={12} className="text-green-500 shrink-0" />
-                            <span>AI kuratori ushbu tanlangan Telegram bot orqali savollarga javob beradi.</span>
-                          </div>
-                        </div>
-                      );
-                    } else {
-                      return (
-                        <div className="flex flex-col gap-2.5 p-4 bg-amber-50/50 border border-amber-200/50 rounded-2xl text-[11px] text-amber-800 mt-1">
-                          <div className="flex items-center gap-2">
-                            <Info size={14} className="shrink-0 text-amber-500" />
-                            <span className="font-bold">Telegram bot topilmadi</span>
-                          </div>
-                          <p className="text-[10px] text-amber-600 leading-relaxed">
-                            AI kuratordan foydalanish uchun sozlamalar sahifasida kamida 1ta Telegram bot ulangan bo&apos;lishi lozim.
-                          </p>
-                          <Link href="/settings" className="mt-1 inline-block w-fit px-4 py-2 bg-black text-[#C7F33C] rounded-full hover:bg-black/90 font-bold text-[10px] shadow-sm transition-all text-center">
-                            Sozlamalar bo&apos;limiga o&apos;tish ➔
-                          </Link>
-                        </div>
-                      );
-                    }
-                  })()}
-                </div>
-              </div>
-
               {/* Sandbox Preview chat simulator */}
               <div className="bg-[#F9F9F7] border border-[#E8E8E8] rounded-[28px] overflow-hidden flex flex-col flex-1 shadow-inner min-h-[400px]">
               {/* Header */}
