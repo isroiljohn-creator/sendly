@@ -82,7 +82,15 @@ export async function GET() {
             const data = await res.json();
             bot.webhookInfo = data;
           } else {
-            bot.error = `Telegram API error: ${res.status} ${res.statusText}`;
+            bot.error = `Telegram API error (webhook): ${res.status}`;
+          }
+
+          // Fetch getMe to verify actual bot username
+          const meRes = await fetch(`https://api.telegram.org/bot${token.trim()}/getMe`);
+          if (meRes.ok) {
+            bot.botInfo = await meRes.json();
+          } else {
+            bot.error = (bot.error || "") + ` | Telegram API error (getMe): ${meRes.status}`;
           }
         } catch (err: any) {
           bot.error = `Fetch failed: ${err.message}`;
