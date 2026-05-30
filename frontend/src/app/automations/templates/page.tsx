@@ -13,7 +13,6 @@ import {
   MessageSquare,
   Gift,
   Send,
-  Music,
   X
 } from "lucide-react";
 import { AppLayout } from "@/components/layout/AppLayout";
@@ -27,7 +26,7 @@ interface TemplateItem {
   id: string;
   name: string;
   category: "subscription" | "ai" | "content" | "crm" | "games" | "referrals";
-  platforms: ("instagram" | "telegram" | "tiktok")[];
+  platforms: ("instagram" | "telegram")[];
   isPro?: boolean;
   hasBuilderBadge?: boolean; // e.g. "Konstruktor yo'q"
   description: string;
@@ -39,7 +38,7 @@ export default function TemplatesPage() {
   const { t } = useI18n();
   const [channels, setChannels] = useState<Channel[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedPlatform, setSelectedPlatform] = useState<"all" | "instagram" | "telegram" | "tiktok">("all");
+  const [selectedPlatform, setSelectedPlatform] = useState<"all" | "instagram" | "telegram">("all");
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [alertConfig, setAlertConfig] = useState<{ isOpen: boolean; title: string; message: string } | null>(null);
 
@@ -79,7 +78,7 @@ export default function TemplatesPage() {
       id: "tmpl_quick_bot",
       name: "Kalit so'zli chat-bot",
       category: "subscription",
-      platforms: ["instagram", "telegram", "tiktok"],
+      platforms: ["instagram", "telegram"],
       hasBuilderBadge: true,
       description: "Oddiy 5 daqiqalik sozlash shakl orqali. Obunani tekshiradi va foydali fayl yoki veb-sayt havolasini yuboradi",
       actionKey: "quick_bot"
@@ -126,7 +125,7 @@ export default function TemplatesPage() {
       id: "tmpl_ai_agent",
       name: "AI Agent",
       category: "ai",
-      platforms: ["instagram", "telegram", "tiktok"],
+      platforms: ["instagram", "telegram"],
       hasBuilderBadge: true,
       description: "Learns from your data and responds 24/7. Adapts to dialogue, removes routine tasks",
       actionKey: "ai_agent"
@@ -411,12 +410,6 @@ export default function TemplatesPage() {
               >
                 <Send size={10} /> Telegram
               </button>
-              <button
-                onClick={() => setSelectedPlatform("tiktok")}
-                className={`px-3 py-1 rounded-full text-[10px] font-bold flex items-center gap-1.5 transition-all ${selectedPlatform === "tiktok" ? "bg-white text-black shadow-xs" : "text-[#707070] hover:text-black bg-transparent"}`}
-              >
-                <Music size={10} /> TikTok
-              </button>
             </div>
           </div>
         </div>
@@ -472,10 +465,8 @@ export default function TemplatesPage() {
                           <span key={p} className="flex items-center" title={p}>
                             {p === "instagram" ? (
                               <Instagram size={10} />
-                            ) : p === "telegram" ? (
-                              <Send size={10} />
                             ) : (
-                              <Music size={10} />
+                              <Send size={10} />
                             )}
                           </span>
                         ))}
