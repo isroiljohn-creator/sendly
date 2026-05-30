@@ -3462,23 +3462,25 @@ export default function AIAgentPage() {
                     )}
                   </form>
                 ) : (
-                  <div className="flex flex-col gap-3 p-3.5 rounded-xl bg-blue-50 border border-blue-200">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-1.5 text-[12px] font-bold text-blue-800">
-                        <AlertTriangle size={14} className="text-amber-600 shrink-0" />
-                        <span>{"Admin profil ulanmagan"}</span>
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-5 rounded-2xl bg-blue-50/60 border border-blue-200/60 shadow-sm transition-all hover:bg-blue-50">
+                    <div className="flex items-start gap-3">
+                      <div className="w-10 h-10 rounded-full bg-blue-100/80 flex items-center justify-center shrink-0 mt-0.5 text-blue-600">
+                        <AlertTriangle size={18} className="text-amber-500" />
                       </div>
-                      <button
-                        type="button"
-                        onClick={() => setIsVerifyingAdmin(true)}
-                        className="text-[11px] font-bold text-white bg-black hover:bg-gray-800 px-4 py-1.5 rounded-lg shadow-sm hover:shadow active:scale-95 transition-all"
-                      >
-                        {"Ulash"}
-                      </button>
+                      <div className="flex flex-col gap-1">
+                        <h4 className="text-[13.5px] font-bold text-blue-900 leading-tight">Admin profil ulanmagan</h4>
+                        <p className="text-[11px] text-blue-700/90 leading-relaxed max-w-md font-medium">
+                          Ulash uchun Telegram botingizga borib, botni ishga tushiring (/start). Bot sizga tasdiqlash kodini yuboradi.
+                        </p>
+                      </div>
                     </div>
-                    <p className="text-[11px] text-blue-700 leading-relaxed">
-                      {"Ulash uchun ulanayotgan Telegram botingizga borib, profilingizdan botni boshlang (/start). Bot sizga tasdiqlash kodini yuboradi."}
-                    </p>
+                    <button
+                      type="button"
+                      onClick={() => setIsVerifyingAdmin(true)}
+                      className="px-5 py-2.5 bg-black hover:bg-neutral-800 text-white rounded-xl text-[12px] font-bold shadow-sm active:scale-95 transition-all shrink-0 hover:shadow-md self-stretch sm:self-auto text-center"
+                    >
+                      Ulash
+                    </button>
                   </div>
                 )}
               </div>
