@@ -3541,7 +3541,7 @@ function AIAgentContent() {
             </div>
 
             {/* Right Side: Sticky column */}
-            <div className="lg:col-span-5 lg:sticky lg:top-28 flex flex-col gap-5 lg:h-[calc(100vh-140px)]">
+            <div className="lg:col-span-5 lg:sticky lg:top-4 flex flex-col gap-5 lg:h-[calc(100vh-200px)]">
               {/* Sandbox Preview chat simulator */}
               <div className="bg-[#F9F9F7] border border-[#E8E8E8] rounded-[28px] overflow-hidden flex flex-col flex-1 shadow-inner min-h-[400px]">
               {/* Header */}
