@@ -236,7 +236,8 @@ const MOCK_FB_FORMS = [
 
 export default function AIAgentPage() {
   const { t } = useI18n();
-  const [selectedAgentType, setSelectedAgentType] = useState<"kurator" | "fb-leads" | null>(null);
+  const [selectedAgentType, setSelectedAgentType] = useState<"kurator" | "fb-leads" | "fb-leads-direct" | null>(null);
+  const [sliderPreviewType, setSliderPreviewType] = useState<"tone" | "length" | "humor">("tone");
   const [activeTab, setActiveTab] = useState<"settings" | "knowledge" | "analytics">("settings");
   
   // Curator Analyzed Messages for CustDev Analytics
@@ -815,6 +816,11 @@ export default function AIAgentPage() {
   const handleSaveAll = async () => {
     if (!settings) return;
     try {
+      if (selectedAgentType === "fb-leads-direct") {
+        settings.fbAgentMode = "direct";
+      } else if (selectedAgentType === "fb-leads") {
+        settings.fbAgentMode = "ai";
+      }
       db.saveBotSettings(settings, settings.telegramBotId);
       db.saveModules(modules);
       db.saveLessons(lessons);
@@ -1018,14 +1024,7 @@ export default function AIAgentPage() {
 
   const handleSliderChange = (type: "tone" | "length" | "humor", value: number) => {
     handleUpdateSettings(type, value);
-    setSliderPreview({ type, value, visible: true });
-
-    if (sliderPreviewTimeoutRef.current) {
-      clearTimeout(sliderPreviewTimeoutRef.current);
-    }
-    sliderPreviewTimeoutRef.current = setTimeout(() => {
-      setSliderPreview(prev => prev ? { ...prev, visible: false } : null);
-    }, 4000);
+    setSliderPreviewType(type);
   };
 
   const getSliderPreviewContent = (type: "tone" | "length" | "humor", value: number) => {
@@ -1211,8 +1210,14 @@ export default function AIAgentPage() {
     setSimLoading(true);
     setSimResult(null);
 
+    const isDirect = selectedAgentType === "fb-leads-direct";
+
     // Initial steps
-    const steps = [
+    const steps = isDirect ? [
+      { id: "step-webhook", label: "Facebook Webhook so'rovi qabul qilindi", status: "running" as const },
+      { id: "step-mapping", label: "Lead maydonlari moslashtirildi (Field Mapping)", status: "pending" as const },
+      { id: "step-crm", label: "Mijoz ma'lumotlari Sendly CRM-ga joylandi va Telegramga yuborildi", status: "pending" as const },
+    ] : [
       { id: "step-webhook", label: "Facebook Webhook so'rovi qabul qilindi", status: "running" as const },
       { id: "step-mapping", label: "Lead maydonlari moslashtirildi (Field Mapping)", status: "pending" as const },
       { id: "step-ai", label: "AI Agent orqali intent/savol tahlil qilindi", status: "pending" as const },
@@ -1271,108 +1276,38 @@ export default function AIAgentPage() {
         })
       );
 
-      // Step 2: Mapping success, AI starts
+      // Step 2: Mapping success, AI starts (or CRM starts in direct mode)
       setTimeout(() => {
         setSimSteps(prev =>
           prev.map(s => {
             if (s.id === "step-mapping") return { ...s, status: "success" as const };
-            if (s.id === "step-ai") return { ...s, status: "running" as const };
+            if (isDirect) {
+              if (s.id === "step-crm") return { ...s, status: "running" as const };
+            } else {
+              if (s.id === "step-ai") return { ...s, status: "running" as const };
+            }
             return s;
           })
         );
 
-        // Step 3: AI analysis done, CRM routing starts
-        setTimeout(() => {
-          const msg = leadMessage.toLowerCase();
-          let detectedGroup = "Sotuvlar";
-          let groupId = "sales";
-          
-          // Get saved default tags
-          let savedTags: string[] = [];
-          if (typeof window !== "undefined") {
-            try {
-              const saved = localStorage.getItem("replai_fb_tags");
-              if (saved) savedTags = JSON.parse(saved);
-            } catch (e) {
-              console.error(e);
-            }
-          }
-          if (savedTags.length === 0) {
-            savedTags = ["Meta Lead", "AI Saralangan"];
-          }
-
-          const tags = [...savedTags];
-          let summary = "Mijoz umumiy ma'lumot so'radi.";
-
-          const currentGroups = db.getGroups();
-          const salesGroup = currentGroups.find(g => g.id === "sales")?.name || "Sotuvlar";
-          const supportGroup = currentGroups.find(g => g.id === "support")?.name || "Qo'llab-quvvatlash";
-
-          if (
-            msg.includes("narx") ||
-            msg.includes("qancha") ||
-            msg.includes("chegirma") ||
-            msg.includes("to'lov") ||
-            msg.includes("narxi") ||
-            msg.includes("aksiy") ||
-            msg.includes("sotib") ||
-            msg.includes("dollar") ||
-            msg.includes("so'm") ||
-            msg.includes("aksiya") ||
-            msg.includes("skidka") ||
-            msg.includes("pul")
-          ) {
-            detectedGroup = salesGroup;
-            groupId = "sales";
-            tags.push("High Intent", "Narxga Qiziqqan");
-            summary = "Mijoz to'lov shakli, narx yoki chegirmalar bo'yicha ma'lumot so'ragan.";
-          } else if (
-            msg.includes("kirish") ||
-            msg.includes("kirmayapti") ||
-            msg.includes("parol") ||
-            msg.includes("kod") ||
-            msg.includes("ochilmadi") ||
-            msg.includes("texnik") ||
-            msg.includes("yordam") ||
-            msg.includes("xatolik") ||
-            msg.includes("muammo") ||
-            msg.includes("sayt") ||
-            msg.includes("telegram bot") ||
-            msg.includes("ishlamayapti")
-          ) {
-            detectedGroup = supportGroup;
-            groupId = "support";
-            tags.push("Texnik muammo", "Support");
-            summary = "Mijoz tizimga kirish yoki texnik nosozlik yuzasidan yordam so'ragan.";
-          } else {
-            const selectedG = currentGroups.find(g => g.id === (settings.targetGroupId || "sales"));
-            detectedGroup = selectedG ? selectedG.name : salesGroup;
-            groupId = settings.targetGroupId || "sales";
-            tags.push("Yangi Lead");
-            summary = "Mijoz Facebook forma orqali ariza qoldirgan.";
-          }
-
-          const welcomeMsg = (settings.fbWelcomeMessage || "Salom {{name}}! So'rovingiz qabul qilindi. Tez orada bog'lanamiz.")
-            .replace("{{name}}", leadName);
-
-          const newResult = {
-            groupName: detectedGroup,
-            groupId,
-            tags,
-            welcomeMsg,
-            summary,
-          };
-
-          setSimSteps(prev =>
-            prev.map(s => {
-              if (s.id === "step-ai") return { ...s, status: "success" as const };
-              if (s.id === "step-crm") return { ...s, status: "running" as const };
-              return s;
-            })
-          );
-
-          // Step 4: CRM routing done
+        if (isDirect) {
+          // Direct Forwarder Mode Flow
           setTimeout(() => {
+            const detectedGroup = "Sotuvlar";
+            const groupId = settings.targetGroupId || "sales";
+            const tags = ["Meta Lead", "Yo'naltirilgan"];
+            const summary = "Mijoz Facebook forma orqali ariza qoldirdi (To'g'ridan-to'g'ri yo'naltirish).";
+            const welcomeMsg = (settings.fbWelcomeMessage || "Salom {{name}}! So'rovingiz qabul qilindi. Tez orada bog'lanamiz.")
+              .replace("{{name}}", leadName);
+
+            const newResult = {
+              groupName: detectedGroup,
+              groupId,
+              tags,
+              welcomeMsg,
+              summary,
+            };
+
             setSimSteps(prev =>
               prev.map(s => {
                 if (s.id === "step-crm") return { ...s, status: "success" as const };
@@ -1398,9 +1333,258 @@ export default function AIAgentPage() {
             };
 
             setLeadLogs(prev => [newLog, ...prev]);
-            showToast("Lid muvaffaqiyatli simulyatsiya qilindi va saralandi! 🎯");
-          }, 800);
-        }, 1000);
+
+            // Save contact to database
+            const allContacts = db.getContacts();
+            const contactId = `contact-${Date.now()}`;
+            const cleanPhone = leadPhone.replace(/\s+/g, "");
+            const newContact = {
+              id: contactId,
+              name: leadName,
+              username: cleanPhone,
+              status: true,
+              messagesCount: 2,
+              tags: tags,
+              lastActive: new Date().toLocaleTimeString("uz-UZ", { hour: "2-digit", minute: "2-digit" }),
+            };
+            db.saveContacts([newContact, ...allContacts]);
+
+            // Save chat history to active channel
+            const channelId = settings.telegramBotId || db.getActiveChannel()?.id;
+            if (channelId) {
+              const chatsKey = `replai_chats_${channelId}`;
+              const storedChats = localStorage.getItem(chatsKey);
+              let chatsList = [];
+              if (storedChats) {
+                try {
+                  chatsList = JSON.parse(storedChats);
+                } catch (e) {
+                  console.error(e);
+                }
+              }
+
+              const userMsgId = `msg-user-${Date.now()}`;
+              const botMsgId = `msg-bot-${Date.now() + 1}`;
+              const timestampStr = new Date().toLocaleTimeString("uz-UZ", { hour: "2-digit", minute: "2-digit" });
+
+              const newChatThread = {
+                id: contactId,
+                name: leadName,
+                username: cleanPhone,
+                avatar: `https://api.dicebear.com/7.x/adventurer/svg?seed=${encodeURIComponent(leadName)}`,
+                lastMessage: welcomeMsg,
+                time: timestampStr,
+                unread: true,
+                tags: tags,
+                messages: [
+                  {
+                    id: userMsgId,
+                    sender: "user" as const,
+                    text: `[Facebook Lead Form: ${selectedForm}]\nIsm: ${leadName}\nTel: ${leadPhone}\nSavol: ${leadMessage}`,
+                    timestamp: timestampStr,
+                  },
+                  {
+                    id: botMsgId,
+                    sender: "bot" as const,
+                    text: welcomeMsg,
+                    timestamp: timestampStr,
+                  }
+                ]
+              };
+
+              chatsList = [newChatThread, ...chatsList.filter((c: any) => c.id !== contactId)];
+              localStorage.setItem(chatsKey, JSON.stringify(chatsList));
+            }
+
+            db.saveToServer();
+            showToast("Lid muvaffaqiyatli simulyatsiya qilindi va Telegramga yuborildi! 🎯");
+          }, 1000);
+        } else {
+          // AI Qualification Mode Flow (Step 3: AI analysis done, CRM routing starts)
+          setTimeout(() => {
+            const msg = leadMessage.toLowerCase();
+            let detectedGroup = "Sotuvlar";
+            let groupId = "sales";
+            
+            // Get saved default tags
+            let savedTags: string[] = [];
+            if (typeof window !== "undefined") {
+              try {
+                const saved = localStorage.getItem("replai_fb_tags");
+                if (saved) savedTags = JSON.parse(saved);
+              } catch (e) {
+                console.error(e);
+              }
+            }
+            if (savedTags.length === 0) {
+              savedTags = ["Meta Lead", "AI Saralangan"];
+            }
+
+            const tags = [...savedTags];
+            let summary = "Mijoz umumiy ma'lumot so'radi.";
+
+            const currentGroups = db.getGroups();
+            const salesGroup = currentGroups.find(g => g.id === "sales")?.name || "Sotuvlar";
+            const supportGroup = currentGroups.find(g => g.id === "support")?.name || "Qo'llab-quvvatlash";
+
+            if (
+              msg.includes("narx") ||
+              msg.includes("qancha") ||
+              msg.includes("chegirma") ||
+              msg.includes("to'lov") ||
+              msg.includes("narxi") ||
+              msg.includes("aksiy") ||
+              msg.includes("sotib") ||
+              msg.includes("dollar") ||
+              msg.includes("so'm") ||
+              msg.includes("aksiya") ||
+              msg.includes("skidka") ||
+              msg.includes("pul")
+            ) {
+              detectedGroup = salesGroup;
+              groupId = "sales";
+              tags.push("High Intent", "Narxga Qiziqqan");
+              summary = "Mijoz to'lov shakli, narx yoki chegirmalar bo'yicha ma'lumot so'ragan.";
+            } else if (
+              msg.includes("kirish") ||
+              msg.includes("kirmayapti") ||
+              msg.includes("parol") ||
+              msg.includes("kod") ||
+              msg.includes("ochilmadi") ||
+              msg.includes("texnik") ||
+              msg.includes("yordam") ||
+              msg.includes("xatolik") ||
+              msg.includes("muammo") ||
+              msg.includes("sayt") ||
+              msg.includes("telegram bot") ||
+              msg.includes("ishlamayapti")
+            ) {
+              detectedGroup = supportGroup;
+              groupId = "support";
+              tags.push("Texnik muammo", "Support");
+              summary = "Mijoz tizimga kirish yoki texnik nosozlik yuzasidan yordam so'ragan.";
+            } else {
+              const selectedG = currentGroups.find(g => g.id === (settings.targetGroupId || "sales"));
+              detectedGroup = selectedG ? selectedG.name : salesGroup;
+              groupId = settings.targetGroupId || "sales";
+              tags.push("Yangi Lead");
+              summary = "Mijoz Facebook forma orqali ariza qoldirgan.";
+            }
+
+            const welcomeMsg = (settings.fbWelcomeMessage || "Salom {{name}}! So'rovingiz qabul qilindi. Tez orada bog'lanamiz.")
+              .replace("{{name}}", leadName);
+
+            const newResult = {
+              groupName: detectedGroup,
+              groupId,
+              tags,
+              welcomeMsg,
+              summary,
+            };
+
+            setSimSteps(prev =>
+              prev.map(s => {
+                if (s.id === "step-ai") return { ...s, status: "success" as const };
+                if (s.id === "step-crm") return { ...s, status: "running" as const };
+                return s;
+              })
+            );
+
+            // Step 4: CRM routing done
+            setTimeout(() => {
+              setSimSteps(prev =>
+                prev.map(s => {
+                  if (s.id === "step-crm") return { ...s, status: "success" as const };
+                  return s;
+                })
+              );
+
+              setSimResult(newResult);
+              setSimLoading(false);
+
+              const selectedForm = MOCK_FB_FORMS.find(f => f.id === formId)?.name || "Kuzgi chegirmalar formasi";
+
+              const newLog = {
+                id: `log-${Date.now()}`,
+                name: leadName,
+                phone: leadPhone,
+                formName: selectedForm,
+                group: detectedGroup,
+                tags: tags,
+                summary: summary,
+                date: "Hozir",
+                status: "success",
+              };
+
+              setLeadLogs(prev => [newLog, ...prev]);
+
+              // Save contact to database
+              const allContacts = db.getContacts();
+              const contactId = `contact-${Date.now()}`;
+              const cleanPhone = leadPhone.replace(/\s+/g, "");
+              const newContact = {
+                id: contactId,
+                name: leadName,
+                username: cleanPhone,
+                status: true,
+                messagesCount: 2,
+                tags: tags,
+                lastActive: new Date().toLocaleTimeString("uz-UZ", { hour: "2-digit", minute: "2-digit" }),
+              };
+              db.saveContacts([newContact, ...allContacts]);
+
+              // Save chat history to active channel
+              const channelId = settings.telegramBotId || db.getActiveChannel()?.id;
+              if (channelId) {
+                const chatsKey = `replai_chats_${channelId}`;
+                const storedChats = localStorage.getItem(chatsKey);
+                let chatsList = [];
+                if (storedChats) {
+                  try {
+                    chatsList = JSON.parse(storedChats);
+                  } catch (e) {
+                    console.error(e);
+                  }
+                }
+
+                const userMsgId = `msg-user-${Date.now()}`;
+                const botMsgId = `msg-bot-${Date.now() + 1}`;
+                const timestampStr = new Date().toLocaleTimeString("uz-UZ", { hour: "2-digit", minute: "2-digit" });
+
+                const newChatThread = {
+                  id: contactId,
+                  name: leadName,
+                  username: cleanPhone,
+                  avatar: `https://api.dicebear.com/7.x/adventurer/svg?seed=${encodeURIComponent(leadName)}`,
+                  lastMessage: welcomeMsg,
+                  time: timestampStr,
+                  unread: true,
+                  tags: tags,
+                  messages: [
+                    {
+                      id: userMsgId,
+                      sender: "user" as const,
+                      text: `[Facebook Lead Form: ${selectedForm}]\nIsm: ${leadName}\nTel: ${leadPhone}\nSavol: ${leadMessage}`,
+                      timestamp: timestampStr,
+                    },
+                    {
+                      id: botMsgId,
+                      sender: "bot" as const,
+                      text: welcomeMsg,
+                      timestamp: timestampStr,
+                    }
+                  ]
+                };
+
+                chatsList = [newChatThread, ...chatsList.filter((c: any) => c.id !== contactId)];
+                localStorage.setItem(chatsKey, JSON.stringify(chatsList));
+              }
+
+              db.saveToServer();
+              showToast("Lid muvaffaqiyatli simulyatsiya qilindi va saralandi! 🎯");
+            }, 800);
+          }, 1000);
+        }
       }, 800);
     }, 800);
   };
@@ -1502,69 +1686,118 @@ export default function AIAgentPage() {
                             </div>
                           )}
 
-                          {item.settings.fbAgentEnabled && (
-                            <div className="bg-white border border-[#E8E8E8] rounded-[28px] p-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 transition-all shadow-md relative overflow-hidden group">
-                              <div className="absolute top-0 right-0 w-24 h-24 bg-blue-500/5 rounded-bl-full -z-10" />
-                              <div className="flex gap-4 items-center">
-                                <div className="w-12 h-12 rounded-2xl bg-blue-600 text-white grid place-items-center font-bold text-[18px] shrink-0">
-                                  <Facebook size={22} />
-                                </div>
-                                <div>
-                                  <div className="flex flex-wrap items-center gap-2">
-                                    <h3 className="text-[17px] font-bold text-black">
-                                      {t("pages.ai_agent.fb_leads_agent")}
-                                    </h3>
-                                    <span className="flex items-center gap-1.5 px-2.5 py-0.5 bg-blue-50 border border-blue-200 rounded-full text-[9px] font-extrabold text-blue-600 uppercase tracking-wider">
-                                      <span className="relative flex h-2 w-2">
-                                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
-                                        <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
-                                      </span>
-                                      FAOL
-                                    </span>
+                                {item.settings.fbAgentEnabled && item.settings.fbAgentMode === "direct" && (
+                              <div className="bg-white border border-[#E8E8E8] rounded-[28px] p-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 transition-all shadow-md relative overflow-hidden group">
+                                <div className="absolute top-0 right-0 w-24 h-24 bg-blue-500/5 rounded-bl-full -z-10" />
+                                <div className="flex gap-4 items-center">
+                                  <div className="w-12 h-12 rounded-2xl bg-blue-600 text-white grid place-items-center font-bold text-[18px] shrink-0">
+                                    <Send size={22} />
                                   </div>
-                                  <p className="text-[11px] text-blue-600 font-semibold mt-1">
-                                    Kanal: @{item.channel.username.replace(/^@+/, "")} | Guruh: {db.getGroups().find(g => g.id === (item.settings.targetGroupId || "sales"))?.name || "Sotuvlar"}
-                                  </p>
-                                  <p className="text-[12px] text-[#707070] mt-1.5 leading-relaxed">
-                                    {t("pages.ai_agent.fb_leads_desc_card")}
-                                  </p>
+                                  <div>
+                                    <div className="flex flex-wrap items-center gap-2">
+                                      <h3 className="text-[17px] font-bold text-black">
+                                        {"Lidlarni Telegramga yo'naltirish"}
+                                      </h3>
+                                      <span className="flex items-center gap-1.5 px-2.5 py-0.5 bg-blue-50 border border-blue-200 rounded-full text-[9px] font-extrabold text-blue-600 uppercase tracking-wider">
+                                        <span className="relative flex h-2 w-2">
+                                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+                                          <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
+                                        </span>
+                                        FAOL
+                                      </span>
+                                    </div>
+                                    <p className="text-[11px] text-blue-600 font-semibold mt-1">
+                                      Kanal: @{item.channel.username.replace(/^@+/, "")} | Guruh: {item.settings.adminTelegramUsername ? `@${item.settings.adminTelegramUsername}` : "Ulanmagan"}
+                                    </p>
+                                    <p className="text-[12px] text-[#707070] mt-1.5 leading-relaxed">
+                                      {"Facebook reklama formasidan kelgan arizalar Telegram guruh yoki profilingizga yo'naltirilmoqda."}
+                                    </p>
+                                  </div>
                                 </div>
+                                <button
+                                  onClick={() => {
+                                    // Switch active editing context to this channel
+                                    const loadedSettings = db.getBotSettings(item.channel.id);
+                                    loadedSettings.telegramBotId = item.channel.id;
+                                    setSettings(loadedSettings);
+                                    setTelegramBotUsername(item.channel.username);
+                                    setIsTelegramLinked(true);
+
+                                    setSelectedAgentType("fb-leads-direct");
+                                    if (typeof window !== "undefined") {
+                                      localStorage.setItem("sendly_selected_agent_type", "fb-leads-direct");
+                                    }
+                                  }}
+                                  className="px-5 py-2.5 bg-blue-600 text-white text-[12px] font-bold hover:bg-blue-700 hover:scale-[1.02] active:scale-95 transition-all text-center rounded-full flex items-center justify-center gap-2 shrink-0 self-stretch sm:self-auto shadow-sm"
+                                >
+                                  <span>Sozlash</span>
+                                  <ArrowRight size={14} />
+                                </button>
                               </div>
-                              <button
-                                onClick={() => {
-                                  // Switch active editing context to this channel
-                                  const loadedSettings = db.getBotSettings(item.channel.id);
-                                  loadedSettings.telegramBotId = item.channel.id;
-                                  setSettings(loadedSettings);
-                                  setTelegramBotUsername(item.channel.username);
-                                  setIsTelegramLinked(true);
+                            )}
 
-                                  setSelectedAgentType("fb-leads");
-                                  if (typeof window !== "undefined") {
-                                    localStorage.setItem("sendly_selected_agent_type", "fb-leads");
-                                  }
-                                }}
-                                className="px-5 py-2.5 bg-blue-600 text-white text-[12px] font-bold hover:bg-blue-700 hover:scale-[1.02] active:scale-95 transition-all text-center rounded-full flex items-center justify-center gap-2 shrink-0 self-stretch sm:self-auto shadow-sm"
-                              >
-                                <span>Sozlash</span>
-                                <ArrowRight size={14} />
-                              </button>
-                            </div>
-                          )}
-                        </React.Fragment>
-                      ))}
+                            {item.settings.fbAgentEnabled && item.settings.fbAgentMode !== "direct" && (
+                              <div className="bg-white border border-[#E8E8E8] rounded-[28px] p-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 transition-all shadow-md relative overflow-hidden group">
+                                <div className="absolute top-0 right-0 w-24 h-24 bg-blue-500/5 rounded-bl-full -z-10" />
+                                <div className="flex gap-4 items-center">
+                                  <div className="w-12 h-12 rounded-2xl bg-blue-600 text-white grid place-items-center font-bold text-[18px] shrink-0">
+                                    <Facebook size={22} />
+                                  </div>
+                                  <div>
+                                    <div className="flex flex-wrap items-center gap-2">
+                                      <h3 className="text-[17px] font-bold text-black">
+                                        {t("pages.ai_agent.fb_leads_agent")}
+                                      </h3>
+                                      <span className="flex items-center gap-1.5 px-2.5 py-0.5 bg-blue-50 border border-blue-200 rounded-full text-[9px] font-extrabold text-blue-600 uppercase tracking-wider">
+                                        <span className="relative flex h-2 w-2">
+                                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+                                          <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
+                                        </span>
+                                        FAOL
+                                      </span>
+                                    </div>
+                                    <p className="text-[11px] text-blue-600 font-semibold mt-1">
+                                      Kanal: @{item.channel.username.replace(/^@+/, "")} | Guruh: {db.getGroups().find(g => g.id === (item.settings.targetGroupId || "sales"))?.name || "Sotuvlar"}
+                                    </p>
+                                    <p className="text-[12px] text-[#707070] mt-1.5 leading-relaxed">
+                                      {t("pages.ai_agent.fb_leads_desc_card")}
+                                    </p>
+                                  </div>
+                                </div>
+                                <button
+                                  onClick={() => {
+                                    // Switch active editing context to this channel
+                                    const loadedSettings = db.getBotSettings(item.channel.id);
+                                    loadedSettings.telegramBotId = item.channel.id;
+                                    setSettings(loadedSettings);
+                                    setTelegramBotUsername(item.channel.username);
+                                    setIsTelegramLinked(true);
+
+                                    setSelectedAgentType("fb-leads");
+                                    if (typeof window !== "undefined") {
+                                      localStorage.setItem("sendly_selected_agent_type", "fb-leads");
+                                    }
+                                  }}
+                                  className="px-5 py-2.5 bg-blue-600 text-white text-[12px] font-bold hover:bg-blue-700 hover:scale-[1.02] active:scale-95 transition-all text-center rounded-full flex items-center justify-center gap-2 shrink-0 self-stretch sm:self-auto shadow-sm"
+                                >
+                                  <span>Sozlash</span>
+                                  <ArrowRight size={14} />
+                                </button>
+                              </div>
+                            )}
+                          </React.Fragment>
+                        ))}
+                      </div>
                     </div>
-                  </div>
-                )/* note: isAnyAgentActive closing brace is below */}
-
-                {isAnyAgentActive && (
-                  <h2 className="text-[11px] font-extrabold text-[#707070] uppercase tracking-wider self-start mt-3.5">
-                    AI agentlar qo&apos;shish
-                  </h2>
-                )}
-
-                {/* Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-5 w-full mt-1">
+                  )/* note: isAnyAgentActive closing brace is below */}
+  
+                  {isAnyAgentActive && (
+                    <h2 className="text-[11px] font-extrabold text-[#707070] uppercase tracking-wider self-start mt-3.5">
+                      AI agentlar qo&apos;shish
+                    </h2>
+                  )}
+  
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-5 w-full mt-1">
                   {/* Card 1: AI Kurator */}
                   <div className="bg-white border border-[#E8E8E8] hover:border-black/20 hover:shadow-xl rounded-[28px] p-6 flex flex-col justify-between transition-all group relative overflow-hidden">
                     <div className="absolute top-0 right-0 w-24 h-24 bg-[#C7F33C]/10 rounded-bl-full -z-10 group-hover:scale-110 transition-transform" />
@@ -1684,6 +1917,66 @@ export default function AIAgentPage() {
                       <ArrowRight size={14} />
                     </button>
                   </div>
+
+                  {/* Card 3: Meta Leads Telegram Forwarder (AIsiz) */}
+                  <div className="bg-white border border-[#E8E8E8] hover:border-black/20 hover:shadow-xl rounded-[28px] p-6 flex flex-col justify-between transition-all group relative overflow-hidden">
+                    <div className="absolute top-0 right-0 w-24 h-24 bg-blue-500/5 rounded-bl-full -z-10 group-hover:scale-110 transition-transform" />
+                    <div className="flex flex-col gap-4">
+                      <div className="flex items-center justify-between">
+                        <div className="w-12 h-12 rounded-2xl bg-blue-600 text-white grid place-items-center font-bold text-[18px]">
+                          <Send size={22} />
+                        </div>
+                        <div className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-full">
+                          <span className="w-2 h-2 rounded-full bg-gray-300"></span>
+                          <span className="text-[10px] font-extrabold text-[#707070] uppercase tracking-wider">
+                            {t("pages.ai_agent.inactive")}
+                          </span>
+                        </div>
+                      </div>
+                      <div>
+                        <h3 className="text-[17px] font-bold text-black group-hover:text-blue-600 transition-colors">
+                          {"Lidlarni Telegramga yo'naltirish"}
+                        </h3>
+                        <p className="text-[12px] text-[#707070] mt-1.5 leading-relaxed">
+                          {"Facebook target arizalarini AIsiz, chiroyli ko'rinishda to'g'ridan-to'g'ri Telegram guruh yoki profilingizga yo'naltiring."}
+                        </p>
+                      </div>
+
+                      <div className="border-t border-[#F0F0F0] my-1" />
+
+                      <ul className="flex flex-col gap-2 text-[11px] text-[#595959]">
+                        <li className="flex items-start gap-2.5">
+                          <CheckCircle className="w-4 h-4 text-blue-500 shrink-0 mt-0.5" />
+                          <span>{"Arizalarni Telegram guruh yoki lichkaga yuborish"}</span>
+                        </li>
+                        <li className="flex items-start gap-2.5">
+                          <CheckCircle className="w-4 h-4 text-blue-500 shrink-0 mt-0.5" />
+                          <span>{"AIsiz to'g'ridan-to'g'ri yo'naltirish rejimida ishlash"}</span>
+                        </li>
+                        <li className="flex items-start gap-2.5">
+                          <CheckCircle className="w-4 h-4 text-blue-500 shrink-0 mt-0.5" />
+                          <span>{"Lid ma'lumotlarini qulay formatda taqdim etish"}</span>
+                        </li>
+                        <li className="flex items-start gap-2.5">
+                          <CheckCircle className="w-4 h-4 text-blue-500 shrink-0 mt-0.5" />
+                          <span>{"Tasdiqlash kodi orqali guruh/botni oson ulash"}</span>
+                        </li>
+                      </ul>
+                    </div>
+
+                    <button
+                      onClick={() => {
+                        setSelectedAgentType("fb-leads-direct");
+                        if (typeof window !== "undefined") {
+                          localStorage.setItem("sendly_selected_agent_type", "fb-leads-direct");
+                        }
+                      }}
+                      className="w-full mt-6 py-3 rounded-full bg-black text-[#C7F33C] text-[12px] font-bold hover:bg-black/90 hover:scale-[1.02] active:scale-95 transition-all text-center flex items-center justify-center gap-2"
+                    >
+                      <span>{t("pages.ai_agent.setup_template_btn")}</span>
+                      <ArrowRight size={14} />
+                    </button>
+                  </div>
                 </div>
               </>
             );
@@ -1693,7 +1986,7 @@ export default function AIAgentPage() {
     );
   }
 
-  if (selectedAgentType === "fb-leads" && settings) {
+  if ((selectedAgentType === "fb-leads" || selectedAgentType === "fb-leads-direct") && settings) {
     const updateFieldMapping = (id: string, key: keyof FieldMapping, value: string) => {
       setFieldMappings(prev =>
         prev.map(m => (m.id === id ? { ...m, [key]: value } : m))
@@ -1766,7 +2059,7 @@ export default function AIAgentPage() {
           {/* Page Header */}
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <PageHeader
-              title="Facebook Lead Handler"
+              title={selectedAgentType === "fb-leads-direct" ? "Lidlarni Telegramga yo'naltirish" : "Facebook Lead Handler"}
               breadcrumbs={t("pages.ai_agent.fb_leads_breadcrumb")}
             />
             <div className="flex items-center gap-3 shrink-0">
@@ -1846,7 +2139,9 @@ export default function AIAgentPage() {
                   <Sparkles size={28} />
                 </div>
                 <div className="text-center">
-                  <h5 className="text-[12px] font-bold text-white leading-tight">{t("pages.ai_agent.ai_mapper_node")}</h5>
+                  <h5 className="text-[12px] font-bold text-white leading-tight">
+                    {selectedAgentType === "fb-leads-direct" ? "Maydonlar moslashuvi" : t("pages.ai_agent.ai_mapper_node")}
+                  </h5>
                   <span className="text-[9px] text-[#A78BFA] font-bold uppercase tracking-wider block mt-0.5">
                     {t("pages.ai_agent.fields_count").replace("{count}", fieldMappings.length.toString())}
                   </span>
@@ -1894,11 +2189,13 @@ export default function AIAgentPage() {
                       <Facebook size={20} className={settings.fbAgentEnabled ? "animate-pulse" : ""} />
                     </div>
                     <div>
-                      <h3 className="text-[14px] font-bold text-black">{t("pages.ai_agent.fb_leads_status")}</h3>
+                      <h3 className="text-[14px] font-bold text-black">
+                        {selectedAgentType === "fb-leads-direct" ? "Lidlarni Telegramga yo'naltirish holati" : t("pages.ai_agent.fb_leads_status")}
+                      </h3>
                       <p className="text-[11px] text-[#707070] mt-0.5">
                         {settings.fbAgentEnabled 
-                          ? t("pages.ai_agent.fb_leads_status_active_desc") 
-                          : t("pages.ai_agent.fb_leads_status_inactive_desc")}
+                          ? (selectedAgentType === "fb-leads-direct" ? "Yo'naltirish faol. Target arizalari Telegram bot orqali guruhga yuborilmoqda." : t("pages.ai_agent.fb_leads_status_active_desc")) 
+                          : (selectedAgentType === "fb-leads-direct" ? "Yo'naltirish o'chirilgan." : t("pages.ai_agent.fb_leads_status_inactive_desc"))}
                       </p>
                     </div>
                   </div>
@@ -2011,21 +2308,34 @@ export default function AIAgentPage() {
                   </div>
 
                   {/* System Prompt */}
-                  <div className="flex flex-col gap-1.5">
-                    <div className="flex items-center justify-between">
-                      <label className="text-[11px] font-bold text-black">{t("pages.ai_agent.ai_prompt_label")}</label>
-                      <div className="flex items-center gap-1 text-[10px] text-[#707070]">
-                        <Info size={12} />
-                        <span>{t("pages.ai_agent.ai_prompt_desc")}</span>
+                  {selectedAgentType === "fb-leads-direct" ? (
+                    <div className="p-4 bg-blue-50 border border-blue-100 rounded-xl flex flex-col gap-1 text-[11px] text-blue-800 leading-relaxed">
+                      <div className="flex items-center gap-1.5 font-bold">
+                        <Info size={14} className="text-blue-600 shrink-0" />
+                        <span>To&apos;g&apos;ridan-to&apos;g&apos;ri yo&apos;naltirish faol</span>
                       </div>
+                      <p>
+                        Ushbu rejimda AI ishtirok etmaydi va lid ma&apos;lumotlarini saralamaydi. Shuning uchun AI prompti talab etilmaydi.
+                        Barcha arizalar to&apos;g&apos;ridan-to&apos;g&apos;ri Telegram guruh yoki profilingizga yo&apos;naltiriladi.
+                      </p>
                     </div>
-                    <textarea
-                      value={settings.fbAgentPrompt || ""}
-                      onChange={(e) => handleUpdateSettings("fbAgentPrompt", e.target.value)}
-                      className="w-full min-h-[140px] p-3 text-[12px] font-mono leading-relaxed bg-[#F9F9F7] border border-[#E8E8E8] rounded-xl focus:outline-none focus:border-black resize-y text-black"
-                      placeholder={t("pages.ai_agent.ai_prompt_placeholder")}
-                    />
-                  </div>
+                  ) : (
+                    <div className="flex flex-col gap-1.5">
+                      <div className="flex items-center justify-between">
+                        <label className="text-[11px] font-bold text-black">{t("pages.ai_agent.ai_prompt_label")}</label>
+                        <div className="flex items-center gap-1 text-[10px] text-[#707070]">
+                          <Info size={12} />
+                          <span>{t("pages.ai_agent.ai_prompt_desc")}</span>
+                        </div>
+                      </div>
+                      <textarea
+                        value={settings.fbAgentPrompt || ""}
+                        onChange={(e) => handleUpdateSettings("fbAgentPrompt", e.target.value)}
+                        className="w-full min-h-[140px] p-3 text-[12px] font-mono leading-relaxed bg-[#F9F9F7] border border-[#E8E8E8] rounded-xl focus:outline-none focus:border-black resize-y text-black"
+                        placeholder={t("pages.ai_agent.ai_prompt_placeholder")}
+                      />
+                    </div>
+                  )}
 
                   {/* Field Mapping Editor */}
                   <div className="flex flex-col gap-3">
@@ -2082,7 +2392,7 @@ export default function AIAgentPage() {
                                     type="text"
                                     value={m.description}
                                     onChange={(e) => updateFieldMapping(m.id, "description", e.target.value)}
-                                    className="w-full px-2 py-1.5 border border-[#E8E8E8] rounded-lg bg-white focus:outline-none focus:border-black text-[#595959]"
+                                    className="w-full px-2 py-1.5 border border-[#E8E8E8] rounded-lg bg-white focus:outline-none focus:border-black text-black"
                                     placeholder={t("pages.ai_agent.description_placeholder")}
                                   />
                                 </td>
@@ -2189,6 +2499,188 @@ export default function AIAgentPage() {
                         ))
                       )}
                     </div>
+                  </div>
+
+                  {/* Telegram Bot Selector for Facebook lead handlers */}
+                  <div className="flex flex-col gap-1.5 pt-4 border-t border-[#F0F0F0] mt-3">
+                    <label className="text-[11px] font-bold text-black">Telegram Bot</label>
+                    {(() => {
+                      const tgChannels = db.getChannels().filter(c => c.type === "telegram" && c.isConnected && c.telegramToken);
+                      if (tgChannels.length > 0) {
+                        const botOptions = tgChannels.map(c => ({
+                          value: c.id,
+                          label: `${c.name} (@${c.username.replace(/^@+/, "")})`
+                        }));
+                        const selectedBotId = settings.telegramBotId || tgChannels[0].id;
+                        return (
+                          <div className="flex flex-col gap-2 mt-1">
+                            <CustomDropdown
+                              value={selectedBotId}
+                              onChange={handleBotChange}
+                              options={botOptions}
+                              placeholder="Telegram botni tanlang..."
+                              className="w-full"
+                            />
+                            <div className="flex items-center gap-1.5 text-[10px] text-green-700 mt-0.5 bg-green-50/50 p-2.5 rounded-xl border border-green-100">
+                              <CheckCircle size={12} className="text-green-500 shrink-0" />
+                              <span>
+                                {selectedAgentType === "fb-leads-direct" 
+                                  ? "Lidlar ushbu Telegram bot orqali guruh yoki profilingizga yo'naltiriladi." 
+                                  : "Inson-kuratorga murojaatlar ushbu Telegram bot orqali yuboriladi."}
+                              </span>
+                            </div>
+                          </div>
+                        );
+                      } else {
+                        return (
+                          <div className="flex flex-col gap-2.5 p-4 bg-amber-50/50 border border-amber-200/50 rounded-2xl text-[11px] text-amber-800 mt-1">
+                            <div className="flex items-center gap-2">
+                              <Info size={14} className="shrink-0 text-amber-500" />
+                              <span className="font-bold">Telegram bot topilmadi</span>
+                            </div>
+                            <p className="text-[10px] text-amber-600 leading-relaxed">
+                              Telegram integratsiyasidan foydalanish uchun sozlamalar sahifasida kamida 1ta Telegram bot ulangan bo&apos;lishi lozim.
+                            </p>
+                            <Link href="/settings" className="mt-1 inline-block w-fit px-4 py-2 bg-black text-[#C7F33C] rounded-full hover:bg-black/90 font-bold text-[10px] shadow-sm transition-all text-center">
+                              Sozlamalar bo&apos;limiga o&apos;tish ➔
+                            </Link>
+                          </div>
+                        );
+                      }
+                    })()}
+                  </div>
+
+                  {/* Curator Admin Connection Settings Inside Router */}
+                  <div className="flex flex-col gap-3 pt-4 border-t border-[#F0F0F0] mt-3">
+                    <div>
+                      <h4 className="text-[12px] font-bold text-black">
+                        {selectedAgentType === "fb-leads-direct" ? "Telegram guruh yoki lichkani ulash" : "Inson-kuratorni ulash"}
+                      </h4>
+                      <p className="text-[10px] text-[#707070] mt-1 leading-relaxed">
+                        {selectedAgentType === "fb-leads-direct"
+                          ? "Lidlar to'g'ridan-to'g'ri Telegram guruh yoki profilingizga yuborilishi uchun admin profilini ulang."
+                          : "AI javob bera olmagan yoki operator kutilgan holatlarda bot sizga Telegram orqali xabar yo'llashi uchun kurator (admin) profilini ulang."}
+                      </p>
+                    </div>
+
+                    {settings.adminTelegramChatId ? (
+                      <div className="flex items-center justify-between p-3.5 rounded-xl bg-green-50 border border-green-200">
+                        <div className="flex flex-col gap-0.5">
+                          <div className="flex items-center gap-1.5 text-[11px] font-bold text-green-800">
+                            <CheckCircle size={14} className="text-green-600 shrink-0" />
+                            <span>{"Admin bog'langan"}</span>
+                          </div>
+                          <span className="text-[10px] text-green-700 mt-0.5">
+                            Foydalanuvchi: @{settings.adminTelegramUsername} (Chat ID: {settings.adminTelegramChatId})
+                          </span>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            handleUpdateSettings("adminTelegramChatId", "");
+                            handleUpdateSettings("adminTelegramUsername", "");
+                          }}
+                          className="text-[10px] font-bold text-red-600 hover:text-red-700 bg-white border border-red-200 px-2.5 py-1.5 rounded-lg shadow-sm hover:shadow active:scale-95 transition-all"
+                        >
+                          {"O'chirish"}
+                        </button>
+                      </div>
+                    ) : isVerifyingAdmin ? (
+                      <form onSubmit={handleVerifyAdminCode} className="flex flex-col gap-2.5 p-3.5 rounded-xl bg-blue-50 border border-blue-200 animate-fadeIn">
+                        <div className="flex items-center gap-1.5 text-[11px] font-bold text-blue-800">
+                          <Sparkles size={14} className="text-blue-600 shrink-0 animate-pulse" />
+                          <span>{"Tasdiqlash kodini kiriting"}</span>
+                        </div>
+                        <p className="text-[10px] text-blue-700 leading-relaxed">
+                          {telegramBotUsername ? (
+                            <>
+                              {"Telegram-da "}
+                              <a
+                                href={`https://t.me/${telegramBotUsername.replace(/^@+/, "")}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="underline font-bold text-blue-900"
+                              >
+                                @{telegramBotUsername.replace(/^@+/, "")}
+                              </a>
+                              {" botimizga o'ting va "}<strong>{"/start"}</strong>{" buyrug'ini bosing. Bot sizga yuborgan tasdiqlash kodini quyida kiriting."}
+                            </>
+                          ) : (
+                            "Telegram botimizga o'ting va /start buyrug'ini bosing. Bot yuborgan tasdiqlash kodini quyida kiriting."
+                          )}
+                        </p>
+                        
+                        <div className="flex flex-col gap-2">
+                          <div className="flex gap-2">
+                            <input
+                              type="text"
+                              placeholder="Kodni kiriting (masalan: 123456)"
+                              value={adminVerifyCode}
+                              onChange={(e) => setAdminVerifyCode(e.target.value)}
+                              disabled={isVerifyLoading}
+                              className="px-3 py-2 text-[11px] bg-white border border-blue-300 rounded-xl focus:outline-none focus:border-blue-600 flex-1 text-black"
+                            />
+                            {telegramBotUsername && (
+                              <a
+                                href={`https://t.me/${telegramBotUsername.replace(/^@+/, "")}?start=verify`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="px-3.5 py-2 bg-[#229ED9] hover:bg-[#1e8ec3] text-white rounded-xl text-[11px] font-bold transition-all shadow-sm active:scale-95 text-center flex items-center justify-center gap-1 shrink-0"
+                              >
+                                <Send size={12} />
+                                <span>Kodni olish</span>
+                              </a>
+                            )}
+                          </div>
+                          
+                          <div className="flex gap-2 justify-end">
+                            <button
+                              type="submit"
+                              disabled={isVerifyLoading || !adminVerifyCode.trim()}
+                              className="text-[10px] font-bold text-white bg-black hover:bg-gray-800 disabled:bg-gray-400 px-4 py-2 rounded-xl transition-all shadow-sm active:scale-95"
+                            >
+                              {isVerifyLoading ? "Tekshirilmoqda..." : "Tasdiqlash"}
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setIsVerifyingAdmin(false);
+                                setVerifyAdminError("");
+                                setAdminVerifyCode("");
+                              }}
+                              disabled={isVerifyLoading}
+                              className="text-[10px] font-bold text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 px-3.5 py-2 rounded-xl transition-all shadow-sm active:scale-95"
+                            >
+                              {"Bekor qilish"}
+                            </button>
+                          </div>
+                        </div>
+                        {verifyAdminError && (
+                          <span className="text-[10px] text-red-600 font-bold mt-1">
+                            {verifyAdminError}
+                          </span>
+                        )}
+                      </form>
+                    ) : (
+                      <div className="flex flex-col gap-2.5 p-3.5 rounded-xl bg-blue-50 border border-blue-200">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-1.5 text-[11px] font-bold text-blue-800">
+                            <AlertTriangle size={14} className="text-amber-600 shrink-0" />
+                            <span>{"Admin ulanmagan"}</span>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => setIsVerifyingAdmin(true)}
+                            className="text-[10px] font-bold text-white bg-black hover:bg-gray-800 px-4 py-2 rounded-lg shadow-sm hover:shadow active:scale-95 transition-all"
+                          >
+                            {"Ulash"}
+                          </button>
+                        </div>
+                        <p className="text-[10px] text-blue-700 leading-relaxed">
+                          {"Ulash uchun ulanayotgan Telegram botingizga borib, profilingizdan botni boshlang (/start). Bot sizga tasdiqlash kodini yuboradi."}
+                        </p>
+                      </div>
+                    )}
                   </div>
                 </div>
               )}
@@ -2534,77 +3026,6 @@ export default function AIAgentPage() {
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
             {/* Left Side: Settings panel */}
             <div className="lg:col-span-7 flex flex-col gap-6">
-              {/* AI Agent Status Card */}
-              <div className="bg-white border border-[#E8E8E8] rounded-[24px] p-6 shadow-sm flex flex-col gap-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className={`w-10 h-10 rounded-full flex items-center justify-center ${settings.aiCuratorEnabled ? "bg-[#C7F33C]/25 text-[#7CA607]" : "bg-gray-100 text-[#707070]"}`}>
-                      <Sparkles size={20} className={settings.aiCuratorEnabled ? "animate-pulse" : ""} />
-                    </div>
-                    <div>
-                      <h3 className="text-[14px] font-bold text-black">{t("pages.ai_agent.curator_status")}</h3>
-                      <p className="text-[11px] text-[#707070] mt-0.5">
-                        {settings.aiCuratorEnabled 
-                          ? t("pages.ai_agent.curator_active_desc") 
-                          : t("pages.ai_agent.curator_inactive_desc")}
-                      </p>
-                    </div>
-                  </div>
-                  <label className="relative inline-flex items-center cursor-pointer shrink-0">
-                    <input
-                      type="checkbox"
-                      checked={settings.aiCuratorEnabled || false}
-                      onChange={(e) => handleToggleAiCurator(e.target.checked)}
-                      className="sr-only peer"
-                    />
-                    <div className="w-11 h-6 bg-[#E8E8E8] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-[#D8D8D8] after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-black"></div>
-                  </label>
-                </div>
-                <div className="flex flex-col gap-1.5 mt-2 pt-2 border-t border-[#F0F0F0]">
-                  <label className="text-[10px] font-extrabold text-[#707070] uppercase tracking-wider">AI Curator uchun Telegram Bot</label>
-                  {(() => {
-                    const tgChannels = db.getChannels().filter(c => c.type === "telegram" && c.isConnected && c.telegramToken);
-                    if (tgChannels.length > 0) {
-                      const botOptions = tgChannels.map(c => ({
-                        value: c.id,
-                        label: `${c.name} (@${c.username.replace(/^@+/, "")})`
-                      }));
-                      const selectedBotId = settings.telegramBotId || tgChannels[0].id;
-                      return (
-                        <div className="flex flex-col gap-2 mt-1">
-                          <CustomDropdown
-                            value={selectedBotId}
-                            onChange={handleBotChange}
-                            options={botOptions}
-                            placeholder="Telegram botni tanlang..."
-                            className="w-full"
-                          />
-                          <div className="flex items-center gap-1.5 text-[10px] text-green-700 mt-1 bg-green-50/50 p-2.5 rounded-xl border border-green-100">
-                            <CheckCircle size={12} className="text-green-500 shrink-0" />
-                            <span>AI kuratori ushbu tanlangan Telegram bot orqali savollarga javob beradi.</span>
-                          </div>
-                        </div>
-                      );
-                    } else {
-                      return (
-                        <div className="flex flex-col gap-2.5 p-4 bg-amber-50/50 border border-amber-200/50 rounded-2xl text-[11px] text-amber-800 mt-1">
-                          <div className="flex items-center gap-2">
-                            <Info size={14} className="shrink-0 text-amber-500" />
-                            <span className="font-bold">Telegram bot topilmadi</span>
-                          </div>
-                          <p className="text-[10px] text-amber-600 leading-relaxed">
-                            AI kuratordan foydalanish uchun sozlamalar sahifasida kamida 1ta Telegram bot ulangan bo&apos;lishi lozim.
-                          </p>
-                          <Link href="/settings" className="mt-1 inline-block w-fit px-4 py-2 bg-black text-[#C7F33C] rounded-full hover:bg-black/90 font-bold text-[10px] shadow-sm transition-all text-center">
-                            Sozlamalar bo&apos;limiga o&apos;tish ➔
-                          </Link>
-                        </div>
-                      );
-                    }
-                  })()}
-                </div>
-              </div>
-
               {/* System Prompt Settings */}
               <div className="bg-white border border-[#E8E8E8] rounded-[24px] p-6 shadow-sm flex flex-col gap-4">
                 <div className="flex items-center justify-between">
@@ -2619,7 +3040,7 @@ export default function AIAgentPage() {
                 <textarea
                   value={settings.systemPrompt}
                   onChange={(e) => handleUpdateSettings("systemPrompt", e.target.value)}
-                  className="w-full min-h-[220px] p-4 text-[12px] font-mono leading-relaxed bg-[#F9F9F7] border border-[#E8E8E8] rounded-[16px] focus:outline-none focus:border-black focus:ring-1 focus:ring-black resize-y"
+                  className="w-full min-h-[220px] p-4 text-[12px] font-mono leading-relaxed bg-[#F9F9F7] border border-[#E8E8E8] rounded-[16px] focus:outline-none focus:border-black focus:ring-1 focus:ring-black resize-y text-black"
                   placeholder={t("pages.ai_agent.system_instruction_placeholder")}
                 />
               </div>
@@ -2697,21 +3118,70 @@ export default function AIAgentPage() {
                     </div>
                   </div>
                 </div>
+              </div>
 
-                {/* Floating Preview Card */}
-                {sliderPreview && sliderPreview.visible && (() => {
-                  const content = getSliderPreviewContent(sliderPreview.type, sliderPreview.value);
+              {/* Permanent Sliders Preview Card */}
+              <div className="bg-white border border-[#E8E8E8] rounded-[24px] p-6 shadow-sm flex flex-col gap-4 animate-in fade-in duration-200">
+                <div className="flex items-center gap-2 border-b border-[#F0F0F0] pb-3">
+                  <Sparkles size={16} className="text-black" />
+                  <h3 className="text-[14px] font-bold text-black">
+                    {"Ohang va Xarakter ta'siri (Suhbat namunasi)"}
+                  </h3>
+                </div>
+
+                {/* Tab Pills */}
+                <div className="flex bg-[#F5F5F3] p-1 rounded-xl text-[11px] font-bold gap-1">
+                  <button
+                    type="button"
+                    onClick={() => setSliderPreviewType("tone")}
+                    className={`flex-1 py-1.5 rounded-lg text-center transition-all ${
+                      sliderPreviewType === "tone"
+                        ? "bg-white text-black shadow-sm"
+                        : "text-[#707070] hover:text-black"
+                    }`}
+                  >
+                    {"Muloqot ohangi"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setSliderPreviewType("length")}
+                    className={`flex-1 py-1.5 rounded-lg text-center transition-all ${
+                      sliderPreviewType === "length"
+                        ? "bg-white text-black shadow-sm"
+                        : "text-[#707070] hover:text-black"
+                    }`}
+                  >
+                    {"Javob uzunligi"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setSliderPreviewType("humor")}
+                    className={`flex-1 py-1.5 rounded-lg text-center transition-all ${
+                      sliderPreviewType === "humor"
+                        ? "bg-white text-black shadow-sm"
+                        : "text-[#707070] hover:text-black"
+                    }`}
+                  >
+                    {"Hazil-mutoyiba"}
+                  </button>
+                </div>
+
+                {/* Render preview message */}
+                {(() => {
+                  const sliderVal = sliderPreviewType === "tone" 
+                    ? settings.tone 
+                    : sliderPreviewType === "length" 
+                    ? settings.length 
+                    : settings.humor;
+                  const content = getSliderPreviewContent(sliderPreviewType, sliderVal);
                   return (
-                    <div className="lg:absolute lg:-right-[312px] lg:top-0 lg:w-[296px] w-full mt-4 lg:mt-0 z-40 bg-white border border-[#E8E8E8] rounded-[24px] shadow-lg p-5 flex flex-col gap-3 transition-all duration-300 animate-in fade-in slide-in-from-right-4">
-                      {/* Header */}
-                      <div className="flex items-center gap-2 border-b border-[#F0F0F0] pb-2">
-                        <Sparkles size={14} className="text-black animate-pulse" />
-                        <span className="text-[12px] font-extrabold text-black uppercase tracking-wider">
-                          {content.title}
+                    <div className="flex flex-col gap-3 pt-2">
+                      <div className="flex justify-between items-center text-[10px] font-bold text-[#707070] px-1 uppercase tracking-wider">
+                        <span>{content.title}</span>
+                        <span className="bg-black/5 px-2 py-0.5 rounded-md text-black font-extrabold">
+                          {sliderVal}%
                         </span>
                       </div>
-                      
-                      {/* Chat Messages */}
                       <div className="flex flex-col gap-2.5 pt-1 text-[11px]">
                         {/* User Message */}
                         <div className="flex flex-col items-end max-w-[85%] ml-auto">
@@ -2944,8 +3414,21 @@ export default function AIAgentPage() {
                         value={adminVerifyCode}
                         onChange={(e) => setAdminVerifyCode(e.target.value)}
                         disabled={isVerifyLoading}
-                        className="px-3 py-2 text-[12px] bg-white border border-blue-300 rounded-xl focus:outline-none focus:border-blue-600 flex-1"
+                        className="px-3 py-2 text-[12px] bg-white border border-[#E8E8E8] rounded-xl focus:outline-none focus:border-black flex-1 text-black"
                       />
+                      {telegramBotUsername && (
+                        <a
+                          href={`https://t.me/${telegramBotUsername.replace(/^@+/, "")}?start=verify`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="px-3.5 py-2 bg-[#229ED9] hover:bg-[#1e8ec3] text-white rounded-xl text-[11px] font-bold transition-all shadow-sm active:scale-95 text-center flex items-center justify-center gap-1 shrink-0"
+                        >
+                          <Send size={12} />
+                          <span>Kodni olish</span>
+                        </a>
+                      )}
+                    </div>
+                    <div className="flex gap-2 justify-end mt-1">
                       <button
                         type="submit"
                         disabled={isVerifyLoading || !adminVerifyCode.trim()}
@@ -2961,7 +3444,7 @@ export default function AIAgentPage() {
                           setAdminVerifyCode("");
                         }}
                         disabled={isVerifyLoading}
-                        className="text-[11px] font-bold text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 px-3 py-2 rounded-xl transition-all shadow-sm active:scale-95"
+                        className="text-[11px] font-bold text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 px-3.5 py-2 rounded-xl transition-all shadow-sm active:scale-95"
                       >
                         {"Bekor qilish"}
                       </button>
@@ -2995,8 +3478,81 @@ export default function AIAgentPage() {
               </div>
             </div>
 
-            {/* Right Side: Sandbox Preview chat simulator */}
-            <div className="lg:col-span-5 sticky top-28 bg-[#F9F9F7] border border-[#E8E8E8] rounded-[28px] overflow-hidden flex flex-col h-[calc(100vh-140px)] shadow-inner">
+            {/* Right Side: Sticky column */}
+            <div className="lg:col-span-5 lg:sticky lg:top-28 flex flex-col gap-5 lg:h-[calc(100vh-140px)]">
+              {/* AI Agent Status Card (Moved from Left Side) */}
+              <div className="bg-white border border-[#E8E8E8] rounded-[24px] p-6 shadow-sm flex flex-col gap-4 shrink-0">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className={`w-10 h-10 rounded-full flex items-center justify-center ${settings.aiCuratorEnabled ? "bg-[#C7F33C]/25 text-[#7CA607]" : "bg-gray-100 text-[#707070]"}`}>
+                      <Sparkles size={20} className={settings.aiCuratorEnabled ? "animate-pulse" : ""} />
+                    </div>
+                    <div>
+                      <h3 className="text-[14px] font-bold text-black">{t("pages.ai_agent.curator_status")}</h3>
+                      <p className="text-[11px] text-[#707070] mt-0.5">
+                        {settings.aiCuratorEnabled 
+                          ? t("pages.ai_agent.curator_active_desc") 
+                          : t("pages.ai_agent.curator_inactive_desc")}
+                      </p>
+                    </div>
+                  </div>
+                  <label className="relative inline-flex items-center cursor-pointer shrink-0">
+                    <input
+                      type="checkbox"
+                      checked={settings.aiCuratorEnabled || false}
+                      onChange={(e) => handleToggleAiCurator(e.target.checked)}
+                      className="sr-only peer"
+                    />
+                    <div className="w-11 h-6 bg-[#E8E8E8] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-[#D8D8D8] after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-black"></div>
+                  </label>
+                </div>
+                <div className="flex flex-col gap-1.5 mt-2 pt-2 border-t border-[#F0F0F0]">
+                  <label className="text-[10px] font-extrabold text-[#707070] uppercase tracking-wider">AI Curator uchun Telegram Bot</label>
+                  {(() => {
+                    const tgChannels = db.getChannels().filter(c => c.type === "telegram" && c.isConnected && c.telegramToken);
+                    if (tgChannels.length > 0) {
+                      const botOptions = tgChannels.map(c => ({
+                        value: c.id,
+                        label: `${c.name} (@${c.username.replace(/^@+/, "")})`
+                      }));
+                      const selectedBotId = settings.telegramBotId || tgChannels[0].id;
+                      return (
+                        <div className="flex flex-col gap-2 mt-1">
+                          <CustomDropdown
+                            value={selectedBotId}
+                            onChange={handleBotChange}
+                            options={botOptions}
+                            placeholder="Telegram botni tanlang..."
+                            className="w-full"
+                          />
+                          <div className="flex items-center gap-1.5 text-[10px] text-green-700 mt-1 bg-green-50/50 p-2.5 rounded-xl border border-green-100">
+                            <CheckCircle size={12} className="text-green-500 shrink-0" />
+                            <span>AI kuratori ushbu tanlangan Telegram bot orqali savollarga javob beradi.</span>
+                          </div>
+                        </div>
+                      );
+                    } else {
+                      return (
+                        <div className="flex flex-col gap-2.5 p-4 bg-amber-50/50 border border-amber-200/50 rounded-2xl text-[11px] text-amber-800 mt-1">
+                          <div className="flex items-center gap-2">
+                            <Info size={14} className="shrink-0 text-amber-500" />
+                            <span className="font-bold">Telegram bot topilmadi</span>
+                          </div>
+                          <p className="text-[10px] text-amber-600 leading-relaxed">
+                            AI kuratordan foydalanish uchun sozlamalar sahifasida kamida 1ta Telegram bot ulangan bo&apos;lishi lozim.
+                          </p>
+                          <Link href="/settings" className="mt-1 inline-block w-fit px-4 py-2 bg-black text-[#C7F33C] rounded-full hover:bg-black/90 font-bold text-[10px] shadow-sm transition-all text-center">
+                            Sozlamalar bo&apos;limiga o&apos;tish ➔
+                          </Link>
+                        </div>
+                      );
+                    }
+                  })()}
+                </div>
+              </div>
+
+              {/* Sandbox Preview chat simulator */}
+              <div className="bg-[#F9F9F7] border border-[#E8E8E8] rounded-[28px] overflow-hidden flex flex-col flex-1 shadow-inner min-h-[400px]">
               {/* Header */}
               <div className="bg-white border-b border-[#E8E8E8] p-4 flex items-center justify-between">
                 <div className="flex items-center gap-3">
@@ -3126,7 +3682,8 @@ export default function AIAgentPage() {
               </form>
             </div>
           </div>
-        )}
+        </div>
+      )}
 
         {/* Bilim Bazasi Workspace */}
         {activeTab === "knowledge" && (

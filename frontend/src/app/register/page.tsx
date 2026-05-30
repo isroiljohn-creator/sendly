@@ -118,6 +118,12 @@ export default function RegisterPage() {
       );
       const payload = JSON.parse(jsonPayload);
       
+      const emailLower = (payload.email || "").trim().toLowerCase();
+      if (!emailLower.endsWith("@gmail.com") && !emailLower.endsWith("@icloud.com")) {
+        setError(t("pages.login_page.error_invalid_email_domain") || "Faqat @gmail.com yoki @icloud.com elektron pochta manzillari qabul qilinadi.");
+        return;
+      }
+      
       const res = db.googleSignIn(payload.email, payload.name);
       if (res.success) {
         window.location.href = "/";
@@ -137,6 +143,12 @@ export default function RegisterPage() {
 
     if (password !== confirmPassword) {
       setError(t("pages.login_page.error_password_mismatch"));
+      return;
+    }
+
+    const emailLower = email.trim().toLowerCase();
+    if (!emailLower.endsWith("@gmail.com") && !emailLower.endsWith("@icloud.com")) {
+      setError(t("pages.login_page.error_invalid_email_domain") || "Faqat @gmail.com yoki @icloud.com elektron pochta manzillari qabul qilinadi.");
       return;
     }
 

@@ -981,6 +981,7 @@
       "error_invalid_otp": "Incorrect code. Please try again.",
       "error_connection": "Connection error:",
       "error_password_mismatch": "Passwords do not match.",
+      "error_invalid_email_domain": "Only @gmail.com or @icloud.com email addresses are accepted.",
       "recovery_title": "Password Recovery",
       "recovery_desc": "Enter the email associated with your account to recover your password.",
       "recovery_otp_desc": "A recovery code has been sent to the email address you entered.",

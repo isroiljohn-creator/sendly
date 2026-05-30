@@ -980,6 +980,7 @@
       "error_invalid_otp": "Tasdiqlash kodi noto'g'ri. Qayta urinib ko'ring.",
       "error_connection": "Tizimga ulanishda xatolik:",
       "error_password_mismatch": "Kiritilgan parollar bir-biriga mos kelmadi.",
+      "error_invalid_email_domain": "Faqat @gmail.com yoki @icloud.com elektron pochta manzillari qabul qilinadi.",
       "recovery_title": "Parolni tiklash",
       "recovery_desc": "Profilingiz parolini tiklash uchun tizimdagi email manzilingizni kiriting.",
       "recovery_otp_desc": "Profilingiz parolini tiklash uchun kiritgan email manzilingizga tasdiqlash kodi yuborildi.",

@@ -488,8 +488,46 @@ export async function handleIncomingLeadgenEvent(payload: LeadgenEventPayload): 
     return;
   }
 
+  // 1.5. Resolve settings from global settings row to support shared DB configurations
+  const { data: globalSettingsRow } = await supabase
+    .from("instagram_accounts")
+    .select("*")
+    .eq("instagram_page_id", "global_settings_" + account.user_id)
+    .maybeSingle();
+
+  const userSettings = (globalSettingsRow?.fb_field_mappings || {}) as Record<string, any>;
+  
+  // Find connected telegram bot channel to retrieve its specific settings
+  let botSettings: any = {};
+  let telegramBotToken = "";
+  if (userSettings.replai_channels) {
+    try {
+      const channels = typeof userSettings.replai_channels === "string"
+        ? JSON.parse(userSettings.replai_channels)
+        : userSettings.replai_channels;
+      
+      if (Array.isArray(channels)) {
+        const tgChannel = channels.find((c: any) => c.type === "telegram" && c.isConnected && c.telegramToken);
+        if (tgChannel) {
+          telegramBotToken = tgChannel.telegramToken;
+          const botSettingsKey = `replai_bot_settings_${tgChannel.id}`;
+          const botSettingsRaw = userSettings[botSettingsKey];
+          botSettings = typeof botSettingsRaw === "string"
+            ? JSON.parse(botSettingsRaw)
+            : (botSettingsRaw || {});
+        }
+      }
+    } catch (err) {
+      console.error("[Trigger] Error parsing replai_channels or bot settings:", err);
+    }
+  }
+
+  // Use botSettings as primary, fallback to account columns
+  const fbAgentEnabled = typeof botSettings.fbAgentEnabled !== "undefined" ? botSettings.fbAgentEnabled : account.fb_agent_enabled;
+  const fbAgentMode = botSettings.fbAgentMode || "ai"; // default to ai mode if not set
+
   // Check if Facebook agent is enabled
-  if (!account.fb_agent_enabled) {
+  if (!fbAgentEnabled) {
     console.log(`[Trigger] Facebook lead handler is disabled for account ${accountId}. Skipping.`);
     return;
   }
@@ -522,20 +560,27 @@ export async function handleIncomingLeadgenEvent(payload: LeadgenEventPayload): 
   }
 
   // 3. Match Field Mappings
-  const mappings = typeof account.fb_field_mappings === "string" 
-    ? JSON.parse(account.fb_field_mappings) 
-    : (account.fb_field_mappings || []);
+  const mappings = typeof botSettings.fbFieldMappings === "string"
+    ? JSON.parse(botSettings.fbFieldMappings)
+    : (botSettings.fbFieldMappings || (typeof account.fb_field_mappings === "string" 
+        ? JSON.parse(account.fb_field_mappings) 
+        : (account.fb_field_mappings || [])));
 
   let leadName = "Noma'lum Mijoz";
   let leadPhone = "Noma'lum Telefon";
   let leadMessage = "";
+  let leadEmail = "";
+  let leadCompany = "";
 
   mappings.forEach((m: any) => {
     const match = resolvedFieldData?.find((fd: any) => fd.name === m.metaField);
     if (match && match.values && match.values[0]) {
-      if (m.sendlyField === "name") leadName = match.values[0];
-      else if (m.sendlyField === "phone") leadPhone = match.values[0];
-      else if (m.sendlyField === "message") leadMessage = match.values[0];
+      const val = match.values[0];
+      if (m.sendlyField === "name") leadName = val;
+      else if (m.sendlyField === "phone") leadPhone = val;
+      else if (m.sendlyField === "message") leadMessage = val;
+      else if (m.sendlyField === "email") leadEmail = val;
+      else if (m.sendlyField === "company") leadCompany = val;
     }
   });
 
@@ -565,97 +610,102 @@ export async function handleIncomingLeadgenEvent(payload: LeadgenEventPayload): 
     }
   }
 
-  // 4. Run AI Qualification / Categorization
-  let detectedGroupId = account.target_group_id || "sales";
-  let tags = Array.isArray(account.fb_tags) ? [...account.fb_tags] : [];
+  // 4. Run AI Qualification / Categorization (Skip if direct forwarding mode is active)
+  let detectedGroupId = botSettings.targetGroupId || account.target_group_id || "sales";
+  let tags = Array.isArray(botSettings.fbTags) ? [...botSettings.fbTags] : (Array.isArray(account.fb_tags) ? [...account.fb_tags] : []);
   let summary = "Mijoz reklama formasi orqali murojaat qildi.";
 
-  // If OpenAI key is available, attempt to call OpenAI GPT models
-  let runRuleFallback = true;
-  if (env.OPENAI_API_KEY) {
-    try {
-      const response = await fetch("https://api.openai.com/v1/chat/completions", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${env.OPENAI_API_KEY}`
-        },
-        body: JSON.stringify({
-          model: "gpt-3.5-turbo",
-          messages: [
-            {
-              role: "system",
-              content: account.fb_agent_prompt || "Categorize this customer query to 'sales' or 'support' and provide tags."
-            },
-            {
-              role: "user",
-              content: `Mijoz ismi: ${leadName}\nTelefon raqami: ${leadPhone}\nSavol/Murojaat: ${leadMessage}`
-            }
-          ],
-          response_format: { type: "json_object" }
-        })
-      });
+  if (fbAgentMode === "direct") {
+    tags.push("Yo'naltirilgan");
+    summary = "Facebook forma orqali ariza (To'g'ridan-to'g'ri yo'naltirish).";
+  } else {
+    // If OpenAI key is available, attempt to call OpenAI GPT models
+    let runRuleFallback = true;
+    if (env.OPENAI_API_KEY) {
+      try {
+        const response = await fetch("https://api.openai.com/v1/chat/completions", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${env.OPENAI_API_KEY}`
+          },
+          body: JSON.stringify({
+            model: "gpt-3.5-turbo",
+            messages: [
+              {
+                role: "system",
+                content: botSettings.fbAgentPrompt || account.fb_agent_prompt || "Categorize this customer query to 'sales' or 'support' and provide tags."
+              },
+              {
+                role: "user",
+                content: `Mijoz ismi: ${leadName}\nTelefon raqami: ${leadPhone}\nSavol/Murojaat: ${leadMessage}`
+              }
+            ],
+            response_format: { type: "json_object" }
+          })
+        });
 
-      if (response.ok) {
-        const json = await response.json();
-        const aiData = JSON.parse(json.choices[0].message.content);
-        if (aiData.group) {
-          detectedGroupId = aiData.group.toLowerCase().includes("support") || aiData.group.toLowerCase().includes("qo'llab") ? "support" : "sales";
+        if (response.ok) {
+          const json = await response.json();
+          const aiData = JSON.parse(json.choices[0].message.content);
+          if (aiData.group) {
+            detectedGroupId = aiData.group.toLowerCase().includes("support") || aiData.group.toLowerCase().includes("qo'llab") ? "support" : "sales";
+          }
+          if (Array.isArray(aiData.tags)) {
+            tags = [...tags, ...aiData.tags];
+          }
+          if (aiData.summary) {
+            summary = aiData.summary;
+          }
+          runRuleFallback = false;
+          console.log(`[Trigger] AI Qualification Success. Group: ${detectedGroupId}, Tags: ${tags.join(", ")}, Summary: ${summary}`);
         }
-        if (Array.isArray(aiData.tags)) {
-          tags = [...tags, ...aiData.tags];
-        }
-        if (aiData.summary) {
-          summary = aiData.summary;
-        }
-        runRuleFallback = false;
-        console.log(`[Trigger] AI Qualification Success. Group: ${detectedGroupId}, Tags: ${tags.join(", ")}, Summary: ${summary}`);
+      } catch (openaiErr) {
+        console.error("[Trigger] OpenAI call failed, falling back to rule engine:", openaiErr);
       }
-    } catch (openaiErr) {
-      console.error("[Trigger] OpenAI call failed, falling back to rule engine:", openaiErr);
     }
-  }
 
-  // Rule-based qualification fallback (Uzbek language keywords)
-  if (runRuleFallback) {
-    const msg = leadMessage.toLowerCase();
-    if (
-      msg.includes("narx") ||
-      msg.includes("qancha") ||
-      msg.includes("chegirma") ||
-      msg.includes("to'lov") ||
-      msg.includes("narxi") ||
-      msg.includes("aksiy") ||
-      msg.includes("sotib") ||
-      msg.includes("dollar") ||
-      msg.includes("so'm") ||
-      msg.includes("aksiya") ||
-      msg.includes("skidka") ||
-      msg.includes("pul")
-    ) {
-      detectedGroupId = "sales";
-      tags.push("Yuqori qiziqish", "Narxga qiziqqan");
-      summary = "Mijoz to'lov shakli, narx yoki chegirmalar bo'yinta ma'lumot so'ragan.";
-    } else if (
-      msg.includes("kirish") ||
-      msg.includes("kirmayapti") ||
-      msg.includes("parol") ||
-      msg.includes("kod") ||
-      msg.includes("ochilmadi") ||
-      msg.includes("texnik") ||
-      msg.includes("yordam") ||
-      msg.includes("xatolik") ||
-      msg.includes("muammo") ||
-      msg.includes("sayt") ||
-      msg.includes("ishlamayapti")
-    ) {
-      detectedGroupId = "support";
-      tags.push("Texnik muammo", "Qo'llab-quvvatlash");
-      summary = "Mijoz tizimga kirish yoki texnik nosozlik yuzasidan yordam so'ragan.";
-    } else {
-      detectedGroupId = account.target_group_id || "sales";
-      tags.push("Yangi Lead");
-      summary = leadMessage ? `Mijoz savoli: "${leadMessage}"` : "Mijoz reklama formasi orqali murojaat qildi.";
+    // Rule-based qualification fallback (Uzbek language keywords)
+    if (runRuleFallback) {
+      const msg = leadMessage.toLowerCase();
+      if (
+        msg.includes("narx") ||
+        msg.includes("qancha") ||
+        msg.includes("chegirma") ||
+        msg.includes("to'lov") ||
+        msg.includes("narxi") ||
+        msg.includes("aksiy") ||
+        msg.includes("sotib") ||
+        msg.includes("dollar") ||
+        msg.includes("so'm") ||
+        msg.includes("aksiya") ||
+        msg.includes("skidka") ||
+        msg.includes("pul")
+      ) {
+        detectedGroupId = "sales";
+        tags.push("Yuqori qiziqish", "Narxga qiziqqan");
+        summary = "Mijoz to'lov shakli, narx yoki chegirmalar bo'yinta ma'lumot so'ragan.";
+      } else if (
+        msg.includes("kirish") ||
+        msg.includes("kirmayapti") ||
+        msg.includes("parol") ||
+        msg.includes("kod") ||
+        msg.includes("ochilmadi") ||
+        msg.includes("texnik") ||
+        msg.includes("yordam") ||
+        msg.includes("xatolik") ||
+        msg.includes("muammo") ||
+        msg.includes("sayt") ||
+        msg.includes("ishlamayapti")
+      ) {
+        detectedGroupId = "support";
+        tags.push("Texnik muammo", "Qo'llab-quvvatlash");
+        summary = "Mijoz tizimga kirish yoki texnik nosozlik yuzasidan yordam so'ragan.";
+      } else {
+        detectedGroupId = botSettings.targetGroupId || account.target_group_id || "sales";
+        tags.push("Yangi Lead");
+        summary = leadMessage ? `Mijoz savoli: "${leadMessage}"` : "Mijoz reklama formasi orqali murojaat qildi.";
+      }
     }
   }
 
@@ -683,6 +733,8 @@ export async function handleIncomingLeadgenEvent(payload: LeadgenEventPayload): 
       qualification_summary: summary,
       lead_phone: leadPhone,
       lead_message: leadMessage,
+      lead_email: leadEmail,
+      lead_company: leadCompany,
       form_id: formId,
       assigned_group: detectedGroupId
     }
@@ -736,8 +788,9 @@ export async function handleIncomingLeadgenEvent(payload: LeadgenEventPayload): 
   }
 
   // 7. Send Auto Welcome Message if configured
-  if (account.fb_welcome_message && contact) {
-    let welcomeMsg = account.fb_welcome_message;
+  const welcomeMessageTemplate = botSettings.fbWelcomeMessage || account.fb_welcome_message;
+  if (welcomeMessageTemplate && contact) {
+    let welcomeMsg = welcomeMessageTemplate;
     welcomeMsg = welcomeMsg.replace(/\{\{\s*name\s*\}\}/gi, leadName);
 
     console.log(`[Trigger] Dispatching Facebook Welcome Message: "${welcomeMsg}"`);
@@ -768,6 +821,38 @@ export async function handleIncomingLeadgenEvent(payload: LeadgenEventPayload): 
       });
     } catch (logErr) {
       console.error("[Trigger] Lead welcome message outbound logging failed:", logErr);
+    }
+  }
+
+  // 8. If direct forwarding mode and Telegram connection info is available, notify the admin chat ID
+  if (fbAgentMode === "direct" && telegramBotToken && botSettings.adminTelegramChatId) {
+    try {
+      const url = `https://api.telegram.org/bot${telegramBotToken}/sendMessage`;
+      const htmlMessage = `<b>🔔 Yangi Lid (AIsiz To'g'ridan-to'g'ri Yo'naltirish)</b>\n\n` +
+        `<b>Ism:</b> ${leadName}\n` +
+        `<b>Tel:</b> ${leadPhone}\n` +
+        (leadEmail ? `<b>E-mail:</b> ${leadEmail}\n` : "") +
+        (leadCompany ? `<b>Kompaniya:</b> ${leadCompany}\n` : "") +
+        (leadMessage ? `<b>Murojaat:</b> ${leadMessage}\n` : "");
+
+      const res = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          chat_id: botSettings.adminTelegramChatId,
+          text: htmlMessage,
+          parse_mode: "HTML",
+        }),
+      });
+
+      if (res.ok) {
+        console.log(`[Trigger] Direct Lead Telegram notification sent to chat ID ${botSettings.adminTelegramChatId}`);
+      } else {
+        const errText = await res.text();
+        console.error(`[Trigger] Failed to send Telegram notification: ${errText}`);
+      }
+    } catch (err) {
+      console.error("[Trigger] Error sending direct lead Telegram notification:", err);
     }
   }
 }

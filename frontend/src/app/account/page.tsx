@@ -186,12 +186,22 @@ export default function AccountPage() {
     }, 1500);
   };
 
-  const handleSaveGeneral = (e: React.FormEvent) => {
+  const handleSaveGeneral = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!currentUser) return;
 
     // Check if email changed
     if (email !== currentUser.email) {
+      const emailLower = email.trim().toLowerCase();
+      if (!emailLower.endsWith("@gmail.com") && !emailLower.endsWith("@icloud.com")) {
+        showAlert(
+          t("common.error"),
+          t("pages.login_page.error_invalid_email_domain") || "Faqat @gmail.com yoki @icloud.com elektron pochta manzillari qabul qilinadi.",
+          "error"
+        );
+        return;
+      }
+
       // Generate a mock code
       const generatedCode = Math.floor(100000 + Math.random() * 900000).toString();
       setEmailVerifyCodeState(generatedCode);
@@ -222,10 +232,14 @@ export default function AccountPage() {
     const updatedUser = { ...currentUser, fullName: name, password };
     localStorage.setItem("replai_current_user", JSON.stringify(updatedUser));
     setCurrentUser(updatedUser);
+    
+    // Persist changes to server
+    await db.saveToServer();
+    
     showAlert(t("common.success"), t("pages.account.general.success_message") || "Profil ma'lumotlari muvaffaqiyatli saqlandi!", "success");
   };
 
-  const handleConfirmEmailOtp = (e: React.FormEvent) => {
+  const handleConfirmEmailOtp = async (e: React.FormEvent) => {
     e.preventDefault();
     if (emailOtpInput !== emailVerifyCodeState) {
       setEmailOtpError("Tasdiqlash kodi noto'g'ri. Iltimos qaytadan urinib ko'ring.");
@@ -246,6 +260,10 @@ export default function AccountPage() {
     localStorage.setItem("replai_current_user", JSON.stringify(updatedUser));
     setCurrentUser(updatedUser);
     setIsEmailOtpModalOpen(false);
+
+    // Persist changes to server
+    await db.saveToServer();
+
     showAlert(t("common.success"), t("pages.account.general.success_message") || "Profil ma'lumotlari muvaffaqiyatli saqlandi!", "success");
   };
 
