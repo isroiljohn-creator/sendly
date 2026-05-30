@@ -3181,86 +3181,7 @@ function AIAgentContent() {
                 </div>
               </div>
 
-              {/* Permanent Sliders Preview Card */}
-              <div className="bg-white border border-[#E8E8E8] rounded-[24px] p-6 shadow-sm flex flex-col gap-4 animate-in fade-in duration-200">
-                <div className="flex items-center gap-2 border-b border-[#F0F0F0] pb-3">
-                  <Sparkles size={16} className="text-black" />
-                  <h3 className="text-[14px] font-bold text-black">
-                    {"Ohang va Xarakter ta'siri (Suhbat namunasi)"}
-                  </h3>
-                </div>
-
-                {/* Tab Pills */}
-                <div className="flex bg-[#F5F5F3] p-1 rounded-xl text-[11px] font-bold gap-1">
-                  <button
-                    type="button"
-                    onClick={() => setSliderPreviewType("tone")}
-                    className={`flex-1 py-1.5 rounded-lg text-center transition-all ${
-                      sliderPreviewType === "tone"
-                        ? "bg-white text-black shadow-sm"
-                        : "text-[#707070] hover:text-black"
-                    }`}
-                  >
-                    {"Muloqot ohangi"}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setSliderPreviewType("length")}
-                    className={`flex-1 py-1.5 rounded-lg text-center transition-all ${
-                      sliderPreviewType === "length"
-                        ? "bg-white text-black shadow-sm"
-                        : "text-[#707070] hover:text-black"
-                    }`}
-                  >
-                    {"Javob uzunligi"}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setSliderPreviewType("humor")}
-                    className={`flex-1 py-1.5 rounded-lg text-center transition-all ${
-                      sliderPreviewType === "humor"
-                        ? "bg-white text-black shadow-sm"
-                        : "text-[#707070] hover:text-black"
-                    }`}
-                  >
-                    {"Hazil-mutoyiba"}
-                  </button>
-                </div>
-
-                {/* Render preview message */}
-                {(() => {
-                  const sliderVal = sliderPreviewType === "tone" 
-                    ? settings.tone 
-                    : sliderPreviewType === "length" 
-                    ? settings.length 
-                    : settings.humor;
-                  const content = getSliderPreviewContent(sliderPreviewType, sliderVal);
-                  return (
-                    <div className="flex flex-col gap-3 pt-2">
-                      <div className="flex justify-between items-center text-[10px] font-bold text-[#707070] px-1 uppercase tracking-wider">
-                        <span>{content.title}</span>
-                        <span className="bg-black/5 px-2 py-0.5 rounded-md text-black font-extrabold">
-                          {sliderVal}%
-                        </span>
-                      </div>
-                      <div className="flex flex-col gap-2.5 pt-1 text-[11px]">
-                        {/* User Message */}
-                        <div className="flex flex-col items-end max-w-[85%] ml-auto">
-                          <div className="bg-[#F0F0F0] text-black px-3.5 py-2 rounded-[16px] rounded-tr-sm leading-relaxed text-right">
-                            {content.question}
-                          </div>
-                        </div>
-                        {/* Bot Reply */}
-                        <div className="flex flex-col items-start max-w-[85%] mr-auto">
-                          <div className="bg-black text-[#C7F33C] px-3.5 py-2 rounded-[16px] rounded-tl-sm leading-relaxed text-left">
-                            {content.reply}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })()}
-              </div>
+              {/* Preview card relocated to the right column under Sandbox Preview */}
 
               {/* Dynamic Restricted Topics */}
               <div className="bg-white border border-[#E8E8E8] rounded-[24px] p-6 shadow-sm flex flex-col gap-4">
@@ -3692,6 +3613,50 @@ function AIAgentContent() {
                   <Send size={15} />
                 </button>
               </form>
+            </div>
+
+            {/* Permanent Sliders Preview Card */}
+            <div className="bg-white border border-[#E8E8E8] rounded-[28px] p-5 shadow-sm flex flex-col gap-4 animate-in fade-in duration-200">
+              <div className="flex items-center gap-2 border-b border-[#F0F0F0] pb-2.5">
+                <Sparkles size={15} className="text-black" />
+                <h3 className="text-[13px] font-bold text-black">
+                  {"Ohang va Xarakter ta'siri (Suhbat namunasi)"}
+                </h3>
+              </div>
+
+              {/* Render preview message */}
+              {(() => {
+                const sliderVal = sliderPreviewType === "tone" 
+                  ? settings.tone 
+                  : sliderPreviewType === "length" 
+                  ? settings.length 
+                  : settings.humor;
+                const content = getSliderPreviewContent(sliderPreviewType, sliderVal);
+                return (
+                  <div className="flex flex-col gap-3">
+                    <div className="flex justify-between items-center text-[10px] font-bold text-[#707070] px-1 uppercase tracking-wider">
+                      <span>{content.title}</span>
+                      <span className="bg-black/5 px-2 py-0.5 rounded-md text-black font-extrabold">
+                        {sliderVal}%
+                      </span>
+                    </div>
+                    <div className="flex flex-col gap-2.5 pt-1 text-[11px]">
+                      {/* User Message */}
+                      <div className="flex flex-col items-end max-w-[85%] ml-auto">
+                        <div className="bg-[#F0F0F0] text-black px-3.5 py-2 rounded-[16px] rounded-tr-sm leading-relaxed text-right">
+                          {content.question}
+                        </div>
+                      </div>
+                      {/* Bot Reply */}
+                      <div className="flex flex-col items-start max-w-[85%] mr-auto">
+                        <div className="bg-black text-[#C7F33C] px-3.5 py-2 rounded-[16px] rounded-tl-sm leading-relaxed text-left">
+                          {content.reply}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })()}
             </div>
           </div>
         </div>
