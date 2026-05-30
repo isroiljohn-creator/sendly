@@ -268,15 +268,12 @@ export default function TemplatesPage() {
     }
     if (selectedTemplate.actionKey === "ai_agent") {
       setIsSelectChannelModalOpen(false);
-      window.location.href = "/ai-agent";
+      window.location.href = "/ai-agent?type=kurator";
       return;
     }
     if (selectedTemplate.actionKey === "fb_leads_direct") {
       setIsSelectChannelModalOpen(false);
-      if (typeof window !== "undefined") {
-        localStorage.setItem("sendly_selected_agent_type", "fb-leads-direct");
-      }
-      window.location.href = "/ai-agent";
+      window.location.href = "/ai-agent?type=fb-leads-direct";
       return;
     }
 

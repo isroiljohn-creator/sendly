@@ -1,7 +1,8 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, Suspense } from "react";
 import Link from "next/link";
+import { useSearchParams, useRouter } from "next/navigation";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { useI18n } from "@/i18n/I18nProvider";
@@ -234,9 +235,20 @@ const MOCK_FB_FORMS = [
   { id: "form-3", name: "Premium a'zolik uchun ariza formasi" },
 ];
 
-export default function AIAgentPage() {
+function AIAgentContent() {
   const { t } = useI18n();
+  const searchParams = useSearchParams();
+  const useRouterObj = useRouter();
+  const typeParam = searchParams.get("type");
   const [selectedAgentType, setSelectedAgentType] = useState<"kurator" | "fb-leads" | "fb-leads-direct" | null>(null);
+
+  useEffect(() => {
+    if (typeParam === "kurator" || typeParam === "fb-leads" || typeParam === "fb-leads-direct") {
+      setSelectedAgentType(typeParam as any);
+    } else {
+      setSelectedAgentType(null);
+    }
+  }, [typeParam]);
   const [sliderPreviewType, setSliderPreviewType] = useState<"tone" | "length" | "humor">("tone");
   const [activeTab, setActiveTab] = useState<"settings" | "knowledge" | "analytics">("settings");
   
@@ -518,12 +530,7 @@ export default function AIAgentPage() {
   // Sync state from local storage / db
   useEffect(() => {
     loadDatabase();
-    if (typeof window !== "undefined") {
-      const savedType = localStorage.getItem("sendly_selected_agent_type");
-      if (savedType === "kurator" || savedType === "fb-leads" || savedType === "fb-leads-direct") {
-        setSelectedAgentType(savedType);
-      }
-    }
+    // Restored on mount via type parameter useEffect
 
     const handleUpdate = () => {
       loadDatabase();
@@ -1679,10 +1686,7 @@ export default function AIAgentPage() {
                                   setTelegramBotUsername(item.channel.username);
                                   setIsTelegramLinked(true);
 
-                                  setSelectedAgentType("kurator");
-                                  if (typeof window !== "undefined") {
-                                    localStorage.setItem("sendly_selected_agent_type", "kurator");
-                                  }
+                                  useRouterObj.push("/ai-agent?type=kurator");
                                 }}
                                 className="px-5 py-2.5 bg-black text-[#C7F33C] text-[12px] font-bold hover:bg-black/90 hover:scale-[1.02] active:scale-95 transition-all text-center rounded-full flex items-center justify-center gap-2 shrink-0 self-stretch sm:self-auto shadow-sm"
                               >
@@ -1729,10 +1733,7 @@ export default function AIAgentPage() {
                                     setTelegramBotUsername(item.channel.username);
                                     setIsTelegramLinked(true);
 
-                                    setSelectedAgentType("fb-leads-direct");
-                                    if (typeof window !== "undefined") {
-                                      localStorage.setItem("sendly_selected_agent_type", "fb-leads-direct");
-                                    }
+                                    useRouterObj.push("/ai-agent?type=fb-leads-direct");
                                   }}
                                   className="px-5 py-2.5 bg-blue-600 text-white text-[12px] font-bold hover:bg-blue-700 hover:scale-[1.02] active:scale-95 transition-all text-center rounded-full flex items-center justify-center gap-2 shrink-0 self-stretch sm:self-auto shadow-sm"
                                 >
@@ -1779,10 +1780,7 @@ export default function AIAgentPage() {
                                     setTelegramBotUsername(item.channel.username);
                                     setIsTelegramLinked(true);
 
-                                    setSelectedAgentType("fb-leads");
-                                    if (typeof window !== "undefined") {
-                                      localStorage.setItem("sendly_selected_agent_type", "fb-leads");
-                                    }
+                                    useRouterObj.push("/ai-agent?type=fb-leads");
                                   }}
                                   className="px-5 py-2.5 bg-blue-600 text-white text-[12px] font-bold hover:bg-blue-700 hover:scale-[1.02] active:scale-95 transition-all text-center rounded-full flex items-center justify-center gap-2 shrink-0 self-stretch sm:self-auto shadow-sm"
                                 >
@@ -1852,10 +1850,7 @@ export default function AIAgentPage() {
 
                     <button
                       onClick={() => {
-                        setSelectedAgentType("kurator");
-                        if (typeof window !== "undefined") {
-                          localStorage.setItem("sendly_selected_agent_type", "kurator");
-                        }
+                        useRouterObj.push("/ai-agent?type=kurator");
                       }}
                       className="w-full mt-6 py-3 rounded-full bg-black text-[#C7F33C] text-[12px] font-bold hover:bg-black/90 hover:scale-[1.02] active:scale-95 transition-all text-center flex items-center justify-center gap-2"
                     >
@@ -1912,10 +1907,7 @@ export default function AIAgentPage() {
 
                     <button
                       onClick={() => {
-                        setSelectedAgentType("fb-leads");
-                        if (typeof window !== "undefined") {
-                          localStorage.setItem("sendly_selected_agent_type", "fb-leads");
-                        }
+                        useRouterObj.push("/ai-agent?type=fb-leads");
                       }}
                       className="w-full mt-6 py-3 rounded-full bg-blue-600 text-white text-[12px] font-bold hover:bg-blue-700 hover:scale-[1.02] active:scale-95 transition-all text-center flex items-center justify-center gap-2"
                     >
@@ -1972,10 +1964,7 @@ export default function AIAgentPage() {
 
                     <button
                       onClick={() => {
-                        setSelectedAgentType("fb-leads-direct");
-                        if (typeof window !== "undefined") {
-                          localStorage.setItem("sendly_selected_agent_type", "fb-leads-direct");
-                        }
+                        useRouterObj.push("/ai-agent?type=fb-leads-direct");
                       }}
                       className="w-full mt-6 py-3 rounded-full bg-black text-[#C7F33C] text-[12px] font-bold hover:bg-black/90 hover:scale-[1.02] active:scale-95 transition-all text-center flex items-center justify-center gap-2"
                     >
@@ -2071,10 +2060,7 @@ export default function AIAgentPage() {
             <div className="flex items-center gap-3 shrink-0">
               <button
                 onClick={() => {
-                  setSelectedAgentType(null);
-                  if (typeof window !== "undefined") {
-                    localStorage.removeItem("sendly_selected_agent_type");
-                  }
+                  useRouterObj.push("/ai-agent");
                 }}
                 className="px-4 py-2.5 rounded-full border border-[#D8D8D8] text-[12px] font-bold text-[#595959] hover:bg-white hover:text-black transition-colors"
               >
@@ -2961,10 +2947,7 @@ export default function AIAgentPage() {
           <div className="flex items-center gap-3 shrink-0">
             <button
               onClick={() => {
-                setSelectedAgentType(null);
-                if (typeof window !== "undefined") {
-                  localStorage.removeItem("sendly_selected_agent_type");
-                }
+                useRouterObj.push("/ai-agent");
               }}
               className="px-4 py-2.5 rounded-full border border-[#D8D8D8] text-[12px] font-bold text-[#595959] hover:bg-white hover:text-black transition-colors"
             >
@@ -4484,5 +4467,20 @@ export default function AIAgentPage() {
         )}
       </div>
     </AppLayout>
+  );
+}
+
+export default function AIAgentPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center bg-[#F9F9F7]">
+        <div className="flex flex-col items-center gap-3">
+          <Loader2 className="animate-spin text-black" size={32} />
+          <span className="text-[12px] font-bold text-[#707070]">Yuklanmoqda...</span>
+        </div>
+      </div>
+    }>
+      <AIAgentContent />
+    </Suspense>
   );
 }
