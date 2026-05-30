@@ -378,10 +378,10 @@ function AIAgentContent() {
   // Telegram Bot Verification States
   const [isTelegramLinked, setIsTelegramLinked] = useState(false);
   const [telegramBotUsername, setTelegramBotUsername] = useState("");
-  const activeBotUser = (telegramBotUsername && telegramBotUsername.toLowerCase() !== "test" && telegramBotUsername.toLowerCase() !== "@test")
+  const activeBotUser = (telegramBotUsername && telegramBotUsername.toLowerCase().trim().replace(/^@+/, "") !== "test")
     ? telegramBotUsername
     : (typeof window !== "undefined"
-        ? (db.getChannels().filter(c => c.type === "telegram" && c.isConnected && c.telegramToken && c.username.toLowerCase() !== "test" && c.username.toLowerCase() !== "@test")[0]?.username || "sendly_robot")
+        ? (db.getChannels().filter(c => c.type === "telegram" && c.isConnected && c.telegramToken && c.username.toLowerCase().trim().replace(/^@+/, "") !== "test")[0]?.username || "sendly_robot")
         : "sendly_robot");
   const [isVerifyingAdmin, setIsVerifyingAdmin] = useState(false);
   const [adminVerifyCode, setAdminVerifyCode] = useState("");
@@ -742,12 +742,12 @@ function AIAgentContent() {
     const channels = db.getChannels();
     let channelsUpdated = false;
     const updatedChannels = channels.map(c => {
-      if (c.type === "telegram" && (c.username.toLowerCase() === "test" || c.username.toLowerCase() === "@test" || c.username === "")) {
+      if (c.type === "telegram" && (c.username.toLowerCase().trim().replace(/^@+/, "") === "test" || c.username.trim() === "")) {
         channelsUpdated = true;
         return { 
           ...c, 
           username: "@sendly_robot", 
-          name: c.name === "Test" || c.name === "" ? "Sendly Bot" : c.name 
+          name: c.name.toLowerCase().trim() === "test" || c.name === "" ? "Sendly Bot" : c.name 
         };
       }
       return c;
@@ -853,30 +853,57 @@ function AIAgentContent() {
     showToast("Telegram bot muvaffaqiyatli bog'landi");
   };
 
-  const handleAddTelegram = () => {
-    if (!tgToken.trim() || !tgUsername.trim()) return;
+  const handleAddTelegram = async () => {
+    if (!tgToken.trim()) return;
     setIsTgSaving(true);
-    setTimeout(() => {
-      const newCh = db.addChannel({
-        type: "telegram",
-        name: tgName || tgUsername,
-        username: tgUsername.startsWith("@") ? tgUsername : `@${tgUsername}`,
-        telegramToken: tgToken,
-        isConnected: true,
-        followersCount: "0",
-      });
-      setTgToken("");
-      setTgName("");
-      setTgUsername("");
-      setShowTgConnectModal(false);
+    
+    let finalUsername = tgUsername.trim();
+    let finalName = tgName.trim();
+    
+    try {
+      const getMeRes = await fetch(`https://api.telegram.org/bot${tgToken.trim()}/getMe`);
+      if (getMeRes.ok) {
+        const getMeData = await getMeRes.json();
+        if (getMeData.ok && getMeData.result) {
+          finalUsername = getMeData.result.username;
+          finalName = getMeData.result.first_name;
+        }
+      }
+    } catch (err) {
+      console.error("Failed to fetch bot info from Telegram:", err);
+    }
+    
+    if (!finalUsername) {
+      showToast("Bot foydalanuvchi nomini aniqlab bo'lmadi. Iltimos, bot foydalanuvchi nomini o'zingiz kiriting.", "error");
       setIsTgSaving(false);
-      window.dispatchEvent(new Event("replai-db-update"));
-      setAlertModal({
-        isOpen: true,
-        title: t("common.success") || "Muvaffaqiyatli",
-        message: "Telegram bot muvaffaqiyatli ulandi!",
-      });
-    }, 800);
+      return;
+    }
+    
+    const formattedUsername = finalUsername.startsWith("@") ? finalUsername : `@${finalUsername}`;
+    
+    const newCh = db.addChannel({
+      type: "telegram",
+      name: finalName || finalUsername,
+      username: formattedUsername,
+      telegramToken: tgToken.trim(),
+      isConnected: true,
+      followersCount: "0",
+    });
+    
+    db.setActiveChannel(newCh.id);
+    
+    setTgToken("");
+    setTgName("");
+    setTgUsername("");
+    setShowTgConnectModal(false);
+    setIsTgSaving(false);
+    
+    window.dispatchEvent(new Event("replai-db-update"));
+    setAlertModal({
+      isOpen: true,
+      title: t("common.success") || "Muvaffaqiyatli",
+      message: `Telegram bot (${formattedUsername}) muvaffaqiyatli ulandi!`,
+    });
   };
 
   // Save changes to DB
@@ -2653,10 +2680,10 @@ function AIAgentContent() {
                               >
                                 @{activeBotUser.replace(/^@+/, "")}
                               </a>
-                              {" botimizga o'ting va "}<strong>{"/start"}</strong>{" buyrug'ini bosing. Bot sizga yuborgan tasdiqlash kodini quyida kiriting."}
+                              {" botimizga o'ting va "}<strong>{"/start"}</strong>{" buyrug'ini bosing. Bot sizga yuborgan tasdiqlash kodini (kod 1 daqiqa davomida faol bo'ladi) quyida kiriting."}
                             </>
                           ) : (
-                            "Telegram botimizga o'ting va /start buyrug'ini bosing. Bot yuborgan tasdiqlash kodini quyida kiriting."
+                            "Telegram botimizga o'ting va /start buyrug'ini bosing. Bot yuborgan tasdiqlash kodini (kod 1 daqiqa davomida faol bo'ladi) quyida kiriting."
                           )}
                         </p>
                         
@@ -2664,7 +2691,7 @@ function AIAgentContent() {
                           <div className="flex gap-2">
                             <input
                               type="text"
-                              placeholder="Kodni kiriting (masalan: 123456)"
+                              placeholder="Kodni kiriting (masalan: 12345)"
                               value={adminVerifyCode}
                               onChange={(e) => setAdminVerifyCode(e.target.value)}
                               disabled={isVerifyLoading}
@@ -3539,11 +3566,11 @@ function AIAgentContent() {
             </div>
 
             {/* Row 4: Escalation Rules (Left) + Curator Admin Connection (Right) */}
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
               {/* Left Side: Escalation Rules */}
               <div className="lg:col-span-7 flex flex-col">
                 {/* Escalation Rules */}
-                <div className="bg-white border border-[#E8E8E8] rounded-[24px] p-6 shadow-sm flex flex-col gap-4 flex-1 w-full justify-between">
+                <div className="bg-white border border-[#E8E8E8] rounded-[24px] p-6 shadow-sm flex flex-col gap-4 w-full justify-between">
                   <div>
                     <h3 className="text-[15px] font-bold text-black flex items-center gap-2">
                       <ArrowRight className="text-blue-500 w-4 h-4" />
@@ -3603,7 +3630,7 @@ function AIAgentContent() {
               {/* Right Side: Column */}
               <div className="lg:col-span-5 flex flex-col">
                 {/* Curator Admin Notification Settings */}
-                <div className="bg-white border border-[#E8E8E8] rounded-[24px] p-6 shadow-sm flex flex-col gap-4 flex-1 w-full justify-between">
+                <div className="bg-white border border-[#E8E8E8] rounded-[24px] p-6 shadow-sm flex flex-col gap-4 w-full h-[310px] min-h-[310px] justify-between">
                   <div>
                     <h3 className="text-[15px] font-bold text-black">
                       {"Inson-kuratorni ulash"}
@@ -3677,16 +3704,16 @@ function AIAgentContent() {
                                 >
                                   @{activeBotUser.replace(/^@+/, "")}
                                 </a>
-                                {" botimizga o'ting va "}<strong>{"/start"}</strong>{" buyrug'ini bosing. Bot sizga yuborgan tasdiqlash kodini quyida kiriting."}
+                                {" botimizga o'ting va "}<strong>{"/start"}</strong>{" buyrug'ini bosing. Bot sizga yuborgan tasdiqlash kodini (kod 1 daqiqa davomida faol bo'ladi) quyida kiriting."}
                               </>
                             ) : (
-                              "Telegram botimizga o'ting va /start buyrug'ini bosing. Bot yuborgan tasdiqlash kodini quyida kiriting."
+                              "Telegram botimizga o'ting va /start buyrug'ini bosing. Bot yuborgan tasdiqlash kodini (kod 1 daqiqa davomida faol bo'ladi) quyida kiriting."
                             )}
                           </p>
                           <div className="flex gap-2">
                             <input
                               type="text"
-                              placeholder="Kodni kiriting (masalan: 123456)"
+                              placeholder="Kodni kiriting (masalan: 12345)"
                               value={adminVerifyCode}
                               onChange={(e) => setAdminVerifyCode(e.target.value)}
                               disabled={isVerifyLoading}
@@ -4473,7 +4500,7 @@ function AIAgentContent() {
                 </button>
                 <button
                   onClick={handleAddTelegram}
-                  disabled={!tgToken.trim() || !tgUsername.trim() || isTgSaving}
+                  disabled={!tgToken.trim() || isTgSaving}
                   className="px-4 py-2 rounded-xl bg-black text-[#C7F33C] text-[12px] font-bold hover:bg-black/90 disabled:opacity-50 transition-all flex items-center gap-1.5"
                 >
                   {isTgSaving && <Loader2 size={13} className="animate-spin" />}

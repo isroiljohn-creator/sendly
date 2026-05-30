@@ -168,7 +168,7 @@ export async function handleTelegramUpdate(channelId: string, token: string, upd
       const cb = update.callback_query;
       if (cb.data === "copy_code") {
         const msgText = cb.message?.text || "";
-        const codeMatch = msgText.match(/Sizning tasdiqlash kodingiz:\s*(\d+)/i) || msgText.match(/kodingiz:\s*(\d+)/i) || msgText.match(/:\s*(\d+)/);
+        const codeMatch = msgText.match(/\b(\d{5})\b/);
         const code = codeMatch ? codeMatch[1] : "";
         
         const answerUrl = `https://api.telegram.org/bot${token}/answerCallbackQuery`;
@@ -177,10 +177,14 @@ export async function handleTelegramUpdate(channelId: string, token: string, upd
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             callback_query_id: cb.id,
-            text: code ? `${code} kodi! Nusxalash uchun matndagi kod ustiga bosing.` : "Matndagi kod ustiga bosing!",
+            text: code ? "Nusxalash uchun alohida xabar yuborildi. Ustiga bosing!" : "Matndagi kod ustiga bosing!",
             show_alert: false
           })
         });
+
+        if (code && cb.message?.chat?.id) {
+          await sendTelegramMessage(token, cb.message.chat.id, `<code>${code}</code>`, "HTML");
+        }
       }
       return;
     }
