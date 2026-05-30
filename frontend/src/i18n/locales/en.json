@@ -298,7 +298,7 @@
     },
     "settings_page": {
       "workspace_section": "Project",
-      "general": "General",
+      "general": "Data",
       "contacts": "Contacts",
       "team": "Team Members",
       "apikeys": "API Keys",

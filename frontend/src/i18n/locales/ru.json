@@ -298,7 +298,7 @@
     },
     "settings_page": {
       "workspace_section": "Проект",
-      "general": "Общие",
+      "general": "Данные",
       "contacts": "Контакты",
       "team": "Участники команды",
       "apikeys": "API Ключи",

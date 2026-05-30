@@ -5,7 +5,7 @@ import { AppLayout } from "@/components/layout/AppLayout";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Card, Button, StatusPill, ConfirmModal, AlertModal } from "@/components/ui/primitives";
 import { useI18n } from "@/i18n/I18nProvider";
-import { Save, Database, Trash2, Plus, Bot, X, CheckCircle, ChevronDown, Download, Upload, Eye, EyeOff, Copy, RefreshCw, Check, Users, ArrowRight } from "lucide-react";
+import { Save, Database, Trash2, Plus, Bot, X, CheckCircle, ChevronDown, Download, Upload, Eye, EyeOff, Copy, RefreshCw, Check } from "lucide-react";
 import { Instagram } from "@/components/ui/icons";
 import { db } from "@/lib/db";
 import type { User, Channel } from "@/lib/db";
@@ -397,6 +397,14 @@ export default function SettingsPage() {
                   {t("pages.settings_page.workspace_section")}
                 </span>
                 <button
+                  onClick={() => {
+                    window.location.href = "/account";
+                  }}
+                  className="flex items-center w-full px-3 py-2 text-[12px] font-semibold rounded-[10px] transition-colors text-[#707070] hover:bg-[#F9F9F7] hover:text-black text-left"
+                >
+                  {t("my_account")}
+                </button>
+                <button
                   onClick={() => setActiveSection("general")}
                   className={`flex items-center w-full px-3 py-2 text-[12px] font-semibold rounded-[10px] transition-colors text-left ${
                     activeSection === "general"
@@ -508,29 +516,6 @@ export default function SettingsPage() {
             {/* General Tab */}
             {activeSection === "general" && (
               <div className="flex flex-col gap-6 max-w-[600px]">
-                <Card className="border border-[#D8D8D8] p-6 text-center flex flex-col items-center gap-4 bg-white">
-                  <div className="h-12 w-12 rounded-full bg-[#C7F33C]/20 text-[#7CA607] flex items-center justify-center">
-                    <Users size={24} />
-                  </div>
-                  <div>
-                    <h3 className="text-[16px] font-bold text-black">
-                      Profil Sozlamalari
-                    </h3>
-                    <p className="text-[12px] text-[#707070] mt-1.5 leading-relaxed max-w-[400px]">
-                      Ism-familiya, elektron pochta manzili va parolni o'zgartirish sozlamalari umumiy hisob qaydnomasi sahifasiga ko'chirilgan.
-                    </p>
-                  </div>
-                  <button
-                    onClick={() => {
-                      window.location.href = "/account";
-                    }}
-                    className="px-5 py-2.5 bg-black text-[#C7F33C] text-[12px] font-bold rounded-full hover:bg-black/90 active:scale-95 transition-all shadow-sm flex items-center gap-2"
-                  >
-                    <span>Mening akkauntim sahifasiga o'tish</span>
-                    <ArrowRight size={14} />
-                  </button>
-                </Card>
-
                 {/* Database Backup & Management Option */}
                 <Card className="border border-[#D8D8D8] bg-white">
                   <div className="flex flex-col gap-6">
