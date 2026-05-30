@@ -371,6 +371,7 @@ function AIAgentContent() {
   // Telegram Bot Verification States
   const [isTelegramLinked, setIsTelegramLinked] = useState(false);
   const [telegramBotUsername, setTelegramBotUsername] = useState("");
+  const activeBotUser = telegramBotUsername || (typeof window !== "undefined" ? (db.getChannels().filter(c => c.type === "telegram" && c.isConnected && c.telegramToken)[0]?.username || "") : "");
   const [isVerifyingAdmin, setIsVerifyingAdmin] = useState(false);
   const [adminVerifyCode, setAdminVerifyCode] = useState("");
   const [verifyAdminError, setVerifyAdminError] = useState("");
@@ -2584,16 +2585,16 @@ function AIAgentContent() {
                           <span>{"Tasdiqlash kodini kiriting"}</span>
                         </div>
                         <p className="text-[10px] text-blue-700 leading-relaxed">
-                          {telegramBotUsername ? (
+                          {activeBotUser ? (
                             <>
                               {"Telegram-da "}
                               <a
-                                href={`https://t.me/${telegramBotUsername.replace(/^@+/, "")}`}
+                                href={`https://t.me/${activeBotUser.replace(/^@+/, "")}`}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="underline font-bold text-blue-900"
                               >
-                                @{telegramBotUsername.replace(/^@+/, "")}
+                                @{activeBotUser.replace(/^@+/, "")}
                               </a>
                               {" botimizga o'ting va "}<strong>{"/start"}</strong>{" buyrug'ini bosing. Bot sizga yuborgan tasdiqlash kodini quyida kiriting."}
                             </>
@@ -2612,9 +2613,9 @@ function AIAgentContent() {
                               disabled={isVerifyLoading}
                               className="px-3 py-2 text-[11px] bg-white border border-blue-300 rounded-xl focus:outline-none focus:border-blue-600 flex-1 text-black"
                             />
-                            {telegramBotUsername && (
+                            {activeBotUser && (
                               <a
-                                href={`https://t.me/${telegramBotUsername.replace(/^@+/, "")}?start=verify`}
+                                href={`https://t.me/${activeBotUser.replace(/^@+/, "")}?start=verify`}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="px-3.5 py-2 bg-[#229ED9] hover:bg-[#1e8ec3] text-white rounded-xl text-[11px] font-bold transition-all shadow-sm active:scale-95 text-center flex items-center justify-center gap-1 shrink-0"
@@ -3450,16 +3451,16 @@ function AIAgentContent() {
                       <span>{"Tasdiqlash kodini kiriting"}</span>
                     </div>
                     <p className="text-[11px] text-blue-700 leading-relaxed">
-                      {telegramBotUsername ? (
+                      {activeBotUser ? (
                         <>
                           {"Telegram-da "}
                           <a
-                            href={`https://t.me/${telegramBotUsername.replace(/^@+/, "")}`}
+                            href={`https://t.me/${activeBotUser.replace(/^@+/, "")}`}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="underline font-bold text-blue-900"
                           >
-                            @{telegramBotUsername.replace(/^@+/, "")}
+                            @{activeBotUser.replace(/^@+/, "")}
                           </a>
                           {" botimizga o'ting va "}<strong>{"/start"}</strong>{" buyrug'ini bosing. Bot sizga yuborgan tasdiqlash kodini quyida kiriting."}
                         </>
@@ -3476,9 +3477,9 @@ function AIAgentContent() {
                         disabled={isVerifyLoading}
                         className="px-3 py-2 text-[12px] bg-white border border-[#E8E8E8] rounded-xl focus:outline-none focus:border-black flex-1 text-black"
                       />
-                      {telegramBotUsername && (
+                      {activeBotUser && (
                         <a
-                          href={`https://t.me/${telegramBotUsername.replace(/^@+/, "")}?start=verify`}
+                          href={`https://t.me/${activeBotUser.replace(/^@+/, "")}?start=verify`}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="px-3.5 py-2 bg-[#229ED9] hover:bg-[#1e8ec3] text-white rounded-xl text-[11px] font-bold transition-all shadow-sm active:scale-95 text-center flex items-center justify-center gap-1 shrink-0"
