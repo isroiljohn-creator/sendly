@@ -251,6 +251,13 @@ function AIAgentContent() {
   }, [typeParam]);
   const [sliderPreviewType, setSliderPreviewType] = useState<"tone" | "length" | "humor">("tone");
   const [activeTab, setActiveTab] = useState<"settings" | "knowledge" | "analytics">("settings");
+
+  // Telegram Connect Modal States
+  const [showTgConnectModal, setShowTgConnectModal] = useState(false);
+  const [tgToken, setTgToken] = useState("");
+  const [tgUsername, setTgUsername] = useState("");
+  const [tgName, setTgName] = useState("");
+  const [isTgSaving, setIsTgSaving] = useState(false);
   
   // Curator Analyzed Messages for CustDev Analytics
   const [analyzedMessages, setAnalyzedMessages] = useState<Array<{
@@ -824,6 +831,32 @@ function AIAgentContent() {
       setTelegramBotUsername("");
     }
     showToast("Telegram bot muvaffaqiyatli bog'landi");
+  };
+
+  const handleAddTelegram = () => {
+    if (!tgToken.trim() || !tgUsername.trim()) return;
+    setIsTgSaving(true);
+    setTimeout(() => {
+      const newCh = db.addChannel({
+        type: "telegram",
+        name: tgName || tgUsername,
+        username: tgUsername.startsWith("@") ? tgUsername : `@${tgUsername}`,
+        telegramToken: tgToken,
+        isConnected: true,
+        followersCount: "0",
+      });
+      setTgToken("");
+      setTgName("");
+      setTgUsername("");
+      setShowTgConnectModal(false);
+      setIsTgSaving(false);
+      window.dispatchEvent(new Event("replai-db-update"));
+      setAlertModal({
+        isOpen: true,
+        title: t("common.success") || "Muvaffaqiyatli",
+        message: "Telegram bot muvaffaqiyatli ulandi!",
+      });
+    }, 800);
   };
 
   // Save changes to DB
@@ -2534,9 +2567,13 @@ function AIAgentContent() {
                             <p className="text-[10px] text-amber-600 leading-relaxed">
                               Telegram integratsiyasidan foydalanish uchun sozlamalar sahifasida kamida 1ta Telegram bot ulangan bo&apos;lishi lozim.
                             </p>
-                            <Link href="/settings" className="mt-1 inline-block w-fit px-4 py-2 bg-black text-[#C7F33C] rounded-full hover:bg-black/90 font-bold text-[10px] shadow-sm transition-all text-center">
-                              Sozlamalar bo&apos;limiga o&apos;tish ➔
-                            </Link>
+                            <button
+                              type="button"
+                              onClick={() => setShowTgConnectModal(true)}
+                              className="mt-1 inline-block w-fit px-4 py-2 bg-black text-[#C7F33C] rounded-full hover:bg-black/90 font-bold text-[10px] shadow-sm transition-all text-center"
+                            >
+                              Botni ulash ➔
+                            </button>
                           </div>
                         );
                       }
@@ -3015,7 +3052,7 @@ function AIAgentContent() {
         {activeTab === "settings" && settings && (
           <div className="flex flex-col gap-6">
             {/* Row 1: Status & Prompts (Left) + Sandbox Preview (Right) */}
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
               {/* Left Side: Status & Prompts */}
               <div className="lg:col-span-7 flex flex-col gap-6">
                 {/* AI Agent Status Card */}
@@ -3077,11 +3114,15 @@ function AIAgentContent() {
                               <span className="font-bold">Telegram bot topilmadi</span>
                             </div>
                             <p className="text-[10px] text-amber-600 leading-relaxed">
-                              AI kuratordan foydalanish uchun sozlamalar sahifasida kamida 1ta Telegram bot ulangan bo&apos;lishi lozim.
+                              AI kuratordan foydalanish uchun kamida 1ta Telegram bot ulangan bo&apos;lishi lozim.
                             </p>
-                            <Link href="/settings" className="mt-1 inline-block w-fit px-4 py-2 bg-black text-[#C7F33C] rounded-full hover:bg-black/90 font-bold text-[10px] shadow-sm transition-all text-center">
-                              Sozlamalar bo&apos;limiga o&apos;tish ➔
-                            </Link>
+                            <button
+                              type="button"
+                              onClick={() => setShowTgConnectModal(true)}
+                              className="mt-2 inline-block w-fit px-5 py-2 bg-black text-[#C7F33C] rounded-full hover:bg-black/90 font-bold text-[10px] shadow-sm transition-all text-center"
+                            >
+                              Botni ulash ➔
+                            </button>
                           </div>
                         );
                       }
@@ -3090,7 +3131,7 @@ function AIAgentContent() {
                 </div>
 
                 {/* System Prompt Settings */}
-                <div className="bg-white border border-[#E8E8E8] rounded-[24px] p-6 shadow-sm flex flex-col gap-4">
+                <div className="bg-white border border-[#E8E8E8] rounded-[24px] p-6 shadow-sm flex flex-col gap-4 flex-1">
                   <div className="flex items-center justify-between">
                     <h3 className="text-[15px] font-bold text-black flex items-center gap-2">
                       {t("pages.ai_agent.system_instruction_label")}
@@ -3103,7 +3144,7 @@ function AIAgentContent() {
                   <textarea
                     value={settings.systemPrompt}
                     onChange={(e) => handleUpdateSettings("systemPrompt", e.target.value)}
-                    className="w-full min-h-[220px] p-4 text-[12px] font-mono leading-relaxed bg-[#F9F9F7] border border-[#E8E8E8] rounded-[16px] focus:outline-none focus:border-black focus:ring-1 focus:ring-black resize-y text-black"
+                    className="w-full flex-1 min-h-[220px] p-4 text-[12px] font-mono leading-relaxed bg-[#F9F9F7] border border-[#E8E8E8] rounded-[16px] focus:outline-none focus:border-black focus:ring-1 focus:ring-black resize-y text-black"
                     placeholder={t("pages.ai_agent.system_instruction_placeholder")}
                   />
                 </div>
@@ -3112,7 +3153,7 @@ function AIAgentContent() {
               {/* Right Side: Column */}
               <div className="lg:col-span-5 flex flex-col gap-6">
                 {/* Sandbox Preview chat simulator */}
-                <div className="bg-[#F9F9F7] border border-[#E8E8E8] rounded-[28px] overflow-hidden flex flex-col shadow-inner h-[580px]">
+                <div className="bg-[#F9F9F7] border border-[#E8E8E8] rounded-[28px] overflow-hidden flex flex-col shadow-inner h-full min-h-[580px] lg:h-full lg:min-h-[200px] flex-1">
                   {/* Header */}
                   <div className="bg-white border-b border-[#E8E8E8] p-4 flex items-center justify-between">
                     <div className="flex items-center gap-3">
@@ -3245,11 +3286,11 @@ function AIAgentContent() {
             </div>
 
             {/* Row 2: Sliders (Left) + Sliders Preview (Right) */}
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
               {/* Left Side: Sliders */}
-              <div className="lg:col-span-7 flex flex-col gap-6">
+              <div className="lg:col-span-7 flex flex-col">
                 {/* Sliders (Tone, Length, Humor) */}
-                <div className="relative bg-white border border-[#E8E8E8] rounded-[24px] p-6 shadow-sm flex flex-col gap-6">
+                <div className="relative bg-white border border-[#E8E8E8] rounded-[24px] p-6 shadow-sm flex flex-col gap-6 flex-1 w-full justify-between">
                   <h3 className="text-[15px] font-bold text-black">
                     {t("pages.ai_agent.curator_tone_title")}
                   </h3>
@@ -3325,9 +3366,9 @@ function AIAgentContent() {
               </div>
 
               {/* Right Side: Column */}
-              <div className="lg:col-span-5 flex flex-col gap-6">
+              <div className="lg:col-span-5 flex flex-col">
                 {/* Permanent Sliders Preview Card */}
-                <div className="bg-white border border-[#E8E8E8] rounded-[24px] p-6 shadow-sm flex flex-col gap-4 animate-in fade-in duration-200">
+                <div className="bg-white border border-[#E8E8E8] rounded-[24px] p-6 shadow-sm flex flex-col gap-4 animate-in fade-in duration-200 flex-1 w-full justify-between">
                   <div className="flex items-center gap-2 border-b border-[#F0F0F0] pb-2.5">
                     <Sparkles size={15} className="text-black" />
                     <h3 className="text-[13px] font-bold text-black">
@@ -3344,14 +3385,14 @@ function AIAgentContent() {
                       : settings.humor;
                     const content = getSliderPreviewContent(sliderPreviewType, sliderVal);
                     return (
-                      <div className="flex flex-col gap-3">
+                      <div className="flex flex-col gap-3 flex-1 justify-between">
                         <div className="flex justify-between items-center text-[10px] font-bold text-[#707070] px-1 uppercase tracking-wider">
                           <span>{content.title}</span>
                           <span className="bg-black/5 px-2 py-0.5 rounded-md text-black font-extrabold">
                             {sliderVal}%
                           </span>
                         </div>
-                        <div className="flex flex-col gap-2.5 pt-1 text-[11px]">
+                        <div className="flex flex-col gap-2.5 pt-1 text-[11px] flex-1 justify-center">
                           {/* User Message */}
                           <div className="flex flex-col items-end max-w-[85%] ml-auto">
                             <div className="bg-[#F0F0F0] text-black px-3.5 py-2 rounded-[16px] rounded-tr-sm leading-relaxed text-right">
@@ -3373,20 +3414,22 @@ function AIAgentContent() {
             </div>
 
             {/* Row 3: Forbidden Topics (Left) + Auto Outreach settings (Right) */}
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
               {/* Left Side: Forbidden Topics */}
-              <div className="lg:col-span-7 flex flex-col gap-6">
+              <div className="lg:col-span-7 flex flex-col">
                 {/* Dynamic Restricted Topics */}
-                <div className="bg-white border border-[#E8E8E8] rounded-[24px] p-6 shadow-sm flex flex-col gap-4">
-                  <h3 className="text-[15px] font-bold text-black flex items-center gap-2">
-                    <ShieldAlert className="text-red-500 w-4 h-4" />
-                    <span>{t("pages.ai_agent.forbidden_topics_title")}</span>
-                  </h3>
-                  <p className="text-[11px] text-[#707070] leading-relaxed">
-                    {t("pages.ai_agent.forbidden_topics_desc")}
-                  </p>
+                <div className="bg-white border border-[#E8E8E8] rounded-[24px] p-6 shadow-sm flex flex-col gap-4 flex-1 w-full justify-between">
+                  <div>
+                    <h3 className="text-[15px] font-bold text-black flex items-center gap-2">
+                      <ShieldAlert className="text-red-500 w-4 h-4" />
+                      <span>{t("pages.ai_agent.forbidden_topics_title")}</span>
+                    </h3>
+                    <p className="text-[11px] text-[#707070] leading-relaxed mt-1">
+                      {t("pages.ai_agent.forbidden_topics_desc")}
+                    </p>
+                  </div>
 
-                  <form onSubmit={handleAddTopic} className="flex gap-2">
+                  <form onSubmit={handleAddTopic} className="flex gap-2 mt-3">
                     <input
                       type="text"
                       value={newTopic}
@@ -3402,7 +3445,7 @@ function AIAgentContent() {
                     </button>
                   </form>
 
-                  <div className="flex flex-wrap gap-2 mt-2">
+                  <div className="flex flex-wrap gap-2 mt-3">
                     {settings.topics.map((topic) => (
                       <span
                         key={topic}
@@ -3426,9 +3469,9 @@ function AIAgentContent() {
               </div>
 
               {/* Right Side: Column */}
-              <div className="lg:col-span-5 flex flex-col gap-6">
+              <div className="lg:col-span-5 flex flex-col">
                 {/* Outreach Auto settings */}
-                <div className="bg-white border border-[#E8E8E8] rounded-[24px] p-6 shadow-sm flex flex-col gap-4">
+                <div className="bg-white border border-[#E8E8E8] rounded-[24px] p-6 shadow-sm flex flex-col gap-4 flex-1 w-full justify-between">
                   <div className="flex items-center justify-between">
                     <div>
                       <h3 className="text-[15px] font-bold text-black">
@@ -3476,20 +3519,22 @@ function AIAgentContent() {
             </div>
 
             {/* Row 4: Escalation Rules (Left) + Curator Admin Connection (Right) */}
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
               {/* Left Side: Escalation Rules */}
-              <div className="lg:col-span-7 flex flex-col gap-6">
+              <div className="lg:col-span-7 flex flex-col">
                 {/* Escalation Rules */}
-                <div className="bg-white border border-[#E8E8E8] rounded-[24px] p-6 shadow-sm flex flex-col gap-4">
-                  <h3 className="text-[15px] font-bold text-black flex items-center gap-2">
-                    <ArrowRight className="text-blue-500 w-4 h-4" />
-                    <span>{t("pages.ai_agent.escalation_rules_title")}</span>
-                  </h3>
-                  <p className="text-[11px] text-[#707070]">
-                    {t("pages.ai_agent.escalation_rules_desc")}
-                  </p>
+                <div className="bg-white border border-[#E8E8E8] rounded-[24px] p-6 shadow-sm flex flex-col gap-4 flex-1 w-full justify-between">
+                  <div>
+                    <h3 className="text-[15px] font-bold text-black flex items-center gap-2">
+                      <ArrowRight className="text-blue-500 w-4 h-4" />
+                      <span>{t("pages.ai_agent.escalation_rules_title")}</span>
+                    </h3>
+                    <p className="text-[11px] text-[#707070] mt-1">
+                      {t("pages.ai_agent.escalation_rules_desc")}
+                    </p>
+                  </div>
 
-                  <form onSubmit={handleAddRule} className="flex gap-2">
+                  <form onSubmit={handleAddRule} className="flex gap-2 mt-3">
                     <input
                       type="text"
                       value={newRule}
@@ -3505,7 +3550,7 @@ function AIAgentContent() {
                     </button>
                   </form>
 
-                  <div className="flex flex-col gap-2 mt-2">
+                  <div className="flex flex-col gap-2 mt-3">
                     {settings.escalationRules.map((rule) => (
                       <div
                         key={rule.id}
@@ -3536,9 +3581,9 @@ function AIAgentContent() {
               </div>
 
               {/* Right Side: Column */}
-              <div className="lg:col-span-5 flex flex-col gap-6">
+              <div className="lg:col-span-5 flex flex-col">
                 {/* Curator Admin Notification Settings */}
-                <div className="bg-white border border-[#E8E8E8] rounded-[24px] p-6 shadow-sm flex flex-col gap-4">
+                <div className="bg-white border border-[#E8E8E8] rounded-[24px] p-6 shadow-sm flex flex-col gap-4 flex-1 w-full justify-between">
                   <div>
                     <h3 className="text-[15px] font-bold text-black">
                       {"Inson-kuratorni ulash"}
@@ -3548,142 +3593,148 @@ function AIAgentContent() {
                     </p>
                   </div>
 
-                  {(() => {
-                    const tgChannels = db.getChannels().filter(c => c.type === "telegram" && c.isConnected && c.telegramToken);
-                    if (tgChannels.length === 0) {
-                      return (
-                        <div className="flex flex-col gap-2.5 p-4 bg-amber-50/50 border border-amber-200/50 rounded-2xl text-[11px] text-amber-800 mt-1">
-                          <div className="flex items-center gap-2">
-                            <Info size={14} className="shrink-0 text-amber-500" />
-                            <span className="font-bold">Telegram bot topilmadi</span>
-                          </div>
-                          <p className="text-[10px] text-amber-600 leading-relaxed">
-                            Ulash uchun avval sozlamalar bo&apos;limida Telegram botni ulashingiz lozim.
-                          </p>
-                          <Link href="/settings" className="mt-1 inline-block w-fit px-4 py-2 bg-black text-[#C7F33C] rounded-full hover:bg-black/90 font-bold text-[10px] shadow-sm transition-all text-center">
-                            Sozlamalar bo&apos;limiga o&apos;tish ➔
-                          </Link>
-                        </div>
-                      );
-                    }
-
-                    return settings.adminTelegramChatId ? (
-                      <div className="flex items-center justify-between p-3.5 rounded-xl bg-green-50 border border-green-200">
-                        <div className="flex flex-col gap-0.5">
-                          <div className="flex items-center gap-1.5 text-[12px] font-bold text-green-800">
-                            <CheckCircle size={14} className="text-green-600 shrink-0" />
-                            <span>{"Admin profil bog'langan"}</span>
-                          </div>
-                          <span className="text-[11px] text-green-700 mt-1">
-                            Foydalanuvchi: @{settings.adminTelegramUsername} (Chat ID: {settings.adminTelegramChatId})
-                          </span>
-                        </div>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            handleUpdateSettings("adminTelegramChatId", "");
-                            handleUpdateSettings("adminTelegramUsername", "");
-                          }}
-                          className="text-[11px] font-bold text-red-600 hover:text-red-700 bg-white border border-red-200 px-3 py-1.5 rounded-lg shadow-sm hover:shadow active:scale-95 transition-all"
-                        >
-                          {"O'chirish"}
-                        </button>
-                      </div>
-                    ) : isVerifyingAdmin ? (
-                      <form onSubmit={handleVerifyAdminCode} className="flex flex-col gap-3 p-3.5 rounded-xl bg-blue-50 border border-blue-200 animate-fadeIn">
-                        <div className="flex items-center gap-1.5 text-[12px] font-bold text-blue-800">
-                          <Sparkles size={14} className="text-blue-600 shrink-0 animate-pulse" />
-                          <span>{"Tasdiqlash kodini kiriting"}</span>
-                        </div>
-                        <p className="text-[11px] text-blue-700 leading-relaxed">
-                          {activeBotUser ? (
-                            <>
-                              {"Telegram-da "}
-                              <a
-                                href={`https://t.me/${activeBotUser.replace(/^@+/, "")}`}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="underline font-bold text-blue-900"
-                              >
-                                @{activeBotUser.replace(/^@+/, "")}
-                              </a>
-                              {" botimizga o'ting va "}<strong>{"/start"}</strong>{" buyrug'ini bosing. Bot sizga yuborgan tasdiqlash kodini quyida kiriting."}
-                            </>
-                          ) : (
-                            "Telegram botimizga o'ting va /start buyrug'ini bosing. Bot yuborgan tasdiqlash kodini quyida kiriting."
-                          )}
-                        </p>
-                        <div className="flex gap-2">
-                          <input
-                            type="text"
-                            placeholder="Kodni kiriting (masalan: 123456)"
-                            value={adminVerifyCode}
-                            onChange={(e) => setAdminVerifyCode(e.target.value)}
-                            disabled={isVerifyLoading}
-                            className="px-3 py-2 text-[12px] bg-white border border-[#E8E8E8] rounded-xl focus:outline-none focus:border-black flex-1 text-black"
-                          />
-                          {activeBotUser && (
-                            <a
-                              href={`https://t.me/${activeBotUser.replace(/^@+/, "")}?start=verify`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="px-3.5 py-2 bg-[#229ED9] hover:bg-[#1e8ec3] text-white rounded-xl text-[11px] font-bold transition-all shadow-sm active:scale-95 text-center flex items-center justify-center gap-1 shrink-0"
+                  <div className="flex-1 flex flex-col justify-center">
+                    {(() => {
+                      const tgChannels = db.getChannels().filter(c => c.type === "telegram" && c.isConnected && c.telegramToken);
+                      if (tgChannels.length === 0) {
+                        return (
+                          <div className="flex flex-col gap-2.5 p-4 bg-amber-50/50 border border-amber-200/50 rounded-2xl text-[11px] text-amber-800 mt-1">
+                            <div className="flex items-center gap-2">
+                              <Info size={14} className="shrink-0 text-amber-500" />
+                              <span className="font-bold">Telegram bot topilmadi</span>
+                            </div>
+                            <p className="text-[10px] text-amber-600 leading-relaxed">
+                              Ulash uchun avval sozlamalar bo&apos;limida Telegram botni ulashingiz lozim.
+                            </p>
+                            <button
+                              type="button"
+                              onClick={() => setShowTgConnectModal(true)}
+                              className="mt-1 inline-block w-fit px-4 py-2 bg-black text-[#C7F33C] rounded-full hover:bg-black/90 font-bold text-[10px] shadow-sm transition-all text-center"
                             >
-                              <Send size={12} />
-                              <span>Kodni olish</span>
-                            </a>
-                          )}
-                        </div>
-                        <div className="flex gap-2 justify-end mt-1">
-                          <button
-                            type="submit"
-                            disabled={isVerifyLoading || !adminVerifyCode.trim()}
-                            className="text-[11px] font-bold text-white bg-black hover:bg-gray-800 disabled:bg-gray-400 px-4 py-2 rounded-xl transition-all shadow-sm active:scale-95"
-                          >
-                            {isVerifyLoading ? "Tekshirilmoqda..." : "Tasdiqlash"}
-                          </button>
+                              Botni ulash ➔
+                            </button>
+                          </div>
+                        );
+                      }
+
+                      return settings.adminTelegramChatId ? (
+                        <div className="flex items-center justify-between p-3.5 rounded-xl bg-green-50 border border-green-200">
+                          <div className="flex flex-col gap-0.5">
+                            <div className="flex items-center gap-1.5 text-[12px] font-bold text-green-800">
+                              <CheckCircle size={14} className="text-green-600 shrink-0" />
+                              <span>{"Admin profil bog'langan"}</span>
+                            </div>
+                            <span className="text-[11px] text-green-700 mt-1">
+                              Foydalanuvchi: @{settings.adminTelegramUsername} (Chat ID: {settings.adminTelegramChatId})
+                            </span>
+                          </div>
                           <button
                             type="button"
                             onClick={() => {
-                              setIsVerifyingAdmin(false);
-                              setVerifyAdminError("");
-                              setAdminVerifyCode("");
+                              handleUpdateSettings("adminTelegramChatId", "");
+                              handleUpdateSettings("adminTelegramUsername", "");
                             }}
-                            disabled={isVerifyLoading}
-                            className="text-[11px] font-bold text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 px-3.5 py-2 rounded-xl transition-all shadow-sm active:scale-95"
+                            className="text-[11px] font-bold text-red-600 hover:text-red-700 bg-white border border-red-200 px-3 py-1.5 rounded-lg shadow-sm hover:shadow active:scale-95 transition-all"
                           >
-                            {"Bekor qilish"}
+                            {"O'chirish"}
                           </button>
                         </div>
-                        {verifyAdminError && (
-                          <span className="text-[10px] text-red-600 font-bold mt-1">
-                            {verifyAdminError}
-                          </span>
-                        )}
-                      </form>
-                    ) : (
-                      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-5 rounded-2xl bg-blue-50/60 border border-blue-200/60 shadow-sm transition-all hover:bg-blue-50">
-                        <div className="flex items-start gap-3">
-                          <div className="w-10 h-10 rounded-full bg-blue-100/80 flex items-center justify-center shrink-0 mt-0.5 text-blue-600">
-                            <AlertTriangle size={18} className="text-amber-500" />
+                      ) : isVerifyingAdmin ? (
+                        <form onSubmit={handleVerifyAdminCode} className="flex flex-col gap-3 p-3.5 rounded-xl bg-blue-50 border border-blue-200 animate-fadeIn">
+                          <div className="flex items-center gap-1.5 text-[12px] font-bold text-blue-800">
+                            <Sparkles size={14} className="text-blue-600 shrink-0 animate-pulse" />
+                            <span>{"Tasdiqlash kodini kiriting"}</span>
                           </div>
-                          <div className="flex flex-col gap-1">
-                            <h4 className="text-[13.5px] font-bold text-blue-900 leading-tight">Admin profil ulanmagan</h4>
-                            <p className="text-[11px] text-blue-700/90 leading-relaxed max-w-md font-medium">
-                              Ulash uchun Telegram botingizga borib, botni ishga tushiring (/start). Bot sizga tasdiqlash kodini yuboradi.
-                            </p>
+                          <p className="text-[11px] text-blue-700 leading-relaxed">
+                            {activeBotUser ? (
+                              <>
+                                {"Telegram-da "}
+                                <a
+                                  href={`https://t.me/${activeBotUser.replace(/^@+/, "")}`}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="underline font-bold text-blue-900"
+                                >
+                                  @{activeBotUser.replace(/^@+/, "")}
+                                </a>
+                                {" botimizga o'ting va "}<strong>{"/start"}</strong>{" buyrug'ini bosing. Bot sizga yuborgan tasdiqlash kodini quyida kiriting."}
+                              </>
+                            ) : (
+                              "Telegram botimizga o'ting va /start buyrug'ini bosing. Bot yuborgan tasdiqlash kodini quyida kiriting."
+                            )}
+                          </p>
+                          <div className="flex gap-2">
+                            <input
+                              type="text"
+                              placeholder="Kodni kiriting (masalan: 123456)"
+                              value={adminVerifyCode}
+                              onChange={(e) => setAdminVerifyCode(e.target.value)}
+                              disabled={isVerifyLoading}
+                              className="px-3 py-2 text-[12px] bg-white border border-[#E8E8E8] rounded-xl focus:outline-none focus:border-black flex-1 text-black"
+                            />
+                            {activeBotUser && (
+                              <a
+                                href={`https://t.me/${activeBotUser.replace(/^@+/, "")}?start=verify`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="px-3.5 py-2 bg-[#229ED9] hover:bg-[#1e8ec3] text-white rounded-xl text-[11px] font-bold transition-all shadow-sm active:scale-95 text-center flex items-center justify-center gap-1 shrink-0"
+                              >
+                                <Send size={12} />
+                                <span>Kodni olish</span>
+                              </a>
+                            )}
                           </div>
+                          <div className="flex gap-2 justify-end mt-1">
+                            <button
+                              type="submit"
+                              disabled={isVerifyLoading || !adminVerifyCode.trim()}
+                              className="text-[11px] font-bold text-white bg-black hover:bg-gray-800 disabled:bg-gray-400 px-4 py-2 rounded-xl transition-all shadow-sm active:scale-95"
+                            >
+                              {isVerifyLoading ? "Tekshirilmoqda..." : "Tasdiqlash"}
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setIsVerifyingAdmin(false);
+                                setVerifyAdminError("");
+                                setAdminVerifyCode("");
+                              }}
+                              disabled={isVerifyLoading}
+                              className="text-[11px] font-bold text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 px-3.5 py-2 rounded-xl transition-all shadow-sm active:scale-95"
+                            >
+                              {"Bekor qilish"}
+                            </button>
+                          </div>
+                          {verifyAdminError && (
+                            <span className="text-[10px] text-red-600 font-bold mt-1">
+                              {verifyAdminError}
+                            </span>
+                          )}
+                        </form>
+                      ) : (
+                        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-5 rounded-2xl bg-blue-50/60 border border-blue-200/60 shadow-sm transition-all hover:bg-blue-50">
+                          <div className="flex items-start gap-3">
+                            <div className="w-10 h-10 rounded-full bg-blue-100/80 flex items-center justify-center shrink-0 mt-0.5 text-blue-600">
+                              <AlertTriangle size={18} className="text-amber-500" />
+                            </div>
+                            <div className="flex flex-col gap-1">
+                              <h4 className="text-[13.5px] font-bold text-blue-900 leading-tight">Admin profil ulanmagan</h4>
+                              <p className="text-[11px] text-blue-700/90 leading-relaxed max-w-md font-medium">
+                                Ulash uchun Telegram botingizga borib, botni ishga tushiring (/start). Bot sizga tasdiqlash kodini yuboradi.
+                              </p>
+                            </div>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => setIsVerifyingAdmin(true)}
+                            className="px-5 py-2.5 bg-black hover:bg-neutral-800 text-white rounded-xl text-[12px] font-bold shadow-sm active:scale-95 transition-all shrink-0 hover:shadow-md self-stretch sm:self-auto text-center"
+                          >
+                            Ulash
+                          </button>
                         </div>
-                        <button
-                          type="button"
-                          onClick={() => setIsVerifyingAdmin(true)}
-                          className="px-5 py-2.5 bg-black hover:bg-neutral-800 text-white rounded-xl text-[12px] font-bold shadow-sm active:scale-95 transition-all shrink-0 hover:shadow-md self-stretch sm:self-auto text-center"
-                        >
-                          Ulash
-                        </button>
-                      </div>
-                    );
-                  })()}
+                      );
+                    })()}
+                  </div>
                 </div>
               </div>
             </div>
@@ -4333,6 +4384,81 @@ function AIAgentContent() {
                     </tbody>
                   </table>
                 </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Modal: Connect Telegram Bot */}
+        {showTgConnectModal && (
+          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[999] flex items-center justify-center p-4">
+            <div className="bg-white border border-[#E8E8E8] rounded-[24px] max-w-[420px] w-full p-6 shadow-2xl flex flex-col gap-4 animate-in zoom-in-95 duration-150 text-black">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
+                  <Send size={18} />
+                </div>
+                <h3 className="text-[15px] font-bold text-black">Telegram botni ulash</h3>
+              </div>
+              
+              <div className="flex flex-col gap-3">
+                <div className="flex flex-col gap-1">
+                  <span className="text-[10px] font-bold text-black">Bot tokeni (HTTP API token)</span>
+                  <input
+                    type="text"
+                    value={tgToken}
+                    onChange={(e) => setTgToken(e.target.value)}
+                    placeholder="Masalan: 123456789:ABCdefGhIJKlmNoPQRsTUVwxyZ"
+                    className="w-full px-4 py-2.5 text-[12px] bg-[#F9F9F7] border border-[#E8E8E8] rounded-xl focus:outline-none focus:border-black text-black"
+                  />
+                  <span className="text-[9px] text-[#707070]">
+                    Tokenni @BotFather orqali yangi bot yaratib olishingiz mumkin.
+                  </span>
+                </div>
+
+                <div className="flex flex-col gap-1">
+                  <span className="text-[10px] font-bold text-black">Bot foydalanuvchi nomi (Username)</span>
+                  <input
+                    type="text"
+                    value={tgUsername}
+                    onChange={(e) => setTgUsername(e.target.value)}
+                    placeholder="Masalan: mening_aqlli_botim"
+                    className="w-full px-4 py-2.5 text-[12px] bg-[#F9F9F7] border border-[#E8E8E8] rounded-xl focus:outline-none focus:border-black text-black"
+                  />
+                </div>
+
+                <div className="flex flex-col gap-1">
+                  <span className="text-[10px] font-bold text-black">Bot nomi (Ixtiyoriy)</span>
+                  <input
+                    type="text"
+                    value={tgName}
+                    onChange={(e) => setTgName(e.target.value)}
+                    placeholder="Masalan: AI Kurator Bot"
+                    className="w-full px-4 py-2.5 text-[12px] bg-[#F9F9F7] border border-[#E8E8E8] rounded-xl focus:outline-none focus:border-black text-black"
+                  />
+                </div>
+              </div>
+
+              <div className="flex items-center justify-end gap-3 mt-2">
+                <button
+                  onClick={() => {
+                    setShowTgConnectModal(false);
+                    setTgToken("");
+                    setTgUsername("");
+                    setTgName("");
+                  }}
+                  className="px-4 py-2 rounded-xl border border-[#D8D8D8] text-[12px] font-bold text-[#595959] hover:bg-[#F9F9F7] transition-all"
+                  disabled={isTgSaving}
+                >
+                  Bekor qilish
+                </button>
+                <button
+                  onClick={handleAddTelegram}
+                  disabled={!tgToken.trim() || !tgUsername.trim() || isTgSaving}
+                  className="px-4 py-2 rounded-xl bg-black text-[#C7F33C] text-[12px] font-bold hover:bg-black/90 disabled:opacity-50 transition-all flex items-center gap-1.5"
+                >
+                  {isTgSaving && <Loader2 size={13} className="animate-spin" />}
+                  <span>{isTgSaving ? "Ulanmoqda..." : "Ulash"}</span>
+                </button>
               </div>
             </div>
           </div>
