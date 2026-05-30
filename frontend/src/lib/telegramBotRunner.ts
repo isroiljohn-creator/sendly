@@ -162,6 +162,7 @@ async function updateDbFile(updater: (dbData: Record<string, any>) => Promise<vo
 }
 
 export async function handleTelegramUpdate(channelId: string, token: string, update: any) {
+  console.log(`[Bot Runner] Handling update for channel ${channelId} (token: ...${token.slice(-6)}):`, JSON.stringify(update));
   try {
     // Handle inline button callback query to copy verification code
     if (update.callback_query) {

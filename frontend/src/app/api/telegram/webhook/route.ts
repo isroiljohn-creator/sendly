@@ -15,6 +15,7 @@ export async function POST(request: Request) {
     }
 
     const update = await request.json();
+    console.log(`[Webhook API] Received Telegram update for channel ${channelId}:`, JSON.stringify(update));
 
     // 1. Fetch config to get the token for the given channelId
     let dbData: any = {};

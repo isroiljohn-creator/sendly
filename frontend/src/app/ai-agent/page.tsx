@@ -3630,7 +3630,7 @@ function AIAgentContent() {
               {/* Right Side: Column */}
               <div className="lg:col-span-5 flex flex-col">
                 {/* Curator Admin Notification Settings */}
-                <div className="bg-white border border-[#E8E8E8] rounded-[24px] p-6 shadow-sm flex flex-col gap-4 w-full h-[310px] min-h-[310px] justify-between">
+                <div className="bg-white border border-[#E8E8E8] rounded-[24px] p-6 shadow-sm flex flex-col gap-4 w-full justify-between">
                   <div>
                     <h3 className="text-[15px] font-bold text-black">
                       {"Inson-kuratorni ulash"}
