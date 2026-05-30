@@ -497,7 +497,7 @@ export function LandingPageView() {
             <ul className="flex flex-col gap-3 text-[13px] text-black flex-1">
               {["1 ta Instagram professional akkaunti", "Cheksiz avtomatlashtirish oqimlari", "Shaxsiy xabarlar va izohlar uchun avtomatik javoblar", "Referral tizimi va ballar", "1 ta Telegram bot ulash", "Analitika paneli"].map((item, i) => (
                 <li key={i} className="flex items-center gap-2.5">
-                  <div className="h-4.5 w-4.5 rounded-full bg-[#C7F33C]/20 flex items-center justify-center shrink-0">
+                  <div className="h-5 w-5 rounded-full bg-[#C7F33C]/20 flex items-center justify-center shrink-0">
                     <Check size={11} className="text-[#7CA607]" />
                   </div>
                   {item}
@@ -523,7 +523,7 @@ export function LandingPageView() {
             <ul className="flex flex-col gap-3 text-[13px] text-black flex-1">
               {["10 ta Instagram professional akkaunti", "PRO dagi barcha imkoniyatlar", "OpenAI va AI agent saralash", "VIP qo'llab-quvvatlash (24/7)", "10 tagacha Telegram bot ulash", "Shaxsiy menejer"].map((item, i) => (
                 <li key={i} className="flex items-center gap-2.5">
-                  <div className="h-4.5 w-4.5 rounded-full bg-purple-50 flex items-center justify-center shrink-0">
+                  <div className="h-5 w-5 rounded-full bg-purple-50 flex items-center justify-center shrink-0">
                     <Check size={11} className="text-purple-600" />
                   </div>
                   {item}
@@ -592,7 +592,7 @@ export function LandingPageView() {
             </div>
             <div className="flex gap-5 font-semibold text-[#707075]">
               <Link href="/privacy" className="hover:text-black transition-colors">{"Maxfiylik"}</Link>
-              <a href="#" className="hover:text-black transition-colors">{"Shartlar"}</a>
+              <Link href="/terms" className="hover:text-black transition-colors">{"Shartlar (Oferta)"}</Link>
             </div>
           </div>
         </div>

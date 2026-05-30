@@ -226,7 +226,8 @@
         "email_placeholder": "email@example.com",
         "password": "Пароль",
         "password_placeholder": "Введите новый пароль",
-        "password_desc": "Пароль также обновится при сохранении информации профиля."
+        "password_desc": "Пароль также обновится при сохранении информации профиля.",
+        "success_message": "Данные профиля успешно сохранены!"
       },
       "billing": {
         "free_plan": "Бесплатный план",
@@ -321,7 +322,7 @@
       "invite_btn": "Пригласить",
       "team_title": "Участники команды",
       "team_desc": "История пользователей, зарегистрированных по вашей ссылке",
-      "ig_direct_api": "Instagram Direct Api",
+      "ig_direct_api": "Instagram",
       "ig_direct_desc": "Это подключение необходимо для автоответов.",
       "ig_direct_active": "Связь с клиентами активна",
       "webhook_api": "Webhooks & API",
@@ -922,7 +923,8 @@
       "intent_faq": "Вопросы по курсу",
       "intent_affiliate": "Партнерская программа",
       "intent_general": "Общие вопросы",
-      "count_unit": "шт."
+      "count_unit": "шт.",
+      "add_btn": "Добавить"
     },
     "partner": {
       "title": "Кабинет партнера",

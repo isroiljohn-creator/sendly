@@ -51,7 +51,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
   }
 
   return (
-    <div className="min-h-screen w-full bg-[#E8E8E8] px-6 py-4 flex flex-col gap-4">
+    <div className="h-screen w-full bg-[#E8E8E8] px-6 py-4 flex flex-col gap-4 overflow-hidden">
       {impersonatorEmail && (
         <div className="w-full bg-blue-600 text-white px-6 py-3 rounded-[16px] flex justify-between items-center animate-in slide-in-from-top duration-300 shadow-sm relative overflow-hidden shrink-0">
           <div className="flex items-center gap-2.5 text-[12px] font-bold">
@@ -88,11 +88,13 @@ export function AppLayout({ children }: { children: ReactNode }) {
         </div>
       )}
 
-      <div className="flex w-full gap-4">
+      <div className="flex w-full flex-1 gap-4 overflow-hidden min-h-0">
         <Sidebar />
-        <div className="flex min-w-0 flex-1 flex-col gap-4">
+        <div className="flex min-w-0 flex-1 flex-col gap-4 h-full">
           <TopBar />
-          {children}
+          <div className="flex-1 overflow-y-auto min-h-0 pr-1">
+            {children}
+          </div>
         </div>
       </div>
       <ConnectChannelModal />

@@ -226,7 +226,8 @@
         "email_placeholder": "email@example.com",
         "password": "Password",
         "password_placeholder": "Enter new password",
-        "password_desc": "Your password will also update when profile details are saved."
+        "password_desc": "Your password will also update when profile details are saved.",
+        "success_message": "Profile details successfully saved!"
       },
       "billing": {
         "free_plan": "Free Plan",
@@ -321,7 +322,7 @@
       "invite_btn": "Invite",
       "team_title": "Referred Clients",
       "team_desc": "A history of users who registered using your referral link",
-      "ig_direct_api": "Instagram Direct Api",
+      "ig_direct_api": "Instagram",
       "ig_direct_desc": "This connection is required for automated messages.",
       "ig_direct_active": "Client connection is active",
       "webhook_api": "Webhooks & API",
@@ -922,7 +923,8 @@
       "intent_faq": "FAQ / Lessons",
       "intent_affiliate": "Affiliate Program",
       "intent_general": "General Inquiry",
-      "count_unit": "msg."
+      "count_unit": "msg.",
+      "add_btn": "Add"
     },
     "partner": {
       "title": "Partner Dashboard",

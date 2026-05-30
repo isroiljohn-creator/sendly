@@ -9,7 +9,9 @@ import {
   Save, 
   Trash2,
   X,
-  Plus
+  Plus,
+  Info,
+  Loader2
 } from "lucide-react";
 import { db, type User } from "@/lib/db";
 import { useI18n } from "@/i18n/I18nProvider";
@@ -64,6 +66,17 @@ export default function AccountPage() {
   const [aiCreditsData, setAiCreditsData] = useState<{ balance: number; used: number; history: any[]; usedVouchers?: string[] }>({ balance: 0, used: 0, history: [] });
   const [isBuyCreditsModalOpen, setIsBuyCreditsModalOpen] = useState(false);
   const [processingPurchase, setProcessingPurchase] = useState(false);
+
+  const [alertType, setAlertType] = useState<"success" | "error">("success");
+
+  // Email verification OTP states
+  const [isEmailOtpModalOpen, setIsEmailOtpModalOpen] = useState(false);
+  const [emailVerifyCodeState, setEmailVerifyCodeState] = useState("");
+  const [pendingEmail, setPendingEmail] = useState("");
+  const [pendingName, setPendingName] = useState("");
+  const [pendingPassword, setPendingPassword] = useState("");
+  const [emailOtpInput, setEmailOtpInput] = useState("");
+  const [emailOtpError, setEmailOtpError] = useState("");
 
   useEffect(() => {
     let interval: NodeJS.Timeout;
@@ -139,15 +152,16 @@ export default function AccountPage() {
     return () => window.removeEventListener("replai-db-update", handleDbUpdate);
   }, []);
 
-  const showAlert = (title: string, message: string) => {
+  const showAlert = (title: string, message: string, type: "success" | "error" = "success") => {
     setAlertTitle(title);
     setAlertMessage(message);
+    setAlertType(type);
     setIsAlertOpen(true);
   };
 
   const handleBuyCredits = async (amount: number, priceUzs: number, packageName: string) => {
     if (!currentUser?.isCardLinked) {
-      showAlert(t("common.error"), "AI kredit sotib olish uchun avval to'lov kartangizni bog'lang.");
+      showAlert(t("common.error"), "AI kredit sotib olish uchun avval to'lov kartangizni bog'lang.", "error");
       setIsBuyCreditsModalOpen(false);
       setIsLinking(true);
       return;
@@ -165,9 +179,9 @@ export default function AccountPage() {
       if (updated) {
         setAiCreditsData(updated);
         setIsBuyCreditsModalOpen(false);
-        showAlert(t("common.success"), `Muvaffaqiyatli xarid qilindi! Hisobingizga ${amount} kredit qo'shildi.`);
+        showAlert(t("common.success"), `Muvaffaqiyatli xarid qilindi! Hisobingizga ${amount} kredit qo'shildi.`, "success");
       } else {
-        showAlert(t("common.error"), "Xarid amalga oshmadi. Iltimos qaytadan urunib ko'ring.");
+        showAlert(t("common.error"), "Xarid amalga oshmadi. Iltimos qaytadan urunib ko'ring.", "error");
       }
     }, 1500);
   };
@@ -175,21 +189,64 @@ export default function AccountPage() {
   const handleSaveGeneral = (e: React.FormEvent) => {
     e.preventDefault();
     if (!currentUser) return;
-    
-    // Save updated name/email/password
+
+    // Check if email changed
+    if (email !== currentUser.email) {
+      // Generate a mock code
+      const generatedCode = Math.floor(100000 + Math.random() * 900000).toString();
+      setEmailVerifyCodeState(generatedCode);
+      setPendingEmail(email);
+      setPendingName(name);
+      setPendingPassword(password);
+      setEmailOtpInput("");
+      setEmailOtpError("");
+      setIsEmailOtpModalOpen(true);
+      
+      showAlert(
+        t("common.success"), 
+        `Tasdiqlash kodi yangi elektron pochtangizga yuborildi. Simulyatsiya tasdiqlash kodi: ${generatedCode}`, 
+        "success"
+      );
+      return;
+    }
+
+    // Save updated name/password (no email change)
     const users = db.getUsers();
     const idx = users.findIndex(u => u.email === currentUser.email);
     if (idx > -1) {
       users[idx].fullName = name;
-      users[idx].email = email;
       users[idx].password = password;
       localStorage.setItem("replai_users", JSON.stringify(users));
     }
     
-    const updatedUser = { ...currentUser, fullName: name, email, password };
+    const updatedUser = { ...currentUser, fullName: name, password };
     localStorage.setItem("replai_current_user", JSON.stringify(updatedUser));
     setCurrentUser(updatedUser);
-    showAlert(t("common.success"), t("pages.account.general.desc") + " " + t("common.success").toLowerCase());
+    showAlert(t("common.success"), t("pages.account.general.success_message") || "Profil ma'lumotlari muvaffaqiyatli saqlandi!", "success");
+  };
+
+  const handleConfirmEmailOtp = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (emailOtpInput !== emailVerifyCodeState) {
+      setEmailOtpError("Tasdiqlash kodi noto'g'ri. Iltimos qaytadan urinib ko'ring.");
+      return;
+    }
+
+    // Success! Update DB and states
+    const users = db.getUsers();
+    const idx = users.findIndex(u => u.email === currentUser?.email);
+    if (idx > -1) {
+      users[idx].fullName = pendingName;
+      users[idx].email = pendingEmail;
+      users[idx].password = pendingPassword;
+      localStorage.setItem("replai_users", JSON.stringify(users));
+    }
+
+    const updatedUser = { ...currentUser, fullName: pendingName, email: pendingEmail, password: pendingPassword };
+    localStorage.setItem("replai_current_user", JSON.stringify(updatedUser));
+    setCurrentUser(updatedUser);
+    setIsEmailOtpModalOpen(false);
+    showAlert(t("common.success"), t("pages.account.general.success_message") || "Profil ma'lumotlari muvaffaqiyatli saqlandi!", "success");
   };
 
   const handleGetOtp = (e: React.FormEvent) => {
@@ -280,10 +337,10 @@ export default function AccountPage() {
         showAlert(t("pages.account.bonuses.success_title"), `"${code.toUpperCase()}" promokodi muvaffaqiyatli faollashtirildi! Hisobingizga ${data.history[0]?.amount?.toLocaleString("uz-UZ")} kredit qo'shildi.`);
         setVoucherCode("");
       } else {
-        showAlert(t("common.error"), data.error || "Promokodni faollashtirishda xatolik yuz berdi.");
+        showAlert(t("common.error"), data.error || "Promokodni faollashtirishda xatolik yuz berdi.", "error");
       }
     } catch (err) {
-      showAlert(t("common.error"), "Tarmoq ulanishida xatolik yuz berdi.");
+      showAlert(t("common.error"), "Tarmoq ulanishida xatolik yuz berdi.", "error");
     }
   };
 
@@ -657,8 +714,11 @@ export default function AccountPage() {
                 </div>
 
                 {/* Info message */}
-                <div className="p-3.5 bg-amber-50/50 border border-amber-200/50 text-amber-800 rounded-2xl text-[11px] leading-relaxed">
-                  <strong>ℹ️ Eslatma:</strong> PRO tarifida bepul AI kreditlar berilmaydi. AI funksiyalardan (FAQ yordamchi yoki kvalifikatsiya) foydalanish uchun hisobingizni kreditlar bilan to'ldirishingiz lozim.
+                <div className="p-3.5 bg-amber-50/50 border border-amber-200/50 text-amber-800 rounded-2xl text-[11px] leading-relaxed flex items-start gap-2">
+                  <Info size={14} className="text-amber-600 shrink-0 mt-0.5" />
+                  <div>
+                    <strong>Eslatma:</strong> PRO tarifida bepul AI kreditlar berilmaydi. AI funksiyalardan (FAQ yordamchi yoki kvalifikatsiya) foydalanish uchun hisobingizni kreditlar bilan to'ldirishingiz lozim.
+                  </div>
                 </div>
 
                 <div>
@@ -746,7 +806,7 @@ export default function AccountPage() {
                   </div>
                 </div>
 
-                <div className="bg-[#F9F9F7] border border-[#F0F0F0] rounded-[14px] p-4.5 mt-2">
+                <div className="bg-[#F9F9F7] border border-[#F0F0F0] rounded-[14px] p-5 mt-2">
                   <h4 className="text-[12px] font-bold text-black uppercase tracking-wider">Premium imkoniyatlar</h4>
                   <p className="text-[11px] text-[#707070] mt-1.5 leading-relaxed">
                     {"Premium tarifga o'tsangiz limitlar 10 barobarga oshiriladi. Shuningdek limitsiz Telegram broadcastlar va professional funksiyalardan to'liq foydalana olasiz."}
@@ -818,7 +878,57 @@ export default function AccountPage() {
         onClose={() => setIsAlertOpen(false)}
         title={alertTitle}
         message={alertMessage}
+        type={alertType}
       />
+
+      {/* ── EMAIL VERIFICATION OTP MODAL ── */}
+      {isEmailOtpModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 overflow-y-auto">
+          <div className="bg-white rounded-[32px] w-full max-w-[400px] shadow-2xl overflow-hidden p-6 md:p-8 border border-[#D8D8D8] animate-in fade-in zoom-in-95 duration-200 text-center relative flex flex-col items-center">
+            {/* Icon */}
+            <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-blue-100 text-blue-600">
+              <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" strokeWidth="2.5" fill="none" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+                <polyline points="22,6 12,13 2,6" />
+              </svg>
+            </div>
+            <h3 className="text-[16px] font-semibold text-black leading-tight">Pochtani tasdiqlang</h3>
+            <p className="mt-2.5 text-[12.5px] text-[#707070] leading-relaxed">
+              Yangi pochtangizga (<strong className="text-black">{pendingEmail}</strong>) tasdiqlash kodi yuborildi. Iltimos, uni quyida kiriting.
+            </p>
+            {emailOtpError && (
+              <div className="mt-3 text-[11px] font-bold text-red-600 bg-red-50 px-3 py-1.5 rounded-xl border border-red-100 w-full">
+                {emailOtpError}
+              </div>
+            )}
+            <form onSubmit={handleConfirmEmailOtp} className="mt-5 w-full flex flex-col gap-4">
+              <input
+                type="text"
+                placeholder="Tasdiqlash kodi"
+                value={emailOtpInput}
+                onChange={(e) => setEmailOtpInput(e.target.value.replace(/\D/g, "").substring(0, 6))}
+                className="w-full rounded-[12px] border border-[#D8D8D8] px-4 py-3 text-[14px] text-center font-bold tracking-[8px] text-black focus:outline-none focus:border-black"
+                required
+              />
+              <div className="flex gap-2.5 mt-2 w-full">
+                <button
+                  type="button"
+                  onClick={() => setIsEmailOtpModalOpen(false)}
+                  className="flex-1 rounded-full border border-[#D8D8D8] py-2.5 text-[12px] font-bold text-[#595959] hover:bg-[#F9F9F7] active:scale-[0.98] transition-all"
+                >
+                  Bekor qilish
+                </button>
+                <button
+                  type="submit"
+                  className="flex-1 rounded-full bg-black py-2.5 text-[12px] font-bold text-white hover:bg-black/90 active:scale-[0.98] transition-all"
+                >
+                  Tasdiqlash
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       <ConfirmModal
         isOpen={isUnlinkModalOpen}
@@ -908,7 +1018,7 @@ export default function AccountPage() {
 
             {processingPurchase && (
               <div className="absolute inset-0 bg-white/80 backdrop-blur-xs flex flex-col items-center justify-center gap-3 rounded-[32px]">
-                <div className="animate-spin text-[24px]">⚙️</div>
+                <Loader2 className="animate-spin text-black" size={24} />
                 <p className="text-[12px] font-bold text-black">To&apos;lov amalga oshirilmoqda...</p>
               </div>
             )}

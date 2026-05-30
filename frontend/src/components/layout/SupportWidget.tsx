@@ -15,7 +15,7 @@ export function SupportWidget() {
   const { lang } = useI18n();
   const [isOpen, setIsOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<"home" | "chat">("home");
-  const [unreadCount, setUnreadCount] = useState(2);
+  const [unreadCount, setUnreadCount] = useState(0);
   const [inputVal, setInputVal] = useState("");
   const [messages, setMessages] = useState<Message[]>([
     {
@@ -86,7 +86,7 @@ export function SupportWidget() {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, isTyping]);
 
-  const handleSend = () => {
+  const handleSend = async () => {
     if (!inputVal.trim()) return;
 
     const userMsgText = inputVal;
@@ -104,53 +104,40 @@ export function SupportWidget() {
     setInputVal("");
     setIsTyping(true);
 
-    // Simulate agent response
-    setTimeout(() => {
-      let replyText = "";
-      const textLower = userMsgText.toLowerCase();
+    try {
+      // Keep only last 8 messages for context to stay within token limits
+      const chatHistory = [...messages, newMsg].slice(-8);
 
-      if (lang === "uz") {
-        if (textLower.includes("salom") || textLower.includes("assalom")) {
-          replyText = "Assalomu alaykum! Sizga yordam berishdan mamnunman. Muammoingiz haqida batafsilroq yozsangiz, darhol hal qilamiz. 😊";
-        } else if (textLower.includes("kanal") || textLower.includes("instagram") || textLower.includes("telegram") || textLower.includes("ulash")) {
-          replyText = "Kanal ulash uchun tepadagi akkaunt tanlash bo'limidan 'Akkaunt qo'shish' havolasiga bosing. Telegram yoki Instagram profilingizni ulashingiz mumkin. ⚙️";
-        } else if (textLower.includes("tarif") || textLower.includes("to'lov") || textLower.includes("pul") || textLower.includes("narx")) {
-          replyText = "Tizimda PRO va Premium tariflari mavjud. Ularni 'Mening akkauntim' -> 'To'lov va tariflar' bo'limida tahlil qilishingiz va yangilashingiz mumkin. 💳";
-        } else {
-          replyText = "Tushunarli. Xabaringiz qabul qilindi. Tez orada operatorlarimiz siz bilan bog'lanishadi! Rahmat. 🙏";
-        }
-      } else if (lang === "ru") {
-        if (textLower.includes("привет") || textLower.includes("здравст")) {
-          replyText = "Здравствуйте! Рад помочь вам. Пожалуйста, опишите вашу проблему подробнее, и мы ее решим. 😊";
-        } else if (textLower.includes("канал") || textLower.includes("инстаграм") || textLower.includes("телеграм") || textLower.includes("подключ")) {
-          replyText = "Чтобы подключить канал, нажмите на 'Добавить аккаунт' в выпадающем меню выбора аккаунтов наверху. Поддерживаются Telegram и Instagram. ⚙️";
-        } else if (textLower.includes("тариф") || textLower.includes("оплат") || textLower.includes("цена") || textLower.includes("деньг")) {
-          replyText = "У нас есть тарифы PRO и Premium. Вы можете ознакомиться с ними и настроить их в меню 'Мой аккаунт' -> 'Оплата и тарифы'. 💳";
-        } else {
-          replyText = "Понятно. Ваше сообщение отправлено в поддержку. Наш оператор ответит вам в ближайшее время! Спасибо. 🙏";
-        }
+      const res = await fetch("/api/support", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ messages: chatHistory })
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        const replyMsg: Message = {
+          id: `s_${Date.now()}`,
+          sender: "support",
+          text: data.text || "Kechirasiz, javob olishda xatolik yuz berdi.",
+          time: timeStr
+        };
+        setMessages((prev) => [...prev, replyMsg]);
       } else {
-        if (textLower.includes("hello") || textLower.includes("hi")) {
-          replyText = "Hello! Glad to help. Please describe your issue in more detail and we will solve it shortly. 😊";
-        } else if (textLower.includes("channel") || textLower.includes("connect") || textLower.includes("instagram") || textLower.includes("telegram")) {
-          replyText = "To connect a channel, click 'Add Account' in the account selection dropdown at the top bar. You can link Telegram and Instagram. ⚙️";
-        } else if (textLower.includes("plan") || textLower.includes("price") || textLower.includes("billing") || textLower.includes("pay")) {
-          replyText = "We offer PRO and Premium plans. You can view them and subscribe under 'My Account' -> 'Billing & Plans'. 💳";
-        } else {
-          replyText = "Got it. Your message has been forwarded. A support representative will get back to you shortly! Thank you. 🙏";
-        }
+        throw new Error("Failed to contact support API");
       }
-
+    } catch (err) {
+      console.error("Support chat error:", err);
       const replyMsg: Message = {
         id: `s_${Date.now()}`,
         sender: "support",
-        text: replyText,
+        text: "Hozirda tizimda uzilish yuz berdi. Savollaringizga elektron pochta (6220v1@gmail.com) orqali yordam bera olamiz.",
         time: timeStr
       };
-
       setMessages((prev) => [...prev, replyMsg]);
+    } finally {
       setIsTyping(false);
-    }, 1500);
+    }
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {

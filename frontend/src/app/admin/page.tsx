@@ -20,7 +20,8 @@ import {
   Eye, 
   ArrowRight,
   TrendingUp,
-  Cpu
+  Cpu,
+  Loader2
 } from "lucide-react";
 import { db } from "@/lib/db";
 import { useI18n } from "@/i18n/I18nProvider";
@@ -369,7 +370,7 @@ export default function AdminPage() {
     return (
       <AppLayout>
         <div className="flex flex-col items-center justify-center min-h-[400px] gap-3">
-          <div className="animate-spin text-[30px]">⚙️</div>
+          <Loader2 className="animate-spin text-black" size={30} />
           <p className="text-[13px] font-bold text-black/80">Admin panel ma&apos;lumotlari yuklanmoqda...</p>
         </div>
       </AppLayout>

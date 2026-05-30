@@ -392,6 +392,7 @@ interface AlertModalProps {
   title: string;
   message: string;
   buttonText?: string;
+  type?: "success" | "error";
 }
 
 export function AlertModal({
@@ -400,17 +401,35 @@ export function AlertModal({
   title,
   message,
   buttonText = "Yopish",
+  type = "success",
 }: AlertModalProps) {
   if (!isOpen) return null;
+
+  const resolvedType = type === "error" || 
+    title.toLowerCase().includes("xato") || 
+    title.toLowerCase().includes("error") || 
+    title.toLowerCase().includes("fail") || 
+    title.toLowerCase().includes("muammo")
+      ? "error"
+      : "success";
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-[4px] p-4 animate-in fade-in duration-200">
       <div className="w-full max-w-[360px] rounded-[28px] bg-white p-6 border border-[#D8D8D8] shadow-[0_20px_50px_rgba(0,0,0,0.15)] scale-100 animate-in zoom-in-95 duration-200 text-center flex flex-col items-center">
-        <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-[#C7F33C]/20 text-black">
-          <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" strokeWidth="2.5" fill="none" strokeLinecap="round" strokeLinejoin="round">
-            <polyline points="20 6 9 17 4 12" />
-          </svg>
-        </div>
+        {resolvedType === "error" ? (
+          <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-red-100 text-red-600">
+            <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" strokeWidth="2.5" fill="none" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18" />
+              <line x1="6" y1="6" x2="18" y2="18" />
+            </svg>
+          </div>
+        ) : (
+          <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-[#C7F33C]/20 text-black">
+            <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" strokeWidth="2.5" fill="none" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="20 6 9 17 4 12" />
+            </svg>
+          </div>
+        )}
         <h3 className="text-[16px] font-semibold text-black leading-tight">
           {title}
         </h3>

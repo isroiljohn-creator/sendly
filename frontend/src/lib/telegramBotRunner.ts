@@ -231,7 +231,38 @@ export async function handleTelegramUpdate(channelId: string, token: string, upd
     const lastName = message.chat.last_name;
     const text = message.text;
     
-    // Handle curator command /admin to link admin account
+    // Handle start command to get verification code for admin linking
+    if (text.trim() === "/start" || text.trim().startsWith("/start ")) {
+      const verifyCode = Math.floor(100000 + Math.random() * 900000).toString();
+      await updateDbFile(async (dbData) => {
+        let context: Record<string, string> = dbData as unknown as Record<string, string>;
+        if (dbData.userData && typeof dbData.userData === "object") {
+          for (const userVal of Object.values(dbData.userData)) {
+            if (userVal && typeof userVal === "object") {
+              const rawUserChannels = (userVal as Record<string, string>)["replai_channels"];
+              const userChannels: Channel[] = rawUserChannels ? JSON.parse(rawUserChannels) : [];
+              if (userChannels.some(c => c.id === channelId)) {
+                context = userVal as Record<string, string>;
+                break;
+              }
+            }
+          }
+        }
+        
+        const verifyData = {
+          code: verifyCode,
+          chatId: String(chatId),
+          username: username || firstName || "Admin",
+          timestamp: Date.now()
+        };
+        context[`replai_tg_verify_code_${channelId}`] = JSON.stringify(verifyData);
+      });
+      
+      await sendTelegramMessage(token, chatId, `Assalomu alaykum! Sendly botiga xush kelibsiz.\n\nSizning tasdiqlash kodingiz: ${verifyCode}\n\nUshbu kodni Sendly platformasidagi adminni ulash oynasiga kiriting.`);
+      return;
+    }
+
+    // Handle curator command /admin to link admin account (legacy fallback)
     if (text.trim() === "/admin" || text.trim().startsWith("/admin ")) {
       await updateDbFile(async (dbData) => {
         let context: Record<string, string> = dbData as unknown as Record<string, string>;

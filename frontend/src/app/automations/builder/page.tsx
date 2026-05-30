@@ -1858,7 +1858,7 @@ export default function BuilderPage() {
   const nodeType = selectedNode?.data.nodeType;
 
   return (
-    <div className="min-h-screen w-full bg-[#E8E8E8] p-6 flex gap-4 overflow-hidden h-screen">
+    <div className="h-screen w-full bg-[#E8E8E8] px-6 py-4 flex gap-4 overflow-hidden">
       <Sidebar />
       <div className="flex-1 flex flex-col bg-white border border-[#E8E8E8] rounded-[24px] overflow-hidden shadow-sm relative h-full">
         {/* Toast */}
@@ -2126,7 +2126,7 @@ export default function BuilderPage() {
                             <button
                               type="button"
                               onClick={() => removeKeyword(tag)}
-                              className="w-4.5 h-4.5 rounded-md hover:bg-neutral-100 flex items-center justify-center text-[#707070] hover:text-black transition-colors cursor-pointer border-none bg-transparent"
+                              className="w-5 h-5 rounded-md hover:bg-neutral-100 flex items-center justify-center text-[#707070] hover:text-black transition-colors cursor-pointer border-none bg-transparent"
                             >
                               <X size={10} strokeWidth={3} />
                             </button>
@@ -2473,7 +2473,7 @@ export default function BuilderPage() {
                                 <button
                                   type="button"
                                   onClick={() => removeKeyword(tag)}
-                                  className="w-4.5 h-4.5 rounded-md hover:bg-neutral-100 flex items-center justify-center text-[#707070] hover:text-black transition-colors cursor-pointer border-none bg-transparent"
+                                  className="w-5 h-5 rounded-md hover:bg-neutral-100 flex items-center justify-center text-[#707070] hover:text-black transition-colors cursor-pointer border-none bg-transparent"
                                 >
                                   <X size={10} strokeWidth={3} />
                                 </button>

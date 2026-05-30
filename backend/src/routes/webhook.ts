@@ -2,7 +2,7 @@ import { Router, Response } from "express";
 import { env } from "../config/env";
 import { verifyWebhookSignature, RequestWithRawBody } from "../middleware/signature";
 import { supabase } from "../config/db";
-import { handleIncomingWebhookEvent, handleIncomingLeadgenEvent } from "../services/trigger";
+import { addWebhookToQueue } from "../services/queue";
 
 const router = Router();
 
@@ -97,7 +97,7 @@ router.post("/instagram", verifyWebhookSignature, async (req: RequestWithRawBody
           }
 
           if (dbAccount) {
-            handleIncomingWebhookEvent({
+            addWebhookToQueue({
               accountId: dbAccount.id,
               instagramPageId: recipientId || entryId || "",
               senderId,
@@ -105,8 +105,8 @@ router.post("/instagram", verifyWebhookSignature, async (req: RequestWithRawBody
               text,
               buttonPayload,
               referralRef,
-            }).catch((err) => {
-              console.error("[Webhook] Error in handleIncomingWebhookEvent for messaging/referral:", err);
+            }, "standard").catch((err) => {
+              console.error("[Webhook] Error adding standard webhook event to queue:", err);
             });
           }
         }
@@ -150,8 +150,8 @@ router.post("/instagram", verifyWebhookSignature, async (req: RequestWithRawBody
           if (dbAccount) {
             // Avoid loops: check if comment author is the page itself
             if (fromUser && fromUser.id !== dbAccount.instagram_page_id) {
-              console.log(`[Webhook] [Comment] Forwarding feed comment from ${fromUser.username} to trigger service.`);
-              handleIncomingWebhookEvent({
+              console.log(`[Webhook] [Comment] Forwarding feed comment from ${fromUser.username} to queue.`);
+              addWebhookToQueue({
                 accountId: dbAccount.id,
                 instagramPageId: entryId,
                 senderId: fromUser.id,
@@ -159,8 +159,8 @@ router.post("/instagram", verifyWebhookSignature, async (req: RequestWithRawBody
                 text,
                 commentId,
                 postId: mediaId,
-              }).catch((err) => {
-                console.error("[Webhook] Error in handleIncomingWebhookEvent for comment:", err);
+              }, "standard").catch((err) => {
+                console.error("[Webhook] Error adding comment webhook event to queue:", err);
               });
             } else {
               console.log("[Webhook] [Comment] Ignoring comment authored by self/unknown user.");
@@ -187,14 +187,14 @@ router.post("/instagram", verifyWebhookSignature, async (req: RequestWithRawBody
 
           if (dbAccount) {
             console.log(`[Webhook] [Leadgen] Received lead gen event for Page ${pageId} (${dbAccount.username}). Form ID: ${formId}, Lead ID: ${leadgenId}`);
-            handleIncomingLeadgenEvent({
+            addWebhookToQueue({
               accountId: dbAccount.id,
               pageId,
               leadgenId,
               formId,
               fieldData,
-            }).catch((err) => {
-              console.error("[Webhook] Error in handleIncomingLeadgenEvent:", err);
+            }, "leadgen").catch((err) => {
+              console.error("[Webhook] Error adding leadgen webhook event to queue:", err);
             });
           } else {
             console.warn(`[Webhook] [Leadgen] Received lead gen event for unlinked Page ID: ${pageId}`);

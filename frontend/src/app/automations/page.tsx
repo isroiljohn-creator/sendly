@@ -760,9 +760,9 @@ export default function AutomationsPage() {
                     {/* Footer Owner Profile */}
                     <div className="flex items-center gap-1.5 min-w-0">
                       {a.channel?.avatar ? (
-                        <img src={a.channel.avatar} alt="" className="h-4.5 w-4.5 rounded-full object-cover shrink-0" />
+                        <img src={a.channel.avatar} alt="" className="h-5 w-5 rounded-full object-cover shrink-0" />
                       ) : (
-                        <div className="h-4.5 w-4.5 rounded-full bg-slate-200 flex items-center justify-center shrink-0 text-[9px] font-bold text-[#8E8E93]">
+                        <div className="h-5 w-5 rounded-full bg-slate-200 flex items-center justify-center shrink-0 text-[9px] font-bold text-[#8E8E93]">
                           {a.channel?.name ? a.channel.name.charAt(0).toUpperCase() : "?"}
                         </div>
                       )}

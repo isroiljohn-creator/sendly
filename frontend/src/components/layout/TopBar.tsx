@@ -142,7 +142,7 @@ export function TopBar() {
   ) : null;
 
   return (
-    <div className="flex items-center justify-between gap-4">
+    <div className="flex h-[42px] items-center justify-between gap-4">
       {/* Account Selector */}
       {!isLessonsPage && (
         <div className="flex items-center gap-2">
@@ -160,9 +160,13 @@ export function TopBar() {
           ) : (
             <button
               onClick={() => window.dispatchEvent(new Event("replai-open-connect-modal"))}
-              className="text-[12px] font-bold text-red-500 hover:underline bg-transparent border-none cursor-pointer"
+              className="flex items-center gap-2.5 px-3.5 py-2 rounded-[14px] bg-red-50 border border-red-200/50 text-red-700 w-fit shrink-0 hover:bg-red-100/50 hover:border-red-300 transition-all select-none shadow-sm hover:shadow-md duration-150 cursor-pointer"
             >
-              Ulanmagan (Akkaunt qo&apos;shish)
+              <div className="grid h-5 w-5 place-items-center rounded-full bg-red-100 text-red-600 shrink-0">
+                <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
+              </div>
+              <span className="text-[12px] font-bold">{t("pages.settings_page.no_channel") || "Ulanmagan"}</span>
+              <span className="text-[10px] text-red-500 font-bold ml-1">{t("common.connect") || "Ulash"} ▾</span>
             </button>
           )}
         </div>

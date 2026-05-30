@@ -29,7 +29,8 @@ import {
   AlertTriangle,
   FileText,
   BarChart2,
-  TrendingUp
+  TrendingUp,
+  Loader2
 } from "lucide-react";
 
 const Facebook = ({ size = 24, className, ...props }: React.SVGProps<SVGSVGElement> & { size?: number }) => (
@@ -357,6 +358,10 @@ export default function AIAgentPage() {
   // Telegram Bot Verification States
   const [isTelegramLinked, setIsTelegramLinked] = useState(false);
   const [telegramBotUsername, setTelegramBotUsername] = useState("");
+  const [isVerifyingAdmin, setIsVerifyingAdmin] = useState(false);
+  const [adminVerifyCode, setAdminVerifyCode] = useState("");
+  const [verifyAdminError, setVerifyAdminError] = useState("");
+  const [isVerifyLoading, setIsVerifyLoading] = useState(false);
 
   // Custom Modal States
   const [confirmModal, setConfirmModal] = useState<{
@@ -394,6 +399,14 @@ export default function AIAgentPage() {
   const [chatInput, setChatInput] = useState("");
   const [chatLoading, setChatLoading] = useState(false);
   const chatEndRef = useRef<HTMLDivElement>(null);
+
+  // Slider preview states
+  const [sliderPreview, setSliderPreview] = useState<{
+    type: "tone" | "length" | "humor";
+    value: number;
+    visible: boolean;
+  } | null>(null);
+  const sliderPreviewTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Facebook Lead Simulator States
   const [simLeadName, setSimLeadName] = useState("Sardor Salimov");
@@ -511,6 +524,9 @@ export default function AIAgentPage() {
     window.addEventListener("replai-db-update", handleUpdate);
     return () => {
       window.removeEventListener("replai-db-update", handleUpdate);
+      if (sliderPreviewTimeoutRef.current) {
+        clearTimeout(sliderPreviewTimeoutRef.current);
+      }
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -812,6 +828,48 @@ export default function AIAgentPage() {
     }
   };
 
+  // Verify Telegram Admin Code
+  const handleVerifyAdminCode = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!adminVerifyCode.trim() || !settings?.telegramBotId) return;
+
+    setIsVerifyLoading(true);
+    setVerifyAdminError("");
+
+    try {
+      const userId = db.getCurrentUser()?.id || "guest";
+      const res = await fetch("/api/telegram/verify-admin", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userId,
+          channelId: settings.telegramBotId,
+          code: adminVerifyCode.trim()
+        })
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        setVerifyAdminError(data.error || "Tasdiqlash kodini tekshirishda xatolik yuz berdi");
+        setIsVerifyLoading(false);
+        return;
+      }
+
+      // Success! Reload settings from server
+      await db.fetchFromServer();
+      loadDatabase();
+
+      setIsVerifyingAdmin(false);
+      setAdminVerifyCode("");
+      showToast("Admin profil muvaffaqiyatli bog'landi!");
+    } catch (err) {
+      console.error("Verification error:", err);
+      setVerifyAdminError("Server bilan bog'lanishda xatolik yuz berdi");
+    } finally {
+      setIsVerifyLoading(false);
+    }
+  };
+
   // Toggle module tree collapse
   const toggleModule = (moduleId: string) => {
     setExpandedModules(prev => ({
@@ -956,6 +1014,82 @@ export default function AIAgentPage() {
       ...settings,
       [field]: value
     });
+  };
+
+  const handleSliderChange = (type: "tone" | "length" | "humor", value: number) => {
+    handleUpdateSettings(type, value);
+    setSliderPreview({ type, value, visible: true });
+
+    if (sliderPreviewTimeoutRef.current) {
+      clearTimeout(sliderPreviewTimeoutRef.current);
+    }
+    sliderPreviewTimeoutRef.current = setTimeout(() => {
+      setSliderPreview(prev => prev ? { ...prev, visible: false } : null);
+    }, 4000);
+  };
+
+  const getSliderPreviewContent = (type: "tone" | "length" | "humor", value: number) => {
+    if (type === "tone") {
+      if (value < 33) {
+        return {
+          title: "Ohang: Norasmiy (Do'stona)",
+          question: "Narxlaringiz qanaqa?",
+          reply: "Salom! 😊 Bizda narxlar juda ham hamyonbop. Kurslarimiz oyiga atigi 150 ming so'mdan boshlanadi. Qiziqib ko'rasizmi? 😉"
+        };
+      } else if (value >= 33 && value <= 66) {
+        return {
+          title: "Ohang: Me'yorida (Samimiy)",
+          question: "Narxlaringiz qanaqa?",
+          reply: "Salom, xush kelibsiz! Bizning o'quv dasturlarimiz narxi oyiga 150 000 so'mdan boshlanadi. Batafsil ma'lumot olishni istasangiz, yozib qoldiring."
+        };
+      } else {
+        return {
+          title: "Ohang: Rasmiy",
+          question: "Narxlaringiz qanaqa?",
+          reply: "Assalomu alaykum. Bizning xizmatlarimiz va o'quv kurslarimizning to'lov miqdori oyiga 150 000 so'mni tashkil etadi. Savollaringiz bo'lsa, xizmatingizdamiz."
+        };
+      }
+    } else if (type === "length") {
+      if (value < 33) {
+        return {
+          title: "Javob uzunligi: Qisqa (Londa)",
+          question: "Darslar qachon boshlanadi?",
+          reply: "Darslar dushanba kuni soat 19:00 da boshlanadi."
+        };
+      } else if (value >= 33 && value <= 66) {
+        return {
+          title: "Javob uzunligi: Me'yorida",
+          question: "Darslar qachon boshlanadi?",
+          reply: "Yangi guruhimiz uchun darslar kelasi dushanba kuni soat 19:00 da boshlanadi. Darslar haftada 3 marta bo'ladi."
+        };
+      } else {
+        return {
+          title: "Javob uzunligi: Batafsil tushuntirish",
+          question: "Darslar qachon boshlanadi?",
+          reply: "Bizning darslarimiz kelasi haftaning dushanba kunidan (soat 19:00 da) boshlanadi. Har bir dars davomiyligi 2 soat bo'lib, haftada 3 kun davom etadi. Dastlabki dars bepul."
+        };
+      }
+    } else {
+      if (value < 33) {
+        return {
+          title: "Hazil va Emojilar: Jiddiy (Akademik)",
+          question: "Kursni sotib olsam bo'ladimi?",
+          reply: "Ha, kursni xarid qilishingiz mumkin. Quyidagi havola orqali Click yoki Payme tizimi orqali to'lovni amalga oshiring."
+        };
+      } else if (value >= 33 && value <= 66) {
+        return {
+          title: "Hazil va Emojilar: Me'yorida",
+          question: "Kursni sotib olsam bo'ladimi?",
+          reply: "Albatta bo'ladi! 😊 Quyidagi to'lov havolasi orqali to'lovni amalga oshiring va guruhga qo'shiling. 🚀"
+        };
+      } else {
+        return {
+          title: "Hazil va Emojilar: Qiziqarli (Emojilar bilan)",
+          question: "Kursni sotib olsam bo'ladimi?",
+          reply: "Voy, albatta-da! 😍 Koinotimizga xush kelibsiz! 🚀 Quyidagi havola orqali to'lovni qilishingiz bilan guruhga uchyapmiz! Click/Payme tayyor! 😉💳✨"
+        };
+      }
+    }
   };
 
   // Send message to live sandbox preview simulator
@@ -2389,6 +2523,13 @@ export default function AIAgentPage() {
         </div>
 
         {/* Main Workspace */}
+        {activeTab === "settings" && !settings && (
+          <div className="flex flex-col items-center justify-center p-12 text-[#707070] gap-3">
+            <Loader2 className="animate-spin text-black" size={24} />
+            <span>Sozlamalar yuklanmoqda...</span>
+          </div>
+        )}
+
         {activeTab === "settings" && settings && (
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
             {/* Left Side: Settings panel */}
@@ -2484,7 +2625,7 @@ export default function AIAgentPage() {
               </div>
 
               {/* Sliders (Tone, Length, Humor) */}
-              <div className="bg-white border border-[#E8E8E8] rounded-[24px] p-6 shadow-sm flex flex-col gap-6">
+              <div className="relative bg-white border border-[#E8E8E8] rounded-[24px] p-6 shadow-sm flex flex-col gap-6">
                 <h3 className="text-[15px] font-bold text-black">
                   {t("pages.ai_agent.curator_tone_title")}
                 </h3>
@@ -2503,7 +2644,7 @@ export default function AIAgentPage() {
                       min="0"
                       max="100"
                       value={settings.tone}
-                      onChange={(e) => handleUpdateSettings("tone", parseInt(e.target.value))}
+                      onChange={(e) => handleSliderChange("tone", parseInt(e.target.value))}
                       className="w-full accent-black h-1 bg-[#F0F0F0] rounded-lg appearance-none cursor-pointer"
                     />
                     <div className="flex justify-between text-[10px] text-[#A0A0A0]">
@@ -2525,7 +2666,7 @@ export default function AIAgentPage() {
                       min="0"
                       max="100"
                       value={settings.length}
-                      onChange={(e) => handleUpdateSettings("length", parseInt(e.target.value))}
+                      onChange={(e) => handleSliderChange("length", parseInt(e.target.value))}
                       className="w-full accent-black h-1 bg-[#F0F0F0] rounded-lg appearance-none cursor-pointer"
                     />
                     <div className="flex justify-between text-[10px] text-[#A0A0A0]">
@@ -2547,7 +2688,7 @@ export default function AIAgentPage() {
                       min="0"
                       max="100"
                       value={settings.humor}
-                      onChange={(e) => handleUpdateSettings("humor", parseInt(e.target.value))}
+                      onChange={(e) => handleSliderChange("humor", parseInt(e.target.value))}
                       className="w-full accent-black h-1 bg-[#F0F0F0] rounded-lg appearance-none cursor-pointer"
                     />
                     <div className="flex justify-between text-[10px] text-[#A0A0A0]">
@@ -2556,6 +2697,38 @@ export default function AIAgentPage() {
                     </div>
                   </div>
                 </div>
+
+                {/* Floating Preview Card */}
+                {sliderPreview && sliderPreview.visible && (() => {
+                  const content = getSliderPreviewContent(sliderPreview.type, sliderPreview.value);
+                  return (
+                    <div className="lg:absolute lg:-right-[312px] lg:top-0 lg:w-[296px] w-full mt-4 lg:mt-0 z-40 bg-white border border-[#E8E8E8] rounded-[24px] shadow-lg p-5 flex flex-col gap-3 transition-all duration-300 animate-in fade-in slide-in-from-right-4">
+                      {/* Header */}
+                      <div className="flex items-center gap-2 border-b border-[#F0F0F0] pb-2">
+                        <Sparkles size={14} className="text-black animate-pulse" />
+                        <span className="text-[12px] font-extrabold text-black uppercase tracking-wider">
+                          {content.title}
+                        </span>
+                      </div>
+                      
+                      {/* Chat Messages */}
+                      <div className="flex flex-col gap-2.5 pt-1 text-[11px]">
+                        {/* User Message */}
+                        <div className="flex flex-col items-end max-w-[85%] ml-auto">
+                          <div className="bg-[#F0F0F0] text-black px-3.5 py-2 rounded-[16px] rounded-tr-sm leading-relaxed text-right">
+                            {content.question}
+                          </div>
+                        </div>
+                        {/* Bot Reply */}
+                        <div className="flex flex-col items-start max-w-[85%] mr-auto">
+                          <div className="bg-black text-[#C7F33C] px-3.5 py-2 rounded-[16px] rounded-tl-sm leading-relaxed text-left">
+                            {content.reply}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })()}
               </div>
 
               {/* Dynamic Restricted Topics */}
@@ -2711,7 +2884,7 @@ export default function AIAgentPage() {
               <div className="bg-white border border-[#E8E8E8] rounded-[24px] p-6 shadow-sm flex flex-col gap-4">
                 <div>
                   <h3 className="text-[15px] font-bold text-black">
-                    {"Inson-kuratorni ulash (Escalation)"}
+                    {"Inson-kuratorni ulash"}
                   </h3>
                   <p className="text-[11px] text-[#707070] mt-1">
                     {"AI javob bera olmagan yoki operator kutilgan holatlarda bot sizga Telegram orqali xabar yo'llashi uchun kurator (admin) profilini ulang."}
@@ -2740,14 +2913,82 @@ export default function AIAgentPage() {
                       {"O'chirish"}
                     </button>
                   </div>
-                ) : (
-                  <div className="flex flex-col gap-2 p-3.5 rounded-xl bg-blue-50 border border-blue-200">
+                ) : isVerifyingAdmin ? (
+                  <form onSubmit={handleVerifyAdminCode} className="flex flex-col gap-3 p-3.5 rounded-xl bg-blue-50 border border-blue-200 animate-fadeIn">
                     <div className="flex items-center gap-1.5 text-[12px] font-bold text-blue-800">
-                      <AlertTriangle size={14} className="text-amber-600 shrink-0" />
-                      <span>{"Admin profil ulanmagan"}</span>
+                      <Sparkles size={14} className="text-blue-600 shrink-0 animate-pulse" />
+                      <span>{"Tasdiqlash kodini kiriting"}</span>
                     </div>
-                    <p className="text-[11px] text-blue-700 leading-relaxed mt-1">
-                      {"Ulash uchun ulanayotgan Telegram botingizga borib, shaxsiy profilingizdan "}<strong>{"/admin"}</strong>{" buyrug'ini yuboring. Bot sizni administrator sifatida avtomatik ro'yxatga oladi."}
+                    <p className="text-[11px] text-blue-700 leading-relaxed">
+                      {telegramBotUsername ? (
+                        <>
+                          {"Telegram-da "}
+                          <a
+                            href={`https://t.me/${telegramBotUsername.replace(/^@+/, "")}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="underline font-bold text-blue-900"
+                          >
+                            @{telegramBotUsername.replace(/^@+/, "")}
+                          </a>
+                          {" botimizga o'ting va "}<strong>{"/start"}</strong>{" buyrug'ini bosing. Bot sizga yuborgan tasdiqlash kodini quyida kiriting."}
+                        </>
+                      ) : (
+                        "Telegram botimizga o'ting va /start buyrug'ini bosing. Bot yuborgan tasdiqlash kodini quyida kiriting."
+                      )}
+                    </p>
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        placeholder="Kodni kiriting (masalan: 123456)"
+                        value={adminVerifyCode}
+                        onChange={(e) => setAdminVerifyCode(e.target.value)}
+                        disabled={isVerifyLoading}
+                        className="px-3 py-2 text-[12px] bg-white border border-blue-300 rounded-xl focus:outline-none focus:border-blue-600 flex-1"
+                      />
+                      <button
+                        type="submit"
+                        disabled={isVerifyLoading || !adminVerifyCode.trim()}
+                        className="text-[11px] font-bold text-white bg-black hover:bg-gray-800 disabled:bg-gray-400 px-4 py-2 rounded-xl transition-all shadow-sm active:scale-95"
+                      >
+                        {isVerifyLoading ? "Tekshirilmoqda..." : "Tasdiqlash"}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setIsVerifyingAdmin(false);
+                          setVerifyAdminError("");
+                          setAdminVerifyCode("");
+                        }}
+                        disabled={isVerifyLoading}
+                        className="text-[11px] font-bold text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 px-3 py-2 rounded-xl transition-all shadow-sm active:scale-95"
+                      >
+                        {"Bekor qilish"}
+                      </button>
+                    </div>
+                    {verifyAdminError && (
+                      <span className="text-[10px] text-red-600 font-bold mt-1">
+                        {verifyAdminError}
+                      </span>
+                    )}
+                  </form>
+                ) : (
+                  <div className="flex flex-col gap-3 p-3.5 rounded-xl bg-blue-50 border border-blue-200">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-1.5 text-[12px] font-bold text-blue-800">
+                        <AlertTriangle size={14} className="text-amber-600 shrink-0" />
+                        <span>{"Admin profil ulanmagan"}</span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setIsVerifyingAdmin(true)}
+                        className="text-[11px] font-bold text-white bg-black hover:bg-gray-800 px-4 py-1.5 rounded-lg shadow-sm hover:shadow active:scale-95 transition-all"
+                      >
+                        {"Ulash"}
+                      </button>
+                    </div>
+                    <p className="text-[11px] text-blue-700 leading-relaxed">
+                      {"Ulash uchun ulanayotgan Telegram botingizga borib, profilingizdan botni boshlang (/start). Bot sizga tasdiqlash kodini yuboradi."}
                     </p>
                   </div>
                 )}

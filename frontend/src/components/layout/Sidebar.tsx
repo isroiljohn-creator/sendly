@@ -186,22 +186,15 @@ export function Sidebar() {
   };
 
   return (
-    <aside className="sticky top-6 z-40 flex w-[60px] shrink-0 flex-col items-center h-[calc(100vh-48px)] pt-1">
-      {/* Logo */}
-      <Link href="/">
-        <div className="grid h-[42px] w-[42px] place-items-center rounded-[14px] bg-black hover:bg-black/80 transition-colors">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-            <path
-              d="M13.5 2c.3 3.5-1.5 5.2-3 6.8C9 10.5 7.5 12 8 14.5 8.4 16.7 10 18 12 18c0-2 .8-3 2-4.2 1.4-1.4 3-3 2.6-6C16.2 5 14.8 3.3 13.5 2Z"
-              fill="#C7F33C"
-            />
-            <path
-              d="M9.5 14c-.6 1-1 2-1 3 0 2.5 1.6 4 3.5 4s3.5-1.5 3.5-4c0-1-.4-2-1-3-.3 1.5-1.2 2.3-2.5 2.3S9.8 15.5 9.5 14Z"
-              fill="#9BC92E"
-            />
-          </svg>
-        </div>
-      </Link>
+    <aside className="sticky top-4 z-40 flex w-[60px] shrink-0 flex-col items-center h-full pt-0">
+      {/* Logo Wrapper to align with TopBar */}
+      <div className="h-[42px] flex items-center justify-center shrink-0">
+        <Link href="/">
+          <div className="grid h-[38px] w-[38px] place-items-center rounded-[12px] bg-[#C7F33C] hover:bg-[#B0D82D] transition-colors shadow-sm duration-150 active:scale-95">
+            <Zap size={18} className="fill-black text-black" />
+          </div>
+        </Link>
+      </div>
 
       {/* Channel Switcher */}
       <div className="mt-4 relative" ref={dropdownRef}>

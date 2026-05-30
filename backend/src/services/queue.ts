@@ -8,6 +8,7 @@ const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 let queue: Queue.Queue | null = null;
 let broadcastsQueue: Queue.Queue | null = null;
+let webhooksQueue: Queue.Queue | null = null;
 
 try {
   queue = new Queue("instagram-chatbot-delays", env.REDIS_URL, {
@@ -46,6 +47,30 @@ try {
 } catch (err) {
   console.error("[Broadcast Queue] Failed to initialize Bull broadcasts queue:", err);
   broadcastsQueue = null;
+}
+
+try {
+  webhooksQueue = new Queue("webhooks-queue", env.REDIS_URL);
+
+  webhooksQueue.process(async (job) => {
+    const { payload, type } = job.data;
+    if (type === "standard") {
+      const { handleIncomingWebhookEvent } = await import("./trigger");
+      console.log(`[Queue Processor] Processing incoming webhook event for account: ${payload.accountId}, sender: ${payload.senderId}`);
+      await handleIncomingWebhookEvent(payload);
+    } else if (type === "leadgen") {
+      const { handleIncomingLeadgenEvent } = await import("./trigger");
+      console.log(`[Queue Processor] Processing incoming leadgen event for account: ${payload.accountId}, leadgenId: ${payload.leadgenId}`);
+      await handleIncomingLeadgenEvent(payload);
+    }
+  });
+
+  webhooksQueue.on("error", (err) => {
+    console.error("[Webhooks Queue] Bull queue error:", err);
+  });
+} catch (err) {
+  console.error("[Webhooks Queue] Failed to initialize Bull webhooks queue:", err);
+  webhooksQueue = null;
 }
 
 /**
@@ -445,3 +470,32 @@ export async function recoverStuckBroadcasts(): Promise<void> {
     console.error("[Recovery] Unexpected error during broadcast recovery:", err);
   }
 }
+
+/**
+ * Adds a webhook payload to the Bull queue.
+ * If Bull queue is not available (e.g. Redis is offline), it falls back to direct execution.
+ */
+export async function addWebhookToQueue(payload: any, type: "standard" | "leadgen"): Promise<void> {
+  if (webhooksQueue) {
+    const jobId = `${type}_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+    await webhooksQueue.add(
+      { payload, type },
+      {
+        jobId,
+        removeOnComplete: true,
+        removeOnFail: true,
+      }
+    );
+    console.log(`[Queue] Added ${type} webhook to Bull queue. Job ID: ${jobId}`);
+  } else {
+    console.log(`[Queue] Bull webhooksQueue not available. Executing ${type} webhook directly (fallback).`);
+    if (type === "standard") {
+      const { handleIncomingWebhookEvent } = await import("./trigger");
+      await handleIncomingWebhookEvent(payload);
+    } else if (type === "leadgen") {
+      const { handleIncomingLeadgenEvent } = await import("./trigger");
+      await handleIncomingLeadgenEvent(payload);
+    }
+  }
+}
+
