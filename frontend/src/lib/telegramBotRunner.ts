@@ -281,6 +281,7 @@ export async function handleTelegramUpdate(channelId: string, token: string, upd
 
       // 5-digit verification code like Telegram
       const verifyCode = Math.floor(10000 + Math.random() * 90000).toString();
+      let matched = false;
       await updateDbFile(async (dbData) => {
         let context: Record<string, string> = dbData as unknown as Record<string, string>;
         if (dbData.userData && typeof dbData.userData === "object") {
@@ -290,20 +291,29 @@ export async function handleTelegramUpdate(channelId: string, token: string, upd
               const userChannels: Channel[] = rawUserChannels ? JSON.parse(rawUserChannels) : [];
               if (userChannels.some(c => c.id === targetChannelId)) {
                 context = userVal as Record<string, string>;
+                matched = true;
                 break;
               }
             }
           }
         }
         
-        const verifyData = {
-          code: verifyCode,
-          chatId: String(chatId),
-          username: username || firstName || "Admin",
-          timestamp: Date.now()
-        };
-        context[`replai_tg_verify_code_${targetChannelId}`] = JSON.stringify(verifyData);
+        if (matched) {
+          const verifyData = {
+            code: verifyCode,
+            chatId: String(chatId),
+            username: username || firstName || "Admin",
+            timestamp: Date.now()
+          };
+          context[`replai_tg_verify_code_${targetChannelId}`] = JSON.stringify(verifyData);
+        }
       });
+
+      if (!matched) {
+        const errorMsg = `Kechirasiz, ushbu havola eskirgan yoki xato. Tasdiqlash kodini olish uchun iltimos platformadagi inson-kuratorni ulash bo'limidagi <b>"Kodni olish"</b> tugmasini bosing.`;
+        await sendTelegramMessage(token, chatId, errorMsg, "HTML");
+        return;
+      }
       
       const messageText = `Assalomu alaykum! Sendly botiga xush kelibsiz.\n\nSizning tasdiqlash kodingiz: <code>${verifyCode}</code>\n\nUshbu kodni Sendly platformasidagi adminni ulash oynasiga kiriting (kod 1 daqiqa davomida faol bo'ladi).`;
       const replyMarkup = {

@@ -970,6 +970,28 @@ function AIAgentContent() {
     }
   };
 
+  // Disconnect Telegram Admin
+  const handleDisconnectAdmin = async () => {
+    if (!settings?.telegramBotId) return;
+    try {
+      const updatedSettings = {
+        ...settings,
+        adminTelegramChatId: "",
+        adminTelegramUsername: ""
+      };
+      setSettings(updatedSettings);
+      
+      db.saveBotSettings(updatedSettings, settings.telegramBotId);
+      await db.saveToServer();
+      await db.fetchFromServer();
+      loadDatabase();
+      showToast("Admin profil muvaffaqiyatli o'chirildi!");
+    } catch (err) {
+      console.error("Disconnect admin error:", err);
+      showToast("Xatolik yuz berdi", "error");
+    }
+  };
+
   // Toggle module tree collapse
   const toggleModule = (moduleId: string) => {
     setExpandedModules(prev => ({
@@ -2653,10 +2675,7 @@ function AIAgentContent() {
                         </div>
                         <button
                           type="button"
-                          onClick={() => {
-                            handleUpdateSettings("adminTelegramChatId", "");
-                            handleUpdateSettings("adminTelegramUsername", "");
-                          }}
+                          onClick={handleDisconnectAdmin}
                           className="text-[10px] font-bold text-red-600 hover:text-red-700 bg-white border border-red-200 px-2.5 py-1.5 rounded-lg shadow-sm hover:shadow active:scale-95 transition-all"
                         >
                           {"O'chirish"}
@@ -3669,10 +3688,7 @@ function AIAgentContent() {
                           </div>
                           <button
                             type="button"
-                            onClick={() => {
-                              handleUpdateSettings("adminTelegramChatId", "");
-                              handleUpdateSettings("adminTelegramUsername", "");
-                            }}
+                            onClick={handleDisconnectAdmin}
                             className="text-[11px] font-bold text-red-600 hover:text-red-700 bg-white border border-red-200 px-3 py-1.5 rounded-lg shadow-sm hover:shadow active:scale-95 transition-all"
                           >
                             {"O'chirish"}
