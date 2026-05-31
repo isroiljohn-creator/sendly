@@ -375,8 +375,8 @@ function AIAgentContent() {
   const activeBotUser = (telegramBotUsername && telegramBotUsername.toLowerCase().trim().replace(/^@+/, "") !== "test")
     ? telegramBotUsername
     : (typeof window !== "undefined"
-        ? (db.getChannels().filter(c => c.type === "telegram" && c.isConnected && c.telegramToken && c.username.toLowerCase().trim().replace(/^@+/, "") !== "test")[0]?.username || "sendly_robot")
-        : "sendly_robot");
+        ? (db.getChannels().filter(c => c.type === "telegram" && c.isConnected && c.telegramToken && c.username.toLowerCase().trim().replace(/^@+/, "") !== "test")[0]?.username || "")
+        : "");
   const [isVerifyingAdmin, setIsVerifyingAdmin] = useState(false);
   const [adminVerifyCode, setAdminVerifyCode] = useState("");
   const [verifyAdminError, setVerifyAdminError] = useState("");
@@ -888,23 +888,8 @@ Nomzodlarga faqat vakansiya va talablar (VAKANSIYALAR VA TALABLAR) doirasida jav
 
   const loadDatabase = () => {
     const channels = db.getChannels();
-    let channelsUpdated = false;
-    const updatedChannels = channels.map(c => {
-      if (c.type === "telegram" && (c.username.toLowerCase().trim().replace(/^@+/, "") === "test" || c.username.trim() === "")) {
-        channelsUpdated = true;
-        return { 
-          ...c, 
-          username: "@sendly_robot", 
-          name: c.name.toLowerCase().trim() === "test" || c.name === "" ? "Sendly Bot" : c.name 
-        };
-      }
-      return c;
-    });
-    if (channelsUpdated) {
-      db.saveChannels(updatedChannels);
-    }
 
-    const tgChannels = updatedChannels.filter(
+    const tgChannels = channels.filter(
       (c) => c.type === "telegram" && c.isConnected && c.telegramToken
     );
 
