@@ -2422,6 +2422,177 @@ Nomzodlarga faqat vakansiya va talablar (VAKANSIYALAR VA TALABLAR) doirasida jav
                       <ArrowRight size={14} />
                     </button>
                   </div>
+
+                  {/* Card 7: Klinika / Shifokor AI */}
+                  <div className="bg-white border border-[#E8E8E8] hover:border-black/20 hover:shadow-xl rounded-[28px] p-6 flex flex-col justify-between transition-all group relative overflow-hidden">
+                    <div className="absolute top-0 right-0 w-24 h-24 bg-[#C7F33C]/10 rounded-bl-full -z-10 group-hover:scale-110 transition-transform" />
+                    <div className="flex flex-col gap-4">
+                      <div className="flex items-center justify-between">
+                        <div className="w-16 h-16 rounded-2xl overflow-hidden shrink-0">
+                          <img src="/robots/robot_clinic.png" alt="Klinika AI" className="w-full h-full object-cover" />
+                        </div>
+                        <div className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-full">
+                          <span className="w-2 h-2 rounded-full bg-gray-300"></span>
+                          <span className="text-[10px] font-extrabold text-[#707070] uppercase tracking-wider">
+                            {t("pages.ai_agent.inactive")}
+                          </span>
+                        </div>
+                      </div>
+                      <div>
+                        <h3 className="text-[17px] font-bold text-black group-hover:text-[#7CA607] transition-colors">
+                          {"Klinika / Shifokor AI"}
+                        </h3>
+                        <p className="text-[12px] text-[#707070] mt-1.5 leading-relaxed min-h-[48px]">
+                          {"Bemorlar bilan suhbatlashib, shifokorga onlayn navbat yozadi, bo'sh vaqtlarni ko'rsatadi va qabul oldi eslatma yuboradi."}
+                        </p>
+                      </div>
+
+                      <div className="border-t border-[#F0F0F0] my-1" />
+
+                      <ul className="flex flex-col gap-2 text-[11px] text-[#595959]">
+                        <li className="flex items-start gap-2.5">
+                          <CheckCircle className="w-4 h-4 text-[#9BC92E] shrink-0 mt-0.5" />
+                          <span>{"Shifokorga onlayn yozilish"}</span>
+                        </li>
+                        <li className="flex items-start gap-2.5">
+                          <CheckCircle className="w-4 h-4 text-[#9BC92E] shrink-0 mt-0.5" />
+                          <span>{"Bo'sh vaqtlarni avtomatik ko'rsatish"}</span>
+                        </li>
+                        <li className="flex items-start gap-2.5">
+                          <CheckCircle className="w-4 h-4 text-[#9BC92E] shrink-0 mt-0.5" />
+                          <span>{"Qabul oldi eslatma yuborish"}</span>
+                        </li>
+                        <li className="flex items-start gap-2.5">
+                          <CheckCircle className="w-4 h-4 text-[#9BC92E] shrink-0 mt-0.5" />
+                          <span>{"Bemorlar bazasi va tarix"}</span>
+                        </li>
+                      </ul>
+                    </div>
+
+                    <button
+                      onClick={() => {
+                        useRouterObj.push("/ai-agent?type=clinic");
+                      }}
+                      className="w-full mt-6 py-3 rounded-full bg-black text-[#C7F33C] text-[12px] font-bold hover:bg-black/90 hover:scale-[1.02] active:scale-95 transition-all text-center flex items-center justify-center gap-2"
+                    >
+                      <span>{t("pages.ai_agent.setup_template_btn")}</span>
+                      <ArrowRight size={14} />
+                    </button>
+                  </div>
+
+                  {/* Card 8: Rieltor AI */}
+                  <div className="bg-white border border-[#E8E8E8] hover:border-black/20 hover:shadow-xl rounded-[28px] p-6 flex flex-col justify-between transition-all group relative overflow-hidden">
+                    <div className="absolute top-0 right-0 w-24 h-24 bg-[#C7F33C]/10 rounded-bl-full -z-10 group-hover:scale-110 transition-transform" />
+                    <div className="flex flex-col gap-4">
+                      <div className="flex items-center justify-between">
+                        <div className="w-16 h-16 rounded-2xl overflow-hidden shrink-0">
+                          <img src="/robots/robot_realtor.png" alt="Rieltor AI" className="w-full h-full object-cover" />
+                        </div>
+                        <div className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-full">
+                          <span className="w-2 h-2 rounded-full bg-gray-300"></span>
+                          <span className="text-[10px] font-extrabold text-[#707070] uppercase tracking-wider">
+                            {t("pages.ai_agent.inactive")}
+                          </span>
+                        </div>
+                      </div>
+                      <div>
+                        <h3 className="text-[17px] font-bold text-black group-hover:text-[#7CA607] transition-colors">
+                          {"Rieltor AI"}
+                        </h3>
+                        <p className="text-[12px] text-[#707070] mt-1.5 leading-relaxed min-h-[48px]">
+                          {"Ko'chmas mulk bazasidan uy-joy qidirib topadi, narx va joylashuv ma'lumotini beradi, ko'rish uchun vaqt belgilaydi."}
+                        </p>
+                      </div>
+
+                      <div className="border-t border-[#F0F0F0] my-1" />
+
+                      <ul className="flex flex-col gap-2 text-[11px] text-[#595959]">
+                        <li className="flex items-start gap-2.5">
+                          <CheckCircle className="w-4 h-4 text-[#9BC92E] shrink-0 mt-0.5" />
+                          <span>{"Uy-joy bazasidan qidiruv"}</span>
+                        </li>
+                        <li className="flex items-start gap-2.5">
+                          <CheckCircle className="w-4 h-4 text-[#9BC92E] shrink-0 mt-0.5" />
+                          <span>{"Narx, joylashuv, surat yuborish"}</span>
+                        </li>
+                        <li className="flex items-start gap-2.5">
+                          <CheckCircle className="w-4 h-4 text-[#9BC92E] shrink-0 mt-0.5" />
+                          <span>{"Ko'rish uchun vaqt belgilash"}</span>
+                        </li>
+                        <li className="flex items-start gap-2.5">
+                          <CheckCircle className="w-4 h-4 text-[#9BC92E] shrink-0 mt-0.5" />
+                          <span>{"Mijoz ehtiyojini tahlil qilish"}</span>
+                        </li>
+                      </ul>
+                    </div>
+
+                    <button
+                      onClick={() => {
+                        useRouterObj.push("/ai-agent?type=realtor");
+                      }}
+                      className="w-full mt-6 py-3 rounded-full bg-black text-[#C7F33C] text-[12px] font-bold hover:bg-black/90 hover:scale-[1.02] active:scale-95 transition-all text-center flex items-center justify-center gap-2"
+                    >
+                      <span>{t("pages.ai_agent.setup_template_btn")}</span>
+                      <ArrowRight size={14} />
+                    </button>
+                  </div>
+
+                  {/* Card 9: Texnik yordam AI */}
+                  <div className="bg-white border border-[#E8E8E8] hover:border-black/20 hover:shadow-xl rounded-[28px] p-6 flex flex-col justify-between transition-all group relative overflow-hidden">
+                    <div className="absolute top-0 right-0 w-24 h-24 bg-[#C7F33C]/10 rounded-bl-full -z-10 group-hover:scale-110 transition-transform" />
+                    <div className="flex flex-col gap-4">
+                      <div className="flex items-center justify-between">
+                        <div className="w-16 h-16 rounded-2xl overflow-hidden shrink-0">
+                          <img src="/robots/robot_helpdesk.png" alt="Texnik yordam AI" className="w-full h-full object-cover" />
+                        </div>
+                        <div className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-full">
+                          <span className="w-2 h-2 rounded-full bg-gray-300"></span>
+                          <span className="text-[10px] font-extrabold text-[#707070] uppercase tracking-wider">
+                            {t("pages.ai_agent.inactive")}
+                          </span>
+                        </div>
+                      </div>
+                      <div>
+                        <h3 className="text-[17px] font-bold text-black group-hover:text-[#7CA607] transition-colors">
+                          {"Texnik yordam AI"}
+                        </h3>
+                        <p className="text-[12px] text-[#707070] mt-1.5 leading-relaxed min-h-[48px]">
+                          {"Foydalanuvchilarning texnik muammolarini hal qiladi, FAQ dan javob topadi, murakkab holatlarni operatorga yo'naltiradi."}
+                        </p>
+                      </div>
+
+                      <div className="border-t border-[#F0F0F0] my-1" />
+
+                      <ul className="flex flex-col gap-2 text-[11px] text-[#595959]">
+                        <li className="flex items-start gap-2.5">
+                          <CheckCircle className="w-4 h-4 text-[#9BC92E] shrink-0 mt-0.5" />
+                          <span>{"FAQ dan avtomatik javob topish"}</span>
+                        </li>
+                        <li className="flex items-start gap-2.5">
+                          <CheckCircle className="w-4 h-4 text-[#9BC92E] shrink-0 mt-0.5" />
+                          <span>{"Muammoni tasniflash va yo'naltirish"}</span>
+                        </li>
+                        <li className="flex items-start gap-2.5">
+                          <CheckCircle className="w-4 h-4 text-[#9BC92E] shrink-0 mt-0.5" />
+                          <span>{"Tiket tizimi integratsiyasi"}</span>
+                        </li>
+                        <li className="flex items-start gap-2.5">
+                          <CheckCircle className="w-4 h-4 text-[#9BC92E] shrink-0 mt-0.5" />
+                          <span>{"Operatorga uzatish qoidalari"}</span>
+                        </li>
+                      </ul>
+                    </div>
+
+                    <button
+                      onClick={() => {
+                        useRouterObj.push("/ai-agent?type=helpdesk");
+                      }}
+                      className="w-full mt-6 py-3 rounded-full bg-black text-[#C7F33C] text-[12px] font-bold hover:bg-black/90 hover:scale-[1.02] active:scale-95 transition-all text-center flex items-center justify-center gap-2"
+                    >
+                      <span>{t("pages.ai_agent.setup_template_btn")}</span>
+                      <ArrowRight size={14} />
+                    </button>
+                  </div>
                 </div>
               </>
             );
