@@ -123,7 +123,7 @@ export default function TemplatesPage() {
     // AI chatbotlar
     {
       id: "tmpl_ai_agent",
-      name: "AI kuratori (AI Curator Agent)",
+      name: "AI kuratori",
       category: "ai",
       platforms: ["instagram", "telegram"],
       hasBuilderBadge: true,
@@ -133,7 +133,7 @@ export default function TemplatesPage() {
     },
     {
       id: "tmpl_ai_sales",
-      name: "Sotuvchi AI Agent (Sales Closer AI)",
+      name: "Sotuvchi AI Agent",
       category: "ai",
       platforms: ["instagram", "telegram"],
       hasBuilderBadge: true,
@@ -143,7 +143,7 @@ export default function TemplatesPage() {
     },
     {
       id: "tmpl_ai_booker",
-      name: "Konsultatsiya va Band qilish AI (Appointment Booker AI)",
+      name: "Konsultatsiya va Band qilish AI",
       category: "ai",
       platforms: ["instagram", "telegram"],
       hasBuilderBadge: true,
@@ -153,7 +153,7 @@ export default function TemplatesPage() {
     },
     {
       id: "tmpl_ai_recruiter",
-      name: "HR va Vakansiyalar uchun AI (HR Recruiter AI)",
+      name: "HR va Vakansiyalar uchun AI",
       category: "ai",
       platforms: ["instagram", "telegram"],
       hasBuilderBadge: true,

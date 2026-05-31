@@ -590,11 +590,11 @@ function AIAgentContent() {
       case "kurator":
         return "AI kuratori";
       case "sales":
-        return "Sotuvchi AI Agent (Sales Closer AI)";
+        return "Sotuvchi AI Agent";
       case "booker":
-        return "Konsultatsiya va Band qilish AI (Appointment Booker AI)";
+        return "Konsultatsiya va Band qilish AI";
       case "recruiter":
-        return "HR va Vakansiyalar uchun AI (HR Recruiter AI)";
+        return "HR va Vakansiyalar uchun AI";
       case "fb-leads":
         return "Facebook Lead Handler";
       case "fb-leads-direct":
@@ -618,6 +618,104 @@ function AIAgentContent() {
         return "Bosh sahifa / AI Agent";
     }
   };
+
+  const getKnowledgeTabName = () => {
+    switch (selectedAgentType) {
+      case "sales": return "Mahsulotlar katalogi";
+      case "booker": return "Mutaxassis bilimlari";
+      case "recruiter": return "Vakansiyalar bazasi";
+      default: return t("pages.ai_agent.knowledge_base_tab");
+    }
+  };
+
+  const getKnowledgeSectionTitle = () => {
+    switch (selectedAgentType) {
+      case "sales": return "Mahsulotlar, narxlar va do'kon ma'lumotlari";
+      case "booker": return "Mutaxassis bilimlari va ish tartibi";
+      case "recruiter": return "Vakansiyalar va talablar";
+      default: return "Darsliklar va materiallar";
+    }
+  };
+
+  const getKnowledgeSectionDesc = () => {
+    switch (selectedAgentType) {
+      case "sales": return "Mahsulotlar katalogi, narxlar, manzil va ish vaqti kabi ma'lumotlarni qo'shing. AI agent shu ma'lumotlar asosida mijozlarga javob beradi.";
+      case "booker": return "Mutaxassisning bilimlari, xizmatlar ro'yxati, ish tartibi va konsultatsiya shartlarini kiriting.";
+      case "recruiter": return "Bo'sh ish o'rinlari, talablar, ish sharoitlari va kompaniya haqida ma'lumotlarni kiriting.";
+      default: return "Kurs materiallari, darsliklar va PDF hujjatlarni qo'shing. AI kurator shu materiallar asosida javob beradi.";
+    }
+  };
+
+  const getSystemPromptTitle = () => {
+    switch (selectedAgentType) {
+      case "sales": return "Sotuvchi ko'rsatmasi";
+      case "booker": return "Maslahatchi ko'rsatmasi";
+      case "recruiter": return "Rekruter ko'rsatmasi";
+      default: return t("pages.ai_agent.system_instruction_label");
+    }
+  };
+
+  const getSystemPromptDesc = () => {
+    switch (selectedAgentType) {
+      case "sales": return "Sotuvchi agentning xulq-atvori va javob berish qoidalarini belgilang.";
+      case "booker": return "Maslahatchi agentning ohangini va konsultatsiya qoidalarini sozlang.";
+      case "recruiter": return "Rekruter agentning nomzodlar bilan suhbat qoidalarini belgilang.";
+      default: return t("pages.ai_agent.system_instruction_desc");
+    }
+  };
+
+  const getForbiddenTopicsTitle = () => {
+    switch (selectedAgentType) {
+      case "sales": return "Gaplashmaydigan mavzular";
+      default: return t("pages.ai_agent.forbidden_topics_title");
+    }
+  };
+
+  const getForbiddenTopicsDesc = () => {
+    switch (selectedAgentType) {
+      case "sales": return "Agent ushbu mavzular haqida mijozlarga javob bermaydi.";
+      case "booker": return "Agent ushbu mavzular haqida gaplashmaydi.";
+      case "recruiter": return "Agent ushbu mavzular haqida nomzodlarga javob bermaydi.";
+      default: return t("pages.ai_agent.forbidden_topics_desc");
+    }
+  };
+
+  const getEscalationTitle = () => {
+    switch (selectedAgentType) {
+      case "sales": return "Inson-sotuvchiga yo'naltirish qoidalari";
+      case "booker": return "Mutaxassisga yo'naltirish qoidalari";
+      case "recruiter": return "HR menejeriga yo'naltirish qoidalari";
+      default: return t("pages.ai_agent.escalation_rules_title");
+    }
+  };
+
+  const getEscalationDesc = () => {
+    switch (selectedAgentType) {
+      case "sales": return "Quyidagi holatlarda suhbat avtomatik ravishda inson-sotuvchiga yo'naltiriladi.";
+      case "booker": return "Quyidagi holatlarda suhbat avtomatik ravishda mutaxassisning o'ziga yo'naltiriladi.";
+      case "recruiter": return "Quyidagi holatlarda ariza avtomatik ravishda HR menejeriga yo'naltiriladi.";
+      default: return t("pages.ai_agent.escalation_rules_desc");
+    }
+  };
+
+  const getModuleLabel = () => {
+    switch (selectedAgentType) {
+      case "sales": return "Katalog bo'limi";
+      case "booker": return "Bilim yo'nalishi";
+      case "recruiter": return "Vakansiya yo'nalishi";
+      default: return "Modul";
+    }
+  };
+
+  const getLessonLabel = () => {
+    switch (selectedAgentType) {
+      case "sales": return "Mahsulot / Ma'lumot";
+      case "booker": return "Bilim sahifasi";
+      case "recruiter": return "Vakansiya sahifasi";
+      default: return "Dars";
+    }
+  };
+
 
   useEffect(() => {
     if (
@@ -1828,13 +1926,13 @@ Nomzodlarga faqat vakansiya va talablar (VAKANSIYALAR VA TALABLAR) doirasida jav
                             let name = "AI kuratori";
                             let desc = "Telegram bot yoki instagram orqali bilimlar bazasidagi ma'lumotlar asosida aqlli, do'stona va javob beruvchi yordamchi.";
                             if (agentType === "sales") {
-                              name = "Sotuvchi AI Agent (Sales Closer AI)";
+                              name = "Sotuvchi AI Agent";
                               desc = "Mahsulotlar katalogi, narxlari va ish vaqti kabi ma'lumotlarni o'rganib, mijozlar bilan muloqot qiladi va sotadi.";
                             } else if (agentType === "booker") {
-                              name = "Konsultatsiya va Band qilish AI (Appointment Booker AI)";
+                              name = "Konsultatsiya va Band qilish AI";
                               desc = "Mutaxassis bilimlari va gaplashish ohangi asosida maslahat beradi va konsultatsiya uchun vaqt band qiladi (pullik to'lov bilan).";
                             } else if (agentType === "recruiter") {
-                              name = "HR va Vakansiyalar uchun AI (HR Recruiter AI)";
+                              name = "HR va Vakansiyalar uchun AI";
                               desc = "Bo'sh ish o'rinlari va nomzodga qo'yiladigan talablar asosida nomzodlarni suhbatdan o'tkazadi, saralaydi va HR-ga yuboradi.";
                             }
 
@@ -2010,7 +2108,7 @@ Nomzodlarga faqat vakansiya va talablar (VAKANSIYALAR VA TALABLAR) doirasida jav
                       </div>
                       <div>
                         <h3 className="text-[17px] font-bold text-black group-hover:text-[#7CA607] transition-colors">
-                          {"AI kuratori (AI Curator)"}
+                          {"AI kuratori"}
                         </h3>
                         <p className="text-[12px] text-[#707070] mt-1.5 leading-relaxed">
                           {"Darsliklar, transkriptlar va PDF materiallar asosida savollarga aqlli va aniq javob beruvchi shaxsiy yordamchi."}
@@ -2067,7 +2165,7 @@ Nomzodlarga faqat vakansiya va talablar (VAKANSIYALAR VA TALABLAR) doirasida jav
                       </div>
                       <div>
                         <h3 className="text-[17px] font-bold text-black group-hover:text-amber-600 transition-colors">
-                          {"Sotuvchi AI Agent (Sales Closer)"}
+                          {"Sotuvchi AI Agent"}
                         </h3>
                         <p className="text-[12px] text-[#707070] mt-1.5 leading-relaxed">
                           {"Katalog, narxlar va ish vaqti kabi ma'lumotlarni o'rganib, mijozlar bilan muloqot qiladi va mahsulot sotadi."}
@@ -2140,11 +2238,11 @@ Nomzodlarga faqat vakansiya va talablar (VAKANSIYALAR VA TALABLAR) doirasida jav
                         </li>
                         <li className="flex items-start gap-2.5">
                           <CheckCircle className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
-                          <span>{"Konsultatsiya band qilish (Booking)"}</span>
+                          <span>{"Konsultatsiya vaqtini band qilish"}</span>
                         </li>
                         <li className="flex items-start gap-2.5">
                           <CheckCircle className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
-                          <span>{"Pre-consultation to'lov havolasi"}</span>
+                          <span>{"Oldindan to'lov havolasi"}</span>
                         </li>
                         <li className="flex items-start gap-2.5">
                           <CheckCircle className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
@@ -2181,7 +2279,7 @@ Nomzodlarga faqat vakansiya va talablar (VAKANSIYALAR VA TALABLAR) doirasida jav
                       </div>
                       <div>
                         <h3 className="text-[17px] font-bold text-black group-hover:text-purple-600 transition-colors">
-                          {"HR Recruiter AI (Vakansiyalar)"}
+                          {"HR va Vakansiyalar uchun AI"}
                         </h3>
                         <p className="text-[12px] text-[#707070] mt-1.5 leading-relaxed">
                           {"Bo'sh ish o'rinlari talablari bo'yicha nomzodlar bilan suhbatlashadi, ularni skrining qiladi va saralaydi."}
@@ -3380,7 +3478,7 @@ Nomzodlarga faqat vakansiya va talablar (VAKANSIYALAR VA TALABLAR) doirasida jav
                 }`}
               >
                 <Database size={16} />
-                <span>{t("pages.ai_agent.knowledge_base_tab")}</span>
+                <span>{getKnowledgeTabName()}</span>
                 {activeTab === "knowledge" && <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-black" />}
               </button>
               <button
@@ -3492,11 +3590,11 @@ Nomzodlarga faqat vakansiya va talablar (VAKANSIYALAR VA TALABLAR) doirasida jav
                 <div className="bg-white border border-[#E8E8E8] rounded-[24px] p-6 shadow-sm flex flex-col gap-4 flex-1">
                   <div className="flex items-center justify-between">
                     <h3 className="text-[15px] font-bold text-black flex items-center gap-2">
-                      {t("pages.ai_agent.system_instruction_label")}
+                      {getSystemPromptTitle()}
                     </h3>
                     <div className="flex items-center gap-1.5 text-[11px] text-[#707070]">
                       <Info size={13} />
-                      <span>{t("pages.ai_agent.system_instruction_desc")}</span>
+                      <span>{getSystemPromptDesc()}</span>
                     </div>
                   </div>
                   <textarea
@@ -3780,10 +3878,10 @@ Nomzodlarga faqat vakansiya va talablar (VAKANSIYALAR VA TALABLAR) doirasida jav
                   <div>
                     <h3 className="text-[15px] font-bold text-black flex items-center gap-2">
                       <ShieldAlert className="text-red-500 w-4 h-4" />
-                      <span>{t("pages.ai_agent.forbidden_topics_title")}</span>
+                      <span>{getForbiddenTopicsTitle()}</span>
                     </h3>
                     <p className="text-[11px] text-[#707070] leading-relaxed mt-1">
-                      {t("pages.ai_agent.forbidden_topics_desc")}
+                      {getForbiddenTopicsDesc()}
                     </p>
                   </div>
 
@@ -3885,10 +3983,10 @@ Nomzodlarga faqat vakansiya va talablar (VAKANSIYALAR VA TALABLAR) doirasida jav
                   <div>
                     <h3 className="text-[15px] font-bold text-black flex items-center gap-2">
                       <ArrowRight className="text-blue-500 w-4 h-4" />
-                      <span>{t("pages.ai_agent.escalation_rules_title")}</span>
+                      <span>{getEscalationTitle()}</span>
                     </h3>
                     <p className="text-[11px] text-[#707070] mt-1">
-                      {t("pages.ai_agent.escalation_rules_desc")}
+                      {getEscalationDesc()}
                     </p>
                   </div>
 
@@ -4094,7 +4192,7 @@ Nomzodlarga faqat vakansiya va talablar (VAKANSIYALAR VA TALABLAR) doirasida jav
             {/* Left Side: Tree navigation of modules/lessons */}
             <div className="md:col-span-5 bg-white border border-[#E8E8E8] rounded-[24px] p-6 shadow-sm">
               <div className="flex items-center justify-between mb-4 pb-2 border-b border-[#F0F0F0]">
-                <h3 className="text-[14px] font-bold text-black">{t("pages.ai_agent.modules_lessons_title")}</h3>
+                <h3 className="text-[14px] font-bold text-black">{getKnowledgeSectionTitle()}</h3>
                 <div className="flex items-center gap-1.5">
                   <button
                     onClick={() => setShowAddModuleModal(true)}
