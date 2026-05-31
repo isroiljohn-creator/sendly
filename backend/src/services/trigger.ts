@@ -787,9 +787,9 @@ export async function handleIncomingLeadgenEvent(payload: LeadgenEventPayload): 
     console.error("[Trigger] Lead inbound message logging failed:", logErr);
   }
 
-  // 7. Send Auto Welcome Message if configured
+  // 7. Send Auto Welcome Message if configured (Skip in direct forwarding mode)
   const welcomeMessageTemplate = botSettings.fbWelcomeMessage || account.fb_welcome_message;
-  if (welcomeMessageTemplate && contact) {
+  if (welcomeMessageTemplate && contact && fbAgentMode !== "direct") {
     let welcomeMsg = welcomeMessageTemplate;
     welcomeMsg = welcomeMsg.replace(/\{\{\s*name\s*\}\}/gi, leadName);
 

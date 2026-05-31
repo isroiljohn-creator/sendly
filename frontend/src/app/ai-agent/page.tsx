@@ -2267,9 +2267,13 @@ function AIAgentContent() {
                   <Send size={26} />
                 </div>
                 <div className="text-center">
-                  <h5 className="text-[12px] font-bold text-white leading-tight">Sendly CRM</h5>
+                  <h5 className="text-[12px] font-bold text-white leading-tight">
+                    {selectedAgentType === "fb-leads-direct" ? "Telegramga yo'naltirish" : "Sendly CRM"}
+                  </h5>
                   <span className="text-[9px] text-[#C7F33C] font-bold uppercase tracking-wider block mt-0.5 truncate max-w-[110px]">
-                    {db.getGroups().find(g => g.id === (settings.targetGroupId || "sales"))?.name || t("pages.ai_agent.th_group")}
+                    {selectedAgentType === "fb-leads-direct"
+                      ? (settings.adminTelegramUsername ? `@${settings.adminTelegramUsername}` : "Ulangan guruh")
+                      : (db.getGroups().find(g => g.id === (settings.targetGroupId || "sales"))?.name || t("pages.ai_agent.th_group"))}
                   </span>
                 </div>
               </div>
@@ -2527,82 +2531,88 @@ function AIAgentContent() {
                       <Send size={20} className="text-[#7CA607]" />
                     </div>
                     <div>
-                      <h3 className="text-[15px] font-extrabold text-black">Sendly CRM Router</h3>
+                      <h3 className="text-[15px] font-extrabold text-black">
+                        {selectedAgentType === "fb-leads-direct" ? "Telegramga yo'naltirish sozlamalari" : "Sendly CRM Router"}
+                      </h3>
                       <p className="text-[11px] text-[#707070] mt-0.5">
-                        {t("pages.ai_agent.routing_desc")}
+                        {selectedAgentType === "fb-leads-direct" ? "Facebook arizalarini Telegram guruh yoki lichkangizga yo'naltirishni sozlang." : t("pages.ai_agent.routing_desc")}
                       </p>
                     </div>
                   </div>
 
-                  {/* Standard Group Dropdown */}
-                  <div className="flex flex-col gap-1.5">
-                    <label className="text-[11px] font-bold text-black">{t("pages.ai_agent.target_group_label")}</label>
-                    <CustomDropdown
-                      value={settings.targetGroupId || "sales"}
-                      onChange={(val) => handleUpdateSettings("targetGroupId", val)}
-                      options={db.getGroups().map(g => ({ value: g.id, label: g.name }))}
-                    />
-                  </div>
+                  {selectedAgentType !== "fb-leads-direct" && (
+                    <>
+                      {/* Standard Group Dropdown */}
+                      <div className="flex flex-col gap-1.5">
+                        <label className="text-[11px] font-bold text-black">{t("pages.ai_agent.target_group_label")}</label>
+                        <CustomDropdown
+                          value={settings.targetGroupId || "sales"}
+                          onChange={(val) => handleUpdateSettings("targetGroupId", val)}
+                          options={db.getGroups().map(g => ({ value: g.id, label: g.name }))}
+                        />
+                      </div>
 
-                  {/* Welcome Message */}
-                  <div className="flex flex-col gap-1.5">
-                    <div className="flex items-center justify-between">
-                      <label className="text-[11px] font-bold text-black">{t("pages.ai_agent.welcome_message_label")}</label>
-                      <span className="text-[9px] text-[#707070] italic">
-                        {t("pages.ai_agent.welcome_message_desc")}
-                      </span>
-                    </div>
-                    <input
-                      type="text"
-                      value={settings.fbWelcomeMessage || ""}
-                      onChange={(e) => handleUpdateSettings("fbWelcomeMessage", e.target.value)}
-                      className="w-full px-4 py-2.5 text-[12px] bg-[#F9F9F7] border border-[#E8E8E8] rounded-xl focus:outline-none focus:border-black text-black"
-                      placeholder={t("pages.ai_agent.welcome_message_placeholder")}
-                    />
-                  </div>
-
-                  {/* Automatic CRM Tags */}
-                  <div className="flex flex-col gap-2">
-                    <label className="text-[11px] font-bold text-black">{t("pages.ai_agent.auto_tags_label")}</label>
-                    
-                    <form onSubmit={addFbTag} className="flex gap-2">
-                      <input
-                        type="text"
-                        value={newTagInput}
-                        onChange={(e) => setNewTagInput(e.target.value)}
-                        placeholder={t("pages.ai_agent.add_tag_placeholder")}
-                        className="flex-1 px-3 py-2 text-[11px] bg-[#F9F9F7] border border-[#E8E8E8] rounded-xl focus:outline-none focus:border-black text-black"
-                      />
-                      <button
-                        type="submit"
-                        className="px-4 py-2 bg-black hover:bg-black/90 text-white rounded-xl text-[11px] font-bold transition-all shrink-0"
-                      >
-                        {t("pages.ai_agent.add_btn")}
-                      </button>
-                    </form>
-
-                    <div className="flex flex-wrap gap-1.5 mt-1 bg-[#F9F9F7] border border-[#E8E8E8] p-3 rounded-xl min-h-[48px]">
-                      {fbTags.length === 0 ? (
-                        <span className="text-[10px] text-[#A0A0A0] italic">{t("pages.ai_agent.no_tags_yet")}</span>
-                      ) : (
-                        fbTags.map(tag => (
-                          <span
-                            key={tag}
-                            className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-white border border-[#E8E8E8] text-black text-[10px] font-semibold rounded-full shadow-sm"
-                          >
-                            <span>{tag}</span>
-                            <button
-                              type="button"
-                              onClick={() => removeFbTag(tag)}
-                              className="w-3.5 h-3.5 rounded-full hover:bg-red-50 hover:text-red-500 flex items-center justify-center text-[#909090] font-bold transition-colors"
-                            >
-                              ×
-                            </button>
+                      {/* Welcome Message */}
+                      <div className="flex flex-col gap-1.5">
+                        <div className="flex items-center justify-between">
+                          <label className="text-[11px] font-bold text-black">{t("pages.ai_agent.welcome_message_label")}</label>
+                          <span className="text-[9px] text-[#707070] italic">
+                            {t("pages.ai_agent.welcome_message_desc")}
                           </span>
-                        ))
-                      )}
-                    </div>
-                  </div>
+                        </div>
+                        <input
+                          type="text"
+                          value={settings.fbWelcomeMessage || ""}
+                          onChange={(e) => handleUpdateSettings("fbWelcomeMessage", e.target.value)}
+                          className="w-full px-4 py-2.5 text-[12px] bg-[#F9F9F7] border border-[#E8E8E8] rounded-xl focus:outline-none focus:border-black text-black"
+                          placeholder={t("pages.ai_agent.welcome_message_placeholder")}
+                        />
+                      </div>
+
+                      {/* Automatic CRM Tags */}
+                      <div className="flex flex-col gap-2">
+                        <label className="text-[11px] font-bold text-black">{t("pages.ai_agent.auto_tags_label")}</label>
+                        
+                        <form onSubmit={addFbTag} className="flex gap-2">
+                          <input
+                            type="text"
+                            value={newTagInput}
+                            onChange={(e) => setNewTagInput(e.target.value)}
+                            placeholder={t("pages.ai_agent.add_tag_placeholder")}
+                            className="flex-1 px-3 py-2 text-[11px] bg-[#F9F9F7] border border-[#E8E8E8] rounded-xl focus:outline-none focus:border-black text-black"
+                          />
+                          <button
+                            type="submit"
+                            className="px-4 py-2 bg-black hover:bg-black/90 text-white rounded-xl text-[11px] font-bold transition-all shrink-0"
+                          >
+                            {t("pages.ai_agent.add_btn")}
+                          </button>
+                        </form>
+
+                        <div className="flex flex-wrap gap-1.5 mt-1 bg-[#F9F9F7] border border-[#E8E8E8] p-3 rounded-xl min-h-[48px]">
+                          {fbTags.length === 0 ? (
+                            <span className="text-[10px] text-[#A0A0A0] italic">{t("pages.ai_agent.no_tags_yet")}</span>
+                          ) : (
+                            fbTags.map(tag => (
+                              <span
+                                key={tag}
+                                className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-white border border-[#E8E8E8] text-black text-[10px] font-semibold rounded-full shadow-sm"
+                              >
+                                <span>{tag}</span>
+                                <button
+                                  type="button"
+                                  onClick={() => removeFbTag(tag)}
+                                  className="w-3.5 h-3.5 rounded-full hover:bg-red-50 hover:text-red-500 flex items-center justify-center text-[#909090] font-bold transition-colors"
+                                >
+                                  ×
+                                </button>
+                              </span>
+                            ))
+                          )}
+                        </div>
+                      </div>
+                    </>
+                  )}
 
                   {/* Telegram Bot Selector for Facebook lead handlers */}
                   <div className="flex flex-col gap-1.5 pt-4 border-t border-[#F0F0F0] mt-3">
