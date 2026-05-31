@@ -1874,7 +1874,7 @@ Nomzodlarga faqat vakansiya va talablar (VAKANSIYALAR VA TALABLAR) doirasida jav
   if (selectedAgentType === null) {
     return (
       <AppLayout>
-        <div className="flex flex-col gap-5 relative pb-6 items-center justify-start max-w-6xl mx-auto py-2 w-full">
+        <div className="flex flex-col gap-5 relative pb-6 justify-start max-w-6xl mx-auto py-2 w-full">
           {/* Toast Alert */}
           {toast && (
             <div className="fixed top-6 right-6 z-[999] flex items-center gap-3 px-5 py-3.5 rounded-xl border bg-white shadow-lg animate-in fade-in slide-in-from-top-3 duration-250">
@@ -1884,17 +1884,10 @@ Nomzodlarga faqat vakansiya va talablar (VAKANSIYALAR VA TALABLAR) doirasida jav
           )}
 
           {/* Header */}
-          <div className="text-center flex flex-col gap-1.5">
-            <span className="px-3.5 py-1.5 bg-[#C7F33C]/20 text-[#7CA607] rounded-full text-[11px] font-bold tracking-wider uppercase inline-block mx-auto">
-              {t("pages.ai_agent.agent_platform")}
-            </span>
-            <h1 className="text-[26px] md:text-[32px] font-extrabold text-black tracking-tight leading-tight">
-              {t("pages.ai_agent.select_template_title")}
-            </h1>
-            <p className="text-[13px] text-[#707070] max-w-lg mx-auto leading-relaxed">
-              {t("pages.ai_agent.select_template_desc")}
-            </p>
-          </div>
+          <PageHeader
+            title={t("pages.ai_agent.select_template_title")}
+            breadcrumbs={t("pages.ai_agent.agent_platform")}
+          />
 
           {/* Active Agents Section */}
           {(() => {
