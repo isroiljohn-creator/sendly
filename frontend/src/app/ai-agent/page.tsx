@@ -2158,7 +2158,7 @@ function AIAgentContent() {
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <PageHeader
               title={selectedAgentType === "fb-leads-direct" ? "Lidlarni Telegramga yo'naltirish" : "Facebook Lead Handler"}
-              breadcrumbs={t("pages.ai_agent.fb_leads_breadcrumb")}
+              breadcrumbs={selectedAgentType === "fb-leads-direct" ? "Bosh sahifa / Integratsiya / Lidlarni Telegramga yo'naltirish" : t("pages.ai_agent.fb_leads_breadcrumb")}
             />
             <div className="flex items-center gap-3 shrink-0">
               <button
@@ -2230,14 +2230,18 @@ function AIAgentContent() {
                     : "hover:bg-[#1E293B]/40 hover:scale-102"
                 }`}
               >
-                <div className="w-16 h-16 rounded-full bg-purple-600/90 text-white flex items-center justify-center shadow-lg border-2 border-purple-500 relative">
-                  <Sparkles size={28} />
+                <div className={`w-16 h-16 rounded-full text-white flex items-center justify-center shadow-lg border-2 relative ${
+                  selectedAgentType === "fb-leads-direct" ? "bg-blue-600/90 border-blue-500" : "bg-purple-600/90 border-purple-500"
+                }`}>
+                  {selectedAgentType === "fb-leads-direct" ? <Database size={28} /> : <Sparkles size={28} />}
                 </div>
                 <div className="text-center">
                   <h5 className="text-[12px] font-bold text-white leading-tight">
                     {selectedAgentType === "fb-leads-direct" ? "Maydonlar moslashuvi" : t("pages.ai_agent.ai_mapper_node")}
                   </h5>
-                  <span className="text-[9px] text-[#A78BFA] font-bold uppercase tracking-wider block mt-0.5">
+                  <span className={`text-[9px] font-bold uppercase tracking-wider block mt-0.5 ${
+                    selectedAgentType === "fb-leads-direct" ? "text-blue-400" : "text-[#A78BFA]"
+                  }`}>
                     {t("pages.ai_agent.fields_count").replace("{count}", fieldMappings.length.toString())}
                   </span>
                 </div>
@@ -2391,13 +2395,17 @@ function AIAgentContent() {
               {activeNode === "mapper" && (
                 <div className="bg-white border border-[#E8E8E8] rounded-[24px] p-6 shadow-sm flex flex-col gap-5 animate-in fade-in slide-in-from-bottom-2 duration-200">
                   <div className="flex items-center gap-3 border-b border-[#F0F0F0] pb-4">
-                    <div className="w-10 h-10 rounded-full bg-purple-50 text-purple-600 flex items-center justify-center shrink-0">
-                      <Sparkles size={20} />
+                    <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${
+                      selectedAgentType === "fb-leads-direct" ? "bg-blue-50 text-blue-600" : "bg-purple-50 text-purple-600"
+                    }`}>
+                      {selectedAgentType === "fb-leads-direct" ? <Database size={20} /> : <Sparkles size={20} />}
                     </div>
                     <div>
-                      <h3 className="text-[15px] font-extrabold text-black">AI Lead Mapper & Processor</h3>
+                      <h3 className="text-[15px] font-extrabold text-black">
+                        {selectedAgentType === "fb-leads-direct" ? "Lid maydonlarini moslashtirish (Field Mapping)" : "AI Lead Mapper & Processor"}
+                      </h3>
                       <p className="text-[11px] text-[#707070] mt-0.5">
-                        {t("pages.ai_agent.mapping_desc")}
+                        {selectedAgentType === "fb-leads-direct" ? "Meta Lead formalari maydonlarini Sendly tizimiga moslashtiring." : t("pages.ai_agent.mapping_desc")}
                       </p>
                     </div>
                   </div>
@@ -2877,7 +2885,7 @@ function AIAgentContent() {
                     {simLoading ? (
                       <>
                         <RefreshCw size={14} className="animate-spin" />
-                        <span>{t("pages.ai_agent.ai_analyzing")}</span>
+                        <span>{selectedAgentType === "fb-leads-direct" ? "Lid yo'naltirilmoqda..." : t("pages.ai_agent.ai_analyzing")}</span>
                       </>
                     ) : (
                       <>
@@ -2932,7 +2940,9 @@ function AIAgentContent() {
                 {simResult && !simLoading && (
                   <div className="mt-1 p-4 bg-blue-50/50 border border-blue-100 rounded-2xl flex flex-col gap-3 animate-in fade-in slide-in-from-top-2 duration-200">
                     <div className="flex justify-between items-center">
-                      <span className="text-[10px] uppercase tracking-wider text-blue-700 font-bold">{t("pages.ai_agent.ai_sort_result")}</span>
+                      <span className="text-[10px] uppercase tracking-wider text-blue-700 font-bold">
+                        {selectedAgentType === "fb-leads-direct" ? "Yo'naltirish natijasi" : t("pages.ai_agent.ai_sort_result")}
+                      </span>
                       <span className="px-2 py-0.5 bg-green-100 text-green-800 text-[9px] font-bold rounded">
                         {t("pages.ai_agent.success_badge")}
                       </span>
@@ -2956,7 +2966,9 @@ function AIAgentContent() {
                     </div>
 
                     <div className="text-[11px] border-t border-blue-100/50 pt-2.5">
-                      <span className="text-[#707070] block text-[9px]">{t("pages.ai_agent.ai_analysis_note")}</span>
+                      <span className="text-[#707070] block text-[9px]">
+                        {selectedAgentType === "fb-leads-direct" ? "Yo'naltirish xulosasi" : t("pages.ai_agent.ai_analysis_note")}
+                      </span>
                       <p className="text-black italic mt-0.5 leading-relaxed">{simResult.summary}</p>
                     </div>
 
@@ -3070,33 +3082,37 @@ function AIAgentContent() {
             }`}
           >
             <Sparkles size={16} />
-            <span>{t("pages.ai_agent.curator_settings_tab")}</span>
+            <span>{selectedAgentType === "fb-leads-direct" ? "Sozlamalar" : t("pages.ai_agent.curator_settings_tab")}</span>
             {activeTab === "settings" && <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-black" />}
           </button>
-          <button
-            onClick={() => setActiveTab("knowledge")}
-            className={`flex items-center gap-2 pb-4 text-[14px] font-bold border-b-2 transition-colors relative ${
-              activeTab === "knowledge"
-                ? "border-black text-black"
-                : "border-transparent text-[#707070] hover:text-black"
-            }`}
-          >
-            <Database size={16} />
-            <span>{t("pages.ai_agent.knowledge_base_tab")}</span>
-            {activeTab === "knowledge" && <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-black" />}
-          </button>
-          <button
-            onClick={() => setActiveTab("analytics")}
-            className={`flex items-center gap-2 pb-4 text-[14px] font-bold border-b-2 transition-colors relative ${
-              activeTab === "analytics"
-                ? "border-black text-black"
-                : "border-transparent text-[#707070] hover:text-black"
-            }`}
-          >
-            <BarChart2 size={16} />
-            <span>{t("pages.ai_agent.curator_analytics_tab")}</span>
-            {activeTab === "analytics" && <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-black" />}
-          </button>
+          {selectedAgentType !== "fb-leads-direct" && (
+            <>
+              <button
+                onClick={() => setActiveTab("knowledge")}
+                className={`flex items-center gap-2 pb-4 text-[14px] font-bold border-b-2 transition-colors relative ${
+                  activeTab === "knowledge"
+                    ? "border-black text-black"
+                    : "border-transparent text-[#707070] hover:text-black"
+                }`}
+              >
+                <Database size={16} />
+                <span>{t("pages.ai_agent.knowledge_base_tab")}</span>
+                {activeTab === "knowledge" && <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-black" />}
+              </button>
+              <button
+                onClick={() => setActiveTab("analytics")}
+                className={`flex items-center gap-2 pb-4 text-[14px] font-bold border-b-2 transition-colors relative ${
+                  activeTab === "analytics"
+                    ? "border-black text-black"
+                    : "border-transparent text-[#707070] hover:text-black"
+                }`}
+              >
+                <BarChart2 size={16} />
+                <span>{t("pages.ai_agent.curator_analytics_tab")}</span>
+                {activeTab === "analytics" && <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-black" />}
+              </button>
+            </>
+          )}
         </div>
 
         {/* Main Workspace */}
