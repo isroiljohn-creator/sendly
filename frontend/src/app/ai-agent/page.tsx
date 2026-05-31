@@ -2081,8 +2081,8 @@ Nomzodlarga faqat vakansiya va talablar (VAKANSIYALAR VA TALABLAR) doirasida jav
                     <div className="absolute top-0 right-0 w-24 h-24 bg-[#C7F33C]/10 rounded-bl-full -z-10 group-hover:scale-110 transition-transform" />
                     <div className="flex flex-col gap-4">
                       <div className="flex items-center justify-between">
-                        <div className="w-12 h-12 rounded-2xl bg-black text-[#C7F33C] grid place-items-center font-bold text-[18px]">
-                          <Sparkles size={22} />
+                        <div className="w-12 h-12 rounded-2xl overflow-hidden shrink-0">
+                          <img src="/robots/robot_kurator.png" alt="AI kuratori" className="w-full h-full object-cover" />
                         </div>
                         <div className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-full">
                           <span className="w-2 h-2 rounded-full bg-gray-300"></span>
@@ -2135,11 +2135,11 @@ Nomzodlarga faqat vakansiya va talablar (VAKANSIYALAR VA TALABLAR) doirasida jav
 
                   {/* Card 2: Sotuvchi AI Agent */}
                   <div className="bg-white border border-[#E8E8E8] hover:border-black/20 hover:shadow-xl rounded-[28px] p-6 flex flex-col justify-between transition-all group relative overflow-hidden">
-                    <div className="absolute top-0 right-0 w-24 h-24 bg-amber-500/10 rounded-bl-full -z-10 group-hover:scale-110 transition-transform" />
+                    <div className="absolute top-0 right-0 w-24 h-24 bg-[#C7F33C]/10 rounded-bl-full -z-10 group-hover:scale-110 transition-transform" />
                     <div className="flex flex-col gap-4">
                       <div className="flex items-center justify-between">
-                        <div className="w-12 h-12 rounded-2xl bg-amber-500 text-white grid place-items-center font-bold text-[18px]">
-                          <Sparkles size={22} />
+                        <div className="w-12 h-12 rounded-2xl overflow-hidden shrink-0">
+                          <img src="/robots/robot_sales.png" alt="Sotuvchi AI" className="w-full h-full object-cover" />
                         </div>
                         <div className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-full">
                           <span className="w-2 h-2 rounded-full bg-gray-300"></span>
@@ -2149,7 +2149,7 @@ Nomzodlarga faqat vakansiya va talablar (VAKANSIYALAR VA TALABLAR) doirasida jav
                         </div>
                       </div>
                       <div>
-                        <h3 className="text-[17px] font-bold text-black group-hover:text-amber-600 transition-colors">
+                        <h3 className="text-[17px] font-bold text-black group-hover:text-[#7CA607] transition-colors">
                           {"Sotuvchi AI Agent"}
                         </h3>
                         <p className="text-[12px] text-[#707070] mt-1.5 leading-relaxed">
@@ -2161,19 +2161,19 @@ Nomzodlarga faqat vakansiya va talablar (VAKANSIYALAR VA TALABLAR) doirasida jav
 
                       <ul className="flex flex-col gap-2 text-[11px] text-[#595959]">
                         <li className="flex items-start gap-2.5">
-                          <CheckCircle className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
+                          <CheckCircle className="w-4 h-4 text-[#9BC92E] shrink-0 mt-0.5" />
                           <span>{"Katalog va narxlar bazasi"}</span>
                         </li>
                         <li className="flex items-start gap-2.5">
-                          <CheckCircle className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
+                          <CheckCircle className="w-4 h-4 text-[#9BC92E] shrink-0 mt-0.5" />
                           <span>{"Ish vaqti va manzil integratsiyasi"}</span>
                         </li>
                         <li className="flex items-start gap-2.5">
-                          <CheckCircle className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
+                          <CheckCircle className="w-4 h-4 text-[#9BC92E] shrink-0 mt-0.5" />
                           <span>{"Sotuv ohangida suhbatlashish"}</span>
                         </li>
                         <li className="flex items-start gap-2.5">
-                          <CheckCircle className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
+                          <CheckCircle className="w-4 h-4 text-[#9BC92E] shrink-0 mt-0.5" />
                           <span>{"Buyurtmani operatorga yo'naltirish"}</span>
                         </li>
                       </ul>
@@ -2192,11 +2192,11 @@ Nomzodlarga faqat vakansiya va talablar (VAKANSIYALAR VA TALABLAR) doirasida jav
 
                   {/* Card 3: Appointment Booker AI */}
                   <div className="bg-white border border-[#E8E8E8] hover:border-black/20 hover:shadow-xl rounded-[28px] p-6 flex flex-col justify-between transition-all group relative overflow-hidden">
-                    <div className="absolute top-0 right-0 w-24 h-24 bg-emerald-500/10 rounded-bl-full -z-10 group-hover:scale-110 transition-transform" />
+                    <div className="absolute top-0 right-0 w-24 h-24 bg-[#C7F33C]/10 rounded-bl-full -z-10 group-hover:scale-110 transition-transform" />
                     <div className="flex flex-col gap-4">
                       <div className="flex items-center justify-between">
-                        <div className="w-12 h-12 rounded-2xl bg-emerald-500 text-white grid place-items-center font-bold text-[18px]">
-                          <Sparkles size={22} />
+                        <div className="w-12 h-12 rounded-2xl overflow-hidden shrink-0">
+                          <img src="/robots/robot_booker.png" alt="Konsultatsiya AI" className="w-full h-full object-cover" />
                         </div>
                         <div className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-full">
                           <span className="w-2 h-2 rounded-full bg-gray-300"></span>
@@ -2206,7 +2206,7 @@ Nomzodlarga faqat vakansiya va talablar (VAKANSIYALAR VA TALABLAR) doirasida jav
                         </div>
                       </div>
                       <div>
-                        <h3 className="text-[17px] font-bold text-black group-hover:text-emerald-600 transition-colors">
+                        <h3 className="text-[17px] font-bold text-black group-hover:text-[#7CA607] transition-colors">
                           {"Konsultatsiya / Band qilish AI"}
                         </h3>
                         <p className="text-[12px] text-[#707070] mt-1.5 leading-relaxed">
@@ -2218,19 +2218,19 @@ Nomzodlarga faqat vakansiya va talablar (VAKANSIYALAR VA TALABLAR) doirasida jav
 
                       <ul className="flex flex-col gap-2 text-[11px] text-[#595959]">
                         <li className="flex items-start gap-2.5">
-                          <CheckCircle className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
+                          <CheckCircle className="w-4 h-4 text-[#9BC92E] shrink-0 mt-0.5" />
                           <span>{"Mutaxassis ohangi va bilimlari"}</span>
                         </li>
                         <li className="flex items-start gap-2.5">
-                          <CheckCircle className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
+                          <CheckCircle className="w-4 h-4 text-[#9BC92E] shrink-0 mt-0.5" />
                           <span>{"Konsultatsiya vaqtini band qilish"}</span>
                         </li>
                         <li className="flex items-start gap-2.5">
-                          <CheckCircle className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
+                          <CheckCircle className="w-4 h-4 text-[#9BC92E] shrink-0 mt-0.5" />
                           <span>{"Oldindan to'lov havolasi"}</span>
                         </li>
                         <li className="flex items-start gap-2.5">
-                          <CheckCircle className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
+                          <CheckCircle className="w-4 h-4 text-[#9BC92E] shrink-0 mt-0.5" />
                           <span>{"Telegram & Direct orqali bron qilish"}</span>
                         </li>
                       </ul>
@@ -2249,11 +2249,11 @@ Nomzodlarga faqat vakansiya va talablar (VAKANSIYALAR VA TALABLAR) doirasida jav
 
                   {/* Card 4: HR Recruiter AI */}
                   <div className="bg-white border border-[#E8E8E8] hover:border-black/20 hover:shadow-xl rounded-[28px] p-6 flex flex-col justify-between transition-all group relative overflow-hidden">
-                    <div className="absolute top-0 right-0 w-24 h-24 bg-purple-500/10 rounded-bl-full -z-10 group-hover:scale-110 transition-transform" />
+                    <div className="absolute top-0 right-0 w-24 h-24 bg-[#C7F33C]/10 rounded-bl-full -z-10 group-hover:scale-110 transition-transform" />
                     <div className="flex flex-col gap-4">
                       <div className="flex items-center justify-between">
-                        <div className="w-12 h-12 rounded-2xl bg-purple-500 text-white grid place-items-center font-bold text-[18px]">
-                          <Sparkles size={22} />
+                        <div className="w-12 h-12 rounded-2xl overflow-hidden shrink-0">
+                          <img src="/robots/robot_recruiter.png" alt="HR AI" className="w-full h-full object-cover" />
                         </div>
                         <div className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-full">
                           <span className="w-2 h-2 rounded-full bg-gray-300"></span>
@@ -2263,7 +2263,7 @@ Nomzodlarga faqat vakansiya va talablar (VAKANSIYALAR VA TALABLAR) doirasida jav
                         </div>
                       </div>
                       <div>
-                        <h3 className="text-[17px] font-bold text-black group-hover:text-purple-600 transition-colors">
+                        <h3 className="text-[17px] font-bold text-black group-hover:text-[#7CA607] transition-colors">
                           {"HR va Vakansiyalar uchun AI"}
                         </h3>
                         <p className="text-[12px] text-[#707070] mt-1.5 leading-relaxed">
@@ -2275,19 +2275,19 @@ Nomzodlarga faqat vakansiya va talablar (VAKANSIYALAR VA TALABLAR) doirasida jav
 
                       <ul className="flex flex-col gap-2 text-[11px] text-[#595959]">
                         <li className="flex items-start gap-2.5">
-                          <CheckCircle className="w-4 h-4 text-purple-500 shrink-0 mt-0.5" />
+                          <CheckCircle className="w-4 h-4 text-[#9BC92E] shrink-0 mt-0.5" />
                           <span>{"Vakansiyalar va talablar bazasi"}</span>
                         </li>
                         <li className="flex items-start gap-2.5">
-                          <CheckCircle className="w-4 h-4 text-purple-500 shrink-0 mt-0.5" />
+                          <CheckCircle className="w-4 h-4 text-[#9BC92E] shrink-0 mt-0.5" />
                           <span>{"Suhbat orqali ma'lumot yig'ish"}</span>
                         </li>
                         <li className="flex items-start gap-2.5">
-                          <CheckCircle className="w-4 h-4 text-purple-500 shrink-0 mt-0.5" />
+                          <CheckCircle className="w-4 h-4 text-[#9BC92E] shrink-0 mt-0.5" />
                           <span>{"Nomzod malakalarini tahlil qilish"}</span>
                         </li>
                         <li className="flex items-start gap-2.5">
-                          <CheckCircle className="w-4 h-4 text-purple-500 shrink-0 mt-0.5" />
+                          <CheckCircle className="w-4 h-4 text-[#9BC92E] shrink-0 mt-0.5" />
                           <span>{"Saralangan arizalarni HR-ga yuborish"}</span>
                         </li>
                       </ul>
