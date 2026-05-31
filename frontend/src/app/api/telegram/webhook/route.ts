@@ -33,14 +33,20 @@ export async function POST(request: Request) {
 
     let token: string | null = null;
 
+    if (channelId === "system_bot") {
+      token = process.env.SYSTEM_BOT_TOKEN || process.env.TELEGRAM_BOT_TOKEN || null;
+    }
+
     // Check legacy channels
-    const rawChannels = dbData["replai_channels"];
-    const legacyChannels = rawChannels ? JSON.parse(rawChannels) : [];
-    if (Array.isArray(legacyChannels)) {
-      for (const c of legacyChannels) {
-        if (c.id === channelId && c.type === "telegram" && c.isConnected && c.telegramToken) {
-          token = c.telegramToken;
-          break;
+    if (!token) {
+      const rawChannels = dbData["replai_channels"];
+      const legacyChannels = rawChannels ? JSON.parse(rawChannels) : [];
+      if (Array.isArray(legacyChannels)) {
+        for (const c of legacyChannels) {
+          if (c.id === channelId && c.type === "telegram" && c.isConnected && c.telegramToken) {
+            token = c.telegramToken;
+            break;
+          }
         }
       }
     }

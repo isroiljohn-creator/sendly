@@ -2669,22 +2669,16 @@ function AIAgentContent() {
                           <span>{"Tasdiqlash kodini kiriting"}</span>
                         </div>
                         <p className="text-[10px] text-blue-700 leading-relaxed">
-                          {activeBotUser ? (
-                            <>
-                              {"Telegram-da "}
-                              <a
-                                href={`https://t.me/${activeBotUser.replace(/^@+/, "")}`}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="underline font-bold text-blue-900"
-                              >
-                                @{activeBotUser.replace(/^@+/, "")}
-                              </a>
-                              {" botimizga o'ting va "}<strong>{"/start"}</strong>{" buyrug'ini bosing. Bot sizga yuborgan tasdiqlash kodini (kod 1 daqiqa davomida faol bo'ladi) quyida kiriting."}
-                            </>
-                          ) : (
-                            "Telegram botimizga o'ting va /start buyrug'ini bosing. Bot yuborgan tasdiqlash kodini (kod 1 daqiqa davomida faol bo'ladi) quyida kiriting."
-                          )}
+                          {"Telegram-da "}
+                          <a
+                            href={`https://t.me/sendly_robot?start=${settings?.telegramBotId}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="underline font-bold text-blue-900"
+                          >
+                            @sendly_robot
+                          </a>
+                          {" botimizga o'ting va "}<strong>{"/start"}</strong>{" buyrug'ini bosing. Bot sizga yuborgan tasdiqlash kodini (kod 1 daqiqa davomida faol bo'ladi) quyida kiriting."}
                         </p>
                         
                         <div className="flex flex-col gap-2">
@@ -2697,17 +2691,15 @@ function AIAgentContent() {
                               disabled={isVerifyLoading}
                               className="px-3 py-2 text-[11px] bg-white border border-blue-300 rounded-xl focus:outline-none focus:border-blue-600 flex-1 text-black"
                             />
-                            {activeBotUser && (
-                              <a
-                                href={`https://t.me/${activeBotUser.replace(/^@+/, "")}?start=verify`}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="px-3.5 py-2 bg-[#229ED9] hover:bg-[#1e8ec3] text-white rounded-xl text-[11px] font-bold transition-all shadow-sm active:scale-95 text-center flex items-center justify-center gap-1 shrink-0"
-                              >
-                                <Send size={12} />
-                                <span>Kodni olish</span>
-                              </a>
-                            )}
+                            <a
+                              href={`https://t.me/sendly_robot?start=${settings?.telegramBotId}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="px-3.5 py-2 bg-[#229ED9] hover:bg-[#1e8ec3] text-white rounded-xl text-[11px] font-bold transition-all shadow-sm active:scale-95 text-center flex items-center justify-center gap-1 shrink-0"
+                            >
+                              <Send size={12} />
+                              <span>Kodni olish</span>
+                            </a>
                           </div>
                           
                           <div className="flex gap-2 justify-end">
@@ -2754,7 +2746,7 @@ function AIAgentContent() {
                           </button>
                         </div>
                         <p className="text-[10px] text-blue-700 leading-relaxed">
-                          {"Ulash uchun ulanayotgan Telegram botingizga borib, profilingizdan botni boshlang (/start). Bot sizga tasdiqlash kodini yuboradi."}
+                          {"Ulash uchun @sendly_robot botimizga borib, profilingizdan botni boshlang (/start). Bot sizga tasdiqlash kodini yuboradi."}
                         </p>
                       </div>
                     )}
@@ -3692,23 +3684,17 @@ function AIAgentContent() {
                             <Sparkles size={14} className="text-blue-600 shrink-0 animate-pulse" />
                             <span>{"Tasdiqlash kodini kiriting"}</span>
                           </div>
-                          <p className="text-[11px] text-blue-700 leading-relaxed">
-                            {activeBotUser ? (
-                              <>
-                                {"Telegram-da "}
-                                <a
-                                  href={`https://t.me/${activeBotUser.replace(/^@+/, "")}`}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="underline font-bold text-blue-900"
-                                >
-                                  @{activeBotUser.replace(/^@+/, "")}
-                                </a>
-                                {" botimizga o'ting va "}<strong>{"/start"}</strong>{" buyrug'ini bosing. Bot sizga yuborgan tasdiqlash kodini (kod 1 daqiqa davomida faol bo'ladi) quyida kiriting."}
-                              </>
-                            ) : (
-                              "Telegram botimizga o'ting va /start buyrug'ini bosing. Bot yuborgan tasdiqlash kodini (kod 1 daqiqa davomida faol bo'ladi) quyida kiriting."
-                            )}
+                          <p className="text-[11px] text-blue-700/90 leading-relaxed">
+                            {"Telegram-da "}
+                            <a
+                              href={`https://t.me/sendly_robot?start=${settings?.telegramBotId}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="underline font-bold text-blue-900"
+                            >
+                              @sendly_robot
+                            </a>
+                            {" botimizga o'ting va "}<strong>{"/start"}</strong>{" buyrug'ini bosing. Bot sizga yuborgan tasdiqlash kodini (kod 1 daqiqa davomida faol bo'ladi) quyida kiriting."}
                           </p>
                           <div className="flex gap-2">
                             <input
@@ -3719,17 +3705,15 @@ function AIAgentContent() {
                               disabled={isVerifyLoading}
                               className="px-3 py-2 text-[12px] bg-white border border-[#E8E8E8] rounded-xl focus:outline-none focus:border-black flex-1 text-black"
                             />
-                            {activeBotUser && (
-                              <a
-                                href={`https://t.me/${activeBotUser.replace(/^@+/, "")}?start=verify`}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="px-3.5 py-2 bg-[#229ED9] hover:bg-[#1e8ec3] text-white rounded-xl text-[11px] font-bold transition-all shadow-sm active:scale-95 text-center flex items-center justify-center gap-1 shrink-0"
-                              >
-                                <Send size={12} />
-                                <span>Kodni olish</span>
-                              </a>
-                            )}
+                            <a
+                              href={`https://t.me/sendly_robot?start=${settings?.telegramBotId}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="px-3.5 py-2 bg-[#229ED9] hover:bg-[#1e8ec3] text-white rounded-xl text-[11px] font-bold transition-all shadow-sm active:scale-95 text-center flex items-center justify-center gap-1 shrink-0"
+                            >
+                              <Send size={12} />
+                              <span>Kodni olish</span>
+                            </a>
                           </div>
                           <div className="flex gap-2 justify-end mt-1">
                             <button
@@ -3767,7 +3751,7 @@ function AIAgentContent() {
                             <div className="flex flex-col gap-1">
                               <h4 className="text-[13.5px] font-bold text-blue-900 leading-tight">Admin profil ulanmagan</h4>
                               <p className="text-[11px] text-blue-700/90 leading-relaxed max-w-md font-medium">
-                                Ulash uchun Telegram botingizga borib, botni ishga tushiring (/start). Bot sizga tasdiqlash kodini yuboradi.
+                                Ulash uchun @sendly_robot botimizga borib, botni ishga tushiring (/start). Bot sizga tasdiqlash kodini yuboradi.
                               </p>
                             </div>
                           </div>

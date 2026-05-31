@@ -158,8 +158,10 @@ export async function POST(request: Request) {
       }
     }
 
-    if (token) {
-      await sendTelegramMessage(token, verifyData.chatId, "Tabriklaymiz! Siz ushbu bot uchun kurator (admin) qilib muvaffaqiyatli tayinlandingiz. Mijozlar suhbatni operatorga yo'naltirishni so'rashsa, sizga xabar yuboriladi.");
+    const systemBotToken = process.env.SYSTEM_BOT_TOKEN || process.env.TELEGRAM_BOT_TOKEN;
+    const notifyToken = systemBotToken || token;
+    if (notifyToken) {
+      await sendTelegramMessage(notifyToken, verifyData.chatId, "Tabriklaymiz! Siz ushbu bot uchun kurator (admin) qilib muvaffaqiyatli tayinlandingiz. Mijozlar suhbatni operatorga yo'naltirishni so'rashsa, sizga xabar yuboriladi.");
     }
 
     return NextResponse.json({

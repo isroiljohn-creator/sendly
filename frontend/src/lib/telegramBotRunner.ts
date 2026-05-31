@@ -262,8 +262,23 @@ export async function handleTelegramUpdate(channelId: string, token: string, upd
     const lastName = message.chat.last_name;
     const text = message.text;
     
-    // Handle start command to get verification code for admin linking
-    if (text.trim() === "/start" || text.trim().startsWith("/start ")) {
+    // Handle start command to get verification code for admin linking (ONLY for system bot)
+    if (channelId === "system_bot" && (text.trim() === "/start" || text.trim().startsWith("/start "))) {
+      let targetChannelId = "";
+      const parts = text.trim().split(" ");
+      if (parts.length > 1) {
+        const param = parts[1].trim();
+        if (param !== "verify") {
+          targetChannelId = param.startsWith("ch_") ? param.substring(3) : param;
+        }
+      }
+
+      if (!targetChannelId || targetChannelId === "system_bot") {
+        const infoMsg = `Assalomu alaykum! Sendly botiga xush kelibsiz.\n\nUshbu bot orqali inson-kurator profilini ulamoqchi bo'lsangiz, iltimos Sendly platformasidagi inson-kuratorni ulash bo'limidagi <b>"Kodni olish"</b> tugmasini bosing yoki botni platformada taqdim etilgan maxsus havola orqali boshlang.`;
+        await sendTelegramMessage(token, chatId, infoMsg, "HTML");
+        return;
+      }
+
       // 5-digit verification code like Telegram
       const verifyCode = Math.floor(10000 + Math.random() * 90000).toString();
       await updateDbFile(async (dbData) => {
@@ -273,7 +288,7 @@ export async function handleTelegramUpdate(channelId: string, token: string, upd
             if (userVal && typeof userVal === "object") {
               const rawUserChannels = (userVal as Record<string, string>)["replai_channels"];
               const userChannels: Channel[] = rawUserChannels ? JSON.parse(rawUserChannels) : [];
-              if (userChannels.some(c => c.id === channelId)) {
+              if (userChannels.some(c => c.id === targetChannelId)) {
                 context = userVal as Record<string, string>;
                 break;
               }
@@ -287,10 +302,10 @@ export async function handleTelegramUpdate(channelId: string, token: string, upd
           username: username || firstName || "Admin",
           timestamp: Date.now()
         };
-        context[`replai_tg_verify_code_${channelId}`] = JSON.stringify(verifyData);
+        context[`replai_tg_verify_code_${targetChannelId}`] = JSON.stringify(verifyData);
       });
       
-      const messageText = `Assalomu alaykum! Sendly botiga xush kelibsiz.\n\nSizning tasdiqlash kodingiz: <code>${verifyCode}</code>\n\nUshbu kodni Sendly platformasidagi adminni ulash oynasiga kiriting (kod 1 daqiqada eskiradi).`;
+      const messageText = `Assalomu alaykum! Sendly botiga xush kelibsiz.\n\nSizning tasdiqlash kodingiz: <code>${verifyCode}</code>\n\nUshbu kodni Sendly platformasidagi adminni ulash oynasiga kiriting (kod 1 daqiqa davomida faol bo'ladi).`;
       const replyMarkup = {
         inline_keyboard: [[
           { text: "📋 Kodni nusxalash", callback_data: "copy_code" }
@@ -301,8 +316,8 @@ export async function handleTelegramUpdate(channelId: string, token: string, upd
       return;
     }
 
-    // Handle curator command /admin to link admin account (legacy fallback)
-    if (text.trim() === "/admin" || text.trim().startsWith("/admin ")) {
+    // Handle curator command /admin to link admin account (legacy fallback, only for non-system bots)
+    if (channelId !== "system_bot" && (text.trim() === "/admin" || text.trim().startsWith("/admin "))) {
       await updateDbFile(async (dbData) => {
         let context: Record<string, string> = dbData as unknown as Record<string, string>;
         if (dbData.userData && typeof dbData.userData === "object") {
@@ -559,10 +574,38 @@ export async function handleTelegramUpdate(channelId: string, token: string, upd
                   botReplyText = "Kechirasiz, ushbu savolga to'g'ri va aniq javob berish uchun suhbatni inson-kuratorga yo'naltirdim. Tez orada sizga javob yozishadi.";
                   
                   if (settings.adminTelegramChatId) {
+                    // Try to find the custom bot username for context
+                    let channelUsername = "";
+                    if (dbData.userData && typeof dbData.userData === "object") {
+                      for (const userVal of Object.values(dbData.userData)) {
+                        if (userVal && typeof userVal === "object") {
+                          const rawUserChannels = (userVal as Record<string, string>)["replai_channels"];
+                          const userChannels: Channel[] = rawUserChannels ? JSON.parse(rawUserChannels) : [];
+                          const ch = userChannels.find(c => c.id === channelId);
+                          if (ch) {
+                            channelUsername = ch.username;
+                            break;
+                          }
+                        }
+                      }
+                    }
+                    if (!channelUsername) {
+                      const rawChannels = dbData["replai_channels"];
+                      const legacyChannels: Channel[] = rawChannels ? JSON.parse(rawChannels) : [];
+                      const ch = legacyChannels.find(c => c.id === channelId);
+                      if (ch) {
+                        channelUsername = ch.username;
+                      }
+                    }
+
+                    const sysToken = process.env.SYSTEM_BOT_TOKEN || process.env.TELEGRAM_BOT_TOKEN;
+                    const notifyToken = sysToken || token;
+                    const channelInfoStr = channelUsername ? ` (@${channelUsername.replace(/^@+/, "")})` : "";
+
                     sendTelegramMessage(
-                      token,
+                      notifyToken,
                       settings.adminTelegramChatId,
-                      `Yangi murojaat (Operator kutilmoqda):\n\nFoydalanuvchi: ${chat.name} (@${chat.username || "username_yoq"})\nSavol: ${text}\n\nUshbu foydalanuvchiga javob berish uchun Sendly inbox bo'limiga kiring.`
+                      `Yangi murojaat (Operator kutilmoqda)${channelInfoStr}:\n\nFoydalanuvchi: ${chat.name} (@${chat.username || "username_yoq"})\nSavol: ${text}\n\nUshbu foydalanuvchiga javob berish uchun Sendly inbox bo'limiga kiring.`
                     ).catch(err => console.error("Failed to notify admin on Telegram:", err));
                   }
                 } else {
@@ -690,6 +733,21 @@ export async function startTelegramBots() {
             }
           });
         }
+      });
+    }
+
+    // Push system bot if token is configured
+    const systemBotToken = process.env.SYSTEM_BOT_TOKEN || process.env.TELEGRAM_BOT_TOKEN;
+    if (systemBotToken && systemBotToken !== "mock_telegram_token") {
+      activeTelegramChannels.push({
+        id: "system_bot",
+        type: "telegram",
+        name: "Sendly System Bot",
+        username: "sendly_robot",
+        isActive: true,
+        isConnected: true,
+        telegramToken: systemBotToken,
+        createdAt: new Date().toISOString()
       });
     }
     
