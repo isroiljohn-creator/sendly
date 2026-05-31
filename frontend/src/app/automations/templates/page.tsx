@@ -123,12 +123,43 @@ export default function TemplatesPage() {
     // AI chatbotlar
     {
       id: "tmpl_ai_agent",
-      name: "AI Agent",
+      name: "AI kuratori (AI Curator Agent)",
       category: "ai",
       platforms: ["instagram", "telegram"],
       hasBuilderBadge: true,
-      description: "Learns from your data and responds 24/7. Adapts to dialogue, removes routine tasks",
-      actionKey: "ai_agent"
+      description: "Darsliklar, dars transkriptlari va PDF hujjatlar asosida o'quvchilar va mijozlar savollariga javob beruvchi yordamchi.",
+      actionKey: "ai_agent",
+      templateKey: "kurator"
+    },
+    {
+      id: "tmpl_ai_sales",
+      name: "Sotuvchi AI Agent (Sales Closer AI)",
+      category: "ai",
+      platforms: ["instagram", "telegram"],
+      hasBuilderBadge: true,
+      description: "Katalog, narxlar va ish vaqti kabi ma'lumotlarni o'rganib, mijozlar bilan muloqot qiladi va mahsulot sotadi.",
+      actionKey: "ai_agent",
+      templateKey: "sales"
+    },
+    {
+      id: "tmpl_ai_booker",
+      name: "Konsultatsiya va Band qilish AI (Appointment Booker AI)",
+      category: "ai",
+      platforms: ["instagram", "telegram"],
+      hasBuilderBadge: true,
+      description: "Mutaxassis bilimlari va gaplashish ohangi asosida maslahat beradi va konsultatsiya uchun vaqt band qiladi (pullik to'lov bilan).",
+      actionKey: "ai_agent",
+      templateKey: "booker"
+    },
+    {
+      id: "tmpl_ai_recruiter",
+      name: "HR va Vakansiyalar uchun AI (HR Recruiter AI)",
+      category: "ai",
+      platforms: ["instagram", "telegram"],
+      hasBuilderBadge: true,
+      description: "Bo'sh ish o'rinlari va nomzodga qo'yiladigan talablar asosida nomzodlarni suhbatdan o'tkazadi, saralaydi va HR menejeriga yuboradi.",
+      actionKey: "ai_agent",
+      templateKey: "recruiter"
     },
     {
       id: "tmpl_ai_chatgpt",
@@ -268,7 +299,8 @@ export default function TemplatesPage() {
     }
     if (selectedTemplate.actionKey === "ai_agent") {
       setIsSelectChannelModalOpen(false);
-      window.location.href = "/ai-agent?type=kurator";
+      const agentType = selectedTemplate.templateKey || "kurator";
+      window.location.href = `/ai-agent?type=${agentType}`;
       return;
     }
     if (selectedTemplate.actionKey === "fb_leads_direct") {

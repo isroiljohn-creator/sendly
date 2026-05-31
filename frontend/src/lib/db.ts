@@ -83,6 +83,7 @@ export type BotSettings = {
   adminTelegramChatId?: string;
   adminTelegramUsername?: string;
   telegramBotId?: string;
+  aiAgentType?: "kurator" | "sales" | "booker" | "recruiter";
 };
 
 export type Lesson = {
@@ -108,6 +109,7 @@ const DEFAULT_BOT_SETTINGS: BotSettings = {
   tone: 60,
   length: 40,
   humor: 30,
+  aiAgentType: "kurator",
   systemPrompt: `# ROL VA IDENTIFIKATSIYA
 Sen marketing kursi o'quvchilariga yordam beruvchi "Mently" nomli shaxsiy AI kuratorsan. Xaraktering: samimiy, do'stona, qisqa va aniq gapiradigan, ortiqcha rasmiyatchilikdan xoli.
 

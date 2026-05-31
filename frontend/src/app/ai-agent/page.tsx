@@ -240,15 +240,210 @@ function AIAgentContent() {
   const searchParams = useSearchParams();
   const useRouterObj = useRouter();
   const typeParam = searchParams.get("type");
-  const [selectedAgentType, setSelectedAgentType] = useState<"kurator" | "fb-leads" | "fb-leads-direct" | null>(null);
+  const [selectedAgentType, setSelectedAgentType] = useState<"kurator" | "sales" | "booker" | "recruiter" | "fb-leads" | "fb-leads-direct" | null>(null);
+
+  const getAgentName = () => {
+    switch (selectedAgentType) {
+      case "kurator":
+        return "AI kuratori";
+      case "sales":
+        return "Sotuvchi AI Agent (Sales Closer AI)";
+      case "booker":
+        return "Konsultatsiya va Band qilish AI (Appointment Booker AI)";
+      case "recruiter":
+        return "HR va Vakansiyalar uchun AI (HR Recruiter AI)";
+      case "fb-leads":
+        return "Facebook Lead Handler";
+      case "fb-leads-direct":
+        return "Lidlarni Telegramga yo'naltirish";
+      default:
+        return "AI Agent";
+    }
+  };
+
+  const getAgentBreadcrumb = () => {
+    switch (selectedAgentType) {
+      case "kurator":
+        return "Bosh sahifa / AI Agent / AI kuratori";
+      case "sales":
+        return "Bosh sahifa / AI Agent / Sotuvchi AI Agent";
+      case "booker":
+        return "Bosh sahifa / AI Agent / Konsultatsiya va Band qilish AI";
+      case "recruiter":
+        return "Bosh sahifa / AI Agent / HR va Vakansiyalar uchun AI";
+      default:
+        return "Bosh sahifa / AI Agent";
+    }
+  };
 
   useEffect(() => {
-    if (typeParam === "kurator" || typeParam === "fb-leads" || typeParam === "fb-leads-direct") {
+    if (
+      typeParam === "kurator" ||
+      typeParam === "sales" ||
+      typeParam === "booker" ||
+      typeParam === "recruiter" ||
+      typeParam === "fb-leads" ||
+      typeParam === "fb-leads-direct"
+    ) {
       setSelectedAgentType(typeParam as any);
     } else {
       setSelectedAgentType(null);
     }
   }, [typeParam]);
+
+  // Sync prompts and simulator settings based on selected agent type
+  useEffect(() => {
+    if (!settings || !selectedAgentType) return;
+    
+    const isSpecialType = ["kurator", "sales", "booker", "recruiter"].includes(selectedAgentType);
+    if (isSpecialType && settings.aiAgentType !== selectedAgentType) {
+      let defaultPrompt = "";
+      let defaultTopics: string[] = [];
+      let defaultRules: Array<{ id: string; text: string; enabled: boolean }> = [];
+      
+      if (selectedAgentType === "kurator") {
+        defaultPrompt = `# ROL VA IDENTIFIKATSIYA
+Sen marketing kursi o'quvchilariga yordam beruvchi "Mently" nomli shaxsiy AI kuratorsan. Xaraktering: samimiy, do'stona, qisqa va aniq gapiradigan, ortiqcha rasmiyatchilikdan xoli.
+
+# ASOSIY VAZIFA
+O'quvchilarning savollariga faqat va faqat quyida taqdim etilgan darslik/kurs materiallari (KURS MATERIALLARI) asosida tushunarli, qisqa va tabiiy javob berish.
+
+# KURS MATERIALLARI:
+{{context}}
+
+# QAT'IY YO'RIQNOMALAR VA CHEKLOVLAR
+1. Cheklangan Ma'lumot: Faqat berilgan KURS MATERIALLARI ichidagi ma'lumotlardan foydalan. Kurs materialida yo'q bo'lgan ma'lumotlarni o'zingdan to'qib chiqarma!
+2. Noma'lum Savollar: Agar savolning javobi darslik materiallarida mavjud bo'lmasa, muloyimlik bilan mana shu javobni ber:
+   "Afsuski, ushbu savolga darslik materiallarida javob topilmadi. Sizga to'g'ri yo'nalish berish va yordam berish uchun ushbu savolni inson-kuratorga yo'naltirdim. Tez orada javob berishadi."
+3. Taqiqlangan Mavzular: Siyosat, din, raqobatchi kurslar yoki marketingga aloqasi bo'lmagan mavzular haqida gapirma. Agar bunday savol berilsa, muloyimlik bilan rad et:
+   "Men faqat ushbu marketing kursi bo'yicha savollarga javob bera olaman. Keling, darsimizga qaytamiz!"
+4. Til qoidasi: O'quvchi qaysi tilda va yozuvda yozgan bo'lsa (Lotin yoki Kirill o'zbek yozuvi, Rus tili yoki Ingliz tili), o'sha yozuv va tilda tabiiy javob ber.
+
+# JAVOB FORMATI VA STILI
+- Tabiiylik va Qisqalik: Javoblaring juda qisqa, aniq va londa bo'lsin (ko'pi bilan 2-3 ta gap). Ortiqcha uzun gaplar, kirish so'zlar yoki sun'iy gaplardan qoch. Oddiy suhbatdoshdek tabiiy gapir.
+- Soddalik: Murakkab marketing atamalarini sodda, kundalik tilda tushuntir.
+- Manba ko'rsatmaslik: JAVOBINGGA HECH QANDAY MANBA YOKI SHUNGA O'XSHASH MA'LUMOTLARNI QO'SHMA (Masalan: "Manba: 1-Modul..." kabi yozuvlar umuman bo'lmasligi shart).
+- Emojilar: Mutlaqo emojilarsiz, faqat matn va belgilar yordamida javob yoz.`;
+        
+        defaultTopics = ["Siyosat", "Din", "Raqobatchilar"];
+        defaultRules = [
+          { id: "esc-1", text: "Ishonch darajasi 60% dan past bo'lganda", enabled: true },
+          { id: "esc-2", text: "O'quvchi shikoyat qilganda", enabled: true },
+          { id: "esc-3", text: "To'lov yoki sertifikat haqida savol bo'lganda", enabled: true }
+        ];
+      } else if (selectedAgentType === "sales") {
+        defaultPrompt = `# ROL VA IDENTIFIKATSIYA
+Sen kompaniyaning sotuvlar bo'limi yordamchisisan (Sales Closer AI). Maqsading: mijozlarga mahsulotlar, narxlar, katalog, manzil va ish vaqti haqida to'liq ma'lumot berish va ularni sotib olishga yo'naltirish, buyurtmalarni tezda rasmiylashtirish.
+
+# ASOSIY VAZIFA
+Mijozlarning savollariga faqat va faqat quyida taqdim etilgan mahsulot katalogi va do'kon ma'lumotlari (MAHSULOT VA DO'KON MATERIALLARI) asosida javob berish.
+
+# MAHSULOT VA DO'KON MATERIALLARI:
+{{context}}
+
+# QAT'IY YO'RIQNOMALAR VA CHEKLOVLAR
+1. Katalogda bo'lmagan yoki noaniq mahsulotlar/narxlar haqida gapirma. Agarda savol katalogda yo'q bo'lsa, mijozning telefon raqamini so'rab:
+   "Afsuski, ushbu mahsulot yoki xizmat haqida hozircha ma'lumot yo'q. Sizga aniq yordam berishimiz uchun telefon raqamingizni qoldirsangiz, mutaxassisimiz tezda bog'lanadi." deb javob ber.
+2. Har bir muloqotda sotuvga va buyurtmaga yo'naltiruvchi savollar ber.
+3. Taqiqlangan mavzulardan qoch (siyosat, shaxsiy savollar va boshqalar).
+
+# JAVOB FORMATI VA STILI
+- Xushmuomala va sotuvga chorlovchi ohang.
+- Javoblarni londa, qisqa va qulay formatda taqdim et (ko'pi bilan 3 ta gap).`;
+        
+        defaultTopics = ["Raqobatchilar haqida ma'lumot", "Shaxsiy savollar", "Siyosat va Din"];
+        defaultRules = [
+          { id: "esc-1", text: "Ishonch darajasi 60% dan past bo'lganda", enabled: true },
+          { id: "esc-2", text: "Mijoz maxsus chegirma yoki muddatli to'lov so'raganda", enabled: true },
+          { id: "esc-3", text: "Mijoz inson sotuvchi bilan gaplashishni talab qilganda", enabled: true }
+        ];
+      } else if (selectedAgentType === "booker") {
+        defaultPrompt = `# ROL VA IDENTIFIKATSIYA
+Sen shaxsiy brend egasining aqlli maslahatchisi va band qilish yordamchisisan (Appointment Booker AI). Maqsading: mutaxassisning nomidan gaplashib, uning ohangi va bilimlariga mos ravishda foydali maslahat berish hamda konsultatsiya/suhbat uchun vaqt belgilash.
+
+# ASOSIY VAZIFA
+Suhbatdoshlarga faqat mutaxassisning bilimlari, qoidalari va ish tartibi (MUTAXASSIS BILIMLARI) doirasida maslahat berish.
+
+# MUTAXASSIS BILIMLARI:
+{{context}}
+
+# QAT'IY YO'RIQNOMALAR VA CHEKLOVLAR
+1. Konsultatsiyani bron qilishdan avval to'lov qilinishi shart bo'lsa, mijozga to'lov shartlari va havolani taqdim et.
+2. Mutaxassisning o'rniga noaniq ma'lumotlarni gapirma, faqat uning bilimlari bazasida yozilgan yo'nalishlarni ber.
+3. Har doim mutaxassisning shaxsiy gaplashish tonida (do'stona, professional, xarakterli) bo'l.
+
+# JAVOB FORMATI VA STILI
+- Tabiiy suhbatdosh kabi ohang.
+- Mijozning ehtiyojini tushunish va to'g'ri vaqtga bron qilishni taklif qilish.`;
+        
+        defaultTopics = ["Shaxsiy hayot", "Boshqa mutaxassislar", "Siyosat"];
+        defaultRules = [
+          { id: "esc-1", text: "Mijoz to'lov muammolari haqida yozganda", enabled: true },
+          { id: "esc-2", text: "Mijoz band qilingan vaqtni o'zgartirishni so'raganida", enabled: true },
+          { id: "esc-3", text: "Mijoz to'g'ridan-to'g'ri inson bilan gaplashmoqchi bo'lganida", enabled: true }
+        ];
+      } else if (selectedAgentType === "recruiter") {
+        defaultPrompt = `# ROL VA IDENTIFIKATSIYA
+Sen kompaniyaning HR yordamchisisan (HR Recruiter AI). Maqsading: nomzodlarga bo'sh ish o'rinlari haqida ma'lumot berish, nomzodlar bilan dastlabki suhbat/skrining o'tkazish, kerakli ma'lumotlarni yig'ish va ularni saralash.
+
+# ASOSIY VAZIFA
+Nomzodlarga faqat vakansiya va talablar (VAKANSIYALAR VA TALABLAR) doirasida javob berish.
+
+# VAKANSIYALAR VA TALABLAR:
+{{context}}
+
+# QAT'IY YO'RIQNOMALAR VA CHEKLOVLAR
+1. Nomzoddan ketma-ket quyidagi ma'lumotlarni to'pla: Ismi, bog'lanish telefoni, tajribasi va ish haqi bo'yicha kutilmasi.
+2. Barcha ma'lumotlarni olmaguncha nomzodning arizasini yakunlama.
+3. Vakansiya talablariga mos kelmaydigan nomzodlarni muloyimlik bilan inson operatorga yo'naltir yoki rad javobini ber.
+
+# JAVOB FORMATI VA STILI
+- Professional, samimiy va suhbat tarzida yondashish.
+- Har bir xabarda faqat bitta savol berib, suhbatni oqilona davom ettirish.`;
+        
+        defaultTopics = ["Kompaniya ichki sirlari", "Maosh to'lash sanalari", "Siyosat"];
+        defaultRules = [
+          { id: "esc-1", text: "Nomzod ish haqi bo'yicha keskin talablar qo'ysa", enabled: true },
+          { id: "esc-2", text: "Nomzod xorijdan turib ishlash shartlarini so'raganida", enabled: true },
+          { id: "esc-3", text: "Nomzod darhol asosiy rahbar bilan uchrashmoqchi bo'lsa", enabled: true }
+        ];
+      }
+      
+      setSettings(prev => prev ? {
+        ...prev,
+        aiAgentType: selectedAgentType,
+        systemPrompt: defaultPrompt,
+        topics: defaultTopics,
+        escalationRules: defaultRules
+      } : null);
+    }
+  }, [selectedAgentType, settings]);
+
+  // Sync simulator welcome messages when selected agent changes
+  useEffect(() => {
+    let welcomeText = "";
+    if (selectedAgentType === "kurator") {
+      welcomeText = "Salom! Men o'quvchilarga yordam beruvchi shaxsiy AI kuratorman. Bilimlar bazasidagi ma'lumotlar asosida savollarga javob beraman. Meni sinab ko'rish uchun bu yerga biror savol yozing! 📚";
+    } else if (selectedAgentType === "sales") {
+      welcomeText = "Salom! Men sizning sotuvchi yordamchingizman. Mahsulotlarimiz, narxlarimiz va do'konimiz haqidagi savollarga javob bera olaman. Meni sinab ko'rish uchun savol yozing! 🛍️";
+    } else if (selectedAgentType === "booker") {
+      welcomeText = "Salom! Men shaxsiy konsultatsiyalarni bron qiluvchi va maslahat beruvchi yordamchiman. Ohang va ma'lumotlarimni tekshirish uchun savol yozib ko'ring! 📅";
+    } else if (selectedAgentType === "recruiter") {
+      welcomeText = "Salom! Men HR/Rekruter yordamchiman. Bo'sh ish o'rinlari haqida ma'lumot beraman va nomzodlarni suhbatdan o'tkaza olaman. Sinab ko'rish uchun savol yozing! 👔";
+    }
+    
+    if (welcomeText) {
+      setChatMessages([
+        {
+          id: "welcome",
+          sender: "bot",
+          text: welcomeText,
+          time: "Hozir",
+          confidence: 100
+        }
+      ]);
+    }
+  }, [selectedAgentType]);
   const [sliderPreviewType, setSliderPreviewType] = useState<"tone" | "length" | "humor">("tone");
   const [activeTab, setActiveTab] = useState<"settings" | "knowledge" | "analytics">("settings");
 
@@ -682,8 +877,22 @@ function AIAgentContent() {
         });
         return;
       }
+      // Enforce mutual exclusion: turn off Facebook lead agent
+      settings.fbAgentEnabled = false;
+      if (selectedAgentType && ["kurator", "sales", "booker", "recruiter"].includes(selectedAgentType)) {
+        settings.aiAgentType = selectedAgentType as any;
+      }
     }
     handleUpdateSettings("aiCuratorEnabled", enabled);
+  };
+
+  const handleToggleFbAgent = (enabled: boolean) => {
+    if (!settings) return;
+    if (enabled) {
+      // Enforce mutual exclusion: turn off RAG AI Curator agent
+      settings.aiCuratorEnabled = false;
+    }
+    handleUpdateSettings("fbAgentEnabled", enabled);
   };
 
   const handleBotChange = (botId: string) => {
@@ -1612,52 +1821,69 @@ function AIAgentContent() {
                     <div className="grid grid-cols-1 gap-4 w-full">
                       {activeAgents.map(item => (
                         <React.Fragment key={item.channel.id}>
-                          {item.settings.aiCuratorEnabled && (
-                            <div className="bg-white border border-[#E8E8E8] rounded-[28px] p-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 transition-all shadow-md relative overflow-hidden group">
-                              <div className="absolute top-0 right-0 w-24 h-24 bg-[#C7F33C]/10 rounded-bl-full -z-10" />
-                              <div className="flex gap-4 items-center">
-                                <div className="w-12 h-12 rounded-2xl bg-black text-[#C7F33C] grid place-items-center font-bold text-[18px] shrink-0">
-                                  <Sparkles size={22} />
-                                </div>
-                                <div>
-                                  <div className="flex flex-wrap items-center gap-2">
-                                    <h3 className="text-[17px] font-bold text-black">
-                                      {t("pages.ai_agent.kurator_agent")}
-                                    </h3>
-                                    <span className="flex items-center gap-1.5 px-2.5 py-0.5 bg-[#C7F33C]/20 border border-[#7CA607]/20 rounded-full text-[9px] font-extrabold text-[#7CA607] uppercase tracking-wider">
-                                      <span className="relative flex h-2 w-2">
-                                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#7CA607] opacity-75"></span>
-                                        <span className="relative inline-flex rounded-full h-2 w-2 bg-[#7CA607]"></span>
-                                      </span>
-                                      FAOL
-                                    </span>
-                                  </div>
-                                  <p className="text-[11px] text-[#7CA607] font-semibold mt-1">
-                                    Bot: @{item.channel.username.replace(/^@+/, "")}
-                                  </p>
-                                  <p className="text-[12px] text-[#707070] mt-1.5 leading-relaxed">
-                                    {t("pages.ai_agent.curator_desc")}
-                                  </p>
-                                </div>
-                              </div>
-                              <button
-                                onClick={() => {
-                                  // Switch active editing context to this channel
-                                  const loadedSettings = db.getBotSettings(item.channel.id);
-                                  loadedSettings.telegramBotId = item.channel.id;
-                                  setSettings(loadedSettings);
-                                  setTelegramBotUsername(item.channel.username);
-                                  setIsTelegramLinked(true);
+                          {item.settings.aiCuratorEnabled && (() => {
+                            const agentType = item.settings.aiAgentType || "kurator";
+                            let name = "AI kuratori";
+                            let desc = "Telegram bot yoki instagram orqali bilimlar bazasidagi ma'lumotlar asosida aqlli, do'stona va javob beruvchi yordamchi.";
+                            if (agentType === "sales") {
+                              name = "Sotuvchi AI Agent (Sales Closer AI)";
+                              desc = "Mahsulotlar katalogi, narxlari va ish vaqti kabi ma'lumotlarni o'rganib, mijozlar bilan muloqot qiladi va sotadi.";
+                            } else if (agentType === "booker") {
+                              name = "Konsultatsiya va Band qilish AI (Appointment Booker AI)";
+                              desc = "Mutaxassis bilimlari va gaplashish ohangi asosida maslahat beradi va konsultatsiya uchun vaqt band qiladi (pullik to'lov bilan).";
+                            } else if (agentType === "recruiter") {
+                              name = "HR va Vakansiyalar uchun AI (HR Recruiter AI)";
+                              desc = "Bo'sh ish o'rinlari va nomzodga qo'yiladigan talablar asosida nomzodlarni suhbatdan o'tkazadi, saralaydi va HR-ga yuboradi.";
+                            }
 
-                                  useRouterObj.push("/ai-agent?type=kurator");
-                                }}
-                                className="px-5 py-2.5 bg-black text-[#C7F33C] text-[12px] font-bold hover:bg-black/90 hover:scale-[1.02] active:scale-95 transition-all text-center rounded-full flex items-center justify-center gap-2 shrink-0 self-stretch sm:self-auto shadow-sm"
-                              >
-                                <span>Sozlash</span>
-                                <ArrowRight size={14} />
-                              </button>
-                            </div>
-                          )}
+                            return (
+                              <div className="bg-white border border-[#E8E8E8] rounded-[28px] p-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 transition-all shadow-md relative overflow-hidden group">
+                                <div className="absolute top-0 right-0 w-24 h-24 bg-[#C7F33C]/10 rounded-bl-full -z-10" />
+                                <div className="flex gap-4 items-center">
+                                  <div className="w-12 h-12 rounded-2xl bg-black text-[#C7F33C] grid place-items-center font-bold text-[18px] shrink-0">
+                                    <Sparkles size={22} />
+                                  </div>
+                                  <div>
+                                    <div className="flex flex-wrap items-center gap-2">
+                                      <h3 className="text-[17px] font-bold text-black">
+                                        {name}
+                                      </h3>
+                                      <span className="flex items-center gap-1.5 px-2.5 py-0.5 bg-[#C7F33C]/20 border border-[#7CA607]/20 rounded-full text-[9px] font-extrabold text-[#7CA607] uppercase tracking-wider">
+                                        <span className="relative flex h-2 w-2">
+                                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#7CA607] opacity-75"></span>
+                                          <span className="relative inline-flex rounded-full h-2 w-2 bg-[#7CA607]"></span>
+                                        </span>
+                                        FAOL
+                                      </span>
+                                    </div>
+                                    <p className="text-[11px] text-[#7CA607] font-semibold mt-1">
+                                      Kanal: @{item.channel.username.replace(/^@+/, "")}
+                                    </p>
+                                    <p className="text-[12px] text-[#707070] mt-1.5 leading-relaxed">
+                                      {desc}
+                                    </p>
+                                  </div>
+                                </div>
+                                <button
+                                  onClick={() => {
+                                    // Switch active editing context to this channel
+                                    const loadedSettings = db.getBotSettings(item.channel.id);
+                                    loadedSettings.telegramBotId = item.channel.id;
+                                    setSettings(loadedSettings);
+                                    setTelegramBotUsername(item.channel.username);
+                                    setIsTelegramLinked(true);
+
+                                    useRouterObj.push(`/ai-agent?type=${agentType}`);
+                                  }}
+                                  className="px-5 py-2.5 bg-black text-[#C7F33C] text-[12px] font-bold hover:bg-black/90 hover:scale-[1.02] active:scale-95 transition-all text-center rounded-full flex items-center justify-center gap-2 shrink-0 self-stretch sm:self-auto shadow-sm"
+                                >
+                                  <span>Sozlash</span>
+                                  <ArrowRight size={14} />
+                                </button>
+                              </div>
+                            );
+                          })()}
+                          {/* item.settings.aiCuratorEnabled closing block is complete */}
 
                                 {item.settings.fbAgentEnabled && item.settings.fbAgentMode === "direct" && (
                               <div className="bg-white border border-[#E8E8E8] rounded-[28px] p-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 transition-all shadow-md relative overflow-hidden group">
@@ -1782,10 +2008,10 @@ function AIAgentContent() {
                       </div>
                       <div>
                         <h3 className="text-[17px] font-bold text-black group-hover:text-[#7CA607] transition-colors">
-                          {t("pages.ai_agent.kurator_agent")}
+                          {"AI kuratori (AI Curator)"}
                         </h3>
                         <p className="text-[12px] text-[#707070] mt-1.5 leading-relaxed">
-                          {t("pages.ai_agent.curator_desc")}
+                          {"Darsliklar, transkriptlar va PDF materiallar asosida savollarga aqlli va aniq javob beruvchi shaxsiy yordamchi."}
                         </p>
                       </div>
 
@@ -1794,19 +2020,19 @@ function AIAgentContent() {
                       <ul className="flex flex-col gap-2 text-[11px] text-[#595959]">
                         <li className="flex items-start gap-2.5">
                           <CheckCircle className="w-4 h-4 text-[#9BC92E] shrink-0 mt-0.5" />
-                          <span>{t("pages.ai_agent.curator_feature_1")}</span>
+                          <span>{"Bilimlar bazasi tizimi (RAG)"}</span>
                         </li>
                         <li className="flex items-start gap-2.5">
                           <CheckCircle className="w-4 h-4 text-[#9BC92E] shrink-0 mt-0.5" />
-                          <span>{t("pages.ai_agent.curator_feature_2")}</span>
+                          <span>{"Telegram bot integratsiyasi"}</span>
                         </li>
                         <li className="flex items-start gap-2.5">
                           <CheckCircle className="w-4 h-4 text-[#9BC92E] shrink-0 mt-0.5" />
-                          <span>{t("pages.ai_agent.curator_feature_3")}</span>
+                          <span>{"Ohang va xarakterni sozlash"}</span>
                         </li>
                         <li className="flex items-start gap-2.5">
                           <CheckCircle className="w-4 h-4 text-[#9BC92E] shrink-0 mt-0.5" />
-                          <span>{t("pages.ai_agent.curator_feature_4")}</span>
+                          <span>{"Inson-kuratorga yo'naltirish qoidalari"}</span>
                         </li>
                       </ul>
                     </div>
@@ -1822,7 +2048,178 @@ function AIAgentContent() {
                     </button>
                   </div>
 
-                  {/* Card 2: Facebook Lead Handler */}
+                  {/* Card 2: Sotuvchi AI Agent */}
+                  <div className="bg-white border border-[#E8E8E8] hover:border-black/20 hover:shadow-xl rounded-[28px] p-6 flex flex-col justify-between transition-all group relative overflow-hidden">
+                    <div className="absolute top-0 right-0 w-24 h-24 bg-amber-500/10 rounded-bl-full -z-10 group-hover:scale-110 transition-transform" />
+                    <div className="flex flex-col gap-4">
+                      <div className="flex items-center justify-between">
+                        <div className="w-12 h-12 rounded-2xl bg-amber-500 text-white grid place-items-center font-bold text-[18px]">
+                          <Sparkles size={22} />
+                        </div>
+                        <div className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-full">
+                          <span className="w-2 h-2 rounded-full bg-gray-300"></span>
+                          <span className="text-[10px] font-extrabold text-[#707070] uppercase tracking-wider">
+                            {t("pages.ai_agent.inactive")}
+                          </span>
+                        </div>
+                      </div>
+                      <div>
+                        <h3 className="text-[17px] font-bold text-black group-hover:text-amber-600 transition-colors">
+                          {"Sotuvchi AI Agent (Sales Closer)"}
+                        </h3>
+                        <p className="text-[12px] text-[#707070] mt-1.5 leading-relaxed">
+                          {"Katalog, narxlar va ish vaqti kabi ma'lumotlarni o'rganib, mijozlar bilan muloqot qiladi va mahsulot sotadi."}
+                        </p>
+                      </div>
+
+                      <div className="border-t border-[#F0F0F0] my-1" />
+
+                      <ul className="flex flex-col gap-2 text-[11px] text-[#595959]">
+                        <li className="flex items-start gap-2.5">
+                          <CheckCircle className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
+                          <span>{"Katalog va narxlar bazasi"}</span>
+                        </li>
+                        <li className="flex items-start gap-2.5">
+                          <CheckCircle className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
+                          <span>{"Ish vaqti va manzil integratsiyasi"}</span>
+                        </li>
+                        <li className="flex items-start gap-2.5">
+                          <CheckCircle className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
+                          <span>{"Sotuv ohangida suhbatlashish"}</span>
+                        </li>
+                        <li className="flex items-start gap-2.5">
+                          <CheckCircle className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
+                          <span>{"Buyurtmani operatorga yo'naltirish"}</span>
+                        </li>
+                      </ul>
+                    </div>
+
+                    <button
+                      onClick={() => {
+                        useRouterObj.push("/ai-agent?type=sales");
+                      }}
+                      className="w-full mt-6 py-3 rounded-full bg-black text-[#C7F33C] text-[12px] font-bold hover:bg-black/90 hover:scale-[1.02] active:scale-95 transition-all text-center flex items-center justify-center gap-2"
+                    >
+                      <span>{t("pages.ai_agent.setup_template_btn")}</span>
+                      <ArrowRight size={14} />
+                    </button>
+                  </div>
+
+                  {/* Card 3: Appointment Booker AI */}
+                  <div className="bg-white border border-[#E8E8E8] hover:border-black/20 hover:shadow-xl rounded-[28px] p-6 flex flex-col justify-between transition-all group relative overflow-hidden">
+                    <div className="absolute top-0 right-0 w-24 h-24 bg-emerald-500/10 rounded-bl-full -z-10 group-hover:scale-110 transition-transform" />
+                    <div className="flex flex-col gap-4">
+                      <div className="flex items-center justify-between">
+                        <div className="w-12 h-12 rounded-2xl bg-emerald-500 text-white grid place-items-center font-bold text-[18px]">
+                          <Sparkles size={22} />
+                        </div>
+                        <div className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-full">
+                          <span className="w-2 h-2 rounded-full bg-gray-300"></span>
+                          <span className="text-[10px] font-extrabold text-[#707070] uppercase tracking-wider">
+                            {t("pages.ai_agent.inactive")}
+                          </span>
+                        </div>
+                      </div>
+                      <div>
+                        <h3 className="text-[17px] font-bold text-black group-hover:text-emerald-600 transition-colors">
+                          {"Konsultatsiya / Band qilish AI"}
+                        </h3>
+                        <p className="text-[12px] text-[#707070] mt-1.5 leading-relaxed">
+                          {"Mutaxassis ohangida maslahat beradi va konsultatsiya uchun vaqt band qiladi. Pullik qilish imkoni bor."}
+                        </p>
+                      </div>
+
+                      <div className="border-t border-[#F0F0F0] my-1" />
+
+                      <ul className="flex flex-col gap-2 text-[11px] text-[#595959]">
+                        <li className="flex items-start gap-2.5">
+                          <CheckCircle className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
+                          <span>{"Mutaxassis ohangi va bilimlari"}</span>
+                        </li>
+                        <li className="flex items-start gap-2.5">
+                          <CheckCircle className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
+                          <span>{"Konsultatsiya band qilish (Booking)"}</span>
+                        </li>
+                        <li className="flex items-start gap-2.5">
+                          <CheckCircle className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
+                          <span>{"Pre-consultation to'lov havolasi"}</span>
+                        </li>
+                        <li className="flex items-start gap-2.5">
+                          <CheckCircle className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
+                          <span>{"Telegram & Direct orqali bron qilish"}</span>
+                        </li>
+                      </ul>
+                    </div>
+
+                    <button
+                      onClick={() => {
+                        useRouterObj.push("/ai-agent?type=booker");
+                      }}
+                      className="w-full mt-6 py-3 rounded-full bg-black text-[#C7F33C] text-[12px] font-bold hover:bg-black/90 hover:scale-[1.02] active:scale-95 transition-all text-center flex items-center justify-center gap-2"
+                    >
+                      <span>{t("pages.ai_agent.setup_template_btn")}</span>
+                      <ArrowRight size={14} />
+                    </button>
+                  </div>
+
+                  {/* Card 4: HR Recruiter AI */}
+                  <div className="bg-white border border-[#E8E8E8] hover:border-black/20 hover:shadow-xl rounded-[28px] p-6 flex flex-col justify-between transition-all group relative overflow-hidden">
+                    <div className="absolute top-0 right-0 w-24 h-24 bg-purple-500/10 rounded-bl-full -z-10 group-hover:scale-110 transition-transform" />
+                    <div className="flex flex-col gap-4">
+                      <div className="flex items-center justify-between">
+                        <div className="w-12 h-12 rounded-2xl bg-purple-500 text-white grid place-items-center font-bold text-[18px]">
+                          <Sparkles size={22} />
+                        </div>
+                        <div className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-full">
+                          <span className="w-2 h-2 rounded-full bg-gray-300"></span>
+                          <span className="text-[10px] font-extrabold text-[#707070] uppercase tracking-wider">
+                            {t("pages.ai_agent.inactive")}
+                          </span>
+                        </div>
+                      </div>
+                      <div>
+                        <h3 className="text-[17px] font-bold text-black group-hover:text-purple-600 transition-colors">
+                          {"HR Recruiter AI (Vakansiyalar)"}
+                        </h3>
+                        <p className="text-[12px] text-[#707070] mt-1.5 leading-relaxed">
+                          {"Bo'sh ish o'rinlari talablari bo'yicha nomzodlar bilan suhbatlashadi, ularni skrining qiladi va saralaydi."}
+                        </p>
+                      </div>
+
+                      <div className="border-t border-[#F0F0F0] my-1" />
+
+                      <ul className="flex flex-col gap-2 text-[11px] text-[#595959]">
+                        <li className="flex items-start gap-2.5">
+                          <CheckCircle className="w-4 h-4 text-purple-500 shrink-0 mt-0.5" />
+                          <span>{"Vakansiyalar va talablar bazasi"}</span>
+                        </li>
+                        <li className="flex items-start gap-2.5">
+                          <CheckCircle className="w-4 h-4 text-purple-500 shrink-0 mt-0.5" />
+                          <span>{"Suhbat orqali ma'lumot yig'ish"}</span>
+                        </li>
+                        <li className="flex items-start gap-2.5">
+                          <CheckCircle className="w-4 h-4 text-purple-500 shrink-0 mt-0.5" />
+                          <span>{"Nomzod malakalarini tahlil qilish"}</span>
+                        </li>
+                        <li className="flex items-start gap-2.5">
+                          <CheckCircle className="w-4 h-4 text-purple-500 shrink-0 mt-0.5" />
+                          <span>{"Saralangan arizalarni HR-ga yuborish"}</span>
+                        </li>
+                      </ul>
+                    </div>
+
+                    <button
+                      onClick={() => {
+                        useRouterObj.push("/ai-agent?type=recruiter");
+                      }}
+                      className="w-full mt-6 py-3 rounded-full bg-black text-[#C7F33C] text-[12px] font-bold hover:bg-black/90 hover:scale-[1.02] active:scale-95 transition-all text-center flex items-center justify-center gap-2"
+                    >
+                      <span>{t("pages.ai_agent.setup_template_btn")}</span>
+                      <ArrowRight size={14} />
+                    </button>
+                  </div>
+
+                  {/* Card 5: Facebook Lead Handler */}
                   <div className="bg-white border border-[#E8E8E8] hover:border-black/20 hover:shadow-xl rounded-[28px] p-6 flex flex-col justify-between transition-all group relative overflow-hidden">
                     <div className="absolute top-0 right-0 w-24 h-24 bg-blue-500/5 rounded-bl-full -z-10 group-hover:scale-110 transition-transform" />
                     <div className="flex flex-col gap-4">
@@ -1879,7 +2276,7 @@ function AIAgentContent() {
                     </button>
                   </div>
 
-                  {/* Card 3: Meta Leads Telegram Forwarder (AIsiz) */}
+                  {/* Card 6: Meta Leads Telegram Forwarder (AIsiz) */}
                   <div className="bg-white border border-[#E8E8E8] hover:border-black/20 hover:shadow-xl rounded-[28px] p-6 flex flex-col justify-between transition-all group relative overflow-hidden">
                     <div className="absolute top-0 right-0 w-24 h-24 bg-blue-500/5 rounded-bl-full -z-10 group-hover:scale-110 transition-transform" />
                     <div className="flex flex-col gap-4">
@@ -2166,7 +2563,7 @@ function AIAgentContent() {
                     <input
                       type="checkbox"
                       checked={settings.fbAgentEnabled || false}
-                      onChange={(e) => handleUpdateSettings("fbAgentEnabled", e.target.checked)}
+                      onChange={(e) => handleToggleFbAgent(e.target.checked)}
                       className="sr-only peer"
                     />
                     <div className="w-11 h-6 bg-[#E8E8E8] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-[#D8D8D8] after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
@@ -2934,8 +3331,8 @@ function AIAgentContent() {
         {/* Page Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <PageHeader
-            title="AI Kurator Agent"
-            breadcrumbs={t("pages.ai_agent.curator_breadcrumb")}
+            title={getAgentName()}
+            breadcrumbs={getAgentBreadcrumb()}
           />
           <div className="flex items-center gap-3 shrink-0">
             <button
@@ -3041,7 +3438,7 @@ function AIAgentContent() {
                     </label>
                   </div>
                   <div className="flex flex-col gap-1.5 mt-2 pt-2 border-t border-[#F0F0F0]">
-                    <label className="text-[10px] font-extrabold text-[#707070] uppercase tracking-wider">AI kuratori uchun Telegram Bot</label>
+                    <label className="text-[10px] font-extrabold text-[#707070] uppercase tracking-wider">{getAgentName()} uchun Telegram Bot</label>
                     {(() => {
                       const tgChannels = db.getChannels().filter(c => c.type === "telegram" && c.isConnected && c.telegramToken);
                       if (tgChannels.length > 0) {
@@ -3061,7 +3458,7 @@ function AIAgentContent() {
                             />
                             <div className="flex items-center gap-1.5 text-[10px] text-green-700 mt-1 bg-green-50/50 p-2.5 rounded-xl border border-green-100">
                               <CheckCircle size={12} className="text-green-500 shrink-0" />
-                              <span>AI kuratori ushbu tanlangan Telegram bot orqali savollarga javob beradi.</span>
+                              <span>{getAgentName()} ushbu tanlangan Telegram bot orqali savollarga javob beradi.</span>
                             </div>
                           </div>
                         );
@@ -3073,7 +3470,7 @@ function AIAgentContent() {
                               <span className="font-bold">Telegram bot topilmadi</span>
                             </div>
                             <p className="text-[10px] text-amber-600 leading-relaxed">
-                              AI kuratordan foydalanish uchun kamida 1ta Telegram bot ulangan bo&apos;lishi lozim.
+                              {getAgentName()}dan foydalanish uchun kamida 1ta Telegram bot ulangan bo&apos;lishi lozim.
                             </p>
                             <button
                               type="button"
