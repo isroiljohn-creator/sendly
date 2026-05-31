@@ -43,6 +43,7 @@ async function sendTelegramMessage(token: string, chatId: string | number, text:
         chat_id: chatId,
         text: text,
       }),
+      cache: "no-store",
     });
     if (!res.ok) {
       console.error(`Failed to send Telegram message to admin: ${res.status}`);
@@ -158,10 +159,45 @@ export async function POST(request: Request) {
       }
     }
 
+    let userEmail = "";
+    try {
+      if (useSupabase && supabase) {
+        const { data: globalUsers } = await supabase
+          .from("instagram_accounts")
+          .select("fb_field_mappings")
+          .eq("instagram_page_id", "global_users")
+          .maybeSingle();
+        if (globalUsers?.fb_field_mappings) {
+          const usersList = typeof globalUsers.fb_field_mappings === "string"
+            ? JSON.parse(globalUsers.fb_field_mappings)
+            : globalUsers.fb_field_mappings;
+          if (Array.isArray(usersList)) {
+            const userObj = usersList.find((u: any) => u.id === userId);
+            if (userObj) {
+              userEmail = userObj.email;
+            }
+          }
+        }
+      } else {
+        const localDb = dbData || readDb();
+        const usersList = localDb.users || [];
+        if (Array.isArray(usersList)) {
+          const userObj = usersList.find((u: any) => u.id === userId);
+          if (userObj) {
+            userEmail = userObj.email;
+          }
+        }
+      }
+    } catch (e) {
+      console.error("Failed to retrieve user email for congratulatory message:", e);
+    }
+
     const systemBotToken = process.env.SYSTEM_BOT_TOKEN || process.env.TELEGRAM_BOT_TOKEN;
     const notifyToken = systemBotToken || token;
     if (notifyToken) {
-      await sendTelegramMessage(notifyToken, verifyData.chatId, "Tabriklaymiz! Siz ushbu bot uchun kurator (admin) qilib muvaffaqiyatli tayinlandingiz. Mijozlar suhbatni operatorga yo'naltirishni so'rashsa, sizga xabar yuboriladi.");
+      const accountInfo = userEmail ? ` Akkaunt: ${userEmail}.` : "";
+      const congratsMsg = `Tabriklaymiz! Siz ushbu bot uchun kurator (admin) qilib muvaffaqiyatli tayinlandingiz.${accountInfo} Mijozlar suhbatni operatorga yo'naltirishni so'rashsa, sizga xabar yuboriladi.`;
+      await sendTelegramMessage(notifyToken, verifyData.chatId, congratsMsg);
     }
 
     return NextResponse.json({

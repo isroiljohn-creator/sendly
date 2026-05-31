@@ -85,6 +85,7 @@ async function sendTelegramMessage(token: string, chatId: number | string, text:
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
+      cache: "no-store"
     });
     if (!res.ok) {
       const errText = await res.text();
@@ -180,7 +181,8 @@ export async function handleTelegramUpdate(channelId: string, token: string, upd
             callback_query_id: cb.id,
             text: code ? "Nusxalash uchun alohida xabar yuborildi. Ustiga bosing!" : "Matndagi kod ustiga bosing!",
             show_alert: false
-          })
+          }),
+          cache: "no-store"
         });
 
         if (code && cb.message?.chat?.id) {
@@ -328,17 +330,30 @@ export async function handleTelegramUpdate(channelId: string, token: string, upd
 
     // Handle curator command /admin to link admin account (legacy fallback, only for non-system bots)
     if (channelId !== "system_bot" && (text.trim() === "/admin" || text.trim().startsWith("/admin "))) {
+      let userEmail = "";
       await updateDbFile(async (dbData) => {
         let context: Record<string, string> = dbData as unknown as Record<string, string>;
+        let matchedUserId = "";
         if (dbData.userData && typeof dbData.userData === "object") {
-          for (const userVal of Object.values(dbData.userData)) {
+          for (const [userId, userVal] of Object.entries(dbData.userData)) {
             if (userVal && typeof userVal === "object") {
               const rawUserChannels = (userVal as Record<string, string>)["replai_channels"];
               const userChannels: Channel[] = rawUserChannels ? JSON.parse(rawUserChannels) : [];
               if (userChannels.some(c => c.id === channelId)) {
                 context = userVal as Record<string, string>;
+                matchedUserId = userId;
                 break;
               }
+            }
+          }
+        }
+        
+        if (matchedUserId) {
+          const usersList = dbData.users || [];
+          if (Array.isArray(usersList)) {
+            const userObj = usersList.find((u: any) => u.id === matchedUserId);
+            if (userObj) {
+              userEmail = userObj.email;
             }
           }
         }
@@ -361,7 +376,8 @@ export async function handleTelegramUpdate(channelId: string, token: string, upd
         context[`replai_bot_settings_${channelId}`] = JSON.stringify(settings);
       });
       
-      await sendTelegramMessage(token, chatId, "Tabriklaymiz! Siz ushbu bot uchun kurator (admin) qilib tayinlandingiz. Mijozlar suhbatni operatorga yo'naltirishni so'rashsa, sizga xabar yuboriladi.");
+      const accountInfo = userEmail ? ` Akkaunt: ${userEmail}.` : "";
+      await sendTelegramMessage(token, chatId, `Tabriklaymiz! Siz ushbu bot uchun kurator (admin) qilib tayinlandingiz.${accountInfo} Mijozlar suhbatni operatorga yo'naltirishni so'rashsa, sizga xabar yuboriladi.`);
       return;
     }
     
@@ -668,7 +684,7 @@ async function runBotPollLoop(channelId: string, botState: TelegramBotState) {
   
   try {
     const deleteWebhookUrl = `https://api.telegram.org/bot${botState.token}/deleteWebhook?drop_pending_updates=true`;
-    await fetch(deleteWebhookUrl);
+    await fetch(deleteWebhookUrl, { cache: "no-store" });
     console.log(`Deleted webhook successfully for bot channel ${channelId}`);
   } catch (err) {
     console.error(`Error deleting webhook for bot channel ${channelId}:`, err);
@@ -677,7 +693,7 @@ async function runBotPollLoop(channelId: string, botState: TelegramBotState) {
   while (botState.active) {
     try {
       const url = `https://api.telegram.org/bot${botState.token}/getUpdates?offset=${botState.offset}&timeout=10`;
-      const res = await fetch(url);
+      const res = await fetch(url, { cache: "no-store" });
       if (!res.ok) {
         console.error(`Telegram API HTTP error for bot ${channelId}: ${res.status}`);
         await new Promise((resolve) => setTimeout(resolve, 5000));
@@ -780,7 +796,7 @@ export async function startTelegramBots() {
         console.log(`[Webhooks] Registering Telegram webhook for bot ${channelId} (${channel.username}) -> ${webhookUrl}`);
         
         try {
-          const res = await fetch(`https://api.telegram.org/bot${token}/setWebhook?url=${encodeURIComponent(webhookUrl)}&drop_pending_updates=true`);
+          const res = await fetch(`https://api.telegram.org/bot${token}/setWebhook?url=${encodeURIComponent(webhookUrl)}&drop_pending_updates=true`, { cache: "no-store" });
           if (!res.ok) {
             const errText = await res.text();
             console.error(`[Webhooks] Failed to set Telegram webhook for bot ${channelId}: ${res.status} - ${errText}`);
