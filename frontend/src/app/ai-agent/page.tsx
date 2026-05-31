@@ -4781,9 +4781,9 @@ function AIAgentContent() {
                     {t("pages.ai_agent.customer_sentiment")}
                   </h3>
                   {(() => {
-                    const pos = analyzedMessages.filter(m => m.sentiment === "positive").length;
-                    const neu = analyzedMessages.filter(m => m.sentiment === "neutral").length;
-                    const neg = analyzedMessages.filter(m => m.sentiment === "negative").length;
+                    const pos = analyzedMessages.filter(m => m && m.sentiment === "positive").length;
+                    const neu = analyzedMessages.filter(m => m && m.sentiment === "neutral").length;
+                    const neg = analyzedMessages.filter(m => m && m.sentiment === "negative").length;
                     const total = analyzedMessages.length || 1;
                     const posPct = Math.round((pos / total) * 100);
                     const neuPct = Math.round((neu / total) * 100);
@@ -4841,7 +4841,7 @@ function AIAgentContent() {
                       {(() => {
                         const intents = ["billing", "support", "faq", "affiliate", "general"];
                         return intents.map(intent => {
-                          const count = analyzedMessages.filter(m => m.intent === intent).length;
+                          const count = analyzedMessages.filter(m => m && m.intent === intent).length;
                           const percentage = analyzedMessages.length > 0 ? Math.round((count / analyzedMessages.length) * 100) : 0;
                           return (
                             <div key={intent} className="flex flex-col gap-1 text-[11px]">
@@ -4986,9 +4986,9 @@ function AIAgentContent() {
                 ) : (
                   <div className="flex flex-col gap-3 max-h-[340px] overflow-y-auto pr-1">
                     {(() => {
-                      const uniqueIntents = Array.from(new Set(analyzedMessages.map(m => m.intent)));
+                      const uniqueIntents = Array.from(new Set(analyzedMessages.map(m => m?.intent).filter(Boolean)));
                       return uniqueIntents.map(intent => {
-                        const msgs = analyzedMessages.filter(m => m.intent === intent);
+                        const msgs = analyzedMessages.filter(m => m && m.intent === intent);
                         if (msgs.length === 0) return null;
                         const sampleMsg = msgs[0];
                         
@@ -5104,10 +5104,11 @@ function AIAgentContent() {
                     <tbody>
                       {(() => {
                         const filtered = analyzedMessages.filter(m => {
+                          if (!m) return false;
                           const matchesFilter = analyticsFilter === "All" || m.intent === analyticsFilter;
                           const matchesSearch = analyticsSearch.trim() === "" || 
-                            m.username.toLowerCase().includes(analyticsSearch.toLowerCase()) ||
-                            m.message.toLowerCase().includes(analyticsSearch.toLowerCase());
+                            (m.username || "").toString().toLowerCase().includes(analyticsSearch.toLowerCase()) ||
+                            (m.message || "").toString().toLowerCase().includes(analyticsSearch.toLowerCase());
                           return matchesFilter && matchesSearch;
                         });
 
