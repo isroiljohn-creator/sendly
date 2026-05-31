@@ -2081,7 +2081,7 @@ Nomzodlarga faqat vakansiya va talablar (VAKANSIYALAR VA TALABLAR) doirasida jav
                     <div className="absolute top-0 right-0 w-24 h-24 bg-[#C7F33C]/10 rounded-bl-full -z-10 group-hover:scale-110 transition-transform" />
                     <div className="flex flex-col gap-4">
                       <div className="flex items-center justify-between">
-                        <div className="w-12 h-12 rounded-2xl overflow-hidden shrink-0">
+                        <div className="w-16 h-16 rounded-2xl overflow-hidden shrink-0">
                           <img src="/robots/robot_kurator.png" alt="AI kuratori" className="w-full h-full object-cover" />
                         </div>
                         <div className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-full">
@@ -2095,7 +2095,7 @@ Nomzodlarga faqat vakansiya va talablar (VAKANSIYALAR VA TALABLAR) doirasida jav
                         <h3 className="text-[17px] font-bold text-black group-hover:text-[#7CA607] transition-colors">
                           {"AI kuratori"}
                         </h3>
-                        <p className="text-[12px] text-[#707070] mt-1.5 leading-relaxed">
+                        <p className="text-[12px] text-[#707070] mt-1.5 leading-relaxed min-h-[48px]">
                           {"Darsliklar, transkriptlar va PDF materiallar asosida savollarga aqlli va aniq javob beruvchi shaxsiy yordamchi."}
                         </p>
                       </div>
@@ -2138,7 +2138,7 @@ Nomzodlarga faqat vakansiya va talablar (VAKANSIYALAR VA TALABLAR) doirasida jav
                     <div className="absolute top-0 right-0 w-24 h-24 bg-[#C7F33C]/10 rounded-bl-full -z-10 group-hover:scale-110 transition-transform" />
                     <div className="flex flex-col gap-4">
                       <div className="flex items-center justify-between">
-                        <div className="w-12 h-12 rounded-2xl overflow-hidden shrink-0">
+                        <div className="w-16 h-16 rounded-2xl overflow-hidden shrink-0">
                           <img src="/robots/robot_sales.png" alt="Sotuvchi AI" className="w-full h-full object-cover" />
                         </div>
                         <div className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-full">
@@ -2152,7 +2152,7 @@ Nomzodlarga faqat vakansiya va talablar (VAKANSIYALAR VA TALABLAR) doirasida jav
                         <h3 className="text-[17px] font-bold text-black group-hover:text-[#7CA607] transition-colors">
                           {"Sotuvchi AI Agent"}
                         </h3>
-                        <p className="text-[12px] text-[#707070] mt-1.5 leading-relaxed">
+                        <p className="text-[12px] text-[#707070] mt-1.5 leading-relaxed min-h-[48px]">
                           {"Katalog, narxlar va ish vaqti kabi ma'lumotlarni o'rganib, mijozlar bilan muloqot qiladi va mahsulot sotadi."}
                         </p>
                       </div>
@@ -2195,7 +2195,7 @@ Nomzodlarga faqat vakansiya va talablar (VAKANSIYALAR VA TALABLAR) doirasida jav
                     <div className="absolute top-0 right-0 w-24 h-24 bg-[#C7F33C]/10 rounded-bl-full -z-10 group-hover:scale-110 transition-transform" />
                     <div className="flex flex-col gap-4">
                       <div className="flex items-center justify-between">
-                        <div className="w-12 h-12 rounded-2xl overflow-hidden shrink-0">
+                        <div className="w-16 h-16 rounded-2xl overflow-hidden shrink-0">
                           <img src="/robots/robot_booker.png" alt="Konsultatsiya AI" className="w-full h-full object-cover" />
                         </div>
                         <div className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-full">
@@ -2209,7 +2209,7 @@ Nomzodlarga faqat vakansiya va talablar (VAKANSIYALAR VA TALABLAR) doirasida jav
                         <h3 className="text-[17px] font-bold text-black group-hover:text-[#7CA607] transition-colors">
                           {"Konsultatsiya / Band qilish AI"}
                         </h3>
-                        <p className="text-[12px] text-[#707070] mt-1.5 leading-relaxed">
+                        <p className="text-[12px] text-[#707070] mt-1.5 leading-relaxed min-h-[48px]">
                           {"Mutaxassis ohangida maslahat beradi va konsultatsiya uchun vaqt band qiladi. Pullik qilish imkoni bor."}
                         </p>
                       </div>
@@ -2252,7 +2252,7 @@ Nomzodlarga faqat vakansiya va talablar (VAKANSIYALAR VA TALABLAR) doirasida jav
                     <div className="absolute top-0 right-0 w-24 h-24 bg-[#C7F33C]/10 rounded-bl-full -z-10 group-hover:scale-110 transition-transform" />
                     <div className="flex flex-col gap-4">
                       <div className="flex items-center justify-between">
-                        <div className="w-12 h-12 rounded-2xl overflow-hidden shrink-0">
+                        <div className="w-16 h-16 rounded-2xl overflow-hidden shrink-0">
                           <img src="/robots/robot_recruiter.png" alt="HR AI" className="w-full h-full object-cover" />
                         </div>
                         <div className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-full">
@@ -2266,7 +2266,7 @@ Nomzodlarga faqat vakansiya va talablar (VAKANSIYALAR VA TALABLAR) doirasida jav
                         <h3 className="text-[17px] font-bold text-black group-hover:text-[#7CA607] transition-colors">
                           {"HR va Vakansiyalar uchun AI"}
                         </h3>
-                        <p className="text-[12px] text-[#707070] mt-1.5 leading-relaxed">
+                        <p className="text-[12px] text-[#707070] mt-1.5 leading-relaxed min-h-[48px]">
                           {"Bo'sh ish o'rinlari talablari bo'yicha nomzodlar bilan suhbatlashadi, ularni skrining qiladi va saralaydi."}
                         </p>
                       </div>
@@ -2309,7 +2309,7 @@ Nomzodlarga faqat vakansiya va talablar (VAKANSIYALAR VA TALABLAR) doirasida jav
                     <div className="absolute top-0 right-0 w-24 h-24 bg-[#C7F33C]/10 rounded-bl-full -z-10 group-hover:scale-110 transition-transform" />
                     <div className="flex flex-col gap-4">
                       <div className="flex items-center justify-between">
-                        <div className="w-12 h-12 rounded-2xl overflow-hidden shrink-0">
+                        <div className="w-16 h-16 rounded-2xl overflow-hidden shrink-0">
                           <img src="/robots/robot_meta_leads.png" alt="Meta Leads AI" className="w-full h-full object-cover" />
                         </div>
                         <div className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-full">
@@ -2323,7 +2323,7 @@ Nomzodlarga faqat vakansiya va talablar (VAKANSIYALAR VA TALABLAR) doirasida jav
                         <h3 className="text-[17px] font-bold text-black group-hover:text-[#7CA607] transition-colors">
                           {t("pages.ai_agent.fb_leads_agent")}
                         </h3>
-                        <p className="text-[12px] text-[#707070] mt-1.5 leading-relaxed">
+                        <p className="text-[12px] text-[#707070] mt-1.5 leading-relaxed min-h-[48px]">
                           {t("pages.ai_agent.fb_leads_desc_card")}
                         </p>
                       </div>
@@ -2366,7 +2366,7 @@ Nomzodlarga faqat vakansiya va talablar (VAKANSIYALAR VA TALABLAR) doirasida jav
                     <div className="absolute top-0 right-0 w-24 h-24 bg-[#C7F33C]/10 rounded-bl-full -z-10 group-hover:scale-110 transition-transform" />
                     <div className="flex flex-col gap-4">
                       <div className="flex items-center justify-between">
-                        <div className="w-12 h-12 rounded-2xl overflow-hidden shrink-0">
+                        <div className="w-16 h-16 rounded-2xl overflow-hidden shrink-0">
                           <img src="/robots/robot_telegram.png" alt="Telegram forward" className="w-full h-full object-cover" />
                         </div>
                         <div className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-full">
@@ -2380,7 +2380,7 @@ Nomzodlarga faqat vakansiya va talablar (VAKANSIYALAR VA TALABLAR) doirasida jav
                         <h3 className="text-[17px] font-bold text-black group-hover:text-[#7CA607] transition-colors">
                           {"Lidlarni Telegramga yo'naltirish"}
                         </h3>
-                        <p className="text-[12px] text-[#707070] mt-1.5 leading-relaxed">
+                        <p className="text-[12px] text-[#707070] mt-1.5 leading-relaxed min-h-[48px]">
                           {"Facebook target arizalarini AIsiz, chiroyli ko'rinishda to'g'ridan-to'g'ri Telegram guruh yoki profilingizga yo'naltiring."}
                         </p>
                       </div>
