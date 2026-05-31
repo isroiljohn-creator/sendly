@@ -202,12 +202,12 @@ export default function Home() {
     }
 
     const totalRuns = automations.reduce((sum, a) => {
-      const val = parseInt(a.runs.replace(/[^0-9]/g, "")) || 0;
+      const val = parseInt((a.runs || "0").toString().replace(/[^0-9]/g, "")) || 0;
       return sum + val;
     }, 0);
 
-    const sentCount = parseInt(realStats.messagesSent.replace(/[^0-9]/g, "")) || 0;
-    const totalUzs = parseInt(realStats.revenueVal.replace(/[^0-9]/g, "")) || 0;
+    const sentCount = parseInt((realStats.messagesSent || "0").toString().replace(/[^0-9]/g, "")) || 0;
+    const totalUzs = parseInt((realStats.revenueVal || "0").toString().replace(/[^0-9]/g, "")) || 0;
 
     let activityVal = "0";
     let activityPoints = [0, 0, 0, 0, 0, 0, 0];

@@ -1170,10 +1170,13 @@ export const db = {
     if (local) {
       try {
         const credits = JSON.parse(local);
-        if (credits.history) {
+        if (credits && credits.history && Array.isArray(credits.history)) {
           credits.history.forEach((tx: any) => {
-            if (tx.type === "purchase" && !tx.description.toLowerCase().includes("welcome")) {
-              totalRevenue += tx.amount;
+            if (tx && tx.type === "purchase" && tx.amount) {
+              const desc = (tx.description || "").toString().toLowerCase();
+              if (!desc.includes("welcome")) {
+                totalRevenue += tx.amount;
+              }
             }
           });
         }
