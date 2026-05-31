@@ -269,7 +269,7 @@ export async function handleTelegramUpdate(channelId: string, token: string, upd
       if (parts.length > 1) {
         const param = parts[1].trim();
         if (param !== "verify") {
-          targetChannelId = param.startsWith("ch_") ? param.substring(3) : param;
+          targetChannelId = param;
         }
       }
 
