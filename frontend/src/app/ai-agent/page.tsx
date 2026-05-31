@@ -181,9 +181,11 @@ interface CustomDropdownProps {
   className?: string;
 }
 
-function CustomDropdown({ value, onChange, options, placeholder = t("common.select") || "Tanlang...", className = "" }: CustomDropdownProps) {
+function CustomDropdown({ value, onChange, options, placeholder, className = "" }: CustomDropdownProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const { t } = useI18n();
   const selectedOption = options.find(o => o.value === value);
+  const displayPlaceholder = placeholder || t("common.select") || "Tanlang...";
 
   return (
     <div className={`relative ${className}`}>
@@ -192,7 +194,7 @@ function CustomDropdown({ value, onChange, options, placeholder = t("common.sele
         onClick={() => setIsOpen(!isOpen)}
         className="flex items-center justify-between w-full px-4 py-2.5 text-[12px] bg-[#F9F9F7] border border-[#E8E8E8] rounded-xl hover:border-black/20 focus:outline-none transition-all text-left text-black font-semibold shadow-sm"
       >
-        <span className="truncate">{selectedOption ? selectedOption.label : placeholder}</span>
+        <span className="truncate">{selectedOption ? selectedOption.label : displayPlaceholder}</span>
         <ChevronDown size={14} className={`text-[#707070] transition-transform duration-200 shrink-0 ml-2 ${isOpen ? "rotate-180" : ""}`} />
       </button>
 
