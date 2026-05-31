@@ -2306,11 +2306,11 @@ Nomzodlarga faqat vakansiya va talablar (VAKANSIYALAR VA TALABLAR) doirasida jav
 
                   {/* Card 5: Facebook Lead Handler */}
                   <div className="bg-white border border-[#E8E8E8] hover:border-black/20 hover:shadow-xl rounded-[28px] p-6 flex flex-col justify-between transition-all group relative overflow-hidden">
-                    <div className="absolute top-0 right-0 w-24 h-24 bg-blue-500/5 rounded-bl-full -z-10 group-hover:scale-110 transition-transform" />
+                    <div className="absolute top-0 right-0 w-24 h-24 bg-[#C7F33C]/10 rounded-bl-full -z-10 group-hover:scale-110 transition-transform" />
                     <div className="flex flex-col gap-4">
                       <div className="flex items-center justify-between">
-                        <div className="w-12 h-12 rounded-2xl bg-blue-600 text-white grid place-items-center font-bold text-[18px]">
-                          <Facebook size={22} />
+                        <div className="w-12 h-12 rounded-2xl overflow-hidden shrink-0">
+                          <img src="/robots/robot_meta_leads.png" alt="Meta Leads AI" className="w-full h-full object-cover" />
                         </div>
                         <div className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-full">
                           <span className="w-2 h-2 rounded-full bg-gray-300"></span>
@@ -2320,7 +2320,7 @@ Nomzodlarga faqat vakansiya va talablar (VAKANSIYALAR VA TALABLAR) doirasida jav
                         </div>
                       </div>
                       <div>
-                        <h3 className="text-[17px] font-bold text-black group-hover:text-blue-600 transition-colors">
+                        <h3 className="text-[17px] font-bold text-black group-hover:text-[#7CA607] transition-colors">
                           {t("pages.ai_agent.fb_leads_agent")}
                         </h3>
                         <p className="text-[12px] text-[#707070] mt-1.5 leading-relaxed">
@@ -2332,19 +2332,19 @@ Nomzodlarga faqat vakansiya va talablar (VAKANSIYALAR VA TALABLAR) doirasida jav
 
                       <ul className="flex flex-col gap-2 text-[11px] text-[#595959]">
                         <li className="flex items-start gap-2.5">
-                          <CheckCircle className="w-4 h-4 text-blue-500 shrink-0 mt-0.5" />
+                          <CheckCircle className="w-4 h-4 text-[#9BC92E] shrink-0 mt-0.5" />
                           <span>{t("pages.ai_agent.fb_feature_1")}</span>
                         </li>
                         <li className="flex items-start gap-2.5">
-                          <CheckCircle className="w-4 h-4 text-blue-500 shrink-0 mt-0.5" />
+                          <CheckCircle className="w-4 h-4 text-[#9BC92E] shrink-0 mt-0.5" />
                           <span>{t("pages.ai_agent.fb_feature_2")}</span>
                         </li>
                         <li className="flex items-start gap-2.5">
-                          <CheckCircle className="w-4 h-4 text-blue-500 shrink-0 mt-0.5" />
+                          <CheckCircle className="w-4 h-4 text-[#9BC92E] shrink-0 mt-0.5" />
                           <span>{t("pages.ai_agent.fb_feature_3")}</span>
                         </li>
                         <li className="flex items-start gap-2.5">
-                          <CheckCircle className="w-4 h-4 text-blue-500 shrink-0 mt-0.5" />
+                          <CheckCircle className="w-4 h-4 text-[#9BC92E] shrink-0 mt-0.5" />
                           <span>{t("pages.ai_agent.fb_feature_4")}</span>
                         </li>
                       </ul>
@@ -2354,7 +2354,7 @@ Nomzodlarga faqat vakansiya va talablar (VAKANSIYALAR VA TALABLAR) doirasida jav
                       onClick={() => {
                         useRouterObj.push("/ai-agent?type=fb-leads");
                       }}
-                      className="w-full mt-6 py-3 rounded-full bg-blue-600 text-white text-[12px] font-bold hover:bg-blue-700 hover:scale-[1.02] active:scale-95 transition-all text-center flex items-center justify-center gap-2"
+                      className="w-full mt-6 py-3 rounded-full bg-black text-[#C7F33C] text-[12px] font-bold hover:bg-black/90 hover:scale-[1.02] active:scale-95 transition-all text-center flex items-center justify-center gap-2"
                     >
                       <span>{t("pages.ai_agent.setup_template_btn")}</span>
                       <ArrowRight size={14} />
@@ -2363,11 +2363,11 @@ Nomzodlarga faqat vakansiya va talablar (VAKANSIYALAR VA TALABLAR) doirasida jav
 
                   {/* Card 6: Meta Leads Telegram Forwarder (AIsiz) */}
                   <div className="bg-white border border-[#E8E8E8] hover:border-black/20 hover:shadow-xl rounded-[28px] p-6 flex flex-col justify-between transition-all group relative overflow-hidden">
-                    <div className="absolute top-0 right-0 w-24 h-24 bg-blue-500/5 rounded-bl-full -z-10 group-hover:scale-110 transition-transform" />
+                    <div className="absolute top-0 right-0 w-24 h-24 bg-[#C7F33C]/10 rounded-bl-full -z-10 group-hover:scale-110 transition-transform" />
                     <div className="flex flex-col gap-4">
                       <div className="flex items-center justify-between">
-                        <div className="w-12 h-12 rounded-2xl bg-blue-600 text-white grid place-items-center font-bold text-[18px]">
-                          <Send size={22} />
+                        <div className="w-12 h-12 rounded-2xl overflow-hidden shrink-0">
+                          <img src="/robots/robot_telegram.png" alt="Telegram forward" className="w-full h-full object-cover" />
                         </div>
                         <div className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-full">
                           <span className="w-2 h-2 rounded-full bg-gray-300"></span>
@@ -2377,7 +2377,7 @@ Nomzodlarga faqat vakansiya va talablar (VAKANSIYALAR VA TALABLAR) doirasida jav
                         </div>
                       </div>
                       <div>
-                        <h3 className="text-[17px] font-bold text-black group-hover:text-blue-600 transition-colors">
+                        <h3 className="text-[17px] font-bold text-black group-hover:text-[#7CA607] transition-colors">
                           {"Lidlarni Telegramga yo'naltirish"}
                         </h3>
                         <p className="text-[12px] text-[#707070] mt-1.5 leading-relaxed">
@@ -2389,19 +2389,19 @@ Nomzodlarga faqat vakansiya va talablar (VAKANSIYALAR VA TALABLAR) doirasida jav
 
                       <ul className="flex flex-col gap-2 text-[11px] text-[#595959]">
                         <li className="flex items-start gap-2.5">
-                          <CheckCircle className="w-4 h-4 text-blue-500 shrink-0 mt-0.5" />
+                          <CheckCircle className="w-4 h-4 text-[#9BC92E] shrink-0 mt-0.5" />
                           <span>{"Arizalarni Telegram guruh yoki lichkaga yuborish"}</span>
                         </li>
                         <li className="flex items-start gap-2.5">
-                          <CheckCircle className="w-4 h-4 text-blue-500 shrink-0 mt-0.5" />
+                          <CheckCircle className="w-4 h-4 text-[#9BC92E] shrink-0 mt-0.5" />
                           <span>{"AIsiz to'g'ridan-to'g'ri yo'naltirish rejimida ishlash"}</span>
                         </li>
                         <li className="flex items-start gap-2.5">
-                          <CheckCircle className="w-4 h-4 text-blue-500 shrink-0 mt-0.5" />
+                          <CheckCircle className="w-4 h-4 text-[#9BC92E] shrink-0 mt-0.5" />
                           <span>{"Lid ma'lumotlarini qulay formatda taqdim etish"}</span>
                         </li>
                         <li className="flex items-start gap-2.5">
-                          <CheckCircle className="w-4 h-4 text-blue-500 shrink-0 mt-0.5" />
+                          <CheckCircle className="w-4 h-4 text-[#9BC92E] shrink-0 mt-0.5" />
                           <span>{"Tasdiqlash kodi orqali guruh/botni oson ulash"}</span>
                         </li>
                       </ul>

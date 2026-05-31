@@ -679,7 +679,7 @@
       "select_template_desc": "Biznesingizni avtomatlashtirish uchun mos keladigan sun'iy intellekt agenti shablonlaridan birini ishga tushiring.",
       "agent_platform": "AI agent platformasi",
       "active": "Faol",
-      "inactive": "Faolsiz",
+      "inactive": "Faol emas",
       "curator_desc": "Telegram bot orqali o'quvchilarga darsliklar, transkriptlar va PDF materiallar asosida aqlli, do'stona va javob beruvchi yordamchi.",
       "curator_feature_1": "Bilimlar bazasi tizimi",
       "curator_feature_2": "Telegram bot integratsiyasi",
