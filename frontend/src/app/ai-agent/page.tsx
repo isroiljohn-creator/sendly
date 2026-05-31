@@ -455,30 +455,7 @@ function AIAgentContent() {
     summary: string;
     date: string;
     status: string;
-  }>>([
-    {
-      id: "log-1",
-      name: "Aziz Rahimov",
-      phone: "+998 93 555 44 33",
-      formName: "Kuzgi chegirmalar va aksiya formasi",
-      group: "Sotuvlar",
-      tags: ["Narxga Qiziqqan", "High Intent"],
-      summary: "Mijoz aksiya va narx bo'yicha murojaat qilgan. Sotuv bo'limiga yo'naltirildi.",
-      date: "Bugun, 18:42",
-      status: "success",
-    },
-    {
-      id: "log-2",
-      name: "Madina Umarova",
-      phone: "+998 99 888 77 66",
-      formName: "Bepul dars va maslahat formasi",
-      group: "Qo'llab-quvvatlash",
-      tags: ["Texnik muammo", "Support"],
-      summary: "Mijoz darsga kirish parolini tiklash bo'yicha yordam so'radi.",
-      date: "Bugun, 15:10",
-      status: "success",
-    },
-  ]);
+  }>>([]);
   // Facebook Visual Integrator States
   const [activeNode, setActiveNode] = useState<"trigger" | "mapper" | "router">("trigger");
   const [isSimulatorJsonMode, setIsSimulatorJsonMode] = useState(false);
@@ -562,153 +539,20 @@ function AIAgentContent() {
     if (typeof window !== "undefined") {
       const stored = localStorage.getItem("replai_curator_analyzed_messages");
       let shouldLoadInitial = false;
+      const initialSamples: any[] = [];
       
-      const initialSamples = [
-        {
-          id: "cur-msg-1",
-          username: "dilshod_marketing",
-          message: "Uzcard orqali to'lov qilsam bo'ladimi? Karta ulab bo'lmadi.",
-          response: "Ha, Uzcard/Humo orqali to'lov qilsangiz bo'ladi. Hisobingizda kartani bog'lang.",
-          intent: "billing",
-          sentiment: "negative" as const,
-          confidence: 92,
-          date: "Bugun, 14:20",
-          painPoint: "To'lov kartasini bog'lashda Uzcard/Humo tizimidagi nosozliklar"
-        },
-        {
-          id: "cur-msg-2",
-          username: "umid_kod",
-          message: "Telegram bot yaratish uchun tokeni qayerdan olaman?",
-          response: "Telegramda @BotFather orqali /newbot buyrug'ini yuboring va tokeni oling.",
-          intent: "support",
-          sentiment: "neutral" as const,
-          confidence: 95,
-          date: "Bugun, 12:05",
-          painPoint: "@BotFather orqali bot yaratish va token olish jarayonini bilmaslik"
-        },
-        {
-          id: "cur-msg-3",
-          username: "sarvar_brand",
-          message: "Sotuvlarni avtomatlashtirish darsini qaysi modulda o'rganamiz?",
-          response: "Ushbu dars 2-Modulda joylashgan, unda Direct orqali avtomatik zanjir sozlash o'rgatiladi.",
-          intent: "faq",
-          sentiment: "positive" as const,
-          confidence: 88,
-          date: "Kecha, 18:40",
-          painPoint: "Kerakli dars yoki modulni qidirib topishdagi qiyinchilik"
-        },
-        {
-          id: "cur-msg-4",
-          username: "nodira_yusupova",
-          message: "Referal havola orqali necha foiz komissiya beriladi?",
-          response: "Hamkorlarimiz uchun har bir o'quvchining premium to'lovidan 30% hamkorlik komissiyasi taqdim etiladi.",
-          intent: "affiliate",
-          sentiment: "positive" as const,
-          confidence: 90,
-          date: "Kecha, 15:30",
-          painPoint: "Hamkorlik tizimi komissiyasi va shartlarini aniqlashtirish"
-        },
-        {
-          id: "cur-msg-5",
-          username: "malika_ig",
-          message: "Instagram professional akkauntini ulashda xatolik beryapti, shaxsiy profil bo'lsa bo'ladimi?",
-          response: "Kechirasiz, faqat Professional (Business yoki Creator) hisoblarni bog'lash mumkin, shaxsiy hisoblar qo'llab-quvvatlanmaydi.",
-          intent: "support",
-          sentiment: "negative" as const,
-          confidence: 85,
-          date: "24 May, 10:15",
-          painPoint: "Shaxsiy profil bilan Instagram API cheklovlariga duch kelish"
-        },
-        {
-          id: "cur-msg-6",
-          username: "doston_smm",
-          message: "Kursni tugatgach sertifikat beriladimi? Qachon olsam bo'ladi?",
-          response: "Ha, barcha modullarni va uy vazifalarini muvaffaqiyatli topshirgan o'quvchilarga sertifikat taqdim etiladi.",
-          intent: "faq",
-          sentiment: "positive" as const,
-          confidence: 94,
-          date: "24 May, 09:30",
-          painPoint: "Kurs yakunida sertifikat taqdim etilishi shartlari"
-        },
-        {
-          id: "cur-msg-7",
-          username: "akbar_biznes",
-          message: "Click orqali to'lov qildim, lekin balansim yangilanmadi. Kimga yozay?",
-          response: "To'lov tasdiqlanishi bilan hisob faollashadi. Agar balans o'zgarmasa, to'lov kvitansiyasini texnik yordamga yuboring.",
-          intent: "billing",
-          sentiment: "negative" as const,
-          confidence: 89,
-          date: "23 May, 16:45",
-          painPoint: "To'lovdan so'ng hisob holatining avtomatik yangilanmasligi"
-        },
-        {
-          id: "cur-msg-8",
-          username: "kamola_growth",
-          message: "Hamkorlik balansidagi pulni Humo kartamga o'tkazib olsam bo'ladimi?",
-          response: "Albatta, yig'ilgan komissiyalarni o'zingizning mahalliy kartalaringizga yechib olishingiz mumkin. Murojaat yuboring.",
-          intent: "affiliate",
-          sentiment: "neutral" as const,
-          confidence: 91,
-          date: "23 May, 11:20",
-          painPoint: "Hamkorlik mukofotini yechish yo'llari va to'lov turlari"
-        },
-        {
-          id: "cur-msg-9",
-          username: "jasur_ceo",
-          message: "Instagram orqali mijozlar bilan muloqot qiladigan bot kerak. Shuni qanday ulayman?",
-          response: "Instagram Professional akkauntingizni Sendly-ga bog'lang. Avtomatlashtirish bo'limidan bot yaratishingiz mumkin.",
-          intent: "general",
-          sentiment: "neutral" as const,
-          confidence: 83,
-          date: "22 May, 15:10",
-          painPoint: "Instagram botining ulanish jarayoni va imkoniyatlari"
-        },
-        {
-          id: "cur-msg-10",
-          username: "nigora_ads",
-          message: "AI kurator savollarga juda tez javob beryapti, uning tezligini biroz sekinlashtirish mumkinmi?",
-          response: "Ha, AI javob berish kechikish vaqtini sozlamalardan o'zgartirishingiz mumkin. Bu tabiiylikni ta'minlaydi.",
-          intent: "support",
-          sentiment: "positive" as const,
-          confidence: 87,
-          date: "22 May, 10:05",
-          painPoint: "AI javob berish kechikish rejimini sozlash imkoniyati"
-        },
-        {
-          id: "cur-msg-11",
-          username: "nodir_dev",
-          message: "Darslikdagi kodlar yozilgan Github havola ochilmayapti, ruxsat bering.",
-          response: "Kechirasiz, havola yangilandi. Iltimos, dars sahifasidan eng oxirgi havolani yuklab oling.",
-          intent: "faq",
-          sentiment: "negative" as const,
-          confidence: 91,
-          date: "21 May, 18:30",
-          painPoint: "Dars materiallarining ochilishida ruxsat xatoligi"
-        },
-        {
-          id: "cur-msg-12",
-          username: "shahlo_brand",
-          message: "Yillik obuna narxida qancha chegirma bor? Buni hisoblab bering.",
-          response: "Yillik obuna sotib olganda oylik to'lovga nisbatan 20% chegirma taqdim etiladi. Bu 2 oylik to'lov tejalishini anglatadi.",
-          intent: "billing",
-          sentiment: "positive" as const,
-          confidence: 93,
-          date: "21 May, 14:15",
-          painPoint: "Yillik obuna tariflaridagi chegirmalar va ularning foydasi"
-        }
-      ];
-
       if (stored) {
         try {
           const parsed = JSON.parse(stored);
           if (Array.isArray(parsed)) {
-            // Check if any of them contains the old intent style or 3D emojis
+            // Check if any of them contains the old intent style, 3D emojis, or is a mock sample
             const hasOldData = parsed.some(
               (m: any) =>
                 !["billing", "support", "faq", "affiliate", "general"].includes(m.intent) ||
                 m.sentiment === "🔴" ||
                 m.sentiment === "🟢" ||
-                m.sentiment === "🟡"
+                m.sentiment === "🟡" ||
+                (m.id && String(m.id).startsWith("cur-msg-"))
             );
             if (hasOldData) {
               shouldLoadInitial = true;
