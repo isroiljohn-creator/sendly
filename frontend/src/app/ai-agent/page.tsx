@@ -2172,6 +2172,183 @@ function AIAgentContent() {
                     <div className="w-11 h-6 bg-[#E8E8E8] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-[#D8D8D8] after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
                   </label>
                 </div>
+
+                {/* Telegram Bot Selector for Facebook lead handlers - Always visible under switch */}
+                <div className="flex flex-col gap-1.5 mt-2 pt-2 border-t border-[#F0F0F0]">
+                  <label className="text-[10px] font-extrabold text-[#707070] uppercase tracking-wider">
+                    {selectedAgentType === "fb-leads-direct" ? "Lidlar uchun Telegram Bot" : "Telegram Bot"}
+                  </label>
+                  {(() => {
+                    const tgChannels = db.getChannels().filter(c => c.type === "telegram" && c.isConnected && c.telegramToken);
+                    if (tgChannels.length > 0) {
+                      const botOptions = tgChannels.map(c => ({
+                        value: c.id,
+                        label: `${c.name} (@${c.username.replace(/^@+/, "")})`
+                      }));
+                      const selectedBotId = settings.telegramBotId || tgChannels[0].id;
+                      return (
+                        <div className="flex flex-col gap-2 mt-1">
+                          <CustomDropdown
+                            value={selectedBotId}
+                            onChange={handleBotChange}
+                            options={botOptions}
+                            placeholder="Telegram botni tanlang..."
+                            className="w-full"
+                          />
+                          <div className="flex items-center gap-1.5 text-[10px] text-green-700 mt-0.5 bg-green-50/50 p-2.5 rounded-xl border border-green-100">
+                            <CheckCircle size={12} className="text-green-500 shrink-0" />
+                            <span>
+                              {selectedAgentType === "fb-leads-direct" 
+                                ? "Lidlar ushbu Telegram bot orqali guruh yoki profilingizga yo'naltiriladi." 
+                                : "Inson-kuratorga murojaatlar ushbu Telegram bot orqali yuboriladi."}
+                            </span>
+                          </div>
+                        </div>
+                      );
+                    } else {
+                      return (
+                        <div className="flex flex-col gap-2.5 p-4 bg-amber-50/50 border border-amber-200/50 rounded-2xl text-[11px] text-amber-800 mt-1">
+                          <div className="flex items-center gap-2">
+                            <Info size={14} className="shrink-0 text-amber-500" />
+                            <span className="font-bold">Telegram bot topilmadi</span>
+                          </div>
+                          <p className="text-[10px] text-amber-600 leading-relaxed">
+                            Telegram integratsiyasidan foydalanish uchun sozlamalar sahifasida kamida 1ta Telegram bot ulangan bo&apos;lishi lozim.
+                          </p>
+                          <button
+                            type="button"
+                            onClick={() => setShowTgConnectModal(true)}
+                            className="mt-1 inline-block w-fit px-4 py-2 bg-black text-[#C7F33C] rounded-full hover:bg-black/90 font-bold text-[10px] shadow-sm transition-all text-center"
+                          >
+                            Botni ulash ➔
+                          </button>
+                        </div>
+                      );
+                    }
+                  })()}
+                </div>
+
+                {/* Curator Admin Connection Settings - Always visible under switch */}
+                <div className="flex flex-col gap-3 pt-3 border-t border-[#F0F0F0] mt-2">
+                  <div>
+                    <h4 className="text-[12px] font-bold text-black">
+                      {selectedAgentType === "fb-leads-direct" ? "Telegram guruh yoki lichkani ulash" : "Inson-kuratorni ulash"}
+                    </h4>
+                    <p className="text-[10px] text-[#707070] mt-1 leading-relaxed">
+                      {selectedAgentType === "fb-leads-direct"
+                        ? "Lidlar to'g'ridan-to'g'ri Telegram guruh yoki profilingizga yuborilishi uchun admin profilini ulang."
+                        : "AI javob bera olmagan yoki operator kutilgan holatlarda bot sizga Telegram orqali xabar yo'llashi uchun kurator (admin) profilini ulang."}
+                    </p>
+                  </div>
+
+                  {settings.adminTelegramChatId ? (
+                    <div className="flex items-center justify-between p-3.5 rounded-xl bg-green-50 border border-green-200">
+                      <div className="flex flex-col gap-0.5">
+                        <div className="flex items-center gap-1.5 text-[11px] font-bold text-green-800">
+                          <CheckCircle size={14} className="text-green-600 shrink-0" />
+                          <span>{"Admin bog'langan"}</span>
+                        </div>
+                        <span className="text-[10px] text-green-700 mt-0.5">
+                          Foydalanuvchi: @{settings.adminTelegramUsername} (Chat ID: {settings.adminTelegramChatId})
+                        </span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={handleDisconnectAdmin}
+                        className="text-[10px] font-bold text-red-600 hover:text-red-700 bg-white border border-red-200 px-2.5 py-1.5 rounded-lg shadow-sm hover:shadow active:scale-95 transition-all"
+                      >
+                        {"O'chirish"}
+                      </button>
+                    </div>
+                  ) : isVerifyingAdmin ? (
+                    <form onSubmit={handleVerifyAdminCode} className="flex flex-col gap-2.5 p-3.5 rounded-xl bg-blue-50 border border-blue-200 animate-fadeIn">
+                      <div className="flex items-center gap-1.5 text-[11px] font-bold text-blue-800">
+                        <Sparkles size={14} className="text-blue-600 shrink-0 animate-pulse" />
+                        <span>{"Tasdiqlash kodini kiriting"}</span>
+                      </div>
+                      <p className="text-[10px] text-blue-700 leading-relaxed">
+                        {"Telegram-da "}
+                        <a
+                          href={`https://t.me/sendly_robot?start=${settings?.telegramBotId}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="underline font-bold text-blue-900"
+                        >
+                          @sendly_robot
+                        </a>
+                        {" botimizga o'ting va "}<strong>{"/start"}</strong>{" buyrug'ini bosing. Bot sizga yuborgan tasdiqlash kodini (kod 1 daqiqa davomida faol bo'ladi) quyida kiriting."}
+                      </p>
+                      
+                      <div className="flex flex-col gap-2">
+                        <div className="flex gap-2">
+                          <input
+                            type="text"
+                            placeholder="Kodni kiriting (masalan: 12345)"
+                            value={adminVerifyCode}
+                            onChange={(e) => setAdminVerifyCode(e.target.value)}
+                            disabled={isVerifyLoading}
+                            className="px-3 py-2 text-[11px] bg-white border border-blue-300 rounded-xl focus:outline-none focus:border-blue-600 flex-1 text-black"
+                          />
+                          <a
+                            href={`https://t.me/sendly_robot?start=${settings?.telegramBotId}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="px-3.5 py-2 bg-[#229ED9] hover:bg-[#1e8ec3] text-white rounded-xl text-[11px] font-bold transition-all shadow-sm active:scale-95 text-center flex items-center justify-center gap-1 shrink-0"
+                          >
+                            <Send size={12} />
+                            <span>Kodni olish</span>
+                          </a>
+                        </div>
+                        
+                        <div className="flex gap-2 justify-end">
+                          <button
+                            type="submit"
+                            disabled={isVerifyLoading || !adminVerifyCode.trim()}
+                            className="text-[10px] font-bold text-white bg-black hover:bg-gray-800 disabled:bg-gray-400 px-4 py-2 rounded-xl transition-all shadow-sm active:scale-95"
+                          >
+                            {isVerifyLoading ? "Tekshirilmoqda..." : "Tasdiqlash"}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setIsVerifyingAdmin(false);
+                              setVerifyAdminError("");
+                              setAdminVerifyCode("");
+                            }}
+                            disabled={isVerifyLoading}
+                            className="text-[10px] font-bold text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 px-3.5 py-2 rounded-xl transition-all shadow-sm active:scale-95"
+                          >
+                            {"Bekor qilish"}
+                          </button>
+                        </div>
+                      </div>
+                      {verifyAdminError && (
+                        <span className="text-[10px] text-red-600 font-bold mt-1">
+                          {verifyAdminError}
+                        </span>
+                      )}
+                    </form>
+                  ) : (
+                    <div className="flex flex-col gap-2.5 p-3.5 rounded-xl bg-blue-50 border border-blue-200">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-1.5 text-[11px] font-bold text-blue-800">
+                          <AlertTriangle size={14} className="text-amber-600 shrink-0" />
+                          <span>{"Admin ulanmagan"}</span>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => setIsVerifyingAdmin(true)}
+                          className="text-[10px] font-bold text-white bg-black hover:bg-gray-800 px-4 py-2 rounded-lg shadow-sm hover:shadow active:scale-95 transition-all"
+                        >
+                          {"Ulash"}
+                        </button>
+                      </div>
+                      <p className="text-[10px] text-blue-700 leading-relaxed">
+                        {"Ulash uchun @sendly_robot botimizga borib, profilingizdan botni boshlang (/start). Bot sizga tasdiqlash kodini yuboradi."}
+                      </p>
+                    </div>
+                  )}
+                </div>
               </div>
               
               {/* TRIGGER CONFIGURATION CARD */}
@@ -2474,180 +2651,6 @@ function AIAgentContent() {
                     </>
                   )}
 
-                  {/* Telegram Bot Selector for Facebook lead handlers */}
-                  <div className="flex flex-col gap-1.5 pt-4 border-t border-[#F0F0F0] mt-3">
-                    <label className="text-[11px] font-bold text-black">Telegram Bot</label>
-                    {(() => {
-                      const tgChannels = db.getChannels().filter(c => c.type === "telegram" && c.isConnected && c.telegramToken);
-                      if (tgChannels.length > 0) {
-                        const botOptions = tgChannels.map(c => ({
-                          value: c.id,
-                          label: `${c.name} (@${c.username.replace(/^@+/, "")})`
-                        }));
-                        const selectedBotId = settings.telegramBotId || tgChannels[0].id;
-                        return (
-                          <div className="flex flex-col gap-2 mt-1">
-                            <CustomDropdown
-                              value={selectedBotId}
-                              onChange={handleBotChange}
-                              options={botOptions}
-                              placeholder="Telegram botni tanlang..."
-                              className="w-full"
-                            />
-                            <div className="flex items-center gap-1.5 text-[10px] text-green-700 mt-0.5 bg-green-50/50 p-2.5 rounded-xl border border-green-100">
-                              <CheckCircle size={12} className="text-green-500 shrink-0" />
-                              <span>
-                                {selectedAgentType === "fb-leads-direct" 
-                                  ? "Lidlar ushbu Telegram bot orqali guruh yoki profilingizga yo'naltiriladi." 
-                                  : "Inson-kuratorga murojaatlar ushbu Telegram bot orqali yuboriladi."}
-                              </span>
-                            </div>
-                          </div>
-                        );
-                      } else {
-                        return (
-                          <div className="flex flex-col gap-2.5 p-4 bg-amber-50/50 border border-amber-200/50 rounded-2xl text-[11px] text-amber-800 mt-1">
-                            <div className="flex items-center gap-2">
-                              <Info size={14} className="shrink-0 text-amber-500" />
-                              <span className="font-bold">Telegram bot topilmadi</span>
-                            </div>
-                            <p className="text-[10px] text-amber-600 leading-relaxed">
-                              Telegram integratsiyasidan foydalanish uchun sozlamalar sahifasida kamida 1ta Telegram bot ulangan bo&apos;lishi lozim.
-                            </p>
-                            <button
-                              type="button"
-                              onClick={() => setShowTgConnectModal(true)}
-                              className="mt-1 inline-block w-fit px-4 py-2 bg-black text-[#C7F33C] rounded-full hover:bg-black/90 font-bold text-[10px] shadow-sm transition-all text-center"
-                            >
-                              Botni ulash ➔
-                            </button>
-                          </div>
-                        );
-                      }
-                    })()}
-                  </div>
-
-                  {/* Curator Admin Connection Settings Inside Router */}
-                  <div className="flex flex-col gap-3 pt-4 border-t border-[#F0F0F0] mt-3">
-                    <div>
-                      <h4 className="text-[12px] font-bold text-black">
-                        {selectedAgentType === "fb-leads-direct" ? "Telegram guruh yoki lichkani ulash" : "Inson-kuratorni ulash"}
-                      </h4>
-                      <p className="text-[10px] text-[#707070] mt-1 leading-relaxed">
-                        {selectedAgentType === "fb-leads-direct"
-                          ? "Lidlar to'g'ridan-to'g'ri Telegram guruh yoki profilingizga yuborilishi uchun admin profilini ulang."
-                          : "AI javob bera olmagan yoki operator kutilgan holatlarda bot sizga Telegram orqali xabar yo'llashi uchun kurator (admin) profilini ulang."}
-                      </p>
-                    </div>
-
-                    {settings.adminTelegramChatId ? (
-                      <div className="flex items-center justify-between p-3.5 rounded-xl bg-green-50 border border-green-200">
-                        <div className="flex flex-col gap-0.5">
-                          <div className="flex items-center gap-1.5 text-[11px] font-bold text-green-800">
-                            <CheckCircle size={14} className="text-green-600 shrink-0" />
-                            <span>{"Admin bog'langan"}</span>
-                          </div>
-                          <span className="text-[10px] text-green-700 mt-0.5">
-                            Foydalanuvchi: @{settings.adminTelegramUsername} (Chat ID: {settings.adminTelegramChatId})
-                          </span>
-                        </div>
-                        <button
-                          type="button"
-                          onClick={handleDisconnectAdmin}
-                          className="text-[10px] font-bold text-red-600 hover:text-red-700 bg-white border border-red-200 px-2.5 py-1.5 rounded-lg shadow-sm hover:shadow active:scale-95 transition-all"
-                        >
-                          {"O'chirish"}
-                        </button>
-                      </div>
-                    ) : isVerifyingAdmin ? (
-                      <form onSubmit={handleVerifyAdminCode} className="flex flex-col gap-2.5 p-3.5 rounded-xl bg-blue-50 border border-blue-200 animate-fadeIn">
-                        <div className="flex items-center gap-1.5 text-[11px] font-bold text-blue-800">
-                          <Sparkles size={14} className="text-blue-600 shrink-0 animate-pulse" />
-                          <span>{"Tasdiqlash kodini kiriting"}</span>
-                        </div>
-                        <p className="text-[10px] text-blue-700 leading-relaxed">
-                          {"Telegram-da "}
-                          <a
-                            href={`https://t.me/sendly_robot?start=${settings?.telegramBotId}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="underline font-bold text-blue-900"
-                          >
-                            @sendly_robot
-                          </a>
-                          {" botimizga o'ting va "}<strong>{"/start"}</strong>{" buyrug'ini bosing. Bot sizga yuborgan tasdiqlash kodini (kod 1 daqiqa davomida faol bo'ladi) quyida kiriting."}
-                        </p>
-                        
-                        <div className="flex flex-col gap-2">
-                          <div className="flex gap-2">
-                            <input
-                              type="text"
-                              placeholder="Kodni kiriting (masalan: 12345)"
-                              value={adminVerifyCode}
-                              onChange={(e) => setAdminVerifyCode(e.target.value)}
-                              disabled={isVerifyLoading}
-                              className="px-3 py-2 text-[11px] bg-white border border-blue-300 rounded-xl focus:outline-none focus:border-blue-600 flex-1 text-black"
-                            />
-                            <a
-                              href={`https://t.me/sendly_robot?start=${settings?.telegramBotId}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="px-3.5 py-2 bg-[#229ED9] hover:bg-[#1e8ec3] text-white rounded-xl text-[11px] font-bold transition-all shadow-sm active:scale-95 text-center flex items-center justify-center gap-1 shrink-0"
-                            >
-                              <Send size={12} />
-                              <span>Kodni olish</span>
-                            </a>
-                          </div>
-                          
-                          <div className="flex gap-2 justify-end">
-                            <button
-                              type="submit"
-                              disabled={isVerifyLoading || !adminVerifyCode.trim()}
-                              className="text-[10px] font-bold text-white bg-black hover:bg-gray-800 disabled:bg-gray-400 px-4 py-2 rounded-xl transition-all shadow-sm active:scale-95"
-                            >
-                              {isVerifyLoading ? "Tekshirilmoqda..." : "Tasdiqlash"}
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => {
-                                setIsVerifyingAdmin(false);
-                                setVerifyAdminError("");
-                                setAdminVerifyCode("");
-                              }}
-                              disabled={isVerifyLoading}
-                              className="text-[10px] font-bold text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 px-3.5 py-2 rounded-xl transition-all shadow-sm active:scale-95"
-                            >
-                              {"Bekor qilish"}
-                            </button>
-                          </div>
-                        </div>
-                        {verifyAdminError && (
-                          <span className="text-[10px] text-red-600 font-bold mt-1">
-                            {verifyAdminError}
-                          </span>
-                        )}
-                      </form>
-                    ) : (
-                      <div className="flex flex-col gap-2.5 p-3.5 rounded-xl bg-blue-50 border border-blue-200">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-1.5 text-[11px] font-bold text-blue-800">
-                            <AlertTriangle size={14} className="text-amber-600 shrink-0" />
-                            <span>{"Admin ulanmagan"}</span>
-                          </div>
-                          <button
-                            type="button"
-                            onClick={() => setIsVerifyingAdmin(true)}
-                            className="text-[10px] font-bold text-white bg-black hover:bg-gray-800 px-4 py-2 rounded-lg shadow-sm hover:shadow active:scale-95 transition-all"
-                          >
-                            {"Ulash"}
-                          </button>
-                        </div>
-                        <p className="text-[10px] text-blue-700 leading-relaxed">
-                          {"Ulash uchun @sendly_robot botimizga borib, profilingizdan botni boshlang (/start). Bot sizga tasdiqlash kodini yuboradi."}
-                        </p>
-                      </div>
-                    )}
-                  </div>
                 </div>
               )}
             </div>
@@ -3038,7 +3041,7 @@ function AIAgentContent() {
                     </label>
                   </div>
                   <div className="flex flex-col gap-1.5 mt-2 pt-2 border-t border-[#F0F0F0]">
-                    <label className="text-[10px] font-extrabold text-[#707070] uppercase tracking-wider">AI Curator uchun Telegram Bot</label>
+                    <label className="text-[10px] font-extrabold text-[#707070] uppercase tracking-wider">AI kuratori uchun Telegram Bot</label>
                     {(() => {
                       const tgChannels = db.getChannels().filter(c => c.type === "telegram" && c.isConnected && c.telegramToken);
                       if (tgChannels.length > 0) {
