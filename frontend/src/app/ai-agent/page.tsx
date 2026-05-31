@@ -240,7 +240,7 @@ function AIAgentContent() {
   const searchParams = useSearchParams();
   const useRouterObj = useRouter();
   const typeParam = searchParams.get("type");
-  const [selectedAgentType, setSelectedAgentType] = useState<"kurator" | "sales" | "booker" | "recruiter" | "fb-leads" | "fb-leads-direct" | null>(null);
+  const [selectedAgentType, setSelectedAgentType] = useState<"kurator" | "sales" | "booker" | "recruiter" | "fb-leads" | "fb-leads-direct" | "clinic" | "realtor" | "helpdesk" | null>(null);
 
 
   const [sliderPreviewType, setSliderPreviewType] = useState<"tone" | "length" | "humor">("tone");
@@ -599,6 +599,12 @@ function AIAgentContent() {
         return "Facebook Lead Handler";
       case "fb-leads-direct":
         return "Lidlarni Telegramga yo'naltirish";
+      case "clinic":
+        return "Klinika / Shifokor AI";
+      case "realtor":
+        return "Rieltor AI";
+      case "helpdesk":
+        return "Texnik yordam AI";
       default:
         return "AI Agent";
     }
@@ -614,6 +620,12 @@ function AIAgentContent() {
         return "Bosh sahifa / AI Agent / Konsultatsiya va Band qilish AI";
       case "recruiter":
         return "Bosh sahifa / AI Agent / HR va Vakansiyalar uchun AI";
+      case "clinic":
+        return "Bosh sahifa / AI Agent / Klinika / Shifokor AI";
+      case "realtor":
+        return "Bosh sahifa / AI Agent / Rieltor AI";
+      case "helpdesk":
+        return "Bosh sahifa / AI Agent / Texnik yordam AI";
       default:
         return "Bosh sahifa / AI Agent";
     }
@@ -624,6 +636,9 @@ function AIAgentContent() {
       case "sales": return "Mahsulotlar katalogi";
       case "booker": return "Mutaxassis bilimlari";
       case "recruiter": return "Vakansiyalar bazasi";
+      case "clinic": return "Klinika ma'lumotlari";
+      case "realtor": return "Ko'chmas mulk bazasi";
+      case "helpdesk": return "Bilimlar bazasi (FAQ)";
       default: return t("pages.ai_agent.knowledge_base_tab");
     }
   };
@@ -633,6 +648,9 @@ function AIAgentContent() {
       case "sales": return "Mahsulotlar, narxlar va do'kon ma'lumotlari";
       case "booker": return "Mutaxassis bilimlari va ish tartibi";
       case "recruiter": return "Vakansiyalar va talablar";
+      case "clinic": return "Shifokorlar, xizmatlar va ish tartibi";
+      case "realtor": return "Uy-joylar, narxlar va joylashuv";
+      case "helpdesk": return "Ko'p so'raladigan savollar va yechimlar";
       default: return "Darsliklar va materiallar";
     }
   };
@@ -642,6 +660,9 @@ function AIAgentContent() {
       case "sales": return "Mahsulotlar katalogi, narxlar, manzil va ish vaqti kabi ma'lumotlarni qo'shing. AI agent shu ma'lumotlar asosida mijozlarga javob beradi.";
       case "booker": return "Mutaxassisning bilimlari, xizmatlar ro'yxati, ish tartibi va konsultatsiya shartlarini kiriting.";
       case "recruiter": return "Bo'sh ish o'rinlari, talablar, ish sharoitlari va kompaniya haqida ma'lumotlarni kiriting.";
+      case "clinic": return "Shifokorlar ro'yxati, bo'limlar, qabul vaqtlari va narxlarni kiriting. AI agent shu ma'lumotlar asosida bemorlarga javob beradi.";
+      case "realtor": return "Uy-joylar ro'yxati, narxlar, joylashuv va ko'rish vaqtlarini kiriting. AI agent shu ma'lumotlar asosida mijozlarga javob beradi.";
+      case "helpdesk": return "Ko'p so'raladigan savollar, texnik muammolar va ularning yechimlari. AI agent shu ma'lumotlar asosida foydalanuvchilarga javob beradi.";
       default: return "Kurs materiallari, darsliklar va PDF hujjatlarni qo'shing. AI kurator shu materiallar asosida javob beradi.";
     }
   };
@@ -651,6 +672,9 @@ function AIAgentContent() {
       case "sales": return "Sotuvchi ko'rsatmasi";
       case "booker": return "Maslahatchi ko'rsatmasi";
       case "recruiter": return "Rekruter ko'rsatmasi";
+      case "clinic": return "Klinika yordamchisi ko'rsatmasi";
+      case "realtor": return "Rieltor yordamchisi ko'rsatmasi";
+      case "helpdesk": return "Texnik yordam ko'rsatmasi";
       default: return t("pages.ai_agent.system_instruction_label");
     }
   };
@@ -660,6 +684,9 @@ function AIAgentContent() {
       case "sales": return "Sotuvchi agentning xulq-atvori va javob berish qoidalarini belgilang.";
       case "booker": return "Maslahatchi agentning ohangini va konsultatsiya qoidalarini sozlang.";
       case "recruiter": return "Rekruter agentning nomzodlar bilan suhbat qoidalarini belgilang.";
+      case "clinic": return "Klinika yordamchisining bemorlar bilan muomala qoidalarini belgilang.";
+      case "realtor": return "Rieltor yordamchisining mijozlar bilan mulk ko'rsatish qoidalarini belgilang.";
+      case "helpdesk": return "Texnik yordam agentining muammolarni hal qilish qoidalarini belgilang.";
       default: return t("pages.ai_agent.system_instruction_desc");
     }
   };
@@ -676,6 +703,9 @@ function AIAgentContent() {
       case "sales": return "Agent ushbu mavzular haqida mijozlarga javob bermaydi.";
       case "booker": return "Agent ushbu mavzular haqida gaplashmaydi.";
       case "recruiter": return "Agent ushbu mavzular haqida nomzodlarga javob bermaydi.";
+      case "clinic": return "Agent ushbu mavzular haqida bemorlarga javob bermaydi.";
+      case "realtor": return "Agent ushbu mavzular haqida mijozlarga javob bermaydi.";
+      case "helpdesk": return "Agent ushbu mavzular haqida foydalanuvchilarga javob bermaydi.";
       default: return t("pages.ai_agent.forbidden_topics_desc");
     }
   };
@@ -685,6 +715,9 @@ function AIAgentContent() {
       case "sales": return "Inson-sotuvchiga yo'naltirish qoidalari";
       case "booker": return "Mutaxassisga yo'naltirish qoidalari";
       case "recruiter": return "HR menejeriga yo'naltirish qoidalari";
+      case "clinic": return "Administratorga yo'naltirish qoidalari";
+      case "realtor": return "Rieltor menejeriga yo'naltirish qoidalari";
+      case "helpdesk": return "Operatorga yo'naltirish qoidalari";
       default: return t("pages.ai_agent.escalation_rules_title");
     }
   };
@@ -694,6 +727,9 @@ function AIAgentContent() {
       case "sales": return "Quyidagi holatlarda suhbat avtomatik ravishda inson-sotuvchiga yo'naltiriladi.";
       case "booker": return "Quyidagi holatlarda suhbat avtomatik ravishda mutaxassisning o'ziga yo'naltiriladi.";
       case "recruiter": return "Quyidagi holatlarda ariza avtomatik ravishda HR menejeriga yo'naltiriladi.";
+      case "clinic": return "Quyidagi holatlarda suhbat avtomatik ravishda administrator/shifokorga yo'naltiriladi.";
+      case "realtor": return "Quyidagi holatlarda suhbat avtomatik ravishda rieltor menejeriga yo'naltiriladi.";
+      case "helpdesk": return "Quyidagi holatlarda suhbat avtomatik ravishda inson operatoriga yo'naltiriladi.";
       default: return t("pages.ai_agent.escalation_rules_desc");
     }
   };
@@ -703,6 +739,9 @@ function AIAgentContent() {
       case "sales": return "Katalog bo'limi";
       case "booker": return "Bilim yo'nalishi";
       case "recruiter": return "Vakansiya yo'nalishi";
+      case "clinic": return "Bo'lim / Yo'nalish";
+      case "realtor": return "Hudud / Tuman";
+      case "helpdesk": return "Kategoriya";
       default: return "Modul";
     }
   };
@@ -712,6 +751,9 @@ function AIAgentContent() {
       case "sales": return "Mahsulot / Ma'lumot";
       case "booker": return "Bilim sahifasi";
       case "recruiter": return "Vakansiya sahifasi";
+      case "clinic": return "Shifokor / Xizmat";
+      case "realtor": return "Uy-joy e'loni";
+      case "helpdesk": return "Muammo / Yechim";
       default: return "Dars";
     }
   };
@@ -724,7 +766,10 @@ function AIAgentContent() {
       typeParam === "booker" ||
       typeParam === "recruiter" ||
       typeParam === "fb-leads" ||
-      typeParam === "fb-leads-direct"
+      typeParam === "fb-leads-direct" ||
+      typeParam === "clinic" ||
+      typeParam === "realtor" ||
+      typeParam === "helpdesk"
     ) {
       setSelectedAgentType(typeParam as any);
     } else {
@@ -736,7 +781,7 @@ function AIAgentContent() {
   useEffect(() => {
     if (!settings || !selectedAgentType) return;
     
-    const isSpecialType = ["kurator", "sales", "booker", "recruiter"].includes(selectedAgentType);
+    const isSpecialType = ["kurator", "sales", "booker", "recruiter", "clinic", "realtor", "helpdesk"].includes(selectedAgentType);
     if (isSpecialType && settings.aiAgentType !== selectedAgentType) {
       let defaultPrompt = "";
       let defaultTopics: string[] = [];
@@ -848,6 +893,81 @@ Nomzodlarga faqat vakansiya va talablar (VAKANSIYALAR VA TALABLAR) doirasida jav
           { id: "esc-2", text: "Nomzod xorijdan turib ishlash shartlarini so'raganida", enabled: true },
           { id: "esc-3", text: "Nomzod darhol asosiy rahbar bilan uchrashmoqchi bo'lsa", enabled: true }
         ];
+      } else if (selectedAgentType === "clinic") {
+        defaultPrompt = `# ROL VA IDENTIFIKATSIYA
+Sen tibbiy markaz/klinikaning onlayn qabul yordamchisisan (Medical Assistant AI). Maqsading: bemorlarga shifokorlar, bo'limlar va qabul vaqtlari haqida ma'lumot berish, onlayn navbat yozish va eslatmalar yuborish.
+
+# ASOSIY VAZIFA
+Bemorlarga faqat klinika ma'lumotlari (KLINIKA MA'LUMOTLARI) doirasida javob berish.
+
+# KLINIKA MA'LUMOTLARI:
+{{context}}
+
+# QAT'IY YO'RIQNOMALAR VA CHEKLOVLAR
+1. Hech qachon tashxis qo'yma yoki dori-darmon tavsiya etma. Faqat shifokorga yozilish va umumiy ma'lumot ber.
+2. Bemorning shikoyatiga qarab tegishli bo'lim yoki shifokorni tavsiya et.
+3. Bo'sh vaqtlarni ko'rsatib, bron qilishni taklif et.
+
+# JAVOB FORMATI VA STILI
+- Muloyim, g'amxo'r va professional ohang.
+- Javoblarni qisqa va aniq ber.`;
+        
+        defaultTopics = ["Tashxis qo'yish", "Dori-darmon tavsiyasi", "Siyosat"];
+        defaultRules = [
+          { id: "esc-1", text: "Bemor shoshilinch tibbiy yordam so'raganida", enabled: true },
+          { id: "esc-2", text: "Bemor shikoyat bildirganida", enabled: true },
+          { id: "esc-3", text: "Bemor to'lov muammolari haqida yozganda", enabled: true }
+        ];
+      } else if (selectedAgentType === "realtor") {
+        defaultPrompt = `# ROL VA IDENTIFIKATSIYA
+Sen ko'chmas mulk agentligining onlayn yordamchisisan (Realtor AI). Maqsading: mijozlarga uy-joylar haqida ma'lumot berish, narx va joylashuv ko'rsatish, ko'rish uchun vaqt belgilash.
+
+# ASOSIY VAZIFA
+Mijozlarga faqat ko'chmas mulk bazasi (MULK BAZASI) doirasida javob berish.
+
+# MULK BAZASI:
+{{context}}
+
+# QAT'IY YO'RIQNOMALAR VA CHEKLOVLAR
+1. Bazada yo'q uy-joylar haqida gapirma.
+2. Mijozning budjetini, joylashuvini va talablarini so'rab, mos variantlarni tavsiya et.
+3. Ko'rish uchun vaqt belgilashni taklif qilib, rieltor bilan bog'lanishni tashkil et.
+
+# JAVOB FORMATI VA STILI
+- Ishonchli, do'stona va ma'lumotli ohang.
+- Har bir uy-joy uchun narx, maydon, xonalar soni va joylashuvni ko'rsat.`;
+        
+        defaultTopics = ["Huquqiy maslahat", "Kredit shartlari", "Siyosat"];
+        defaultRules = [
+          { id: "esc-1", text: "Mijoz shartnoma va huquqiy masalalar so'raganida", enabled: true },
+          { id: "esc-2", text: "Mijoz maxsus narx yoki chegirma talab qilganida", enabled: true },
+          { id: "esc-3", text: "Mijoz to'g'ridan-to'g'ri rieltor bilan gaplashmoqchi bo'lganida", enabled: true }
+        ];
+      } else if (selectedAgentType === "helpdesk") {
+        defaultPrompt = `# ROL VA IDENTIFIKATSIYA
+Sen kompaniyaning texnik yordam yordamchisisan (Help Desk AI). Maqsading: foydalanuvchilarga texnik muammolarni hal qilishda yordam berish, FAQ dan javob topish, murakkab holatlarni inson operatoriga yo'naltirish.
+
+# ASOSIY VAZIFA
+Foydalanuvchilarga faqat bilimlar bazasi (BILIMLAR BAZASI) doirasida javob berish.
+
+# BILIMLAR BAZASI:
+{{context}}
+
+# QAT'IY YO'RIQNOMALAR VA CHEKLOVLAR
+1. Muammoni avval tasniflash: texnik xatolik, hisob muammosi, to'lov muammosi yoki boshqa.
+2. Bazada javob bo'lsa — aniq va bosqichma-bosqich yechim ber.
+3. Bazada javob topilmasa — tiket raqami berib, operatorga yo'naltir.
+
+# JAVOB FORMATI VA STILI
+- Sabr-toqatli, tushunarli va texnik jihatdan aniq.
+- Muammoni hal qilish uchun bosqichma-bosqich ko'rsatmalar ber.`;
+        
+        defaultTopics = ["Kompaniya ichki sirlari", "Narxlar va moliyaviy ma'lumotlar", "Siyosat"];
+        defaultRules = [
+          { id: "esc-1", text: "Muammo bazada topilmaganida", enabled: true },
+          { id: "esc-2", text: "Foydalanuvchi shikoyat bildirganida", enabled: true },
+          { id: "esc-3", text: "Foydalanuvchi to'lov qaytarilishini so'raganida", enabled: true }
+        ];
       }
       
       setSettings(prev => prev ? {
@@ -871,6 +991,12 @@ Nomzodlarga faqat vakansiya va talablar (VAKANSIYALAR VA TALABLAR) doirasida jav
       welcomeText = "Salom! Men shaxsiy konsultatsiyalarni bron qiluvchi va maslahat beruvchi yordamchiman. Ohang va ma'lumotlarimni tekshirish uchun savol yozib ko'ring! 📅";
     } else if (selectedAgentType === "recruiter") {
       welcomeText = "Salom! Men HR/Rekruter yordamchiman. Bo'sh ish o'rinlari haqida ma'lumot beraman va nomzodlarni suhbatdan o'tkaza olaman. Sinab ko'rish uchun savol yozing! 👔";
+    } else if (selectedAgentType === "clinic") {
+      welcomeText = "Salom! Men klinikaning onlayn yordamchisiman. Shifokorlarga yozilish, bo'sh vaqtlarni ko'rish va bo'limlar haqida ma'lumot olishingiz mumkin. Sinab ko'ring! 🏥";
+    } else if (selectedAgentType === "realtor") {
+      welcomeText = "Salom! Men ko'chmas mulk yordamchisiman. Uy-joylar, narxlar va joylashuvlar haqida ma'lumot beraman. Ko'rishga vaqt belgilashingiz ham mumkin. Sinab ko'ring! 🏠";
+    } else if (selectedAgentType === "helpdesk") {
+      welcomeText = "Salom! Men texnik yordam yordamchisiman. Muammolaringizni hal qilishda yordam beraman. Savolingizni yozing! 🔧";
     }
     
     if (welcomeText) {
@@ -976,7 +1102,7 @@ Nomzodlarga faqat vakansiya va talablar (VAKANSIYALAR VA TALABLAR) doirasida jav
       }
       // Enforce mutual exclusion: turn off Facebook lead agent
       settings.fbAgentEnabled = false;
-      if (selectedAgentType && ["kurator", "sales", "booker", "recruiter"].includes(selectedAgentType)) {
+      if (selectedAgentType && ["kurator", "sales", "booker", "recruiter", "clinic", "realtor", "helpdesk"].includes(selectedAgentType)) {
         settings.aiAgentType = selectedAgentType as any;
       }
     }
