@@ -887,6 +887,18 @@ Nomzodlarga faqat vakansiya va talablar (VAKANSIYALAR VA TALABLAR) doirasida jav
   }, [selectedAgentType]);
 
   const loadDatabase = () => {
+    // Clean up any lingering demo @sendly_robot channel from localStorage
+    const allChannels = db.getChannels();
+    const hasDemoBot = allChannels.some(
+      (c) => c.username && c.username.toLowerCase().replace(/^@+/, "") === "sendly_robot"
+    );
+    if (hasDemoBot) {
+      const cleanedChannels = allChannels.filter(
+        (c) => !(c.username && c.username.toLowerCase().replace(/^@+/, "") === "sendly_robot")
+      );
+      db.saveChannels(cleanedChannels);
+    }
+
     const channels = db.getChannels();
 
     const tgChannels = channels.filter(
