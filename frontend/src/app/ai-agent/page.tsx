@@ -98,7 +98,7 @@ const generateJsonPayload = (name: string, phone: string, message: string, mappi
     let value = "";
     if (m.sendlyField === "name") value = name;
     else if (m.sendlyField === "phone") value = phone;
-    else if (m.sendlyField === "message") value = message;
+    else if (m.sendlyField === "message" || m.sendlyField === "email") value = message;
     else value = "Mock qiymat";
     return {
       name: m.metaField,
@@ -515,6 +515,15 @@ function AIAgentContent() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [simLeadName, simLeadPhone, simLeadMessage, fieldMappings, isSimulatorJsonMode]);
+
+  // Set default message/email value based on selectedAgentType
+  useEffect(() => {
+    if (selectedAgentType === "fb-leads-direct") {
+      setSimLeadMessage("sardor@gmail.com");
+    } else {
+      setSimLeadMessage("Kurs narxi qancha? Chegirma bormi?");
+    }
+  }, [selectedAgentType]);
 
   // Sync state from local storage / db
   useEffect(() => {
@@ -1332,11 +1341,18 @@ function AIAgentContent() {
                 name: leadName,
                 username: cleanPhone,
                 avatar: `https://api.dicebear.com/7.x/adventurer/svg?seed=${encodeURIComponent(leadName)}`,
-                lastMessage: welcomeMsg,
+                lastMessage: isDirect ? "Facebook Lead Form submitted" : welcomeMsg,
                 time: timestampStr,
                 unread: true,
                 tags: tags,
-                messages: [
+                messages: isDirect ? [
+                  {
+                    id: userMsgId,
+                    sender: "user" as const,
+                    text: `[Facebook Lead Form: ${selectedForm}]\nIsm: ${leadName}\nTel: ${leadPhone}\nEmail: ${leadMessage}`,
+                    timestamp: timestampStr,
+                  }
+                ] : [
                   {
                     id: userMsgId,
                     sender: "user" as const,
@@ -2644,11 +2660,11 @@ function AIAgentContent() {
                 <div className="flex items-center justify-between border-b border-[#F0F0F0] pb-3">
                   <h4 className="text-[13px] font-bold text-black flex items-center gap-1.5">
                     <RefreshCw size={14} className={`text-blue-500 ${simLoading ? "animate-spin" : ""}`} />
-                    <span>{t("pages.ai_agent.sandbox_title")}</span>
+                    <span>{selectedAgentType === "fb-leads-direct" ? "Integratsiya sinovi (Lid simulyatori)" : t("pages.ai_agent.sandbox_title")}</span>
                   </h4>
                   <span className="text-[10px] text-green-600 flex items-center gap-1 font-semibold bg-green-50 px-2 py-0.5 rounded border border-green-100">
                     <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
-                    {t("pages.ai_agent.sandbox_mode_title")}
+                    {selectedAgentType === "fb-leads-direct" ? "Sinov rejimi" : t("pages.ai_agent.sandbox_mode_title")}
                   </span>
                 </div>
 
@@ -2701,13 +2717,25 @@ function AIAgentContent() {
                       </div>
 
                       <div className="flex flex-col gap-1.5">
-                        <label className="text-[10px] font-bold text-black">{t("pages.ai_agent.customer_message")}</label>
-                        <textarea
-                          value={simLeadMessage}
-                          onChange={(e) => setSimLeadMessage(e.target.value)}
-                          className="w-full h-20 px-3 py-2 text-[11px] bg-[#F9F9F7] border border-[#E8E8E8] rounded-xl focus:outline-none focus:border-black resize-none text-black"
-                          placeholder={t("pages.ai_agent.customer_message_placeholder")}
-                        />
+                        <label className="text-[10px] font-bold text-black">
+                          {selectedAgentType === "fb-leads-direct" ? "Mijoz E-pochtasi (Email)" : t("pages.ai_agent.customer_message")}
+                        </label>
+                        {selectedAgentType === "fb-leads-direct" ? (
+                          <input
+                            type="email"
+                            value={simLeadMessage}
+                            onChange={(e) => setSimLeadMessage(e.target.value)}
+                            className="px-3 py-2 text-[11px] bg-[#F9F9F7] border border-[#E8E8E8] rounded-xl focus:outline-none focus:border-black text-black"
+                            placeholder="masalan, sardor@gmail.com"
+                          />
+                        ) : (
+                          <textarea
+                            value={simLeadMessage}
+                            onChange={(e) => setSimLeadMessage(e.target.value)}
+                            className="w-full h-20 px-3 py-2 text-[11px] bg-[#F9F9F7] border border-[#E8E8E8] rounded-xl focus:outline-none focus:border-black resize-none text-black"
+                            placeholder={t("pages.ai_agent.customer_message_placeholder")}
+                          />
+                        )}
                       </div>
                     </>
                   ) : (
