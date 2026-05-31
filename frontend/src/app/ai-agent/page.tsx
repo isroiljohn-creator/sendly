@@ -4756,7 +4756,7 @@ function AIAgentContent() {
                 <span className="text-[10px] font-extrabold text-[#707070] uppercase tracking-wider">{t("pages.ai_agent.avg_confidence")}</span>
                 <span className="text-[24px] font-extrabold text-black">
                   {analyzedMessages.length > 0 
-                    ? Math.round(analyzedMessages.reduce((acc, curr) => acc + curr.confidence, 0) / analyzedMessages.length) 
+                    ? Math.round(analyzedMessages.reduce((acc, curr) => acc + (curr?.confidence || 0), 0) / analyzedMessages.length) 
                     : 0}%
                 </span>
                 <span className="text-[10px] text-[#A0A0A0] mt-1">{t("pages.ai_agent.labels.ai_response_accuracy")}</span>
@@ -4885,13 +4885,13 @@ function AIAgentContent() {
                         }
                         const headers = [t("pages.ai_agent.table.user"), t("pages.ai_agent.table.message"), t("pages.ai_agent.table.ai_reply"), t("pages.ai_agent.table.category"), t("pages.ai_agent.table.sentiment"), t("pages.ai_agent.table.confidence"), t("pages.ai_agent.table.date")];
                         const rows = analyzedMessages.map(m => [
-                          `@${m.username}`,
-                          m.message.replace(/"/g, '""'),
-                          m.response.replace(/"/g, '""'),
-                          t("pages.ai_agent.intent_" + m.intent),
-                          t("pages.ai_agent.sentiment_" + m.sentiment),
-                          `${m.confidence}%`,
-                          m.date
+                          `@${m?.username || ""}`,
+                          (m?.message || "").toString().replace(/"/g, '""'),
+                          (m?.response || "").toString().replace(/"/g, '""'),
+                          t("pages.ai_agent.intent_" + (m?.intent || "general")),
+                          t("pages.ai_agent.sentiment_" + (m?.sentiment || "neutral")),
+                          `${m?.confidence || 0}%`,
+                          m?.date || ""
                         ]);
                         const csvContent = "data:text/csv;charset=utf-8,\uFEFF" 
                           + [headers.join(","), ...rows.map(e => e.map(val => `"${val}"`).join(","))].join("\n");
