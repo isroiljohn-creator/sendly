@@ -1156,7 +1156,7 @@ export const db = {
     autos.forEach(a => {
       const runsVal = parseInt(a.runs) || 0;
       if (runsVal > 0) {
-        const compVal = parseInt(a.completion.replace("%", "")) || 0;
+        const compVal = parseInt((a.completion || "0%").toString().replace("%", "")) || 0;
         totalComp += compVal;
         autoCount++;
       }
