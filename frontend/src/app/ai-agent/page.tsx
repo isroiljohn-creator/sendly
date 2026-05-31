@@ -30,7 +30,16 @@ import {
   FileText,
   BarChart2,
   TrendingUp,
-  Loader2
+  Loader2,
+  Search,
+  X,
+  Stethoscope,
+  Activity,
+  Home,
+  Key,
+  LifeBuoy,
+  HelpCircle,
+  GraduationCap
 } from "lucide-react";
 
 const Facebook = ({ size = 24, className, ...props }: React.SVGProps<SVGSVGElement> & { size?: number }) => (
@@ -247,6 +256,7 @@ function AIAgentContent() {
 
   const [sliderPreviewType, setSliderPreviewType] = useState<"tone" | "length" | "humor">("tone");
   const [activeTab, setActiveTab] = useState<"settings" | "knowledge" | "analytics">("settings");
+  const [searchQuery, setSearchQuery] = useState("");
 
   // Telegram Connect Modal States
   const [showTgConnectModal, setShowTgConnectModal] = useState(false);
@@ -740,6 +750,32 @@ function AIAgentContent() {
   const getKnowledgeTabName = () => {
     if (!selectedAgentType) return t("pages.ai_agent.knowledge_base_tab");
     return t(`pages.ai_agent.knowledge_tab_names.${selectedAgentType}`);
+  };
+
+  const getModuleIcon = () => {
+    switch (selectedAgentType) {
+      case "clinic":
+        return Stethoscope;
+      case "realtor":
+        return Home;
+      case "helpdesk":
+        return LifeBuoy;
+      default:
+        return FolderPlus;
+    }
+  };
+
+  const getLessonIcon = () => {
+    switch (selectedAgentType) {
+      case "clinic":
+        return Activity;
+      case "realtor":
+        return Key;
+      case "helpdesk":
+        return HelpCircle;
+      default:
+        return BookOpen;
+    }
   };
 
   const getKnowledgeSectionTitle = () => {
@@ -3522,6 +3558,29 @@ function AIAgentContent() {
     );
   }
 
+  const filteredModules = modules.filter(mod => {
+    if (!searchQuery) return true;
+    const query = searchQuery.toLowerCase();
+    const matchesMod = mod.title.toLowerCase().includes(query);
+    const modLessons = lessons.filter(l => l.moduleId === mod.id);
+    const matchesAnyLesson = modLessons.some(
+      les => les.title.toLowerCase().includes(query) || (les.transcript && les.transcript.toLowerCase().includes(query))
+    );
+    return matchesMod || matchesAnyLesson;
+  });
+
+  const getFilteredLessonsForModule = (moduleId: string) => {
+    const modLessons = lessons.filter(l => l.moduleId === moduleId);
+    if (!searchQuery) return modLessons;
+    const query = searchQuery.toLowerCase();
+    const mod = modules.find(m => m.id === moduleId);
+    const matchesMod = mod?.title.toLowerCase().includes(query);
+    if (matchesMod) return modLessons;
+    return modLessons.filter(
+      les => les.title.toLowerCase().includes(query) || (les.transcript && les.transcript.toLowerCase().includes(query))
+    );
+  };
+
   return (
     <AppLayout>
       <div className="flex flex-col gap-6 relative min-h-screen pb-12">
@@ -4293,148 +4352,204 @@ function AIAgentContent() {
 
         {/* Bilim Bazasi Workspace */}
         {activeTab === "knowledge" && (
-          <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-start">
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-stretch">
             {/* Left Side: Tree navigation of modules/lessons */}
-            <div className="md:col-span-5 bg-white border border-[#E8E8E8] rounded-[24px] p-6 shadow-sm">
-              <div className="flex items-center justify-between mb-4 pb-2 border-b border-[#F0F0F0]">
-                <h3 className="text-[14px] font-bold text-black">{getKnowledgeSectionTitle()}</h3>
-                <div className="flex items-center gap-1.5">
-                  <button
-                    onClick={() => setShowAddModuleModal(true)}
-                    className="p-1.5 text-black hover:bg-[#F9F9F7] rounded-lg transition-all"
-                    title={t("pages.ai_agent.create_module_tooltip")}
-                  >
-                    <FolderPlus size={16} />
-                  </button>
-                  <button
-                    onClick={() => {
-                      if (modules.length === 0) {
-                        setAlertModal({
-                          isOpen: true,
-                          title: t("pages.ai_agent.lesson_create_error_title"),
-                          message: t("pages.ai_agent.lesson_create_error_desc"),
-                        });
-                        return;
-                      }
-                      setNewLessonModuleId(modules[0].id);
-                      setShowAddLessonModal(true);
-                    }}
-                    className="p-1.5 text-black hover:bg-[#F9F9F7] rounded-lg transition-all"
-                    title={t("pages.ai_agent.create_lesson_tooltip")}
-                  >
-                    <FilePlus size={16} />
-                  </button>
+            <div className="md:col-span-5 bg-white border border-[#E8E8E8] rounded-[24px] p-6 shadow-sm flex flex-col justify-between min-h-[500px]">
+              <div className="flex flex-col gap-4 flex-1">
+                <div className="flex items-center justify-between pb-2 border-b border-[#F0F0F0]">
+                  <h3 className="text-[13px] font-extrabold text-black uppercase tracking-wider">{getKnowledgeSectionTitle()}</h3>
+                  <div className="flex items-center gap-1">
+                    <button
+                      onClick={() => setShowAddModuleModal(true)}
+                      className="p-1.5 text-[#595959] hover:text-black hover:bg-[#F9F9F7] rounded-lg transition-all"
+                      title={t("pages.ai_agent.create_module_tooltip")}
+                    >
+                      <FolderPlus size={15} />
+                    </button>
+                    <button
+                      onClick={() => {
+                        if (modules.length === 0) {
+                          setAlertModal({
+                            isOpen: true,
+                            title: t("pages.ai_agent.lesson_create_error_title"),
+                            message: t("pages.ai_agent.lesson_create_error_desc"),
+                          });
+                          return;
+                        }
+                        setNewLessonModuleId(modules[0].id);
+                        setShowAddLessonModal(true);
+                      }}
+                      className="p-1.5 text-[#595959] hover:text-black hover:bg-[#F9F9F7] rounded-lg transition-all"
+                      title={t("pages.ai_agent.create_lesson_tooltip")}
+                    >
+                      <FilePlus size={15} />
+                    </button>
+                  </div>
+                </div>
+
+                {/* Search Bar */}
+                <div className="relative">
+                  <Search size={13} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#707070]" />
+                  <input
+                    type="text"
+                    placeholder={t("pages.ai_agent.search_placeholder") || "Qidirish (modul yoki darslar)..."}
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="w-full pl-9 pr-8 py-2 text-[11px] bg-[#F9F9F7] border border-[#E8E8E8] rounded-xl focus:outline-none focus:border-black/35 transition-all text-black placeholder:text-[#A0A0A0] font-semibold"
+                  />
+                  {searchQuery && (
+                    <button
+                      onClick={() => setSearchQuery("")}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-[#707070] hover:text-black transition-colors"
+                    >
+                      <X size={12} />
+                    </button>
+                  )}
+                </div>
+
+                {/* Tree structure */}
+                <div className="flex flex-col gap-2 max-h-[420px] overflow-y-auto pr-1">
+                  {filteredModules.map((mod) => {
+                    const isExpanded = searchQuery ? true : expandedModules[mod.id];
+                    const modLessons = getFilteredLessonsForModule(mod.id);
+
+                    return (
+                      <div key={mod.id} className="flex flex-col gap-1 border-b border-[#F9F9F7] pb-2 last:border-0 last:pb-0">
+                        {/* Module header */}
+                        <div
+                          onClick={() => toggleModule(mod.id)}
+                          className="flex items-center justify-between p-2 hover:bg-[#F9F9F7] rounded-xl cursor-pointer group transition-colors"
+                        >
+                          <div className="flex items-center gap-2 min-w-0">
+                            <span className="shrink-0">{isExpanded ? <ChevronDown size={14} className="text-[#707070]" /> : <ChevronRight size={14} className="text-[#707070]" />}</span>
+                            <span className="shrink-0">{React.createElement(getModuleIcon(), { size: 14, className: "text-[#707070] shrink-0" })}</span>
+                            <span className="text-[12px] font-bold text-black truncate">{mod.title}</span>
+                            <span className="text-[9px] bg-[#F0F0F0] px-1.5 py-0.5 rounded-full text-[#707070] font-bold shrink-0">
+                              {t("pages.ai_agent.lesson_count_badge").replace("{count}", modLessons.length.toString())}
+                            </span>
+                          </div>
+                          
+                          {/* Hover action buttons */}
+                          <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all shrink-0">
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setNewLessonModuleId(mod.id);
+                                setShowAddLessonModal(true);
+                              }}
+                              className="text-[#707070] hover:text-black transition-colors p-1"
+                              title={t("pages.ai_agent.create_lesson_tooltip")}
+                            >
+                              <FilePlus size={12} />
+                            </button>
+                            <button
+                              onClick={(e) => handleDeleteModule(mod.id, e)}
+                              className="text-[#A0A0A0] hover:text-red-600 transition-colors p-1"
+                              title={t("common.delete") || "O'chirish"}
+                            >
+                              <Trash2 size={12} />
+                            </button>
+                          </div>
+                        </div>
+
+                        {/* Lessons list under module */}
+                        {isExpanded && (
+                          <div className="pl-6 flex flex-col gap-0.5 mt-0.5 border-l border-[#E8E8E8]/50 ml-3.5">
+                            {modLessons.map((les) => {
+                              const isSelected = selectedLesson?.id === les.id;
+                              return (
+                                <div
+                                  key={les.id}
+                                  onClick={() => setSelectedLesson(les)}
+                                  className={`flex items-center justify-between p-2 rounded-xl cursor-pointer group transition-all ${
+                                    isSelected
+                                      ? "bg-black text-[#C7F33C]"
+                                      : "text-black hover:bg-[#F9F9F7]"
+                                  }`}
+                                >
+                                  <div className="flex items-center gap-2 min-w-0">
+                                    <span className="shrink-0">{React.createElement(getLessonIcon(), { size: 12, className: isSelected ? "text-[#C7F33C]" : "text-[#707070]" })}</span>
+                                    <span className="text-[11px] font-bold truncate">{les.title}</span>
+                                  </div>
+                                  <button
+                                    onClick={(e) => handleDeleteLesson(les.id, e)}
+                                    className={`opacity-0 group-hover:opacity-100 transition-all p-1 ${
+                                      isSelected ? "text-[#C7F33C] hover:text-red-400" : "text-[#A0A0A0] hover:text-red-600"
+                                    }`}
+                                    title={t("common.delete") || "O'chirish"}
+                                  >
+                                    <Trash2 size={12} />
+                                  </button>
+                                </div>
+                              );
+                            })}
+                            {modLessons.length === 0 && (
+                              <p className="text-[10px] text-[#A0A0A0] italic p-2">{t("pages.ai_agent.no_lessons_yet")}</p>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+
+                  {filteredModules.length === 0 && (
+                    <div className="text-center py-8">
+                      <p className="text-[11px] text-[#707070] italic">
+                        {searchQuery ? t("pages.ai_agent.kb_search_no_results") || "Qidiruv bo'yicha hech narsa topilmadi" : t("pages.ai_agent.no_modules_yet")}
+                      </p>
+                      {!searchQuery && (
+                        <button
+                          onClick={() => setShowAddModuleModal(true)}
+                          className="text-[11px] font-extrabold text-black underline mt-2"
+                        >
+                          {t("pages.ai_agent.create_first_module")}
+                        </button>
+                      )}
+                    </div>
+                  )}
                 </div>
               </div>
 
-              {/* Tree structure */}
-              <div className="flex flex-col gap-3">
-                {modules.map((mod) => {
-                  const isExpanded = expandedModules[mod.id];
-                  const modLessons = lessons.filter((l) => l.moduleId === mod.id);
-
-                  return (
-                    <div key={mod.id} className="flex flex-col gap-1 border-b border-[#F9F9F7] pb-2 last:border-0 last:pb-0">
-                      {/* Module title header */}
-                      <div
-                        onClick={() => toggleModule(mod.id)}
-                        className="flex items-center justify-between p-2 hover:bg-[#F9F9F7] rounded-xl cursor-pointer group transition-colors"
-                      >
-                        <div className="flex items-center gap-2">
-                          {isExpanded ? <ChevronDown size={14} className="text-[#707070]" /> : <ChevronRight size={14} className="text-[#707070]" />}
-                          <span className="text-[12px] font-bold text-black">{mod.title}</span>
-                          <span className="text-[9px] bg-[#F0F0F0] px-1.5 py-0.5 rounded-full text-[#707070] font-medium">
-                            {t("pages.ai_agent.lesson_count_badge").replace("{count}", modLessons.length.toString())}
-                          </span>
-                        </div>
-                        <button
-                          onClick={(e) => handleDeleteModule(mod.id, e)}
-                          className="opacity-0 group-hover:opacity-100 text-[#A0A0A0] hover:text-red-600 transition-all p-1"
-                        >
-                          <Trash2 size={12} />
-                        </button>
-                      </div>
-
-                      {/* Lessons list under module */}
-                      {isExpanded && (
-                        <div className="pl-6 flex flex-col gap-0.5">
-                          {modLessons.map((les) => {
-                            const isSelected = selectedLesson?.id === les.id;
-                            return (
-                              <div
-                                key={les.id}
-                                onClick={() => setSelectedLesson(les)}
-                                className={`flex items-center justify-between p-2 rounded-xl cursor-pointer group transition-all ${
-                                  isSelected
-                                    ? "bg-black text-[#C7F33C]"
-                                    : "text-black hover:bg-[#F9F9F7]"
-                                }`}
-                              >
-                                <div className="flex items-center gap-2 min-w-0">
-                                  <BookOpen size={12} className={isSelected ? "text-[#C7F33C]" : "text-[#707070]"} />
-                                  <span className="text-[11px] font-medium truncate">{les.title}</span>
-                                </div>
-                                <button
-                                  onClick={(e) => handleDeleteLesson(les.id, e)}
-                                  className={`opacity-0 group-hover:opacity-100 transition-all p-1 ${
-                                    isSelected ? "text-[#C7F33C] hover:text-red-400" : "text-[#A0A0A0] hover:text-red-600"
-                                  }`}
-                                >
-                                  <Trash2 size={12} />
-                                </button>
-                              </div>
-                            );
-                          })}
-                          {modLessons.length === 0 && (
-                            <p className="text-[10px] text-[#A0A0A0] italic p-2">{t("pages.ai_agent.no_lessons_yet")}</p>
-                          )}
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
-
-                {modules.length === 0 && (
-                  <div className="text-center py-8">
-                    <p className="text-[11px] text-[#707070] italic">{t("pages.ai_agent.no_modules_yet")}</p>
-                    <button
-                      onClick={() => setShowAddModuleModal(true)}
-                      className="text-[11px] font-bold text-black underline mt-2"
-                    >
-                      {t("pages.ai_agent.create_first_module")}
-                    </button>
-                  </div>
-                )}
-              </div>
+              {/* Sidebar Footer quick action button */}
+              {modules.length > 0 && (
+                <button
+                  onClick={() => setShowAddModuleModal(true)}
+                  className="w-full mt-4 py-2 border border-dashed border-[#D8D8D8] hover:border-black/35 rounded-xl text-[11px] font-bold text-[#595959] hover:bg-[#F9F9F7] active:scale-95 transition-all text-center"
+                >
+                  {t("pages.ai_agent.add_module") || "+ Yangi modul yaratish"}
+                </button>
+              )}
             </div>
 
             {/* Right Side: Transcript / Lesson editor */}
-            <div className="md:col-span-7 bg-white border border-[#E8E8E8] rounded-[24px] p-6 shadow-sm min-h-[400px] flex flex-col justify-between">
+            <div className="md:col-span-7 bg-white border border-[#E8E8E8] rounded-[24px] p-6 shadow-sm min-h-[500px] flex flex-col justify-between">
               {selectedLesson ? (
                 <div className="flex flex-col gap-5 flex-1">
                   <div>
-                    <span className="text-[9px] uppercase tracking-wider text-[#A0A0A0] font-bold">
+                    <span className="text-[9px] uppercase tracking-wider text-[#A0A0A0] font-extrabold">
                       {modules.find((m) => m.id === selectedLesson.moduleId)?.title || t("pages.ai_agent.module_label")}
                     </span>
-                    <input
-                      type="text"
-                      value={selectedLesson.title}
-                      onChange={(e) => handleUpdateSelectedLesson("title", e.target.value)}
-                      className="w-full text-[16px] font-bold text-black border-b border-transparent hover:border-[#E8E8E8] focus:border-black focus:outline-none py-1.5 transition-colors"
-                    />
+                    <div className="flex items-center gap-2 border-b border-[#E8E8E8] focus-within:border-black transition-colors py-1">
+                      <input
+                        type="text"
+                        value={selectedLesson.title}
+                        onChange={(e) => handleUpdateSelectedLesson("title", e.target.value)}
+                        className="w-full text-[15px] font-bold text-black focus:outline-none bg-transparent"
+                      />
+                    </div>
                   </div>
 
                   <div className="flex-1 flex flex-col gap-2">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
-                        <label className="text-[12px] font-bold text-black">
+                        <label className="text-[12px] font-extrabold text-black">
                           {t("pages.ai_agent.lesson_transcript_label")}
                         </label>
                         <button
                           type="button"
                           disabled={isStructuring || !selectedLesson.transcript || selectedLesson.transcript.trim() === ""}
                           onClick={handleAiStructureTranscript}
-                          className="px-2.5 py-1 text-[10px] font-bold rounded-lg border border-[#D8D8D8] bg-[#C7F33C] hover:bg-[#b5e02c] disabled:bg-[#F5F5F5] disabled:text-[#A0A0A0] disabled:border-transparent text-black transition-all flex items-center gap-1 active:scale-95 shadow-xs"
+                          className="px-3 py-1 text-[10px] font-bold rounded-lg bg-gradient-to-r from-[#C7F33C] to-[#9BC92E] hover:scale-[1.02] disabled:scale-100 disabled:opacity-50 disabled:from-gray-100 disabled:to-gray-100 disabled:text-gray-400 text-black transition-all flex items-center gap-1 active:scale-95 shadow-xs border border-[#7CA607]/20"
                           title="Ushbu matnni Gemini 3.5 yordamida savol-javob ko'rinishida strukturalash va ortiqcha gaplardan tozalash"
                         >
                           {isStructuring ? (
@@ -4450,60 +4565,159 @@ function AIAgentContent() {
                           )}
                         </button>
                       </div>
-                      <span className="text-[10px] text-[#707070]">
+                      <span className="text-[10px] text-[#707070] font-bold">
                         {t("pages.ai_agent.chars_count").replace("{count}", (selectedLesson.transcript?.length || 0).toString())}
                       </span>
                     </div>
                     <textarea
                       value={selectedLesson.transcript || ""}
                       onChange={(e) => handleUpdateSelectedLesson("transcript", e.target.value)}
-                      className="w-full flex-1 min-h-[300px] p-4 text-[12px] leading-relaxed bg-[#F9F9F7] border border-[#E8E8E8] rounded-[16px] focus:outline-none focus:border-black resize-y"
+                      className="w-full flex-1 min-h-[250px] p-4 text-[12px] leading-relaxed bg-[#F9F9F7] border border-[#E8E8E8] rounded-[16px] focus:outline-none focus:border-black resize-y"
                       placeholder={t("pages.ai_agent.lesson_transcript_placeholder")}
                     />
                   </div>
 
-                  {/* Materials upload Mock */}
-                  <div className="border-t border-[#F0F0F0] pt-4 mt-2">
-                    <label className="text-[12px] font-bold text-black block mb-2">
+                  {/* Materials upload Section */}
+                  <div className="border-t border-[#F0F0F0] pt-5 mt-4">
+                    <label className="text-[12px] font-bold text-black block mb-3">
                       {t("pages.ai_agent.useful_materials_label")}
                     </label>
-                    <div className="flex items-center gap-3">
-                      <div className="flex-1 flex flex-wrap gap-2">
-                        {selectedLesson.pdfMaterials?.map((pdf, idx) => (
-                          <span
-                            key={idx}
-                            className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-[#F9F9F7] border border-[#E8E8E8] text-[11px] text-[#595959]"
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
+                      {selectedLesson.pdfMaterials?.map((pdf, idx) => (
+                        <div
+                          key={idx}
+                          className="flex items-center justify-between p-3 rounded-xl bg-[#F9F9F7] border border-[#E8E8E8] hover:border-black/10 transition-all group"
+                        >
+                          <div className="flex items-center gap-2.5 min-w-0">
+                            <div className="w-8 h-8 rounded-lg bg-red-50 text-red-600 flex items-center justify-center shrink-0">
+                              <FileText size={16} />
+                            </div>
+                            <div className="flex flex-col min-w-0">
+                              <span className="text-[11px] font-bold text-black truncate">{pdf}</span>
+                              <span className="text-[9px] text-[#A0A0A0]">PDF Document • Mock size 1.2 MB</span>
+                            </div>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const currentPdfs = selectedLesson.pdfMaterials || [];
+                              handleUpdateSelectedLesson("pdfMaterials", currentPdfs.filter((_, i) => i !== idx));
+                              showToast(t("pages.ai_agent.toasts.material_deleted") || "Hujjat o'chirildi");
+                            }}
+                            className="text-[#A0A0A0] hover:text-red-600 transition-colors p-1"
+                            title={t("common.delete") || "O'chirish"}
                           >
-                            <FileText size={12} className="text-[#707070]" />
-                            <span>{pdf}</span>
-                          </span>
-                        )) || <span className="text-[11px] text-[#A0A0A0] italic">{t("pages.ai_agent.no_materials_yet")}</span>}
+                            <Trash2 size={13} />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Drag and drop style mockup button */}
+                    <div
+                      onClick={() => {
+                        const mockName = prompt(t("pages.ai_agent.enter_material_name"));
+                        if (mockName) {
+                          const currentPdfs = selectedLesson.pdfMaterials || [];
+                          handleUpdateSelectedLesson("pdfMaterials", [...currentPdfs, mockName.endsWith(".pdf") ? mockName : mockName + ".pdf"]);
+                          showToast(t("pages.ai_agent.material_added_toast"));
+                        }
+                      }}
+                      className="border border-dashed border-[#D8D8D8] hover:border-black/35 rounded-xl p-4 flex flex-col items-center justify-center gap-1.5 cursor-pointer hover:bg-[#F9F9F7] transition-all text-center"
+                    >
+                      <Upload size={20} className="text-[#707070]" />
+                      <div className="flex flex-col gap-0.5">
+                        <span className="text-[11px] font-bold text-black">
+                          {t("pages.ai_agent.drag_drop_attachments") || "Faylni tanlang yoki sudrab olib keling (PDF)"}
+                        </span>
+                        <span className="text-[9px] text-[#A0A0A0]">Maksimal hajm 10MB gacha</span>
                       </div>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          const mockName = prompt(t("pages.ai_agent.enter_material_name"));
-                          if (mockName) {
-                            const currentPdfs = selectedLesson.pdfMaterials || [];
-                            handleUpdateSelectedLesson("pdfMaterials", [...currentPdfs, mockName + ".pdf"]);
-                            showToast(t("pages.ai_agent.material_added_toast"));
-                          }
-                        }}
-                        className="flex items-center gap-1.5 px-3 py-2 border border-[#D8D8D8] rounded-xl hover:bg-[#F9F9F7] text-[11px] font-semibold text-[#595959] transition-all"
-                      >
-                        <Upload size={12} />
-                        <span>{t("pages.ai_agent.upload_file_btn")}</span>
-                      </button>
                     </div>
                   </div>
                 </div>
               ) : (
-                <div className="flex-1 flex flex-col items-center justify-center text-center py-20">
-                  <BookOpen size={48} className="text-[#A0A0A0] mb-4" />
-                  <h4 className="text-[14px] font-bold text-black">{t("pages.ai_agent.no_lesson_selected")}</h4>
-                  <p className="text-[11px] text-[#707070] mt-1 max-w-[280px]">
-                    {t("pages.ai_agent.no_lesson_selected_desc")}
-                  </p>
+                <div className="flex-1 flex flex-col gap-6 animate-in fade-in duration-200">
+                  {/* Dashboard Header */}
+                  <div className="flex flex-col gap-1.5 pb-4 border-b border-[#F0F0F0]">
+                    <h4 className="text-[15px] font-extrabold text-black flex items-center gap-2">
+                      <Database size={16} className="text-black" />
+                      <span>{t("pages.ai_agent.kb_dashboard_title") || "Bilimlar bazasi paneli"}</span>
+                    </h4>
+                    <p className="text-[11px] text-[#707070] leading-relaxed">
+                      {t("pages.ai_agent.kb_dashboard_desc") || "Chap tomondagi darslik yoki mavzulardan birini tanlang, qidiruvdan foydalaning yoki yangi modul va darslar qo'shib bilim bazasini kengaytiring."}
+                    </p>
+                  </div>
+
+                  {/* Statistics Grid */}
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div className="bg-[#F9F9F7] border border-[#E8E8E8] rounded-2xl p-4 flex flex-col gap-1 relative overflow-hidden">
+                      <FolderPlus size={16} className="text-[#707070] absolute right-4 top-4 opacity-40" />
+                      <span className="text-[9px] font-extrabold text-[#707070] uppercase tracking-wider">
+                        {t("pages.ai_agent.stats_modules") || "Jami modullar"}
+                      </span>
+                      <span className="text-[20px] font-extrabold text-black">{modules.length}</span>
+                    </div>
+
+                    <div className="bg-[#F9F9F7] border border-[#E8E8E8] rounded-2xl p-4 flex flex-col gap-1 relative overflow-hidden">
+                      <BookOpen size={16} className="text-[#707070] absolute right-4 top-4 opacity-40" />
+                      <span className="text-[9px] font-extrabold text-[#707070] uppercase tracking-wider">
+                        {t("pages.ai_agent.stats_lessons") || "Jami darslar"}
+                      </span>
+                      <span className="text-[20px] font-extrabold text-black">{lessons.length}</span>
+                    </div>
+
+                    <div className="bg-[#F9F9F7] border border-[#E8E8E8] rounded-2xl p-4 flex flex-col gap-1 relative overflow-hidden">
+                      <FileText size={16} className="text-[#707070] absolute right-4 top-4 opacity-40" />
+                      <span className="text-[9px] font-extrabold text-[#707070] uppercase tracking-wider">
+                        {t("pages.ai_agent.stats_chars") || "Jami belgilar"}
+                      </span>
+                      <span className="text-[20px] font-extrabold text-black">
+                        {lessons.reduce((acc, curr) => acc + (curr.transcript?.length || 0), 0).toLocaleString()}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Illustrated Placeholder */}
+                  <div className="flex-1 flex flex-col items-center justify-center py-6 text-center">
+                    <div className="w-20 h-20 rounded-full bg-[#C7F33C]/10 flex items-center justify-center mb-4">
+                      {React.createElement(getModuleIcon(), { size: 30, className: "text-[#7CA607]" })}
+                    </div>
+                    <p className="text-[12px] font-extrabold text-black">
+                      {t("pages.ai_agent.no_lesson_selected") || "Darslik tanlanmagan"}
+                    </p>
+                    <p className="text-[11px] text-[#707070] mt-1 max-w-[280px] leading-relaxed">
+                      {t("pages.ai_agent.no_lesson_selected_desc") || "Chap tomondagi ro'yxatdan darsni tanlang yoki bilim bazasini to'ldirish uchun yangi modul/dars yarating."}
+                    </p>
+                  </div>
+
+                  {/* Quick Action Buttons */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-4 border-t border-[#F0F0F0]">
+                    <button
+                      onClick={() => setShowAddModuleModal(true)}
+                      className="flex items-center justify-center gap-2 py-3 rounded-xl border border-[#D8D8D8] text-[11px] font-bold text-[#595959] hover:bg-[#F9F9F7] active:scale-95 transition-all shadow-xs"
+                    >
+                      <FolderPlus size={14} />
+                      <span>{t("pages.ai_agent.add_module")}</span>
+                    </button>
+                    <button
+                      onClick={() => {
+                        if (modules.length === 0) {
+                          setAlertModal({
+                            isOpen: true,
+                            title: t("pages.ai_agent.lesson_create_error_title"),
+                            message: t("pages.ai_agent.lesson_create_error_desc"),
+                          });
+                          return;
+                        }
+                        setNewLessonModuleId(modules[0].id);
+                        setShowAddLessonModal(true);
+                      }}
+                      className="flex items-center justify-center gap-2 py-3 rounded-xl bg-black text-[#C7F33C] text-[11px] font-bold hover:bg-black/90 active:scale-95 transition-all shadow-sm"
+                    >
+                      <FilePlus size={14} />
+                      <span>{t("pages.ai_agent.add_lesson")}</span>
+                    </button>
+                  </div>
                 </div>
               )}
             </div>

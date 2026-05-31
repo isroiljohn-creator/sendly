@@ -695,6 +695,15 @@
       "support_tooltip": "Qo'llab-quvvatlash"
     },
     "ai_agent": {
+      "search_placeholder": "Qidirish (modul yoki darslar)...",
+      "stats_modules": "Jami modullar",
+      "stats_lessons": "Jami darslar",
+      "stats_chars": "Jami belgilar",
+      "kb_dashboard_title": "Bilimlar bazasi paneli",
+      "kb_dashboard_desc": "Chap tomondagi darslik yoki mavzulardan birini tanlang, qidiruvdan foydalaning yoki yangi modul va darslar qo'shib bilim bazasini kengaytiring.",
+      "kb_search_no_results": "Qidiruv bo'yicha hech narsa topilmadi",
+      "drag_drop_attachments": "Faylni tanlang yoki sudrab olib keling (PDF)",
+      "kb_chars_unit": "belgi",
       "select_template_title": "AI agent shablonini tanlang",
       "select_template_desc": "Biznesingizni avtomatlashtirish uchun mos keladigan sun'iy intellekt agenti shablonlaridan birini ishga tushiring.",
       "agent_platform": "AI agent platformasi",

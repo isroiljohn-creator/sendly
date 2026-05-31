@@ -695,6 +695,15 @@
       "support_tooltip": "Support"
     },
     "ai_agent": {
+      "search_placeholder": "Search (modules or lessons)...",
+      "stats_modules": "Total Modules",
+      "stats_lessons": "Total Lessons",
+      "stats_chars": "Total Characters",
+      "kb_dashboard_title": "Knowledge Base Dashboard",
+      "kb_dashboard_desc": "Select a module or lesson from the left sidebar, use search to filter, or create new items to expand the knowledge base.",
+      "kb_search_no_results": "No results found for your query",
+      "drag_drop_attachments": "Select file or drag & drop (PDF)",
+      "kb_chars_unit": "chars",
       "select_template_title": "Select AI Agent Template",
       "select_template_desc": "Launch one of the artificial intelligence agent templates suitable for automating your business.",
       "agent_platform": "AI Agent Platform",
