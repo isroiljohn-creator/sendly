@@ -3,6 +3,8 @@ import fs from "fs";
 import path from "path";
 import { getDbDataFromSupabase } from "@/lib/telegramBotRunner";
 
+export const dynamic = "force-dynamic";
+
 const DB_FILE = process.env.DB_FILE_PATH || path.join(process.cwd(), "db.json");
 
 export async function GET() {
