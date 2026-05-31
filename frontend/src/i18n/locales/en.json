@@ -22,7 +22,8 @@
     "today": "Today",
     "yesterday": "Yesterday",
     "success": "Success",
-    "error": "An error occurred"
+    "error": "An error occurred",
+    "close": "Close"
   },
   "nav": {
     "admin": "Admin Panel",
@@ -63,6 +64,9 @@
       "revenue_sub": "Total for period",
       "ig_title": "Connect your\nInstagram account",
       "ig_sub": "Required to start",
+      "active_automations": "Active Automations",
+      "no_active_bots": "No active bots",
+      "no_bots_created": "No bots have been created in the system yet.",
       "ranges": {
         "today": "Today",
         "today_sub": "Active conversations today",
@@ -130,7 +134,7 @@
       "last_activity": "Last activity",
       "bot_status": "Bot status",
       "bot_active": "Bot active",
-      "live_operator": "Live operator"
+      "live_operator": "Live Operator"
     },
     "contacts": {
       "title": "Contact List",
@@ -356,6 +360,7 @@
       "invalid_session": "User ID not found in session. Please refresh the page and try again.",
       "team_role_admin": "Administrator",
       "team_role_owner": "Owner",
+      "team_role_observer": "Observer",
       "refreshing": "Refreshing...",
       "remove_account": "Remove account",
       "remove_account_desc": "It will remove Account and all Contacts, Chats, Automations and Growth tools associated with selected Account.",
@@ -387,7 +392,25 @@
       "tg_step_1": "Message @BotFather on Telegram",
       "tg_step_2": "Send \"/newbot\" command",
       "tg_step_3": "Enter bot name and username",
-      "tg_step_4": "Copy the token and paste it here"
+      "tg_step_4": "Copy the token and paste it here",
+      "tab_mcp": "Model Context Protocol (MCP)",
+      "mcp_title": "Model Context Protocol (MCP) Integrations",
+      "mcp_desc": "Connect and use CRM contacts, chats, history, and analytics data from your Sendly project in any AI client (Claude Desktop, Cursor, ChatGPT, web-native Claude, and others).",
+      "mcp_local_tab": "Claude Desktop / Cursor (Local)",
+      "mcp_cloud_tab": "ChatGPT Actions (Cloud)",
+      "mcp_sse_tab": "Web & Remote (SSE)",
+      "mcp_api_key_info": "Your API Key:",
+      "mcp_local_desc": "To use Sendly tools in local AI clients like Claude Desktop or Cursor, follow these steps:",
+      "mcp_local_step_1": "1. Copy or download the 'sendly-mcp.js' script from your project directory.",
+      "mcp_local_step_2": "2. Open the Claude Desktop configuration file (~/Library/Application Support/Claude/claude_desktop_config.json)",
+      "mcp_local_step_3": "3. Add the following JSON block and restart the Claude application:",
+      "mcp_cloud_desc": "To use Sendly data in ChatGPT Custom GPTs or other cloud services, use the OpenAPI specification:",
+      "mcp_cloud_step_1": "1. Create a new Custom GPT and go to the 'Actions' section.",
+      "mcp_cloud_step_2": "2. Paste the following URL in the OpenAPI schema field:",
+      "mcp_cloud_step_3": "3. In 'Authentication' settings, select API Key type, configure it in Header as 'x-api-key', and paste your Sendly API Key.",
+      "mcp_sse_desc": "For web applications or other clients supporting Server-Sent Events, use the direct SSE connection URL:",
+      "mcp_sse_url_label": "SSE Connection URL:",
+      "mcp_sse_desc_note": "Note: This connection is real-time, allowing you to use tools and knowledge bases in any web client."
     },
     "automations_page": {
       "title": "Automations",
@@ -527,7 +550,7 @@
       "no_buttons": "No buttons added yet",
       "btn_action": "Action",
       "btn_link": "Link",
-      "btn_placeholder": "Button name",
+      "btn_placeholder": "e.g. Yes, start the lesson!",
       "btn_url_placeholder": "https://t.me/yourusername",
       "tag_name": "Tag name",
       "var_name": "Variable name",
@@ -553,10 +576,10 @@
       "no": "No",
       "unselected_block_title": "Block not selected",
       "tmpl_lead_trigger_label": "Trigger: DM – book, course",
-      "tmpl_lead_cond_label": "Condition: Is follower?",
-      "tmpl_lead_msg1_label": "DM: Here is your free guide \nhttps://drive.google.com/...",
+      "tmpl_lead_cond_label": "Is follower?",
+      "tmpl_lead_msg1_label": "Hi, want to get a lesson on setting up automation in Direct with a subscription check and lead magnet delivery?🤩",
       "tmpl_lead_msg1_btn": "Get the guide",
-      "tmpl_lead_msg2_label": "DM: Please follow @account first",
+      "tmpl_lead_msg2_label": "Great! Thank you for subscribing. Here is the bonus lesson link: https://t.me/yourusername",
       "tmpl_story_trigger_label": "Trigger: Story Mention",
       "tmpl_story_msg_label": "DM: Thanks for mentioning us in your Stories! \nHere is your special coupon: STORY20",
       "tmpl_story_msg_btn": "️ Order with discount",
@@ -627,12 +650,9 @@
       "trigger_message_recognition": "Message recognition",
       "trigger_story_reaction": "Story Reaction",
       "trigger_payment": "Successful Payment",
-      "tmpl_lead_msg1_label": "Hi, want to get a lesson on setting up automation in Direct with a subscription check and lead magnet delivery?🤩",
       "tmpl_lead_msg1_btn1": "Yes, I do!🤩",
       "tmpl_lead_msg1_btn2": "Start",
       "tmpl_lead_act_label": "Button clicked detection",
-      "tmpl_lead_cond_label": "Is follower?",
-      "tmpl_lead_msg2_label": "Great! Thank you for subscribing. Here is the bonus lesson link: https://t.me/yourusername",
       "tmpl_lead_msg2_btn": "Download",
       "tmpl_lead_msg3_label": "Unfortunately, you are not subscribed yet. Please subscribe to our page and click 'Check subscription'.",
       "tmpl_lead_msg3_btn": "Check subscription",
@@ -649,7 +669,6 @@
       "btn_copy_suffix": " (Copy)",
       "btn_settings_title": "Button Settings",
       "btn_label_input": "Button text",
-      "btn_placeholder": "e.g. Yes, start the lesson!",
       "btn_action_title": "Button Action",
       "btn_url_label": "Website link (URL)",
       "trigger_source_label": "Trigger Type",
@@ -924,7 +943,518 @@
       "intent_affiliate": "Affiliate Program",
       "intent_general": "General Inquiry",
       "count_unit": "msg.",
-      "add_btn": "Add"
+      "add_btn": "Add",
+      "add_agents_section": "Add AI Agents",
+      "names": {
+        "kurator": "AI Curator",
+        "sales": "AI Sales Agent",
+        "booker": "AI for Consultation & Booking",
+        "recruiter": "AI for HR & Vacancies",
+        "fb_leads": "Meta Leads AI Sorting",
+        "fb_leads_direct": "Lead Telegram Forwarder",
+        "clinic": "AI Clinic & Doctor Assistant",
+        "realtor": "AI Realtor",
+        "helpdesk": "AI Technical Support",
+        "default": "AI Agent"
+      },
+      "breadcrumbs": {
+        "kurator": "Home / AI Agent / AI Curator",
+        "sales": "Home / AI Agent / AI Sales Agent",
+        "booker": "Home / AI Agent / AI for Consultation & Booking",
+        "recruiter": "Home / AI Agent / AI for HR & Vacancies",
+        "clinic": "Home / AI Agent / AI Clinic & Doctor Assistant",
+        "realtor": "Home / AI Agent / AI Realtor",
+        "helpdesk": "Home / AI Agent / AI Technical Support",
+        "default": "Home / AI Agent"
+      },
+      "knowledge_tab_names": {
+        "kurator": "Knowledge Base",
+        "sales": "Product Catalog",
+        "booker": "Specialist Knowledge",
+        "recruiter": "Vacancy Database",
+        "clinic": "Clinic Information",
+        "realtor": "Real Estate Database",
+        "helpdesk": "Knowledge Base (FAQ)",
+        "default": "Knowledge Base"
+      },
+      "knowledge_section_titles": {
+        "kurator": "Textbooks and Materials",
+        "sales": "Products, Prices, and Store Information",
+        "booker": "Specialist Knowledge and Working Hours",
+        "recruiter": "Vacancies and Requirements",
+        "clinic": "Doctors, Services, and Working Hours",
+        "realtor": "Housing, Prices, and Location",
+        "helpdesk": "Frequently Asked Questions and Solutions",
+        "default": "Textbooks and Materials"
+      },
+      "knowledge_section_descs": {
+        "kurator": "Add course materials, textbooks, and PDF documents. The AI curator will answer based on this materials.",
+        "sales": "Add product catalog, prices, address, and working hours. The AI agent will answer clients based on this info.",
+        "booker": "Enter specialist knowledge, list of services, working hours, and consultation conditions.",
+        "recruiter": "Add open vacancies, requirements, working conditions, and company information.",
+        "clinic": "Enter doctors list, departments, working hours, and prices. The AI agent will answer patients based on this info.",
+        "realtor": "Enter list of properties, prices, location, and viewing times. The AI agent will answer clients based on this info.",
+        "helpdesk": "Frequently asked questions, technical problems, and their solutions. The AI agent will answer users based on this info.",
+        "default": "Add course materials, textbooks, and PDF documents. The AI curator will answer based on this materials."
+      },
+      "system_prompt_titles": {
+        "kurator": "System Instruction (System Prompt)",
+        "sales": "Sales Instruction",
+        "booker": "Consultant Instruction",
+        "recruiter": "Recruiter Instruction",
+        "clinic": "Clinic Assistant Instruction",
+        "realtor": "Realtor Assistant Instruction",
+        "helpdesk": "Technical Support Instruction",
+        "default": "System Instruction"
+      },
+      "system_prompt_descs": {
+        "kurator": "Define the role and response rules for the AI curator.",
+        "sales": "Set the behavior and response rules for the sales agent.",
+        "booker": "Configure the tone and consultation rules for the booking assistant.",
+        "recruiter": "Define the rules for recruiter agent interactions with candidates.",
+        "clinic": "Set the rules for clinical assistant interactions with patients.",
+        "realtor": "Set the rules for showing property listings and realtor interaction with clients.",
+        "helpdesk": "Define the rules for solving technical problems by the support agent.",
+        "default": "Write AI agent role and response rules..."
+      },
+      "forbidden_topics_titles": {
+        "kurator": "Forbidden Topics",
+        "sales": "Forbidden Topics",
+        "booker": "Forbidden Topics",
+        "recruiter": "Forbidden Topics",
+        "clinic": "Forbidden Topics",
+        "realtor": "Forbidden Topics",
+        "helpdesk": "Forbidden Topics",
+        "default": "Forbidden Topics"
+      },
+      "forbidden_topics_descs": {
+        "kurator": "When questions are asked on these topics, the bot will politely ask to stay within the course materials.",
+        "sales": "The agent will not answer clients on these topics.",
+        "booker": "The agent will not discuss these topics.",
+        "recruiter": "The agent will not answer candidates on these topics.",
+        "clinic": "The agent will not answer patients on these topics.",
+        "realtor": "The agent will not answer clients on these topics.",
+        "helpdesk": "The agent will not answer users on these topics.",
+        "default": "When questions are asked on these topics, the bot will politely ask to stay within the scope."
+      },
+      "escalation_titles": {
+        "kurator": "Human Curator Escalation Rules",
+        "sales": "Human Sales Agent Escalation Rules",
+        "booker": "Specialist Escalation Rules",
+        "recruiter": "HR Manager Escalation Rules",
+        "clinic": "Administrator Escalation Rules",
+        "realtor": "Realtor Manager Escalation Rules",
+        "helpdesk": "Operator Escalation Rules",
+        "default": "Operator Escalation Rules"
+      },
+      "escalation_descs": {
+        "kurator": "When these conditions occur, the bot will activate liveTakeover flag and notify the curator.",
+        "sales": "In the following cases, the conversation is automatically forwarded to a human salesperson.",
+        "booker": "In the following cases, the conversation is automatically forwarded to the specialist.",
+        "recruiter": "In the following cases, the application is automatically forwarded to the HR manager.",
+        "clinic": "In the following cases, the conversation is automatically forwarded to the administrator or doctor.",
+        "realtor": "In the following cases, the conversation is automatically forwarded to the realtor manager.",
+        "helpdesk": "In the following cases, the conversation is automatically forwarded to a human support operator.",
+        "default": "When the customer meets the following conditions, the conversation goes to the operator:"
+      },
+      "module_labels": {
+        "kurator": "Module",
+        "sales": "Catalog Category",
+        "booker": "Knowledge Area",
+        "recruiter": "Vacancy Area",
+        "clinic": "Department / Area",
+        "realtor": "District / Zone",
+        "helpdesk": "Category",
+        "default": "Module"
+      },
+      "lesson_labels": {
+        "kurator": "Lesson",
+        "sales": "Product / Info",
+        "booker": "Knowledge Page",
+        "recruiter": "Vacancy Page",
+        "clinic": "Doctor / Service",
+        "realtor": "Property Listing",
+        "helpdesk": "Issue / Solution",
+        "default": "Lesson"
+      },
+      "templates": {
+        "kurator": {
+          "name": "AI Curator",
+          "desc": "Smart assistant answering questions based on course textbooks, lesson transcripts, and PDF files.",
+          "feature_1": "Knowledge Base System (RAG)",
+          "feature_2": "Telegram Bot Integration",
+          "feature_3": "Tone and Character Settings",
+          "feature_4": "Human-Curator Escalation Rules"
+        },
+        "sales": {
+          "name": "AI Sales Agent",
+          "desc": "Learns product catalog, prices, and working hours, interacts with clients and helps sell products.",
+          "feature_1": "Catalog and Price Database",
+          "feature_2": "Working Hours and Address Sync",
+          "feature_3": "Sales-Oriented Conversations",
+          "feature_4": "Forward Order to Human Operator"
+        },
+        "booker": {
+          "name": "AI for Consultation & Booking",
+          "desc": "Consults in the specialist's style and books time for consultations. Payment integration is possible.",
+          "feature_1": "Expert Tone and Knowledge Base",
+          "feature_2": "Appointment Booking",
+          "feature_3": "Prepayment Link Integration",
+          "feature_4": "Booking via Telegram & Direct"
+        },
+        "recruiter": {
+          "name": "AI for HR & Vacancies",
+          "desc": "Interviews and screens candidates based on job requirements and vacancy details.",
+          "feature_1": "Vacancies and Requirements Base",
+          "feature_2": "Information Gathering via Chat",
+          "feature_3": "Candidate Qualifications Analysis",
+          "feature_4": "Send Screened Applications to HR"
+        },
+        "fb_leads": {
+          "name": "Meta Leads AI Sorting",
+          "desc": "An agent classifying lead data from Facebook target ads via AI, routing to CRM groups, and sending automatic greetings.",
+          "feature_1": "Meta Lead Ads Integration",
+          "feature_2": "AI Analysis of Customer Intent",
+          "feature_3": "CRM Group Routing & Tagging",
+          "feature_4": "Automatic Greeting Messages"
+        },
+        "fb_leads_direct": {
+          "name": "Lead Telegram Forwarder (No AI)",
+          "desc": "Forward Facebook target leads directly to your Telegram group or profile in a clean format without using AI.",
+          "feature_1": "Forward Leads to Telegram Group/Chat",
+          "feature_2": "Direct Forwarding without AI",
+          "feature_3": "Lead Information in a Clean Format",
+          "feature_4": "Easy Group/Bot Verification via Code"
+        },
+        "clinic": {
+          "name": "AI Clinic & Doctor Assistant",
+          "desc": "Chats with patients, schedules online doctor appointments, shows free slots, and sends reminders.",
+          "feature_1": "Online Doctor Booking",
+          "feature_2": "Automatic Free Slot Display",
+          "feature_3": "Pre-Appointment Reminders",
+          "feature_4": "Patient Database and History"
+        },
+        "realtor": {
+          "name": "AI Realtor",
+          "desc": "Searches for housing in the property database, provides prices/location info, and schedules property viewing times.",
+          "feature_1": "Property Database Search",
+          "feature_2": "Send Prices, Locations & Photos",
+          "feature_3": "Schedule Property Viewings",
+          "feature_4": "Analyze Customer Requirements"
+        },
+        "helpdesk": {
+          "name": "AI Technical Support",
+          "desc": "Solves technical problems of users, finds answers in FAQ, and escalates complex issues to human operators.",
+          "feature_1": "Automatic FAQ Lookup",
+          "feature_2": "Issue Classification & Routing",
+          "feature_3": "Ticket System Integration",
+          "feature_4": "Escalation to Operator Rules"
+        }
+      },
+      "defaults": {
+        "kurator": {
+          "prompt": "# ROLE AND IDENTIFICATION\nYou are a personal AI curator named \"Mently\", helping marketing course students. Your character: sincere, friendly, concise, and direct, without excessive formality.\n\n# MAIN TASK\nAnswer students' questions strictly based on the provided course materials (COURSE MATERIALS) in an understandable, brief, and natural way.\n\n# COURSE MATERIALS:\n{{context}}\n\n# STRICT DIRECTIVES AND LIMITATIONS\n1. Limited Information: Use only the information inside the provided COURSE MATERIALS. Do not make up anything on your own!\n2. Unknown Questions: If the answer is not in the course materials, politely reply:\n   \"Unfortunately, no answer was found in the course materials. To help you, I have forwarded this question to a human curator. They will reply shortly.\"\n3. Forbidden Topics: Do not talk about politics, religion, competitors, or topics unrelated to marketing. If such a question is asked, politely decline:\n   \"I can only answer questions regarding this marketing course. Let's get back to our lesson!\"\n4. Language Rule: Respond in the same language and script (Latin or Cyrillic Uzbek, Russian, or English) that the student used.\n\n# RESPONSE FORMAT AND STYLE\n- Naturalness and Brevity: Your answers should be very short and precise (maximum 2-3 sentences). Avoid long introductions or artificial phrases. Speak naturally like a normal conversation partner.\n- Simplicity: Explain complex marketing terms in simple, everyday language.\n- Do not show sources: DO NOT add any sources or references to your answer (e.g., \"Source: Module 1...\").\n- Emojis: Strictly do not use emojis, write using only text and punctuation.",
+          "topics": [
+            "Politics",
+            "Religion",
+            "Competitors"
+          ],
+          "rules": {
+            "esc_1": "When confidence level is below 60%",
+            "esc_2": "When student complains",
+            "esc_3": "When there is a question about payment or certificate"
+          },
+          "welcome": "Hello! I am your personal AI curator helping students. I answer questions based on the knowledge base. Ask a question here to test me! 📚"
+        },
+        "sales": {
+          "prompt": "# ROLE AND IDENTIFICATION\nYou are the sales assistant of the company (Sales Closer AI). Your goal: to inform customers about products, prices, catalog, address and working hours, and direct them to purchase and place an order.\n\n# MAIN TASK\nAnswer customer questions strictly based on the product catalog and store details (CATALOG MATERIALS).\n\n# CATALOG MATERIALS:\n{{context}}\n\n# STRICT DIRECTIVES AND LIMITATIONS\n1. Do not speak about products or prices not in the catalog. If product is missing, ask for phone number:\n   \"Unfortunately, there is no information about this product or service yet. Please leave your phone number, and our specialist will contact you shortly.\"\n2. In each dialogue, make a call to purchase or book.\n3. Avoid forbidden topics (politics, personal questions, etc.).\n\n# RESPONSE FORMAT AND STYLE\n- Polite, sales-oriented tone.\n- Responses should be brief and clear (maximum 3 sentences).",
+          "topics": [
+            "Information about competitors",
+            "Personal questions",
+            "Politics & Religion"
+          ],
+          "rules": {
+            "esc_1": "When confidence level is below 60%",
+            "esc_2": "When customer asks for a discount or installment plan",
+            "esc_3": "When customer demands to talk to a human sales agent"
+          },
+          "welcome": "Hello! I am your AI sales assistant. I can answer questions about our products, prices, and store. Write a question to test me! 💻"
+        },
+        "booker": {
+          "prompt": "# ROLE AND IDENTIFICATION\nYou are a smart consultant and booking assistant (Appointment Booker AI) on behalf of the personal brand owner. Your goal: to consult in their style and book time for consultations.\n\n# MAIN TASK\nAnswer customers strictly within the specialist's knowledge base (SPECIALIST KNOWLEDGE).\n\n# SPECIALIST KNOWLEDGE:\n{{context}}\n\n# STRICT DIRECTIVES AND LIMITATIONS\n1. If payment is required before booking, provide the customer with payment terms and link.\n2. Do not give inaccurate information, write strictly what is in the knowledge base.\n3. Always communicate in the specialist's tone (friendly, professional, characteristic).\n\n# RESPONSE FORMAT AND STYLE\n- Natural dialogue tone.\n- Understand customer needs and offer to book a convenient time.",
+          "topics": [
+            "Personal life",
+            "Other specialists",
+            "Politics"
+          ],
+          "rules": {
+            "esc_1": "When customer writes about payment issues",
+            "esc_2": "When customer asks to change the booked time",
+            "esc_3": "When customer wants to talk directly with a human"
+          },
+          "welcome": "Hello! I am your AI assistant for consultation and booking. Write a question to test my tone of voice and knowledge base! 📅"
+        },
+        "recruiter": {
+          "prompt": "# ROLE AND IDENTIFICATION\nYou are the company's HR assistant (HR Recruiter AI). Your goal: to inform candidates about open vacancies, conduct primary screening/interview, and collect data.\n\n# MAIN TASK\nAnswer candidates strictly within vacancy requirements (VACANCIES AND REQUIREMENTS).\n\n# VACANCIES AND REQUIREMENTS:\n{{context}}\n\n# STRICT DIRECTIVES AND LIMITATIONS\n1. Collect candidate details one by one: Name, contact phone, experience, and salary expectations.\n2. Do not complete candidate application until you receive all details.\n3. Candidates who do not meet the requirements should be politely redirected to HR manager or rejected.\n\n# RESPONSE FORMAT AND STYLE\n- Professional, friendly style.\n- Ask only one question per message to keep dialogue consistent.",
+          "topics": [
+            "Company secrets",
+            "Salary payment dates",
+            "Politics"
+          ],
+          "rules": {
+            "esc_1": "When candidate sets sharp salary conditions",
+            "esc_2": "When candidate asks about working remotely from abroad",
+            "esc_3": "When candidate wants to meet the main manager immediately"
+          },
+          "welcome": "Hello! I am your AI HR/Recruiter assistant. I provide vacancy info and can conduct interviews. Write a question to test me! 👔"
+        },
+        "clinic": {
+          "prompt": "# ROLE AND IDENTIFICATION\nYou are the online assistant of the medical center/clinic (Medical Assistant AI). Your goal: to inform patients about doctors, departments and admission times, schedule appointments online, and send reminders.\n\n# MAIN TASK\nAnswer patients strictly within the clinic information (CLINIC INFORMATION).\n\n# CLINIC INFORMATION:\n{{context}}\n\n# STRICT DIRECTIVES AND LIMITATIONS\n1. Never diagnose or recommend medication. Only appointment booking and general information.\n2. Recommend the appropriate department or doctor depending on patient's complaint.\n3. Show free slots and offer to book an appointment.\n\n# RESPONSE FORMAT AND STYLE\n- Polite, caring, and professional tone.\n- Responses should be brief and accurate.",
+          "topics": [
+            "Making diagnosis",
+            "Medication recommendation",
+            "Politics"
+          ],
+          "rules": {
+            "esc_1": "When patient asks for emergency medical help",
+            "esc_2": "When patient submits a complaint",
+            "esc_3": "When patient writes about payment issues"
+          },
+          "welcome": "Hello! I am the clinic's online assistant. You can book doctor appointments, check free slots, and get info about departments. Try it out! 🏥"
+        },
+        "realtor": {
+          "prompt": "# ROLE AND IDENTIFICATION\nYou are the online assistant of a real estate agency (Realtor AI). Your goal: to inform clients about property listings, prices and locations, and schedule viewings.\n\n# MAIN TASK\nAnswer clients strictly within the property database (PROPERTY DATABASE).\n\n# PROPERTY DATABASE:\n{{context}}\n\n# STRICT DIRECTIVES AND LIMITATIONS\n1. Do not speak about properties not in the database.\n2. Ask for client's budget, location, and requirements to recommend matching options.\n3. Offer to schedule a viewing and coordinate contact with realtor.\n\n# RESPONSE FORMAT AND STYLE\n- Trustworthy, friendly, and informative tone.\n- For each property show price, area, room count, and location.",
+          "topics": [
+            "Legal advice",
+            "Loan/Credit conditions",
+            "Politics"
+          ],
+          "rules": {
+            "esc_1": "When customer asks about contract and legal matters",
+            "esc_2": "When customer demands a special price or discount",
+            "esc_3": "When customer wants to talk directly with a realtor"
+          },
+          "welcome": "Hello! I am your AI real estate assistant. I provide info about housing, prices, and locations. You can also book a viewing time. Try it out! 🏠"
+        },
+        "helpdesk": {
+          "prompt": "# ROLE AND IDENTIFICATION\nYou are the company's technical assistant (Help Desk AI). Your goal: to help users solve technical problems, find answers in FAQ, and forward complex cases to operators.\n\n# MAIN TASK\nAnswer users strictly within the knowledge base (KNOWLEDGE BASE).\n\n# KNOWLEDGE BASE:\n{{context}}\n\n# STRICT DIRECTIVES AND LIMITATIONS\n1. First classify the problem: technical glitch, account issue, payment issue, etc.\n2. If the answer is in the knowledge base — give a clear step-by-step solution.\n3. If not in the base — provide a ticket number and forward to operator.\n\n# RESPONSE FORMAT AND STYLE\n- Patient, clear, and technically accurate.\n- Give step-by-step instructions to solve the problem.",
+          "topics": [
+            "Company secrets",
+            "Prices and financial info",
+            "Politics"
+          ],
+          "rules": {
+            "esc_1": "When issue is not found in the knowledge base",
+            "esc_2": "When user submits a complaint",
+            "esc_3": "When user asks for a refund"
+          },
+          "welcome": "Hello! I am your AI technical support assistant. I will help solve your problems. Write your question! 🔧"
+        }
+      },
+      "toasts": {
+        "tg_bot_linked": "Telegram bot successfully linked",
+        "tg_bot_username_error": "Failed to determine bot username. Please enter it manually.",
+        "save_success": "All changes successfully saved!",
+        "error_occurred": "An error occurred",
+        "admin_linked": "Admin profile successfully linked!",
+        "admin_unlinked": "Admin profile successfully unlinked!",
+        "module_created": "Module \"{title}\" created",
+        "module_deleted": "Module deleted",
+        "lesson_created": "Lesson \"{title}\" created",
+        "lesson_deleted": "Lesson deleted",
+        "webhook_json_error": "Webhook JSON format error! ❌",
+        "input_required": "Please enter name and phone number! ❌",
+        "sim_sent_tg": "Lead successfully simulated and sent to Telegram! 🎯",
+        "sim_sorted": "Lead successfully simulated and sorted! 🎯",
+        "no_data_export": "No data to export!",
+        "csv_downloaded": "CSV report successfully downloaded! 📊",
+        "json_downloaded": "JSON report successfully downloaded! 💻",
+        "history_cleared": "Analysis history successfully cleared! 🧹",
+        "analysis_updated": "AI CustDev analysis updated! 🚀",
+        "tg_bot_linked_success": "Telegram bot ({username}) successfully connected!"
+      },
+      "now": "Now",
+      "errors": {
+        "verify_code_error": "An error occurred while verifying the confirmation code",
+        "server_connection_error": "An error occurred while connecting to the server",
+        "response_generation_error": "Sorry, an error occurred while generating response. Please try again."
+      },
+      "confirmations": {
+        "delete_module_title": "Delete Module",
+        "delete_module_message": "Are you sure you want to delete this module and all lessons in it?",
+        "delete_lesson_title": "Delete Lesson",
+        "delete_lesson_message": "Are you sure you want to delete this lesson?",
+        "clear_history_title": "Clear Analytics History",
+        "clear_history_message": "Are you sure you want to delete all analyzed messages history? This action cannot be undone."
+      },
+      "placeholders": {
+        "new_lesson_content": "New lesson transcript text...",
+        "enter_code": "Enter code (e.g. 12345)",
+        "select_tg_bot": "Select Telegram bot...",
+        "email_example": "e.g., sardor@gmail.com",
+        "token_example": "E.g.: 123456789:ABCdefGhIJKlmNoPQRsTUVwxyZ",
+        "username_example": "E.g.: my_smart_bot",
+        "bot_name_example": "E.g.: AI Curator Bot"
+      },
+      "slider_previews": {
+        "tone": {
+          "low_title": "Tone: Informal (Friendly)",
+          "low_question": "What are your prices?",
+          "low_reply": "Hi! 😊 Our prices are very affordable. Our courses start at just 150k UZS per month. Want to learn more? 😉",
+          "mid_title": "Tone: Moderate (Warm)",
+          "mid_question": "What are your prices?",
+          "mid_reply": "Hello, welcome! The price of our training programs starts at 150,000 UZS per month. If you would like to get detailed information, please write.",
+          "high_title": "Tone: Formal",
+          "high_question": "What are your prices?",
+          "high_reply": "Hello. The cost of our services and courses is 150,000 UZS per month. If you have any questions, we are at your service."
+        },
+        "length": {
+          "low_title": "Response Length: Concise (Short)",
+          "low_question": "When do lessons start?",
+          "low_reply": "Lessons start on Monday at 19:00.",
+          "mid_title": "Response Length: Moderate",
+          "mid_question": "When do lessons start?",
+          "mid_reply": "Lessons for our new group will start next Monday at 19:00. Lessons will be held 3 times a week.",
+          "high_title": "Response Length: Detailed Explanation",
+          "high_question": "When do lessons start?",
+          "high_reply": "Our lessons will start next Monday (at 19:00). Each lesson lasts 2 hours, 3 days a week. The first lesson is free."
+        },
+        "humor": {
+          "low_title": "Humor & Emojis: Serious (Academic)",
+          "low_question": "Can I buy the course?",
+          "low_reply": "Yes, you can purchase the course. Please make payment via Click or Payme using the following link.",
+          "mid_title": "Humor & Emojis: Moderate",
+          "mid_question": "Can I buy the course?",
+          "mid_reply": "Sure! 😊 Pay via the following payment link and join the group. 🚀",
+          "high_title": "Humor & Emojis: Funny (With Emojis)",
+          "high_question": "Can I buy the course?",
+          "high_reply": "Oh, of course! 😍 Welcome to our universe! 🚀 As soon as you pay via the link below, we will fly to the group! Click/Payme ready! 😉💳✨"
+        }
+      },
+      "simulation": {
+        "webhook_received": "Facebook Webhook request received",
+        "field_mapped": "Lead fields mapped (Field Mapping)",
+        "crm_direct_sent": "Customer data saved to Sendly CRM and sent to Telegram",
+        "ai_analyzed": "Intent/question analyzed by AI Agent",
+        "crm_saved": "Customer data saved to Sendly CRM",
+        "error_webhook_json": "Error: Could not read Webhook JSON format",
+        "error_input_required": "Error: Name and phone are required",
+        "default_summary_direct": "Customer submitted a lead form on Facebook (Direct forwarding).",
+        "default_summary_ai": "Customer submitted a lead form on Facebook.",
+        "summary_price": "Customer asked for payment method, price, or discounts.",
+        "summary_technical": "Customer asked for help regarding system login or technical issues.",
+        "summary_general": "Customer asked for general information.",
+        "tag_high_intent": "High Intent",
+        "tag_price_interested": "Interested in Price",
+        "tag_tech_issue": "Technical Issue",
+        "tag_support": "Support",
+        "tag_new_lead": "New Lead",
+        "tag_meta_lead": "Meta Lead",
+        "tag_forwarded": "Forwarded",
+        "tag_ai_sorted": "AI Sorted"
+      },
+      "labels": {
+        "active_agents": "Active AI Agents",
+        "active_badge": "ACTIVE",
+        "configure_btn": "Configure",
+        "connected_group": "Connected Group",
+        "tg_routing": "Telegram Forwarding",
+        "sendly_crm": "Sendly CRM",
+        "tg_forwarding_status": "Lead Telegram Forwarding Status",
+        "tg_forwarding_active_desc": "Forwarding is active. Lead forms are sent to the group via Telegram bot.",
+        "tg_forwarding_inactive_desc": "Forwarding is disabled.",
+        "tg_bot_for_leads": "Telegram Bot for Leads",
+        "tg_bot": "Telegram Bot",
+        "leads_forwarded_via_bot": "Leads will be forwarded to your group or profile via this Telegram bot.",
+        "escalations_sent_via_bot": "Escalations to human curator will be sent via this Telegram bot.",
+        "tg_bot_not_found": "Telegram bot not found",
+        "tg_bot_not_found_desc": "To use Telegram integration, at least 1 Telegram bot must be connected in settings.",
+        "link_bot_btn": "Connect Bot ➔",
+        "link_tg_group_or_chat": "Connect Telegram Group or Chat",
+        "link_human_curator": "Connect Human Curator",
+        "link_admin_for_leads_desc": "Connect admin profile to send leads directly to your Telegram group or personal chat.",
+        "link_admin_for_escalations_desc": "Connect curator (admin) profile so the bot can notify you via Telegram when AI cannot answer or operator is requested.",
+        "admin_linked": "Admin connected",
+        "admin_user_info": "User: @{username} (Chat ID: {chatId})",
+        "delete": "Delete",
+        "enter_verify_code": "Enter verification code",
+        "verify_instructions_part1": "Go to our ",
+        "verify_instructions_part2": " bot in Telegram and press ",
+        "verify_instructions_part3": ". Enter the verification code sent by the bot below (code is active for 1 minute).",
+        "get_code": "Get code",
+        "checking": "Checking...",
+        "verify": "Verify",
+        "cancel": "Cancel",
+        "admin_not_linked": "Admin not connected",
+        "link": "Connect",
+        "link_instructions": "To connect, go to our bot @sendly_robot and start it (/start). The bot will send you a verification code.",
+        "field_mapping_direct": "Lead Field Mapping",
+        "ai_lead_mapper": "AI Lead Mapper & Processor",
+        "field_mapping_direct_desc": "Map fields from Meta Lead forms to the Sendly system.",
+        "direct_forwarding_active": "Direct forwarding is active",
+        "direct_forwarding_desc": "In this mode, AI is not involved and does not qualify lead data. AI system prompt is not required. All leads are forwarded directly to your Telegram group or profile.",
+        "tg_routing_settings": "Telegram Forwarding Settings",
+        "crm_router": "Sendly CRM Router",
+        "tg_routing_desc": "Configure forwarding of Facebook leads to your Telegram group or personal chat.",
+        "integration_test_simulator": "Integration Test (Lead Simulator)",
+        "test_mode": "Test Mode",
+        "customer_email": "Customer Email",
+        "forwarding_lead": "Forwarding lead...",
+        "forwarding_result": "Forwarding Result",
+        "forwarding_summary": "Forwarding Summary",
+        "ai_response_accuracy": "AI Response Accuracy",
+        "avg_response_speed": "Average Response Speed",
+        "based_on_neural_analysis": "Based on neural network analysis",
+        "reports_management": "Reports & Management",
+        "no_data_found": "No data found.",
+        "link_tg_bot_title": "Connect Telegram Bot",
+        "bot_token": "Bot Token (HTTP API Token)",
+        "get_token_desc": "You can get the token by creating a new bot via @BotFather.",
+        "bot_username": "Bot Username",
+        "bot_name_optional": "Bot Name (Optional)",
+        "connecting": "Connecting...",
+        "sentiment": "Sentiment",
+        "fb_leads_agent": "Meta Lead Handler + AI",
+        "fb_leads_desc_card": "Facebook lead qualification with AI is active.",
+        "tg_bot_for_bot": "Telegram Bot for {agentName}",
+        "tg_bot_will_answer": "{agentName} will answer questions via this selected Telegram bot.",
+        "tg_bot_required": "To use {agentName}, at least 1 Telegram bot must be connected.",
+        "tg_routing_breadcrumb": "Home / Integration / Forward Leads to Telegram",
+        "pain_points_details": {
+          "billing": "Difficulties with payment methods or the card binding process",
+          "support": "Technical issues with linking the platform to social networks or Telegram bot",
+          "faq": "Inability to independently find the required topic in lesson transcripts",
+          "affiliate": "Clarifying affiliate commissions and referral link rules",
+          "default": "Getting additional information about the platform's capabilities"
+        }
+      },
+      "solutions": {
+        "billing": "Add step-by-step photo/video guide on connecting Uzcard/Humo cards and warning about payment errors.",
+        "support": "Enrich the section on getting API token via @BotFather with visual animations in the first module of the course.",
+        "faq": "Include the most frequently asked questions and answers from students as a new module in the knowledge base (RAG).",
+        "default": "Add additional information to the description or guide.",
+        "affiliate": "Add an FAQ section on commission withdrawal and referral system terms to the partner dashboard page."
+      },
+      "pain_points": {
+        "billing": "Binding Uzcard/Humo cards and payment errors",
+        "support": "Steps of getting and setting up API token via @BotFather",
+        "instagram": "Restrictions when connecting a professional Instagram account",
+        "affiliate": "Withdrawing referral commissions and affiliate terms"
+      },
+      "table": {
+        "user": "User",
+        "message": "Message Text",
+        "ai_reply": "AI Response",
+        "category": "Category",
+        "sentiment": "Sentiment",
+        "confidence": "Confidence",
+        "date": "Date"
+      },
+      "forms": {
+        "autumn_sale": "Autumn discounts & promo form",
+        "free_lesson": "Free lesson & consultation form",
+        "premium_membership": "Premium membership application form"
+      }
     },
     "partner": {
       "title": "Partner Dashboard",

@@ -93,16 +93,13 @@ export async function GET(request: Request) {
     writeDb(dbData);
   }
 
-  if (!dbData.users || dbData.users.length === 0) {
-    dbData.users = [
-      { id: "1", email: "admin@sendly.uz", password: "admin123", fullName: "Admin", isCardLinked: true, plan: "premium" },
-      { id: "2", email: "isroiljohnabdullayev@gmail.com", password: "password", fullName: "Isroiljon Abdullayev", isCardLinked: true, plan: "premium" }
-    ];
-    if (!dbData.userData) {
-      dbData.userData = {};
-    }
-    writeDb(dbData);
+  if (!dbData.users) {
+    dbData.users = [];
   }
+  if (!dbData.userData) {
+    dbData.userData = {};
+  }
+  writeDb(dbData);
   
   // Extract user's specific data
   const userSpecificData = dbData.userData?.[userId] || {};
@@ -194,6 +191,71 @@ export async function POST(request: Request) {
         } catch (e) {
           console.error("Failed to parse replai_users payload:", e);
         }
+
+        try {
+          const { data: prevUsersData } = await supabase
+            .from("instagram_accounts")
+            .select("fb_field_mappings")
+            .eq("instagram_page_id", "global_users")
+            .maybeSingle();
+          const prevUsersList = prevUsersData?.fb_field_mappings || [];
+          
+          const prevUser = prevUsersList.find((u: any) => u.id === userId || (u.email && u.email === usersList.find((x: any) => x.id === userId)?.email));
+          const newUser = usersList.find((u: any) => u.id === userId);
+          
+          if (newUser && (!prevUser || prevUser.plan !== newUser.plan)) {
+            const newPlan = newUser.plan || "free";
+            const { data: userSettings } = await supabase
+              .from("instagram_accounts")
+              .select("fb_field_mappings")
+              .eq("instagram_page_id", "global_settings_" + userId)
+              .maybeSingle();
+
+            const uData = userSettings?.fb_field_mappings || {};
+            let creditsData = { balance: 100, used: 0, history: [] as any[] };
+            if (uData.replai_ai_credits_data) {
+              try {
+                creditsData = typeof uData.replai_ai_credits_data === "string"
+                  ? JSON.parse(uData.replai_ai_credits_data)
+                  : uData.replai_ai_credits_data;
+              } catch {
+                // ignore
+              }
+            }
+
+            let creditBalance = 100;
+            let description = "Hisob bepul tarifga o'tkazildi (Free reset)";
+            if (newPlan === "pro") {
+              creditBalance = 1000;
+              description = "PRO tarif obunasi uchun 1000 ta kredit taqdim etildi";
+            } else if (newPlan === "premium") {
+              creditBalance = 150000;
+              description = "PREMIUM tarif obunasi uchun 150 000 ta kredit taqdim etildi";
+            }
+
+            creditsData.balance = creditBalance;
+            creditsData.history.unshift({
+              id: `tx-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+              type: "purchase",
+              amount: creditBalance,
+              description,
+              date: new Date().toLocaleString("uz-UZ", { timeZone: "Asia/Tashkent" })
+            });
+
+            uData.replai_ai_credits_data = creditsData;
+            await supabase
+              .from("instagram_accounts")
+              .upsert({
+                user_id: cleanUserId,
+                instagram_page_id: "global_settings_" + userId,
+                access_token: "global_settings_token",
+                fb_field_mappings: uData
+              }, { onConflict: "instagram_page_id" });
+          }
+        } catch (planChangeErr) {
+          console.error("Failed to sync credits on plan change detection (Supabase API):", planChangeErr);
+        }
+
         await supabase
           .from("instagram_accounts")
           .upsert({
@@ -264,7 +326,47 @@ export async function POST(request: Request) {
     // 1. Update shared user list if present in payload
     if (payload.replai_users) {
       try {
+        const prevUsers = [...(dbData.users || [])];
         dbData.users = JSON.parse(payload.replai_users);
+        
+        // Detect plan change to sync credits in local mode
+        const prevUser = prevUsers.find((u: any) => u.id === userId || (u.email && u.email === dbData.users.find((x: any) => x.id === userId)?.email));
+        const newUser = dbData.users.find((u: any) => u.id === userId);
+        
+        if (newUser && (!prevUser || prevUser.plan !== newUser.plan)) {
+          const newPlan = newUser.plan || "free";
+          if (!dbData.userData[userId]) dbData.userData[userId] = {};
+          
+          let creditsData = { balance: 100, used: 0, history: [] as any[] };
+          if (dbData.userData[userId]["replai_ai_credits_data"]) {
+            try {
+              creditsData = JSON.parse(dbData.userData[userId]["replai_ai_credits_data"]);
+            } catch {
+              // ignore
+            }
+          }
+
+          let creditBalance = 100;
+          let description = "Hisob bepul tarifga o'tkazildi (Free reset)";
+          if (newPlan === "pro") {
+            creditBalance = 1000;
+            description = "PRO tarif obunasi uchun 1000 ta kredit taqdim etildi";
+          } else if (newPlan === "premium") {
+            creditBalance = 150000;
+            description = "PREMIUM tarif obunasi uchun 150 000 ta kredit taqdim etildi";
+          }
+
+          creditsData.balance = creditBalance;
+          creditsData.history.unshift({
+            id: `tx-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+            type: "purchase",
+            amount: creditBalance,
+            description,
+            date: new Date().toLocaleString("uz-UZ", { timeZone: "Asia/Tashkent" })
+          });
+
+          dbData.userData[userId]["replai_ai_credits_data"] = JSON.stringify(creditsData);
+        }
       } catch (e) {
         console.error("Failed to parse replai_users payload:", e);
       }

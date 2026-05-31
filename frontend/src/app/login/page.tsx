@@ -409,22 +409,8 @@ export default function LoginPage() {
             <div className="flex-1 text-left">
               <span className="text-[12px] font-bold block leading-none text-yellow-600">{t("pages.login_page.smtp_warning_title")}</span>
               <p className="text-[11px] text-[#555] mt-1.5 leading-relaxed">
-                {t("pages.login_page.smtp_warning_desc")}
+                OTP yuborish xizmati sozlanmaganligi sababli, tasdiqlash kodi server konsoliga (terminal/log) chiqarildi. Iltimos terminalni tekshiring.
               </p>
-              <div className="mt-3 flex items-center justify-between bg-[#F5F5F3] px-3.5 py-2 rounded-xl border border-[#E8E8E8]">
-                <span className="text-[16px] font-mono font-bold tracking-widest text-[#1A2906]">{isRecovering ? recoveryOtpCode : otpCode}</span>
-                <button 
-                  onClick={() => {
-                    const activeCode = isRecovering ? recoveryOtpCode : otpCode;
-                    navigator.clipboard.writeText(activeCode);
-                    setShowNotification(false);
-                  }}
-                  type="button"
-                  className="text-[11px] font-semibold text-[#1A2906] hover:underline"
-                >
-                  {t("pages.login_page.copy_code")}
-                </button>
-              </div>
             </div>
           </div>
         </div>

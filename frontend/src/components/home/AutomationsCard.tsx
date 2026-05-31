@@ -5,9 +5,11 @@ import { Zap, MessageCircle, Sparkles } from "lucide-react";
 import { Card } from "@/components/ui/primitives";
 import { db } from "@/lib/db";
 import type { Automation } from "@/lib/db";
+import { useI18n } from "@/i18n/I18nProvider";
 
 export function AutomationsCard() {
   const [automations, setAutomations] = useState<Automation[]>([]);
+  const { t } = useI18n();
 
   useEffect(() => {
     const activeCh = db.getActiveChannel();
@@ -22,16 +24,16 @@ export function AutomationsCard() {
     <Card className="flex min-h-[250px] flex-col bg-white p-5 justify-between">
       <div className="flex items-center justify-between shrink-0">
         <span className="text-[13px] font-bold text-black uppercase tracking-wider">
-          {"Faol avtomatlashtirishlar"}
+          {t("pages.home.active_automations")}
         </span>
       </div>
 
       {automations.length === 0 ? (
         <div className="flex flex-1 flex-col items-center justify-center text-center text-[#707070] gap-1 p-4">
           <Sparkles size={20} className="stroke-1 opacity-50 text-[#C7F33C]" />
-          <div className="text-[12px] font-bold text-black">{"Faol botlar yo'q"}</div>
+          <div className="text-[12px] font-bold text-black">{t("pages.home.no_active_bots")}</div>
           <p className="text-[10px] max-w-[200px] leading-tight">
-            {"Tizimda hozircha hech qanday bot yaratilmagan."}
+            {t("pages.home.no_bots_created")}
           </p>
         </div>
       ) : (
@@ -56,7 +58,7 @@ export function AutomationsCard() {
                 <div className="min-w-0 flex-1">
                   <div className="text-[12px] font-bold text-black truncate">{a.name}</div>
                   <div className="text-[10px] text-[#707070] truncate">
-                    {isKeyword ? "Kalit so'z" : "Story mention"}: {a.triggerDetails}
+                    {isKeyword ? t("pages.automations.trigger_kw") : t("pages.automations.trigger_story")}: {a.triggerDetails}
                   </div>
                 </div>
                 <div className="bf-tight text-[14px] font-bold text-black">

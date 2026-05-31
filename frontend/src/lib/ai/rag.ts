@@ -229,44 +229,19 @@ export async function queryRAG(
     };
   }
 
-  // Fallback to offline mock generator
-  const sentences = context.split(/[.!?\n]+/);
-  const words = question.toLowerCase().split(/\s+/).filter(w => w.length > 3);
-  let bestSentence = "";
-  let maxMatch = 0;
-
-  for (const sentence of sentences) {
-    const sLower = sentence.toLowerCase();
-    let matchCount = 0;
-    for (const w of words) {
-      if (sLower.includes(w)) {
-        matchCount++;
-      }
-    }
-    if (matchCount > maxMatch) {
-      maxMatch = matchCount;
-      bestSentence = sentence.trim();
-    }
-  }
-
-  let textResult = "";
-  if (bestSentence && maxMatch > 0) {
-    textResult = `${bestSentence}.`;
-  } else {
-    const firstLesson = lessons[0];
-    const transcript = firstLesson?.transcript || "";
-    textResult = transcript.slice(0, 150) + "...";
-  }
-
-  if (settings.tone > 70) {
-    textResult = "Hurmatli o'quvchi, " + textResult.charAt(0).toLowerCase() + textResult.slice(1);
-  } else if (settings.tone < 30) {
-    textResult = textResult.replace(/Siz/g, "Sen").replace(/siz/g, "san");
+  // Real fallback check: If Gemini API Key is missing or the response is empty
+  const apiKey = process.env.GEMINI_API_KEY || process.env.NEXT_PUBLIC_GEMINI_API_KEY;
+  if (!apiKey) {
+    return {
+      text: "Tizim sozlamalarida xatolik: Gemini API Key sozlanmagan. Iltimos platforma administratoriga xabar bering.",
+      confidence: 0,
+      sources: []
+    };
   }
 
   return {
-    text: textResult,
-    confidence: 65,
-    sources: sources.length > 0 ? [sources[0]] : ["Darslik materiallari"]
+    text: "Kechirasiz, sun'iy intellekt xizmati vaqtincha band yoki javob berishda uzilish yuz berdi. Iltimos qaytadan urinib ko'ring.",
+    confidence: 0,
+    sources: []
   };
 }

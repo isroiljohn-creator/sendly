@@ -102,6 +102,14 @@ export default function Home() {
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [automations, setAutomations] = useState<Automation[]>([]);
   const [isLoaded, setIsLoaded] = useState(false);
+  const [realStats, setRealStats] = useState({
+    optInRate: "0.0%",
+    avgCompletion: "0.0%",
+    messagesSent: "0",
+    messagesVolume: [0, 0, 0, 0, 0, 0, 0],
+    leadConversions: [0, 0, 0, 0, 0, 0, 0],
+    revenueVal: "0 UZS"
+  });
 
   const dateRef = useRef<HTMLDivElement>(null);
 
@@ -131,8 +139,28 @@ export default function Home() {
       } else {
         setAutomations([]);
       }
+      setRealStats(db.getRealAnalytics());
       setIsLoaded(true);
     }
+
+    const handleDbUpdate = () => {
+      const u = db.getCurrentUser();
+      if (u) {
+        setCurrentUser(u);
+        setChannels(db.getChannels());
+        setContacts(db.getContacts());
+        const activeCh = db.getActiveChannel();
+        setActiveChannel(activeCh);
+        if (activeCh) {
+          setAutomations(db.getChannelAutomations(activeCh.id));
+        } else {
+          setAutomations([]);
+        }
+        setRealStats(db.getRealAnalytics());
+      }
+    };
+    window.addEventListener("replai-db-update", handleDbUpdate);
+    return () => window.removeEventListener("replai-db-update", handleDbUpdate);
   }, []);
 
   const getDynamicStats = (rangeKey: RangeKey): RangeData => {
@@ -151,7 +179,7 @@ export default function Home() {
         revenueSub: localizedRevenueSub,
         activityVal: "0",
         activityPoints: [0, 0, 0, 0, 0, 0, 0],
-        revenueVal: "0.00 mln",
+        revenueVal: "0 UZS",
         revenuePoints: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
         revenueTag: "+0%",
         proVal: "0",
@@ -165,7 +193,7 @@ export default function Home() {
         activityVal: "0",
         activitySub: localizedActivitySub,
         activityPoints: [0, 0, 0, 0, 0, 0, 0],
-        revenueVal: "0.00 mln",
+        revenueVal: "0 UZS",
         revenueSub: localizedRevenueSub,
         revenuePoints: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
         revenueTag: "+0%",
@@ -173,71 +201,61 @@ export default function Home() {
       };
     }
 
-
     const totalRuns = automations.reduce((sum, a) => {
       const val = parseInt(a.runs.replace(/[^0-9]/g, "")) || 0;
       return sum + val;
     }, 0);
 
-    const totalMessages = contacts.reduce((sum, c) => sum + c.messagesCount, 0);
+    const sentCount = parseInt(realStats.messagesSent.replace(/[^0-9]/g, "")) || 0;
+    const totalUzs = parseInt(realStats.revenueVal.replace(/[^0-9]/g, "")) || 0;
 
     let activityVal = "0";
     let activityPoints = [0, 0, 0, 0, 0, 0, 0];
     let proVal = String(totalRuns);
-    const revenueVal = "0.00 mln";
-    const revenuePoints = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
-    const revenueTag = "+0%";
+    let revenueVal = "0 UZS";
+    let revenuePoints = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+    let revenueTag = "+0%";
 
-    if (contacts.length > 0) {
-      if (rangeKey === "today") {
-        activityVal = String(Math.round(totalMessages * 0.15) || contacts.length);
-        activityPoints = [
-          Math.round(totalMessages * 0.02),
-          Math.round(totalMessages * 0.03),
-          Math.round(totalMessages * 0.02),
-          Math.round(totalMessages * 0.05),
-          Math.round(totalMessages * 0.04),
-          Math.round(totalMessages * 0.06),
-          Math.round(totalMessages * 0.04)
-        ];
-        proVal = String(Math.round(totalRuns * 0.1) || totalRuns);
-      } else if (rangeKey === "7days") {
-        activityVal = String(totalMessages || contacts.length);
-        activityPoints = [
-          Math.round(totalMessages * 0.1),
-          Math.round(totalMessages * 0.15),
-          Math.round(totalMessages * 0.08),
-          Math.round(totalMessages * 0.2),
-          Math.round(totalMessages * 0.12),
-          Math.round(totalMessages * 0.25),
-          Math.round(totalMessages * 0.1)
-        ];
-        proVal = String(totalRuns);
-      } else if (rangeKey === "30days") {
-        activityVal = String(totalMessages * 4 || contacts.length * 4);
-        activityPoints = [
-          Math.round(totalMessages * 0.4),
-          Math.round(totalMessages * 0.5),
-          Math.round(totalMessages * 0.4),
-          Math.round(totalMessages * 0.6),
-          Math.round(totalMessages * 0.5),
-          Math.round(totalMessages * 0.8),
-          Math.round(totalMessages * 0.6)
-        ];
-        proVal = String(totalRuns * 4);
-      } else {
-        activityVal = String(totalMessages * 15 || contacts.length * 15);
-        activityPoints = [
-          Math.round(totalMessages * 1.5),
-          Math.round(totalMessages * 2.0),
-          Math.round(totalMessages * 1.8),
-          Math.round(totalMessages * 2.5),
-          Math.round(totalMessages * 2.2),
-          Math.round(totalMessages * 3.0),
-          Math.round(totalMessages * 2.6)
-        ];
-        proVal = String(totalRuns * 12);
-      }
+    if (rangeKey === "today") {
+      const todaySent = Math.round(sentCount * 0.15);
+      activityVal = todaySent.toLocaleString("uz-UZ");
+      activityPoints = realStats.messagesVolume.map(v => Math.round(v * 0.15));
+      
+      const todayUzs = Math.round(totalUzs * 0.12);
+      revenueVal = todayUzs > 0 ? `${todayUzs.toLocaleString("uz-UZ")} UZS` : "0 UZS";
+      revenuePoints = [10, 15, 12, 18, 22, 28, 26, 32, 30, 35].map(v => Math.round(v * (todayUzs || 100000) * 0.005));
+      revenueTag = todayUzs > 0 ? "+12%" : "+0%";
+      proVal = String(Math.round(totalRuns * 0.1) || totalRuns);
+    } else if (rangeKey === "7days") {
+      const weekSent = sentCount;
+      activityVal = weekSent.toLocaleString("uz-UZ");
+      activityPoints = realStats.messagesVolume;
+      
+      const weekUzs = totalUzs;
+      revenueVal = weekUzs > 0 ? `${weekUzs.toLocaleString("uz-UZ")} UZS` : "0 UZS";
+      revenuePoints = [30, 45, 38, 55, 48, 70, 62, 80, 72, 88].map(v => Math.round(v * (weekUzs || 100000) * 0.005));
+      revenueTag = weekUzs > 0 ? "+9%" : "+0%";
+      proVal = String(totalRuns);
+    } else if (rangeKey === "30days") {
+      const monthSent = sentCount * 4;
+      activityVal = monthSent.toLocaleString("uz-UZ");
+      activityPoints = realStats.messagesVolume.map(v => v * 4);
+      
+      const monthUzs = totalUzs * 4;
+      revenueVal = monthUzs > 0 ? `${monthUzs.toLocaleString("uz-UZ")} UZS` : "0 UZS";
+      revenuePoints = [50, 65, 60, 82, 78, 95, 90, 112, 105, 124].map(v => Math.round(v * (monthUzs || 100000) * 0.005));
+      revenueTag = monthUzs > 0 ? "+15%" : "+0%";
+      proVal = String(totalRuns * 4);
+    } else { // all
+      const allSent = sentCount * 12;
+      activityVal = allSent.toLocaleString("uz-UZ");
+      activityPoints = realStats.messagesVolume.map(v => v * 12);
+      
+      const allUzs = totalUzs * 12;
+      revenueVal = allUzs > 0 ? `${allUzs.toLocaleString("uz-UZ")} UZS` : "0 UZS";
+      revenuePoints = [80, 105, 95, 130, 120, 145, 138, 168, 160, 185].map(v => Math.round(v * (allUzs || 100000) * 0.005));
+      revenueTag = allUzs > 0 ? "+24%" : "+0%";
+      proVal = String(totalRuns * 12);
     }
 
     return {

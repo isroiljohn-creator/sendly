@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { cn } from "@/lib/utils";
+import { useI18n } from "@/i18n/I18nProvider";
 
 // 1. CARD
 export interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
@@ -77,7 +78,10 @@ interface StatusPillProps {
   inactiveText?: string;
 }
 
-export function StatusPill({ status, activeText = "Faol", inactiveText = "Nofaol" }: StatusPillProps) {
+export function StatusPill({ status, activeText, inactiveText }: StatusPillProps) {
+  const { t } = useI18n();
+  const resolvedActiveText = activeText || t("common.active") || "Active";
+  const resolvedInactiveText = inactiveText || t("common.inactive") || "Inactive";
   const isActive = typeof status === "boolean" ? status : status === "active";
   return (
     <div
@@ -87,7 +91,7 @@ export function StatusPill({ status, activeText = "Faol", inactiveText = "Nofaol
       )}
     >
       <span className={cn("h-1.5 w-1.5 rounded-full", isActive ? "bg-[#16A34A]" : "bg-[#707070]")} />
-      {isActive ? activeText : inactiveText}
+      {isActive ? resolvedActiveText : resolvedInactiveText}
     </div>
   );
 }
@@ -347,9 +351,13 @@ export function ConfirmModal({
   onConfirm,
   title,
   message,
-  confirmText = "O'chirish",
-  cancelText = "Bekor qilish",
+  confirmText,
+  cancelText,
 }: ConfirmModalProps) {
+  const { t } = useI18n();
+  const resolvedConfirmText = confirmText || t("common.delete") || "Delete";
+  const resolvedCancelText = cancelText || t("common.cancel") || "Cancel";
+
   if (!isOpen) return null;
 
   return (
@@ -367,7 +375,7 @@ export function ConfirmModal({
             onClick={onClose}
             className="rounded-full bg-[#F0F0F0] px-4 py-2 font-medium text-black hover:bg-[#E8E8E8] active:scale-95 transition-all"
           >
-            {cancelText}
+            {resolvedCancelText}
           </button>
           <button
             type="button"
@@ -377,7 +385,7 @@ export function ConfirmModal({
             }}
             className="rounded-full bg-[#DC2626] px-4 py-2 font-medium text-white hover:bg-[#B91C1C] active:scale-95 transition-all"
           >
-            {confirmText}
+            {resolvedConfirmText}
           </button>
         </div>
       </div>
@@ -400,9 +408,12 @@ export function AlertModal({
   onClose,
   title,
   message,
-  buttonText = "Yopish",
+  buttonText,
   type = "success",
 }: AlertModalProps) {
+  const { t } = useI18n();
+  const resolvedButtonText = buttonText || t("common.close") || "Close";
+
   if (!isOpen) return null;
 
   const resolvedType = type === "error" || 
@@ -441,7 +452,7 @@ export function AlertModal({
           onClick={onClose}
           className="mt-6 w-full rounded-full bg-black py-3 text-[12px] font-bold text-white hover:bg-black/90 active:scale-[0.98] transition-all"
         >
-          {buttonText}
+          {resolvedButtonText}
         </button>
       </div>
     </div>

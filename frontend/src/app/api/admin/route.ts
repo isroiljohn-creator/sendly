@@ -206,6 +206,61 @@ export async function GET(request: Request) {
         }
       }
 
+      // Enhance channels with bot settings & automations count
+      if (Array.isArray(channels)) {
+        channels = channels.map((ch: any) => {
+          const settingsKey = `replai_bot_settings_${ch.id}`;
+          let botSettings = null;
+          if (uData[settingsKey]) {
+            try {
+              botSettings = typeof uData[settingsKey] === "string"
+                ? JSON.parse(uData[settingsKey])
+                : uData[settingsKey];
+            } catch {}
+          }
+          
+          const automationsKey = `replai_automations_${ch.id}`;
+          let automationsList = [];
+          if (uData[automationsKey]) {
+            try {
+              automationsList = typeof uData[automationsKey] === "string"
+                ? JSON.parse(uData[automationsKey])
+                : uData[automationsKey];
+            } catch {}
+          }
+          
+          return {
+            ...ch,
+            botSettings,
+            automationsCount: Array.isArray(automationsList) ? automationsList.length : 0
+          };
+        });
+      }
+
+      let lessonsCount = 0;
+      if (uData.replai_lessons) {
+        try {
+          const lessonsList = typeof uData.replai_lessons === "string"
+            ? JSON.parse(uData.replai_lessons)
+            : uData.replai_lessons;
+          if (Array.isArray(lessonsList)) {
+            lessonsCount = lessonsList.length;
+          }
+        } catch {}
+      }
+
+      let modulesCount = 0;
+      if (uData.replai_modules) {
+        try {
+          const modulesList = typeof uData.replai_modules === "string"
+            ? JSON.parse(uData.replai_modules)
+            : uData.replai_modules;
+          if (Array.isArray(modulesList)) {
+            modulesCount = modulesList.length;
+          }
+        } catch {}
+      }
+
       let credits = { balance: 100, used: 0, history: [] };
       if (uData.replai_ai_credits_data) {
         try {
@@ -221,6 +276,8 @@ export async function GET(request: Request) {
         ...u,
         channelsCount: Array.isArray(channels) ? channels.length : 0,
         channelsList: Array.isArray(channels) ? channels : [],
+        lessonsCount,
+        modulesCount,
         creditsBalance: credits.balance || 0,
         creditsData: credits
       };
@@ -279,7 +336,10 @@ export async function GET(request: Request) {
                 tags: c.tags || [],
                 lastActive: c.lastActive || "",
                 ownerEmail: owner?.email || "guest",
-                currentStep: c.currentStep || STUCK_STEPS[index % STUCK_STEPS.length]
+                currentStep: c.currentStep || STUCK_STEPS[index % STUCK_STEPS.length],
+                phone: c.phone || "",
+                email: c.email || "",
+                companyName: c.companyName || ""
               });
             }
           });
@@ -486,6 +546,59 @@ export async function POST(request: Request) {
               fb_field_mappings: usersList
             }, { onConflict: "instagram_page_id" });
 
+          // Sync credit balance on plan change
+          try {
+            const { data: userSettings } = await supabase
+              .from("instagram_accounts")
+              .select("fb_field_mappings")
+              .eq("instagram_page_id", "global_settings_" + userId)
+              .maybeSingle();
+
+            const uData = userSettings?.fb_field_mappings || {};
+            let creditsData = { balance: 100, used: 0, history: [] as any[] };
+            if (uData.replai_ai_credits_data) {
+              try {
+                creditsData = typeof uData.replai_ai_credits_data === "string"
+                  ? JSON.parse(uData.replai_ai_credits_data)
+                  : uData.replai_ai_credits_data;
+              } catch {
+                // ignore
+              }
+            }
+
+            let creditBalance = 100;
+            let description = "Hisob bepul tarifga o'tkazildi (Free reset)";
+            if (plan === "pro") {
+              creditBalance = 1000;
+              description = "PRO tarif obunasi uchun 1000 ta kredit taqdim etildi";
+            } else if (plan === "premium") {
+              creditBalance = 150000;
+              description = "PREMIUM tarif obunasi uchun 150 000 ta kredit taqdim etildi";
+            }
+
+            creditsData.balance = creditBalance;
+            creditsData.history.unshift({
+              id: `tx-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+              type: "purchase",
+              amount: creditBalance,
+              description,
+              date: timestamp
+            });
+
+            uData.replai_ai_credits_data = creditsData;
+            const cleanUserId = isValidUuid(userId) ? userId : "00000000-0000-0000-0000-000000000000";
+            await supabase
+              .from("instagram_accounts")
+              .upsert({
+                user_id: cleanUserId,
+                instagram_page_id: "global_settings_" + userId,
+                access_token: "global_settings_token",
+                fb_field_mappings: uData
+              }, { onConflict: "instagram_page_id" });
+          } catch (err) {
+            console.error("Failed to sync user credits on admin plan change (Supabase):", err);
+          }
+
         } else if (action === "update_user_credits") {
           const { userId, amount } = body;
           
@@ -642,6 +755,44 @@ export async function POST(request: Request) {
           month: "long",
           year: "numeric"
         });
+      }
+
+      // Sync credit balance on plan change
+      try {
+        if (!dbData.userData) dbData.userData = {};
+        if (!dbData.userData[userId]) dbData.userData[userId] = {};
+
+        let creditsData = { balance: 100, used: 0, history: [] as any[] };
+        if (dbData.userData[userId]["replai_ai_credits_data"]) {
+          try {
+            creditsData = JSON.parse(dbData.userData[userId]["replai_ai_credits_data"]);
+          } catch {
+            // ignore
+          }
+        }
+
+        let creditBalance = 100;
+        let description = "Hisob bepul tarifga o'tkazildi (Free reset)";
+        if (plan === "pro") {
+          creditBalance = 1000;
+          description = "PRO tarif obunasi uchun 1000 ta kredit taqdim etildi";
+        } else if (plan === "premium") {
+          creditBalance = 150000;
+          description = "PREMIUM tarif obunasi uchun 150 000 ta kredit taqdim etildi";
+        }
+
+        creditsData.balance = creditBalance;
+        creditsData.history.unshift({
+          id: `tx-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+          type: "purchase",
+          amount: creditBalance,
+          description,
+          date: timestamp
+        });
+
+        dbData.userData[userId]["replai_ai_credits_data"] = JSON.stringify(creditsData);
+      } catch (err) {
+        console.error("Failed to sync user credits on admin plan change (local DB):", err);
       }
 
       dbData.auditLogs.unshift({

@@ -22,10 +22,11 @@
     "today": "Bugun",
     "yesterday": "Kecha",
     "success": "Muvaffaqiyatli",
-    "error": "Xatolik yuz berdi"
+    "error": "Xatolik yuz berdi",
+    "close": "Yopish"
   },
   "nav": {
-    "admin": "Admin panel",
+    "admin": "Administrator paneli",
     "home": "Bosh sahifa",
     "automations": "Avtomatlashtirish",
     "contacts": "Mijozlar",
@@ -63,6 +64,9 @@
       "revenue_sub": "Jami davr uchun",
       "ig_title": "Instagram\nhisobini ulang",
       "ig_sub": "Boshlash uchun zarur",
+      "active_automations": "Faol avtomatlashtirishlar",
+      "no_active_bots": "Faol botlar yo'q",
+      "no_bots_created": "Tizimda hozircha hech qanday bot yaratilmagan.",
       "ranges": {
         "today": "Bugun",
         "today_sub": "Bugungi faol suhbatlar soni",
@@ -130,7 +134,7 @@
       "last_activity": "Oxirgi faollik",
       "bot_status": "Bot holati",
       "bot_active": "Bot faol",
-      "live_operator": "Live operator"
+      "live_operator": "Jonli operator"
     },
     "contacts": {
       "title": "Mijozlar ro'yxati",
@@ -356,6 +360,7 @@
       "invalid_session": "Foydalanuvchi seansidan ID topilmadi. Iltimos, sahifani yangilab qaytadan urinib ko'ring.",
       "team_role_admin": "Administrator",
       "team_role_owner": "Egasi",
+      "team_role_observer": "Kuzatuvchi",
       "refreshing": "Yangilanmoqda...",
       "remove_account": "Akkauntni o'chirish",
       "remove_account_desc": "Ushbu o'chirish tanlangan akkaunt bilan bog'liq barcha kontaktlar, chatlar, avtomatlashtirishlar va growth toolslarni o'chirib tashlaydi.",
@@ -387,7 +392,25 @@
       "tg_step_1": "Telegramda @BotFather ga yozing",
       "tg_step_2": "\"/newbot\" buyrug'ini yuboring",
       "tg_step_3": "Bot nomini va username kiriting",
-      "tg_step_4": "Token nusxalab shu yerga qo'ying"
+      "tg_step_4": "Token nusxalab shu yerga qo'ying",
+      "tab_mcp": "Model Context Protocol (MCP)",
+      "mcp_title": "Model Context Protocol (MCP) Integratsiyalari",
+      "mcp_desc": "Sendly loyihangizdagi kontaktlar, chatlar va analitika ma'lumotlarini istalgan AI agentga (Claude Desktop, Cursor, ChatGPT, web-native Claude va boshqalar) ulab ishlating.",
+      "mcp_local_tab": "Claude Desktop / Cursor (Local)",
+      "mcp_cloud_tab": "ChatGPT Actions (Cloud)",
+      "mcp_sse_tab": "Web & Remote (SSE)",
+      "mcp_api_key_info": "Sizning API kalitingiz:",
+      "mcp_local_desc": "Claude Desktop yoki Cursor kabi mahalliy AI mijozlarida Sendly asboblarini ishlatish uchun quyidagi qadamlarni bajaring:",
+      "mcp_local_step_1": "1. Loyiha papkasidagi 'sendly-mcp.js' skriptini nusxalab oling yoki yuklab oling.",
+      "mcp_local_step_2": "2. Claude Desktop konfiguratsiya faylini oching (~/Library/Application Support/Claude/claude_desktop_config.json)",
+      "mcp_local_step_3": "3. Quyidagi JSON blokini qo'shing va Claude ilovasini qayta ishga tushiring:",
+      "mcp_cloud_desc": "ChatGPT Custom GPT-larida yoki boshqa bulutli xizmatlarda Sendly ma'lumotlaridan foydalanish uchun OpenAPI sxemasidan foydalaning:",
+      "mcp_cloud_step_1": "1. Yangi Custom GPT yarating va 'Actions' bo'limiga o'ting.",
+      "mcp_cloud_step_2": "2. OpenAPI sxemasi havolasiga quyidagi URLni kiriting:",
+      "mcp_cloud_step_3": "3. 'Authentication' sozlamalaridan API Key turini tanlang, uni Header orqali 'x-api-key' nomi bilan sozlang va Sendly API kalitingizni kiriting.",
+      "mcp_sse_desc": "Veb-ilovalar yoki Server-Sent Events qo'llab-quvvatlaydigan boshqa mijozlar uchun to'g'ridan-to'g'ri SSE havolasidan foydalaning:",
+      "mcp_sse_url_label": "SSE ulanish havolasi:",
+      "mcp_sse_desc_note": "Eslatma: Ushbu ulanish real vaqt rejimida server bilan bog'lanib, asboblar va bilimlarni istalgan veb-mijozda ishlatish imkonini beradi."
     },
     "automations_page": {
       "title": "Avtomatlashtirish",
@@ -460,7 +483,8 @@
       "load_template": "Shablonni yuklash",
       "quick_setup": "Tezkor sozlash",
       "conversion": "Konversiya",
-      "quick_bot_reply_placeholder": "Foydalanuvchi kalit so'zni yozganda yuboriladigan xabar matni..."
+      "quick_bot_reply_placeholder": "Foydalanuvchi kalit so'zni yozganda yuboriladigan xabar matni...",
+      "unknown_channel": "Noma'lum kanal"
     },
     "builder": {
       "sync_btn": "Sinxronlash",
@@ -504,7 +528,7 @@
       "act_webhook": "Webhook yuborish",
       "act_telegram": "Telegram admin bildirishnomasi",
       "blocks_title": "Bloklar",
-      "block_trigger": "Start triggeri",
+      "block_trigger": "Boshlang'ich trigger",
       "block_trigger_sub": "DM, izoh, hikoya...",
       "block_message": "Xabar",
       "block_message_sub": "Instagram DM yuborish",
@@ -526,11 +550,11 @@
       "no_buttons": "Hali tugma qo'shilmagan",
       "btn_action": "Harakat",
       "btn_link": "Havola",
-      "btn_placeholder": "Tugma nomi",
+      "btn_placeholder": "Masalan: Ha, darsni boshlash!",
       "btn_url_placeholder": "https://t.me/yourusername",
       "tag_name": "Teg nomi",
       "var_name": "O'zgaruvchi nomi",
-      "webhook_url": "Webhook URL",
+      "webhook_url": "Webhook havolasi",
       "tg_chat_id": "Telegram Chat ID",
       "val_label": "Qiymat",
       "yes_next": "Ha keyingi",
@@ -552,11 +576,11 @@
       "no": "Yo'q",
       "unselected_block_title": "Blok tanlanmagan",
       "tmpl_lead_trigger_label": "Trigger: DM – kitob, kurs",
-      "tmpl_lead_cond_label": "Shart: Obunachimi?",
-      "tmpl_lead_msg1_label": "DM: Mana bepul qo'llanma \nhttps://drive.google.com/...",
+      "tmpl_lead_cond_label": "Obuna bo'lganmi?",
+      "tmpl_lead_msg1_label": "Salom! Direct'da obunani tekshirish va yopiq dars/bonus materialni avtomatik yetkazish bo'yicha mini-kursni olishni istaysizmi?🤩",
       "tmpl_lead_msg1_btn": "Qo'llanmani olish",
-      "tmpl_lead_msg2_label": "DM: Avval @account'ga obuna bo'lishingizni so'raymiz",
-      "tmpl_story_trigger_label": "Trigger: Story Mention",
+      "tmpl_lead_msg2_label": "Yaxshi! Obuna bo'lganingiz uchun rahmat. Mana bonus dars havolasi: https://t.me/yourusername",
+      "tmpl_story_trigger_label": "Trigger: Story-da belgilash",
       "tmpl_story_msg_label": "DM: Bizni Stories-da belgilaganingiz uchun rahmat! \nMana sizga maxsus kupon: STORY20",
       "tmpl_story_msg_btn": "️ Chegirma bilan buyurtma",
       "tmpl_story_act_label": "Harakat: 'story_user' tegini qo'sh",
@@ -626,12 +650,9 @@
       "trigger_message_recognition": "Xabarni aniqlash",
       "trigger_story_reaction": "Story munosabati",
       "trigger_payment": "Muvaffaqiyatli to'lov",
-      "tmpl_lead_msg1_label": "Salom! Direct'da obunani tekshirish va yopiq dars/bonus materialni avtomatik yetkazish bo'yicha mini-kursni olishni istaysizmi?🤩",
       "tmpl_lead_msg1_btn1": "Ha, istayman!🤩",
       "tmpl_lead_msg1_btn2": "Boshlash",
       "tmpl_lead_act_label": "Tugma bosilganligini aniqlash",
-      "tmpl_lead_cond_label": "Obuna bo'lganmi?",
-      "tmpl_lead_msg2_label": "Yaxshi! Obuna bo'lganingiz uchun rahmat. Mana bonus dars havolasi: https://t.me/yourusername",
       "tmpl_lead_msg2_btn": "Yuklab olish",
       "tmpl_lead_msg3_label": "Afsuski, siz hali obuna bo'lmagansiz. Iltimos, sahifamizga obuna bo'ling va keyin 'Obunani tekshirish' tugmasini bosing.",
       "tmpl_lead_msg3_btn": "Obunani tekshirish",
@@ -648,7 +669,6 @@
       "btn_copy_suffix": " (Nusxa)",
       "btn_settings_title": "Tugma sozlamalari",
       "btn_label_input": "Tugma matni",
-      "btn_placeholder": "Masalan: Ha, darsni boshlash!",
       "btn_action_title": "Tugma ustidagi amal",
       "btn_url_label": "Veb-sayt havolasi",
       "trigger_source_label": "Trigger turi",
@@ -716,7 +736,7 @@
       "sandbox_title": "AI sandbox simulyatori",
       "sandbox_desc": "Ushbu simulyatorda AIning bilimlar bazasidan foydalanishi va taqiqlangan mavzularga munosabatini real vaqtda sinab ko'rishingiz mumkin.",
       "chat_placeholder": "AI-ga savol yozing...",
-      "fb_leads_title": "Meta Lead Gen Integrator",
+      "fb_leads_title": "Meta Lead arizalar integratori",
       "fb_leads_desc": "Facebook Lead Ads reklamalaridan keladigan arizalarni avtomatik tarzda Sendly CRM va AI agentga yo'naltirish visual oqimi.",
       "simulator_title": "Vizual webhook simulyatori",
       "simulator_desc": "Facebook-dan keladigan webhook so'rovini vizual simulyatsiya qilish uchun lead ma'lumotlarini to'ldiring.",
@@ -884,7 +904,7 @@
       "alert_modal_close_btn": "Tushunarli",
       "alert_modal_configure_btn": "Sozlash",
       "fields_count": "{count} ta maydon",
-      "fb_trigger_node": "Facebook Trigger",
+      "fb_trigger_node": "Facebook triggeri",
       "ai_mapper_node": "AI Lid tasniflagich (Lead Mapper)",
       "lesson_create_error_title": "Modul mavjud emas",
       "lesson_create_error_desc": "Dars yaratish uchun avval kamida bitta modul yaratishingiz kerak.",
@@ -923,7 +943,518 @@
       "intent_affiliate": "Hamkorlik",
       "intent_general": "Umumiy qiziqish",
       "count_unit": "ta",
-      "add_btn": "Qo'shish"
+      "add_btn": "Qo'shish",
+      "add_agents_section": "AI agentlar qo'shish",
+      "names": {
+        "kurator": "AI kuratori",
+        "sales": "Sotuvchi AI Agent",
+        "booker": "Konsultatsiya va Band qilish AI",
+        "recruiter": "HR va Vakansiyalar uchun AI",
+        "fb_leads": "Meta Leads + AI orqali saralash",
+        "fb_leads_direct": "Lidlarni Telegramga yo'naltirish",
+        "clinic": "Klinika / Shifokor AI",
+        "realtor": "Rieltor AI",
+        "helpdesk": "Texnik yordam AI",
+        "default": "AI Agent"
+      },
+      "breadcrumbs": {
+        "kurator": "Bosh sahifa / AI Agent / AI kuratori",
+        "sales": "Bosh sahifa / AI Agent / Sotuvchi AI Agent",
+        "booker": "Bosh sahifa / AI Agent / Konsultatsiya va Band qilish AI",
+        "recruiter": "Bosh sahifa / AI Agent / HR va Vakansiyalar uchun AI",
+        "clinic": "Bosh sahifa / AI Agent / Klinika / Shifokor AI",
+        "realtor": "Bosh sahifa / AI Agent / Rieltor AI",
+        "helpdesk": "Bosh sahifa / AI Agent / Texnik yordam AI",
+        "default": "Bosh sahifa / AI Agent"
+      },
+      "knowledge_tab_names": {
+        "kurator": "Bilimlar bazasi",
+        "sales": "Mahsulotlar katalogi",
+        "booker": "Mutaxassis bilimlari",
+        "recruiter": "Vakansiyalar bazasi",
+        "clinic": "Klinika ma'lumotlari",
+        "realtor": "Ko'chmas mulk bazasi",
+        "helpdesk": "Bilimlar bazasi (FAQ)",
+        "default": "Bilimlar bazasi"
+      },
+      "knowledge_section_titles": {
+        "kurator": "Darsliklar va materiallar",
+        "sales": "Mahsulotlar, narxlar va do'kon ma'lumotlari",
+        "booker": "Mutaxassis bilimlari va ish tartibi",
+        "recruiter": "Vakansiyalar va talablar",
+        "clinic": "Shifokorlar, xizmatlar va ish tartibi",
+        "realtor": "Uy-joylar, narxlar va joylashuv",
+        "helpdesk": "Ko'p so'raladigan savollar va yechimlar",
+        "default": "Darsliklar va materiallar"
+      },
+      "knowledge_section_descs": {
+        "kurator": "Kurs materiallari, darsliklar va PDF hujjatlarni qo'shing. AI kurator shu materiallar asosida javob beradi.",
+        "sales": "Mahsulotlar katalogi, narxlar, manzil va ish vaqti kabi ma'lumotlarni qo'shing. AI agent shu ma'lumotlar asosida mijozlarga javob beradi.",
+        "booker": "Mutaxassisning bilimlari, xizmatlar ro'yxati, ish tartibi va konsultatsiya shartlarini kiriting.",
+        "recruiter": "Bo'sh ish o'rinlari, talablar, ish sharoitlari va kompaniya haqida ma'lumotlarni kiriting.",
+        "clinic": "Shifokorlar ro'yxati, bo'limlar, qabul vaqtlari va narxlarni kiriting. AI agent shu ma'lumotlar asosida bemorlarga javob beradi.",
+        "realtor": "Uy-joylar ro'yxati, narxlar, joylashuv va ko'rish vaqtlarini kiriting. AI agent shu ma'lumotlar asosida mijozlarga javob beradi.",
+        "helpdesk": "Ko'p so'raladigan savollar, texnik muammolar va ularning yechimlari. AI agent shu ma'lumotlar asosida foydalanuvchilarga javob beradi.",
+        "default": "Kurs materiallari, darsliklar va PDF hujjatlarni qo'shing. AI kurator shu materiallar asosida javob beradi."
+      },
+      "system_prompt_titles": {
+        "kurator": "Tizim ko'rsatmasi (System Prompt)",
+        "sales": "Sotuvchi ko'rsatmasi",
+        "booker": "Maslahatchi ko'rsatmasi",
+        "recruiter": "Rekruter ko'rsatmasi",
+        "clinic": "Klinika yordamchisi ko'rsatmasi",
+        "realtor": "Rieltor yordamchisi ko'rsatmasi",
+        "helpdesk": "Texnik yordam ko'rsatmasi",
+        "default": "Tizimli ko'rsatma"
+      },
+      "system_prompt_descs": {
+        "kurator": "AI kuratorning rolini va javob berish qoidalarini belgilang.",
+        "sales": "Sotuvchi agentning xulq-atvori va javob berish qoidalarini belgilang.",
+        "booker": "Maslahatchi agentning ohangini va konsultatsiya qoidalarini sozlang.",
+        "recruiter": "Rekruter agentning nomzodlar bilan suhbat qoidalarini belgilang.",
+        "clinic": "Klinika yordamchisining bemorlar bilan muomala qoidalarini belgilang.",
+        "realtor": "Rieltor yordamchisining mijozlar bilan mulk ko'rsatish qoidalarini belgilang.",
+        "helpdesk": "Texnik yordam agentining muammolarni hal qilish qoidalarini belgilang.",
+        "default": "AI agent rolini va javob berish tartibini yozing..."
+      },
+      "forbidden_topics_titles": {
+        "kurator": "Taqiqlangan mavzular",
+        "sales": "Gaplashmaydigan mavzular",
+        "booker": "Taqiqlangan mavzular",
+        "recruiter": "Taqiqlangan mavzular",
+        "clinic": "Taqiqlangan mavzular",
+        "realtor": "Taqiqlangan mavzular",
+        "helpdesk": "Taqiqlangan mavzular",
+        "default": "Taqiqlangan mavzular"
+      },
+      "forbidden_topics_descs": {
+        "kurator": "Ushbu mavzular bo'yicha savol berilganda, bot avtomatik ravishda dars doirasidan chiqmaslikni so'raydi.",
+        "sales": "Agent ushbu mavzular haqida mijozlarga javob bermaydi.",
+        "booker": "Agent ushbu mavzular haqida gaplashmaydi.",
+        "recruiter": "Agent ushbu mavzular haqida nomzodlarga javob bermaydi.",
+        "clinic": "Agent ushbu mavzular haqida bemorlarga javob bermaydi.",
+        "realtor": "Agent ushbu mavzular haqida mijozlarga javob bermaydi.",
+        "helpdesk": "Agent ushbu mavzular haqida foydalanuvchilarga javob bermaydi.",
+        "default": "Ushbu mavzular bo'yicha savol berilganda, bot avtomatik ravishda dars doirasidan chiqmaslikni so'raydi."
+      },
+      "escalation_titles": {
+        "kurator": "Inson-kuratorga yo'naltirish qoidalari",
+        "sales": "Inson-sotuvchiga yo'naltirish qoidalari",
+        "booker": "Mutaxassisga yo'naltirish qoidalari",
+        "recruiter": "HR menejeriga yo'naltirish qoidalari",
+        "clinic": "Administratorga yo'naltirish qoidalari",
+        "realtor": "Rieltor menejeriga yo'naltirish qoidalari",
+        "helpdesk": "Operatorga yo'naltirish qoidalari",
+        "default": "Operatorga yo'naltirish qoidalari"
+      },
+      "escalation_descs": {
+        "kurator": "Ushbu shartlar yuzaga kelganda bot liveTakeover bayrog'ini faollashtiradi va kuratorni ogohlantiradi.",
+        "sales": "Quyidagi holatlarda suhbat avtomatik ravishda inson-sotuvchiga yo'naltiriladi.",
+        "booker": "Quyidagi holatlarda suhbat avtomatik ravishda mutaxassisning o'ziga yo'naltiriladi.",
+        "recruiter": "Quyidagi holatlarda ariza avtomatik ravishda HR menejeriga yo'naltiriladi.",
+        "clinic": "Quyidagi holatlarda suhbat avtomatik ravishda administrator/shifokorga yo'naltiriladi.",
+        "realtor": "Quyidagi holatlarda suhbat avtomatik ravishda rieltor menejeriga yo'naltiriladi.",
+        "helpdesk": "Quyidagi holatlarda suhbat avtomatik ravishda inson operatoriga yo'naltiriladi.",
+        "default": "Mijoz tomonidan quyidagi shartlar bajarilganda suhbat operatorga o'tadi:"
+      },
+      "module_labels": {
+        "kurator": "Modul",
+        "sales": "Katalog bo'limi",
+        "booker": "Bilim yo'nalishi",
+        "recruiter": "Vakansiya yo'nalishi",
+        "clinic": "Bo'lim / Yo'nalish",
+        "realtor": "Hudud / Tuman",
+        "helpdesk": "Kategoriya",
+        "default": "Modul"
+      },
+      "lesson_labels": {
+        "kurator": "Dars",
+        "sales": "Mahsulot / Ma'lumot",
+        "booker": "Bilim sahifasi",
+        "recruiter": "Vakansiya sahifasi",
+        "clinic": "Shifokor / Xizmat",
+        "realtor": "Uy-joy e'loni",
+        "helpdesk": "Muammo / Yechim",
+        "default": "Dars"
+      },
+      "templates": {
+        "kurator": {
+          "name": "AI kuratori",
+          "desc": "Darsliklar, transkriptlar va PDF materiallar asosida savollarga aqlli va aniq javob beruvchi shaxsiy yordamchi.",
+          "feature_1": "Bilimlar bazasi tizimi (RAG)",
+          "feature_2": "Telegram bot integratsiyasi",
+          "feature_3": "Ohang va xarakterni sozlash",
+          "feature_4": "Inson-kuratorga yo'naltirish qoidalari"
+        },
+        "sales": {
+          "name": "Sotuvchi AI Agent",
+          "desc": "Katalog, narxlar va ish vaqti kabi ma'lumotlarni o'rganib, mijozlar bilan muloqot qiladi va mahsulot sotadi.",
+          "feature_1": "Katalog va narxlar bazasi",
+          "feature_2": "Ish vaqti va manzil integratsiyasi",
+          "feature_3": "Sotuv ohangida suhbatlashish",
+          "feature_4": "Buyurtmani operatorga yo'naltirish"
+        },
+        "booker": {
+          "name": "Konsultatsiya / Band qilish AI",
+          "desc": "Mutaxassis ohangida maslahat beradi va konsultatsiya uchun vaqt band qiladi. Pullik qilish imkoni bor.",
+          "feature_1": "Mutaxassis ohangi va bilimlari",
+          "feature_2": "Konsultatsiya vaqtini band qilish",
+          "feature_3": "Oldindan to'lov havolasi",
+          "feature_4": "Telegram & Direct orqali bron qilish"
+        },
+        "recruiter": {
+          "name": "HR va Vakansiyalar uchun AI",
+          "desc": "Bo'sh ish o'rinlari talablari bo'yicha nomzodlar bilan suhbatlashadi, ularni skrining qiladi va saralaydi.",
+          "feature_1": "Vakansiyalar va talablar bazasi",
+          "feature_2": "Suhbat orqali ma'lumot yig'ish",
+          "feature_3": "Nomzod malakalarini tahlil qilish",
+          "feature_4": "Saralangan arizalarni HR-ga yuborish"
+        },
+        "fb_leads": {
+          "name": "Meta Leads + AI orqali saralash",
+          "desc": "Facebook target reklama formalaridan kelgan lid ma'lumotlarini AI yordamida saralab, guruhlarga yo'naltiruvchi va avtomatik salomlashish xabari yuboruvchi agent.",
+          "feature_1": "Meta Lead Ads formalari bilan bog'lanish",
+          "feature_2": "AI orqali mijoz xohishini tahlil qilish",
+          "feature_3": "Guruhlarga yo'naltirish va taglash",
+          "feature_4": "Avtomatik salomlashish xabarlari"
+        },
+        "fb_leads_direct": {
+          "name": "Lidlarni Telegramga yo'naltirish (AIsiz)",
+          "desc": "Facebook target arizalarini AIsiz, chiroyli ko'rinishda to'g'ridan-to'g'ri Telegram guruh yoki profilingizga yo'naltiring.",
+          "feature_1": "Arizalarni Telegram guruh yoki lichkaga yuborish",
+          "feature_2": "AIsiz to'g'ridan-to'g'ri yo'naltirish rejimida ishlash",
+          "feature_3": "Lid ma'lumotlarini qulay formatda taqdim etish",
+          "feature_4": "Tasdiqlash kodi orqali guruh/botni oson ulash"
+        },
+        "clinic": {
+          "name": "Klinika / Shifokor AI",
+          "desc": "Bemorlar bilan suhbatlashib, shifokorga onlayn navbat yozadi, bo'sh vaqtlarni ko'rsatadi va qabul oldi eslatma yuboradi.",
+          "feature_1": "Shifokorga onlayn yozilish",
+          "feature_2": "Bo'sh vaqtlarni avtomatik ko'rsatish",
+          "feature_3": "Qabul oldi eslatma yuborish",
+          "feature_4": "Bemorlar bazasi va tarix"
+        },
+        "realtor": {
+          "name": "Rieltor AI",
+          "desc": "Ko'chmas mulk bazasidan uy-joy qidirib topadi, narx va joylashuv ma'lumotini beradi, ko'rish uchun vaqt belgilaydi.",
+          "feature_1": "Uy-joy bazasidan qidiruv",
+          "feature_2": "Narx, joylashuv, surat yuborish",
+          "feature_3": "Ko'rish uchun vaqt belgilash",
+          "feature_4": "Mijoz ehtiyojini tahlil qilish"
+        },
+        "helpdesk": {
+          "name": "Texnik yordam AI",
+          "desc": "Foydalanuvchilarning texnik muammolarini hal qiladi, FAQ dan javob topadi, murakkab holatlarni operatorga yo'naltiradi.",
+          "feature_1": "FAQ dan avtomatik javob topish",
+          "feature_2": "Muammoni tasniflash va yo'naltirish",
+          "feature_3": "Tiket tizimi integratsiyasi",
+          "feature_4": "Operatorga uzatish qoidalari"
+        }
+      },
+      "defaults": {
+        "kurator": {
+          "prompt": "# ROL VA IDENTIFIKATSIYA\nSen marketing kursi o'quvchilariga yordam beruvchi \"Mently\" nomli shaxsiy AI kuratorsan. Xaraktering: samimiy, do'stona, qisqa va aniq gapiradigan, ortiqcha rasmiyatchilikdan xoli.\n\n# ASOSIY VAZIFA\nO'quvchilarning savollariga faqat va faqat quyida taqdim etilgan darslik/kurs materiallari (KURS MATERIALLARI) asosida tushunarli, qisqa va tabiiy javob berish.\n\n# KURS MATERIALLARI:\n{{context}}\n\n# QAT'IY YO'RIQNOMALAR VA CHEKLOVLAR\n1. Cheklangan Ma'lumot: Faqat berilgan KURS MATERIALLARI ichidagi ma'lumotlardan foydalan. Kurs materialida yo'q bo'lgan ma'lumotlarni o'zingdan to'qib chiqarma!\n2. Noma'lum Savollar: Agar savolning javobi darslik materiallarida mavjud bo'lmasa, muloyimlik bilan mana shu javobni ber:\n   \"Afsuski, ushbu savolga darslik materiallarida javob topilmadi. Sizga to'g'ri yo'nalish berish va yordam berish uchun ushbu savolni inson-kuratorga yo'naltirdim. Tez orada javob berishadi.\"\n3. Taqiqlangan Mavzular: Siyosat, din, raqobatchi kurslar yoki marketingga aloqasi bo'lmagan mavzular haqida gapirma. Agar bunday savol berilsa, muloyimlik bilan rad et:\n   \"Men faqat ushbu marketing kursi bo'yicha savollarga javob bera olaman. Keling, darsimizga qaytamiz!\"\n4. Til qoidasi: O'quvchi qaysi tilda va yozuvda yozgan bo'lsa (Lotin yoki Kirill o'zbek yozuvi, Rus tili yoki Ingliz tili), o'sha yozuv va tilda tabiiy javob ber.\n\n# JAVOB FORMATI VA STILI\n- Tabiiylik va Qisqalik: Javoblaring juda qisqa, aniq va londa bo'lsin (ko'pi bilan 2-3 ta gap). Ortiqcha uzun gaplar, kirish so'zlar yoki sun'iy gaplardan qoch. Oddiy suhbatdoshdek tabiiy gapir.\n- Soddalik: Murakkab marketing atamalarini sodda, kundalik tilda tushuntir.\n- Manba ko'rsatmaslik: JAVOBINGGA HECH QANDAY MANBA YOKI SHUNGA O'XSHASH MA'LUMOTLARNI QO'SHMA (Masalan: \"Manba: 1-Modul...\" kabi yozuvlar umuman bo'lmasligi shart).\n- Emojilar: Mutlaqo emojilarsiz, faqat matn va belgilar yordamida javob yoz.",
+          "topics": [
+            "Siyosat",
+            "Din",
+            "Raqobatchilar"
+          ],
+          "rules": {
+            "esc_1": "Ishonch darajasi 60% dan past bo'lganda",
+            "esc_2": "O'quvchi shikoyat qilganda",
+            "esc_3": "To'lov yoki sertifikat haqida savol bo'lganda"
+          },
+          "welcome": "Salom! Men o'quvchilarga yordam beruvchi shaxsiy AI kuratorman. Bilimlar bazasidagi ma'lumotlar asosida savollarga javob beraman. Meni sinab ko'rish uchun bu yerga biror savol yozing! 📚"
+        },
+        "sales": {
+          "prompt": "# ROL VA IDENTIFIKATSIYA\nSen kompaniyaning sotuvlar bo'limi yordamchisisan (Sales Closer AI). Maqsading: mijozlarga mahsulotlar, narxlar, katalog, manzil va ish vaqti haqida to'liq ma'lumot berish va ularni sotib olishga yo'naltirish, buyurtmalarni tezda rasmiylashtirish.\n\n# ASOSIY VAZIFA\nMijozlarning savollariga faqat va faqat quyida taqdim etilgan mahsulot katalogi va do'kon ma'lumotlari (MAHSULOT VA DO'KON MATERIALLARI) asosida javob berish.\n\n# MAHSULOT VA DO'KON MATERIALLARI:\n{{context}}\n\n# QAT'IY YO'RIQNOMALAR VA CHEKLOVLAR\n1. Katalogda bo'lmagan yoki noaniq mahsulotlar/narxlar haqida gapirma. Agarda savol katalogda yo'q bo'lsa, mijozning telefon raqamini so'rab:\n   \"Afsuski, ushbu mahsulot yoki xizmat haqida hozircha ma'lumot yo'q. Sizga aniq yordam berishimiz uchun telefon raqamingizni qoldirsangiz, mutaxassisimiz tezda bog'lanadi.\" deb javob ber.\n2. Har bir muloqotda sotuvga va buyurtmaga yo'naltiruvchi savollar ber.\n3. Taqiqlangan mavzulardan qoch (siyosat, shaxsiy savollar va boshqalar).\n\n# JAVOB FORMATI VA STILI\n- Xushmuomala va sotuvga chorlovchi ohang.\n- Javoblarni londa, qisqa va qulay formatda taqdim et (ko'pi bilan 3 ta gap).",
+          "topics": [
+            "Raqobatchilar haqida ma'lumot",
+            "Shaxsiy savollar",
+            "Siyosat va Din"
+          ],
+          "rules": {
+            "esc_1": "Ishonch darajasi 60% dan past bo'lganda",
+            "esc_2": "Mijoz maxsus chegirma yoki muddatli to'lov so'raganda",
+            "esc_3": "Mijoz inson sotuvchi bilan gaplashishni talab qilganda"
+          },
+          "welcome": "Salom! Men sizning sotuvchi yordamchingizman. Mahsulotlarimiz, narxlarimiz va do'konimiz haqidagi savollarga javob bera olaman. Meni sinab ko'rish uchun savol yozing! 💻"
+        },
+        "booker": {
+          "prompt": "# ROL VA IDENTIFIKATSIYA\nSen shaxsiy brend egasining aqlli maslahatchisi va band qilish yordamchisisan (Appointment Booker AI). Maqsading: mutaxassisning nomidan gaplashib, uning ohangi va bilimlariga mos ravishda foydali maslahat berish hamda konsultatsiya/suhbat uchun vaqt belgilash.\n\n# ASOSIY VAZIFA\nSuhbatdoshlarga faqat mutaxassisning bilimlari, qoidalari va ish tartibi (MUTAXASSIS BILIMLARI) doirasida maslahat berish.\n\n# MUTAXASSIS BILIMLARI:\n{{context}}\n\n# QAT'IY YO'RIQNOMALAR VA CHEKLOVLAR\n1. Konsultatsiyani bron qilishdan avval to'lov qilinishi shart bo'lsa, mijozga to'lov shartlari va havolani taqdim et.\n2. Mutaxassisning o'rniga noaniq ma'lumotlarni gapirma, faqat uning bilimlari bazasida yozilgan yo'nalishlarni ber.\n3. Har doim mutaxassisning shaxsiy gaplashish tonida (do'stona, professional, xarakterli) bo'l.\n\n# JAVOB FORMATI VA STILI\n- Tabiiy suhbatdosh kabi ohang.\n- Mijozning ehtiyojini tushunish va to'g'ri vaqtga bron qilishni taklif qilish.",
+          "topics": [
+            "Shaxsiy hayot",
+            "Boshqa mutaxassislar",
+            "Siyosat"
+          ],
+          "rules": {
+            "esc_1": "Mijoz to'lov muammolari haqida yozganda",
+            "esc_2": "Mijoz band qilingan vaqtni o'zgartirishni so'raganida",
+            "esc_3": "Mijoz to'g'ridan-to'g'ri inson bilan gaplashmoqchi bo'lganida"
+          },
+          "welcome": "Salom! Men shaxsiy konsultatsiyalarni bron qiluvchi va maslahat beruvchi yordamchiman. Ohang va ma'lumotlarimni tekshirish uchun savol yozib ko'ring! 📅"
+        },
+        "recruiter": {
+          "prompt": "# ROL VA IDENTIFIKATSIYA\nSen kompaniyaning HR yordamchisisan (HR Recruiter AI). Maqsading: nomzodlarga bo'sh ish o'rinlari haqida ma'lumot berish, nomzodlar bilan dastlabki suhbat/skrining o'tkazish, kerakli ma'lumotlarni yig'ish va ularni saralash.\n\n# ASOSIY VAZIFA\nNomzodlarga faqat vakansiya va talablar (VAKANSIYALAR VA TALABLAR) doirasida javob berish.\n\n# VAKANSIYALAR VA TALABLAR:\n{{context}}\n\n# QAT'IY YO'RIQNOMALAR VA CHEKLOVLAR\n1. Nomzoddan ketma-ket quyidagi ma'lumotlarni to'pla: Ismi, bog'lanish telefoni, tajribasi va ish haqi bo'yicha kutilmasi.\n2. Balla ma'lumotlarni olmaguncha nomzodning arizasini yakunlama.\n3. Vakansiya talablariga mos kelmaydigan nomzodlarni muloyimlik bilan inson operatorga yo'naltir yoki rad javobini ber.\n\n# JAVOB FORMATI VA STILI\n- Professional, samimiy va suhbat tarzida yondashish.\n- Har bir xabarda faqat bitta savol berib, suhbatni oqilona davom ettirish.",
+          "topics": [
+            "Kompaniya ichki sirlari",
+            "Maosh to'lash sanalari",
+            "Siyosat"
+          ],
+          "rules": {
+            "esc_1": "Nomzod ish haqi bo'yicha keskin talablar qo'ysa",
+            "esc_2": "Nomzod xorijdan turib ishlash shartlarini so'raganida",
+            "esc_3": "Nomzod darhol asosiy rahbar bilan uchrashmoqchi bo'lsa"
+          },
+          "welcome": "Salom! Men HR/Rekruter yordamchiman. Bo'sh ish o'rinlari haqida ma'lumot beraman va nomzodlarni suhbatdan o'tkaza olaman. Sinab ko'rish uchun savol yozing! 👔"
+        },
+        "clinic": {
+          "prompt": "# ROL VA IDENTIFIKATSIYA\nSen tibbiy markaz/klinikaning onlayn qabul yordamchisisan (Medical Assistant AI). Maqsading: bemorlarga shifokorlar, bo'limlar va qabul vaqtlari haqida ma'lumot berish, onlayn navbat yozish va eslatmalar yuborish.\n\n# ASOSIY VAZIFA\nBemorlarga faqat klinika ma'lumotlari (KLINIKA MA'LUMOTLARI) doirasida javob berish.\n\n# KLINIKA MA'LUMOTLARI:\n{{context}}\n\n# QAT'IY YO'RIQNOMALAR VA CHEKLOVLAR\n1. Hech qachon tashxis qo'yma yoki dori-darmon tavsiya etma. Faqat shifokorga yozilish va umumiy ma'lumot ber.\n2. Bemorning shikoyatiga qarab tegishli bo'lim yoki shifokorni tavsiya et.\n3. Bo'sh vaqtlarni ko'rsatib, bron qilishni taklif et.\n\n# JAVOB FORMATI VA STILI\n- Muloyim, g'amxo'r va professional ohang.\n- Javoblarni qisqa va aniq ber.",
+          "topics": [
+            "Tashxis qo'yish",
+            "Dori-darmon tavsiyasi",
+            "Siyosat"
+          ],
+          "rules": {
+            "esc_1": "Bemor shoshilinch tibbiy yordam so'raganida",
+            "esc_2": "Bemor shikoyat bildirganida",
+            "esc_3": "Bemor to'lov muammolari haqida yozganda"
+          },
+          "welcome": "Salom! Men klinikaning onlayn yordamchisiman. Shifokorlarga yozilish, bo'sh vaqtlarni ko'rish va bo'limlar haqida ma'lumot olishingiz mumkin. Sinab ko'ring! 🏥"
+        },
+        "realtor": {
+          "prompt": "# ROL VA IDENTIFIKATSIYA\nSen ko'chmas mulk agentligining onlayn yordamchisisan (Realtor AI). Maqsading: mijozlarga uy-joylar haqida ma'lumot berish, narx va joylashuv ko'rsatish, ko'rish uchun vaqt belgilash.\n\n# ASOSIY VAZIFA\nMijozlarga faqat ko'chmas mulk bazasi (MULK BAZASI) doirasida javob berish.\n\n# MULK BAZASI:\n{{context}}\n\n# QAT'IY YO'RIQNOMALAR VA CHEKLOVLAR\n1. Bazada yo'q uy-joylar haqida gapirma.\n2. Mijozning budjetini, joylashuvini va talablarini so'rab, mos variantlarni tavsiya et.\n3. Ko'rish uchun vaqt belgilashni taklif qilib, rieltor bilan bog'lanishni tashkil et.\n\n# JAVOB FORMATI VA STILI\n- Ishonchli, do'stona va ma'lumotli ohang.\n- Har bir uy-joy uchun narx, maydon, xonalar soni va joylashuvni ko'rsat.",
+          "topics": [
+            "Huquqiy maslahat",
+            "Kredit shartlari",
+            "Siyosat"
+          ],
+          "rules": {
+            "esc_1": "Mijoz shartnoma va huquqiy masalalar so'raganida",
+            "esc_2": "Mijoz maxsus narx yoki chegirma talab qilganida",
+            "esc_3": "Mijoz to'g'ridan-to'g'ri rieltor bilan gaplashmoqchi bo'lganida"
+          },
+          "welcome": "Salom! Men ko'chmas mulk yordamchisiman. Uy-joylar, narxlar va joylashuvlar haqida ma'lumot beraman. Ko'rishga vaqt belgilashingiz ham mumkin. Sinab ko'ring! 🏠"
+        },
+        "helpdesk": {
+          "prompt": "# ROL VA IDENTIFIKATSIYA\nSen kompaniyaning texnik yordam yordamchisisan (Help Desk AI). Maqsading: foydalanuvchilarga texnik muammolarni hal qilishda yordam berish, FAQ dan javob topish, murakkab holatlarni inson operatoriga yo'naltirish.\n\n# ASOSIY VAZIFA\nFoydalanuvchilarga faqat bilimlar bazasi (BILIMLAR BAZASI) doirasida javob berish.\n\n# BILIMLAR BAZASI:\n{{context}}\n\n# QAT'IY YO'RIQNOMALAR VA CHEKLOVLAR\n1. Muammoni avval tasniflash: texnik xatolik, hisob muammosi, to'lov muammosi yoki boshqa.\n2. Bazada javob bo'lsa — aniq va bosqichma-bosqich yechim ber.\n3. Bazada javob topilmasa — tiket raqami berib, operatorga yo'naltir.\n\n# JAVOB FORMATI VA STILI\n- Sabr-toqatli, tushunarli va texnik jihatdan aniq.\n- Muammoni hal qilish uchun bosqichma-bosqich ko'rsatmalar ber.",
+          "topics": [
+            "Kompaniya ichki sirlari",
+            "Narxlar va moliyaviy ma'lumotlar",
+            "Siyosat"
+          ],
+          "rules": {
+            "esc_1": "Muammo bazada topilmaganida",
+            "esc_2": "Foydalanuvchi shikoyat bildirganida",
+            "esc_3": "Foydalanuvchi to'lov qaytarilishini so'raganida"
+          },
+          "welcome": "Salom! Men texnik yordam yordamchisiman. Muammolaringizni hal qilishda yordam beraman. Savolingizni yozing! 🔧"
+        }
+      },
+      "toasts": {
+        "tg_bot_linked": "Telegram bot muvaffaqiyatli bog'landi",
+        "tg_bot_username_error": "Bot foydalanuvchi nomini aniqlab bo'lmadi. Iltimos, bot foydalanuvchi nomini o'zingiz kiriting.",
+        "save_success": "Barcha o'zgarishlar muvaffaqiyatli saqlandi!",
+        "error_occurred": "Xatolik yuz berdi",
+        "admin_linked": "Admin profil muvaffaqiyatli bog'landi!",
+        "admin_unlinked": "Admin profil muvaffaqiyatli o'chirildi!",
+        "module_created": "\"{title}\" moduli yaratildi",
+        "module_deleted": "Modul o'chirildi",
+        "lesson_created": "\"{title}\" darsi yaratildi",
+        "lesson_deleted": "Dars o'chirildi",
+        "webhook_json_error": "Webhook JSON formatida xatolik! ❌",
+        "input_required": "Iltimos, ism va telefon raqamini kiriting! ❌",
+        "sim_sent_tg": "Lid muvaffaqiyatli simulyatsiya qilindi va Telegramga yuborildi! 🎯",
+        "sim_sorted": "Lid muvaffaqiyatli simulyatsiya qilindi va saralandi! 🎯",
+        "no_data_export": "Eksport qilish uchun ma'lumotlar yo'q!",
+        "csv_downloaded": "CSV hisoboti muvaffaqiyatli yuklab olindi! 📊",
+        "json_downloaded": "JSON hisoboti muvaffaqiyatli yuklab olindi! 💻",
+        "history_cleared": "Tahlillar tarixi muvaffaqiyatli tozalandi! 🧹",
+        "analysis_updated": "AI CustDev tahlillari yangilandi! 🚀",
+        "tg_bot_linked_success": "Telegram bot ({username}) muvaffaqiyatli ulandi!"
+      },
+      "now": "Hozir",
+      "errors": {
+        "verify_code_error": "Tasdiqlash kodini tekshirishda xatolik yuz berdi",
+        "server_connection_error": "Server bilan bog'lanishda xatolik yuz berdi",
+        "response_generation_error": "Kechirasiz, javob shakllantirishda xatolik yuz berdi. Iltimos qayta urinib ko'ring."
+      },
+      "confirmations": {
+        "delete_module_title": "Modulni o'chirish",
+        "delete_module_message": "Ushbu modul va uning ichidagi barcha darslarni o'chirishni tasdiqlaysizmi?",
+        "delete_lesson_title": "Darsni o'chirish",
+        "delete_lesson_message": "Ushbu darsni o'chirishni tasdiqlaysizmi?",
+        "clear_history_title": "Tahlillar tarixini tozalash",
+        "clear_history_message": "Haqiqatan ham barcha tahlil qilingan xabarlar tarixini o'chirib tashlamoqchimisiz? Bu amalni ortga qaytarib bo'lmaydi."
+      },
+      "placeholders": {
+        "new_lesson_content": "Yangi dars matni transkripti...",
+        "enter_code": "Kodni kiriting (masalan: 12345)",
+        "select_tg_bot": "Telegram botni tanlang...",
+        "email_example": "masalan, sardor@gmail.com",
+        "token_example": "Masalan: 123456789:ABCdefGhIJKlmNoPQRsTUVwxyZ",
+        "username_example": "Masalan: mening_aqlli_botim",
+        "bot_name_example": "Masalan: AI Kurator Bot"
+      },
+      "slider_previews": {
+        "tone": {
+          "low_title": "Ohang: Norasmiy (Do'stona)",
+          "low_question": "Narxlaringiz qanaqa?",
+          "low_reply": "Salom! 😊 Bizda narxlar juda ham hamyonbop. Kurslarimiz oyiga atigi 150 ming so'mdan boshlanadi. Qiziqib ko'rasizmi? 😉",
+          "mid_title": "Ohang: Me'yorida (Samimiy)",
+          "mid_question": "Narxlaringiz qanaqa?",
+          "mid_reply": "Salom, xush kelibsiz! Bizning o'quv dasturlarimiz narxi oyiga 150 000 so'mdan boshlanadi. Batafsil ma'lumot olishni istasangiz, yozib qoldiring.",
+          "high_title": "Ohang: Rasmiy",
+          "high_question": "Narxlaringiz qanaqa?",
+          "high_reply": "Assalomu alaykum. Bizning xizmatlarimiz va o'quv kurslarimizning to'lov miqdori oyiga 150 000 so'mni tashkil etadi. Savollaringiz bo'lsa, xizmatingizdamiz."
+        },
+        "length": {
+          "low_title": "Javob uzunligi: Qisqa (Londa)",
+          "low_question": "Darslar qachon boshlanadi?",
+          "low_reply": "Darslar dushanba kuni soat 19:00 da boshlanadi.",
+          "mid_title": "Javob uzunligi: Me'yorida",
+          "mid_question": "Darslar qachon boshlanadi?",
+          "mid_reply": "Yangi guruhimiz uchun darslar kelasi dushanba kuni soat 19:00 da boshlanadi. Darslar haftada 3 marta bo'ladi.",
+          "high_title": "Javob uzunligi: Batafsil tushuntirish",
+          "high_question": "Darslar qachon boshlanadi?",
+          "high_reply": "Bizning darslarimiz kelasi haftaning dushanba kunidan (soat 19:00 da) boshlanadi. Har bir dars davomiyligi 2 soat bo'lib, haftada 3 kun davom etadi. Dastlabki dars bepul."
+        },
+        "humor": {
+          "low_title": "Hazil va Emojilar: Jiddiy (Akademik)",
+          "low_question": "Kursni sotib olsam bo'ladimi?",
+          "low_reply": "Ha, kursni xarid qilishingiz mumkin. Quyidagi havola orqali Click yoki Payme tizimi orqali to'lovni amalga oshiring.",
+          "mid_title": "Hazil va Emojilar: Me'yorida",
+          "mid_question": "Kursni sotib olsam bo'ladimi?",
+          "mid_reply": "Albatta bo'ladi! 😊 Quyidagi to'lov havolasi orqali to'lovni amalga oshiring va guruhga qo'shiling. 🚀",
+          "high_title": "Hazil va Emojilar: Qiziqarli (Emojilar bilan)",
+          "high_question": "Kursni sotib olsam bo'ladimi?",
+          "high_reply": "Voy, albatta-da! 😍 Koinotimizga xush kelibsiz! 🚀 Quyidagi havola orqali to'lovni qilishingiz bilan guruhga uchyapmiz! Click/Payme tayyor! 😉💳✨"
+        }
+      },
+      "simulation": {
+        "webhook_received": "Facebook Webhook so'rovi qabul qilindi",
+        "field_mapped": "Lead maydonlari moslashtirildi (Field Mapping)",
+        "crm_direct_sent": "Mijoz ma'lumotlari Sendly CRM-ga joylandi va Telegramga yuborildi",
+        "ai_analyzed": "AI Agent orqali intent/savol tahlil qilindi",
+        "crm_saved": "Mijoz ma'lumotlari Sendly CRM-ga joylandi",
+        "error_webhook_json": "Xatolik: Webhook JSON formatini o'qib bo'lmadi",
+        "error_input_required": "Xatolik: Ism va telefon kiritilishi shart",
+        "default_summary_direct": "Mijoz Facebook forma orqali ariza qoldirdi (To'g'ridan-to'g'ri yo'naltirish).",
+        "default_summary_ai": "Mijoz Facebook forma orqali ariza qoldirgan.",
+        "summary_price": "Mijoz to'lov shakli, narx yoki chegirmalar bo'yicha ma'lumot so'ragan.",
+        "summary_technical": "Mijoz tizimga kirish yoki texnik nosozlik yuzasidan yordam so'ragan.",
+        "summary_general": "Mijoz umumiy ma'lumot so'radi.",
+        "tag_high_intent": "High Intent",
+        "tag_price_interested": "Narxga Qiziqqan",
+        "tag_tech_issue": "Texnik muammo",
+        "tag_support": "Support",
+        "tag_new_lead": "Yangi Lead",
+        "tag_meta_lead": "Meta Lead",
+        "tag_forwarded": "Yo'naltirilgan",
+        "tag_ai_sorted": "AI Saralangan"
+      },
+      "labels": {
+        "active_agents": "Ishlab turgan AI agent",
+        "active_badge": "FAOL",
+        "configure_btn": "Sozlash",
+        "connected_group": "Ulangan guruh",
+        "tg_routing": "Telegramga yo'naltirish",
+        "sendly_crm": "Sendly CRM",
+        "tg_forwarding_status": "Lidlarni Telegramga yo'naltirish holati",
+        "tg_forwarding_active_desc": "Yo'naltirish faol. Target arizalari Telegram bot orqali guruhga yuborilmoqda.",
+        "tg_forwarding_inactive_desc": "Yo'naltirish o'chirilgan.",
+        "tg_bot_for_leads": "Lidlar uchun Telegram Bot",
+        "tg_bot": "Telegram Bot",
+        "leads_forwarded_via_bot": "Lidlar ushbu Telegram bot orqali guruh yoki profilingizga yo'naltiriladi.",
+        "escalations_sent_via_bot": "Inson-kuratorga murojaatlar ushbu Telegram bot orqali yuboriladi.",
+        "tg_bot_not_found": "Telegram bot topilmadi",
+        "tg_bot_not_found_desc": "Telegram integratsiyasidan foydalanish uchun sozlamalar sahifasida kamida 1ta Telegram bot ulangan bo'lishi lozim.",
+        "link_bot_btn": "Botni ulash ➔",
+        "link_tg_group_or_chat": "Telegram guruh yoki lichkani ulash",
+        "link_human_curator": "Inson-kuratorni ulash",
+        "link_admin_for_leads_desc": "Lidlar to'g'ridan-to'g'ri Telegram guruh yoki profilingizga yuborilishi uchun admin profilini ulang.",
+        "link_admin_for_escalations_desc": "AI javob bera olmagan yoki operator kutilgan holatlarda bot sizga Telegram orqali xabar yo'llashi uchun kurator (admin) profilini ulang.",
+        "admin_linked": "Admin bog'langan",
+        "admin_user_info": "Foydalanuvchi: @{username} (Chat ID: {chatId})",
+        "delete": "O'chirish",
+        "enter_verify_code": "Tasdiqlash kodini kiriting",
+        "verify_instructions_part1": "Telegram-da ",
+        "verify_instructions_part2": " botimizga o'ting va ",
+        "verify_instructions_part3": " buyrug'ini bosing. Bot sizga yuborgan tasdiqlash kodini (kod 1 daqiqa davomida faol bo'ladi) quyida kiriting.",
+        "get_code": "Kodni olish",
+        "checking": "Tekshirilmoqda...",
+        "verify": "Tasdiqlash",
+        "cancel": "Bekor qilish",
+        "admin_not_linked": "Admin ulanmagan",
+        "link": "Ulash",
+        "link_instructions": "Ulash uchun @sendly_robot botimizga borib, profilingizdan botni boshlang (/start). Bot sizga tasdiqlash kodini yuboradi.",
+        "field_mapping_direct": "Lid maydonlarini moslashtirish (Field Mapping)",
+        "ai_lead_mapper": "AI Lead Mapper & Processor",
+        "field_mapping_direct_desc": "Meta Lead formalari maydonlarini Sendly tizimiga moslashtiring.",
+        "direct_forwarding_active": "To'g'ridan-to'g'ri yo'naltirish faol",
+        "direct_forwarding_desc": "Ushbu rejimda AI ishtirok etmaydi va lid ma'lumotlarini saralamaydi. Shuning uchun AI prompti talab etilmaydi. Barcha arizalar to'g'ridan-to'g'ri Telegram guruh yoki profilingizga yo'naltiriladi.",
+        "tg_routing_settings": "Telegramga yo'naltirish sozlamalari",
+        "crm_router": "Sendly CRM Router",
+        "tg_routing_desc": "Facebook arizalarini Telegram guruh yoki lichkangizga yo'naltirishni sozlang.",
+        "integration_test_simulator": "Integratsiya sinovi (Lid simulyatori)",
+        "test_mode": "Sinov rejimi",
+        "customer_email": "Mijoz E-pochtasi (Email)",
+        "forwarding_lead": "Lid yo'naltirilmoqda...",
+        "forwarding_result": "Yo'naltirish natijasi",
+        "forwarding_summary": "Yo'naltirish xulosasi",
+        "ai_response_accuracy": "AI javob berish aniqligi",
+        "avg_response_speed": "O'rtacha javob qaytarish tezligi",
+        "based_on_neural_analysis": "Neyron tarmoq tahlili asosida",
+        "reports_management": "Hisobotlar va boshqaruv",
+        "no_data_found": "Ma'lumot topilmadi.",
+        "link_tg_bot_title": "Telegram botni ulash",
+        "bot_token": "Bot tokeni (HTTP API token)",
+        "get_token_desc": "Tokenni @BotFather orqali yangi bot yaratib olishingiz mumkin.",
+        "bot_username": "Bot foydalanuvchi nomi (Username)",
+        "bot_name_optional": "Bot nomi (Ixtiyoriy)",
+        "connecting": "Ulanmoqda...",
+        "sentiment": "Kayfiyat",
+        "fb_leads_agent": "Facebook Lead Handler + AI",
+        "fb_leads_desc_card": "Facebook reklama formasidan kelgan arizalarni AI orqali saralash faol.",
+        "tg_bot_for_bot": "{agentName} uchun Telegram Bot",
+        "tg_bot_will_answer": "{agentName} ushbu tanlangan Telegram bot orqali savollarga javob beradi.",
+        "tg_bot_required": "{agentName}dan foydalanish uchun kamida 1ta Telegram bot ulangan bo'lishi lozim.",
+        "tg_routing_breadcrumb": "Bosh sahifa / Integratsiya / Lidlarni Telegramga yo'naltirish",
+        "pain_points_details": {
+          "billing": "To'lov usullari yoki kartani bog'lash jarayonidagi qiyinchiliklar",
+          "support": "Platformani ijtimoiy tarmoqlar yoki Telegram botga bog'lashdagi texnik muammolar",
+          "faq": "Dars transkriptlari ichidan kerakli mavzuni mustaqil topa olmaslik",
+          "affiliate": "Hamkorlik komissiyalari va taklif etish havolasi ishlash qoidalarini aniqlashtirish",
+          "default": "Platformaning ishlash imkoniyatlari haqida qo'shimcha ma'lumot olish"
+        }
+      },
+      "solutions": {
+        "billing": "Uzcard/Humo kartalarini ulash bo'yicha bosqichma-bosqich rasm/video qo'llanma qo'shish va to'lov xatoliklari bo'yicha ogohlantirish.",
+        "support": "@BotFather orqali token olish qismini darslikning 1-modulida visual animatsiyalar bilan boyitish.",
+        "faq": "Darslik bilimlar bazasiga (RAG) o'quvchilar tomonidan eng ko'p so'ralgan FAQ javoblarni yangi modul sifatida kiritish.",
+        "default": "Tavsif yoki qo'llanmaga qo'shimcha ma'lumotlar qo'shish.",
+        "affiliate": "Hamkor kabineti sahifasiga komissiya yechib olish va referal tizim shartlari bo'yicha FAQ bo'limini qo'shish."
+      },
+      "pain_points": {
+        "billing": "Uzcard/Humo kartalarini bog'lash va to'lov xatoliklari",
+        "support": "@BotFather orqali API token olish va sozlash bosqichlari",
+        "instagram": "Instagram professional akkauntini ulashdagi cheklovlar",
+        "affiliate": "Referal komissiyalarni yechish va hamkorlik shartlari"
+      },
+      "table": {
+        "user": "Foydalanuvchi",
+        "message": "Murojaat matni",
+        "ai_reply": "AI javobi",
+        "category": "Toifa",
+        "sentiment": "Kayfiyat",
+        "confidence": "Ishonch darajasi",
+        "date": "Sana"
+      },
+      "forms": {
+        "autumn_sale": "Kuzgi chegirmalar va aksiya formasi",
+        "free_lesson": "Bepul dars va maslahat formasi",
+        "premium_membership": "Premium a'zolik uchun ariza formasi"
+      }
     },
     "partner": {
       "title": "Hamkor kabineti",

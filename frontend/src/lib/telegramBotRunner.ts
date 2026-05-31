@@ -263,6 +263,7 @@ export async function handleTelegramUpdate(channelId: string, token: string, upd
     const firstName = message.chat.first_name;
     const lastName = message.chat.last_name;
     const text = message.text;
+    const userLang = (message.from?.language_code || "").startsWith("ru") ? "ru" : (message.from?.language_code || "").startsWith("en") ? "en" : "uz";
     
     // Handle start command to get verification code for admin linking (ONLY for system bot)
     if (channelId === "system_bot" && (text.trim() === "/start" || text.trim().startsWith("/start "))) {
@@ -276,7 +277,12 @@ export async function handleTelegramUpdate(channelId: string, token: string, upd
       }
 
       if (!targetChannelId || targetChannelId === "system_bot") {
-        const infoMsg = `Assalomu alaykum! Sendly botiga xush kelibsiz.\n\nUshbu bot orqali inson-kurator profilini ulamoqchi bo'lsangiz, iltimos Sendly platformasidagi inson-kuratorni ulash bo'limidagi <b>"Kodni olish"</b> tugmasini bosing yoki botni platformada taqdim etilgan maxsus havola orqali boshlang.`;
+        const infoMsg =
+          userLang === "en"
+            ? `Hello! Welcome to the Sendly bot.\n\nIf you want to link a human-curator profile using this bot, please click the <b>"Get Code"</b> button in the link human-curator section on the Sendly platform, or start the bot via the special link provided on the platform.`
+            : userLang === "ru"
+            ? `Здравствуйте! Добро пожаловать в бот Sendly.\n\nЕсли вы хотите подключить профиль человека-куратора через этот бот, пожалуйста, нажмите кнопку <b>"Получить код"</b> в разделе подключения человека-куратора на платформе Sendly или запустите бот по специальной ссылке, предоставленной на платформе.`
+            : `Assalomu alaykum! Sendly botiga xush kelibsiz.\n\nUshbu bot orqali inson-kurator profilini ulamoqchi bo'lsangiz, iltimos Sendly platformasidagi inson-kuratorni ulash bo'limidagi <b>"Kodni olish"</b> tugmasini bosing yoki botni platformada taqdim etilgan maxsus havola orqali boshlang.`;
         await sendTelegramMessage(token, chatId, infoMsg, "HTML");
         return;
       }
@@ -312,15 +318,27 @@ export async function handleTelegramUpdate(channelId: string, token: string, upd
       });
 
       if (!matched) {
-        const errorMsg = `Kechirasiz, ushbu havola eskirgan yoki xato. Tasdiqlash kodini olish uchun iltimos platformadagi inson-kuratorni ulash bo'limidagi <b>"Kodni olish"</b> tugmasini bosing.`;
+        const errorMsg =
+          userLang === "en"
+            ? `Sorry, this link has expired or is incorrect. To get the confirmation code, please click the <b>"Get Code"</b> button in the link human-curator section on the platform.`
+            : userLang === "ru"
+            ? `Извините, эта ссылка устарела или неверна. Чтобы получить код подтверждения, пожалуйста, нажмите кнопку <b>"Получить код"</b> в разделе подключения человека-куратора на платформе.`
+            : `Kechirasiz, ushbu havola eskirgan yoki xato. Tasdiqlash kodini olish uchun iltimos platformadagi inson-kuratorni ulash bo'limidagi <b>"Kodni olish"</b> tugmasini bosing.`;
         await sendTelegramMessage(token, chatId, errorMsg, "HTML");
         return;
       }
       
-      const messageText = `Assalomu alaykum! Sendly botiga xush kelibsiz.\n\nSizning tasdiqlash kodingiz: <code>${verifyCode}</code>\n\nUshbu kodni Sendly platformasidagi adminni ulash oynasiga kiriting (kod 1 daqiqa davomida faol bo'ladi).`;
+      const messageText =
+        userLang === "en"
+          ? `Hello! Welcome to the Sendly bot.\n\nYour confirmation code is: <code>${verifyCode}</code>\n\nType this code into the connect admin modal on the Sendly platform (code is active for 1 minute).`
+          : userLang === "ru"
+          ? `Здравствуйте! Добро пожаловать в бот Sendly.\n\nВаш код подтверждения: <code>${verifyCode}</code>\n\nВведите этот код в окно подключения администратора на платформе Sendly (код активен в течение 1 минуты).`
+          : `Assalomu alaykum! Sendly botiga xush kelibsiz.\n\nSizning tasdiqlash kodingiz: <code>${verifyCode}</code>\n\nUshbu kodni Sendly platformasidagi adminni ulash oynasiga kiriting (kod 1 daqiqa davomida faol bo'ladi).`;
+      
+      const copyBtnText = userLang === "en" ? "📋 Copy Code" : userLang === "ru" ? "📋 Копировать код" : "📋 Kodni nusxalash";
       const replyMarkup = {
         inline_keyboard: [[
-          { text: "📋 Kodni nusxalash", callback_data: "copy_code" }
+          { text: copyBtnText, callback_data: "copy_code" }
         ]]
       };
       
@@ -376,8 +394,21 @@ export async function handleTelegramUpdate(channelId: string, token: string, upd
         context[`replai_bot_settings_${channelId}`] = JSON.stringify(settings);
       });
       
-      const accountInfo = userEmail ? ` Akkaunt: ${userEmail}.` : "";
-      await sendTelegramMessage(token, chatId, `Tabriklaymiz! Siz ushbu bot uchun kurator (admin) qilib tayinlandingiz.${accountInfo} Mijozlar suhbatni operatorga yo'naltirishni so'rashsa, sizga xabar yuboriladi.`);
+      const accountInfo =
+        userLang === "en"
+          ? userEmail ? ` Account: ${userEmail}.` : ""
+          : userLang === "ru"
+          ? userEmail ? ` Аккаунт: ${userEmail}.` : ""
+          : userEmail ? ` Akkaunt: ${userEmail}.` : "";
+
+      const curatorSuccessMsg =
+        userLang === "en"
+          ? `Congratulations! You have been assigned as the curator (admin) for this bot.${accountInfo} If customers request a human support transfer, you will be notified.`
+          : userLang === "ru"
+          ? `Поздравляем! Вы были назначены куратором (админом) для этого бота.${accountInfo} Если клиенты попросят перенаправить диалог оператору, вам будет отправлено уведомление.`
+          : `Tabriklaymiz! Siz ushbu bot uchun kurator (admin) qilib tayinlandingiz.${accountInfo} Mijozlar suhbatni operatorga yo'naltirishni so'rashsa, sizga xabar yuboriladi.`;
+
+      await sendTelegramMessage(token, chatId, curatorSuccessMsg);
       return;
     }
     
@@ -496,11 +527,26 @@ export async function handleTelegramUpdate(channelId: string, token: string, upd
              if (matchedAutomation.replyText) {
                botReplyText = matchedAutomation.replyText;
              } else if (nameLower.includes("lead magnet") || matchedKeyword === "kitob" || matchedKeyword === "bonus") {
-               botReplyText = "Bepul qo'llanma havolasi: https://sendly.uz/book. Obunangiz uchun rahmat!";
+               botReplyText =
+                 userLang === "en"
+                   ? "Free guide link: https://sendly.uz/book. Thank you for your subscription!"
+                   : userLang === "ru"
+                   ? "Ссылка на бесплатное руководство: https://sendly.uz/book. Спасибо за вашу подписку!"
+                   : "Bepul qo'llanma havolasi: https://sendly.uz/book. Obunangiz uchun rahmat!";
              } else if (matchedKeyword === "/start" || matchedKeyword === "boshlash") {
-               botReplyText = "Assalomu alaykum! Sendly chatbot xizmatiga xush kelibsiz. Tizimimiz muvaffaqiyatli ulangan.";
+               botReplyText =
+                 userLang === "en"
+                   ? "Hello! Welcome to the Sendly chatbot service. Our system is successfully connected."
+                   : userLang === "ru"
+                   ? "Здравствуйте! Добро пожаловать в сервис чат-ботов Sendly. Наша система успешно подключена."
+                   : "Assalomu alaykum! Sendly chatbot xizmatiga xush kelibsiz. Tizimimiz muvaffaqiyatli ulangan.";
              } else if (matchedKeyword === "narxi" || matchedKeyword === "tarif" || matchedKeyword === "kurs") {
-               botReplyText = "Bizning tariflarimiz: \n• Pro: 150,000 so'm/oy (1ta akkaunt)\n• Premium: 1,000,000 so'm/oy (10ta akkaunt)\n\nBatafsil ma'lumot olish yoki ulanish uchun operatorimiz tez orada javob yozadi.";
+               botReplyText =
+                 userLang === "en"
+                   ? "Our pricing: \n• Pro: 150,000 UZS/month (1 account)\n• Premium: 1,200,000 UZS/month (10 accounts)\n\nOur operator will reply shortly with more details or to help you connect."
+                   : userLang === "ru"
+                   ? "Наши тарифы: \n• Pro: 150,000 сум/мес (1 аккаунт)\n• Premium: 1,200,000 сум/мес (10 аккаунтов)\n\nНаш оператор скоро свяжется с вами для подробной информации."
+                   : "Bizning tariflarimiz: \n• Pro: 150,000 so'm/oy (1ta akkaunt)\n• Premium: 1,200,000 so'm/oy (10ta akkaunt)\n\nBatafsil ma'lumot olish yoki ulanish uchun operatorimiz tez orada javob yozadi.";
              } else {
                botReplyText = matchedKeyword;
              }
@@ -521,7 +567,12 @@ export async function handleTelegramUpdate(channelId: string, token: string, upd
             }
 
             if ((credits.balance || 0) < 5) {
-              botReplyText = "Hisobingizda AI kreditlar yetarli emas. Iltimos, replai.uz hisobingiz orqali AI kreditlarni to'ldiring.";
+              botReplyText =
+                userLang === "en"
+                  ? "You do not have enough AI credits on your account. Please top up your AI credits balance in your replai.uz panel."
+                  : userLang === "ru"
+                  ? "На вашем балансе недостаточно AI кредитов. Пожалуйста, пополните баланс AI кредитов в личном кабинете replai.uz."
+                  : "Hisobingizda AI kreditlar yetarli emas. Iltimos, replai.uz hisobingiz orqali AI kreditlarni to'ldiring.";
             } else {
               const studentName = chat.name || "Talaba";
               const chatHistory = chat.messages
@@ -597,7 +648,12 @@ export async function handleTelegramUpdate(channelId: string, token: string, upd
 
                 if (shouldEscalate) {
                   chat.liveTakeover = true;
-                  botReplyText = "Kechirasiz, ushbu savolga to'g'ri va aniq javob berish uchun suhbatni inson-kuratorga yo'naltirdim. Tez orada sizga javob yozishadi.";
+                  botReplyText =
+                    userLang === "en"
+                      ? "Sorry, to provide an accurate answer to this question, I have transferred this conversation to a human curator. You will receive a response shortly."
+                      : userLang === "ru"
+                      ? "Извините, для точного ответа на этот вопрос я перенаправил этот чат человеку-куратору. Вам скоро ответят."
+                      : "Kechirasiz, ushbu savolga to'g'ri va aniq javob berish uchun suhbatni inson-kuratorga yo'naltirdim. Tez orada sizga javob yozishadi.";
                   
                   if (settings.adminTelegramChatId) {
                     // Try to find the custom bot username for context
@@ -627,25 +683,41 @@ export async function handleTelegramUpdate(channelId: string, token: string, upd
                     const sysToken = process.env.SYSTEM_BOT_TOKEN || process.env.TELEGRAM_BOT_TOKEN;
                     const notifyToken = sysToken || token;
                     const channelInfoStr = channelUsername ? ` (@${channelUsername.replace(/^@+/, "")})` : "";
+                    
+                    const noUsernameStr = userLang === "en" ? "no_username" : userLang === "ru" ? "нет_юзернейма" : "username_yoq";
+                    const newNotificationText =
+                      userLang === "en"
+                        ? `New ticket (Operator requested)${channelInfoStr}:\n\nUser: ${chat.name} (@${chat.username || noUsernameStr})\nQuestion: ${text}\n\nPlease visit the Sendly inbox to reply to this user.`
+                        : userLang === "ru"
+                        ? `Новое обращение (Ожидание оператора)${channelInfoStr}:\n\nПользователь: ${chat.name} (@${chat.username || noUsernameStr})\nВопрос: ${text}\n\nПожалуйста, перейдите в раздел Входящие в Sendly, чтобы ответить пользователю.`
+                        : `Yangi murojaat (Operator kutilmoqda)${channelInfoStr}:\n\nFoydalanuvchi: ${chat.name} (@${chat.username || noUsernameStr})\nSavol: ${text}\n\nUshbu foydalanuvchiga javob berish uchun Sendly inbox bo'limiga kiring.`;
 
                     sendTelegramMessage(
                       notifyToken,
                       settings.adminTelegramChatId,
-                      `Yangi murojaat (Operator kutilmoqda)${channelInfoStr}:\n\nFoydalanuvchi: ${chat.name} (@${chat.username || "username_yoq"})\nSavol: ${text}\n\nUshbu foydalanuvchiga javob berish uchun Sendly inbox bo'limiga kiring.`
+                      newNotificationText
                     ).catch(err => console.error("Failed to notify admin on Telegram:", err));
                   }
                 } else {
                   botReplyText = ragResult.text;
                 }
 
-                const cost = 5 + Math.ceil(botReplyText.length / 10);
+                const cost = Math.min(100, 5 + Math.ceil(botReplyText.length / 10));
                 credits.balance = Math.max(0, credits.balance - cost);
                 credits.used = (credits.used || 0) + cost;
+                
+                const usageDesc =
+                  userLang === "en"
+                    ? `AI Curator response (${botReplyText.length} chars)`
+                    : userLang === "ru"
+                    ? `Ответ AI куратора (${botReplyText.length} симв.)`
+                    : `AI Curator javobi (${botReplyText.length} belgi)`;
+
                 credits.history.unshift({
                   id: `tx-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
                   type: "usage",
                   amount: cost,
-                  description: `AI Curator javobi (${botReplyText.length} belgi)`,
+                  description: usageDesc,
                   date: new Date().toLocaleString("uz-UZ", { timeZone: "Asia/Tashkent" })
                 });
                 context["replai_ai_credits_data"] = JSON.stringify(credits);
@@ -672,10 +744,242 @@ export async function handleTelegramUpdate(channelId: string, token: string, upd
         }
       }
       
+      // 5. Update CRM Contacts list with parsed lead information (phone, email, company name)
+      const contactsKey = "replai_contacts";
+      const rawContacts = context[contactsKey];
+      let contactsList: any[] = rawContacts ? JSON.parse(rawContacts) : [];
+      if (!Array.isArray(contactsList)) {
+        contactsList = [];
+      }
+
+      // Check if contact already exists
+      let contactObj = contactsList.find((c: any) => c.username === (username || `tg_${chatId}`) || c.id === String(chatId));
+
+      // Attempt to extract phone number from text
+      let extractedPhone = "";
+      const phoneMatch = text.match(/(?:\+?998|8)\s?\(?\d{2}\)?\s?\d{3}\s?\d{2}\s?\d{2}/) || text.match(/\+?\d{9,15}/);
+      if (phoneMatch) {
+        extractedPhone = phoneMatch[0].replace(/\s+/g, "");
+      }
+
+      // Attempt to extract email
+      let extractedEmail = "";
+      const emailMatch = text.match(/[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/);
+      if (emailMatch) {
+        extractedEmail = emailMatch[0];
+      }
+
+      // Attempt to extract company/business name
+      let extractedCompany = "";
+      const companyPatterns = [
+        /(?:kompaniyam|firmam|biznesim|tashkilotim|do'konim|dokonim)\s+(?:nomi\s+)?(?:yo'q\s+emas\s+)?(["']?[A-Za-z0-9\sа-яА-ЯёЁўЎқҚғҒҳҲ\-]{2,30}["']?)/i,
+        /kompaniya:\s*(["']?[A-Za-z0-9\sа-яА-ЯёЁўЎқҚғҒҳҲ\-]{2,30}["']?)/i,
+        /(?:kompaniya|firma|mchj|ooo)\s+(["']?[A-Za-z0-9\sа-яА-ЯёЁўЎқҚғҒҳҲ\-]{2,30}["']?)/i
+      ];
+      for (const pattern of companyPatterns) {
+        const match = text.match(pattern);
+        if (match && match[1]) {
+          extractedCompany = match[1].replace(/["']/g, "").trim();
+          break;
+        }
+      }
+
+      const cleanName = `${firstName || ""} ${lastName || ""}`.trim() || username || `Telegram User ${chatId}`;
+
+      if (!contactObj) {
+        contactObj = {
+          id: String(chatId),
+          name: cleanName,
+          username: username || `tg_${chatId}`,
+          status: true,
+          messagesCount: 1,
+          tags: ["Telegram"],
+          lastActive: new Date().toLocaleTimeString("uz-UZ", { hour: "2-digit", minute: "2-digit" }),
+          phone: extractedPhone,
+          email: extractedEmail,
+          companyName: extractedCompany,
+          lastMessage: text
+        };
+        contactsList.unshift(contactObj);
+      } else {
+        contactObj.messagesCount = (contactObj.messagesCount || 0) + 1;
+        contactObj.lastActive = new Date().toLocaleTimeString("uz-UZ", { hour: "2-digit", minute: "2-digit" });
+        contactObj.lastMessage = text;
+        if (extractedPhone) contactObj.phone = extractedPhone;
+        if (extractedEmail) contactObj.email = extractedEmail;
+        if (extractedCompany) contactObj.companyName = extractedCompany;
+        
+        // Add interest tags based on suhbat keywords
+        if (text.toLowerCase().includes("narxi") || text.toLowerCase().includes("to'lov")) {
+          if (!contactObj.tags.includes("Tarifga qiziqqan")) {
+            contactObj.tags.push("Tarifga qiziqqan");
+          }
+        }
+        if (text.toLowerCase().includes("muammo") || text.toLowerCase().includes("ishlamayapti")) {
+          if (!contactObj.tags.includes("Texnik yordam")) {
+            contactObj.tags.push("Texnik yordam");
+          }
+        }
+      }
+
+      context[contactsKey] = JSON.stringify(contactsList);
       context[chatsKey] = JSON.stringify(chatsList);
     });
   } catch (err) {
     console.error(`Error handling Telegram update for ${channelId}:`, err);
+  }
+}
+
+const lastOutreachChecks: Record<string, number> = {};
+
+async function checkAndRunAutoOutreach(channelId: string, token: string) {
+  try {
+    await updateDbFile(async (dbData) => {
+      let context: Record<string, string> = dbData as unknown as Record<string, string>;
+
+      if (dbData.userData && typeof dbData.userData === "object") {
+        for (const userVal of Object.values(dbData.userData)) {
+          if (userVal && typeof userVal === "object") {
+            const rawUserChannels = (userVal as Record<string, string>)["replai_channels"];
+            const userChannels: Channel[] = rawUserChannels ? JSON.parse(rawUserChannels) : [];
+            if (userChannels.some(c => c.id === channelId)) {
+              context = userVal as Record<string, string>;
+              break;
+            }
+          }
+        }
+      }
+
+      // Check if bot settings enable autoOutreach
+      const rawSettings = context[`replai_bot_settings_${channelId}`];
+      if (!rawSettings) return;
+      const settings: BotSettings = JSON.parse(rawSettings);
+      if (!settings.autoOutreach) return;
+
+      // Check active hours
+      const now = new Date();
+      const currentHour = now.getHours();
+      const currentMinute = now.getMinutes();
+      const currentTimeVal = currentHour * 60 + currentMinute;
+
+      const [startHour, startMin] = (settings.outreachStart || "09:00").split(":").map(Number);
+      const [endHour, endMin] = (settings.outreachEnd || "21:00").split(":").map(Number);
+      const startTimeVal = startHour * 60 + startMin;
+      const endTimeVal = endHour * 60 + endMin;
+
+      if (currentTimeVal < startTimeVal || currentTimeVal > endTimeVal) {
+        return; // Outside outreach hours
+      }
+
+      // Load chats
+      const chatsKey = `replai_chats_${channelId}`;
+      const rawChats = context[chatsKey];
+      if (!rawChats) return;
+      const chatsList: ChatThread[] = JSON.parse(rawChats);
+
+      let credits = { balance: 100, used: 0, history: [] as any[] };
+      if (context["replai_ai_credits_data"]) {
+        try {
+          credits = JSON.parse(context["replai_ai_credits_data"]);
+        } catch (e) {
+          // ignore
+        }
+      }
+
+      const lessons: Lesson[] = context["replai_lessons"] ? JSON.parse(context["replai_lessons"]) : [];
+      const modules: Module[] = context["replai_modules"] ? JSON.parse(context["replai_modules"]) : [];
+
+      let hasUpdates = false;
+
+      for (const chat of chatsList) {
+        if (chat.liveTakeover) continue; // Skip if operator is talking
+
+        const lastMsg = chat.messages[chat.messages.length - 1];
+        if (!lastMsg) continue;
+
+        // Skip if the last message was already an auto outreach follow-up
+        if (lastMsg.sender === "bot" && lastMsg.text.includes("[Follow-up]")) continue;
+
+        // Determine inactivity duration.
+        // We look for chats that have been inactive for more than 24 hours.
+        let timestampMs = 0;
+        if (lastMsg.id.startsWith("msg-")) {
+          const parts = lastMsg.id.split("-");
+          timestampMs = parseInt(parts[1]);
+        }
+        if (!timestampMs || isNaN(timestampMs)) continue;
+
+        const elapsedHours = (Date.now() - timestampMs) / (1000 * 60 * 60);
+        if (elapsedHours < 24) continue; 
+
+        // Verify credit balance
+        if ((credits.balance || 0) < 5) continue;
+
+        // Build follow-up query to Gemini RAG
+        const chatHistory = chat.messages
+          .filter(m => m.text)
+          .map(m => ({
+            role: m.sender === "user" ? ("user" as const) : ("model" as const),
+            parts: [{ text: m.text }]
+          }));
+
+        // We ask Gemini to write a follow up
+        try {
+          const followUpPrompt = "Mijoz suhbatni to'xtatdi. Dars materiallariga asoslanib, uning savoli yoki qiziqishi qolgan-qolmaganini so'rab muloyim va juda qisqa eslatma yozing (1-2 gap).";
+          
+          const ragResult = await queryRAG(
+            followUpPrompt,
+            chat.name || "Talaba",
+            lessons,
+            modules,
+            settings,
+            chatHistory
+          );
+
+          if (ragResult && ragResult.text) {
+            const outreachText = ragResult.text;
+            
+            // Send the message on Telegram
+            await sendTelegramMessage(token, chat.id, outreachText);
+
+            // Record message in history
+            const botMsg: ChatMessage = {
+              id: `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+              sender: "bot",
+              text: `${outreachText} \n\n[Follow-up]`,
+              timestamp: new Date().toLocaleTimeString("uz-UZ", { hour: "2-digit", minute: "2-digit" }),
+            };
+            chat.messages.push(botMsg);
+            chat.lastMessage = outreachText;
+            chat.unread = true;
+            chat.time = "Hozir";
+
+            // Deduct credits
+            const cost = Math.min(100, 5 + Math.ceil(outreachText.length / 10));
+            credits.balance = Math.max(0, credits.balance - cost);
+            credits.used = (credits.used || 0) + cost;
+            credits.history.unshift({
+              id: `tx-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+              type: "usage",
+              amount: cost,
+              description: `AI Curator avtomatik eslatma (Follow-up)`,
+              date: new Date().toLocaleString("uz-UZ", { timeZone: "Asia/Tashkent" })
+            });
+
+            hasUpdates = true;
+          }
+        } catch (err) {
+          console.error(`Failed to generate outreach for chat ${chat.id}:`, err);
+        }
+      }
+
+      if (hasUpdates) {
+        context[chatsKey] = JSON.stringify(chatsList);
+        context["replai_ai_credits_data"] = JSON.stringify(credits);
+      }
+    });
+  } catch (err) {
+    console.error("Error in checkAndRunAutoOutreach:", err);
   }
 }
 
@@ -715,6 +1019,16 @@ async function runBotPollLoop(channelId: string, botState: TelegramBotState) {
       for (const update of updates) {
         botState.offset = Math.max(botState.offset, update.update_id + 1);
         await handleTelegramUpdate(channelId, botState.token, update);
+      }
+
+      // Periodically check and run auto outreach (every 5 minutes)
+      const now = Date.now();
+      const lastCheck = lastOutreachChecks[channelId] || 0;
+      if (now - lastCheck > 5 * 60 * 1000) {
+        lastOutreachChecks[channelId] = now;
+        checkAndRunAutoOutreach(channelId, botState.token).catch((err) =>
+          console.error("Auto outreach check failed:", err)
+        );
       }
     } catch (err) {
       console.error(`Error in bot poll loop for ${channelId}:`, err);

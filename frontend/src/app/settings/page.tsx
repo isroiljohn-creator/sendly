@@ -9,6 +9,7 @@ import { Save, Database, Trash2, Plus, Bot, X, CheckCircle, ChevronDown, Downloa
 import { Instagram } from "@/components/ui/icons";
 import { db } from "@/lib/db";
 import type { User, Channel } from "@/lib/db";
+import { CustomDropdown } from "@/components/ui/CustomDropdown";
 
 type ModalType = "instagram" | "telegram" | "choose" | null;
 
@@ -57,6 +58,10 @@ export default function SettingsPage() {
   const [apiKey, setApiKey] = useState("");
   const [showKey, setShowKey] = useState(false);
   const [copiedKey, setCopiedKey] = useState(false);
+  const [mcpTab, setMcpTab] = useState<"local" | "cloud" | "sse">("local");
+  const [copiedMcpConfig, setCopiedMcpConfig] = useState(false);
+  const [copiedMcpUrl, setCopiedMcpUrl] = useState(false);
+  const [inviting, setInviting] = useState(false);
 
   // Form states
   const [name, setName] = useState("");
@@ -172,18 +177,42 @@ export default function SettingsPage() {
   const [inviteEmail, setInviteEmail] = useState("");
   const [inviteRole, setInviteRole] = useState("Administrator");
 
-  const handleInviteMember = (e: React.FormEvent) => {
+  const handleInviteMember = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!inviteEmail.trim()) return;
-    const newMember = {
-      id: `m_${Date.now()}`,
-      name: inviteEmail.split("@")[0],
-      email: inviteEmail,
-      role: inviteRole
-    };
-    setTeamMembers([...teamMembers, newMember]);
-    setInviteEmail("");
-    showAlert(t("common.success"), t("pages.settings_page.team_title") + " (" + inviteEmail + ")");
+    if (!inviteEmail.trim() || inviting) return;
+
+    setInviting(true);
+    try {
+      const newMember = {
+        id: `m_${Date.now()}`,
+        name: inviteEmail.split("@")[0],
+        email: inviteEmail,
+        role: inviteRole
+      };
+      
+      const res = await fetch("/api/invite", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: inviteEmail,
+          role: inviteRole,
+          inviterName: currentUser?.fullName || "Workspace Egasi"
+        })
+      });
+
+      if (!res.ok) {
+        throw new Error("Pochta jo'natish xatoligi");
+      }
+
+      setTeamMembers([...teamMembers, newMember]);
+      setInviteEmail("");
+      showAlert(t("common.success"), t("pages.settings_page.team_title") + " (" + inviteEmail + ")");
+    } catch (err: any) {
+      console.error("Invite member failed:", err);
+      showAlert(t("common.error"), err.message || "Xatolik yuz berdi");
+    } finally {
+      setInviting(false);
+    }
   };
 
   const handleRoleChange = (id: string, newRole: string) => {
@@ -452,6 +481,16 @@ export default function SettingsPage() {
                 >
                   {t("pages.settings_page.apikeys")}
                 </button>
+                <button
+                  onClick={() => setActiveSection("mcp")}
+                  className={`flex items-center w-full px-3 py-2 text-[12px] font-semibold rounded-[10px] transition-colors text-left ${
+                    activeSection === "mcp"
+                    ? "bg-[#C7F33C]/20 text-black font-bold"
+                    : "text-[#707070] hover:bg-[#F9F9F7] hover:text-black"
+                  }`}
+                >
+                  {t("pages.settings_page.tab_mcp")}
+                </button>
               </div>
 
               {/* Accounts Section */}
@@ -607,18 +646,15 @@ export default function SettingsPage() {
                     className="flex-1 rounded-[10px] border border-[#D8D8D8] px-4 py-3 text-[13px] text-black focus:outline-none focus:border-black"
                     placeholder={t("pages.settings_page.invite_email_placeholder")}
                   />
-                  <div className="relative">
-                    <select
+                  <div className="w-[150px]">
+                    <CustomDropdown
                       value={inviteRole}
-                      onChange={(e) => setInviteRole(e.target.value)}
-                      className="appearance-none bg-white rounded-[10px] border border-[#D8D8D8] pl-4 pr-10 py-3 text-[13px] font-semibold text-black focus:outline-none focus:border-black cursor-pointer h-[44px]"
-                    >
-                      <option value="Administrator">{t("pages.settings_page.team_role_admin")}</option>
-                      <option value="Egasi">{t("pages.settings_page.team_role_owner")}</option>
-                    </select>
-                    <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-[#707070]">
-                      <ChevronDown size={14} />
-                    </div>
+                      onChange={(val) => setInviteRole(val)}
+                      options={[
+                        { value: "Administrator", label: t("pages.settings_page.team_role_admin") },
+                        { value: "Kuzatuvchi", label: t("pages.settings_page.team_role_observer") }
+                      ]}
+                    />
                   </div>
                   <button
                     type="submit"
@@ -636,18 +672,24 @@ export default function SettingsPage() {
                         <p className="text-[14px] font-bold text-black">{member.name}</p>
                         <p className="text-[12px] text-[#707070] mt-0.5">{member.email}</p>
                       </div>
-                      <div className="relative">
-                        <select
-                          value={member.role}
-                          onChange={(e) => handleRoleChange(member.id, e.target.value)}
-                          className="appearance-none bg-transparent pl-2 pr-8 py-1.5 text-[13px] font-semibold text-[#707070] hover:text-black focus:outline-none cursor-pointer"
-                        >
-                          <option value="Egasi">{t("pages.settings_page.team_role_owner")}</option>
-                          <option value="Administrator">{t("pages.settings_page.team_role_admin")}</option>
-                        </select>
-                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-1 text-[#707070]">
-                          <ChevronDown size={14} />
-                        </div>
+                      <div>
+                        {member.role === "Egasi" ? (
+                          <span className="text-[12px] font-bold text-[#5A7C1E] bg-[#C7F33C]/20 px-3 py-1.5 rounded-full select-none">
+                            {t("pages.settings_page.team_role_owner")}
+                          </span>
+                        ) : (
+                          <div className="w-[150px]">
+                            <CustomDropdown
+                              value={member.role}
+                              onChange={(val) => handleRoleChange(member.id, val)}
+                              options={[
+                                { value: "Administrator", label: t("pages.settings_page.team_role_admin") },
+                                { value: "Kuzatuvchi", label: t("pages.settings_page.team_role_observer") }
+                              ]}
+                              className="border-none bg-transparent hover:bg-black/5"
+                            />
+                          </div>
+                        )}
                       </div>
                     </div>
                   ))}
@@ -771,6 +813,204 @@ export default function SettingsPage() {
                       <span>{tr("regenerate_btn")}</span>
                     </button>
                   </div>
+                </div>
+              </div>
+            )}
+
+            {/* MCP Tab */}
+            {activeSection === "mcp" && (
+              <div className="max-w-[680px] flex flex-col gap-6 animate-in fade-in duration-200">
+                <div>
+                  <h3 className="text-[28px] font-bold text-black">{t("pages.settings_page.mcp_title")}</h3>
+                  <p className="text-[13px] text-[#707070] mt-1.5 leading-relaxed">{t("pages.settings_page.mcp_desc")}</p>
+                </div>
+
+                {/* API Key warning/info box */}
+                <div className="p-4 rounded-[14px] bg-[#C7F33C]/10 border border-[#C7F33C]/20 flex items-center justify-between gap-3 text-[12px] text-black">
+                  <div className="flex items-center gap-2">
+                    <Database size={16} className="text-black shrink-0" />
+                    <span>
+                      <strong>{t("pages.settings_page.mcp_api_key_info")}</strong>{" "}
+                      <code className="bg-white/60 px-2 py-0.5 rounded font-mono text-[11px]">
+                        {apiKey ? `${apiKey.substring(0, 12)}...${apiKey.substring(apiKey.length - 4)}` : "Generate a key first"}
+                      </code>
+                    </span>
+                  </div>
+                  <button
+                    onClick={() => {
+                      navigator.clipboard.writeText(apiKey);
+                      showAlert(t("common.success"), t("pages.settings_page.copied_title") || "Nusxalandi");
+                    }}
+                    className="flex items-center gap-1 text-[11px] font-bold hover:underline cursor-pointer"
+                  >
+                    <Copy size={12} />
+                    <span>{t("common.copy")}</span>
+                  </button>
+                </div>
+
+                {/* Navigation inside MCP: Tabs switcher */}
+                <div className="flex border-b border-[#E8E8E8] gap-6 text-[13px] font-semibold text-[#707070]">
+                  <button
+                    type="button"
+                    onClick={() => setMcpTab("local")}
+                    className={`pb-3 relative transition-colors ${
+                      mcpTab === "local" ? "text-black border-b-2 border-black" : "hover:text-black"
+                    }`}
+                  >
+                    {t("pages.settings_page.mcp_local_tab")}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setMcpTab("cloud")}
+                    className={`pb-3 relative transition-colors ${
+                      mcpTab === "cloud" ? "text-black border-b-2 border-black" : "hover:text-black"
+                    }`}
+                  >
+                    {t("pages.settings_page.mcp_cloud_tab")}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setMcpTab("sse")}
+                    className={`pb-3 relative transition-colors ${
+                      mcpTab === "sse" ? "text-black border-b-2 border-black" : "hover:text-black"
+                    }`}
+                  >
+                    {t("pages.settings_page.mcp_sse_tab")}
+                  </button>
+                </div>
+
+                {/* Tab content */}
+                <div className="mt-2">
+                  {mcpTab === "local" && (
+                    <div className="flex flex-col gap-4 animate-in fade-in duration-150">
+                      <p className="text-[13px] text-[#707070] leading-relaxed">
+                        {t("pages.settings_page.mcp_local_desc")}
+                      </p>
+                      
+                      <div className="flex flex-col gap-3.5 bg-[#F9F9F7] border border-[#E8E8E8] p-5 rounded-[16px] text-[12px] text-[#505050]">
+                        <p>{t("pages.settings_page.mcp_local_step_1")}</p>
+                        <p>{t("pages.settings_page.mcp_local_step_2")}</p>
+                        <p>{t("pages.settings_page.mcp_local_step_3")}</p>
+
+                        <div className="relative mt-2 rounded-[12px] bg-black text-white p-4 font-mono text-[11px] overflow-x-auto">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const configText = JSON.stringify({
+                                "mcpServers": {
+                                  "sendly-workspace": {
+                                    "command": "node",
+                                    "args": [
+                                      "/absolute/path/to/sendly-mcp.js"
+                                    ],
+                                    "env": {
+                                      "SENDLY_API_URL": typeof window !== "undefined" ? window.location.origin : "http://localhost:3000",
+                                      "SENDLY_API_KEY": apiKey,
+                                      "SENDLY_USER_ID": apiKey
+                                    }
+                                  }
+                                }
+                              }, null, 2);
+                              navigator.clipboard.writeText(configText);
+                              showAlert(t("common.success"), t("pages.settings_page.copied_title") || "Nusxalandi");
+                            }}
+                            className="absolute top-3 right-3 text-white/60 hover:text-white p-1 hover:bg-white/10 rounded transition-all"
+                            title="Copy config"
+                          >
+                            <Copy size={14} />
+                          </button>
+                          <pre>{JSON.stringify({
+                            "mcpServers": {
+                              "sendly-workspace": {
+                                "command": "node",
+                                "args": [
+                                  "/absolute/path/to/sendly-mcp.js"
+                                ],
+                                "env": {
+                                  "SENDLY_API_URL": typeof window !== "undefined" ? window.location.origin : "http://localhost:3000",
+                                  "SENDLY_API_KEY": apiKey,
+                                  "SENDLY_USER_ID": apiKey
+                                }
+                              }
+                            }
+                          }, null, 2)}</pre>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {mcpTab === "cloud" && (
+                    <div className="flex flex-col gap-4 animate-in fade-in duration-150">
+                      <p className="text-[13px] text-[#707070] leading-relaxed">
+                        {t("pages.settings_page.mcp_cloud_desc")}
+                      </p>
+
+                      <div className="flex flex-col gap-3.5 bg-[#F9F9F7] border border-[#E8E8E8] p-5 rounded-[16px] text-[12px] text-[#505050]">
+                        <p>{t("pages.settings_page.mcp_cloud_step_1")}</p>
+                        <p>{t("pages.settings_page.mcp_cloud_step_2")}</p>
+                        
+                        <div className="flex items-center gap-2 pl-4">
+                          <input
+                            type="text"
+                            readOnly
+                            value={typeof window !== "undefined" ? `${window.location.origin}/api/mcp/openapi.json` : "/api/mcp/openapi.json"}
+                            className="flex-1 bg-white border border-[#D8D8D8] rounded-[8px] px-3 py-1.5 text-[11px] font-mono text-black focus:outline-none"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const specUrl = typeof window !== "undefined" ? `${window.location.origin}/api/mcp/openapi.json` : "/api/mcp/openapi.json";
+                              navigator.clipboard.writeText(specUrl);
+                              showAlert(t("common.success"), t("pages.settings_page.copied_title") || "Nusxalandi");
+                            }}
+                            className="bg-black hover:bg-black/90 text-white font-semibold text-[11px] px-3.5 py-1.5 rounded-[8px] transition-all flex items-center gap-1 active:scale-95 shrink-0"
+                          >
+                            <Copy size={12} />
+                            <span>{t("common.copy")}</span>
+                          </button>
+                        </div>
+
+                        <p>{t("pages.settings_page.mcp_cloud_step_3")}</p>
+                      </div>
+                    </div>
+                  )}
+
+                  {mcpTab === "sse" && (
+                    <div className="flex flex-col gap-4 animate-in fade-in duration-150">
+                      <p className="text-[13px] text-[#707070] leading-relaxed">
+                        {t("pages.settings_page.mcp_sse_desc")}
+                      </p>
+
+                      <div className="flex flex-col gap-3.5 bg-[#F9F9F7] border border-[#E8E8E8] p-5 rounded-[16px] text-[12px] text-[#505050]">
+                        <p className="font-bold text-black">{t("pages.settings_page.mcp_sse_url_label")}</p>
+                        
+                        <div className="flex items-center gap-2">
+                          <input
+                            type="text"
+                            readOnly
+                            value={typeof window !== "undefined" ? `${window.location.origin}/api/mcp/sse?apiKey=${apiKey}` : `/api/mcp/sse?apiKey=${apiKey}`}
+                            className="flex-1 bg-white border border-[#D8D8D8] rounded-[8px] px-3 py-1.5 text-[11px] font-mono text-black focus:outline-none"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const sseUrl = typeof window !== "undefined" ? `${window.location.origin}/api/mcp/sse?apiKey=${apiKey}` : `/api/mcp/sse?apiKey=${apiKey}`;
+                              navigator.clipboard.writeText(sseUrl);
+                              showAlert(t("common.success"), t("pages.settings_page.copied_title") || "Nusxalandi");
+                            }}
+                            className="bg-black hover:bg-black/90 text-white font-semibold text-[11px] px-3.5 py-1.5 rounded-[8px] transition-all flex items-center gap-1 active:scale-95 shrink-0"
+                          >
+                            <Copy size={12} />
+                            <span>{t("common.copy")}</span>
+                          </button>
+                        </div>
+
+                        <div className="p-3 rounded-lg bg-black/5 text-[#707070] text-[11px] leading-relaxed italic text-center">
+                          {t("pages.settings_page.mcp_sse_desc_note")}
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             )}

@@ -7,7 +7,6 @@ import { AppLayout } from "@/components/layout/AppLayout";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { useI18n } from "@/i18n/I18nProvider";
 import { db, BotSettings, Lesson, Module } from "@/lib/db";
-import { queryRAG } from "@/lib/ai/rag";
 import { moderateMessage } from "@/lib/ai/moderation";
 import {
   Sparkles,
@@ -129,7 +128,7 @@ const generateJsonPayload = (name: string, phone: string, message: string, mappi
   }, null, 2);
 };
 
-const parseJsonPayload = (jsonStr: string, mappings: FieldMapping[]) => {
+const parseJsonPayload = (jsonStr: string, mappings: FieldMapping[], lang?: string) => {
   try {
     const data = JSON.parse(jsonStr);
     const changes = data?.entry?.[0]?.changes?.[0]?.value;
@@ -149,9 +148,12 @@ const parseJsonPayload = (jsonStr: string, mappings: FieldMapping[]) => {
       }
     });
 
+    const defaultName = lang === "en" ? "Unknown Customer" : lang === "ru" ? "Неизвестный клиент" : "Noma'lum Mijoz";
+    const defaultPhone = lang === "en" ? "Unknown Phone" : lang === "ru" ? "Неизвестный телефон" : "Noma'lum Telefon";
+
     return {
-      name: extractedName || "Noma'lum Mijoz",
-      phone: extractedPhone || "Noma'lum Telefon",
+      name: extractedName || defaultName,
+      phone: extractedPhone || defaultPhone,
       message: extractedMessage || "",
       formId: changes.form_id || "form-1"
     };
@@ -170,7 +172,7 @@ interface CustomDropdownProps {
   className?: string;
 }
 
-function CustomDropdown({ value, onChange, options, placeholder = "Tanlang...", className = "" }: CustomDropdownProps) {
+function CustomDropdown({ value, onChange, options, placeholder = t("common.select") || "Tanlang...", className = "" }: CustomDropdownProps) {
   const [isOpen, setIsOpen] = useState(false);
   const selectedOption = options.find(o => o.value === value);
 
@@ -230,13 +232,13 @@ interface SimulatedMessage {
 }
 
 const MOCK_FB_FORMS = [
-  { id: "form-1", name: "Kuzgi chegirmalar va aksiya formasi" },
-  { id: "form-2", name: "Bepul dars va maslahat formasi" },
-  { id: "form-3", name: "Premium a'zolik uchun ariza formasi" },
+  { id: "form-1", name: "pages.ai_agent.forms.autumn_sale" },
+  { id: "form-2", name: "pages.ai_agent.forms.free_lesson" },
+  { id: "form-3", name: "pages.ai_agent.forms.premium_membership" },
 ];
 
 function AIAgentContent() {
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
   const searchParams = useSearchParams();
   const useRouterObj = useRouter();
   const typeParam = searchParams.get("type");
@@ -277,7 +279,25 @@ function AIAgentContent() {
       msg.includes("payme") ||
       msg.includes("karta") ||
       msg.includes("obuna") ||
-      msg.includes("tarif")
+      msg.includes("tarif") ||
+      msg.includes("price") ||
+      msg.includes("billing") ||
+      msg.includes("pay") ||
+      msg.includes("payment") ||
+      msg.includes("cost") ||
+      msg.includes("money") ||
+      msg.includes("card") ||
+      msg.includes("subscription") ||
+      msg.includes("tariff") ||
+      msg.includes("цена") ||
+      msg.includes("оплата") ||
+      msg.includes("платить") ||
+      msg.includes("деньги") ||
+      msg.includes("карта") ||
+      msg.includes("подписка") ||
+      msg.includes("тариф") ||
+      msg.includes("платеж") ||
+      msg.includes("стоимость")
     ) {
       return "billing";
     }
@@ -289,7 +309,24 @@ function AIAgentContent() {
       msg.includes("ulash") ||
       msg.includes("xatolik") ||
       msg.includes("muammo") ||
-      msg.includes("ishlamayapti")
+      msg.includes("ishlamayapti") ||
+      msg.includes("channel") ||
+      msg.includes("connect") ||
+      msg.includes("error") ||
+      msg.includes("issue") ||
+      msg.includes("bug") ||
+      msg.includes("problem") ||
+      msg.includes("broken") ||
+      msg.includes("not working") ||
+      msg.includes("телеграм") ||
+      msg.includes("канал") ||
+      msg.includes("токен") ||
+      msg.includes("подключить") ||
+      msg.includes("ошибка") ||
+      msg.includes("проблема") ||
+      msg.includes("баг") ||
+      msg.includes("не работает") ||
+      msg.includes("сбой")
     ) {
       return "support";
     }
@@ -299,7 +336,24 @@ function AIAgentContent() {
       msg.includes("kirish") ||
       msg.includes("o'qish") ||
       msg.includes("kurs") ||
-      msg.includes("dastur")
+      msg.includes("dastur") ||
+      msg.includes("lesson") ||
+      msg.includes("module") ||
+      msg.includes("access") ||
+      msg.includes("study") ||
+      msg.includes("course") ||
+      msg.includes("program") ||
+      msg.includes("learn") ||
+      msg.includes("classes") ||
+      msg.includes("login") ||
+      msg.includes("урок") ||
+      msg.includes("модуль") ||
+      msg.includes("доступ") ||
+      msg.includes("учеба") ||
+      msg.includes("курс") ||
+      msg.includes("программа") ||
+      msg.includes("учиться") ||
+      msg.includes("войти")
     ) {
       return "faq";
     }
@@ -307,7 +361,19 @@ function AIAgentContent() {
       msg.includes("hamkor") ||
       msg.includes("referal") ||
       msg.includes("pul ishlash") ||
-      msg.includes("komissiya")
+      msg.includes("komissiya") ||
+      msg.includes("partner") ||
+      msg.includes("affiliate") ||
+      msg.includes("referral") ||
+      msg.includes("earn") ||
+      msg.includes("commission") ||
+      msg.includes("invite") ||
+      msg.includes("партнер") ||
+      msg.includes("реферал") ||
+      msg.includes("заработать") ||
+      msg.includes("заработок") ||
+      msg.includes("комиссия") ||
+      msg.includes("пригласить")
     ) {
       return "affiliate";
     }
@@ -316,29 +382,73 @@ function AIAgentContent() {
 
   const detectSentiment = (text: string): "positive" | "neutral" | "negative" => {
     const msg = text.toLowerCase();
-    if (msg.includes("yaxshi") || msg.includes("zo'r") || msg.includes("rahmat") || msg.includes("ajoyib") || msg.includes("muvaffaqiyat") || msg.includes("😊") || msg.includes("👍")) {
+    if (
+      msg.includes("yaxshi") ||
+      msg.includes("zo'r") ||
+      msg.includes("rahmat") ||
+      msg.includes("ajoyib") ||
+      msg.includes("muvaffaqiyat") ||
+      msg.includes("😊") ||
+      msg.includes("👍") ||
+      msg.includes("good") ||
+      msg.includes("great") ||
+      msg.includes("thanks") ||
+      msg.includes("thank you") ||
+      msg.includes("awesome") ||
+      msg.includes("cool") ||
+      msg.includes("success") ||
+      msg.includes("perfect") ||
+      msg.includes("nice") ||
+      msg.includes("хорошо") ||
+      msg.includes("отлично") ||
+      msg.includes("спасибо") ||
+      msg.includes("супер") ||
+      msg.includes("круто") ||
+      msg.includes("успех") ||
+      msg.includes("прекрасно") ||
+      msg.includes("классно")
+    ) {
       return "positive";
     }
-    if (msg.includes("xatolik") || msg.includes("ishlamadi") || msg.includes("muammo") || msg.includes("afsus") || msg.includes("yomon") || msg.includes("tushunmadim") || msg.includes("qiyin") || msg.includes("😡") || msg.includes("👎")) {
+    if (
+      msg.includes("xatolik") ||
+      msg.includes("ishlamadi") ||
+      msg.includes("muammo") ||
+      msg.includes("afsus") ||
+      msg.includes("yomon") ||
+      msg.includes("tushunmadim") ||
+      msg.includes("qiyin") ||
+      msg.includes("😡") ||
+      msg.includes("👎") ||
+      msg.includes("error") ||
+      msg.includes("broken") ||
+      msg.includes("problem") ||
+      msg.includes("unfortunately") ||
+      msg.includes("bad") ||
+      msg.includes("didn't understand") ||
+      msg.includes("hard") ||
+      msg.includes("difficult") ||
+      msg.includes("failure") ||
+      msg.includes("ошибка") ||
+      msg.includes("сломалось") ||
+      msg.includes("проблема") ||
+      msg.includes("к сожалению") ||
+      msg.includes("плохо") ||
+      msg.includes("не понял") ||
+      msg.includes("сложно") ||
+      msg.includes("трудно") ||
+      msg.includes("фигня")
+    ) {
       return "negative";
     }
     return "neutral";
   };
 
   const extractPainPoint = (text: string, intent: string): string => {
-    if (intent === "billing") {
-      return "To'lov usullari yoki kartani bog'lash jarayonidagi qiyinchiliklar";
+    if (intent === "billing" || intent === "support" || intent === "faq" || intent === "affiliate") {
+      return t("pages.ai_agent.pain_points_details." + intent);
     }
-    if (intent === "support") {
-      return "Platformani ijtimoiy tarmoqlar yoki Telegram botga bog'lashdagi texnik muammolar";
-    }
-    if (intent === "faq") {
-      return "Dars transkriptlari ichidan kerakli mavzuni mustaqil topa olmaslik";
-    }
-    if (intent === "affiliate") {
-      return "Hamkorlik komissiyalari va taklif etish havolasi ishlash qoidalarini aniqlashtirish";
-    }
-    return "Platformaning ishlash imkoniyatlari haqida qo'shimcha ma'lumot olish";
+    return t("pages.ai_agent.pain_points_details.default");
   };
   
   // Database States
@@ -368,6 +478,7 @@ function AIAgentContent() {
   const [analyticsSearch, setAnalyticsSearch] = useState("");
   const [analyticsFilter, setAnalyticsFilter] = useState("All");
   const [isRefreshingAnalysis, setIsRefreshingAnalysis] = useState(false);
+  const [isStructuring, setIsStructuring] = useState(false);
 
   // Telegram Bot Verification States
   const [isTelegramLinked, setIsTelegramLinked] = useState(false);
@@ -410,8 +521,8 @@ function AIAgentContent() {
     {
       id: "welcome",
       sender: "bot",
-      text: "Salom! Men o'quvchilarga yordam beruvchi shaxsiy AI kuratorman. Bilimlar bazasidagi ma'lumotlar asosida savollarga javob beraman. Meni sinab ko'rish uchun bu yerga biror savol yozing! 📚",
-      time: "Hozir",
+      text: t("pages.ai_agent.defaults.kurator.welcome"),
+      time: t("pages.ai_agent.now"),
       confidence: 100
     }
   ]);
@@ -466,11 +577,25 @@ function AIAgentContent() {
         }
       }
     }
-    return [
-      { id: "map-1", metaField: "full_name", sendlyField: "name", description: "Mijozning to'liq ismi (Ism)" },
-      { id: "map-2", metaField: "phone_number", sendlyField: "phone", description: "Telefon raqami (Telefon)" },
-      { id: "map-3", metaField: "user_question", sendlyField: "message", description: "Murojaat matni / Savol (Izoh)" },
-    ];
+    if (lang === "en") {
+      return [
+        { id: "map-1", metaField: "full_name", sendlyField: "name", description: "Customer's full name (Name)" },
+        { id: "map-2", metaField: "phone_number", sendlyField: "phone", description: "Phone number (Phone)" },
+        { id: "map-3", metaField: "user_question", sendlyField: "message", description: "Message text / Question (Comment)" },
+      ];
+    } else if (lang === "ru") {
+      return [
+        { id: "map-1", metaField: "full_name", sendlyField: "name", description: "Полное имя клиента (Имя)" },
+        { id: "map-2", metaField: "phone_number", sendlyField: "phone", description: "Номер телефона (Телефон)" },
+        { id: "map-3", metaField: "user_question", sendlyField: "message", description: "Текст обращения / Вопрос (Комментарий)" },
+      ];
+    } else {
+      return [
+        { id: "map-1", metaField: "full_name", sendlyField: "name", description: "Mijozning to'liq ismi (Ism)" },
+        { id: "map-2", metaField: "phone_number", sendlyField: "phone", description: "Telefon raqami (Telefon)" },
+        { id: "map-3", metaField: "user_question", sendlyField: "message", description: "Murojaat matni / Savol (Izoh)" },
+      ];
+    }
   });
 
   // Save mappings to localStorage
@@ -479,6 +604,23 @@ function AIAgentContent() {
       localStorage.setItem("replai_fb_field_mappings", JSON.stringify(fieldMappings));
     }
   }, [fieldMappings]);
+
+  // Initialize simulator inputs based on language
+  useEffect(() => {
+    if (lang === "en") {
+      setSimLeadName("John Doe");
+      setSimLeadPhone("+1 555 123 45 67");
+      setSimLeadMessage("How much is the course? Is there a discount?");
+    } else if (lang === "ru") {
+      setSimLeadName("Иван Иванов");
+      setSimLeadPhone("+7 900 123 45 67");
+      setSimLeadMessage("Сколько стоит курс? Есть ли скидка?");
+    } else {
+      setSimLeadName("Sardor Salimov");
+      setSimLeadPhone("+998 90 123 45 67");
+      setSimLeadMessage("Kurs narxi qancha? Chegirma bormi?");
+    }
+  }, [lang]);
 
   const [fbTags, setFbTags] = useState<string[]>(() => {
     if (typeof window !== "undefined") {
@@ -586,176 +728,68 @@ function AIAgentContent() {
   }, [chatMessages]);
 
   const getAgentName = () => {
-    switch (selectedAgentType) {
-      case "kurator":
-        return "AI kuratori";
-      case "sales":
-        return "Sotuvchi AI Agent";
-      case "booker":
-        return "Konsultatsiya va Band qilish AI";
-      case "recruiter":
-        return "HR va Vakansiyalar uchun AI";
-      case "fb-leads":
-        return "Facebook Lead Handler";
-      case "fb-leads-direct":
-        return "Lidlarni Telegramga yo'naltirish";
-      case "clinic":
-        return "Klinika / Shifokor AI";
-      case "realtor":
-        return "Rieltor AI";
-      case "helpdesk":
-        return "Texnik yordam AI";
-      default:
-        return "AI Agent";
-    }
+    if (!selectedAgentType) return t("pages.ai_agent.names.default");
+    return t(`pages.ai_agent.names.${selectedAgentType}`);
   };
 
   const getAgentBreadcrumb = () => {
-    switch (selectedAgentType) {
-      case "kurator":
-        return "Bosh sahifa / AI Agent / AI kuratori";
-      case "sales":
-        return "Bosh sahifa / AI Agent / Sotuvchi AI Agent";
-      case "booker":
-        return "Bosh sahifa / AI Agent / Konsultatsiya va Band qilish AI";
-      case "recruiter":
-        return "Bosh sahifa / AI Agent / HR va Vakansiyalar uchun AI";
-      case "clinic":
-        return "Bosh sahifa / AI Agent / Klinika / Shifokor AI";
-      case "realtor":
-        return "Bosh sahifa / AI Agent / Rieltor AI";
-      case "helpdesk":
-        return "Bosh sahifa / AI Agent / Texnik yordam AI";
-      default:
-        return "Bosh sahifa / AI Agent";
-    }
+    if (!selectedAgentType) return t("pages.ai_agent.breadcrumbs.default");
+    return t(`pages.ai_agent.breadcrumbs.${selectedAgentType}`);
   };
 
   const getKnowledgeTabName = () => {
-    switch (selectedAgentType) {
-      case "sales": return "Mahsulotlar katalogi";
-      case "booker": return "Mutaxassis bilimlari";
-      case "recruiter": return "Vakansiyalar bazasi";
-      case "clinic": return "Klinika ma'lumotlari";
-      case "realtor": return "Ko'chmas mulk bazasi";
-      case "helpdesk": return "Bilimlar bazasi (FAQ)";
-      default: return t("pages.ai_agent.knowledge_base_tab");
-    }
+    if (!selectedAgentType) return t("pages.ai_agent.knowledge_base_tab");
+    return t(`pages.ai_agent.knowledge_tab_names.${selectedAgentType}`);
   };
 
   const getKnowledgeSectionTitle = () => {
-    switch (selectedAgentType) {
-      case "sales": return "Mahsulotlar, narxlar va do'kon ma'lumotlari";
-      case "booker": return "Mutaxassis bilimlari va ish tartibi";
-      case "recruiter": return "Vakansiyalar va talablar";
-      case "clinic": return "Shifokorlar, xizmatlar va ish tartibi";
-      case "realtor": return "Uy-joylar, narxlar va joylashuv";
-      case "helpdesk": return "Ko'p so'raladigan savollar va yechimlar";
-      default: return "Darsliklar va materiallar";
-    }
+    if (!selectedAgentType) return t("pages.ai_agent.knowledge_section_titles.default");
+    return t(`pages.ai_agent.knowledge_section_titles.${selectedAgentType}`);
   };
 
   const getKnowledgeSectionDesc = () => {
-    switch (selectedAgentType) {
-      case "sales": return "Mahsulotlar katalogi, narxlar, manzil va ish vaqti kabi ma'lumotlarni qo'shing. AI agent shu ma'lumotlar asosida mijozlarga javob beradi.";
-      case "booker": return "Mutaxassisning bilimlari, xizmatlar ro'yxati, ish tartibi va konsultatsiya shartlarini kiriting.";
-      case "recruiter": return "Bo'sh ish o'rinlari, talablar, ish sharoitlari va kompaniya haqida ma'lumotlarni kiriting.";
-      case "clinic": return "Shifokorlar ro'yxati, bo'limlar, qabul vaqtlari va narxlarni kiriting. AI agent shu ma'lumotlar asosida bemorlarga javob beradi.";
-      case "realtor": return "Uy-joylar ro'yxati, narxlar, joylashuv va ko'rish vaqtlarini kiriting. AI agent shu ma'lumotlar asosida mijozlarga javob beradi.";
-      case "helpdesk": return "Ko'p so'raladigan savollar, texnik muammolar va ularning yechimlari. AI agent shu ma'lumotlar asosida foydalanuvchilarga javob beradi.";
-      default: return "Kurs materiallari, darsliklar va PDF hujjatlarni qo'shing. AI kurator shu materiallar asosida javob beradi.";
-    }
+    if (!selectedAgentType) return t("pages.ai_agent.knowledge_section_descs.default");
+    return t(`pages.ai_agent.knowledge_section_descs.${selectedAgentType}`);
   };
 
   const getSystemPromptTitle = () => {
-    switch (selectedAgentType) {
-      case "sales": return "Sotuvchi ko'rsatmasi";
-      case "booker": return "Maslahatchi ko'rsatmasi";
-      case "recruiter": return "Rekruter ko'rsatmasi";
-      case "clinic": return "Klinika yordamchisi ko'rsatmasi";
-      case "realtor": return "Rieltor yordamchisi ko'rsatmasi";
-      case "helpdesk": return "Texnik yordam ko'rsatmasi";
-      default: return t("pages.ai_agent.system_instruction_label");
-    }
+    if (!selectedAgentType) return t("pages.ai_agent.system_prompt_titles.default");
+    return t(`pages.ai_agent.system_prompt_titles.${selectedAgentType}`);
   };
 
   const getSystemPromptDesc = () => {
-    switch (selectedAgentType) {
-      case "sales": return "Sotuvchi agentning xulq-atvori va javob berish qoidalarini belgilang.";
-      case "booker": return "Maslahatchi agentning ohangini va konsultatsiya qoidalarini sozlang.";
-      case "recruiter": return "Rekruter agentning nomzodlar bilan suhbat qoidalarini belgilang.";
-      case "clinic": return "Klinika yordamchisining bemorlar bilan muomala qoidalarini belgilang.";
-      case "realtor": return "Rieltor yordamchisining mijozlar bilan mulk ko'rsatish qoidalarini belgilang.";
-      case "helpdesk": return "Texnik yordam agentining muammolarni hal qilish qoidalarini belgilang.";
-      default: return t("pages.ai_agent.system_instruction_desc");
-    }
+    if (!selectedAgentType) return t("pages.ai_agent.system_prompt_descs.default");
+    return t(`pages.ai_agent.system_prompt_descs.${selectedAgentType}`);
   };
 
   const getForbiddenTopicsTitle = () => {
-    switch (selectedAgentType) {
-      case "sales": return "Gaplashmaydigan mavzular";
-      default: return t("pages.ai_agent.forbidden_topics_title");
-    }
+    if (!selectedAgentType) return t("pages.ai_agent.forbidden_topics_title");
+    return t(`pages.ai_agent.forbidden_topics_titles.${selectedAgentType}`);
   };
 
   const getForbiddenTopicsDesc = () => {
-    switch (selectedAgentType) {
-      case "sales": return "Agent ushbu mavzular haqida mijozlarga javob bermaydi.";
-      case "booker": return "Agent ushbu mavzular haqida gaplashmaydi.";
-      case "recruiter": return "Agent ushbu mavzular haqida nomzodlarga javob bermaydi.";
-      case "clinic": return "Agent ushbu mavzular haqida bemorlarga javob bermaydi.";
-      case "realtor": return "Agent ushbu mavzular haqida mijozlarga javob bermaydi.";
-      case "helpdesk": return "Agent ushbu mavzular haqida foydalanuvchilarga javob bermaydi.";
-      default: return t("pages.ai_agent.forbidden_topics_desc");
-    }
+    if (!selectedAgentType) return t("pages.ai_agent.forbidden_topics_descs.default");
+    return t(`pages.ai_agent.forbidden_topics_descs.${selectedAgentType}`);
   };
 
   const getEscalationTitle = () => {
-    switch (selectedAgentType) {
-      case "sales": return "Inson-sotuvchiga yo'naltirish qoidalari";
-      case "booker": return "Mutaxassisga yo'naltirish qoidalari";
-      case "recruiter": return "HR menejeriga yo'naltirish qoidalari";
-      case "clinic": return "Administratorga yo'naltirish qoidalari";
-      case "realtor": return "Rieltor menejeriga yo'naltirish qoidalari";
-      case "helpdesk": return "Operatorga yo'naltirish qoidalari";
-      default: return t("pages.ai_agent.escalation_rules_title");
-    }
+    if (!selectedAgentType) return t("pages.ai_agent.escalation_titles.default");
+    return t(`pages.ai_agent.escalation_titles.${selectedAgentType}`);
   };
 
   const getEscalationDesc = () => {
-    switch (selectedAgentType) {
-      case "sales": return "Quyidagi holatlarda suhbat avtomatik ravishda inson-sotuvchiga yo'naltiriladi.";
-      case "booker": return "Quyidagi holatlarda suhbat avtomatik ravishda mutaxassisning o'ziga yo'naltiriladi.";
-      case "recruiter": return "Quyidagi holatlarda ariza avtomatik ravishda HR menejeriga yo'naltiriladi.";
-      case "clinic": return "Quyidagi holatlarda suhbat avtomatik ravishda administrator/shifokorga yo'naltiriladi.";
-      case "realtor": return "Quyidagi holatlarda suhbat avtomatik ravishda rieltor menejeriga yo'naltiriladi.";
-      case "helpdesk": return "Quyidagi holatlarda suhbat avtomatik ravishda inson operatoriga yo'naltiriladi.";
-      default: return t("pages.ai_agent.escalation_rules_desc");
-    }
+    if (!selectedAgentType) return t("pages.ai_agent.escalation_descs.default");
+    return t(`pages.ai_agent.escalation_descs.${selectedAgentType}`);
   };
 
   const getModuleLabel = () => {
-    switch (selectedAgentType) {
-      case "sales": return "Katalog bo'limi";
-      case "booker": return "Bilim yo'nalishi";
-      case "recruiter": return "Vakansiya yo'nalishi";
-      case "clinic": return "Bo'lim / Yo'nalish";
-      case "realtor": return "Hudud / Tuman";
-      case "helpdesk": return "Kategoriya";
-      default: return "Modul";
-    }
+    if (!selectedAgentType) return t("pages.ai_agent.module_labels.default");
+    return t(`pages.ai_agent.module_labels.${selectedAgentType}`);
   };
 
   const getLessonLabel = () => {
-    switch (selectedAgentType) {
-      case "sales": return "Mahsulot / Ma'lumot";
-      case "booker": return "Bilim sahifasi";
-      case "recruiter": return "Vakansiya sahifasi";
-      case "clinic": return "Shifokor / Xizmat";
-      case "realtor": return "Uy-joy e'loni";
-      case "helpdesk": return "Muammo / Yechim";
-      default: return "Dars";
-    }
+    if (!selectedAgentType) return t("pages.ai_agent.lesson_labels.default");
+    return t(`pages.ai_agent.lesson_labels.${selectedAgentType}`);
   };
 
 
@@ -783,192 +817,17 @@ function AIAgentContent() {
     
     const isSpecialType = ["kurator", "sales", "booker", "recruiter", "clinic", "realtor", "helpdesk"].includes(selectedAgentType);
     if (isSpecialType && settings.aiAgentType !== selectedAgentType) {
-      let defaultPrompt = "";
-      let defaultTopics: string[] = [];
-      let defaultRules: Array<{ id: string; text: string; enabled: boolean }> = [];
-      
-      if (selectedAgentType === "kurator") {
-        defaultPrompt = `# ROL VA IDENTIFIKATSIYA
-Sen marketing kursi o'quvchilariga yordam beruvchi "Mently" nomli shaxsiy AI kuratorsan. Xaraktering: samimiy, do'stona, qisqa va aniq gapiradigan, ortiqcha rasmiyatchilikdan xoli.
-
-# ASOSIY VAZIFA
-O'quvchilarning savollariga faqat va faqat quyida taqdim etilgan darslik/kurs materiallari (KURS MATERIALLARI) asosida tushunarli, qisqa va tabiiy javob berish.
-
-# KURS MATERIALLARI:
-{{context}}
-
-# QAT'IY YO'RIQNOMALAR VA CHEKLOVLAR
-1. Cheklangan Ma'lumot: Faqat berilgan KURS MATERIALLARI ichidagi ma'lumotlardan foydalan. Kurs materialida yo'q bo'lgan ma'lumotlarni o'zingdan to'qib chiqarma!
-2. Noma'lum Savollar: Agar savolning javobi darslik materiallarida mavjud bo'lmasa, muloyimlik bilan mana shu javobni ber:
-   "Afsuski, ushbu savolga darslik materiallarida javob topilmadi. Sizga to'g'ri yo'nalish berish va yordam berish uchun ushbu savolni inson-kuratorga yo'naltirdim. Tez orada javob berishadi."
-3. Taqiqlangan Mavzular: Siyosat, din, raqobatchi kurslar yoki marketingga aloqasi bo'lmagan mavzular haqida gapirma. Agar bunday savol berilsa, muloyimlik bilan rad et:
-   "Men faqat ushbu marketing kursi bo'yicha savollarga javob bera olaman. Keling, darsimizga qaytamiz!"
-4. Til qoidasi: O'quvchi qaysi tilda va yozuvda yozgan bo'lsa (Lotin yoki Kirill o'zbek yozuvi, Rus tili yoki Ingliz tili), o'sha yozuv va tilda tabiiy javob ber.
-
-# JAVOB FORMATI VA STILI
-- Tabiiylik va Qisqalik: Javoblaring juda qisqa, aniq va londa bo'lsin (ko'pi bilan 2-3 ta gap). Ortiqcha uzun gaplar, kirish so'zlar yoki sun'iy gaplardan qoch. Oddiy suhbatdoshdek tabiiy gapir.
-- Soddalik: Murakkab marketing atamalarini sodda, kundalik tilda tushuntir.
-- Manba ko'rsatmaslik: JAVOBINGGA HECH QANDAY MANBA YOKI SHUNGA O'XSHASH MA'LUMOTLARNI QO'SHMA (Masalan: "Manba: 1-Modul..." kabi yozuvlar umuman bo'lmasligi shart).
-- Emojilar: Mutlaqo emojilarsiz, faqat matn va belgilar yordamida javob yoz.`;
-        
-        defaultTopics = ["Siyosat", "Din", "Raqobatchilar"];
-        defaultRules = [
-          { id: "esc-1", text: "Ishonch darajasi 60% dan past bo'lganda", enabled: true },
-          { id: "esc-2", text: "O'quvchi shikoyat qilganda", enabled: true },
-          { id: "esc-3", text: "To'lov yoki sertifikat haqida savol bo'lganda", enabled: true }
-        ];
-      } else if (selectedAgentType === "sales") {
-        defaultPrompt = `# ROL VA IDENTIFIKATSIYA
-Sen kompaniyaning sotuvlar bo'limi yordamchisisan (Sales Closer AI). Maqsading: mijozlarga mahsulotlar, narxlar, katalog, manzil va ish vaqti haqida to'liq ma'lumot berish va ularni sotib olishga yo'naltirish, buyurtmalarni tezda rasmiylashtirish.
-
-# ASOSIY VAZIFA
-Mijozlarning savollariga faqat va faqat quyida taqdim etilgan mahsulot katalogi va do'kon ma'lumotlari (MAHSULOT VA DO'KON MATERIALLARI) asosida javob berish.
-
-# MAHSULOT VA DO'KON MATERIALLARI:
-{{context}}
-
-# QAT'IY YO'RIQNOMALAR VA CHEKLOVLAR
-1. Katalogda bo'lmagan yoki noaniq mahsulotlar/narxlar haqida gapirma. Agarda savol katalogda yo'q bo'lsa, mijozning telefon raqamini so'rab:
-   "Afsuski, ushbu mahsulot yoki xizmat haqida hozircha ma'lumot yo'q. Sizga aniq yordam berishimiz uchun telefon raqamingizni qoldirsangiz, mutaxassisimiz tezda bog'lanadi." deb javob ber.
-2. Har bir muloqotda sotuvga va buyurtmaga yo'naltiruvchi savollar ber.
-3. Taqiqlangan mavzulardan qoch (siyosat, shaxsiy savollar va boshqalar).
-
-# JAVOB FORMATI VA STILI
-- Xushmuomala va sotuvga chorlovchi ohang.
-- Javoblarni londa, qisqa va qulay formatda taqdim et (ko'pi bilan 3 ta gap).`;
-        
-        defaultTopics = ["Raqobatchilar haqida ma'lumot", "Shaxsiy savollar", "Siyosat va Din"];
-        defaultRules = [
-          { id: "esc-1", text: "Ishonch darajasi 60% dan past bo'lganda", enabled: true },
-          { id: "esc-2", text: "Mijoz maxsus chegirma yoki muddatli to'lov so'raganda", enabled: true },
-          { id: "esc-3", text: "Mijoz inson sotuvchi bilan gaplashishni talab qilganda", enabled: true }
-        ];
-      } else if (selectedAgentType === "booker") {
-        defaultPrompt = `# ROL VA IDENTIFIKATSIYA
-Sen shaxsiy brend egasining aqlli maslahatchisi va band qilish yordamchisisan (Appointment Booker AI). Maqsading: mutaxassisning nomidan gaplashib, uning ohangi va bilimlariga mos ravishda foydali maslahat berish hamda konsultatsiya/suhbat uchun vaqt belgilash.
-
-# ASOSIY VAZIFA
-Suhbatdoshlarga faqat mutaxassisning bilimlari, qoidalari va ish tartibi (MUTAXASSIS BILIMLARI) doirasida maslahat berish.
-
-# MUTAXASSIS BILIMLARI:
-{{context}}
-
-# QAT'IY YO'RIQNOMALAR VA CHEKLOVLAR
-1. Konsultatsiyani bron qilishdan avval to'lov qilinishi shart bo'lsa, mijozga to'lov shartlari va havolani taqdim et.
-2. Mutaxassisning o'rniga noaniq ma'lumotlarni gapirma, faqat uning bilimlari bazasida yozilgan yo'nalishlarni ber.
-3. Har doim mutaxassisning shaxsiy gaplashish tonida (do'stona, professional, xarakterli) bo'l.
-
-# JAVOB FORMATI VA STILI
-- Tabiiy suhbatdosh kabi ohang.
-- Mijozning ehtiyojini tushunish va to'g'ri vaqtga bron qilishni taklif qilish.`;
-        
-        defaultTopics = ["Shaxsiy hayot", "Boshqa mutaxassislar", "Siyosat"];
-        defaultRules = [
-          { id: "esc-1", text: "Mijoz to'lov muammolari haqida yozganda", enabled: true },
-          { id: "esc-2", text: "Mijoz band qilingan vaqtni o'zgartirishni so'raganida", enabled: true },
-          { id: "esc-3", text: "Mijoz to'g'ridan-to'g'ri inson bilan gaplashmoqchi bo'lganida", enabled: true }
-        ];
-      } else if (selectedAgentType === "recruiter") {
-        defaultPrompt = `# ROL VA IDENTIFIKATSIYA
-Sen kompaniyaning HR yordamchisisan (HR Recruiter AI). Maqsading: nomzodlarga bo'sh ish o'rinlari haqida ma'lumot berish, nomzodlar bilan dastlabki suhbat/skrining o'tkazish, kerakli ma'lumotlarni yig'ish va ularni saralash.
-
-# ASOSIY VAZIFA
-Nomzodlarga faqat vakansiya va talablar (VAKANSIYALAR VA TALABLAR) doirasida javob berish.
-
-# VAKANSIYALAR VA TALABLAR:
-{{context}}
-
-# QAT'IY YO'RIQNOMALAR VA CHEKLOVLAR
-1. Nomzoddan ketma-ket quyidagi ma'lumotlarni to'pla: Ismi, bog'lanish telefoni, tajribasi va ish haqi bo'yicha kutilmasi.
-2. Barcha ma'lumotlarni olmaguncha nomzodning arizasini yakunlama.
-3. Vakansiya talablariga mos kelmaydigan nomzodlarni muloyimlik bilan inson operatorga yo'naltir yoki rad javobini ber.
-
-# JAVOB FORMATI VA STILI
-- Professional, samimiy va suhbat tarzida yondashish.
-- Har bir xabarda faqat bitta savol berib, suhbatni oqilona davom ettirish.`;
-        
-        defaultTopics = ["Kompaniya ichki sirlari", "Maosh to'lash sanalari", "Siyosat"];
-        defaultRules = [
-          { id: "esc-1", text: "Nomzod ish haqi bo'yicha keskin talablar qo'ysa", enabled: true },
-          { id: "esc-2", text: "Nomzod xorijdan turib ishlash shartlarini so'raganida", enabled: true },
-          { id: "esc-3", text: "Nomzod darhol asosiy rahbar bilan uchrashmoqchi bo'lsa", enabled: true }
-        ];
-      } else if (selectedAgentType === "clinic") {
-        defaultPrompt = `# ROL VA IDENTIFIKATSIYA
-Sen tibbiy markaz/klinikaning onlayn qabul yordamchisisan (Medical Assistant AI). Maqsading: bemorlarga shifokorlar, bo'limlar va qabul vaqtlari haqida ma'lumot berish, onlayn navbat yozish va eslatmalar yuborish.
-
-# ASOSIY VAZIFA
-Bemorlarga faqat klinika ma'lumotlari (KLINIKA MA'LUMOTLARI) doirasida javob berish.
-
-# KLINIKA MA'LUMOTLARI:
-{{context}}
-
-# QAT'IY YO'RIQNOMALAR VA CHEKLOVLAR
-1. Hech qachon tashxis qo'yma yoki dori-darmon tavsiya etma. Faqat shifokorga yozilish va umumiy ma'lumot ber.
-2. Bemorning shikoyatiga qarab tegishli bo'lim yoki shifokorni tavsiya et.
-3. Bo'sh vaqtlarni ko'rsatib, bron qilishni taklif et.
-
-# JAVOB FORMATI VA STILI
-- Muloyim, g'amxo'r va professional ohang.
-- Javoblarni qisqa va aniq ber.`;
-        
-        defaultTopics = ["Tashxis qo'yish", "Dori-darmon tavsiyasi", "Siyosat"];
-        defaultRules = [
-          { id: "esc-1", text: "Bemor shoshilinch tibbiy yordam so'raganida", enabled: true },
-          { id: "esc-2", text: "Bemor shikoyat bildirganida", enabled: true },
-          { id: "esc-3", text: "Bemor to'lov muammolari haqida yozganda", enabled: true }
-        ];
-      } else if (selectedAgentType === "realtor") {
-        defaultPrompt = `# ROL VA IDENTIFIKATSIYA
-Sen ko'chmas mulk agentligining onlayn yordamchisisan (Realtor AI). Maqsading: mijozlarga uy-joylar haqida ma'lumot berish, narx va joylashuv ko'rsatish, ko'rish uchun vaqt belgilash.
-
-# ASOSIY VAZIFA
-Mijozlarga faqat ko'chmas mulk bazasi (MULK BAZASI) doirasida javob berish.
-
-# MULK BAZASI:
-{{context}}
-
-# QAT'IY YO'RIQNOMALAR VA CHEKLOVLAR
-1. Bazada yo'q uy-joylar haqida gapirma.
-2. Mijozning budjetini, joylashuvini va talablarini so'rab, mos variantlarni tavsiya et.
-3. Ko'rish uchun vaqt belgilashni taklif qilib, rieltor bilan bog'lanishni tashkil et.
-
-# JAVOB FORMATI VA STILI
-- Ishonchli, do'stona va ma'lumotli ohang.
-- Har bir uy-joy uchun narx, maydon, xonalar soni va joylashuvni ko'rsat.`;
-        
-        defaultTopics = ["Huquqiy maslahat", "Kredit shartlari", "Siyosat"];
-        defaultRules = [
-          { id: "esc-1", text: "Mijoz shartnoma va huquqiy masalalar so'raganida", enabled: true },
-          { id: "esc-2", text: "Mijoz maxsus narx yoki chegirma talab qilganida", enabled: true },
-          { id: "esc-3", text: "Mijoz to'g'ridan-to'g'ri rieltor bilan gaplashmoqchi bo'lganida", enabled: true }
-        ];
-      } else if (selectedAgentType === "helpdesk") {
-        defaultPrompt = `# ROL VA IDENTIFIKATSIYA
-Sen kompaniyaning texnik yordam yordamchisisan (Help Desk AI). Maqsading: foydalanuvchilarga texnik muammolarni hal qilishda yordam berish, FAQ dan javob topish, murakkab holatlarni inson operatoriga yo'naltirish.
-
-# ASOSIY VAZIFA
-Foydalanuvchilarga faqat bilimlar bazasi (BILIMLAR BAZASI) doirasida javob berish.
-
-# BILIMLAR BAZASI:
-{{context}}
-
-# QAT'IY YO'RIQNOMALAR VA CHEKLOVLAR
-1. Muammoni avval tasniflash: texnik xatolik, hisob muammosi, to'lov muammosi yoki boshqa.
-2. Bazada javob bo'lsa — aniq va bosqichma-bosqich yechim ber.
-3. Bazada javob topilmasa — tiket raqami berib, operatorga yo'naltir.
-
-# JAVOB FORMATI VA STILI
-- Sabr-toqatli, tushunarli va texnik jihatdan aniq.
-- Muammoni hal qilish uchun bosqichma-bosqich ko'rsatmalar ber.`;
-        
-        defaultTopics = ["Kompaniya ichki sirlari", "Narxlar va moliyaviy ma'lumotlar", "Siyosat"];
-        defaultRules = [
-          { id: "esc-1", text: "Muammo bazada topilmaganida", enabled: true },
-          { id: "esc-2", text: "Foydalanuvchi shikoyat bildirganida", enabled: true },
-          { id: "esc-3", text: "Foydalanuvchi to'lov qaytarilishini so'raganida", enabled: true }
-        ];
-      }
+      const defaultPrompt = t(`pages.ai_agent.defaults.${selectedAgentType}.prompt`);
+      const defaultTopics = [
+        t(`pages.ai_agent.defaults.${selectedAgentType}.topics.0`),
+        t(`pages.ai_agent.defaults.${selectedAgentType}.topics.1`),
+        t(`pages.ai_agent.defaults.${selectedAgentType}.topics.2`)
+      ];
+      const defaultRules = [
+        { id: "esc-1", text: t(`pages.ai_agent.defaults.${selectedAgentType}.rules.esc_1`), enabled: true },
+        { id: "esc-2", text: t(`pages.ai_agent.defaults.${selectedAgentType}.rules.esc_2`), enabled: true },
+        { id: "esc-3", text: t(`pages.ai_agent.defaults.${selectedAgentType}.rules.esc_3`), enabled: true }
+      ];
       
       setSettings(prev => prev ? {
         ...prev,
@@ -978,26 +837,12 @@ Foydalanuvchilarga faqat bilimlar bazasi (BILIMLAR BAZASI) doirasida javob beris
         escalationRules: defaultRules
       } : null);
     }
-  }, [selectedAgentType, settings]);
+  }, [selectedAgentType, settings, t]);
 
   // Sync simulator welcome messages when selected agent changes
   useEffect(() => {
-    let welcomeText = "";
-    if (selectedAgentType === "kurator") {
-      welcomeText = "Salom! Men o'quvchilarga yordam beruvchi shaxsiy AI kuratorman. Bilimlar bazasidagi ma'lumotlar asosida savollarga javob beraman. Meni sinab ko'rish uchun bu yerga biror savol yozing! 📚";
-    } else if (selectedAgentType === "sales") {
-      welcomeText = "Salom! Men sizning sotuvchi yordamchingizman. Mahsulotlarimiz, narxlarimiz va do'konimiz haqidagi savollarga javob bera olaman. Meni sinab ko'rish uchun savol yozing! 🛍️";
-    } else if (selectedAgentType === "booker") {
-      welcomeText = "Salom! Men shaxsiy konsultatsiyalarni bron qiluvchi va maslahat beruvchi yordamchiman. Ohang va ma'lumotlarimni tekshirish uchun savol yozib ko'ring! 📅";
-    } else if (selectedAgentType === "recruiter") {
-      welcomeText = "Salom! Men HR/Rekruter yordamchiman. Bo'sh ish o'rinlari haqida ma'lumot beraman va nomzodlarni suhbatdan o'tkaza olaman. Sinab ko'rish uchun savol yozing! 👔";
-    } else if (selectedAgentType === "clinic") {
-      welcomeText = "Salom! Men klinikaning onlayn yordamchisiman. Shifokorlarga yozilish, bo'sh vaqtlarni ko'rish va bo'limlar haqida ma'lumot olishingiz mumkin. Sinab ko'ring! 🏥";
-    } else if (selectedAgentType === "realtor") {
-      welcomeText = "Salom! Men ko'chmas mulk yordamchisiman. Uy-joylar, narxlar va joylashuvlar haqida ma'lumot beraman. Ko'rishga vaqt belgilashingiz ham mumkin. Sinab ko'ring! 🏠";
-    } else if (selectedAgentType === "helpdesk") {
-      welcomeText = "Salom! Men texnik yordam yordamchisiman. Muammolaringizni hal qilishda yordam beraman. Savolingizni yozing! 🔧";
-    }
+    if (!selectedAgentType) return;
+    const welcomeText = t(`pages.ai_agent.defaults.${selectedAgentType}.welcome`);
     
     if (welcomeText) {
       setChatMessages([
@@ -1005,12 +850,12 @@ Foydalanuvchilarga faqat bilimlar bazasi (BILIMLAR BAZASI) doirasida javob beris
           id: "welcome",
           sender: "bot",
           text: welcomeText,
-          time: "Hozir",
+          time: t("pages.ai_agent.now"),
           confidence: 100
         }
       ]);
     }
-  }, [selectedAgentType]);
+  }, [selectedAgentType, t]);
 
   const loadDatabase = () => {
     // Clean up any lingering demo @sendly_robot channel from localStorage
@@ -1095,8 +940,8 @@ Foydalanuvchilarga faqat bilimlar bazasi (BILIMLAR BAZASI) doirasida javob beris
       if (!telegramChannel) {
         setAlertModal({
           isOpen: true,
-          title: "Telegram Bot ulanmagan",
-          message: "AI Agentni faollashtirish uchun avval Telegram botingizni integratsiya qilishingiz kerak. Kanallar bo'limiga o'ting va Telegram bot tokenini kiriting.",
+          title: t("pages.ai_agent.tg_not_linked_title"),
+          message: t("pages.ai_agent.tg_not_linked_msg"),
         });
         return;
       }
@@ -1135,7 +980,7 @@ Foydalanuvchilarga faqat bilimlar bazasi (BILIMLAR BAZASI) doirasida javob beris
       setIsTelegramLinked(false);
       setTelegramBotUsername("");
     }
-    showToast("Telegram bot muvaffaqiyatli bog'landi");
+    showToast(t("pages.ai_agent.toasts.tg_bot_linked"));
   };
 
   const handleAddTelegram = async () => {
@@ -1159,7 +1004,7 @@ Foydalanuvchilarga faqat bilimlar bazasi (BILIMLAR BAZASI) doirasida javob beris
     }
     
     if (!finalUsername) {
-      showToast("Bot foydalanuvchi nomini aniqlab bo'lmadi. Iltimos, bot foydalanuvchi nomini o'zingiz kiriting.", "error");
+      showToast(t("pages.ai_agent.toasts.tg_bot_username_error"), "error");
       setIsTgSaving(false);
       return;
     }
@@ -1187,7 +1032,7 @@ Foydalanuvchilarga faqat bilimlar bazasi (BILIMLAR BAZASI) doirasida javob beris
     setAlertModal({
       isOpen: true,
       title: t("common.success") || "Muvaffaqiyatli",
-      message: `Telegram bot (${formattedUsername}) muvaffaqiyatli ulandi!`,
+      message: t("pages.ai_agent.toasts.tg_bot_linked_success").replace("{username}", formattedUsername),
     });
   };
 
@@ -1206,10 +1051,10 @@ Foydalanuvchilarga faqat bilimlar bazasi (BILIMLAR BAZASI) doirasida javob beris
       
       // Sync client state with local server JSON file db.json
       await db.saveToServer();
-      showToast("Barcha o'zgarishlar muvaffaqiyatli saqlandi!");
+      showToast(t("pages.ai_agent.toasts.save_success"));
     } catch (err) {
       console.error(err);
-      showToast("Xatolik yuz berdi", "error");
+      showToast(t("pages.ai_agent.toasts.error_occurred"), "error");
     }
   };
 
@@ -1235,7 +1080,7 @@ Foydalanuvchilarga faqat bilimlar bazasi (BILIMLAR BAZASI) doirasida javob beris
 
       const data = await res.json();
       if (!res.ok) {
-        setVerifyAdminError(data.error || "Tasdiqlash kodini tekshirishda xatolik yuz berdi");
+        setVerifyAdminError(data.error || t("pages.ai_agent.errors.verify_code_error"));
         setIsVerifyLoading(false);
         return;
       }
@@ -1246,10 +1091,10 @@ Foydalanuvchilarga faqat bilimlar bazasi (BILIMLAR BAZASI) doirasida javob beris
 
       setIsVerifyingAdmin(false);
       setAdminVerifyCode("");
-      showToast("Admin profil muvaffaqiyatli bog'landi!");
+      showToast(t("pages.ai_agent.toasts.admin_linked"));
     } catch (err) {
       console.error("Verification error:", err);
-      setVerifyAdminError("Server bilan bog'lanishda xatolik yuz berdi");
+      setVerifyAdminError(t("pages.ai_agent.errors.server_connection_error"));
     } finally {
       setIsVerifyLoading(false);
     }
@@ -1270,10 +1115,10 @@ Foydalanuvchilarga faqat bilimlar bazasi (BILIMLAR BAZASI) doirasida javob beris
       await db.saveToServer();
       await db.fetchFromServer();
       loadDatabase();
-      showToast("Admin profil muvaffaqiyatli o'chirildi!");
+      showToast(t("pages.ai_agent.toasts.admin_unlinked"));
     } catch (err) {
       console.error("Disconnect admin error:", err);
-      showToast("Xatolik yuz berdi", "error");
+      showToast(t("pages.ai_agent.toasts.error_occurred"), "error");
     }
   };
 
@@ -1292,7 +1137,7 @@ Foydalanuvchilarga faqat bilimlar bazasi (BILIMLAR BAZASI) doirasida javob beris
     setModules(db.getModules());
     setNewModuleName("");
     setShowAddModuleModal(false);
-    showToast(`"${newMod.title}" moduli yaratildi`);
+    showToast(t("pages.ai_agent.toasts.module_created").replace("{title}", newMod.title));
   };
 
   // Delete module
@@ -1300,8 +1145,8 @@ Foydalanuvchilarga faqat bilimlar bazasi (BILIMLAR BAZASI) doirasida javob beris
     e.stopPropagation();
     setConfirmModal({
       isOpen: true,
-      title: "Modulni o'chirish",
-      message: "Ushbu modul va uning ichidagi barcha darslarni o'chirishni tasdiqlaysizmi?",
+      title: t("pages.ai_agent.confirmations.delete_module_title"),
+      message: t("pages.ai_agent.confirmations.delete_module_message"),
       onConfirm: () => {
         db.deleteModule(moduleId);
         setModules(db.getModules());
@@ -1310,7 +1155,7 @@ Foydalanuvchilarga faqat bilimlar bazasi (BILIMLAR BAZASI) doirasida javob beris
         if (selectedLesson && selectedLesson.moduleId === moduleId) {
           setSelectedLesson(remainingLessons[0] || null);
         }
-        showToast("Modul o'chirildi");
+        showToast(t("pages.ai_agent.toasts.module_deleted"));
         setConfirmModal(prev => ({ ...prev, isOpen: false }));
       }
     });
@@ -1319,13 +1164,13 @@ Foydalanuvchilarga faqat bilimlar bazasi (BILIMLAR BAZASI) doirasida javob beris
   // Add new lesson
   const handleAddLesson = () => {
     if (!newLessonName.trim() || !newLessonModuleId) return;
-    const newLes = db.addLesson(newLessonModuleId, newLessonName.trim(), "Yangi dars matni transkripti...");
+    const newLes = db.addLesson(newLessonModuleId, newLessonName.trim(), t("pages.ai_agent.placeholders.new_lesson_content"));
     const updatedLessons = db.getLessons();
     setLessons(updatedLessons);
     setSelectedLesson(newLes);
     setNewLessonName("");
     setShowAddLessonModal(false);
-    showToast(`"${newLes.title}" darsi yaratildi`);
+    showToast(t("pages.ai_agent.toasts.lesson_created").replace("{title}", newLes.title));
   };
 
   // Delete lesson
@@ -1333,8 +1178,8 @@ Foydalanuvchilarga faqat bilimlar bazasi (BILIMLAR BAZASI) doirasida javob beris
     e.stopPropagation();
     setConfirmModal({
       isOpen: true,
-      title: "Darsni o'chirish",
-      message: "Ushbu darsni o'chirishni tasdiqlaysizmi?",
+      title: t("pages.ai_agent.confirmations.delete_lesson_title"),
+      message: t("pages.ai_agent.confirmations.delete_lesson_message"),
       onConfirm: () => {
         db.deleteLesson(lessonId);
         const updatedLessons = db.getLessons();
@@ -1342,7 +1187,7 @@ Foydalanuvchilarga faqat bilimlar bazasi (BILIMLAR BAZASI) doirasida javob beris
         if (selectedLesson && selectedLesson.id === lessonId) {
           setSelectedLesson(updatedLessons[0] || null);
         }
-        showToast("Dars o'chirildi");
+        showToast(t("pages.ai_agent.toasts.lesson_deleted"));
         setConfirmModal(prev => ({ ...prev, isOpen: false }));
       }
     });
@@ -1354,6 +1199,33 @@ Foydalanuvchilarga faqat bilimlar bazasi (BILIMLAR BAZASI) doirasida javob beris
     const updated = { ...selectedLesson, [field]: value };
     setSelectedLesson(updated);
     setLessons(prev => prev.map(l => l.id === selectedLesson.id ? updated : l));
+  };
+
+  const handleAiStructureTranscript = async () => {
+    if (!selectedLesson || !selectedLesson.transcript || selectedLesson.transcript.trim() === "") {
+      showToast("Tahlil qilish uchun matn bo'sh bo'lmasligi kerak", "error");
+      return;
+    }
+
+    setIsStructuring(true);
+    try {
+      const res = await fetch("/api/ai/structure", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ transcript: selectedLesson.transcript })
+      });
+      const data = await res.json();
+      if (res.ok && data.text) {
+        handleUpdateSelectedLesson("transcript", data.text);
+        showToast("Matn sun'iy intellekt (Gemini 3.5) yordamida muvaffaqiyatli tahlil qilindi va strukturalandi!");
+      } else {
+        showToast(data.error || "Tahlil qilishda xatolik yuz berdi", "error");
+      }
+    } catch (err) {
+      showToast("Tarmoq ulanishida xatolik yuz berdi", "error");
+    } finally {
+      setIsStructuring(false);
+    }
   };
 
   // Settings: Add dynamic forbidden topic badge
@@ -1429,67 +1301,12 @@ Foydalanuvchilarga faqat bilimlar bazasi (BILIMLAR BAZASI) doirasida javob beris
   };
 
   const getSliderPreviewContent = (type: "tone" | "length" | "humor", value: number) => {
-    if (type === "tone") {
-      if (value < 33) {
-        return {
-          title: "Ohang: Norasmiy (Do'stona)",
-          question: "Narxlaringiz qanaqa?",
-          reply: "Salom! 😊 Bizda narxlar juda ham hamyonbop. Kurslarimiz oyiga atigi 150 ming so'mdan boshlanadi. Qiziqib ko'rasizmi? 😉"
-        };
-      } else if (value >= 33 && value <= 66) {
-        return {
-          title: "Ohang: Me'yorida (Samimiy)",
-          question: "Narxlaringiz qanaqa?",
-          reply: "Salom, xush kelibsiz! Bizning o'quv dasturlarimiz narxi oyiga 150 000 so'mdan boshlanadi. Batafsil ma'lumot olishni istasangiz, yozib qoldiring."
-        };
-      } else {
-        return {
-          title: "Ohang: Rasmiy",
-          question: "Narxlaringiz qanaqa?",
-          reply: "Assalomu alaykum. Bizning xizmatlarimiz va o'quv kurslarimizning to'lov miqdori oyiga 150 000 so'mni tashkil etadi. Savollaringiz bo'lsa, xizmatingizdamiz."
-        };
-      }
-    } else if (type === "length") {
-      if (value < 33) {
-        return {
-          title: "Javob uzunligi: Qisqa (Londa)",
-          question: "Darslar qachon boshlanadi?",
-          reply: "Darslar dushanba kuni soat 19:00 da boshlanadi."
-        };
-      } else if (value >= 33 && value <= 66) {
-        return {
-          title: "Javob uzunligi: Me'yorida",
-          question: "Darslar qachon boshlanadi?",
-          reply: "Yangi guruhimiz uchun darslar kelasi dushanba kuni soat 19:00 da boshlanadi. Darslar haftada 3 marta bo'ladi."
-        };
-      } else {
-        return {
-          title: "Javob uzunligi: Batafsil tushuntirish",
-          question: "Darslar qachon boshlanadi?",
-          reply: "Bizning darslarimiz kelasi haftaning dushanba kunidan (soat 19:00 da) boshlanadi. Har bir dars davomiyligi 2 soat bo'lib, haftada 3 kun davom etadi. Dastlabki dars bepul."
-        };
-      }
-    } else {
-      if (value < 33) {
-        return {
-          title: "Hazil va Emojilar: Jiddiy (Akademik)",
-          question: "Kursni sotib olsam bo'ladimi?",
-          reply: "Ha, kursni xarid qilishingiz mumkin. Quyidagi havola orqali Click yoki Payme tizimi orqali to'lovni amalga oshiring."
-        };
-      } else if (value >= 33 && value <= 66) {
-        return {
-          title: "Hazil va Emojilar: Me'yorida",
-          question: "Kursni sotib olsam bo'ladimi?",
-          reply: "Albatta bo'ladi! 😊 Quyidagi to'lov havolasi orqali to'lovni amalga oshiring va guruhga qo'shiling. 🚀"
-        };
-      } else {
-        return {
-          title: "Hazil va Emojilar: Qiziqarli (Emojilar bilan)",
-          question: "Kursni sotib olsam bo'ladimi?",
-          reply: "Voy, albatta-da! 😍 Koinotimizga xush kelibsiz! 🚀 Quyidagi havola orqali to'lovni qilishingiz bilan guruhga uchyapmiz! Click/Payme tayyor! 😉💳✨"
-        };
-      }
-    }
+    const level = value < 33 ? "low" : (value >= 33 && value <= 66) ? "mid" : "high";
+    return {
+      title: t(`pages.ai_agent.slider_previews.${type}.${level}_title`),
+      question: t(`pages.ai_agent.slider_previews.${type}.${level}_question`),
+      reply: t(`pages.ai_agent.slider_previews.${type}.${level}_reply`)
+    };
   };
 
   // Send message to live sandbox preview simulator
@@ -1531,19 +1348,29 @@ Foydalanuvchilarga faqat bilimlar bazasi (BILIMLAR BAZASI) doirasida javob beris
 
     // 2. Query RAG (local mock or live Gemini API depending on environment keys)
     try {
-      const ragResult = await queryRAG(
-        userText,
-        "Sinovchi Foydalanuvchi",
-        lessons,
-        modules,
-        settings,
-        chatMessages
-          .filter(m => m.sender !== "warning")
-          .map(m => ({
-            role: m.sender === "user" ? "user" : "model",
-            parts: [{ text: m.text }]
-          }))
-      );
+      const response = await fetch("/api/ai/rag", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          question: userText,
+          studentName: "Sinovchi Foydalanuvchi",
+          lessons,
+          modules,
+          settings,
+          history: chatMessages
+            .filter(m => m.sender !== "warning")
+            .map(m => ({
+              role: m.sender === "user" ? "user" : "model",
+              parts: [{ text: m.text }]
+            }))
+        })
+      });
+      
+      if (!response.ok) {
+        throw new Error(await response.text());
+      }
+      
+      const ragResult = await response.json();
 
       setChatMessages(prev => [
         ...prev,
@@ -1576,7 +1403,7 @@ Foydalanuvchilarga faqat bilimlar bazasi (BILIMLAR BAZASI) doirasida javob beris
         intent: detectedIntent,
         sentiment: sentiment,
         confidence: ragResult.confidence || 75,
-        date: "Hozir",
+        date: t("pages.ai_agent.now"),
         painPoint: painPoint
       };
 
@@ -1594,7 +1421,7 @@ Foydalanuvchilarga faqat bilimlar bazasi (BILIMLAR BAZASI) doirasida javob beris
         {
           id: `error-${Date.now()}`,
           sender: "bot",
-          text: "Kechirasiz, javob shakllantirishda xatolik yuz berdi. Iltimos qayta urinib ko'ring.",
+          text: t("pages.ai_agent.errors.response_generation_error"),
           time: timeString,
           confidence: 0
         }
@@ -1615,14 +1442,14 @@ Foydalanuvchilarga faqat bilimlar bazasi (BILIMLAR BAZASI) doirasida javob beris
 
     // Initial steps
     const steps = isDirect ? [
-      { id: "step-webhook", label: "Facebook Webhook so'rovi qabul qilindi", status: "running" as const },
-      { id: "step-mapping", label: "Lead maydonlari moslashtirildi (Field Mapping)", status: "pending" as const },
-      { id: "step-crm", label: "Mijoz ma'lumotlari Sendly CRM-ga joylandi va Telegramga yuborildi", status: "pending" as const },
+      { id: "step-webhook", label: t("pages.ai_agent.simulation.webhook_received"), status: "running" as const },
+      { id: "step-mapping", label: t("pages.ai_agent.simulation.field_mapped"), status: "pending" as const },
+      { id: "step-crm", label: t("pages.ai_agent.simulation.crm_direct_sent"), status: "pending" as const },
     ] : [
-      { id: "step-webhook", label: "Facebook Webhook so'rovi qabul qilindi", status: "running" as const },
-      { id: "step-mapping", label: "Lead maydonlari moslashtirildi (Field Mapping)", status: "pending" as const },
-      { id: "step-ai", label: "AI Agent orqali intent/savol tahlil qilindi", status: "pending" as const },
-      { id: "step-crm", label: "Mijoz ma'lumotlari Sendly CRM-ga joylandi", status: "pending" as const },
+      { id: "step-webhook", label: t("pages.ai_agent.simulation.webhook_received"), status: "running" as const },
+      { id: "step-mapping", label: t("pages.ai_agent.simulation.field_mapped"), status: "pending" as const },
+      { id: "step-ai", label: t("pages.ai_agent.simulation.ai_analyzed"), status: "pending" as const },
+      { id: "step-crm", label: t("pages.ai_agent.simulation.crm_saved"), status: "pending" as const },
     ];
     setSimSteps(steps);
 
@@ -1634,17 +1461,17 @@ Foydalanuvchilarga faqat bilimlar bazasi (BILIMLAR BAZASI) doirasida javob beris
       let formId = settings.fbFormId || "form-1";
 
       if (isSimulatorJsonMode) {
-        const parsed = parseJsonPayload(simJsonPayload, fieldMappings);
+        const parsed = parseJsonPayload(simJsonPayload, fieldMappings, lang);
         if (!parsed) {
           setSimSteps(prev =>
             prev.map(s => {
               if (s.id === "step-webhook") return { ...s, status: "success" as const };
-              if (s.id === "step-mapping") return { ...s, status: "error" as const, label: "Xatolik: Webhook JSON formatini o'qib bo'lmadi" };
+              if (s.id === "step-mapping") return { ...s, status: "error" as const, label: t("pages.ai_agent.simulation.error_webhook_json") };
               return s;
             })
           );
           setSimLoading(false);
-          showToast("Webhook JSON formatida xatolik! ❌", "error");
+          showToast(t("pages.ai_agent.toasts.webhook_json_error"), "error");
           return;
         }
         leadName = parsed.name;
@@ -1655,12 +1482,12 @@ Foydalanuvchilarga faqat bilimlar bazasi (BILIMLAR BAZASI) doirasida javob beris
         if (!simLeadName.trim() || !simLeadPhone.trim()) {
           setSimSteps(prev =>
             prev.map(s => {
-              if (s.id === "step-webhook") return { ...s, status: "error" as const, label: "Xatolik: Ism va telefon kiritilishi shart" };
+              if (s.id === "step-webhook") return { ...s, status: "error" as const, label: t("pages.ai_agent.simulation.error_input_required") };
               return s;
             })
           );
           setSimLoading(false);
-          showToast("Iltimos, ism va telefon raqamini kiriting! ❌", "error");
+          showToast(t("pages.ai_agent.toasts.input_required"), "error");
           return;
         }
         leadName = simLeadName;
@@ -1696,8 +1523,8 @@ Foydalanuvchilarga faqat bilimlar bazasi (BILIMLAR BAZASI) doirasida javob beris
           setTimeout(() => {
             const detectedGroup = "Sotuvlar";
             const groupId = settings.targetGroupId || "sales";
-            const tags = ["Meta Lead", "Yo'naltirilgan"];
-            const summary = "Mijoz Facebook forma orqali ariza qoldirdi (To'g'ridan-to'g'ri yo'naltirish).";
+            const tags = [t("pages.ai_agent.simulation.tag_meta_lead"), t("pages.ai_agent.simulation.tag_forwarded")];
+            const summary = t("pages.ai_agent.simulation.default_summary_direct");
             const welcomeMsg = (settings.fbWelcomeMessage || "Salom {{name}}! So'rovingiz qabul qilindi. Tez orada bog'lanamiz.")
               .replace("{{name}}", leadName);
 
@@ -1719,7 +1546,8 @@ Foydalanuvchilarga faqat bilimlar bazasi (BILIMLAR BAZASI) doirasida javob beris
             setSimResult(newResult);
             setSimLoading(false);
 
-            const selectedForm = MOCK_FB_FORMS.find(f => f.id === formId)?.name || "Kuzgi chegirmalar formasi";
+            const selectedFormKey = MOCK_FB_FORMS.find(f => f.id === formId)?.name || "pages.ai_agent.forms.autumn_sale";
+              const selectedForm = t(selectedFormKey);
 
             const newLog = {
               id: `log-${Date.now()}`,
@@ -1729,7 +1557,7 @@ Foydalanuvchilarga faqat bilimlar bazasi (BILIMLAR BAZASI) doirasida javob beris
               group: detectedGroup,
               tags: tags,
               summary: summary,
-              date: "Hozir",
+              date: t("pages.ai_agent.now"),
               status: "success",
             };
 
@@ -1805,7 +1633,7 @@ Foydalanuvchilarga faqat bilimlar bazasi (BILIMLAR BAZASI) doirasida javob beris
             }
 
             db.saveToServer();
-            showToast("Lid muvaffaqiyatli simulyatsiya qilindi va Telegramga yuborildi! 🎯");
+            showToast(t("pages.ai_agent.toasts.sim_sent_tg"));
           }, 1000);
         } else {
           // AI Qualification Mode Flow (Step 3: AI analysis done, CRM routing starts)
@@ -1825,11 +1653,11 @@ Foydalanuvchilarga faqat bilimlar bazasi (BILIMLAR BAZASI) doirasida javob beris
               }
             }
             if (savedTags.length === 0) {
-              savedTags = ["Meta Lead", "AI Saralangan"];
+              savedTags = [t("pages.ai_agent.simulation.tag_meta_lead"), t("pages.ai_agent.simulation.tag_ai_sorted")];
             }
 
             const tags = [...savedTags];
-            let summary = "Mijoz umumiy ma'lumot so'radi.";
+            let summary = t("pages.ai_agent.simulation.summary_general");
 
             const currentGroups = db.getGroups();
             const salesGroup = currentGroups.find(g => g.id === "sales")?.name || "Sotuvlar";
@@ -1851,8 +1679,8 @@ Foydalanuvchilarga faqat bilimlar bazasi (BILIMLAR BAZASI) doirasida javob beris
             ) {
               detectedGroup = salesGroup;
               groupId = "sales";
-              tags.push("High Intent", "Narxga Qiziqqan");
-              summary = "Mijoz to'lov shakli, narx yoki chegirmalar bo'yicha ma'lumot so'ragan.";
+              tags.push(t("pages.ai_agent.simulation.tag_high_intent"), t("pages.ai_agent.simulation.tag_price_interested"));
+              summary = t("pages.ai_agent.simulation.summary_price");
             } else if (
               msg.includes("kirish") ||
               msg.includes("kirmayapti") ||
@@ -1869,14 +1697,14 @@ Foydalanuvchilarga faqat bilimlar bazasi (BILIMLAR BAZASI) doirasida javob beris
             ) {
               detectedGroup = supportGroup;
               groupId = "support";
-              tags.push("Texnik muammo", "Support");
-              summary = "Mijoz tizimga kirish yoki texnik nosozlik yuzasidan yordam so'ragan.";
+              tags.push(t("pages.ai_agent.simulation.tag_tech_issue"), t("pages.ai_agent.simulation.tag_support"));
+              summary = t("pages.ai_agent.simulation.summary_technical");
             } else {
               const selectedG = currentGroups.find(g => g.id === (settings.targetGroupId || "sales"));
               detectedGroup = selectedG ? selectedG.name : salesGroup;
               groupId = settings.targetGroupId || "sales";
-              tags.push("Yangi Lead");
-              summary = "Mijoz Facebook forma orqali ariza qoldirgan.";
+              tags.push(t("pages.ai_agent.simulation.tag_new_lead"));
+              summary = t("pages.ai_agent.simulation.default_summary_ai");
             }
 
             const welcomeMsg = (settings.fbWelcomeMessage || "Salom {{name}}! So'rovingiz qabul qilindi. Tez orada bog'lanamiz.")
@@ -1910,7 +1738,8 @@ Foydalanuvchilarga faqat bilimlar bazasi (BILIMLAR BAZASI) doirasida javob beris
               setSimResult(newResult);
               setSimLoading(false);
 
-              const selectedForm = MOCK_FB_FORMS.find(f => f.id === formId)?.name || "Kuzgi chegirmalar formasi";
+              const selectedFormKey = MOCK_FB_FORMS.find(f => f.id === formId)?.name || "pages.ai_agent.forms.autumn_sale";
+              const selectedForm = t(selectedFormKey);
 
               const newLog = {
                 id: `log-${Date.now()}`,
@@ -1920,7 +1749,7 @@ Foydalanuvchilarga faqat bilimlar bazasi (BILIMLAR BAZASI) doirasida javob beris
                 group: detectedGroup,
                 tags: tags,
                 summary: summary,
-                date: "Hozir",
+                date: t("pages.ai_agent.now"),
                 status: "success",
               };
 
@@ -1989,7 +1818,7 @@ Foydalanuvchilarga faqat bilimlar bazasi (BILIMLAR BAZASI) doirasida javob beris
               }
 
               db.saveToServer();
-              showToast("Lid muvaffaqiyatli simulyatsiya qilindi va saralandi! 🎯");
+              showToast(t("pages.ai_agent.toasts.sim_sorted"));
             }, 800);
           }, 1000);
         }
@@ -2032,25 +1861,15 @@ Foydalanuvchilarga faqat bilimlar bazasi (BILIMLAR BAZASI) doirasida javob beris
                 {isAnyAgentActive && (
                   <div className="w-full flex flex-col gap-3 mt-1">
                     <h2 className="text-[11px] font-extrabold text-[#707070] uppercase tracking-wider self-start">
-                      Ishlab turgan AI agent
+                      {t("pages.ai_agent.labels.active_agents")}
                     </h2>
                     <div className="grid grid-cols-1 gap-4 w-full">
                       {activeAgents.map(item => (
                         <React.Fragment key={item.channel.id}>
                           {item.settings.aiCuratorEnabled && (() => {
                             const agentType = item.settings.aiAgentType || "kurator";
-                            let name = "AI kuratori";
-                            let desc = "Telegram bot yoki instagram orqali bilimlar bazasidagi ma'lumotlar asosida aqlli, do'stona va javob beruvchi yordamchi.";
-                            if (agentType === "sales") {
-                              name = "Sotuvchi AI Agent";
-                              desc = "Mahsulotlar katalogi, narxlari va ish vaqti kabi ma'lumotlarni o'rganib, mijozlar bilan muloqot qiladi va sotadi.";
-                            } else if (agentType === "booker") {
-                              name = "Konsultatsiya va Band qilish AI";
-                              desc = "Mutaxassis bilimlari va gaplashish ohangi asosida maslahat beradi va konsultatsiya uchun vaqt band qiladi (pullik to'lov bilan).";
-                            } else if (agentType === "recruiter") {
-                              name = "HR va Vakansiyalar uchun AI";
-                              desc = "Bo'sh ish o'rinlari va nomzodga qo'yiladigan talablar asosida nomzodlarni suhbatdan o'tkazadi, saralaydi va HR-ga yuboradi.";
-                            }
+                            const name = t(`pages.ai_agent.templates.${agentType}.name`);
+                            const desc = t(`pages.ai_agent.templates.${agentType}.desc`);
 
                             return (
                               <div className="bg-white border border-[#E8E8E8] rounded-[28px] p-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 transition-all shadow-md relative overflow-hidden group">
@@ -2069,7 +1888,7 @@ Foydalanuvchilarga faqat bilimlar bazasi (BILIMLAR BAZASI) doirasida javob beris
                                           <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#7CA607] opacity-75"></span>
                                           <span className="relative inline-flex rounded-full h-2 w-2 bg-[#7CA607]"></span>
                                         </span>
-                                        FAOL
+                                        {t("pages.ai_agent.labels.active_badge")}
                                       </span>
                                     </div>
                                     <p className="text-[11px] text-[#7CA607] font-semibold mt-1">
@@ -2093,7 +1912,7 @@ Foydalanuvchilarga faqat bilimlar bazasi (BILIMLAR BAZASI) doirasida javob beris
                                   }}
                                   className="px-5 py-2.5 bg-black text-[#C7F33C] text-[12px] font-bold hover:bg-black/90 hover:scale-[1.02] active:scale-95 transition-all text-center rounded-full flex items-center justify-center gap-2 shrink-0 self-stretch sm:self-auto shadow-sm"
                                 >
-                                  <span>Sozlash</span>
+                                  <span>{t("pages.ai_agent.labels.configure_btn")}</span>
                                   <ArrowRight size={14} />
                                 </button>
                               </div>
@@ -2111,21 +1930,21 @@ Foydalanuvchilarga faqat bilimlar bazasi (BILIMLAR BAZASI) doirasida javob beris
                                   <div>
                                     <div className="flex flex-wrap items-center gap-2">
                                       <h3 className="text-[17px] font-bold text-black">
-                                        {"Lidlarni Telegramga yo'naltirish"}
+                                        {t("pages.ai_agent.templates.fb_leads_direct.name")}
                                       </h3>
                                       <span className="flex items-center gap-1.5 px-2.5 py-0.5 bg-blue-50 border border-blue-200 rounded-full text-[9px] font-extrabold text-blue-600 uppercase tracking-wider">
                                         <span className="relative flex h-2 w-2">
                                           <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
                                           <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
                                         </span>
-                                        FAOL
+                                        {t("pages.ai_agent.labels.active_badge")}
                                       </span>
                                     </div>
                                     <p className="text-[11px] text-blue-600 font-semibold mt-1">
                                       Kanal: @{item.channel.username.replace(/^@+/, "")} | Guruh: {item.settings.adminTelegramUsername ? `@${item.settings.adminTelegramUsername}` : "Ulanmagan"}
                                     </p>
                                     <p className="text-[12px] text-[#707070] mt-1.5 leading-relaxed">
-                                      {"Facebook reklama formasidan kelgan arizalar Telegram guruh yoki profilingizga yo'naltirilmoqda."}
+                                      {t("pages.ai_agent.labels.fb_leads_desc_card")}
                                     </p>
                                   </div>
                                 </div>
@@ -2142,7 +1961,7 @@ Foydalanuvchilarga faqat bilimlar bazasi (BILIMLAR BAZASI) doirasida javob beris
                                   }}
                                   className="px-5 py-2.5 bg-blue-600 text-white text-[12px] font-bold hover:bg-blue-700 hover:scale-[1.02] active:scale-95 transition-all text-center rounded-full flex items-center justify-center gap-2 shrink-0 self-stretch sm:self-auto shadow-sm"
                                 >
-                                  <span>Sozlash</span>
+                                  <span>{t("pages.ai_agent.labels.configure_btn")}</span>
                                   <ArrowRight size={14} />
                                 </button>
                               </div>
@@ -2158,21 +1977,21 @@ Foydalanuvchilarga faqat bilimlar bazasi (BILIMLAR BAZASI) doirasida javob beris
                                   <div>
                                     <div className="flex flex-wrap items-center gap-2">
                                       <h3 className="text-[17px] font-bold text-black">
-                                        {t("pages.ai_agent.fb_leads_agent")}
+                                        {t("pages.ai_agent.labels.fb_leads_agent")}
                                       </h3>
                                       <span className="flex items-center gap-1.5 px-2.5 py-0.5 bg-blue-50 border border-blue-200 rounded-full text-[9px] font-extrabold text-blue-600 uppercase tracking-wider">
                                         <span className="relative flex h-2 w-2">
                                           <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
                                           <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
                                         </span>
-                                        FAOL
+                                        {t("pages.ai_agent.labels.active_badge")}
                                       </span>
                                     </div>
                                     <p className="text-[11px] text-blue-600 font-semibold mt-1">
                                       Kanal: @{item.channel.username.replace(/^@+/, "")} | Guruh: {db.getGroups().find(g => g.id === (item.settings.targetGroupId || "sales"))?.name || "Sotuvlar"}
                                     </p>
                                     <p className="text-[12px] text-[#707070] mt-1.5 leading-relaxed">
-                                      {t("pages.ai_agent.fb_leads_desc_card")}
+                                      {t("pages.ai_agent.labels.fb_leads_desc_card")}
                                     </p>
                                   </div>
                                 </div>
@@ -2189,7 +2008,7 @@ Foydalanuvchilarga faqat bilimlar bazasi (BILIMLAR BAZASI) doirasida javob beris
                                   }}
                                   className="px-5 py-2.5 bg-blue-600 text-white text-[12px] font-bold hover:bg-blue-700 hover:scale-[1.02] active:scale-95 transition-all text-center rounded-full flex items-center justify-center gap-2 shrink-0 self-stretch sm:self-auto shadow-sm"
                                 >
-                                  <span>Sozlash</span>
+                                  <span>{t("pages.ai_agent.labels.configure_btn")}</span>
                                   <ArrowRight size={14} />
                                 </button>
                               </div>
@@ -2202,7 +2021,7 @@ Foydalanuvchilarga faqat bilimlar bazasi (BILIMLAR BAZASI) doirasida javob beris
   
                   {isAnyAgentActive && (
                     <h2 className="text-[11px] font-extrabold text-[#707070] uppercase tracking-wider self-start mt-3.5">
-                      AI agentlar qo&apos;shish
+                      {t("pages.ai_agent.add_agents_section")}
                     </h2>
                   )}
   
@@ -2213,7 +2032,7 @@ Foydalanuvchilarga faqat bilimlar bazasi (BILIMLAR BAZASI) doirasida javob beris
                     <div className="flex flex-col gap-4">
                       <div className="flex items-center justify-between">
                         <div className="w-16 h-16 rounded-2xl overflow-hidden shrink-0">
-                          <img src="/robots/robot_kurator.png" alt="AI kuratori" className="w-full h-full object-cover" />
+                          <img src="/robots/robot_kurator.png" alt={t("pages.ai_agent.templates.kurator.name")} className="w-full h-full object-cover" />
                         </div>
                         <div className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-full">
                           <span className="w-2 h-2 rounded-full bg-gray-300"></span>
@@ -2224,10 +2043,10 @@ Foydalanuvchilarga faqat bilimlar bazasi (BILIMLAR BAZASI) doirasida javob beris
                       </div>
                       <div>
                         <h3 className="text-[17px] font-bold text-black group-hover:text-[#7CA607] transition-colors">
-                          {"AI kuratori"}
+                          {t("pages.ai_agent.templates.kurator.name")}
                         </h3>
                         <p className="text-[12px] text-[#707070] mt-1.5 leading-relaxed min-h-[48px]">
-                          {"Darsliklar, transkriptlar va PDF materiallar asosida savollarga aqlli va aniq javob beruvchi shaxsiy yordamchi."}
+                          {t("pages.ai_agent.templates.kurator.desc")}
                         </p>
                       </div>
 
@@ -2236,19 +2055,19 @@ Foydalanuvchilarga faqat bilimlar bazasi (BILIMLAR BAZASI) doirasida javob beris
                       <ul className="flex flex-col gap-2 text-[11px] text-[#595959]">
                         <li className="flex items-start gap-2.5">
                           <CheckCircle className="w-4 h-4 text-[#9BC92E] shrink-0 mt-0.5" />
-                          <span>{"Bilimlar bazasi tizimi (RAG)"}</span>
+                          <span>{t("pages.ai_agent.templates.kurator.feature_1")}</span>
                         </li>
                         <li className="flex items-start gap-2.5">
                           <CheckCircle className="w-4 h-4 text-[#9BC92E] shrink-0 mt-0.5" />
-                          <span>{"Telegram bot integratsiyasi"}</span>
+                          <span>{t("pages.ai_agent.templates.kurator.feature_2")}</span>
                         </li>
                         <li className="flex items-start gap-2.5">
                           <CheckCircle className="w-4 h-4 text-[#9BC92E] shrink-0 mt-0.5" />
-                          <span>{"Ohang va xarakterni sozlash"}</span>
+                          <span>{t("pages.ai_agent.templates.kurator.feature_3")}</span>
                         </li>
                         <li className="flex items-start gap-2.5">
                           <CheckCircle className="w-4 h-4 text-[#9BC92E] shrink-0 mt-0.5" />
-                          <span>{"Inson-kuratorga yo'naltirish qoidalari"}</span>
+                          <span>{t("pages.ai_agent.templates.kurator.feature_4")}</span>
                         </li>
                       </ul>
                     </div>
@@ -2270,7 +2089,7 @@ Foydalanuvchilarga faqat bilimlar bazasi (BILIMLAR BAZASI) doirasida javob beris
                     <div className="flex flex-col gap-4">
                       <div className="flex items-center justify-between">
                         <div className="w-16 h-16 rounded-2xl overflow-hidden shrink-0">
-                          <img src="/robots/robot_sales.png" alt="Sotuvchi AI" className="w-full h-full object-cover" />
+                          <img src="/robots/robot_sales.png" alt={t("pages.ai_agent.templates.sales.name")} className="w-full h-full object-cover" />
                         </div>
                         <div className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-full">
                           <span className="w-2 h-2 rounded-full bg-gray-300"></span>
@@ -2281,10 +2100,10 @@ Foydalanuvchilarga faqat bilimlar bazasi (BILIMLAR BAZASI) doirasida javob beris
                       </div>
                       <div>
                         <h3 className="text-[17px] font-bold text-black group-hover:text-[#7CA607] transition-colors">
-                          {"Sotuvchi AI Agent"}
+                          {t("pages.ai_agent.templates.sales.name")}
                         </h3>
                         <p className="text-[12px] text-[#707070] mt-1.5 leading-relaxed min-h-[48px]">
-                          {"Katalog, narxlar va ish vaqti kabi ma'lumotlarni o'rganib, mijozlar bilan muloqot qiladi va mahsulot sotadi."}
+                          {t("pages.ai_agent.templates.sales.desc")}
                         </p>
                       </div>
 
@@ -2293,19 +2112,19 @@ Foydalanuvchilarga faqat bilimlar bazasi (BILIMLAR BAZASI) doirasida javob beris
                       <ul className="flex flex-col gap-2 text-[11px] text-[#595959]">
                         <li className="flex items-start gap-2.5">
                           <CheckCircle className="w-4 h-4 text-[#9BC92E] shrink-0 mt-0.5" />
-                          <span>{"Katalog va narxlar bazasi"}</span>
+                          <span>{t("pages.ai_agent.templates.sales.feature_1")}</span>
                         </li>
                         <li className="flex items-start gap-2.5">
                           <CheckCircle className="w-4 h-4 text-[#9BC92E] shrink-0 mt-0.5" />
-                          <span>{"Ish vaqti va manzil integratsiyasi"}</span>
+                          <span>{t("pages.ai_agent.templates.sales.feature_2")}</span>
                         </li>
                         <li className="flex items-start gap-2.5">
                           <CheckCircle className="w-4 h-4 text-[#9BC92E] shrink-0 mt-0.5" />
-                          <span>{"Sotuv ohangida suhbatlashish"}</span>
+                          <span>{t("pages.ai_agent.templates.sales.feature_3")}</span>
                         </li>
                         <li className="flex items-start gap-2.5">
                           <CheckCircle className="w-4 h-4 text-[#9BC92E] shrink-0 mt-0.5" />
-                          <span>{"Buyurtmani operatorga yo'naltirish"}</span>
+                          <span>{t("pages.ai_agent.templates.sales.feature_4")}</span>
                         </li>
                       </ul>
                     </div>
@@ -2327,7 +2146,7 @@ Foydalanuvchilarga faqat bilimlar bazasi (BILIMLAR BAZASI) doirasida javob beris
                     <div className="flex flex-col gap-4">
                       <div className="flex items-center justify-between">
                         <div className="w-16 h-16 rounded-2xl overflow-hidden shrink-0">
-                          <img src="/robots/robot_booker.png" alt="Konsultatsiya AI" className="w-full h-full object-cover" />
+                          <img src="/robots/robot_booker.png" alt={t("pages.ai_agent.templates.booker.name")} className="w-full h-full object-cover" />
                         </div>
                         <div className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-full">
                           <span className="w-2 h-2 rounded-full bg-gray-300"></span>
@@ -2338,10 +2157,10 @@ Foydalanuvchilarga faqat bilimlar bazasi (BILIMLAR BAZASI) doirasida javob beris
                       </div>
                       <div>
                         <h3 className="text-[17px] font-bold text-black group-hover:text-[#7CA607] transition-colors">
-                          {"Konsultatsiya / Band qilish AI"}
+                          {t("pages.ai_agent.templates.booker.name")}
                         </h3>
                         <p className="text-[12px] text-[#707070] mt-1.5 leading-relaxed min-h-[48px]">
-                          {"Mutaxassis ohangida maslahat beradi va konsultatsiya uchun vaqt band qiladi. Pullik qilish imkoni bor."}
+                          {t("pages.ai_agent.templates.booker.desc")}
                         </p>
                       </div>
 
@@ -2350,19 +2169,19 @@ Foydalanuvchilarga faqat bilimlar bazasi (BILIMLAR BAZASI) doirasida javob beris
                       <ul className="flex flex-col gap-2 text-[11px] text-[#595959]">
                         <li className="flex items-start gap-2.5">
                           <CheckCircle className="w-4 h-4 text-[#9BC92E] shrink-0 mt-0.5" />
-                          <span>{"Mutaxassis ohangi va bilimlari"}</span>
+                          <span>{t("pages.ai_agent.templates.booker.feature_1")}</span>
                         </li>
                         <li className="flex items-start gap-2.5">
                           <CheckCircle className="w-4 h-4 text-[#9BC92E] shrink-0 mt-0.5" />
-                          <span>{"Konsultatsiya vaqtini band qilish"}</span>
+                          <span>{t("pages.ai_agent.templates.booker.feature_2")}</span>
                         </li>
                         <li className="flex items-start gap-2.5">
                           <CheckCircle className="w-4 h-4 text-[#9BC92E] shrink-0 mt-0.5" />
-                          <span>{"Oldindan to'lov havolasi"}</span>
+                          <span>{t("pages.ai_agent.templates.booker.feature_3")}</span>
                         </li>
                         <li className="flex items-start gap-2.5">
                           <CheckCircle className="w-4 h-4 text-[#9BC92E] shrink-0 mt-0.5" />
-                          <span>{"Telegram & Direct orqali bron qilish"}</span>
+                          <span>{t("pages.ai_agent.templates.booker.feature_4")}</span>
                         </li>
                       </ul>
                     </div>
@@ -2384,7 +2203,7 @@ Foydalanuvchilarga faqat bilimlar bazasi (BILIMLAR BAZASI) doirasida javob beris
                     <div className="flex flex-col gap-4">
                       <div className="flex items-center justify-between">
                         <div className="w-16 h-16 rounded-2xl overflow-hidden shrink-0">
-                          <img src="/robots/robot_recruiter.png" alt="HR AI" className="w-full h-full object-cover" />
+                          <img src="/robots/robot_recruiter.png" alt={t("pages.ai_agent.templates.recruiter.name")} className="w-full h-full object-cover" />
                         </div>
                         <div className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-full">
                           <span className="w-2 h-2 rounded-full bg-gray-300"></span>
@@ -2395,10 +2214,10 @@ Foydalanuvchilarga faqat bilimlar bazasi (BILIMLAR BAZASI) doirasida javob beris
                       </div>
                       <div>
                         <h3 className="text-[17px] font-bold text-black group-hover:text-[#7CA607] transition-colors">
-                          {"HR va Vakansiyalar uchun AI"}
+                          {t("pages.ai_agent.templates.recruiter.name")}
                         </h3>
                         <p className="text-[12px] text-[#707070] mt-1.5 leading-relaxed min-h-[48px]">
-                          {"Bo'sh ish o'rinlari talablari bo'yicha nomzodlar bilan suhbatlashadi, ularni skrining qiladi va saralaydi."}
+                          {t("pages.ai_agent.templates.recruiter.desc")}
                         </p>
                       </div>
 
@@ -2407,19 +2226,19 @@ Foydalanuvchilarga faqat bilimlar bazasi (BILIMLAR BAZASI) doirasida javob beris
                       <ul className="flex flex-col gap-2 text-[11px] text-[#595959]">
                         <li className="flex items-start gap-2.5">
                           <CheckCircle className="w-4 h-4 text-[#9BC92E] shrink-0 mt-0.5" />
-                          <span>{"Vakansiyalar va talablar bazasi"}</span>
+                          <span>{t("pages.ai_agent.templates.recruiter.feature_1")}</span>
                         </li>
                         <li className="flex items-start gap-2.5">
                           <CheckCircle className="w-4 h-4 text-[#9BC92E] shrink-0 mt-0.5" />
-                          <span>{"Suhbat orqali ma'lumot yig'ish"}</span>
+                          <span>{t("pages.ai_agent.templates.recruiter.feature_2")}</span>
                         </li>
                         <li className="flex items-start gap-2.5">
                           <CheckCircle className="w-4 h-4 text-[#9BC92E] shrink-0 mt-0.5" />
-                          <span>{"Nomzod malakalarini tahlil qilish"}</span>
+                          <span>{t("pages.ai_agent.templates.recruiter.feature_3")}</span>
                         </li>
                         <li className="flex items-start gap-2.5">
                           <CheckCircle className="w-4 h-4 text-[#9BC92E] shrink-0 mt-0.5" />
-                          <span>{"Saralangan arizalarni HR-ga yuborish"}</span>
+                          <span>{t("pages.ai_agent.templates.recruiter.feature_4")}</span>
                         </li>
                       </ul>
                     </div>
@@ -2452,10 +2271,10 @@ Foydalanuvchilarga faqat bilimlar bazasi (BILIMLAR BAZASI) doirasida javob beris
                       </div>
                       <div>
                         <h3 className="text-[17px] font-bold text-black group-hover:text-[#7CA607] transition-colors">
-                          {t("pages.ai_agent.fb_leads_agent")}
+                          {t("pages.ai_agent.labels.fb_leads_agent")}
                         </h3>
                         <p className="text-[12px] text-[#707070] mt-1.5 leading-relaxed min-h-[48px]">
-                          {t("pages.ai_agent.fb_leads_desc_card")}
+                          {t("pages.ai_agent.labels.fb_leads_desc_card")}
                         </p>
                       </div>
 
@@ -2498,7 +2317,7 @@ Foydalanuvchilarga faqat bilimlar bazasi (BILIMLAR BAZASI) doirasida javob beris
                     <div className="flex flex-col gap-4">
                       <div className="flex items-center justify-between">
                         <div className="w-16 h-16 rounded-2xl overflow-hidden shrink-0">
-                          <img src="/robots/robot_telegram.png" alt="Telegram forward" className="w-full h-full object-cover" />
+                          <img src="/robots/robot_telegram.png" alt={t("pages.ai_agent.templates.fb_leads_direct.name")} className="w-full h-full object-cover" />
                         </div>
                         <div className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-full">
                           <span className="w-2 h-2 rounded-full bg-gray-300"></span>
@@ -2509,10 +2328,10 @@ Foydalanuvchilarga faqat bilimlar bazasi (BILIMLAR BAZASI) doirasida javob beris
                       </div>
                       <div>
                         <h3 className="text-[17px] font-bold text-black group-hover:text-[#7CA607] transition-colors">
-                          {"Lidlarni Telegramga yo'naltirish"}
+                          {t("pages.ai_agent.templates.fb_leads_direct.name")}
                         </h3>
                         <p className="text-[12px] text-[#707070] mt-1.5 leading-relaxed min-h-[48px]">
-                          {"Facebook target arizalarini AIsiz, chiroyli ko'rinishda to'g'ridan-to'g'ri Telegram guruh yoki profilingizga yo'naltiring."}
+                          {t("pages.ai_agent.templates.fb_leads_direct.desc")}
                         </p>
                       </div>
 
@@ -2521,19 +2340,19 @@ Foydalanuvchilarga faqat bilimlar bazasi (BILIMLAR BAZASI) doirasida javob beris
                       <ul className="flex flex-col gap-2 text-[11px] text-[#595959]">
                         <li className="flex items-start gap-2.5">
                           <CheckCircle className="w-4 h-4 text-[#9BC92E] shrink-0 mt-0.5" />
-                          <span>{"Arizalarni Telegram guruh yoki lichkaga yuborish"}</span>
+                          <span>{t("pages.ai_agent.templates.fb_leads_direct.feature_1")}</span>
                         </li>
                         <li className="flex items-start gap-2.5">
                           <CheckCircle className="w-4 h-4 text-[#9BC92E] shrink-0 mt-0.5" />
-                          <span>{"AIsiz to'g'ridan-to'g'ri yo'naltirish rejimida ishlash"}</span>
+                          <span>{t("pages.ai_agent.templates.fb_leads_direct.feature_2")}</span>
                         </li>
                         <li className="flex items-start gap-2.5">
                           <CheckCircle className="w-4 h-4 text-[#9BC92E] shrink-0 mt-0.5" />
-                          <span>{"Lid ma'lumotlarini qulay formatda taqdim etish"}</span>
+                          <span>{t("pages.ai_agent.templates.fb_leads_direct.feature_3")}</span>
                         </li>
                         <li className="flex items-start gap-2.5">
                           <CheckCircle className="w-4 h-4 text-[#9BC92E] shrink-0 mt-0.5" />
-                          <span>{"Tasdiqlash kodi orqali guruh/botni oson ulash"}</span>
+                          <span>{t("pages.ai_agent.templates.fb_leads_direct.feature_4")}</span>
                         </li>
                       </ul>
                     </div>
@@ -2555,7 +2374,7 @@ Foydalanuvchilarga faqat bilimlar bazasi (BILIMLAR BAZASI) doirasida javob beris
                     <div className="flex flex-col gap-4">
                       <div className="flex items-center justify-between">
                         <div className="w-16 h-16 rounded-2xl overflow-hidden shrink-0">
-                          <img src="/robots/robot_clinic.png" alt="Klinika AI" className="w-full h-full object-cover" />
+                          <img src="/robots/robot_clinic.png" alt={t("pages.ai_agent.templates.clinic.name")} className="w-full h-full object-cover" />
                         </div>
                         <div className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-full">
                           <span className="w-2 h-2 rounded-full bg-gray-300"></span>
@@ -2566,10 +2385,10 @@ Foydalanuvchilarga faqat bilimlar bazasi (BILIMLAR BAZASI) doirasida javob beris
                       </div>
                       <div>
                         <h3 className="text-[17px] font-bold text-black group-hover:text-[#7CA607] transition-colors">
-                          {"Klinika / Shifokor AI"}
+                          {t("pages.ai_agent.templates.clinic.name")}
                         </h3>
                         <p className="text-[12px] text-[#707070] mt-1.5 leading-relaxed min-h-[48px]">
-                          {"Bemorlar bilan suhbatlashib, shifokorga onlayn navbat yozadi, bo'sh vaqtlarni ko'rsatadi va qabul oldi eslatma yuboradi."}
+                          {t("pages.ai_agent.templates.clinic.desc")}
                         </p>
                       </div>
 
@@ -2578,19 +2397,19 @@ Foydalanuvchilarga faqat bilimlar bazasi (BILIMLAR BAZASI) doirasida javob beris
                       <ul className="flex flex-col gap-2 text-[11px] text-[#595959]">
                         <li className="flex items-start gap-2.5">
                           <CheckCircle className="w-4 h-4 text-[#9BC92E] shrink-0 mt-0.5" />
-                          <span>{"Shifokorga onlayn yozilish"}</span>
+                          <span>{t("pages.ai_agent.templates.clinic.feature_1")}</span>
                         </li>
                         <li className="flex items-start gap-2.5">
                           <CheckCircle className="w-4 h-4 text-[#9BC92E] shrink-0 mt-0.5" />
-                          <span>{"Bo'sh vaqtlarni avtomatik ko'rsatish"}</span>
+                          <span>{t("pages.ai_agent.templates.clinic.feature_2")}</span>
                         </li>
                         <li className="flex items-start gap-2.5">
                           <CheckCircle className="w-4 h-4 text-[#9BC92E] shrink-0 mt-0.5" />
-                          <span>{"Qabul oldi eslatma yuborish"}</span>
+                          <span>{t("pages.ai_agent.templates.clinic.feature_3")}</span>
                         </li>
                         <li className="flex items-start gap-2.5">
                           <CheckCircle className="w-4 h-4 text-[#9BC92E] shrink-0 mt-0.5" />
-                          <span>{"Bemorlar bazasi va tarix"}</span>
+                          <span>{t("pages.ai_agent.templates.clinic.feature_4")}</span>
                         </li>
                       </ul>
                     </div>
@@ -2612,7 +2431,7 @@ Foydalanuvchilarga faqat bilimlar bazasi (BILIMLAR BAZASI) doirasida javob beris
                     <div className="flex flex-col gap-4">
                       <div className="flex items-center justify-between">
                         <div className="w-16 h-16 rounded-2xl overflow-hidden shrink-0">
-                          <img src="/robots/robot_realtor.png" alt="Rieltor AI" className="w-full h-full object-cover" />
+                          <img src="/robots/robot_realtor.png" alt={t("pages.ai_agent.templates.realtor.name")} className="w-full h-full object-cover" />
                         </div>
                         <div className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-full">
                           <span className="w-2 h-2 rounded-full bg-gray-300"></span>
@@ -2623,10 +2442,10 @@ Foydalanuvchilarga faqat bilimlar bazasi (BILIMLAR BAZASI) doirasida javob beris
                       </div>
                       <div>
                         <h3 className="text-[17px] font-bold text-black group-hover:text-[#7CA607] transition-colors">
-                          {"Rieltor AI"}
+                          {t("pages.ai_agent.templates.realtor.name")}
                         </h3>
                         <p className="text-[12px] text-[#707070] mt-1.5 leading-relaxed min-h-[48px]">
-                          {"Ko'chmas mulk bazasidan uy-joy qidirib topadi, narx va joylashuv ma'lumotini beradi, ko'rish uchun vaqt belgilaydi."}
+                          {t("pages.ai_agent.templates.realtor.desc")}
                         </p>
                       </div>
 
@@ -2635,19 +2454,19 @@ Foydalanuvchilarga faqat bilimlar bazasi (BILIMLAR BAZASI) doirasida javob beris
                       <ul className="flex flex-col gap-2 text-[11px] text-[#595959]">
                         <li className="flex items-start gap-2.5">
                           <CheckCircle className="w-4 h-4 text-[#9BC92E] shrink-0 mt-0.5" />
-                          <span>{"Uy-joy bazasidan qidiruv"}</span>
+                          <span>{t("pages.ai_agent.templates.realtor.feature_1")}</span>
                         </li>
                         <li className="flex items-start gap-2.5">
                           <CheckCircle className="w-4 h-4 text-[#9BC92E] shrink-0 mt-0.5" />
-                          <span>{"Narx, joylashuv, surat yuborish"}</span>
+                          <span>{t("pages.ai_agent.templates.realtor.feature_2")}</span>
                         </li>
                         <li className="flex items-start gap-2.5">
                           <CheckCircle className="w-4 h-4 text-[#9BC92E] shrink-0 mt-0.5" />
-                          <span>{"Ko'rish uchun vaqt belgilash"}</span>
+                          <span>{t("pages.ai_agent.templates.realtor.feature_3")}</span>
                         </li>
                         <li className="flex items-start gap-2.5">
                           <CheckCircle className="w-4 h-4 text-[#9BC92E] shrink-0 mt-0.5" />
-                          <span>{"Mijoz ehtiyojini tahlil qilish"}</span>
+                          <span>{t("pages.ai_agent.templates.realtor.feature_4")}</span>
                         </li>
                       </ul>
                     </div>
@@ -2669,7 +2488,7 @@ Foydalanuvchilarga faqat bilimlar bazasi (BILIMLAR BAZASI) doirasida javob beris
                     <div className="flex flex-col gap-4">
                       <div className="flex items-center justify-between">
                         <div className="w-16 h-16 rounded-2xl overflow-hidden shrink-0">
-                          <img src="/robots/robot_helpdesk.png" alt="Texnik yordam AI" className="w-full h-full object-cover" />
+                          <img src="/robots/robot_helpdesk.png" alt={t("pages.ai_agent.templates.helpdesk.name")} className="w-full h-full object-cover" />
                         </div>
                         <div className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-full">
                           <span className="w-2 h-2 rounded-full bg-gray-300"></span>
@@ -2680,10 +2499,10 @@ Foydalanuvchilarga faqat bilimlar bazasi (BILIMLAR BAZASI) doirasida javob beris
                       </div>
                       <div>
                         <h3 className="text-[17px] font-bold text-black group-hover:text-[#7CA607] transition-colors">
-                          {"Texnik yordam AI"}
+                          {t("pages.ai_agent.templates.helpdesk.name")}
                         </h3>
                         <p className="text-[12px] text-[#707070] mt-1.5 leading-relaxed min-h-[48px]">
-                          {"Foydalanuvchilarning texnik muammolarini hal qiladi, FAQ dan javob topadi, murakkab holatlarni operatorga yo'naltiradi."}
+                          {t("pages.ai_agent.templates.helpdesk.desc")}
                         </p>
                       </div>
 
@@ -2692,19 +2511,19 @@ Foydalanuvchilarga faqat bilimlar bazasi (BILIMLAR BAZASI) doirasida javob beris
                       <ul className="flex flex-col gap-2 text-[11px] text-[#595959]">
                         <li className="flex items-start gap-2.5">
                           <CheckCircle className="w-4 h-4 text-[#9BC92E] shrink-0 mt-0.5" />
-                          <span>{"FAQ dan avtomatik javob topish"}</span>
+                          <span>{t("pages.ai_agent.templates.helpdesk.feature_1")}</span>
                         </li>
                         <li className="flex items-start gap-2.5">
                           <CheckCircle className="w-4 h-4 text-[#9BC92E] shrink-0 mt-0.5" />
-                          <span>{"Muammoni tasniflash va yo'naltirish"}</span>
+                          <span>{t("pages.ai_agent.templates.helpdesk.feature_2")}</span>
                         </li>
                         <li className="flex items-start gap-2.5">
                           <CheckCircle className="w-4 h-4 text-[#9BC92E] shrink-0 mt-0.5" />
-                          <span>{"Tiket tizimi integratsiyasi"}</span>
+                          <span>{t("pages.ai_agent.templates.helpdesk.feature_3")}</span>
                         </li>
                         <li className="flex items-start gap-2.5">
                           <CheckCircle className="w-4 h-4 text-[#9BC92E] shrink-0 mt-0.5" />
-                          <span>{"Operatorga uzatish qoidalari"}</span>
+                          <span>{t("pages.ai_agent.templates.helpdesk.feature_4")}</span>
                         </li>
                       </ul>
                     </div>
@@ -2801,8 +2620,8 @@ Foydalanuvchilarga faqat bilimlar bazasi (BILIMLAR BAZASI) doirasida javob beris
           {/* Page Header */}
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <PageHeader
-              title={selectedAgentType === "fb-leads-direct" ? "Lidlarni Telegramga yo'naltirish" : "Facebook Lead Handler"}
-              breadcrumbs={selectedAgentType === "fb-leads-direct" ? "Bosh sahifa / Integratsiya / Lidlarni Telegramga yo'naltirish" : t("pages.ai_agent.fb_leads_breadcrumb")}
+              title={selectedAgentType === "fb-leads-direct" ? t("pages.ai_agent.labels.tg_routing") : t("pages.ai_agent.labels.fb_leads_agent")}
+              breadcrumbs={selectedAgentType === "fb-leads-direct" ? t("pages.ai_agent.labels.tg_routing_breadcrumb") : t("pages.ai_agent.fb_leads_breadcrumb")}
             />
             <div className="flex items-center gap-3 shrink-0">
               <button
@@ -2912,11 +2731,11 @@ Foydalanuvchilarga faqat bilimlar bazasi (BILIMLAR BAZASI) doirasida javob beris
                 </div>
                 <div className="text-center">
                   <h5 className="text-[12px] font-bold text-white leading-tight">
-                    {selectedAgentType === "fb-leads-direct" ? "Telegramga yo'naltirish" : "Sendly CRM"}
+                    {selectedAgentType === "fb-leads-direct" ? t("pages.ai_agent.labels.tg_routing") : t("pages.ai_agent.labels.sendly_crm")}
                   </h5>
                   <span className="text-[9px] text-[#C7F33C] font-bold uppercase tracking-wider block mt-0.5 truncate max-w-[110px]">
                     {selectedAgentType === "fb-leads-direct"
-                      ? (settings.adminTelegramUsername ? `@${settings.adminTelegramUsername}` : "Ulangan guruh")
+                      ? (settings.adminTelegramUsername ? `@${settings.adminTelegramUsername}` : t("pages.ai_agent.labels.connected_group"))
                       : (db.getGroups().find(g => g.id === (settings.targetGroupId || "sales"))?.name || t("pages.ai_agent.th_group"))}
                   </span>
                 </div>
@@ -2937,12 +2756,12 @@ Foydalanuvchilarga faqat bilimlar bazasi (BILIMLAR BAZASI) doirasida javob beris
                     </div>
                     <div>
                       <h3 className="text-[14px] font-bold text-black">
-                        {selectedAgentType === "fb-leads-direct" ? "Lidlarni Telegramga yo'naltirish holati" : t("pages.ai_agent.fb_leads_status")}
+                        {selectedAgentType === "fb-leads-direct" ? t("pages.ai_agent.labels.tg_forwarding_status") : t("pages.ai_agent.fb_leads_status")}
                       </h3>
                       <p className="text-[11px] text-[#707070] mt-0.5">
                         {settings.fbAgentEnabled 
-                          ? (selectedAgentType === "fb-leads-direct" ? "Yo'naltirish faol. Target arizalari Telegram bot orqali guruhga yuborilmoqda." : t("pages.ai_agent.fb_leads_status_active_desc")) 
-                          : (selectedAgentType === "fb-leads-direct" ? "Yo'naltirish o'chirilgan." : t("pages.ai_agent.fb_leads_status_inactive_desc"))}
+                          ? (selectedAgentType === "fb-leads-direct" ? t("pages.ai_agent.labels.tg_forwarding_active_desc") : t("pages.ai_agent.fb_leads_status_active_desc")) 
+                          : (selectedAgentType === "fb-leads-direct" ? t("pages.ai_agent.labels.tg_forwarding_inactive_desc") : t("pages.ai_agent.fb_leads_status_inactive_desc"))}
                       </p>
                     </div>
                   </div>
@@ -2960,7 +2779,7 @@ Foydalanuvchilarga faqat bilimlar bazasi (BILIMLAR BAZASI) doirasida javob beris
                 {/* Telegram Bot Selector for Facebook lead handlers - Always visible under switch */}
                 <div className="flex flex-col gap-1.5 mt-2 pt-2 border-t border-[#F0F0F0]">
                   <label className="text-[10px] font-extrabold text-[#707070] uppercase tracking-wider">
-                    {selectedAgentType === "fb-leads-direct" ? "Lidlar uchun Telegram Bot" : "Telegram Bot"}
+                    {selectedAgentType === "fb-leads-direct" ? t("pages.ai_agent.labels.tg_bot_for_leads") : t("pages.ai_agent.labels.tg_bot")}
                   </label>
                   {(() => {
                     const tgChannels = db.getChannels().filter(c => c.type === "telegram" && c.isConnected && c.telegramToken);
@@ -2976,15 +2795,15 @@ Foydalanuvchilarga faqat bilimlar bazasi (BILIMLAR BAZASI) doirasida javob beris
                             value={selectedBotId}
                             onChange={handleBotChange}
                             options={botOptions}
-                            placeholder="Telegram botni tanlang..."
+                            placeholder={t("pages.ai_agent.placeholders.select_tg_bot")}
                             className="w-full"
                           />
                           <div className="flex items-center gap-1.5 text-[10px] text-green-700 mt-0.5 bg-green-50/50 p-2.5 rounded-xl border border-green-100">
                             <CheckCircle size={12} className="text-green-500 shrink-0" />
                             <span>
                               {selectedAgentType === "fb-leads-direct" 
-                                ? "Lidlar ushbu Telegram bot orqali guruh yoki profilingizga yo'naltiriladi." 
-                                : "Inson-kuratorga murojaatlar ushbu Telegram bot orqali yuboriladi."}
+                                ? t("pages.ai_agent.labels.leads_forwarded_via_bot") 
+                                : t("pages.ai_agent.labels.escalations_sent_via_bot")}
                             </span>
                           </div>
                         </div>
@@ -2994,17 +2813,17 @@ Foydalanuvchilarga faqat bilimlar bazasi (BILIMLAR BAZASI) doirasida javob beris
                         <div className="flex flex-col gap-2.5 p-4 bg-amber-50/50 border border-amber-200/50 rounded-2xl text-[11px] text-amber-800 mt-1">
                           <div className="flex items-center gap-2">
                             <Info size={14} className="shrink-0 text-amber-500" />
-                            <span className="font-bold">Telegram bot topilmadi</span>
+                            <span className="font-bold">{t("pages.ai_agent.labels.tg_bot_not_found")}</span>
                           </div>
                           <p className="text-[10px] text-amber-600 leading-relaxed">
-                            Telegram integratsiyasidan foydalanish uchun sozlamalar sahifasida kamida 1ta Telegram bot ulangan bo&apos;lishi lozim.
+                            {t("pages.ai_agent.labels.tg_bot_not_found_desc")}
                           </p>
                           <button
                             type="button"
                             onClick={() => setShowTgConnectModal(true)}
                             className="mt-1 inline-block w-fit px-4 py-2 bg-black text-[#C7F33C] rounded-full hover:bg-black/90 font-bold text-[10px] shadow-sm transition-all text-center"
                           >
-                            Botni ulash ➔
+                            {t("pages.ai_agent.labels.link_bot_btn")}
                           </button>
                         </div>
                       );
@@ -3016,12 +2835,12 @@ Foydalanuvchilarga faqat bilimlar bazasi (BILIMLAR BAZASI) doirasida javob beris
                 <div className="flex flex-col gap-3 pt-3 border-t border-[#F0F0F0] mt-2">
                   <div>
                     <h4 className="text-[12px] font-bold text-black">
-                      {selectedAgentType === "fb-leads-direct" ? "Telegram guruh yoki lichkani ulash" : "Inson-kuratorni ulash"}
+                      {selectedAgentType === "fb-leads-direct" ? t("pages.ai_agent.labels.link_tg_group_or_chat") : t("pages.ai_agent.labels.link_human_curator")}
                     </h4>
                     <p className="text-[10px] text-[#707070] mt-1 leading-relaxed">
                       {selectedAgentType === "fb-leads-direct"
-                        ? "Lidlar to'g'ridan-to'g'ri Telegram guruh yoki profilingizga yuborilishi uchun admin profilini ulang."
-                        : "AI javob bera olmagan yoki operator kutilgan holatlarda bot sizga Telegram orqali xabar yo'llashi uchun kurator (admin) profilini ulang."}
+                        ? t("pages.ai_agent.labels.link_admin_for_leads_desc")
+                        : t("pages.ai_agent.labels.link_admin_for_escalations_desc")}
                     </p>
                   </div>
 
@@ -3030,7 +2849,7 @@ Foydalanuvchilarga faqat bilimlar bazasi (BILIMLAR BAZASI) doirasida javob beris
                       <div className="flex flex-col gap-0.5">
                         <div className="flex items-center gap-1.5 text-[11px] font-bold text-green-800">
                           <CheckCircle size={14} className="text-green-600 shrink-0" />
-                          <span>{"Admin bog'langan"}</span>
+                          <span>{t("pages.ai_agent.labels.admin_linked")}</span>
                         </div>
                         <span className="text-[10px] text-green-700 mt-0.5">
                           Foydalanuvchi: @{settings.adminTelegramUsername} (Chat ID: {settings.adminTelegramChatId})
@@ -3041,17 +2860,17 @@ Foydalanuvchilarga faqat bilimlar bazasi (BILIMLAR BAZASI) doirasida javob beris
                         onClick={handleDisconnectAdmin}
                         className="text-[10px] font-bold text-red-600 hover:text-red-700 bg-white border border-red-200 px-2.5 py-1.5 rounded-lg shadow-sm hover:shadow active:scale-95 transition-all"
                       >
-                        {"O'chirish"}
+                        {t("pages.ai_agent.labels.delete")}
                       </button>
                     </div>
                   ) : isVerifyingAdmin ? (
                     <form onSubmit={handleVerifyAdminCode} className="flex flex-col gap-2.5 p-3.5 rounded-xl bg-blue-50 border border-blue-200 animate-fadeIn">
                       <div className="flex items-center gap-1.5 text-[11px] font-bold text-blue-800">
                         <Sparkles size={14} className="text-blue-600 shrink-0 animate-pulse" />
-                        <span>{"Tasdiqlash kodini kiriting"}</span>
+                        <span>{t("pages.ai_agent.labels.enter_verify_code")}</span>
                       </div>
                       <p className="text-[10px] text-blue-700 leading-relaxed">
-                        {"Telegram-da "}
+                        {t("pages.ai_agent.labels.verify_instructions_part1")}
                         <a
                           href={`https://t.me/sendly_robot?start=${settings?.telegramBotId}`}
                           target="_blank"
@@ -3060,14 +2879,14 @@ Foydalanuvchilarga faqat bilimlar bazasi (BILIMLAR BAZASI) doirasida javob beris
                         >
                           @sendly_robot
                         </a>
-                        {" botimizga o'ting va "}<strong>{"/start"}</strong>{" buyrug'ini bosing. Bot sizga yuborgan tasdiqlash kodini (kod 1 daqiqa davomida faol bo'ladi) quyida kiriting."}
+                        {t("pages.ai_agent.labels.verify_instructions_part2")}<strong>{"/start"}</strong>{t("pages.ai_agent.labels.verify_instructions_part3")}
                       </p>
                       
                       <div className="flex flex-col gap-2">
                         <div className="flex gap-2">
                           <input
                             type="text"
-                            placeholder="Kodni kiriting (masalan: 12345)"
+                            placeholder={t("pages.ai_agent.placeholders.enter_code")}
                             value={adminVerifyCode}
                             onChange={(e) => setAdminVerifyCode(e.target.value)}
                             disabled={isVerifyLoading}
@@ -3080,7 +2899,7 @@ Foydalanuvchilarga faqat bilimlar bazasi (BILIMLAR BAZASI) doirasida javob beris
                             className="px-3.5 py-2 bg-[#229ED9] hover:bg-[#1e8ec3] text-white rounded-xl text-[11px] font-bold transition-all shadow-sm active:scale-95 text-center flex items-center justify-center gap-1 shrink-0"
                           >
                             <Send size={12} />
-                            <span>Kodni olish</span>
+                            <span>{t("pages.ai_agent.labels.get_code")}</span>
                           </a>
                         </div>
                         
@@ -3090,7 +2909,7 @@ Foydalanuvchilarga faqat bilimlar bazasi (BILIMLAR BAZASI) doirasida javob beris
                             disabled={isVerifyLoading || !adminVerifyCode.trim()}
                             className="text-[10px] font-bold text-white bg-black hover:bg-gray-800 disabled:bg-gray-400 px-4 py-2 rounded-xl transition-all shadow-sm active:scale-95"
                           >
-                            {isVerifyLoading ? "Tekshirilmoqda..." : "Tasdiqlash"}
+                            {isVerifyLoading ? t("pages.ai_agent.labels.checking") : t("pages.ai_agent.labels.verify")}
                           </button>
                           <button
                             type="button"
@@ -3102,7 +2921,7 @@ Foydalanuvchilarga faqat bilimlar bazasi (BILIMLAR BAZASI) doirasida javob beris
                             disabled={isVerifyLoading}
                             className="text-[10px] font-bold text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 px-3.5 py-2 rounded-xl transition-all shadow-sm active:scale-95"
                           >
-                            {"Bekor qilish"}
+                            {t("pages.ai_agent.labels.cancel")}
                           </button>
                         </div>
                       </div>
@@ -3117,18 +2936,18 @@ Foydalanuvchilarga faqat bilimlar bazasi (BILIMLAR BAZASI) doirasida javob beris
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-1.5 text-[11px] font-bold text-blue-800">
                           <AlertTriangle size={14} className="text-amber-600 shrink-0" />
-                          <span>{"Admin ulanmagan"}</span>
+                          <span>{t("pages.ai_agent.labels.admin_not_linked")}</span>
                         </div>
                         <button
                           type="button"
                           onClick={() => setIsVerifyingAdmin(true)}
                           className="text-[10px] font-bold text-white bg-black hover:bg-gray-800 px-4 py-2 rounded-lg shadow-sm hover:shadow active:scale-95 transition-all"
                         >
-                          {"Ulash"}
+                          {t("pages.ai_agent.labels.link")}
                         </button>
                       </div>
                       <p className="text-[10px] text-blue-700 leading-relaxed">
-                        {"Ulash uchun @sendly_robot botimizga borib, profilingizdan botni boshlang (/start). Bot sizga tasdiqlash kodini yuboradi."}
+                        {t("pages.ai_agent.labels.link_instructions")}
                       </p>
                     </div>
                   )}
@@ -3210,7 +3029,7 @@ Foydalanuvchilarga faqat bilimlar bazasi (BILIMLAR BAZASI) doirasida javob beris
                     <CustomDropdown
                       value={settings.fbFormId || "form-1"}
                       onChange={(val) => handleUpdateSettings("fbFormId", val)}
-                      options={MOCK_FB_FORMS.map(f => ({ value: f.id, label: f.name }))}
+                      options={MOCK_FB_FORMS.map(f => ({ value: f.id, label: t(f.name) }))}
                     />
                   </div>
                 </div>
@@ -3227,10 +3046,10 @@ Foydalanuvchilarga faqat bilimlar bazasi (BILIMLAR BAZASI) doirasida javob beris
                     </div>
                     <div>
                       <h3 className="text-[15px] font-extrabold text-black">
-                        {selectedAgentType === "fb-leads-direct" ? "Lid maydonlarini moslashtirish (Field Mapping)" : "AI Lead Mapper & Processor"}
+                        {selectedAgentType === "fb-leads-direct" ? t("pages.ai_agent.labels.field_mapping_direct") : t("pages.ai_agent.labels.ai_lead_mapper")}
                       </h3>
                       <p className="text-[11px] text-[#707070] mt-0.5">
-                        {selectedAgentType === "fb-leads-direct" ? "Meta Lead formalari maydonlarini Sendly tizimiga moslashtiring." : t("pages.ai_agent.mapping_desc")}
+                        {selectedAgentType === "fb-leads-direct" ? t("pages.ai_agent.labels.field_mapping_direct_desc") : t("pages.ai_agent.mapping_desc")}
                       </p>
                     </div>
                   </div>
@@ -3240,11 +3059,10 @@ Foydalanuvchilarga faqat bilimlar bazasi (BILIMLAR BAZASI) doirasida javob beris
                     <div className="p-4 bg-blue-50 border border-blue-100 rounded-xl flex flex-col gap-1 text-[11px] text-blue-800 leading-relaxed">
                       <div className="flex items-center gap-1.5 font-bold">
                         <Info size={14} className="text-blue-600 shrink-0" />
-                        <span>To&apos;g&apos;ridan-to&apos;g&apos;ri yo&apos;naltirish faol</span>
+                        <span>{t("pages.ai_agent.labels.direct_forwarding_active")}</span>
                       </div>
                       <p>
-                        Ushbu rejimda AI ishtirok etmaydi va lid ma&apos;lumotlarini saralamaydi. Shuning uchun AI prompti talab etilmaydi.
-                        Barcha arizalar to&apos;g&apos;ridan-to&apos;g&apos;ri Telegram guruh yoki profilingizga yo&apos;naltiriladi.
+                        {t("pages.ai_agent.labels.direct_forwarding_desc")}
                       </p>
                     </div>
                   ) : (
@@ -3353,10 +3171,10 @@ Foydalanuvchilarga faqat bilimlar bazasi (BILIMLAR BAZASI) doirasida javob beris
                     </div>
                     <div>
                       <h3 className="text-[15px] font-extrabold text-black">
-                        {selectedAgentType === "fb-leads-direct" ? "Telegramga yo'naltirish sozlamalari" : "Sendly CRM Router"}
+                        {selectedAgentType === "fb-leads-direct" ? t("pages.ai_agent.labels.tg_routing_settings") : t("pages.ai_agent.labels.crm_router")}
                       </h3>
                       <p className="text-[11px] text-[#707070] mt-0.5">
-                        {selectedAgentType === "fb-leads-direct" ? "Facebook arizalarini Telegram guruh yoki lichkangizga yo'naltirishni sozlang." : t("pages.ai_agent.routing_desc")}
+                        {selectedAgentType === "fb-leads-direct" ? t("pages.ai_agent.labels.tg_routing_desc") : t("pages.ai_agent.routing_desc")}
                       </p>
                     </div>
                   </div>
@@ -3447,11 +3265,11 @@ Foydalanuvchilarga faqat bilimlar bazasi (BILIMLAR BAZASI) doirasida javob beris
                 <div className="flex items-center justify-between border-b border-[#F0F0F0] pb-3">
                   <h4 className="text-[13px] font-bold text-black flex items-center gap-1.5">
                     <RefreshCw size={14} className={`text-blue-500 ${simLoading ? "animate-spin" : ""}`} />
-                    <span>{selectedAgentType === "fb-leads-direct" ? "Integratsiya sinovi (Lid simulyatori)" : t("pages.ai_agent.sandbox_title")}</span>
+                    <span>{selectedAgentType === "fb-leads-direct" ? t("pages.ai_agent.labels.integration_test_simulator") : t("pages.ai_agent.sandbox_title")}</span>
                   </h4>
                   <span className="text-[10px] text-green-600 flex items-center gap-1 font-semibold bg-green-50 px-2 py-0.5 rounded border border-green-100">
                     <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
-                    {selectedAgentType === "fb-leads-direct" ? "Sinov rejimi" : t("pages.ai_agent.sandbox_mode_title")}
+                    {selectedAgentType === "fb-leads-direct" ? t("pages.ai_agent.labels.test_mode") : t("pages.ai_agent.sandbox_mode_title")}
                   </span>
                 </div>
 
@@ -3505,7 +3323,7 @@ Foydalanuvchilarga faqat bilimlar bazasi (BILIMLAR BAZASI) doirasida javob beris
 
                       <div className="flex flex-col gap-1.5">
                         <label className="text-[10px] font-bold text-black">
-                          {selectedAgentType === "fb-leads-direct" ? "Mijoz E-pochtasi (Email)" : t("pages.ai_agent.customer_message")}
+                          {selectedAgentType === "fb-leads-direct" ? t("pages.ai_agent.labels.customer_email") : t("pages.ai_agent.customer_message")}
                         </label>
                         {selectedAgentType === "fb-leads-direct" ? (
                           <input
@@ -3513,7 +3331,7 @@ Foydalanuvchilarga faqat bilimlar bazasi (BILIMLAR BAZASI) doirasida javob beris
                             value={simLeadMessage}
                             onChange={(e) => setSimLeadMessage(e.target.value)}
                             className="px-3 py-2 text-[11px] bg-[#F9F9F7] border border-[#E8E8E8] rounded-xl focus:outline-none focus:border-black text-black"
-                            placeholder="masalan, sardor@gmail.com"
+                            placeholder={t("pages.ai_agent.placeholders.email_example")}
                           />
                         ) : (
                           <textarea
@@ -3554,7 +3372,7 @@ Foydalanuvchilarga faqat bilimlar bazasi (BILIMLAR BAZASI) doirasida javob beris
                     {simLoading ? (
                       <>
                         <RefreshCw size={14} className="animate-spin" />
-                        <span>{selectedAgentType === "fb-leads-direct" ? "Lid yo'naltirilmoqda..." : t("pages.ai_agent.ai_analyzing")}</span>
+                        <span>{selectedAgentType === "fb-leads-direct" ? t("pages.ai_agent.labels.forwarding_lead") : t("pages.ai_agent.ai_analyzing")}</span>
                       </>
                     ) : (
                       <>
@@ -3610,7 +3428,7 @@ Foydalanuvchilarga faqat bilimlar bazasi (BILIMLAR BAZASI) doirasida javob beris
                   <div className="mt-1 p-4 bg-blue-50/50 border border-blue-100 rounded-2xl flex flex-col gap-3 animate-in fade-in slide-in-from-top-2 duration-200">
                     <div className="flex justify-between items-center">
                       <span className="text-[10px] uppercase tracking-wider text-blue-700 font-bold">
-                        {selectedAgentType === "fb-leads-direct" ? "Yo'naltirish natijasi" : t("pages.ai_agent.ai_sort_result")}
+                        {selectedAgentType === "fb-leads-direct" ? t("pages.ai_agent.labels.forwarding_result") : t("pages.ai_agent.ai_sort_result")}
                       </span>
                       <span className="px-2 py-0.5 bg-green-100 text-green-800 text-[9px] font-bold rounded">
                         {t("pages.ai_agent.success_badge")}
@@ -3636,7 +3454,7 @@ Foydalanuvchilarga faqat bilimlar bazasi (BILIMLAR BAZASI) doirasida javob beris
 
                     <div className="text-[11px] border-t border-blue-100/50 pt-2.5">
                       <span className="text-[#707070] block text-[9px]">
-                        {selectedAgentType === "fb-leads-direct" ? "Yo'naltirish xulosasi" : t("pages.ai_agent.ai_analysis_note")}
+                        {selectedAgentType === "fb-leads-direct" ? t("pages.ai_agent.labels.forwarding_summary") : t("pages.ai_agent.ai_analysis_note")}
                       </span>
                       <p className="text-black italic mt-0.5 leading-relaxed">{simResult.summary}</p>
                     </div>
@@ -3825,7 +3643,7 @@ Foydalanuvchilarga faqat bilimlar bazasi (BILIMLAR BAZASI) doirasida javob beris
                     </label>
                   </div>
                   <div className="flex flex-col gap-1.5 mt-2 pt-2 border-t border-[#F0F0F0]">
-                    <label className="text-[10px] font-extrabold text-[#707070] uppercase tracking-wider">{getAgentName()} uchun Telegram Bot</label>
+                    <label className="text-[10px] font-extrabold text-[#707070] uppercase tracking-wider">{t("pages.ai_agent.labels.tg_bot_for_bot").replace("{agentName}", getAgentName())}</label>
                     {(() => {
                       const tgChannels = db.getChannels().filter(c => c.type === "telegram" && c.isConnected && c.telegramToken);
                       if (tgChannels.length > 0) {
@@ -3840,12 +3658,12 @@ Foydalanuvchilarga faqat bilimlar bazasi (BILIMLAR BAZASI) doirasida javob beris
                               value={selectedBotId}
                               onChange={handleBotChange}
                               options={botOptions}
-                              placeholder="Telegram botni tanlang..."
+                              placeholder={t("pages.ai_agent.placeholders.select_tg_bot")}
                               className="w-full"
                             />
                             <div className="flex items-center gap-1.5 text-[10px] text-green-700 mt-1 bg-green-50/50 p-2.5 rounded-xl border border-green-100">
                               <CheckCircle size={12} className="text-green-500 shrink-0" />
-                              <span>{getAgentName()} ushbu tanlangan Telegram bot orqali savollarga javob beradi.</span>
+                              <span>{t("pages.ai_agent.labels.tg_bot_will_answer").replace("{agentName}", getAgentName())}</span>
                             </div>
                           </div>
                         );
@@ -3854,17 +3672,17 @@ Foydalanuvchilarga faqat bilimlar bazasi (BILIMLAR BAZASI) doirasida javob beris
                           <div className="flex flex-col gap-2.5 p-4 bg-amber-50/50 border border-amber-200/50 rounded-2xl text-[11px] text-amber-800 mt-1">
                             <div className="flex items-center gap-2">
                               <Info size={14} className="shrink-0 text-amber-500" />
-                              <span className="font-bold">Telegram bot topilmadi</span>
+                              <span className="font-bold">{t("pages.ai_agent.labels.tg_bot_not_found")}</span>
                             </div>
                             <p className="text-[10px] text-amber-600 leading-relaxed">
-                              {getAgentName()}dan foydalanish uchun kamida 1ta Telegram bot ulangan bo&apos;lishi lozim.
+                              {t("pages.ai_agent.labels.tg_bot_required").replace("{agentName}", getAgentName())}
                             </p>
                             <button
                               type="button"
                               onClick={() => setShowTgConnectModal(true)}
                               className="mt-2 inline-block w-fit px-5 py-2 bg-black text-[#C7F33C] rounded-full hover:bg-black/90 font-bold text-[10px] shadow-sm transition-all text-center"
                             >
-                              Botni ulash ➔
+                              {t("pages.ai_agent.labels.link_bot_btn")}
                             </button>
                           </div>
                         );
@@ -4329,10 +4147,10 @@ Foydalanuvchilarga faqat bilimlar bazasi (BILIMLAR BAZASI) doirasida javob beris
                 <div className="bg-white border border-[#E8E8E8] rounded-[24px] p-6 shadow-sm flex flex-col gap-4 w-full justify-between">
                   <div>
                     <h3 className="text-[15px] font-bold text-black">
-                      {"Inson-kuratorni ulash"}
+                      {t("pages.ai_agent.labels.link_human_curator")}
                     </h3>
                     <p className="text-[11px] text-[#707070] mt-1">
-                      {"AI javob bera olmagan yoki operator kutilgan holatlarda bot sizga Telegram orqali xabar yo'llashi uchun kurator (admin) profilini ulang."}
+                      {t("pages.ai_agent.labels.link_admin_for_escalations_desc")}
                     </p>
                   </div>
 
@@ -4344,17 +4162,17 @@ Foydalanuvchilarga faqat bilimlar bazasi (BILIMLAR BAZASI) doirasida javob beris
                           <div className="flex flex-col gap-2.5 p-4 bg-amber-50/50 border border-amber-200/50 rounded-2xl text-[11px] text-amber-800 mt-1">
                             <div className="flex items-center gap-2">
                               <Info size={14} className="shrink-0 text-amber-500" />
-                              <span className="font-bold">Telegram bot topilmadi</span>
+                              <span className="font-bold">{t("pages.ai_agent.labels.tg_bot_not_found")}</span>
                             </div>
                             <p className="text-[10px] text-amber-600 leading-relaxed">
-                              Ulash uchun avval sozlamalar bo&apos;limida Telegram botni ulashingiz lozim.
+                              {t("pages.ai_agent.labels.tg_bot_not_found_desc")}
                             </p>
                             <button
                               type="button"
                               onClick={() => setShowTgConnectModal(true)}
                               className="mt-1 inline-block w-fit px-4 py-2 bg-black text-[#C7F33C] rounded-full hover:bg-black/90 font-bold text-[10px] shadow-sm transition-all text-center"
                             >
-                              Botni ulash ➔
+                              {t("pages.ai_agent.labels.link_bot_btn")}
                             </button>
                           </div>
                         );
@@ -4365,7 +4183,7 @@ Foydalanuvchilarga faqat bilimlar bazasi (BILIMLAR BAZASI) doirasida javob beris
                           <div className="flex flex-col gap-0.5">
                             <div className="flex items-center gap-1.5 text-[12px] font-bold text-green-800">
                               <CheckCircle size={14} className="text-green-600 shrink-0" />
-                              <span>{"Admin profil bog'langan"}</span>
+                              <span>{t("pages.ai_agent.labels.admin_linked")}</span>
                             </div>
                             <span className="text-[11px] text-green-700 mt-1">
                               Foydalanuvchi: @{settings.adminTelegramUsername} (Chat ID: {settings.adminTelegramChatId})
@@ -4376,14 +4194,14 @@ Foydalanuvchilarga faqat bilimlar bazasi (BILIMLAR BAZASI) doirasida javob beris
                             onClick={handleDisconnectAdmin}
                             className="text-[11px] font-bold text-red-600 hover:text-red-700 bg-white border border-red-200 px-3 py-1.5 rounded-lg shadow-sm hover:shadow active:scale-95 transition-all"
                           >
-                            {"O'chirish"}
+                            {t("pages.ai_agent.labels.delete")}
                           </button>
                         </div>
                       ) : isVerifyingAdmin ? (
                         <form onSubmit={handleVerifyAdminCode} className="flex flex-col gap-3 p-3.5 rounded-xl bg-blue-50 border border-blue-200 animate-fadeIn">
                           <div className="flex items-center gap-1.5 text-[12px] font-bold text-blue-800">
                             <Sparkles size={14} className="text-blue-600 shrink-0 animate-pulse" />
-                            <span>{"Tasdiqlash kodini kiriting"}</span>
+                            <span>{t("pages.ai_agent.labels.enter_verify_code")}</span>
                           </div>
                           <p className="text-[11px] text-blue-700/90 leading-relaxed">
                             {"Telegram-da "}
@@ -4400,7 +4218,7 @@ Foydalanuvchilarga faqat bilimlar bazasi (BILIMLAR BAZASI) doirasida javob beris
                           <div className="flex gap-2">
                             <input
                               type="text"
-                              placeholder="Kodni kiriting (masalan: 12345)"
+                              placeholder={t("pages.ai_agent.placeholders.enter_code")}
                               value={adminVerifyCode}
                               onChange={(e) => setAdminVerifyCode(e.target.value)}
                               disabled={isVerifyLoading}
@@ -4413,7 +4231,7 @@ Foydalanuvchilarga faqat bilimlar bazasi (BILIMLAR BAZASI) doirasida javob beris
                               className="px-3.5 py-2 bg-[#229ED9] hover:bg-[#1e8ec3] text-white rounded-xl text-[11px] font-bold transition-all shadow-sm active:scale-95 text-center flex items-center justify-center gap-1 shrink-0"
                             >
                               <Send size={12} />
-                              <span>Kodni olish</span>
+                              <span>{t("pages.ai_agent.labels.get_code")}</span>
                             </a>
                           </div>
                           <div className="flex gap-2 justify-end mt-1">
@@ -4422,7 +4240,7 @@ Foydalanuvchilarga faqat bilimlar bazasi (BILIMLAR BAZASI) doirasida javob beris
                               disabled={isVerifyLoading || !adminVerifyCode.trim()}
                               className="text-[11px] font-bold text-white bg-black hover:bg-gray-800 disabled:bg-gray-400 px-4 py-2 rounded-xl transition-all shadow-sm active:scale-95"
                             >
-                              {isVerifyLoading ? "Tekshirilmoqda..." : "Tasdiqlash"}
+                              {isVerifyLoading ? t("pages.ai_agent.labels.checking") : t("pages.ai_agent.labels.verify")}
                             </button>
                             <button
                               type="button"
@@ -4434,7 +4252,7 @@ Foydalanuvchilarga faqat bilimlar bazasi (BILIMLAR BAZASI) doirasida javob beris
                               disabled={isVerifyLoading}
                               className="text-[11px] font-bold text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 px-3.5 py-2 rounded-xl transition-all shadow-sm active:scale-95"
                             >
-                              {"Bekor qilish"}
+                              {t("pages.ai_agent.labels.cancel")}
                             </button>
                           </div>
                           {verifyAdminError && (
@@ -4452,7 +4270,7 @@ Foydalanuvchilarga faqat bilimlar bazasi (BILIMLAR BAZASI) doirasida javob beris
                             <div className="flex flex-col gap-1">
                               <h4 className="text-[13.5px] font-bold text-blue-900 leading-tight">Admin profil ulanmagan</h4>
                               <p className="text-[11px] text-blue-700/90 leading-relaxed max-w-md font-medium">
-                                Ulash uchun @sendly_robot botimizga borib, botni ishga tushiring (/start). Bot sizga tasdiqlash kodini yuboradi.
+                                {t("pages.ai_agent.labels.link_instructions")}
                               </p>
                             </div>
                           </div>
@@ -4461,7 +4279,7 @@ Foydalanuvchilarga faqat bilimlar bazasi (BILIMLAR BAZASI) doirasida javob beris
                             onClick={() => setIsVerifyingAdmin(true)}
                             className="px-5 py-2.5 bg-black hover:bg-neutral-800 text-white rounded-xl text-[12px] font-bold shadow-sm active:scale-95 transition-all shrink-0 hover:shadow-md self-stretch sm:self-auto text-center"
                           >
-                            Ulash
+                            {t("pages.ai_agent.labels.link")}
                           </button>
                         </div>
                       );
@@ -4608,9 +4426,30 @@ Foydalanuvchilarga faqat bilimlar bazasi (BILIMLAR BAZASI) doirasida javob beris
 
                   <div className="flex-1 flex flex-col gap-2">
                     <div className="flex items-center justify-between">
-                      <label className="text-[12px] font-bold text-black">
-                        {t("pages.ai_agent.lesson_transcript_label")}
-                      </label>
+                      <div className="flex items-center gap-2">
+                        <label className="text-[12px] font-bold text-black">
+                          {t("pages.ai_agent.lesson_transcript_label")}
+                        </label>
+                        <button
+                          type="button"
+                          disabled={isStructuring || !selectedLesson.transcript || selectedLesson.transcript.trim() === ""}
+                          onClick={handleAiStructureTranscript}
+                          className="px-2.5 py-1 text-[10px] font-bold rounded-lg border border-[#D8D8D8] bg-[#C7F33C] hover:bg-[#b5e02c] disabled:bg-[#F5F5F5] disabled:text-[#A0A0A0] disabled:border-transparent text-black transition-all flex items-center gap-1 active:scale-95 shadow-xs"
+                          title="Ushbu matnni Gemini 3.5 yordamida savol-javob ko'rinishida strukturalash va ortiqcha gaplardan tozalash"
+                        >
+                          {isStructuring ? (
+                            <>
+                              <Loader2 className="h-3 w-3 animate-spin" />
+                              <span>Tahlil qilinmoqda...</span>
+                            </>
+                          ) : (
+                            <>
+                              <Sparkles size={11} className="text-black" />
+                              <span>AI Tahlil (Gemini 3.5)</span>
+                            </>
+                          )}
+                        </button>
+                      </div>
                       <span className="text-[10px] text-[#707070]">
                         {t("pages.ai_agent.chars_count").replace("{count}", (selectedLesson.transcript?.length || 0).toString())}
                       </span>
@@ -4706,7 +4545,7 @@ Foydalanuvchilarga faqat bilimlar bazasi (BILIMLAR BAZASI) doirasida javob beris
                     ? Math.round(analyzedMessages.reduce((acc, curr) => acc + curr.confidence, 0) / analyzedMessages.length) 
                     : 0}%
                 </span>
-                <span className="text-[10px] text-[#A0A0A0] mt-1">AI javob berish aniqligi</span>
+                <span className="text-[10px] text-[#A0A0A0] mt-1">{t("pages.ai_agent.labels.ai_response_accuracy")}</span>
               </div>
 
               <div className="bg-white border border-[#E8E8E8] rounded-[24px] p-5 shadow-sm flex flex-col gap-1.5 relative overflow-hidden">
@@ -4715,7 +4554,7 @@ Foydalanuvchilarga faqat bilimlar bazasi (BILIMLAR BAZASI) doirasida javob beris
                 </div>
                 <span className="text-[10px] font-extrabold text-[#707070] uppercase tracking-wider">{t("pages.ai_agent.avg_response_time")}</span>
                 <span className="text-[24px] font-extrabold text-blue-600">1.1 sek</span>
-                <span className="text-[10px] text-[#A0A0A0] mt-1">O'rtacha javob qaytarish tezligi</span>
+                <span className="text-[10px] text-[#A0A0A0] mt-1">{t("pages.ai_agent.labels.avg_response_speed")}</span>
               </div>
             </div>
 
@@ -4772,7 +4611,7 @@ Foydalanuvchilarga faqat bilimlar bazasi (BILIMLAR BAZASI) doirasida javob beris
                     );
                   })()}
                 </div>
-                <span className="text-[10px] text-[#A0A0A0] text-center">Neyron tarmoq tahlili asosida</span>
+                <span className="text-[10px] text-[#A0A0A0] text-center">{t("pages.ai_agent.labels.based_on_neural_analysis")}</span>
               </div>
 
               {/* Topics Breakdown */}
@@ -4821,16 +4660,16 @@ Foydalanuvchilarga faqat bilimlar bazasi (BILIMLAR BAZASI) doirasida javob beris
               <div className="lg:col-span-3 bg-white border border-[#E8E8E8] rounded-[24px] p-6 shadow-sm flex flex-col justify-between gap-4">
                 <div>
                   <h3 className="text-[13px] font-extrabold text-black border-b border-[#F0F0F0] pb-2.5">
-                    Hisobotlar & Boshqaruv
+                    {t("pages.ai_agent.labels.reports_management")}
                   </h3>
                   <div className="flex flex-col gap-2.5 mt-4">
                     <button
                       onClick={() => {
                         if (analyzedMessages.length === 0) {
-                          showToast("Eksport qilish uchun ma'lumotlar yo'q!");
+                          showToast(t("pages.ai_agent.toasts.no_data_export"));
                           return;
                         }
-                        const headers = ["Foydalanuvchi", "Murojaat matni", "AI javobi", "Toifa", "Kayfiyat", "Ishonch darajasi", "Sana"];
+                        const headers = [t("pages.ai_agent.table.user"), t("pages.ai_agent.table.message"), t("pages.ai_agent.table.ai_reply"), t("pages.ai_agent.table.category"), t("pages.ai_agent.table.sentiment"), t("pages.ai_agent.table.confidence"), t("pages.ai_agent.table.date")];
                         const rows = analyzedMessages.map(m => [
                           `@${m.username}`,
                           m.message.replace(/"/g, '""'),
@@ -4849,7 +4688,7 @@ Foydalanuvchilarga faqat bilimlar bazasi (BILIMLAR BAZASI) doirasida javob beris
                         document.body.appendChild(link);
                         link.click();
                         document.body.removeChild(link);
-                        showToast("CSV hisoboti muvaffaqiyatli yuklab olindi! 📊");
+                        showToast(t("pages.ai_agent.toasts.csv_downloaded"));
                       }}
                       className="w-full flex items-center justify-center gap-2 py-2.5 bg-black hover:bg-black/90 text-[#C7F33C] text-[11px] font-bold rounded-xl transition-all shadow-sm"
                     >
@@ -4860,7 +4699,7 @@ Foydalanuvchilarga faqat bilimlar bazasi (BILIMLAR BAZASI) doirasida javob beris
                     <button
                       onClick={() => {
                         if (analyzedMessages.length === 0) {
-                          showToast("Eksport qilish uchun ma'lumotlar yo'q!");
+                          showToast(t("pages.ai_agent.toasts.no_data_export"));
                           return;
                         }
                         const jsonString = `data:text/json;charset=utf-8,${encodeURIComponent(
@@ -4872,7 +4711,7 @@ Foydalanuvchilarga faqat bilimlar bazasi (BILIMLAR BAZASI) doirasida javob beris
                         document.body.appendChild(link);
                         link.click();
                         document.body.removeChild(link);
-                        showToast("JSON hisoboti muvaffaqiyatli yuklab olindi! 💻");
+                        showToast(t("pages.ai_agent.toasts.json_downloaded"));
                       }}
                       className="w-full flex items-center justify-center gap-2 py-2.5 bg-[#F9F9F7] hover:bg-[#F0F0EE] border border-[#E8E8E8] text-black text-[11px] font-bold rounded-xl transition-all shadow-sm"
                     >
@@ -4886,14 +4725,14 @@ Foydalanuvchilarga faqat bilimlar bazasi (BILIMLAR BAZASI) doirasida javob beris
                   onClick={() => {
                     setConfirmModal({
                       isOpen: true,
-                      title: "Tahlillar tarixini tozalash",
-                      message: "Haqiqatan ham barcha tahlil qilingan xabarlar tarixini o'chirib tashlamoqchimisiz? Bu amalni ortga qaytarib bo'lmaydi.",
+                      title: t("pages.ai_agent.confirmations.clear_history_title"),
+                      message: t("pages.ai_agent.confirmations.clear_history_message"),
                       onConfirm: () => {
                         setAnalyzedMessages([]);
                         if (typeof window !== "undefined") {
                           localStorage.removeItem("replai_curator_analyzed_messages");
                         }
-                        showToast("Tahlillar tarixi muvaffaqiyatli tozalandi! 🧹");
+                        showToast(t("pages.ai_agent.toasts.history_cleared"));
                         setConfirmModal(prev => ({ ...prev, isOpen: false }));
                       }
                     });
@@ -4919,7 +4758,7 @@ Foydalanuvchilarga faqat bilimlar bazasi (BILIMLAR BAZASI) doirasida javob beris
                       setIsRefreshingAnalysis(true);
                       setTimeout(() => {
                         setIsRefreshingAnalysis(false);
-                        showToast("AI CustDev tahlillari yangilandi! 🚀");
+                        showToast(t("pages.ai_agent.toasts.analysis_updated"));
                       }, 1000);
                     }}
                     className="text-[9px] bg-black hover:bg-black/90 text-[#C7F33C] px-2.5 py-1.5 rounded-full font-bold flex items-center gap-1.5 transition-all"
@@ -4939,11 +4778,10 @@ Foydalanuvchilarga faqat bilimlar bazasi (BILIMLAR BAZASI) doirasida javob beris
                         if (msgs.length === 0) return null;
                         const sampleMsg = msgs[0];
                         
-                        let solution = "Tavsif yoki qo'llanmaga qo'shimcha ma'lumotlar qo'shish.";
-                        if (intent === "billing") solution = "Uzcard/Humo kartalarini ulash bo'yicha bosqichma-bosqich rasm/video qo'llanma qo'shish va to'lov xatoliklari bo'yicha ogohlantirish.";
-                        if (intent === "support") solution = "@BotFather orqali token olish qismini darslikning 1-modulida visual animatsiyalar bilan boyitish.";
-                        if (intent === "faq") solution = "Darslik bilimlar bazasiga (RAG) o'quvchilar tomonidan eng ko'p so'ralgan FAQ javoblarni yangi modul sifatida kiritish.";
-                        if (intent === "affiliate") solution = "Hamkor kabineti sahifasiga komissiya yechib olish va referal tizim shartlari bo'yicha FAQ bo'limini qo'shish.";
+                        let solution = t("pages.ai_agent.solutions.default");
+                        if (intent === "billing" || intent === "support" || intent === "faq" || intent === "affiliate") {
+                          solution = t("pages.ai_agent.solutions." + intent);
+                        }
 
                         return (
                           <div key={intent} className="p-3 bg-[#F9F9F7] rounded-xl border border-[#E8E8E8] flex flex-col gap-2 text-[11px]">
@@ -4977,10 +4815,10 @@ Foydalanuvchilarga faqat bilimlar bazasi (BILIMLAR BAZASI) doirasida javob beris
                 ) : (
                   <div className="flex flex-col gap-3">
                     {[
-                      { text: "Uzcard/Humo kartalarini bog'lash va to'lov xatoliklari", count: 32, priority: "high", color: "red" },
-                      { text: "@BotFather orqali API token olish va sozlash bosqichlari", count: 24, priority: "medium", color: "amber" },
-                      { text: "Instagram professional akkauntini ulashdagi cheklovlar", count: 19, priority: "medium", color: "amber" },
-                      { text: "Referal komissiyalarni yechish va hamkorlik shartlari", count: 12, priority: "low", color: "blue" }
+                      { text: t("pages.ai_agent.pain_points.billing"), count: 32, priority: "high", color: "red" },
+                      { text: t("pages.ai_agent.pain_points.support"), count: 24, priority: "medium", color: "amber" },
+                      { text: t("pages.ai_agent.pain_points.instagram"), count: 19, priority: "medium", color: "amber" },
+                      { text: t("pages.ai_agent.pain_points.affiliate"), count: 12, priority: "low", color: "blue" }
                     ].map((item, idx) => (
                       <div key={idx} className="p-3 bg-[#F9F9F7] rounded-xl border border-[#E8E8E8] flex flex-col gap-1.5 text-[11px]">
                         <div className="flex items-center justify-between">
@@ -5045,7 +4883,7 @@ Foydalanuvchilarga faqat bilimlar bazasi (BILIMLAR BAZASI) doirasida javob beris
                         <th className="p-3 min-w-[150px] max-w-[280px]">{t("pages.ai_agent.raw_message")}</th>
                         <th className="p-3 min-w-[180px] max-w-[320px]">{t("pages.ai_agent.ai_response_msg")}</th>
                         <th className="p-3 w-[130px]">{t("pages.ai_agent.custdev_tag")}</th>
-                        <th className="p-3 w-[90px] text-center">Kayfiyat</th>
+                        <th className="p-3 w-[90px] text-center">{t("pages.ai_agent.labels.sentiment")}</th>
                         <th className="p-3 w-[70px] text-center">{t("pages.ai_agent.confidence_level")}</th>
                       </tr>
                     </thead>
@@ -5063,7 +4901,7 @@ Foydalanuvchilarga faqat bilimlar bazasi (BILIMLAR BAZASI) doirasida javob beris
                           return (
                             <tr>
                               <td colSpan={6} className="p-6 text-center text-[#A0A0A0] italic">
-                                Ma&apos;lumot topilmadi.
+                                {t("pages.ai_agent.labels.no_data_found")}
                               </td>
                             </tr>
                           );
@@ -5129,42 +4967,42 @@ Foydalanuvchilarga faqat bilimlar bazasi (BILIMLAR BAZASI) doirasida javob beris
                 <div className="w-10 h-10 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
                   <Send size={18} />
                 </div>
-                <h3 className="text-[15px] font-bold text-black">Telegram botni ulash</h3>
+                <h3 className="text-[15px] font-bold text-black">{t("pages.ai_agent.labels.link_tg_bot_title")}</h3>
               </div>
               
               <div className="flex flex-col gap-3">
                 <div className="flex flex-col gap-1">
-                  <span className="text-[10px] font-bold text-black">Bot tokeni (HTTP API token)</span>
+                  <span className="text-[10px] font-bold text-black">{t("pages.ai_agent.labels.bot_token")}</span>
                   <input
                     type="text"
                     value={tgToken}
                     onChange={(e) => setTgToken(e.target.value)}
-                    placeholder="Masalan: 123456789:ABCdefGhIJKlmNoPQRsTUVwxyZ"
+                    placeholder={t("pages.ai_agent.placeholders.token_example")}
                     className="w-full px-4 py-2.5 text-[12px] bg-[#F9F9F7] border border-[#E8E8E8] rounded-xl focus:outline-none focus:border-black text-black"
                   />
                   <span className="text-[9px] text-[#707070]">
-                    Tokenni @BotFather orqali yangi bot yaratib olishingiz mumkin.
+                    {t("pages.ai_agent.labels.get_token_desc")}
                   </span>
                 </div>
 
                 <div className="flex flex-col gap-1">
-                  <span className="text-[10px] font-bold text-black">Bot foydalanuvchi nomi (Username)</span>
+                  <span className="text-[10px] font-bold text-black">{t("pages.ai_agent.labels.bot_username")}</span>
                   <input
                     type="text"
                     value={tgUsername}
                     onChange={(e) => setTgUsername(e.target.value)}
-                    placeholder="Masalan: mening_aqlli_botim"
+                    placeholder={t("pages.ai_agent.placeholders.username_example")}
                     className="w-full px-4 py-2.5 text-[12px] bg-[#F9F9F7] border border-[#E8E8E8] rounded-xl focus:outline-none focus:border-black text-black"
                   />
                 </div>
 
                 <div className="flex flex-col gap-1">
-                  <span className="text-[10px] font-bold text-black">Bot nomi (Ixtiyoriy)</span>
+                  <span className="text-[10px] font-bold text-black">{t("pages.ai_agent.labels.bot_name_optional")}</span>
                   <input
                     type="text"
                     value={tgName}
                     onChange={(e) => setTgName(e.target.value)}
-                    placeholder="Masalan: AI Kurator Bot"
+                    placeholder={t("pages.ai_agent.placeholders.bot_name_example")}
                     className="w-full px-4 py-2.5 text-[12px] bg-[#F9F9F7] border border-[#E8E8E8] rounded-xl focus:outline-none focus:border-black text-black"
                   />
                 </div>
@@ -5189,7 +5027,7 @@ Foydalanuvchilarga faqat bilimlar bazasi (BILIMLAR BAZASI) doirasida javob beris
                   className="px-4 py-2 rounded-xl bg-black text-[#C7F33C] text-[12px] font-bold hover:bg-black/90 disabled:opacity-50 transition-all flex items-center gap-1.5"
                 >
                   {isTgSaving && <Loader2 size={13} className="animate-spin" />}
-                  <span>{isTgSaving ? "Ulanmoqda..." : "Ulash"}</span>
+                  <span>{isTgSaving ? t("pages.ai_agent.labels.connecting") : t("pages.ai_agent.labels.link")}</span>
                 </button>
               </div>
             </div>
@@ -5324,14 +5162,16 @@ Foydalanuvchilarga faqat bilimlar bazasi (BILIMLAR BAZASI) doirasida javob beris
                   {t("pages.ai_agent.alert_modal_close_btn")}
                 </button>
                 {!isTelegramLinked && alertModal.title.includes("Telegram") && (
-                  <Link
-                    href="/channels"
-                    onClick={() => setAlertModal(prev => ({ ...prev, isOpen: false }))}
+                  <button
+                    onClick={() => {
+                      setAlertModal(prev => ({ ...prev, isOpen: false }));
+                      setShowTgConnectModal(true);
+                    }}
                     className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-black text-[#C7F33C] text-[12px] font-bold hover:bg-black/90 transition-all"
                   >
                     <span>{t("pages.ai_agent.alert_modal_configure_btn")}</span>
                     <ArrowRight size={13} />
-                  </Link>
+                  </button>
                 )}
               </div>
             </div>

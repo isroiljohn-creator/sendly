@@ -107,7 +107,21 @@ const LOCAL_TRANSLATIONS: Record<string, Record<string, string>> = {
     changePlan: "Tarif rejasini o'zgartirish",
     addRemoveCredits: "AI kreditlarini qo'shish / yechib olish",
     save: "Saqlash",
-    enter: "Kiritish"
+    enter: "Kiritish",
+    agents: "AI Agentlar",
+    agentName: "AI Agent nomi",
+    kbSize: "Bilimlar bazasi",
+    viewDetails: "Ko'rish",
+    noAgents: "Tizimda ulangan AI agentlar topilmadi.",
+    searchAgentsPlaceholder: "Biznes yoki agent bo'yicha qidirish...",
+    totalAgents: "Jami agentlar",
+    agentDetails: "AI Agent Sozlamalari Tafsiloti",
+    agentPrompt: "Tizim ko'rsatmasi (System Prompt)",
+    tonality: "Ohang / Xarakter",
+    lengthLimit: "Javob uzunligi",
+    humorLevel: "Hazil darajasi",
+    workingHours: "Ish vaqti",
+    escalationRulesLabel: "Yo'naltirish qoidalari"
   },
   ru: {
     overview: "Общая аналитика",
@@ -189,7 +203,21 @@ const LOCAL_TRANSLATIONS: Record<string, Record<string, string>> = {
     changePlan: "Изменить тарифный план",
     addRemoveCredits: "Начислить / списать ИИ кредиты",
     save: "Сохранить",
-    enter: "Ввести"
+    enter: "Ввести",
+    agents: "Бизнесы & ИИ Агенты",
+    agentName: "Имя ИИ Агента",
+    kbSize: "База знаний",
+    viewDetails: "Просмотр",
+    noAgents: "ИИ-агенты в системе не найдены.",
+    searchAgentsPlaceholder: "Поиск по бизнесу или агенту...",
+    totalAgents: "Всего агентов",
+    agentDetails: "Детали настроек ИИ-агента",
+    agentPrompt: "Системная инструкция (System Prompt)",
+    tonality: "Тональность / Характер",
+    lengthLimit: "Длина ответа",
+    humorLevel: "Уровень юмора",
+    workingHours: "Рабочее время",
+    escalationRulesLabel: "Правила эскалации"
   },
   en: {
     overview: "General Analytics",
@@ -271,7 +299,21 @@ const LOCAL_TRANSLATIONS: Record<string, Record<string, string>> = {
     changePlan: "Change Subscription Plan",
     addRemoveCredits: "Add / Remove AI Credits",
     save: "Save",
-    enter: "Enter"
+    enter: "Enter",
+    agents: "Businesses & AI Agents",
+    agentName: "AI Agent Name",
+    kbSize: "Knowledge Base",
+    viewDetails: "View Details",
+    noAgents: "No connected AI agents found in the system.",
+    searchAgentsPlaceholder: "Search by business or agent...",
+    totalAgents: "Total agents",
+    agentDetails: "AI Agent Settings Details",
+    agentPrompt: "System Prompt",
+    tonality: "Tone / Character",
+    lengthLimit: "Response Length",
+    humorLevel: "Humor Level",
+    workingHours: "Working Hours",
+    escalationRulesLabel: "Escalation Rules"
   }
 };
 
@@ -282,7 +324,7 @@ export default function AdminPage() {
     return LOCAL_TRANSLATIONS[currentLang]?.[key] || LOCAL_TRANSLATIONS.uz[key] || key;
   };
 
-  const [activeTab, setActiveTab] = useState<"overview" | "users" | "promos" | "referrals" | "bots" | "logs">("overview");
+  const [activeTab, setActiveTab] = useState<"overview" | "users" | "agents" | "promos" | "referrals" | "bots" | "logs">("overview");
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
 
@@ -313,6 +355,8 @@ export default function AdminPage() {
 
   // User search query state
   const [userQuery, setUserQuery] = useState("");
+  const [agentQuery, setAgentQuery] = useState("");
+  const [selectedAgent, setSelectedAgent] = useState<any>(null);
 
   // Modals
   const [alertOpen, setAlertOpen] = useState(false);
@@ -559,6 +603,16 @@ export default function AdminPage() {
             >
               <Users size={16} />
               <span>{tr("users")}</span>
+            </button>
+
+            <button
+              onClick={() => setActiveTab("agents")}
+              className={`flex items-center gap-3 w-full px-4 py-3 rounded-[16px] text-left text-[13px] font-bold transition-all ${
+                activeTab === "agents" ? "bg-black text-[#C7F33C]" : "text-[#595959] hover:bg-[#F0F0F0]/50 hover:text-black"
+              }`}
+            >
+              <Cpu size={16} />
+              <span>{tr("agents")}</span>
             </button>
 
             <button
@@ -888,7 +942,7 @@ export default function AdminPage() {
                     <div className="flex justify-between items-center py-2 text-[12.5px] font-extrabold mt-2">
                       <span className="text-black">{tr("totalRevenueMonthly")}:</span>
                       <span className="text-black">
-                        {(((stats?.activePremiumCount ?? 0) * 1000000) + ((stats?.activeProCount ?? 0) * 150000)).toLocaleString("uz-UZ")} UZS / oy
+                        {(((stats?.activePremiumCount ?? 0) * 1200000) + ((stats?.activeProCount ?? 0) * 150000)).toLocaleString("uz-UZ")} UZS / oy
                       </span>
                     </div>
                   </Card>
@@ -1010,6 +1064,127 @@ export default function AdminPage() {
               </div>
             </Card>
           )}
+
+          {/* ── AGENTS TAB ── */}
+          {activeTab === "agents" && (() => {
+            const allAgents: any[] = [];
+            (users || []).forEach((u: any) => {
+              if (u.channelsList && Array.isArray(u.channelsList)) {
+                u.channelsList.forEach((ch: any) => {
+                  allAgents.push({
+                    ownerName: u.fullName || "Foydalanuvchi",
+                    ownerEmail: u.email || "",
+                    userId: u.id,
+                    channelId: ch.id,
+                    type: ch.type,
+                    name: ch.name,
+                    username: ch.username,
+                    isActive: ch.isActive,
+                    isConnected: ch.isConnected,
+                    followersCount: ch.followersCount || "0",
+                    createdAt: ch.createdAt,
+                    botSettings: ch.botSettings || null,
+                    automationsCount: ch.automationsCount || 0,
+                    lessonsCount: u.lessonsCount || 0,
+                    modulesCount: u.modulesCount || 0
+                  });
+                });
+              }
+            });
+
+            const filteredAgents = allAgents.filter(ag => 
+              (ag.name || "").toLowerCase().includes(agentQuery.toLowerCase()) ||
+              (ag.username || "").toLowerCase().includes(agentQuery.toLowerCase()) ||
+              (ag.ownerName || "").toLowerCase().includes(agentQuery.toLowerCase()) ||
+              (ag.ownerEmail || "").toLowerCase().includes(agentQuery.toLowerCase())
+            );
+
+            return (
+              <Card className="p-0 overflow-hidden border border-[#D8D8D8]">
+                <div className="p-5 border-b border-[#F0F0F0] flex flex-wrap gap-4 items-center justify-between bg-white">
+                  <div className="relative flex items-center w-full max-w-[320px]">
+                    <Search size={16} className="absolute left-4 text-[#707070]" />
+                    <input
+                      type="text"
+                      placeholder={tr("searchAgentsPlaceholder")}
+                      value={agentQuery}
+                      onChange={(e) => setAgentQuery(e.target.value)}
+                      className="w-full rounded-full bg-[#F0F0F0] pl-10 pr-4 py-2 text-[12.5px] text-black outline-none placeholder:text-[#a0a0a0] focus:bg-[#e8e8e8]"
+                    />
+                  </div>
+                  <div className="text-[12px] text-[#707070] font-semibold">
+                    {tr("totalAgents")}: {filteredAgents.length} ta
+                  </div>
+                </div>
+
+                <div className="overflow-x-auto bg-white">
+                  <table className="w-full border-collapse text-left text-[12px]">
+                    <thead>
+                      <tr className="border-b border-[#F0F0F0] text-[10px] font-bold text-[#707070] uppercase tracking-wider bg-[#F9F9F7]">
+                        <th className="px-6 py-3">{tr("agentName")}</th>
+                        <th className="px-6 py-3">{tr("botOwner")}</th>
+                        <th className="px-6 py-3">{tr("agentType")}</th>
+                        <th className="px-6 py-3">{tr("kbSize")}</th>
+                        <th className="px-6 py-3 text-right">Ulanish</th>
+                        <th className="px-6 py-3 text-right">{tr("actions")}</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-[#F0F0F0]">
+                      {filteredAgents.length === 0 ? (
+                        <tr>
+                          <td colSpan={6} className="py-16 text-center text-[#A0A0A0] italic">
+                            {tr("noAgents")}
+                          </td>
+                        </tr>
+                      ) : filteredAgents.map((ag, idx) => (
+                        <tr key={ag.channelId || idx} className="hover:bg-[#F9F9F7]/50 transition-colors">
+                          <td className="px-6 py-3.5">
+                            <div className="font-bold text-black flex items-center gap-1.5">
+                              {ag.name || "AI Agent"}
+                              <span className={`text-[8px] font-black px-1.5 py-0.5 rounded-full uppercase shrink-0 ${
+                                ag.type === "telegram" ? "bg-blue-100 text-blue-800" : "bg-purple-100 text-purple-800"
+                              }`}>
+                                {ag.type}
+                              </span>
+                            </div>
+                            <div className="text-[10px] text-[#707070]">@{ag.username || ""}</div>
+                          </td>
+                          <td className="px-6 py-3.5">
+                            <div className="font-medium text-black">{ag.ownerName}</div>
+                            <div className="text-[10px] text-[#707070]">{ag.ownerEmail}</div>
+                          </td>
+                          <td className="px-6 py-3.5">
+                            <span className="inline-block bg-neutral-100 text-neutral-800 font-extrabold text-[9px] px-2 py-0.5 rounded-full uppercase">
+                              {ag.botSettings?.aiAgentType || "kurator"}
+                            </span>
+                          </td>
+                          <td className="px-6 py-3.5">
+                            <div className="font-semibold text-black">{ag.modulesCount} mod / {ag.lessonsCount} dars</div>
+                            <div className="text-[9px] text-[#707070]">{ag.automationsCount} ta avtomatizatsiya</div>
+                          </td>
+                          <td className="px-6 py-3.5 text-right">
+                            {ag.isConnected ? (
+                              <span className="text-[#7CA607] font-bold">Faol</span>
+                            ) : (
+                              <span className="text-[#A0A0A0]">Nofaol</span>
+                            )}
+                          </td>
+                          <td className="px-6 py-3.5 text-right">
+                            <button
+                              onClick={() => setSelectedAgent(ag)}
+                              className="bg-[#EFF2FC] text-black hover:bg-[#e1e6f7] font-bold text-[11px] px-3 py-1.5 rounded-lg"
+                            >
+                              {tr("viewDetails")}
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </Card>
+            );
+          })()}
 
           {/* ── PROMO CODES TAB ── */}
           {activeTab === "promos" && (
@@ -1195,16 +1370,17 @@ export default function AdminPage() {
                   <thead>
                     <tr className="border-b border-[#F0F0F0] text-[10px] font-bold text-[#707070] uppercase tracking-wider bg-[#F9F9F7]">
                       <th className="py-3 px-6">{tr("customer")}</th>
+                      <th className="py-3 px-6">Yig&apos;ilgan ma&apos;lumotlar</th>
                       <th className="py-3 px-6">{tr("botOwner")}</th>
                       <th className="py-3 px-6 text-right">{tr("messagesCount")}</th>
-                      <th className="py-3 px-6">Oxirgi faollik</th>
+                      <th className="py-3 px-6 text-center">Oxirgi faollik</th>
                       <th className="py-3 px-6 text-right">{tr("stuckStep")}</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-[#F0F0F0]">
                     {(botContacts || []).filter(Boolean).length === 0 ? (
                       <tr>
-                        <td colSpan={5} className="py-16 text-center text-[#A0A0A0] italic">
+                        <td colSpan={6} className="py-16 text-center text-[#A0A0A0] italic">
                           {tr("noBotContacts")}
                         </td>
                       </tr>
@@ -1214,9 +1390,23 @@ export default function AdminPage() {
                           <div className="font-bold">{c.name}</div>
                           <div className="text-[10px] text-[#707070]">@{c.username}</div>
                         </td>
+                        <td className="py-3.5 px-6">
+                          {c.companyName && (
+                            <div className="font-bold text-[#7CA607]">Kompaniya: {c.companyName}</div>
+                          )}
+                          {c.phone && (
+                            <div className="text-[10.5px] text-black font-semibold">Tel: {c.phone}</div>
+                          )}
+                          {c.email && (
+                            <div className="text-[10px] text-[#707070]">Email: {c.email}</div>
+                          )}
+                          {!c.companyName && !c.phone && !c.email && (
+                            <span className="text-gray-400 italic">Mavjud emas</span>
+                          )}
+                        </td>
                         <td className="py-3.5 px-6 text-[#505050] font-medium">{c.ownerEmail}</td>
                         <td className="py-3.5 px-6 text-right font-semibold">{c.messagesCount} ta</td>
-                        <td className="py-3.5 px-6 text-[#707070]">{c.lastActive}</td>
+                        <td className="py-3.5 px-6 text-center text-[#707070]">{c.lastActive}</td>
                         <td className="py-3.5 px-6 text-right">
                           <span className="inline-block bg-amber-50 text-amber-700 font-extrabold text-[10px] px-3 py-1 rounded-full border border-amber-200 uppercase tracking-wider">
                             {c.currentStep}
@@ -1309,6 +1499,92 @@ export default function AdminPage() {
               <button
                 onClick={() => setSelectedUser(null)}
                 className="bg-gray-100 hover:bg-gray-200 text-black font-bold text-[12px] px-5 py-2.5 rounded-full transition-all"
+              >
+                {tr("close")}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── SELECT AGENT DETAILS DIALOG ── */}
+      {selectedAgent && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4 overflow-y-auto">
+          <div className="bg-white rounded-[28px] w-full max-w-[540px] p-7 border border-[#D8D8D8] shadow-2xl animate-in zoom-in-95 duration-200 my-8">
+            <h3 className="text-[18px] font-black text-black leading-none mb-2">{tr("agentDetails")}</h3>
+            <p className="text-[12px] text-[#707070] mb-5">{selectedAgent.name} (Biznes: {selectedAgent.ownerName})</p>
+
+            <div className="flex flex-col gap-4 max-h-[450px] overflow-y-auto pr-1">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="p-3 bg-[#F9F9F7] rounded-xl border border-[#F0F0F0]">
+                  <span className="text-[9px] font-bold text-[#707070] uppercase">Mulk egasi</span>
+                  <p className="text-[12px] font-bold text-black mt-0.5">{selectedAgent.ownerEmail}</p>
+                </div>
+                <div className="p-3 bg-[#F9F9F7] rounded-xl border border-[#F0F0F0]">
+                  <span className="text-[9px] font-bold text-[#707070] uppercase">Agent Turi</span>
+                  <p className="text-[12px] font-bold text-black mt-0.5 uppercase">{selectedAgent.botSettings?.aiAgentType || "kurator"}</p>
+                </div>
+              </div>
+
+              {/* Tonality / Humor / Length */}
+              {selectedAgent.botSettings && (
+                <div className="p-4 bg-[#F9F9F7] rounded-xl border border-[#F0F0F0] flex flex-col gap-2.5">
+                  <span className="text-[10px] font-bold text-[#707070] uppercase">Hissiyotlar & Sozlamalar</span>
+                  <div className="grid grid-cols-3 gap-2 text-center">
+                    <div>
+                      <div className="text-[13px] font-bold text-black">{selectedAgent.botSettings.tone || 60}%</div>
+                      <div className="text-[9px] text-[#707070]">{tr("tonality")}</div>
+                    </div>
+                    <div>
+                      <div className="text-[13px] font-bold text-black">{selectedAgent.botSettings.length || 40}%</div>
+                      <div className="text-[9px] text-[#707070]">{tr("lengthLimit")}</div>
+                    </div>
+                    <div>
+                      <div className="text-[13px] font-bold text-black">{selectedAgent.botSettings.humor || 30}%</div>
+                      <div className="text-[9px] text-[#707070]">{tr("humorLevel")}</div>
+                    </div>
+                  </div>
+                  <div className="border-t border-[#E8E8E8] pt-2 mt-1 flex justify-between text-[11px]">
+                    <span className="text-[#707070]">{tr("workingHours")}:</span>
+                    <span className="font-bold text-black">
+                      {selectedAgent.botSettings.autoOutreach 
+                        ? `${selectedAgent.botSettings.outreachStart} - ${selectedAgent.botSettings.outreachEnd}`
+                        : "24/7 faol"}
+                    </span>
+                  </div>
+                </div>
+              )}
+
+              {/* Escalation Rules */}
+              {selectedAgent.botSettings?.escalationRules && selectedAgent.botSettings.escalationRules.length > 0 && (
+                <div className="p-4 bg-[#F9F9F7] rounded-xl border border-[#F0F0F0] flex flex-col gap-2">
+                  <span className="text-[10px] font-bold text-[#707070] uppercase">{tr("escalationRulesLabel")}</span>
+                  <div className="flex flex-col gap-1.5">
+                    {selectedAgent.botSettings.escalationRules.map((rule: any) => (
+                      <div key={rule.id} className="flex items-center gap-2 text-[11px]">
+                        <span className={`h-1.5 w-1.5 rounded-full shrink-0 ${rule.enabled ? "bg-[#16A34A]" : "bg-[#707070]"}`} />
+                        <span className={rule.enabled ? "text-black" : "text-[#707070] line-through"}>{rule.text}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* System Prompt */}
+              {selectedAgent.botSettings?.systemPrompt && (
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-[10px] font-bold text-[#707070] uppercase">{tr("agentPrompt")}</label>
+                  <pre className="w-full bg-[#1e1e1e] text-[#d4d4d4] rounded-xl p-4 text-[10px] overflow-x-auto whitespace-pre-wrap max-h-[220px] font-mono leading-relaxed">
+                    {selectedAgent.botSettings.systemPrompt}
+                  </pre>
+                </div>
+              )}
+            </div>
+
+            <div className="flex justify-end mt-6">
+              <button
+                onClick={() => setSelectedAgent(null)}
+                className="bg-black text-[#C7F33C] hover:bg-black/90 font-bold text-[12px] px-6 py-2.5 rounded-full transition-all"
               >
                 {tr("close")}
               </button>

@@ -68,7 +68,7 @@ export default function TermsOfService() {
                 <strong>PRO tarifi:</strong> 150,000 so'm / oy. Bitta Instagram professional akkaunti va cheksiz chatbot oqimlari.
               </li>
               <li>
-                <strong>PREMIUM tarifi:</strong> 1,000,000 so'm / oy. 10 tagacha Instagram akkaunti, OpenAI / Sun'iy intellekt integratsiyasi va maxsus yordam.
+                <strong>PREMIUM tarifi:</strong> 1,200,000 so'm / oy. 10 tagacha Instagram akkaunti, OpenAI / Sun'iy intellekt integratsiyasi va maxsus yordam.
               </li>
             </ul>
             <p className="mt-3">

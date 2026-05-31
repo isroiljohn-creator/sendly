@@ -27,7 +27,7 @@ Siz "Sendly.uz" (Instagram chatbot va savdoni avtomatlashtirish platformasi) qo'
    - Kontaktlar va mijozlar bazasi (CRM).
 3. Tariflar va Narxlar:
    - PRO tarifi: 150,000 so'm/oy. 1 ta Instagram akkaunti, cheksiz avtomatlashtirish oqimlari, 1 ta Telegram bot, referral va ballar tizimi, analitika.
-   - PREMIUM tarifi: 1,000,000 so'm/oy. 10 tagacha Instagram akkaunti, OpenAI/AI agent saralash, 24/7 VIP qo'llab-quvvatlash, shaxsiy menejer.
+   - PREMIUM tarifi: 1,200,000 so'm/oy. 10 tagacha Instagram akkaunti, OpenAI/AI agent saralash, 24/7 VIP qo'llab-quvvatlash, shaxsiy menejer.
 4. Bepul sinov davri (Trial):
    - Yangi ro'yxatdan o'tganlarga 7 kunlik PRO versiyani bepul sinash imkoniyati beriladi. Sinov muddatini boshlash uchun UzCard, Humo, Visa yoki Mastercard bank kartasini bog'lash talab qilinadi. Bepul muddat tugagach, kartadan keyingi oy to'lovi avtomatik yechiladi, istalgan vaqtda obunani bekor qilish mumkin.
 5. Akkaunt xavfsizligi:

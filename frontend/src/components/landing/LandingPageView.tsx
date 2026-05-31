@@ -122,7 +122,7 @@ export function LandingPageView() {
       let reply = "";
       let next: string[] = [];
       if (btnText.includes("Narxi")) {
-        reply = "Sendly tariflari:\n• PRO: 150,000 so'm/oy — 1 akkaunt\n• PREMIUM: 1,000,000 so'm/oy — 10 akkaunt\n\n7 kun bepul sinab ko'ring! Sinash uchun karta bog'lash shart.";
+        reply = "Sendly tariflari:\n• PRO: 150,000 so'm/oy — 1 akkaunt\n• PREMIUM: 1,200,000 so'm/oy — 10 akkaunt\n\n7 kun bepul sinab ko'ring! Sinash uchun karta bog'lash shart.";
         next = ["Bepul boshlash", "Boshqa savol"];
       } else if (btnText.includes("ishlaydi")) {
         reply = "Juda oson:\n1. Ro'yxatdan o'ting\n2. Instagram professional akkauntingizni ulang\n3. Bot oqimlarini yarating\n\nBot 24/7 avtomatik javob beradi!";
@@ -516,7 +516,7 @@ export function LandingPageView() {
             <h3 className="text-[20px] font-extrabold text-black">{"PREMIUM"}</h3>
             <p className="text-[12px] text-[#707075] mt-1">{"Agentliklar va katta bizneslar uchun"}</p>
             <div className="mt-5 flex items-baseline gap-1.5">
-              <span className="text-[46px] font-[900] text-black tracking-tight leading-none">{"1,000,000"}</span>
+              <span className="text-[46px] font-[900] text-black tracking-tight leading-none">{"1,200,000"}</span>
               <span className="text-[#515154] text-[13px] font-semibold">{"so'm / oy"}</span>
             </div>
             <div className="h-px bg-black/5 my-6" />

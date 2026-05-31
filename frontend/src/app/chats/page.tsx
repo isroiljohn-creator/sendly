@@ -40,7 +40,6 @@ export default function ChatsPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [inputText, setInputText] = useState("");
   const [activeChannel, setActiveChannel] = useState<Channel | null>(null);
-  const [simulationSender, setSimulationSender] = useState<"agent" | "user">("agent");
 
   // Load and sync chats from server/localStorage
   useEffect(() => {
@@ -122,157 +121,43 @@ export default function ChatsPage() {
 
     const timestamp = new Date().toLocaleTimeString("uz-UZ", { hour: "2-digit", minute: "2-digit" });
 
-    if (simulationSender === "agent") {
-      const newMessage: Message = {
-        id: `msg-${Date.now()}-operator`,
-        sender: "agent",
-        text: messageText,
-        timestamp,
-      };
+    const newMessage: Message = {
+      id: `msg-${Date.now()}-operator`,
+      sender: "agent",
+      text: messageText,
+      timestamp,
+    };
 
-      const updatedChats = chats.map((c) => {
-        if (c.id === activeChat.id) {
-          return {
-            ...c,
-            lastMessage: messageText,
-            unread: false,
-            messages: [...c.messages, newMessage],
-          };
-        }
-        return c;
-      });
-
-      setChats(updatedChats);
-      localStorage.setItem(`replai_chats_${activeChannel.id}`, JSON.stringify(updatedChats));
-      setInputText("");
-
-      try {
-        await fetch("/api/telegram/send", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            chatId: activeChat.id,
-            text: messageText,
-            token: activeChannel.type === "telegram" ? activeChannel.telegramToken : undefined,
-            channelId: activeChannel.id,
-          }),
-        });
-        db.saveToServer();
-      } catch (err) {
-        console.error("Failed to send message via API:", err);
-      }
-    } else {
-      const newMessage: Message = {
-        id: `msg-${Date.now()}-user`,
-        sender: "user",
-        text: messageText,
-        timestamp,
-      };
-
-      const updatedChats = chats.map((c) => {
-        if (c.id === activeChat.id) {
-          return {
-            ...c,
-            lastMessage: messageText,
-            unread: false,
-            messages: [...c.messages, newMessage],
-          };
-        }
-        return c;
-      });
-
-      setChats(updatedChats);
-      localStorage.setItem(`replai_chats_${activeChannel.id}`, JSON.stringify(updatedChats));
-      db.saveToServer();
-      setInputText("");
-
-      if (liveTakeover) {
-        return;
-      }
-
-      setTimeout(() => {
-        const automations = db.getChannelAutomations(activeChannel.id);
-        const activeAutomations = automations.filter((a) => a.active);
-
-        let matchedAutomation = null;
-        let matchedKeyword = "";
-
-        for (const auto of activeAutomations) {
-          if (auto.triggerType === "keyword") {
-            const keywords = auto.triggerDetails
-              .split(",")
-              .map((k) => k.trim().toLowerCase())
-              .filter(Boolean);
-
-            const foundKeyword = keywords.find((kw) =>
-              messageText.toLowerCase().includes(kw)
-            );
-
-            if (foundKeyword) {
-              matchedAutomation = auto;
-              matchedKeyword = foundKeyword;
-              break;
-            }
-          }
-        }
-
-        let botReplyText = "";
-        if (matchedAutomation) {
-          // Increment runs count and update conversion rate
-          const automationsList = db.getChannelAutomations(activeChannel.id);
-          const idx = automationsList.findIndex((a) => a.id === (matchedAutomation as any).id);
-          if (idx > -1) {
-            const runsVal = parseInt(automationsList[idx].runs || "0") + 1;
-            automationsList[idx].runs = String(runsVal);
-            
-            // Calculate a realistic conversion dynamically based on ID hash
-            const hash = (matchedAutomation as any).id.split("").reduce((acc: number, char: string) => acc + char.charCodeAt(0), 0);
-            const rate = 65 + (hash % 25); // conversion rate between 65% and 90%
-            const completedVal = Math.round(runsVal * (rate / 100));
-            automationsList[idx].completion = runsVal > 0 ? `${Math.round((completedVal / runsVal) * 100)}%` : "0%";
-            
-            db.saveChannelAutomations(activeChannel.id, automationsList);
-          }
-
-          const nameLower = (matchedAutomation as any).name.toLowerCase();
-          if ((matchedAutomation as any).replyText) {
-            botReplyText = (matchedAutomation as any).replyText;
-          } else if (nameLower.includes("lead magnet") || matchedKeyword === "kitob" || matchedKeyword === "bonus") {
-            botReplyText = "Bepul qo'llanma havolasi: https://sendly.uz/book. Obunangiz uchun rahmat!";
-          } else if (matchedKeyword === "/start" || matchedKeyword === "boshlash") {
-            botReplyText = "Assalomu alaykum! Sendly chatbot xizmatining inbox simulyatoriga xush kelibsiz. Tizimimiz muvaffaqiyatli ulangan!";
-          } else if (matchedKeyword === "narxi" || matchedKeyword === "tarif" || matchedKeyword === "kurs") {
-            botReplyText = "Bizning tariflarimiz: \n• Pro: 150,000 so'm/oy (1ta akkaunt)\n• Premium: 1,000,000 so'm/oy (10ta akkaunt)\n\nBatafsil ma'lumot olish yoki ulanish uchun operatorimiz tez orada javob yozadi.";
-          } else {
-            botReplyText = matchedKeyword;
-          }
-        } else {
-          botReplyText = "Murojaatingiz uchun rahmat! Tez orada operatorimiz sizga bog'lanadi.";
-        }
-
-        const autoReply: Message = {
-          id: `msg-${Date.now()}-bot`,
-          sender: "bot",
-          text: botReplyText,
-          timestamp: new Date().toLocaleTimeString("uz-UZ", { hour: "2-digit", minute: "2-digit" }),
+    const updatedChats = chats.map((c) => {
+      if (c.id === activeChat.id) {
+        return {
+          ...c,
+          lastMessage: messageText,
+          unread: false,
+          messages: [...c.messages, newMessage],
         };
+      }
+      return c;
+    });
 
-        setChats((prevChats) => {
-          const newChats = prevChats.map((c) => {
-            if (c.id === activeChat.id) {
-              return {
-                ...c,
-                lastMessage: autoReply.text,
-                messages: [...c.messages, autoReply],
-              };
-            }
-            return c;
-          });
-          localStorage.setItem(`replai_chats_${activeChannel.id}`, JSON.stringify(newChats));
-          db.saveToServer();
-          return newChats;
-        });
-      }, 1200);
+    setChats(updatedChats);
+    localStorage.setItem(`replai_chats_${activeChannel.id}`, JSON.stringify(updatedChats));
+    setInputText("");
+
+    try {
+      await fetch("/api/telegram/send", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          chatId: activeChat.id,
+          text: messageText,
+          token: activeChannel.type === "telegram" ? activeChannel.telegramToken : undefined,
+          channelId: activeChannel.id,
+        }),
+      });
+      db.saveToServer();
+    } catch (err) {
+      console.error("Failed to send message via API:", err);
     }
   };
 
@@ -445,44 +330,18 @@ export default function ChatsPage() {
 
                 {/* Message Input Footer */}
                 {activeChat && (
-                  <div className="p-4 border-t border-[#D8D8D8] bg-white flex flex-col gap-3 shrink-0">
-                    {/* Sender selector / Simulation Mode */}
-                    <div className="flex items-center justify-between text-[11px] px-1">
-                      <div className="flex items-center gap-1.5 text-[#707070]">
-                        <Zap size={12} className={simulationSender === "user" ? "text-[#C7F33C]" : ""} />
-                        <span>{t("pages.chats.write_mode_simulation")}</span>
-                      </div>
-                      <div className="flex items-center bg-[#F0F0F0] p-0.5 rounded-full border border-[#E8E8E8]">
-                        <button
-                          type="button"
-                          onClick={() => setSimulationSender("agent")}
-                          className={`flex items-center gap-1 px-3 py-1 rounded-full text-[10px] font-semibold transition-all ${simulationSender === "agent" ? "bg-black text-white shadow-sm" : "text-[#707070] hover:text-black"}`}
-                        >
-                          <User size={12} />
-                          <span>{t("pages.chats.operator_you")}</span>
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setSimulationSender("user")}
-                          className={`flex items-center gap-1 px-3 py-1 rounded-full text-[10px] font-semibold transition-all ${simulationSender === "user" ? "bg-[#C7F33C] text-black shadow-sm" : "text-[#707070] hover:text-black"}`}
-                        >
-                          <MessageSquare size={12} />
-                          <span>{t("pages.chats.customer_test")}</span>
-                        </button>
-                      </div>
-                    </div>
-
+                  <div className="p-4 border-t border-[#D8D8D8] bg-white shrink-0">
                     <form onSubmit={handleSendMessage} className="flex items-center gap-2">
                       <input
                         type="text"
-                        placeholder={simulationSender === "user" ? t("pages.chats.placeholder_customer_simulation") : t("pages.chats.placeholder_operator")}
+                        placeholder={t("pages.chats.placeholder_operator")}
                         value={inputText}
                         onChange={(e) => setInputText(e.target.value)}
-                        className={`flex-1 rounded-full px-5 py-3 text-[13px] outline-none transition-all ${simulationSender === "user" ? "bg-[#C7F33C]/10 text-black border border-[#C7F33C]/30 focus:bg-[#C7F33C]/15" : "bg-[#F0F0F0] text-black focus:bg-[#e8e8e8]"}`}
+                        className="flex-1 rounded-full px-5 py-3 text-[13px] outline-none transition-all bg-[#F0F0F0] text-black focus:bg-[#e8e8e8]"
                       />
                       <button
                         type="submit"
-                        className={`grid h-11 w-11 place-items-center rounded-full active:scale-95 transition-all ${simulationSender === "user" ? "bg-[#C7F33C] text-black hover:bg-[#b0d82d]" : "bg-black text-[#C7F33C] hover:bg-black/90"}`}
+                        className="grid h-11 w-11 place-items-center rounded-full active:scale-95 transition-all bg-black text-[#C7F33C] hover:bg-black/90"
                       >
                         <Send size={16} />
                       </button>

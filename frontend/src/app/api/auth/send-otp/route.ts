@@ -43,7 +43,7 @@ export async function POST(request: Request) {
 
     const apiKey = process.env.RESEND_API_KEY;
     if (!apiKey) {
-      console.warn("[send-otp] RESEND_API_KEY is not set.");
+      console.log(`\n==================================================\n[OTP DEBUG FOR LOCAL TESTING]\nEmail: ${email}\nOTP: ${otp}\n==================================================\n`);
       return NextResponse.json(
         {
           success: false,

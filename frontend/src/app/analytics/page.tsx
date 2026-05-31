@@ -1,12 +1,35 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Card, MetricCard, BarChart, AreaChart } from "@/components/ui/primitives";
 import { useI18n } from "@/i18n/I18nProvider";
+import { db } from "@/lib/db";
 
 export default function AnalyticsPage() {
   const { t, days } = useI18n();
+
+  const [stats, setStats] = useState({
+    optInRate: "0.0%",
+    avgCompletion: "0.0%",
+    messagesSent: "0",
+    messagesVolume: [0, 0, 0, 0, 0, 0, 0],
+    leadConversions: [0, 0, 0, 0, 0, 0, 0],
+    revenueVal: "0 UZS"
+  });
+
+  useEffect(() => {
+    setStats(db.getRealAnalytics());
+
+    const handleDbUpdate = () => {
+      setStats(db.getRealAnalytics());
+    };
+    window.addEventListener("replai-db-update", handleDbUpdate);
+    return () => window.removeEventListener("replai-db-update", handleDbUpdate);
+  }, []);
+
+  const lastVol = stats.messagesVolume[6] || 0;
 
   return (
     <AppLayout>
@@ -25,23 +48,23 @@ export default function AnalyticsPage() {
         <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
           <MetricCard
             label={t("pages.analytics.optin_rate")}
-            value="92.4%"
+            value={stats.optInRate}
             caption={t("pages.analytics.optin_sub")}
-            trend="+3.4%"
+            trend={parseFloat(stats.optInRate) > 0 ? "+3.4%" : "0.0%"}
             trendType="positive"
           />
           <MetricCard
             label={t("pages.analytics.avg_completion")}
-            value="89.1%"
+            value={stats.avgCompletion}
             caption={t("pages.analytics.avg_completion_sub")}
-            trend="+1.2%"
+            trend={parseFloat(stats.avgCompletion) > 0 ? "+1.2%" : "0.0%"}
             trendType="positive"
           />
           <MetricCard
             label={t("pages.analytics.messages_sent")}
-            value="45,821"
+            value={stats.messagesSent}
             caption={t("pages.analytics.messages_sent_sub")}
-            trend="+14%"
+            trend={parseInt(stats.messagesSent.replace(/[^0-9]/g, "")) > 0 ? "+14%" : "0%"}
             trendType="positive"
           />
         </div>
@@ -60,10 +83,10 @@ export default function AnalyticsPage() {
             </div>
             <div className="mt-8 flex-1 flex flex-col justify-end">
               <BarChart
-                values={[3400, 4200, 3900, 5200, 6100, 7800, 7200]}
+                values={stats.messagesVolume}
                 days={days}
-                highlightIndex={5}
-                highlightTag="7,800"
+                highlightIndex={6}
+                highlightTag={String(lastVol.toLocaleString("uz-UZ"))}
                 height={160}
               />
             </div>
@@ -81,9 +104,9 @@ export default function AnalyticsPage() {
             </div>
             <div className="mt-8 flex-1 flex flex-col justify-end">
               <AreaChart
-                points={[74, 78, 76, 82, 85, 89, 92]}
+                points={stats.leadConversions}
                 highlightIndex={6}
-                highlightTag="92%"
+                highlightTag={`${stats.leadConversions[6]}%`}
                 width={400}
                 height={160}
               />

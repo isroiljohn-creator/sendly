@@ -42,11 +42,22 @@ export default function BroadcastPage() {
     e.preventDefault();
     if (!title.trim() || !message.trim()) return;
  
+    const contactsList = db.getContacts();
+    let count = 0;
+    if (tag === "Barcha faol mijozlar") {
+      count = contactsList.length;
+    } else if (tag === "VIP foydalanuvchilar") {
+      count = contactsList.filter((c) => c.tags.includes("VIP")).length;
+    } else {
+      // Qiziqqan (Leads)
+      count = contactsList.filter((c) => c.tags.includes("Tarifga qiziqqan") || c.tags.includes("Leads") || c.tags.includes("Telegram")).length;
+    }
+
     const newBroadcast: Broadcast = {
       id: `${broadcasts.length + 1}`,
       name: title,
       segment: tag,
-      sentCount: tag === "Barcha faol mijozlar" ? "2,418" : tag === "VIP foydalanuvchilar" ? "480" : "928",
+      sentCount: String(count.toLocaleString("uz-UZ")),
       date: "Hozirgina",
       status: "Completed",
     };

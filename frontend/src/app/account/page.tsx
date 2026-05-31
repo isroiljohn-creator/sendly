@@ -646,7 +646,7 @@ export default function AccountPage() {
           {activeTab === "billing" && (() => {
             const connectedCount = channelsCount;
             const userPlan = currentUser?.plan || "free";
-            const basePrice = userPlan === "premium" ? 1000000 : userPlan === "pro" ? 150000 : 0;
+            const basePrice = userPlan === "premium" ? 1200000 : userPlan === "pro" ? 150000 : 0;
             const includedChannels = userPlan === "premium" ? 10 : 1;
             const extraChannels = Math.max(0, connectedCount - includedChannels);
             const extraCost = extraChannels * 150000;
@@ -1083,16 +1083,16 @@ export default function AccountPage() {
               {/* Package 1 */}
               <div 
                 className="border border-[#E8E8E8] hover:border-black rounded-[20px] p-5 flex items-center justify-between transition-all bg-[#F9F9F7] hover:shadow-md cursor-pointer group"
-                onClick={() => handleBuyCredits(1000, 10000, "Ekonom")}
+                onClick={() => handleBuyCredits(10000, 100000, "Boshlang'ich")}
               >
                 <div>
-                  <h4 className="text-[15px] font-bold text-black group-hover:text-[#7CA607] transition-colors">Ekonom paket</h4>
-                  <p className="text-[11px] text-[#707070] mt-1">~1 000 ta AI yordamchi javobi uchun</p>
-                  <span className="text-[20px] font-black text-black mt-2 block">1 000 <span className="text-[11px] font-bold text-[#707070]">kredit</span></span>
+                  <h4 className="text-[15px] font-bold text-black group-hover:text-[#7CA607] transition-colors">Boshlang'ich paket</h4>
+                  <p className="text-[11px] text-[#707070] mt-1">~500 ta AI yordamchi javobi uchun</p>
+                  <span className="text-[20px] font-black text-black mt-2 block">10 000 <span className="text-[11px] font-bold text-[#707070]">kredit</span></span>
                 </div>
                 <div className="text-right">
                   <span className="bg-black text-[#C7F33C] text-[12px] font-bold px-4 py-2 rounded-full whitespace-nowrap shadow-sm group-hover:scale-105 transition-all">
-                    10 000 UZS
+                    100 000 UZS
                   </span>
                 </div>
               </div>
@@ -1100,19 +1100,19 @@ export default function AccountPage() {
               {/* Package 2 */}
               <div 
                 className="border border-black bg-black text-white rounded-[20px] p-5 flex items-center justify-between transition-all hover:shadow-md cursor-pointer relative overflow-hidden group"
-                onClick={() => handleBuyCredits(5000, 45000, "Standart")}
+                onClick={() => handleBuyCredits(50000, 350000, "Standart")}
               >
                 <div className="absolute top-0 right-0 bg-[#C7F33C] text-black text-[8px] font-extrabold uppercase px-2.5 py-0.5 rounded-bl-[10px]">
-                  10% CHEGIRMA
+                  30% CHEGIRMA
                 </div>
                 <div>
                   <h4 className="text-[15px] font-bold text-[#C7F33C]">Standart paket</h4>
-                  <p className="text-[11px] text-white/60 mt-1">~5 000 ta AI yordamchi javobi uchun</p>
-                  <span className="text-[20px] font-black text-white mt-2 block">5 000 <span className="text-[11px] font-bold text-white/60">kredit</span></span>
+                  <p className="text-[11px] text-white/60 mt-1">~2 500 ta AI yordamchi javobi uchun</p>
+                  <span className="text-[20px] font-black text-white mt-2 block">50 000 <span className="text-[11px] font-bold text-white/60">kredit</span></span>
                 </div>
                 <div className="text-right">
                   <span className="bg-[#C7F33C] text-black text-[12px] font-bold px-4 py-2 rounded-full whitespace-nowrap shadow-sm group-hover:scale-105 transition-all">
-                    45 000 UZS
+                    350 000 UZS
                   </span>
                 </div>
               </div>
@@ -1120,19 +1120,19 @@ export default function AccountPage() {
               {/* Package 3 */}
               <div 
                 className="border border-[#E8E8E8] hover:border-black rounded-[20px] p-5 flex items-center justify-between transition-all bg-[#F9F9F7] hover:shadow-md cursor-pointer group"
-                onClick={() => handleBuyCredits(10000, 80000, "Biznes")}
+                onClick={() => handleBuyCredits(150000, 700000, "Biznes")}
               >
                 <div className="absolute top-0 right-0 bg-[#C7F33C] text-black text-[8px] font-extrabold uppercase px-2.5 py-0.5 rounded-bl-[10px]">
-                  20% CHEGIRMA
+                  53% CHEGIRMA
                 </div>
                 <div>
                   <h4 className="text-[15px] font-bold text-black group-hover:text-[#7CA607] transition-colors">Biznes paket</h4>
-                  <p className="text-[11px] text-[#707070] mt-1">~10 000 ta AI yordamchi javobi uchun</p>
-                  <span className="text-[20px] font-black text-black mt-2 block">10 000 <span className="text-[11px] font-bold text-[#707070]">kredit</span></span>
+                  <p className="text-[11px] text-[#707070] mt-1">~7 500 ta AI yordamchi javobi uchun</p>
+                  <span className="text-[20px] font-black text-black mt-2 block">150 000 <span className="text-[11px] font-bold text-[#707070]">kredit</span></span>
                 </div>
                 <div className="text-right">
                   <span className="bg-black text-[#C7F33C] text-[12px] font-bold px-4 py-2 rounded-full whitespace-nowrap shadow-sm group-hover:scale-105 transition-all">
-                    80 000 UZS
+                    700 000 UZS
                   </span>
                 </div>
               </div>
@@ -1281,7 +1281,7 @@ export default function AccountPage() {
                         
                         <div className="my-6">
                           <span className="text-[26px] font-black text-[#C7F33C] leading-none">
-                            {billingCycle === "monthly" ? "1 000 000" : "9 600 000"}
+                            {billingCycle === "monthly" ? "1 200 000" : "11 520 000"}
                           </span>
                           <span className="text-[12px] text-white/60 ml-1">UZS / {billingCycle === "monthly" ? "oy" : "yil"}</span>
                         </div>
