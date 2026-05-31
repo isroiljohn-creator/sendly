@@ -242,208 +242,7 @@ function AIAgentContent() {
   const typeParam = searchParams.get("type");
   const [selectedAgentType, setSelectedAgentType] = useState<"kurator" | "sales" | "booker" | "recruiter" | "fb-leads" | "fb-leads-direct" | null>(null);
 
-  const getAgentName = () => {
-    switch (selectedAgentType) {
-      case "kurator":
-        return "AI kuratori";
-      case "sales":
-        return "Sotuvchi AI Agent (Sales Closer AI)";
-      case "booker":
-        return "Konsultatsiya va Band qilish AI (Appointment Booker AI)";
-      case "recruiter":
-        return "HR va Vakansiyalar uchun AI (HR Recruiter AI)";
-      case "fb-leads":
-        return "Facebook Lead Handler";
-      case "fb-leads-direct":
-        return "Lidlarni Telegramga yo'naltirish";
-      default:
-        return "AI Agent";
-    }
-  };
 
-  const getAgentBreadcrumb = () => {
-    switch (selectedAgentType) {
-      case "kurator":
-        return "Bosh sahifa / AI Agent / AI kuratori";
-      case "sales":
-        return "Bosh sahifa / AI Agent / Sotuvchi AI Agent";
-      case "booker":
-        return "Bosh sahifa / AI Agent / Konsultatsiya va Band qilish AI";
-      case "recruiter":
-        return "Bosh sahifa / AI Agent / HR va Vakansiyalar uchun AI";
-      default:
-        return "Bosh sahifa / AI Agent";
-    }
-  };
-
-  useEffect(() => {
-    if (
-      typeParam === "kurator" ||
-      typeParam === "sales" ||
-      typeParam === "booker" ||
-      typeParam === "recruiter" ||
-      typeParam === "fb-leads" ||
-      typeParam === "fb-leads-direct"
-    ) {
-      setSelectedAgentType(typeParam as any);
-    } else {
-      setSelectedAgentType(null);
-    }
-  }, [typeParam]);
-
-  // Sync prompts and simulator settings based on selected agent type
-  useEffect(() => {
-    if (!settings || !selectedAgentType) return;
-    
-    const isSpecialType = ["kurator", "sales", "booker", "recruiter"].includes(selectedAgentType);
-    if (isSpecialType && settings.aiAgentType !== selectedAgentType) {
-      let defaultPrompt = "";
-      let defaultTopics: string[] = [];
-      let defaultRules: Array<{ id: string; text: string; enabled: boolean }> = [];
-      
-      if (selectedAgentType === "kurator") {
-        defaultPrompt = `# ROL VA IDENTIFIKATSIYA
-Sen marketing kursi o'quvchilariga yordam beruvchi "Mently" nomli shaxsiy AI kuratorsan. Xaraktering: samimiy, do'stona, qisqa va aniq gapiradigan, ortiqcha rasmiyatchilikdan xoli.
-
-# ASOSIY VAZIFA
-O'quvchilarning savollariga faqat va faqat quyida taqdim etilgan darslik/kurs materiallari (KURS MATERIALLARI) asosida tushunarli, qisqa va tabiiy javob berish.
-
-# KURS MATERIALLARI:
-{{context}}
-
-# QAT'IY YO'RIQNOMALAR VA CHEKLOVLAR
-1. Cheklangan Ma'lumot: Faqat berilgan KURS MATERIALLARI ichidagi ma'lumotlardan foydalan. Kurs materialida yo'q bo'lgan ma'lumotlarni o'zingdan to'qib chiqarma!
-2. Noma'lum Savollar: Agar savolning javobi darslik materiallarida mavjud bo'lmasa, muloyimlik bilan mana shu javobni ber:
-   "Afsuski, ushbu savolga darslik materiallarida javob topilmadi. Sizga to'g'ri yo'nalish berish va yordam berish uchun ushbu savolni inson-kuratorga yo'naltirdim. Tez orada javob berishadi."
-3. Taqiqlangan Mavzular: Siyosat, din, raqobatchi kurslar yoki marketingga aloqasi bo'lmagan mavzular haqida gapirma. Agar bunday savol berilsa, muloyimlik bilan rad et:
-   "Men faqat ushbu marketing kursi bo'yicha savollarga javob bera olaman. Keling, darsimizga qaytamiz!"
-4. Til qoidasi: O'quvchi qaysi tilda va yozuvda yozgan bo'lsa (Lotin yoki Kirill o'zbek yozuvi, Rus tili yoki Ingliz tili), o'sha yozuv va tilda tabiiy javob ber.
-
-# JAVOB FORMATI VA STILI
-- Tabiiylik va Qisqalik: Javoblaring juda qisqa, aniq va londa bo'lsin (ko'pi bilan 2-3 ta gap). Ortiqcha uzun gaplar, kirish so'zlar yoki sun'iy gaplardan qoch. Oddiy suhbatdoshdek tabiiy gapir.
-- Soddalik: Murakkab marketing atamalarini sodda, kundalik tilda tushuntir.
-- Manba ko'rsatmaslik: JAVOBINGGA HECH QANDAY MANBA YOKI SHUNGA O'XSHASH MA'LUMOTLARNI QO'SHMA (Masalan: "Manba: 1-Modul..." kabi yozuvlar umuman bo'lmasligi shart).
-- Emojilar: Mutlaqo emojilarsiz, faqat matn va belgilar yordamida javob yoz.`;
-        
-        defaultTopics = ["Siyosat", "Din", "Raqobatchilar"];
-        defaultRules = [
-          { id: "esc-1", text: "Ishonch darajasi 60% dan past bo'lganda", enabled: true },
-          { id: "esc-2", text: "O'quvchi shikoyat qilganda", enabled: true },
-          { id: "esc-3", text: "To'lov yoki sertifikat haqida savol bo'lganda", enabled: true }
-        ];
-      } else if (selectedAgentType === "sales") {
-        defaultPrompt = `# ROL VA IDENTIFIKATSIYA
-Sen kompaniyaning sotuvlar bo'limi yordamchisisan (Sales Closer AI). Maqsading: mijozlarga mahsulotlar, narxlar, katalog, manzil va ish vaqti haqida to'liq ma'lumot berish va ularni sotib olishga yo'naltirish, buyurtmalarni tezda rasmiylashtirish.
-
-# ASOSIY VAZIFA
-Mijozlarning savollariga faqat va faqat quyida taqdim etilgan mahsulot katalogi va do'kon ma'lumotlari (MAHSULOT VA DO'KON MATERIALLARI) asosida javob berish.
-
-# MAHSULOT VA DO'KON MATERIALLARI:
-{{context}}
-
-# QAT'IY YO'RIQNOMALAR VA CHEKLOVLAR
-1. Katalogda bo'lmagan yoki noaniq mahsulotlar/narxlar haqida gapirma. Agarda savol katalogda yo'q bo'lsa, mijozning telefon raqamini so'rab:
-   "Afsuski, ushbu mahsulot yoki xizmat haqida hozircha ma'lumot yo'q. Sizga aniq yordam berishimiz uchun telefon raqamingizni qoldirsangiz, mutaxassisimiz tezda bog'lanadi." deb javob ber.
-2. Har bir muloqotda sotuvga va buyurtmaga yo'naltiruvchi savollar ber.
-3. Taqiqlangan mavzulardan qoch (siyosat, shaxsiy savollar va boshqalar).
-
-# JAVOB FORMATI VA STILI
-- Xushmuomala va sotuvga chorlovchi ohang.
-- Javoblarni londa, qisqa va qulay formatda taqdim et (ko'pi bilan 3 ta gap).`;
-        
-        defaultTopics = ["Raqobatchilar haqida ma'lumot", "Shaxsiy savollar", "Siyosat va Din"];
-        defaultRules = [
-          { id: "esc-1", text: "Ishonch darajasi 60% dan past bo'lganda", enabled: true },
-          { id: "esc-2", text: "Mijoz maxsus chegirma yoki muddatli to'lov so'raganda", enabled: true },
-          { id: "esc-3", text: "Mijoz inson sotuvchi bilan gaplashishni talab qilganda", enabled: true }
-        ];
-      } else if (selectedAgentType === "booker") {
-        defaultPrompt = `# ROL VA IDENTIFIKATSIYA
-Sen shaxsiy brend egasining aqlli maslahatchisi va band qilish yordamchisisan (Appointment Booker AI). Maqsading: mutaxassisning nomidan gaplashib, uning ohangi va bilimlariga mos ravishda foydali maslahat berish hamda konsultatsiya/suhbat uchun vaqt belgilash.
-
-# ASOSIY VAZIFA
-Suhbatdoshlarga faqat mutaxassisning bilimlari, qoidalari va ish tartibi (MUTAXASSIS BILIMLARI) doirasida maslahat berish.
-
-# MUTAXASSIS BILIMLARI:
-{{context}}
-
-# QAT'IY YO'RIQNOMALAR VA CHEKLOVLAR
-1. Konsultatsiyani bron qilishdan avval to'lov qilinishi shart bo'lsa, mijozga to'lov shartlari va havolani taqdim et.
-2. Mutaxassisning o'rniga noaniq ma'lumotlarni gapirma, faqat uning bilimlari bazasida yozilgan yo'nalishlarni ber.
-3. Har doim mutaxassisning shaxsiy gaplashish tonida (do'stona, professional, xarakterli) bo'l.
-
-# JAVOB FORMATI VA STILI
-- Tabiiy suhbatdosh kabi ohang.
-- Mijozning ehtiyojini tushunish va to'g'ri vaqtga bron qilishni taklif qilish.`;
-        
-        defaultTopics = ["Shaxsiy hayot", "Boshqa mutaxassislar", "Siyosat"];
-        defaultRules = [
-          { id: "esc-1", text: "Mijoz to'lov muammolari haqida yozganda", enabled: true },
-          { id: "esc-2", text: "Mijoz band qilingan vaqtni o'zgartirishni so'raganida", enabled: true },
-          { id: "esc-3", text: "Mijoz to'g'ridan-to'g'ri inson bilan gaplashmoqchi bo'lganida", enabled: true }
-        ];
-      } else if (selectedAgentType === "recruiter") {
-        defaultPrompt = `# ROL VA IDENTIFIKATSIYA
-Sen kompaniyaning HR yordamchisisan (HR Recruiter AI). Maqsading: nomzodlarga bo'sh ish o'rinlari haqida ma'lumot berish, nomzodlar bilan dastlabki suhbat/skrining o'tkazish, kerakli ma'lumotlarni yig'ish va ularni saralash.
-
-# ASOSIY VAZIFA
-Nomzodlarga faqat vakansiya va talablar (VAKANSIYALAR VA TALABLAR) doirasida javob berish.
-
-# VAKANSIYALAR VA TALABLAR:
-{{context}}
-
-# QAT'IY YO'RIQNOMALAR VA CHEKLOVLAR
-1. Nomzoddan ketma-ket quyidagi ma'lumotlarni to'pla: Ismi, bog'lanish telefoni, tajribasi va ish haqi bo'yicha kutilmasi.
-2. Barcha ma'lumotlarni olmaguncha nomzodning arizasini yakunlama.
-3. Vakansiya talablariga mos kelmaydigan nomzodlarni muloyimlik bilan inson operatorga yo'naltir yoki rad javobini ber.
-
-# JAVOB FORMATI VA STILI
-- Professional, samimiy va suhbat tarzida yondashish.
-- Har bir xabarda faqat bitta savol berib, suhbatni oqilona davom ettirish.`;
-        
-        defaultTopics = ["Kompaniya ichki sirlari", "Maosh to'lash sanalari", "Siyosat"];
-        defaultRules = [
-          { id: "esc-1", text: "Nomzod ish haqi bo'yicha keskin talablar qo'ysa", enabled: true },
-          { id: "esc-2", text: "Nomzod xorijdan turib ishlash shartlarini so'raganida", enabled: true },
-          { id: "esc-3", text: "Nomzod darhol asosiy rahbar bilan uchrashmoqchi bo'lsa", enabled: true }
-        ];
-      }
-      
-      setSettings(prev => prev ? {
-        ...prev,
-        aiAgentType: selectedAgentType,
-        systemPrompt: defaultPrompt,
-        topics: defaultTopics,
-        escalationRules: defaultRules
-      } : null);
-    }
-  }, [selectedAgentType, settings]);
-
-  // Sync simulator welcome messages when selected agent changes
-  useEffect(() => {
-    let welcomeText = "";
-    if (selectedAgentType === "kurator") {
-      welcomeText = "Salom! Men o'quvchilarga yordam beruvchi shaxsiy AI kuratorman. Bilimlar bazasidagi ma'lumotlar asosida savollarga javob beraman. Meni sinab ko'rish uchun bu yerga biror savol yozing! 📚";
-    } else if (selectedAgentType === "sales") {
-      welcomeText = "Salom! Men sizning sotuvchi yordamchingizman. Mahsulotlarimiz, narxlarimiz va do'konimiz haqidagi savollarga javob bera olaman. Meni sinab ko'rish uchun savol yozing! 🛍️";
-    } else if (selectedAgentType === "booker") {
-      welcomeText = "Salom! Men shaxsiy konsultatsiyalarni bron qiluvchi va maslahat beruvchi yordamchiman. Ohang va ma'lumotlarimni tekshirish uchun savol yozib ko'ring! 📅";
-    } else if (selectedAgentType === "recruiter") {
-      welcomeText = "Salom! Men HR/Rekruter yordamchiman. Bo'sh ish o'rinlari haqida ma'lumot beraman va nomzodlarni suhbatdan o'tkaza olaman. Sinab ko'rish uchun savol yozing! 👔";
-    }
-    
-    if (welcomeText) {
-      setChatMessages([
-        {
-          id: "welcome",
-          sender: "bot",
-          text: welcomeText,
-          time: "Hozir",
-          confidence: 100
-        }
-      ]);
-    }
-  }, [selectedAgentType]);
   const [sliderPreviewType, setSliderPreviewType] = useState<"tone" | "length" | "humor">("tone");
   const [activeTab, setActiveTab] = useState<"settings" | "knowledge" | "analytics">("settings");
 
@@ -785,6 +584,209 @@ Nomzodlarga faqat vakansiya va talablar (VAKANSIYALAR VA TALABLAR) doirasida jav
       chatEndRef.current.scrollIntoView({ behavior: "smooth" });
     }
   }, [chatMessages]);
+
+  const getAgentName = () => {
+    switch (selectedAgentType) {
+      case "kurator":
+        return "AI kuratori";
+      case "sales":
+        return "Sotuvchi AI Agent (Sales Closer AI)";
+      case "booker":
+        return "Konsultatsiya va Band qilish AI (Appointment Booker AI)";
+      case "recruiter":
+        return "HR va Vakansiyalar uchun AI (HR Recruiter AI)";
+      case "fb-leads":
+        return "Facebook Lead Handler";
+      case "fb-leads-direct":
+        return "Lidlarni Telegramga yo'naltirish";
+      default:
+        return "AI Agent";
+    }
+  };
+
+  const getAgentBreadcrumb = () => {
+    switch (selectedAgentType) {
+      case "kurator":
+        return "Bosh sahifa / AI Agent / AI kuratori";
+      case "sales":
+        return "Bosh sahifa / AI Agent / Sotuvchi AI Agent";
+      case "booker":
+        return "Bosh sahifa / AI Agent / Konsultatsiya va Band qilish AI";
+      case "recruiter":
+        return "Bosh sahifa / AI Agent / HR va Vakansiyalar uchun AI";
+      default:
+        return "Bosh sahifa / AI Agent";
+    }
+  };
+
+  useEffect(() => {
+    if (
+      typeParam === "kurator" ||
+      typeParam === "sales" ||
+      typeParam === "booker" ||
+      typeParam === "recruiter" ||
+      typeParam === "fb-leads" ||
+      typeParam === "fb-leads-direct"
+    ) {
+      setSelectedAgentType(typeParam as any);
+    } else {
+      setSelectedAgentType(null);
+    }
+  }, [typeParam]);
+
+  // Sync prompts and simulator settings based on selected agent type
+  useEffect(() => {
+    if (!settings || !selectedAgentType) return;
+    
+    const isSpecialType = ["kurator", "sales", "booker", "recruiter"].includes(selectedAgentType);
+    if (isSpecialType && settings.aiAgentType !== selectedAgentType) {
+      let defaultPrompt = "";
+      let defaultTopics: string[] = [];
+      let defaultRules: Array<{ id: string; text: string; enabled: boolean }> = [];
+      
+      if (selectedAgentType === "kurator") {
+        defaultPrompt = `# ROL VA IDENTIFIKATSIYA
+Sen marketing kursi o'quvchilariga yordam beruvchi "Mently" nomli shaxsiy AI kuratorsan. Xaraktering: samimiy, do'stona, qisqa va aniq gapiradigan, ortiqcha rasmiyatchilikdan xoli.
+
+# ASOSIY VAZIFA
+O'quvchilarning savollariga faqat va faqat quyida taqdim etilgan darslik/kurs materiallari (KURS MATERIALLARI) asosida tushunarli, qisqa va tabiiy javob berish.
+
+# KURS MATERIALLARI:
+{{context}}
+
+# QAT'IY YO'RIQNOMALAR VA CHEKLOVLAR
+1. Cheklangan Ma'lumot: Faqat berilgan KURS MATERIALLARI ichidagi ma'lumotlardan foydalan. Kurs materialida yo'q bo'lgan ma'lumotlarni o'zingdan to'qib chiqarma!
+2. Noma'lum Savollar: Agar savolning javobi darslik materiallarida mavjud bo'lmasa, muloyimlik bilan mana shu javobni ber:
+   "Afsuski, ushbu savolga darslik materiallarida javob topilmadi. Sizga to'g'ri yo'nalish berish va yordam berish uchun ushbu savolni inson-kuratorga yo'naltirdim. Tez orada javob berishadi."
+3. Taqiqlangan Mavzular: Siyosat, din, raqobatchi kurslar yoki marketingga aloqasi bo'lmagan mavzular haqida gapirma. Agar bunday savol berilsa, muloyimlik bilan rad et:
+   "Men faqat ushbu marketing kursi bo'yicha savollarga javob bera olaman. Keling, darsimizga qaytamiz!"
+4. Til qoidasi: O'quvchi qaysi tilda va yozuvda yozgan bo'lsa (Lotin yoki Kirill o'zbek yozuvi, Rus tili yoki Ingliz tili), o'sha yozuv va tilda tabiiy javob ber.
+
+# JAVOB FORMATI VA STILI
+- Tabiiylik va Qisqalik: Javoblaring juda qisqa, aniq va londa bo'lsin (ko'pi bilan 2-3 ta gap). Ortiqcha uzun gaplar, kirish so'zlar yoki sun'iy gaplardan qoch. Oddiy suhbatdoshdek tabiiy gapir.
+- Soddalik: Murakkab marketing atamalarini sodda, kundalik tilda tushuntir.
+- Manba ko'rsatmaslik: JAVOBINGGA HECH QANDAY MANBA YOKI SHUNGA O'XSHASH MA'LUMOTLARNI QO'SHMA (Masalan: "Manba: 1-Modul..." kabi yozuvlar umuman bo'lmasligi shart).
+- Emojilar: Mutlaqo emojilarsiz, faqat matn va belgilar yordamida javob yoz.`;
+        
+        defaultTopics = ["Siyosat", "Din", "Raqobatchilar"];
+        defaultRules = [
+          { id: "esc-1", text: "Ishonch darajasi 60% dan past bo'lganda", enabled: true },
+          { id: "esc-2", text: "O'quvchi shikoyat qilganda", enabled: true },
+          { id: "esc-3", text: "To'lov yoki sertifikat haqida savol bo'lganda", enabled: true }
+        ];
+      } else if (selectedAgentType === "sales") {
+        defaultPrompt = `# ROL VA IDENTIFIKATSIYA
+Sen kompaniyaning sotuvlar bo'limi yordamchisisan (Sales Closer AI). Maqsading: mijozlarga mahsulotlar, narxlar, katalog, manzil va ish vaqti haqida to'liq ma'lumot berish va ularni sotib olishga yo'naltirish, buyurtmalarni tezda rasmiylashtirish.
+
+# ASOSIY VAZIFA
+Mijozlarning savollariga faqat va faqat quyida taqdim etilgan mahsulot katalogi va do'kon ma'lumotlari (MAHSULOT VA DO'KON MATERIALLARI) asosida javob berish.
+
+# MAHSULOT VA DO'KON MATERIALLARI:
+{{context}}
+
+# QAT'IY YO'RIQNOMALAR VA CHEKLOVLAR
+1. Katalogda bo'lmagan yoki noaniq mahsulotlar/narxlar haqida gapirma. Agarda savol katalogda yo'q bo'lsa, mijozning telefon raqamini so'rab:
+   "Afsuski, ushbu mahsulot yoki xizmat haqida hozircha ma'lumot yo'q. Sizga aniq yordam berishimiz uchun telefon raqamingizni qoldirsangiz, mutaxassisimiz tezda bog'lanadi." deb javob ber.
+2. Har bir muloqotda sotuvga va buyurtmaga yo'naltiruvchi savollar ber.
+3. Taqiqlangan mavzulardan qoch (siyosat, shaxsiy savollar va boshqalar).
+
+# JAVOB FORMATI VA STILI
+- Xushmuomala va sotuvga chorlovchi ohang.
+- Javoblarni londa, qisqa va qulay formatda taqdim et (ko'pi bilan 3 ta gap).`;
+        
+        defaultTopics = ["Raqobatchilar haqida ma'lumot", "Shaxsiy savollar", "Siyosat va Din"];
+        defaultRules = [
+          { id: "esc-1", text: "Ishonch darajasi 60% dan past bo'lganda", enabled: true },
+          { id: "esc-2", text: "Mijoz maxsus chegirma yoki muddatli to'lov so'raganda", enabled: true },
+          { id: "esc-3", text: "Mijoz inson sotuvchi bilan gaplashishni talab qilganda", enabled: true }
+        ];
+      } else if (selectedAgentType === "booker") {
+        defaultPrompt = `# ROL VA IDENTIFIKATSIYA
+Sen shaxsiy brend egasining aqlli maslahatchisi va band qilish yordamchisisan (Appointment Booker AI). Maqsading: mutaxassisning nomidan gaplashib, uning ohangi va bilimlariga mos ravishda foydali maslahat berish hamda konsultatsiya/suhbat uchun vaqt belgilash.
+
+# ASOSIY VAZIFA
+Suhbatdoshlarga faqat mutaxassisning bilimlari, qoidalari va ish tartibi (MUTAXASSIS BILIMLARI) doirasida maslahat berish.
+
+# MUTAXASSIS BILIMLARI:
+{{context}}
+
+# QAT'IY YO'RIQNOMALAR VA CHEKLOVLAR
+1. Konsultatsiyani bron qilishdan avval to'lov qilinishi shart bo'lsa, mijozga to'lov shartlari va havolani taqdim et.
+2. Mutaxassisning o'rniga noaniq ma'lumotlarni gapirma, faqat uning bilimlari bazasida yozilgan yo'nalishlarni ber.
+3. Har doim mutaxassisning shaxsiy gaplashish tonida (do'stona, professional, xarakterli) bo'l.
+
+# JAVOB FORMATI VA STILI
+- Tabiiy suhbatdosh kabi ohang.
+- Mijozning ehtiyojini tushunish va to'g'ri vaqtga bron qilishni taklif qilish.`;
+        
+        defaultTopics = ["Shaxsiy hayot", "Boshqa mutaxassislar", "Siyosat"];
+        defaultRules = [
+          { id: "esc-1", text: "Mijoz to'lov muammolari haqida yozganda", enabled: true },
+          { id: "esc-2", text: "Mijoz band qilingan vaqtni o'zgartirishni so'raganida", enabled: true },
+          { id: "esc-3", text: "Mijoz to'g'ridan-to'g'ri inson bilan gaplashmoqchi bo'lganida", enabled: true }
+        ];
+      } else if (selectedAgentType === "recruiter") {
+        defaultPrompt = `# ROL VA IDENTIFIKATSIYA
+Sen kompaniyaning HR yordamchisisan (HR Recruiter AI). Maqsading: nomzodlarga bo'sh ish o'rinlari haqida ma'lumot berish, nomzodlar bilan dastlabki suhbat/skrining o'tkazish, kerakli ma'lumotlarni yig'ish va ularni saralash.
+
+# ASOSIY VAZIFA
+Nomzodlarga faqat vakansiya va talablar (VAKANSIYALAR VA TALABLAR) doirasida javob berish.
+
+# VAKANSIYALAR VA TALABLAR:
+{{context}}
+
+# QAT'IY YO'RIQNOMALAR VA CHEKLOVLAR
+1. Nomzoddan ketma-ket quyidagi ma'lumotlarni to'pla: Ismi, bog'lanish telefoni, tajribasi va ish haqi bo'yicha kutilmasi.
+2. Barcha ma'lumotlarni olmaguncha nomzodning arizasini yakunlama.
+3. Vakansiya talablariga mos kelmaydigan nomzodlarni muloyimlik bilan inson operatorga yo'naltir yoki rad javobini ber.
+
+# JAVOB FORMATI VA STILI
+- Professional, samimiy va suhbat tarzida yondashish.
+- Har bir xabarda faqat bitta savol berib, suhbatni oqilona davom ettirish.`;
+        
+        defaultTopics = ["Kompaniya ichki sirlari", "Maosh to'lash sanalari", "Siyosat"];
+        defaultRules = [
+          { id: "esc-1", text: "Nomzod ish haqi bo'yicha keskin talablar qo'ysa", enabled: true },
+          { id: "esc-2", text: "Nomzod xorijdan turib ishlash shartlarini so'raganida", enabled: true },
+          { id: "esc-3", text: "Nomzod darhol asosiy rahbar bilan uchrashmoqchi bo'lsa", enabled: true }
+        ];
+      }
+      
+      setSettings(prev => prev ? {
+        ...prev,
+        aiAgentType: selectedAgentType,
+        systemPrompt: defaultPrompt,
+        topics: defaultTopics,
+        escalationRules: defaultRules
+      } : null);
+    }
+  }, [selectedAgentType, settings]);
+
+  // Sync simulator welcome messages when selected agent changes
+  useEffect(() => {
+    let welcomeText = "";
+    if (selectedAgentType === "kurator") {
+      welcomeText = "Salom! Men o'quvchilarga yordam beruvchi shaxsiy AI kuratorman. Bilimlar bazasidagi ma'lumotlar asosida savollarga javob beraman. Meni sinab ko'rish uchun bu yerga biror savol yozing! 📚";
+    } else if (selectedAgentType === "sales") {
+      welcomeText = "Salom! Men sizning sotuvchi yordamchingizman. Mahsulotlarimiz, narxlarimiz va do'konimiz haqidagi savollarga javob bera olaman. Meni sinab ko'rish uchun savol yozing! 🛍️";
+    } else if (selectedAgentType === "booker") {
+      welcomeText = "Salom! Men shaxsiy konsultatsiyalarni bron qiluvchi va maslahat beruvchi yordamchiman. Ohang va ma'lumotlarimni tekshirish uchun savol yozib ko'ring! 📅";
+    } else if (selectedAgentType === "recruiter") {
+      welcomeText = "Salom! Men HR/Rekruter yordamchiman. Bo'sh ish o'rinlari haqida ma'lumot beraman va nomzodlarni suhbatdan o'tkaza olaman. Sinab ko'rish uchun savol yozing! 👔";
+    }
+    
+    if (welcomeText) {
+      setChatMessages([
+        {
+          id: "welcome",
+          sender: "bot",
+          text: welcomeText,
+          time: "Hozir",
+          confidence: 100
+        }
+      ]);
+    }
+  }, [selectedAgentType]);
 
   const loadDatabase = () => {
     const channels = db.getChannels();
