@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { GraduationCap, BookOpen } from "lucide-react";
 import { Card } from "@/components/ui/primitives";
@@ -7,6 +8,7 @@ import { useI18n } from "@/i18n/I18nProvider";
 
 export function DashboardLessonsCard() {
   const { t } = useI18n();
+  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
 
   const lessons = [
     {
@@ -60,19 +62,61 @@ export function DashboardLessonsCard() {
 
       <div className="relative h-[125px] w-full mt-3.5 select-none overflow-hidden">
         {lessons.map((l, i) => {
-          let leftClass = "left-0";
-          if (i === 1) leftClass = "left-[50px] sm:left-[60px]";
-          if (i === 2) leftClass = "left-[100px] sm:left-[120px]";
-          
-          let zIndexClass = "z-10";
-          if (i === 1) zIndexClass = "z-20";
-          if (i === 2) zIndexClass = "z-30";
+          // Dynamic mobile position offsets
+          let leftMobile = i * 50;
+          if (hoveredIndex !== null) {
+            if (hoveredIndex === 0) {
+              if (i === 1) leftMobile = 50 + 15;
+              if (i === 2) leftMobile = 100 + 25;
+            } else if (hoveredIndex === 1) {
+              if (i === 0) leftMobile = -10;
+              if (i === 2) leftMobile = 100 + 15;
+            } else if (hoveredIndex === 2) {
+              if (i === 0) leftMobile = -20;
+              if (i === 1) leftMobile = 50 - 12;
+            }
+          }
+
+          // Dynamic desktop position offsets
+          let leftDesktop = i * 60;
+          if (hoveredIndex !== null) {
+            if (hoveredIndex === 0) {
+              if (i === 1) leftDesktop = 60 + 18;
+              if (i === 2) leftDesktop = 120 + 30;
+            } else if (hoveredIndex === 1) {
+              if (i === 0) leftDesktop = -12;
+              if (i === 2) leftDesktop = 120 + 18;
+            } else if (hoveredIndex === 2) {
+              if (i === 0) leftDesktop = -24;
+              if (i === 1) leftDesktop = 60 - 15;
+            }
+          }
+
+          // Dynamic distance-based z-index stack logic
+          let zIndex = 10;
+          if (hoveredIndex === null) {
+            // Default: stack Card 3 on top of Card 2 on top of Card 1
+            zIndex = i === 0 ? 10 : i === 1 ? 20 : 30;
+          } else {
+            if (hoveredIndex === i) {
+              zIndex = 50;
+            } else {
+              zIndex = 30 - Math.abs(i - hoveredIndex) * 10;
+            }
+          }
 
           return (
             <Link
               key={l.id}
               href="/lessons"
-              className={`absolute top-1 ${leftClass} ${zIndexClass} hover:z-50 flex w-[145px] sm:w-[155px] h-[110px] flex-col justify-between rounded-[18px] p-3 shadow-md hover:shadow-xl hover:-translate-y-2 hover:scale-[1.02] transition-all duration-300 ease-out cursor-pointer ${l.bg}`}
+              onMouseEnter={() => setHoveredIndex(i)}
+              onMouseLeave={() => setHoveredIndex(null)}
+              style={{
+                zIndex,
+                "--left-mobile": `${leftMobile}px`,
+                "--left-desktop": `${leftDesktop}px`
+              } as React.CSSProperties}
+              className={`absolute top-1 left-[var(--left-mobile)] sm:left-[var(--left-desktop)] flex w-[145px] sm:w-[155px] h-[110px] flex-col justify-between rounded-[18px] p-3 shadow-md hover:shadow-xl hover:-translate-y-2 hover:scale-[1.02] transition-all duration-300 ease-out cursor-pointer ${l.bg}`}
             >
               <div className="flex items-center justify-between">
                 <GraduationCap size={13} className={l.iconColor} />
