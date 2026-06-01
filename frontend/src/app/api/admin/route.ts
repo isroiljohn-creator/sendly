@@ -109,9 +109,24 @@ export async function GET(request: Request) {
               ? JSON.parse(globalAdminRow.fb_field_mappings)
               : globalAdminRow.fb_field_mappings;
             
-            promoCodes = adminData.promoCodes || [];
-            auditLogs = adminData.auditLogs || [];
+            const rawPromoCodes = adminData.promoCodes || [];
+            const rawAuditLogs = adminData.auditLogs || [];
+
+            promoCodes = rawPromoCodes.filter((p: any) => p && p.code !== "SENDLY10" && p.code !== "WELCOME" && p.code !== "PROMO50");
+            auditLogs = rawAuditLogs.filter((l: any) => l && !l.action?.includes("SENDLY10") && l.user !== "admin@sendly.uz" && !l.user?.includes("test.com"));
             systemAnnouncement = adminData.systemAnnouncement || "";
+
+            // If legacy mock data was present and filtered, update Supabase automatically to clean it permanently
+            if (promoCodes.length !== rawPromoCodes.length || auditLogs.length !== rawAuditLogs.length) {
+              await supabase
+                .from("instagram_accounts")
+                .upsert({
+                  user_id: "00000000-0000-0000-0000-000000000000",
+                  instagram_page_id: "global_admin_data",
+                  access_token: "global_admin_token",
+                  fb_field_mappings: { promoCodes, auditLogs, systemAnnouncement }
+                }, { onConflict: "instagram_page_id" });
+            }
           }
 
           // Parse user specific settings
@@ -129,19 +144,10 @@ export async function GET(request: Request) {
           });
         }
 
-        // Seed default admin settings if not present
+        // Seed default admin settings if not present (as empty arrays)
         if (promoCodes.length === 0 && auditLogs.length === 0) {
-          promoCodes = [
-            { code: "SENDLY10", amount: 10000, maxUses: 1000, usedCount: 142, restrictedToEmail: "", createdAt: "15-may, 2026" },
-            { code: "WELCOME", amount: 5000, maxUses: 1000, usedCount: 521, restrictedToEmail: "", createdAt: "10-may, 2026" },
-            { code: "PROMO50", amount: 50000, maxUses: 50, usedCount: 12, restrictedToEmail: "", createdAt: "20-may, 2026" }
-          ];
-          auditLogs = [
-            { id: "l-1", user: "admin@sendly.uz", action: "Tizim sozlamalari yangilandi", date: "26-May, 20:10" },
-            { id: "l-2", user: "ali@test.com", action: "SENDLY10 promokodini faollashtirdi", date: "26-May, 19:42" },
-            { id: "l-3", user: "nodir@test.com", action: "PRO obunaga bog'landi (UzCard)", date: "26-May, 18:15" },
-            { id: "l-4", user: "shavkat@test.com", action: "Yangi telegram ulanishini yaratdi", date: "26-May, 15:30" }
-          ];
+          promoCodes = [];
+          auditLogs = [];
 
           await supabase
             .from("instagram_accounts")
@@ -165,27 +171,35 @@ export async function GET(request: Request) {
       usersList = dbData.users || [];
       userDataMap = dbData.userData || {};
 
+      let dbUpdated = false;
       if (!dbData.promoCodes) {
-        dbData.promoCodes = [
-          { code: "SENDLY10", amount: 10000, maxUses: 1000, usedCount: 142, restrictedToEmail: "", createdAt: "15-may, 2026" },
-          { code: "WELCOME", amount: 5000, maxUses: 1000, usedCount: 521, restrictedToEmail: "", createdAt: "10-may, 2026" },
-          { code: "PROMO50", amount: 50000, maxUses: 50, usedCount: 12, restrictedToEmail: "", createdAt: "20-may, 2026" }
-        ];
-        writeDb(dbData);
+        dbData.promoCodes = [];
+        dbUpdated = true;
+      } else {
+        const prevLen = dbData.promoCodes.length;
+        dbData.promoCodes = dbData.promoCodes.filter((p: any) => p && p.code !== "SENDLY10" && p.code !== "WELCOME" && p.code !== "PROMO50");
+        if (dbData.promoCodes.length !== prevLen) {
+          dbUpdated = true;
+        }
       }
       promoCodes = dbData.promoCodes;
 
       if (!dbData.auditLogs) {
-        dbData.auditLogs = [
-          { id: "l-1", user: "admin@sendly.uz", action: "Tizim sozlamalari yangilandi", date: "26-May, 20:10" },
-          { id: "l-2", user: "ali@test.com", action: "SENDLY10 promokodini faollashtirdi", date: "26-May, 19:42" },
-          { id: "l-3", user: "nodir@test.com", action: "PRO obunaga bog'landi (UzCard)", date: "26-May, 18:15" },
-          { id: "l-4", user: "shavkat@test.com", action: "Yangi telegram ulanishini yaratdi", date: "26-May, 15:30" }
-        ];
-        writeDb(dbData);
+        dbData.auditLogs = [];
+        dbUpdated = true;
+      } else {
+        const prevLen = dbData.auditLogs.length;
+        dbData.auditLogs = dbData.auditLogs.filter((l: any) => l && !l.action?.includes("SENDLY10") && l.user !== "admin@sendly.uz" && !l.user?.includes("test.com"));
+        if (dbData.auditLogs.length !== prevLen) {
+          dbUpdated = true;
+        }
       }
       auditLogs = dbData.auditLogs;
       systemAnnouncement = dbData.systemAnnouncement || "";
+
+      if (dbUpdated) {
+        writeDb(dbData);
+      }
     }
 
     // Filter out null/undefined elements from user list to prevent mapping crashes
@@ -378,11 +392,7 @@ export async function GET(request: Request) {
       .slice(0, 5);
 
     if (topChannelsList.length === 0) {
-      topChannelsList = [
-        { id: "tc-1", name: "Uzbek Clothes Shop", username: "uz_clothes_bot", messagesCount: 1420, ownerEmail: "owner1@mail.com", currentStep: "Narxlar ro'yxati" },
-        { id: "tc-2", name: "Avto Ehtiyot Qismlar", username: "avto_qismlar_bot", messagesCount: 980, ownerEmail: "owner2@mail.com", currentStep: "Bosh menyu" },
-        { id: "tc-3", name: "Gullar Yetkazish", username: "flowers_delivery_uz", messagesCount: 750, ownerEmail: "owner3@mail.com", currentStep: "FAQ javobi" }
-      ];
+      topChannelsList = [];
     }
 
     let topConsumersList = [...richUsers]
@@ -398,11 +408,7 @@ export async function GET(request: Request) {
       }));
 
     if (topConsumersList.length === 0) {
-      topConsumersList = [
-        { id: "u-1", fullName: "Isroiljon Abdullayev", email: "isroiljohnabdullayev@gmail.com", plan: "premium", creditsBalance: 45000, creditsUsed: 12400 },
-        { id: "u-2", fullName: "Sardor Ahmedov", email: "sardor@mail.com", plan: "pro", creditsBalance: 8200, creditsUsed: 4300 },
-        { id: "u-3", fullName: "Shahzoda Karimova", email: "shahzoda@mail.com", plan: "free", creditsBalance: 120, creditsUsed: 980 }
-      ];
+      topConsumersList = [];
     }
 
     return NextResponse.json({

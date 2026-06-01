@@ -159,11 +159,9 @@ export async function POST(request: Request) {
 
       // Initialize promoCodes database if not present
       if (!dbData.promoCodes) {
-        dbData.promoCodes = [
-          { code: "SENDLY10", amount: 10000, maxUses: 1000, usedCount: 0, restrictedToEmail: "", createdAt: new Date().toLocaleDateString("uz-UZ") },
-          { code: "WELCOME", amount: 5000, maxUses: 1000, usedCount: 0, restrictedToEmail: "", createdAt: new Date().toLocaleDateString("uz-UZ") },
-          { code: "PROMO50", amount: 50000, maxUses: 1000, usedCount: 0, restrictedToEmail: "", createdAt: new Date().toLocaleDateString("uz-UZ") }
-        ];
+        dbData.promoCodes = [];
+      } else {
+        dbData.promoCodes = dbData.promoCodes.filter((v: any) => v && v.code !== "SENDLY10" && v.code !== "WELCOME" && v.code !== "PROMO50");
       }
 
       const voucherInfo = dbData.promoCodes.find((v: any) => v.code === normalizedCode);
