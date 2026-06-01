@@ -1176,15 +1176,21 @@ export default function SettingsPage() {
             </div>
             <div className="flex flex-col gap-3">
               <button
-                onClick={() => setModal("instagram")}
-                className="flex items-center gap-3 w-full p-3.5 rounded-[16px] border border-[#E8E8E8] hover:border-black text-[13px] font-medium transition-all text-left"
+                disabled
+                type="button"
+                className="flex items-center gap-3 w-full p-3.5 rounded-[16px] border border-[#E8E8E8] text-[13px] font-medium transition-all text-left grayscale opacity-60 cursor-not-allowed select-none"
               >
-                <div className="grid h-8 w-8 place-items-center rounded-[10px] bg-gradient-to-br from-[#f09433] via-[#e6683c] to-[#bc1888] text-white">
+                <div className="grid h-8 w-8 place-items-center rounded-[10px] bg-gradient-to-br from-[#f09433] via-[#e6683c] to-[#bc1888] text-white shrink-0">
                   <Instagram size={16} />
                 </div>
-                <div>
-                  <p className="font-semibold text-black">{t("pages.settings_page.ig_direct_api")}</p>
-                  <p className="text-[11px] text-[#707070]">{t("pages.settings_page.ig_direct_subtitle")}</p>
+                <div className="flex-1 flex justify-between items-center min-w-0">
+                  <div className="truncate pr-2">
+                    <p className="font-semibold text-black">{t("pages.settings_page.ig_direct_api")}</p>
+                    <p className="text-[11px] text-[#707070] truncate">{t("pages.settings_page.ig_direct_subtitle")}</p>
+                  </div>
+                  <span className="text-[9px] font-extrabold text-white bg-black/60 px-2 py-0.5 rounded-md shrink-0 uppercase tracking-wide">
+                    Tez kunda
+                  </span>
                 </div>
               </button>
               <button
