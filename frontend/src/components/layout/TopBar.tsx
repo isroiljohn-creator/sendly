@@ -15,6 +15,7 @@ import {
   Users,
   Languages,
   HelpCircle,
+  Menu
 } from "lucide-react";
 import { Instagram } from "@/components/ui/icons";
 import { useI18n } from "@/i18n/I18nProvider";
@@ -143,9 +144,16 @@ export function TopBar() {
 
   return (
     <div className="flex h-[42px] items-center justify-between gap-4 w-full">
-      {/* Mobile Brand Logo */}
-      <div className="flex md:hidden items-center gap-2">
-        <div className="w-7 h-7 rounded-[8px] overflow-hidden shrink-0">
+      {/* Mobile Header Menu Button & Brand */}
+      <div className="flex md:hidden items-center gap-1">
+        <button 
+          onClick={() => window.dispatchEvent(new Event("replai-toggle-mobile-menu"))}
+          className="p-1.5 -ml-1 text-black hover:bg-neutral-100 rounded-full active:scale-95 transition-all shrink-0"
+          title="Menyu"
+        >
+          <Menu size={20} />
+        </button>
+        <div className="w-7 h-7 rounded-[8px] overflow-hidden shrink-0 ml-1">
           <img src="/logo.png" alt="Sendly" className="h-full w-full object-cover" />
         </div>
         <span className="font-black text-[14px] text-black tracking-tight">Sendly</span>

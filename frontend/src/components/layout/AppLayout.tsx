@@ -47,7 +47,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
   const [dismissed, setDismissed] = useState(false);
   const [impersonatorEmail, setImpersonatorEmail] = useState("");
 
-  // Mobile menu sheet drawer state
+  // Mobile menu side-drawer state
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   // Sync state for active channel and channels
@@ -89,12 +89,20 @@ export function AppLayout({ children }: { children: ReactNode }) {
       setActiveChannel(db.getActiveChannel());
       setCurrentUser(db.getCurrentUser());
     };
+    const handleToggle = () => setIsMobileMenuOpen(prev => !prev);
+    const handleClose = () => setIsMobileMenuOpen(false);
+
     load();
     window.addEventListener("focus", load);
     window.addEventListener("replai-db-update", load);
+    window.addEventListener("replai-toggle-mobile-menu", handleToggle);
+    window.addEventListener("replai-close-mobile-menu", handleClose);
+
     return () => {
       window.removeEventListener("focus", load);
       window.removeEventListener("replai-db-update", load);
+      window.removeEventListener("replai-toggle-mobile-menu", handleToggle);
+      window.removeEventListener("replai-close-mobile-menu", handleClose);
     };
   }, []);
 
@@ -179,7 +187,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
         </button>
       </div>
 
-      {/* Mobile Slide-up Menu Drawer Backdrop */}
+      {/* Mobile Side-Drawer Backdrop */}
       {isMobileMenuOpen && (
         <div 
           className="fixed inset-0 bg-black/45 backdrop-blur-[2px] z-[98] md:hidden animate-in fade-in duration-200"
@@ -187,35 +195,37 @@ export function AppLayout({ children }: { children: ReactNode }) {
         />
       )}
 
-      {/* Mobile Slide-up Menu Drawer */}
+      {/* Mobile Left Slide-in side Drawer */}
       <div 
-        className={`fixed bottom-0 left-0 right-0 max-h-[82vh] bg-white rounded-t-[30px] border-t border-[#E8E8E8] shadow-[0_-10px_35px_rgba(0,0,0,0.06)] z-[99] md:hidden flex flex-col transition-transform duration-300 ease-out ${
-          isMobileMenuOpen ? "translate-y-0" : "translate-y-full"
+        className={`fixed top-0 bottom-0 left-0 w-[290px] bg-white border-r border-[#E8E8E8] shadow-[10px_0_35px_rgba(0,0,0,0.08)] z-[99] md:hidden flex flex-col transition-transform duration-300 ease-out ${
+          isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
-        {/* Handle bar */}
-        <div className="w-12 h-1 bg-[#E8E8E8] rounded-full mx-auto my-3 shrink-0" />
-        
-        <div className="flex-1 overflow-y-auto px-5 pb-12">
-          {/* Title & Close */}
-          <div className="flex items-center justify-between pb-3 border-b border-[#F0F0F0]">
-            <h3 className="text-[15px] font-black text-black">{t("common.menu") || "Menyu"}</h3>
-            <button 
-              onClick={() => setIsMobileMenuOpen(false)}
-              className="p-1.5 rounded-full hover:bg-neutral-100 transition-colors"
-            >
-              <X size={18} className="text-neutral-500" />
-            </button>
+        {/* Brand header */}
+        <div className="flex items-center justify-between p-4 border-b border-[#F0F0F0] shrink-0">
+          <div className="flex items-center gap-2">
+            <div className="w-7 h-7 rounded-[8px] overflow-hidden shrink-0">
+              <img src="/logo.png" alt="Sendly" className="h-full w-full object-cover" />
+            </div>
+            <span className="font-extrabold text-[14px] text-black tracking-tight">Sendly</span>
           </div>
-
+          <button 
+            onClick={() => setIsMobileMenuOpen(false)}
+            className="p-1.5 rounded-full hover:bg-neutral-100 transition-colors"
+          >
+            <X size={16} className="text-neutral-500" />
+          </button>
+        </div>
+        
+        <div className="flex-1 overflow-y-auto px-4 py-4 pb-12">
           {/* Active Channel Info & Switcher */}
-          <div className="mt-4">
+          <div>
             <p className="text-[9px] font-extrabold text-[#a0a0a0] uppercase tracking-wider mb-2">
               {t("nav.channels_header")}
             </p>
             
             {activeChannel ? (
-              <div className="flex items-center justify-between p-3 rounded-2xl bg-neutral-50 border border-neutral-100">
+              <div className="flex items-center justify-between p-3 rounded-2xl bg-neutral-50 border border-neutral-100/50">
                 <div className="flex items-center gap-2.5 min-w-0">
                   <div className={`grid h-8 w-8 place-items-center rounded-full shrink-0 ${
                     activeChannel.type === "instagram" ? "bg-gradient-to-br from-[#f09433] via-[#e6683c] to-[#bc1888]" : "bg-[#229ED9]"
@@ -223,11 +233,11 @@ export function AppLayout({ children }: { children: ReactNode }) {
                     {activeChannel.type === "instagram" ? <Instagram size={14} className="text-white" /> : <Bot size={14} className="text-white" />}
                   </div>
                   <div className="min-w-0">
-                    <p className="text-[12px] font-bold text-black truncate">{activeChannel.name}</p>
-                    <p className="text-[10px] text-[#707070] truncate">{activeChannel.username}</p>
+                    <p className="text-[11.5px] font-bold text-black truncate">{activeChannel.name}</p>
+                    <p className="text-[9.5px] text-[#707070] truncate">{activeChannel.username}</p>
                   </div>
                 </div>
-                <span className="text-[9px] font-black bg-[#C7F33C]/20 text-[#7CA607] px-2 py-0.5 rounded-full">
+                <span className="text-[8.5px] font-black bg-[#C7F33C]/25 text-[#7CA607] px-2 py-0.5 rounded-full">
                   {t("pages.settings_page.channel_connected") || "ulangan"}
                 </span>
               </div>
@@ -249,7 +259,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
 
             {/* Other Connected Channels Switcher */}
             {channels.length > 1 && (
-              <div className="mt-2 flex flex-col gap-1.5 max-h-[140px] overflow-y-auto pr-1">
+              <div className="mt-2 flex flex-col gap-1.5 max-h-[120px] overflow-y-auto pr-1">
                 {channels.filter(ch => ch.id !== activeChannel?.id).map((ch) => (
                   <button
                     key={ch.id}
@@ -274,30 +284,36 @@ export function AppLayout({ children }: { children: ReactNode }) {
             )}
           </div>
 
-          {/* Main Pages Section */}
+          {/* Primary Navigation Sections (All 8 pages) */}
           <div className="mt-6">
             <p className="text-[9px] font-extrabold text-[#a0a0a0] uppercase tracking-wider mb-2">
               {t("pages.automations_page.navigation") || "Navigatsiya"}
             </p>
-            <div className="grid grid-cols-2 gap-2">
+            <div className="flex flex-col gap-1">
               {[
+                { to: "/", Icon: Home, label: t("nav.home") },
+                { to: "/automations", Icon: Zap, label: t("nav.automations") },
+                { to: "/ai-agent", Icon: Brain, label: t("nav.ai-agent") },
+                { to: "/chats", Icon: MessageSquare, label: t("nav.chats") },
                 { to: "/contacts", Icon: Users, label: t("nav.contacts") },
                 { to: "/broadcast", Icon: Send, label: t("nav.broadcast") },
                 { to: "/analytics", Icon: BarChart3, label: t("nav.analytics") },
                 { to: "/settings", Icon: Settings, label: t("nav.settings") }
               ].map((item) => {
-                const active = pathname.startsWith(item.to);
+                const active = item.to === "/" ? pathname === "/" : pathname.startsWith(item.to);
                 return (
                   <Link
                     key={item.to}
                     href={item.to}
                     onClick={() => setIsMobileMenuOpen(false)}
-                    className={`flex items-center gap-2 p-2.5 rounded-xl border transition-colors ${
-                      active ? "bg-[#C7F33C]/10 border-[#C7F33C] text-black" : "bg-neutral-50/50 border-neutral-100 hover:bg-neutral-50 text-neutral-700"
+                    className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl border transition-colors ${
+                      active 
+                        ? "bg-[#C7F33C]/15 border-[#C7F33C] text-black font-extrabold" 
+                        : "bg-neutral-50 border-neutral-100/50 hover:bg-neutral-100 text-neutral-800 font-semibold"
                     }`}
                   >
-                    <item.Icon size={14} className={active ? "text-black" : "text-neutral-500"} />
-                    <span className="text-[11px] font-bold">{item.label}</span>
+                    <item.Icon size={15} className={active ? "text-black" : "text-neutral-500"} />
+                    <span className="text-[12px]">{item.label}</span>
                   </Link>
                 );
               })}
@@ -320,16 +336,16 @@ export function AppLayout({ children }: { children: ReactNode }) {
                   key={item.to}
                   href={item.to}
                   onClick={() => setIsMobileMenuOpen(false)}
-                  className="flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-neutral-50 transition-colors text-left text-neutral-800"
+                  className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-neutral-50 transition-colors text-left text-neutral-850 font-bold"
                 >
-                  <item.Icon size={15} className="text-neutral-500" />
-                  <span className="text-[12px] font-bold">{item.label}</span>
+                  <item.Icon size={15} className="text-neutral-550" />
+                  <span className="text-[12px]">{item.label}</span>
                 </Link>
               ))}
             </div>
           </div>
 
-          {/* Language Inline Selector */}
+          {/* Language Selector */}
           <div className="mt-6">
             <p className="text-[9px] font-extrabold text-[#a0a0a0] uppercase tracking-wider mb-2">
               Tizim tili
@@ -347,7 +363,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
                     onClick={() => {
                       setLang(item.code as any);
                     }}
-                    className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl border text-[11px] font-bold transition-colors ${
+                    className={`flex-1 flex items-center justify-center gap-1 py-2 rounded-xl border text-[11px] font-bold transition-colors ${
                       isAct ? "bg-black text-[#C7F33C] border-black" : "bg-neutral-50 border-neutral-100 text-neutral-700 hover:bg-neutral-100"
                     }`}
                   >
