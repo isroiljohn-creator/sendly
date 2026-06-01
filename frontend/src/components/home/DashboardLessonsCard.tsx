@@ -37,15 +37,15 @@ export function DashboardLessonsCard() {
             <GraduationCap size={15} />
           </div>
           <div>
-            <h3 className="text-[13px] font-black text-black leading-none">O&apos;quv darslari</h3>
-            <p className="text-[9px] text-[#707070] mt-0.5">Chatbot sozlash bo&apos;yicha darsliklar</p>
+            <h3 className="text-[13px] font-black text-black leading-none">{t("pages.home.lessons_title")}</h3>
+            <p className="text-[9px] text-[#707070] mt-0.5">{t("pages.home.lessons_desc")}</p>
           </div>
         </div>
         <Link
           href="/lessons"
           className="text-[10px] font-bold text-black hover:underline shrink-0"
         >
-          Barchasi ➔
+          {t("pages.home.all_link")}
         </Link>
       </div>
 
@@ -83,7 +83,7 @@ export function DashboardLessonsCard() {
           className="w-full py-2 rounded-full text-[11px] font-bold text-black bg-[#F5F5F7] border border-[#E8E8E8] hover:bg-[#E8E8E8] transition-colors flex items-center justify-center gap-1.5 active:scale-[0.98] text-center block"
         >
           <BookOpen size={12} />
-          <span>Darslarni boshlash</span>
+          <span>{t("pages.home.start_lessons_btn")}</span>
         </Link>
       </div>
     </Card>

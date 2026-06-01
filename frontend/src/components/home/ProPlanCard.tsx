@@ -3,14 +3,17 @@
 import Link from "next/link";
 import { Zap, Plus, Settings } from "lucide-react";
 import { Card } from "@/components/ui/primitives";
+import { useI18n } from "@/i18n/I18nProvider";
 
 export function ProPlanCard({ hasChannels = false }: { hasChannels?: boolean; value?: string }) {
+  const { t } = useI18n();
+
   if (!hasChannels) {
     return (
       <Card className="flex min-h-[250px] flex-col justify-between bg-black text-white border border-[#222222] p-5">
         <div className="flex items-center justify-between shrink-0">
           <span className="text-[12px] font-semibold text-[#C7F33C] uppercase tracking-wider">
-            Sinab ko&apos;rish
+            {t("pages.home.try_badge")}
           </span>
           <div className="grid h-7 w-7 place-items-center rounded-full bg-white/10 text-[#C7F33C]">
             <Plus size={13} />
@@ -19,10 +22,10 @@ export function ProPlanCard({ hasChannels = false }: { hasChannels?: boolean; va
 
         <div className="flex-1 flex flex-col justify-center my-1.5">
           <h3 className="text-[18px] font-bold text-white leading-tight">
-            Akkauntni bog&apos;lang
+            {t("pages.home.connect_card_title")}
           </h3>
           <p className="text-[11px] text-[#A0A0A0] mt-1 leading-relaxed">
-            Sendly xizmatining barcha imkoniyatlaridan foydalanish uchun Instagram yoki Telegram akkauntingizni ulang.
+            {t("pages.home.connect_card_desc")}
           </p>
         </div>
 
@@ -32,7 +35,7 @@ export function ProPlanCard({ hasChannels = false }: { hasChannels?: boolean; va
             className="w-full py-2.5 rounded-full text-[12px] font-bold text-black bg-[#C7F33C] hover:bg-[#9BC92E] transition-all flex items-center justify-center gap-1.5 active:scale-[0.98] text-center block"
           >
             <Plus size={14} />
-            <span>Akkauntni ulash</span>
+            <span>{t("pages.home.connect_card_btn")}</span>
           </Link>
         </div>
       </Card>
@@ -43,7 +46,7 @@ export function ProPlanCard({ hasChannels = false }: { hasChannels?: boolean; va
     <Card className="flex min-h-[250px] flex-col justify-between bg-black text-white border border-[#222222] p-5">
       <div className="flex items-center justify-between shrink-0">
         <span className="text-[12px] font-semibold text-[#C7F33C] uppercase tracking-wider">
-          Chatbot xizmati
+          {t("pages.home.chatbot_service_badge")}
         </span>
         <div className="grid h-7 w-7 place-items-center rounded-full bg-white/10 text-[#C7F33C]">
           <Zap size={13} fill="#C7F33C" />
@@ -52,10 +55,10 @@ export function ProPlanCard({ hasChannels = false }: { hasChannels?: boolean; va
 
       <div className="flex-1 flex flex-col justify-center my-1.5">
         <h3 className="text-[18px] font-bold text-white leading-tight">
-          Chatbotni sozlash
+          {t("pages.home.setup_chatbot_title")}
         </h3>
         <p className="text-[11px] text-[#A0A0A0] mt-1 leading-relaxed">
-          Mijozlaringiz bilan avtomatlashtirilgan shaxsiy xabarlar oqimini va izohlarga javoblarni sozlang.
+          {t("pages.home.setup_chatbot_desc")}
         </p>
       </div>
 
@@ -65,7 +68,7 @@ export function ProPlanCard({ hasChannels = false }: { hasChannels?: boolean; va
           className="w-full py-2.5 rounded-full text-[12px] font-bold text-black bg-[#C7F33C] hover:bg-[#9BC92E] transition-all flex items-center justify-center gap-1.5 active:scale-[0.98] text-center block"
         >
           <Settings size={14} />
-          <span>Ssenariylarni sozlash</span>
+          <span>{t("pages.home.setup_automations_btn")}</span>
         </Link>
       </div>
     </Card>
