@@ -9,7 +9,7 @@ import { useI18n } from "@/i18n/I18nProvider";
 import { db, BotSettings, Lesson, Module } from "@/lib/db";
 import { moderateMessage } from "@/lib/ai/moderation";
 import {
-  Sparkles,
+  Brain,
   Database,
   Trash2,
   BookOpen,
@@ -1914,7 +1914,7 @@ function AIAgentContent() {
                                 <div className="absolute top-0 right-0 w-24 h-24 bg-[#C7F33C]/10 rounded-bl-full -z-10" />
                                 <div className="flex gap-4 items-center">
                                   <div className="w-12 h-12 rounded-2xl bg-black text-[#C7F33C] grid place-items-center font-bold text-[18px] shrink-0">
-                                    <Sparkles size={22} />
+                                    <Brain size={22} />
                                   </div>
                                   <div>
                                     <div className="flex flex-wrap items-center gap-2">
@@ -2734,7 +2734,7 @@ function AIAgentContent() {
                 <div className={`w-16 h-16 rounded-full text-white flex items-center justify-center shadow-lg border-2 relative ${
                   selectedAgentType === "fb-leads-direct" ? "bg-blue-600/90 border-blue-500" : "bg-purple-600/90 border-purple-500"
                 }`}>
-                  {selectedAgentType === "fb-leads-direct" ? <Database size={28} /> : <Sparkles size={28} />}
+                  {selectedAgentType === "fb-leads-direct" ? <Database size={28} /> : <Brain size={28} />}
                 </div>
                 <div className="text-center">
                   <h5 className="text-[12px] font-bold text-white leading-tight">
@@ -2904,7 +2904,7 @@ function AIAgentContent() {
                   ) : isVerifyingAdmin ? (
                     <form onSubmit={handleVerifyAdminCode} className="flex flex-col gap-2.5 p-3.5 rounded-xl bg-blue-50 border border-blue-200 animate-fadeIn">
                       <div className="flex items-center gap-1.5 text-[11px] font-bold text-blue-800">
-                        <Sparkles size={14} className="text-blue-600 shrink-0 animate-pulse" />
+                        <Brain size={14} className="text-blue-600 shrink-0 animate-pulse" />
                         <span>{t("pages.ai_agent.labels.enter_verify_code")}</span>
                       </div>
                       <p className="text-[10px] text-blue-700 leading-relaxed">
@@ -3080,7 +3080,7 @@ function AIAgentContent() {
                     <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${
                       selectedAgentType === "fb-leads-direct" ? "bg-blue-50 text-blue-600" : "bg-purple-50 text-purple-600"
                     }`}>
-                      {selectedAgentType === "fb-leads-direct" ? <Database size={20} /> : <Sparkles size={20} />}
+                      {selectedAgentType === "fb-leads-direct" ? <Database size={20} /> : <Brain size={20} />}
                     </div>
                     <div>
                       <h3 className="text-[15px] font-extrabold text-black">
@@ -3629,7 +3629,7 @@ function AIAgentContent() {
                 : "border-transparent text-[#707070] hover:text-black"
             }`}
           >
-            <Sparkles size={16} />
+            <Brain size={16} />
             <span>{selectedAgentType === "fb-leads-direct" ? "Sozlamalar" : t("pages.ai_agent.curator_settings_tab")}</span>
             {activeTab === "settings" && <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-black" />}
           </button>
@@ -3682,7 +3682,7 @@ function AIAgentContent() {
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
                       <div className={`w-10 h-10 rounded-full flex items-center justify-center ${settings.aiCuratorEnabled ? "bg-[#C7F33C]/25 text-[#7CA607]" : "bg-gray-100 text-[#707070]"}`}>
-                        <Sparkles size={20} className={settings.aiCuratorEnabled ? "animate-pulse" : ""} />
+                        <Brain size={20} className={settings.aiCuratorEnabled ? "animate-pulse" : ""} />
                       </div>
                       <div>
                         <h3 className="text-[14px] font-bold text-black">{t("pages.ai_agent.curator_status")}</h3>
@@ -3780,7 +3780,7 @@ function AIAgentContent() {
                   <div className="bg-white border-b border-[#E8E8E8] p-4 flex items-center justify-between">
                     <div className="flex items-center gap-3">
                       <div className="w-9 h-9 rounded-full bg-black text-[#C7F33C] grid place-items-center font-bold text-[14px]">
-                        <Sparkles size={16} />
+                        <Brain size={16} />
                       </div>
                       <div>
                         <h4 className="text-[12px] font-bold text-black">{t("pages.ai_agent.curator_sandbox_title")}</h4>
@@ -3992,7 +3992,7 @@ function AIAgentContent() {
                 {/* Permanent Sliders Preview Card */}
                 <div className="bg-white border border-[#E8E8E8] rounded-[24px] p-6 shadow-sm flex flex-col gap-4 animate-in fade-in duration-200 flex-1 w-full justify-between">
                   <div className="flex items-center gap-2 border-b border-[#F0F0F0] pb-2.5">
-                    <Sparkles size={15} className="text-black" />
+                    <Brain size={15} className="text-black" />
                     <h3 className="text-[13px] font-bold text-black">
                       {"Ohang va Xarakter ta'siri (Suhbat namunasi)"}
                     </h3>
@@ -4261,7 +4261,7 @@ function AIAgentContent() {
                       ) : isVerifyingAdmin ? (
                         <form onSubmit={handleVerifyAdminCode} className="flex flex-col gap-3 p-3.5 rounded-xl bg-blue-50 border border-blue-200 animate-fadeIn">
                           <div className="flex items-center gap-1.5 text-[12px] font-bold text-blue-800">
-                            <Sparkles size={14} className="text-blue-600 shrink-0 animate-pulse" />
+                            <Brain size={14} className="text-blue-600 shrink-0 animate-pulse" />
                             <span>{t("pages.ai_agent.labels.enter_verify_code")}</span>
                           </div>
                           <p className="text-[11px] text-blue-700/90 leading-relaxed">
@@ -4561,7 +4561,7 @@ function AIAgentContent() {
                             </>
                           ) : (
                             <>
-                              <Sparkles size={11} className="text-black" />
+                              <Brain size={11} className="text-black" />
                               <span>AI Tahlil (Gemini 3.5)</span>
                             </>
                           )}
@@ -4753,7 +4753,7 @@ function AIAgentContent() {
 
               <div className="bg-white border border-[#E8E8E8] rounded-[24px] p-5 shadow-sm flex flex-col gap-1.5 relative overflow-hidden">
                 <div className="absolute right-4 top-4 text-amber-500/20">
-                  <Sparkles size={24} />
+                  <Brain size={24} />
                 </div>
                 <span className="text-[10px] font-extrabold text-[#707070] uppercase tracking-wider">{t("pages.ai_agent.avg_confidence")}</span>
                 <span className="text-[24px] font-extrabold text-black">

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Zap, MessageCircle, Sparkles } from "lucide-react";
+import { Zap, MessageCircle, Brain } from "lucide-react";
 import { Card } from "@/components/ui/primitives";
 import { db } from "@/lib/db";
 import type { Automation } from "@/lib/db";
@@ -30,7 +30,7 @@ export function AutomationsCard() {
 
       {automations.length === 0 ? (
         <div className="flex flex-1 flex-col items-center justify-center text-center text-[#707070] gap-1 p-4">
-          <Sparkles size={20} className="stroke-1 opacity-50 text-[#C7F33C]" />
+          <Brain size={20} className="stroke-1 opacity-50 text-[#C7F33C]" />
           <div className="text-[12px] font-bold text-black">{t("pages.home.no_active_bots")}</div>
           <p className="text-[10px] max-w-[200px] leading-tight">
             {t("pages.home.no_bots_created")}

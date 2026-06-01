@@ -5,7 +5,7 @@ import { useState, useEffect } from "react";
 import { Card, Button } from "@/components/ui/primitives";
 import { useI18n } from "@/i18n/I18nProvider";
 import type { Lang } from "@/i18n/I18nProvider";
-import { ChevronDown, AlertCircle, Mail, Lock, Sparkles, Check } from "lucide-react";
+import { ChevronDown, AlertCircle, Mail, Lock, Brain, Check, Zap } from "lucide-react";
 import { db } from "@/lib/db";
 
 export default function LoginPage() {
@@ -404,7 +404,7 @@ export default function LoginPage() {
         <div className="fixed top-6 left-1/2 -translate-x-1/2 z-[110] w-[90%] max-w-[380px] rounded-2xl bg-white border border-[#D8D8D8] p-4 shadow-[0_15px_40px_rgba(0,0,0,0.15)] animate-in slide-in-from-top duration-300">
           <div className="flex items-start gap-3 text-black">
             <div className="mt-0.5 rounded-full bg-[#C7F33C] p-1.5 text-black">
-              <Sparkles size={16} className="fill-black/10" />
+              <Brain size={16} className="fill-black/10" />
             </div>
             <div className="flex-1 text-left">
               <span className="text-[12px] font-bold block leading-none text-yellow-600">{t("pages.login_page.smtp_warning_title")}</span>
@@ -433,14 +433,7 @@ export default function LoginPage() {
         
         <div className="flex flex-col items-center text-center">
           <div className="grid h-[52px] w-[52px] place-items-center rounded-[18px] bg-[#C7F33C] text-black shadow-[0_0_20px_rgba(199,243,60,0.2)]">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" className="stroke-black">
-              <path
-                d="M13.5 2c.3 3.5-1.5 5.2-3 6.8C9 10.5 7.5 12 8 14.5 8.4 16.7 10 18 12 18c0-2 .8-3 2-4.2 1.4-1.4 3-3 2.6-6C16.2 5 14.8 3.3 13.5 2Z"
-                fill="currentColor"
-                stroke="currentColor"
-                strokeWidth="1"
-              />
-            </svg>
+            <Zap size={24} className="fill-black text-black" />
           </div>
           <h2 className="mt-4 text-[26px] font-extrabold text-black tracking-tight">
             {"Sendly"}

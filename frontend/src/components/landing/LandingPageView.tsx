@@ -18,7 +18,7 @@ import {
   X,
   Users,
   BarChart3,
-  Sparkles,
+  Brain,
 } from "lucide-react";
 
 interface SimMessage {
@@ -155,7 +155,7 @@ export function LandingPageView() {
       desc: "Post ostida izoh qoldirgan foydalanuvchiga avtomatik shaxsiy xabar yuboring.",
     },
     {
-      icon: Sparkles,
+      icon: Brain,
       color: "text-purple-600",
       bg: "bg-purple-50",
       title: "Sun'iy intellekt agenti",

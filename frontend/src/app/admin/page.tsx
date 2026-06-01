@@ -15,7 +15,7 @@ import {
   Trash2, 
   ShieldAlert, 
   Search, 
-  Sparkles, 
+  Brain, 
   RefreshCw, 
   Eye, 
   ArrowRight,
@@ -864,7 +864,7 @@ export default function AdminPage() {
                   {/* Top Chatbots */}
                   <Card className="p-6 border border-[#D8D8D8]">
                     <h3 className="text-[15px] font-bold text-black mb-4 flex items-center gap-2">
-                      <Sparkles size={16} className="text-[#C7F33C]" fill="black" />
+                    <Brain size={16} className="text-[#C7F33C]" fill="black" />
                       <span>{tr("topChatbots")}</span>
                     </h3>
                     <div className="flex flex-col gap-3">

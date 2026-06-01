@@ -22,7 +22,7 @@ import {
   LogOut,
   ChevronRight,
   Check,
-  Sparkles,
+  Brain,
   Shield,
 } from "lucide-react";
 import { Instagram } from "@/components/ui/icons";
@@ -43,7 +43,7 @@ type NavItem = {
 const TOP_ITEMS: NavItem[] = [
   { to: "/", Icon: Home, labelKey: "nav.home" },
   { to: "/automations", Icon: Zap, labelKey: "nav.automations" },
-  { to: "/ai-agent", Icon: Sparkles, labelKey: "nav.ai-agent" },
+  { to: "/ai-agent", Icon: Brain, labelKey: "nav.ai-agent" },
   { to: "/chats", Icon: MessageSquare, labelKey: "nav.chats" },
   { to: "/contacts", Icon: Users, labelKey: "nav.contacts" },
   { to: "/broadcast", Icon: Send, labelKey: "nav.broadcast" },
