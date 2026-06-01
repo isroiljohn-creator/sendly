@@ -192,7 +192,19 @@
       "table_segment": "Segment",
       "status_sent": "Sent",
       "status_pending": "Pending",
-      "sent_unit": "{count} sent"
+      "sent_unit": "{count} sent",
+      "add_button_title": "Add Button (URL link)",
+      "add_button_desc": "Link button under the message text",
+      "button_text_placeholder": "Button text (e.g. Details)",
+      "button_url_placeholder": "Link address (URL)",
+      "add_workflow_title": "Add Workflow (Automation)",
+      "add_workflow_desc": "Trigger a scenario when the button is clicked",
+      "select_workflow_placeholder": "Select workflow",
+      "wf_flow1": "Go via link (Flow 1)",
+      "wf_subscribe": "Subscribe to course",
+      "wf_coupon": "Distribute discount coupon",
+      "create_workflow_btn": "Create new workflow",
+      "just_now": "Just now"
     },
     "analytics": {
       "title": "System Analytics",
@@ -202,7 +214,11 @@
       "avg_completion": "Avg. Completion",
       "avg_completion_sub": "Bot Conversations",
       "messages_sent": "Messages Sent",
-      "messages_sent_sub": "Total in Period"
+      "messages_sent_sub": "Total in Period",
+      "sent_volume_title": "Volume of messages sent",
+      "sent_volume_desc": "Total Direct messages sent by day",
+      "conversion_rate_title": "Conversion rate",
+      "conversion_rate_desc": "Conversion rate from bot chat to customer"
     },
     "lessons": {
       "title": "Mini Courses",
@@ -243,7 +259,15 @@
         "password": "Password",
         "password_placeholder": "Enter new password",
         "password_desc": "Your password will also update when profile details are saved.",
-        "success_message": "Profile details successfully saved!"
+        "success_message": "Profile details successfully saved!",
+        "sending": "Sending...",
+        "new_email": "New Email",
+        "verify_code": "Verification Code",
+        "resend_code": "Resend Code: {timer}",
+        "resend_btn": "Resend Code",
+        "confirm_btn": "Confirm",
+        "sent_otp_success": "Verification code sent to your email.",
+        "otp_incorrect": "Incorrect verification code. Please try again."
       },
       "billing": {
         "free_plan": "Free Plan",
@@ -268,7 +292,35 @@
         "link_success": "Card linked successfully, 7-day PRO activated!",
         "otp_input_error": "Verification code is incorrect or incomplete.",
         "card_input_error": "Card number is incorrect or incomplete.",
-        "expiry_input_error": "Incorrect card expiration date."
+        "expiry_input_error": "Incorrect card expiration date.",
+        "base_price_label": "Base plan price (with {count} connection):",
+        "connected_channels_count": "Current connected channels count:",
+        "unit_channel": "{count} channels",
+        "extra_channels_label": "Extra channels ({count} x {price} UZS):",
+        "total_monthly_payment": "Total monthly payment:",
+        "unit_monthly_payment": "{price} UZS / month",
+        "link_card_btn": "Link Card",
+        "card_expiry_label": "Expiry Date",
+        "card_cvc_label": "CVC / CVV",
+        "card_link_note": "Card linking is absolutely free. No funds will be charged until the 7-day trial ends. Payment is processed only after the trial expiration.",
+        "ai_credits_title": "AI Credits & Expenses",
+        "ai_credits_desc": "Credit balance required to run AI agents (FAQ assistants and classification bots).",
+        "unit_credits": "credits",
+        "credits_note_bold": "Note:",
+        "credits_note_text": "Free AI credits are not included in the PRO plan. To use AI features, you need to purchase credits.",
+        "buy_credits_btn": "Buy AI Credits",
+        "expenses_history": "Expenses History",
+        "th_action": "Action",
+        "th_amount": "Amount",
+        "th_description": "Description",
+        "th_date": "Date",
+        "tx_kirim": "IN",
+        "tx_chiqim": "OUT",
+        "no_expenses_history": "No expenses history available yet.",
+        "active_badge": "ACTIVE",
+        "unit_year": "year",
+        "unit_month": "month",
+        "link_card_prompt": "Please link your payment card first to purchase AI credits."
       },
       "limits": {
         "title": "Limits",
@@ -276,7 +328,9 @@
         "active_automations": "Automations (Active)",
         "connected_channels": "Connected Channels",
         "info_title": "Plan Capacity",
-        "info_desc": "You can increase limits by upgrading your plan. Free plan allows 2 active automations, Pro allows 50, and Premium allows 500, with up to 10 connected channels."
+        "info_desc": "You can increase limits by upgrading your plan. Free plan allows 2 active automations, Pro allows 50, and Premium allows 500, with up to 10 connected channels.",
+        "premium_features_title": "Premium Features",
+        "premium_features_desc": "Upgrading to Premium increases limits by 10x, and unlocks unlimited Telegram broadcasts and all professional features."
       },
       "bonuses": {
         "title": "Bonuses",
@@ -289,7 +343,11 @@
         "reg_bonus": "$10.00 Registration Bonus",
         "reg_bonus_desc": "Credited automatically",
         "trial_bonus": "7-day PRO trial",
-        "trial_bonus_desc": "Activates when card is linked"
+        "trial_bonus_desc": "Activates when card is linked",
+        "promo_bonus": "{code} promo code bonus",
+        "promo_activated_desc": "Successfully activated",
+        "activated_badge": "ACTIVATED",
+        "status_waiting": "PENDING"
       },
       "cancel_confirm": {
         "title": "Cancel Subscription",
@@ -310,6 +368,19 @@
         "switch_free": "Switch to Free",
         "switch_pro": "Try Pro",
         "switch_premium": "Try Premium"
+      },
+      "purchase_modal": {
+        "title": "Buy AI Credits",
+        "desc": "Choose the credit package that suits you best",
+        "processing": "Payment is being processed...",
+        "starter_pkg": "Starter package",
+        "standard_pkg": "Standard package",
+        "business_pkg": "Business package",
+        "starter_pkg_desc": "For ~500 AI assistant replies",
+        "standard_pkg_desc": "For ~2,500 AI assistant replies",
+        "business_pkg_desc": "For ~7,500 AI assistant replies",
+        "unit_credit": "credits",
+        "discount": "{pct}% DISCOUNT"
       }
     },
     "settings_page": {
@@ -497,7 +568,108 @@
       "quick_setup": "Quick Setup",
       "conversion": "Conversion",
       "unknown_channel": "Unknown channel",
-      "quick_bot_reply_placeholder": "Message text to send when a user types the keyword..."
+      "quick_bot_reply_placeholder": "Message text to send when a user types the keyword...",
+      "ready_templates_title": "Ready-made templates (Automation templates)",
+      "use_template": "Use →",
+      "create_modal_title": "New Automation",
+      "create_modal_desc": "Select how to create the automation",
+      "mode_scratch_title": "Build from scratch by yourself",
+      "mode_scratch_desc": "Suitable for advanced users familiar with the platform features",
+      "mode_template_title": "Based on a ready-made template",
+      "mode_template_desc": "Suitable for beginners planning to launch their first automation in 5 minutes",
+      "next_btn": "Next",
+      "group_sales": "Sales",
+      "group_support": "Support"
+    },
+    "templates_page": {
+      "title": "Templates",
+      "desc": "List of quick automation templates",
+      "search_placeholder": "Search templates",
+      "all_channels": "All channels",
+      "topics_header": "Topics",
+      "templates_header": "Templates ({count})",
+      "no_template_title": "No templates found",
+      "no_template_desc": "There are no templates matching this search criteria. Please select another category or platform.",
+      "builder_badge": "No Builder",
+      "action_launch": "Launch template",
+      "modal_add_title": "Add Template",
+      "modal_add_desc": "The template will be saved in the current project",
+      "modal_add_placeholder": "Select Account",
+      "modal_add_btn": "Add",
+      "alert_no_channels": "No accounts connected. To load the template, first connect an account in settings.",
+      "alert_limit_reached_title": "Template is loading",
+      "alert_limit_reached_desc": "Active bots limit ({limit}) on your plan is full. The new bot will be created in inactive status.",
+      "categories": {
+        "all": "All topics",
+        "subscription": "Subscription verification",
+        "ai": "AI chatbots",
+        "content": "Content activity",
+        "crm": "CRM and payments",
+        "games": "Games and gamification",
+        "referrals": "Referral mechanics"
+      },
+      "items": {
+        "quick_bot": {
+          "name": "Keyword chatbot",
+          "desc": "Simple 5-minute setup form. Verifies subscription and sends a useful file or website link."
+        },
+        "insta_sub": {
+          "name": "Verify subscription on Instagram",
+          "desc": "Verifies subscription to your Instagram account and allows access to PDF file or other content."
+        },
+        "tg_sub": {
+          "name": "Verify subscription on Telegram",
+          "desc": "Verifies subscription to Telegram channel and provides access to link or PDF file."
+        },
+        "acct_badge": {
+          "name": "Account badge",
+          "desc": "Verifies Instagram subscription, sets tags and sends lead magnet."
+        },
+        "tags_sub": {
+          "name": "Tags and subscription verification",
+          "desc": "Verifies Instagram subscription, sets tags and sends lead magnet."
+        },
+        "ai_chatgpt": {
+          "name": "AI · ChatGPT",
+          "desc": "Duplicates ChatGPT behavior: simulating live conversation using OpenAI..."
+        },
+        "ai_savol": {
+          "name": "AI · Question",
+          "desc": "Gathers user data, forms a complex query and sends it..."
+        },
+        "ref_link": {
+          "name": "Ref. links · Link",
+          "desc": "Generates a personal referral link to invite users to a Telegram channel."
+        },
+        "ref_gift": {
+          "name": "Ref. links · Prize",
+          "desc": "Provides a prize for referring a user to a Telegram channel..."
+        },
+        "tg_circle": {
+          "name": "Circle on Telegram · Referral points",
+          "desc": "Calculates points for subscribing to channels of invited users in the circle..."
+        },
+        "ref_code": {
+          "name": "Referral code",
+          "desc": "Checks the referral code and awards points to both the inviter and the new member."
+        },
+        "ref_check": {
+          "name": "Ref. links · Referral",
+          "desc": "Verifies if the user invited via your link has subscribed to the Telegram channel."
+        },
+        "content_prod": {
+          "name": "Sales via Reels",
+          "desc": "Automatically sends a link via DM to a user who commented, increasing sales."
+        },
+        "crm_pay": {
+          "name": "Connect CRM and payments",
+          "desc": "Sends a payment link via bot and updates client status in the CRM system."
+        },
+        "gamify_quiz": {
+          "name": "Gamification test",
+          "desc": "Offers test tasks to clients and awards points for correct answers."
+        }
+      }
     },
     "builder": {
       "sync_btn": "Sync Flow",
@@ -708,6 +880,8 @@
       "support_tooltip": "Support"
     },
     "ai_agent": {
+      "prefix_channel": "Channel",
+      "prefix_group": "Group",
       "search_placeholder": "Search (modules or lessons)...",
       "stats_modules": "Total Modules",
       "stats_lessons": "Total Lessons",

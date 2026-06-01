@@ -31,6 +31,12 @@ import type { Automation, Channel, Group } from "@/lib/db";
 
 export default function AutomationsPage() {
   const { t } = useI18n();
+  const getGroupNameById = (id: string) => {
+    if (id === "sales") return t("pages.automations_page.group_sales");
+    if (id === "support") return t("pages.automations_page.group_support");
+    const g = groups.find((group) => group.id === id);
+    return g ? g.name : id;
+  };
   const [allAutomations, setAllAutomations] = useState<(Automation & { channel?: Channel })[]>([]);
   const [channels, setChannels] = useState<Channel[]>([]);
   const [groups, setGroups] = useState<Group[]>([]);
@@ -322,7 +328,7 @@ export default function AutomationsPage() {
                     className={`flex-1 flex items-center justify-between px-3 py-2 text-[12px] text-left rounded-[12px] ${selectedGroupId === group.id ? "bg-[#C7F33C]/20 text-black font-bold" : "text-[#505050]"}`}
                   >
                     <span className="flex items-center gap-2">
-                      <Folder size={14} className="text-[#3b82f6]" fill="#3b82f6" /> {group.name}
+                      <Folder size={14} className="text-[#3b82f6]" fill="#3b82f6" /> {getGroupNameById(group.id)}
                     </span>
                     <span className="text-[10px] bg-white border border-[#E8E8E8] px-1.5 py-0.5 rounded-full font-bold">
                       {allAutomations.filter((a) => a.groupId === group.id).length}
@@ -416,7 +422,7 @@ export default function AutomationsPage() {
                 ) : selectedGroupId === "none" ? (
                   t("pages.automations_page.uncategorized")
                 ) : (
-                  <span>{t("pages.automations_page.groups")}: {groups.find((g) => g.id === selectedGroupId)?.name}</span>
+                  <span>{t("pages.automations_page.groups")}: {getGroupNameById(selectedGroupId)}</span>
                 )}
                 {selectedChannelId !== "all" && (
                   <span className="text-[11px] font-normal bg-black text-[#C7F33C] px-2 py-0.5 rounded-full">
@@ -497,7 +503,7 @@ export default function AutomationsPage() {
             </div>
 
             {filteredAutomations.length === 0 ? (
-              <div className="flex flex-col gap-6 w-full">
+                <div className="flex flex-col gap-6 w-full">
                 {/* 1. Promotional Quick Bot Card (First Card, larger version) */}
                 <Link 
                   href="/automations/quick-bot" 
@@ -511,10 +517,10 @@ export default function AutomationsPage() {
                   </div>
                   <div>
                     <h3 className="text-[16px] font-black text-white leading-tight mt-2">
-                      Kalit so&apos;zli chat-bot
+                      {t("pages.automations_page.quick_bot_title")}
                     </h3>
                     <p className="text-[12px] text-[#A0A0A0] mt-1.5 leading-relaxed font-medium">
-                      Har qanday qurilmadan, konstruktorsiz avtomatlashtirish yaratishning yangi usuli
+                      {t("pages.automations_page.quick_bot_desc")}
                     </p>
                   </div>
                 </Link>
@@ -522,7 +528,7 @@ export default function AutomationsPage() {
                 {/* Templates Section */}
                 <div className="flex flex-col gap-4 mt-2">
                   <h3 className="text-[14px] font-extrabold text-black uppercase tracking-wider text-left">
-                    Tayyor shablonlar (Avtomatlashtirish shablonlari)
+                    {t("pages.automations_page.ready_templates_title")}
                   </h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {/* Lead Magnet Template */}
@@ -534,12 +540,12 @@ export default function AutomationsPage() {
                         <div className="w-9 h-9 rounded-xl bg-green-50 text-green-600 flex items-center justify-center">
                           <BookOpen size={18} />
                         </div>
-                        <span className="text-[12px] text-slate-400 group-hover:text-black transition-colors font-extrabold">Foydalanish →</span>
+                        <span className="text-[12px] text-slate-400 group-hover:text-black transition-colors font-extrabold">{t("pages.automations_page.use_template")}</span>
                       </div>
                       <div>
                         <h4 className="text-[14px] font-bold text-black">{t("pages.automations_page.tmpl_lead_magnet_name")}</h4>
                         <p className="text-[11px] text-[#707070] mt-1 leading-normal font-medium">
-                          Mijozlar yozgan kalit so&apos;z (masalan: &quot;bonus&quot;) orqali ularga avtomatik tarzda PDF qo&apos;llanma yoki havola yuborish.
+                          {t("pages.automations_page.tmpl_lead_magnet_desc")}
                         </p>
                       </div>
                     </div>
@@ -553,12 +559,12 @@ export default function AutomationsPage() {
                         <div className="w-9 h-9 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center">
                           <Gift size={18} />
                         </div>
-                        <span className="text-[12px] text-slate-400 group-hover:text-black transition-colors font-extrabold">Foydalanish →</span>
+                        <span className="text-[12px] text-slate-400 group-hover:text-black transition-colors font-extrabold">{t("pages.automations_page.use_template")}</span>
                       </div>
                       <div>
                         <h4 className="text-[14px] font-bold text-black">{t("pages.automations_page.tmpl_story_coupon_name")}</h4>
                         <p className="text-[11px] text-[#707070] mt-1 leading-normal font-medium">
-                          Mijozlar sizning hikoyangizga (story) munosabat bildirganda ularga avtomatik ravishda kupon yuborish.
+                          {t("pages.automations_page.tmpl_story_coupon_desc")}
                         </p>
                       </div>
                     </div>
@@ -572,12 +578,12 @@ export default function AutomationsPage() {
                         <div className="w-9 h-9 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
                           <MessageSquare size={18} />
                         </div>
-                        <span className="text-[12px] text-slate-400 group-hover:text-black transition-colors font-extrabold">Foydalanish →</span>
+                        <span className="text-[12px] text-slate-400 group-hover:text-black transition-colors font-extrabold">{t("pages.automations_page.use_template")}</span>
                       </div>
                       <div>
                         <h4 className="text-[14px] font-bold text-black">{t("pages.automations_page.tmpl_comment_dm_name")}</h4>
                         <p className="text-[11px] text-[#707070] mt-1 leading-normal font-medium">
-                          Postlar ostida izoh qoldirgan mijozlarga shaxsiy xabar (DM) orqali batafsil ma&apos;lumot yuborish.
+                          {t("pages.automations_page.tmpl_comment_dm_desc")}
                         </p>
                       </div>
                     </div>
@@ -591,12 +597,12 @@ export default function AutomationsPage() {
                         <div className="w-9 h-9 rounded-xl bg-orange-50 text-orange-600 flex items-center justify-center">
                           <HelpCircle size={18} />
                         </div>
-                        <span className="text-[12px] text-slate-400 group-hover:text-black transition-colors font-extrabold">Foydalanish →</span>
+                        <span className="text-[12px] text-slate-400 group-hover:text-black transition-colors font-extrabold">{t("pages.automations_page.use_template")}</span>
                       </div>
                       <div>
                         <h4 className="text-[14px] font-bold text-black">{t("pages.automations_page.tmpl_welcome_faq_name")}</h4>
                         <p className="text-[11px] text-[#707070] mt-1 leading-normal font-medium">
-                          Mijozlar birinchi marta yozganda salomlashish va eng ko&apos;p so&apos;raladigan savollarga tezkor javob berish.
+                          {t("pages.automations_page.tmpl_welcome_faq_desc")}
                         </p>
                       </div>
                     </div>
@@ -618,10 +624,10 @@ export default function AutomationsPage() {
                   </div>
                   <div>
                     <h3 className="text-[14px] font-black text-white leading-tight">
-                      Kalit so&apos;zli chat-bot
+                      {t("pages.automations_page.quick_bot_title")}
                     </h3>
                     <p className="text-[11px] text-[#A0A0A0] mt-1 leading-normal font-medium line-clamp-2">
-                      Har qanday qurilmadan, konstruktorsiz avtomatlashtirish yaratishning yangi usuli
+                      {t("pages.automations_page.quick_bot_desc")}
                     </p>
                   </div>
                 </Link>
@@ -724,7 +730,7 @@ export default function AutomationsPage() {
                                   }}
                                   className={`w-full flex items-center gap-1.5 px-3 py-1 text-[10px] hover:bg-[#F5F5F5] text-left ${a.groupId === g.id ? "font-bold text-black" : "text-[#707070]"}`}
                                 >
-                                  <Folder size={12} className="text-[#707070] shrink-0 mr-1.5" fill="none" />{g.name}
+                                  <Folder size={12} className="text-[#707070] shrink-0 mr-1.5" fill="none" />{getGroupNameById(g.id)}
                                 </button>
                               ))}
 
@@ -795,10 +801,10 @@ export default function AutomationsPage() {
 
             <div>
               <h3 className="text-[17px] font-black text-black tracking-tight">
-                Yangi avtomatlashtirish
+                {t("pages.automations_page.create_modal_title")}
               </h3>
               <p className="text-[12px] text-[#707070] mt-1 font-medium">
-                Avtomatlashtirishni yaratish usulini tanlang
+                {t("pages.automations_page.create_modal_desc")}
               </p>
             </div>
 
@@ -816,9 +822,9 @@ export default function AutomationsPage() {
                   className="mt-1 h-4 w-4 text-black border-[#D8D8D8] focus:ring-black shrink-0" 
                 />
                 <div className="flex flex-col">
-                  <span className="text-[13px] font-bold text-black">Noldan o&apos;zingiz bajaring</span>
+                  <span className="text-[13px] font-bold text-black">{t("pages.automations_page.mode_scratch_title")}</span>
                   <span className="text-[10.5px] text-[#707070] mt-0.5 font-medium leading-relaxed">
-                    Servisning imkoniyatlari bilan tanish bo&apos;lgan ilg&apos;or foydalanuvchilar uchun mos keladi
+                    {t("pages.automations_page.mode_scratch_desc")}
                   </span>
                 </div>
               </label>
@@ -836,9 +842,9 @@ export default function AutomationsPage() {
                   className="mt-1 h-4 w-4 text-black border-[#D8D8D8] focus:ring-black shrink-0" 
                 />
                 <div className="flex flex-col">
-                  <span className="text-[13px] font-bold text-black">Tayyor shablon bo&apos;yicha</span>
+                  <span className="text-[13px] font-bold text-black">{t("pages.automations_page.mode_template_title")}</span>
                   <span className="text-[10.5px] text-[#707070] mt-0.5 font-medium leading-relaxed">
-                    5 daqiqada birinchi avtomatlashtirishni ishga tushirishni rejalashtirgan yangi boshlovchilar uchun mos keladi
+                    {t("pages.automations_page.mode_template_desc")}
                   </span>
                 </div>
               </label>
@@ -855,7 +861,7 @@ export default function AutomationsPage() {
               }}
               className="w-full py-3 bg-black hover:bg-black/90 text-white font-extrabold rounded-xl text-[12px] transition-all text-center active:scale-95 shadow-sm mt-2"
             >
-              Keyin
+              {t("pages.automations_page.next_btn")}
             </button>
           </div>
         </div>

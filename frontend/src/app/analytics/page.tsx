@@ -75,10 +75,10 @@ export default function AnalyticsPage() {
           <Card className="flex flex-col min-h-[300px]">
             <div>
               <h3 className="text-[15px] font-medium text-black">
-                Yuborilgan xabarlar hajmi
+                {t("pages.analytics.sent_volume_title")}
               </h3>
               <p className="text-[12px] text-[#707070] mt-0.5">
-                {"Kuni bo'yicha yuborilgan umumiy Direct xabarlar"}
+                {t("pages.analytics.sent_volume_desc")}
               </p>
             </div>
             <div className="mt-8 flex-1 flex flex-col justify-end">
@@ -96,10 +96,10 @@ export default function AnalyticsPage() {
           <Card className="flex flex-col min-h-[300px]">
             <div>
               <h3 className="text-[15px] font-medium text-black">
-                {"Konversiyalar koeffitsiyenti"}
+                {t("pages.analytics.conversion_rate_title")}
               </h3>
               <p className="text-[12px] text-[#707070] mt-0.5">
-                {"Bot bilan suhbatdan mijozlikka o'tish foizi"}
+                {t("pages.analytics.conversion_rate_desc")}
               </p>
             </div>
             <div className="mt-8 flex-1 flex flex-col justify-end">

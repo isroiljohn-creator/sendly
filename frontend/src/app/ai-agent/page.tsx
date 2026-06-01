@@ -1559,8 +1559,14 @@ function AIAgentContent() {
         if (isDirect) {
           // Direct Forwarder Mode Flow
           setTimeout(() => {
-            const detectedGroup = "Sotuvlar";
             const groupId = settings.targetGroupId || "sales";
+            const getGroupNameById = (id: string) => {
+              if (id === "sales") return t("pages.automations_page.group_sales");
+              if (id === "support") return t("pages.automations_page.group_support");
+              const g = db.getGroups().find((group) => group.id === id);
+              return g ? g.name : t("pages.automations_page.group_sales");
+            };
+            const detectedGroup = getGroupNameById(groupId);
             const tags = [t("pages.ai_agent.simulation.tag_meta_lead"), t("pages.ai_agent.simulation.tag_forwarded")];
             const summary = t("pages.ai_agent.simulation.default_summary_direct");
             const welcomeMsg = (settings.fbWelcomeMessage || "Salom {{name}}! So'rovingiz qabul qilindi. Tez orada bog'lanamiz.")
@@ -1677,8 +1683,14 @@ function AIAgentContent() {
           // AI Qualification Mode Flow (Step 3: AI analysis done, CRM routing starts)
           setTimeout(() => {
             const msg = leadMessage.toLowerCase();
-            let detectedGroup = "Sotuvlar";
+            const getGroupNameById = (id: string) => {
+              if (id === "sales") return t("pages.automations_page.group_sales");
+              if (id === "support") return t("pages.automations_page.group_support");
+              const g = db.getGroups().find((group) => group.id === id);
+              return g ? g.name : t("pages.automations_page.group_sales");
+            };
             let groupId = "sales";
+            let detectedGroup = getGroupNameById(groupId);
             
             // Get saved default tags
             let savedTags: string[] = [];
@@ -1697,9 +1709,8 @@ function AIAgentContent() {
             const tags = [...savedTags];
             let summary = t("pages.ai_agent.simulation.summary_general");
 
-            const currentGroups = db.getGroups();
-            const salesGroup = currentGroups.find(g => g.id === "sales")?.name || "Sotuvlar";
-            const supportGroup = currentGroups.find(g => g.id === "support")?.name || "Qo'llab-quvvatlash";
+            const salesGroup = t("pages.automations_page.group_sales");
+            const supportGroup = t("pages.automations_page.group_support");
 
             if (
               msg.includes("narx") ||
@@ -1738,9 +1749,8 @@ function AIAgentContent() {
               tags.push(t("pages.ai_agent.simulation.tag_tech_issue"), t("pages.ai_agent.simulation.tag_support"));
               summary = t("pages.ai_agent.simulation.summary_technical");
             } else {
-              const selectedG = currentGroups.find(g => g.id === (settings.targetGroupId || "sales"));
-              detectedGroup = selectedG ? selectedG.name : salesGroup;
               groupId = settings.targetGroupId || "sales";
+              detectedGroup = getGroupNameById(groupId);
               tags.push(t("pages.ai_agent.simulation.tag_new_lead"));
               summary = t("pages.ai_agent.simulation.default_summary_ai");
             }
@@ -1930,7 +1940,7 @@ function AIAgentContent() {
                                       </span>
                                     </div>
                                     <p className="text-[11px] text-[#7CA607] font-semibold mt-1">
-                                      Kanal: @{item.channel.username.replace(/^@+/, "")}
+                                      {t("pages.ai_agent.prefix_channel")}: @{item.channel.username.replace(/^@+/, "")}
                                     </p>
                                     <p className="text-[12px] text-[#707070] mt-1.5 leading-relaxed">
                                       {desc}
@@ -1979,7 +1989,7 @@ function AIAgentContent() {
                                       </span>
                                     </div>
                                     <p className="text-[11px] text-blue-600 font-semibold mt-1">
-                                      Kanal: @{item.channel.username.replace(/^@+/, "")} | Guruh: {item.settings.adminTelegramUsername ? `@${item.settings.adminTelegramUsername}` : "Ulanmagan"}
+                                      {t("pages.ai_agent.prefix_channel")}: @{item.channel.username.replace(/^@+/, "")} | {t("pages.ai_agent.prefix_group")}: {item.settings.adminTelegramUsername ? `@${item.settings.adminTelegramUsername}` : t("pages.ai_agent.labels.admin_not_linked")}
                                     </p>
                                     <p className="text-[12px] text-[#707070] mt-1.5 leading-relaxed">
                                       {t("pages.ai_agent.labels.fb_leads_desc_card")}
@@ -2026,7 +2036,13 @@ function AIAgentContent() {
                                       </span>
                                     </div>
                                     <p className="text-[11px] text-blue-600 font-semibold mt-1">
-                                      Kanal: @{item.channel.username.replace(/^@+/, "")} | Guruh: {db.getGroups().find(g => g.id === (item.settings.targetGroupId || "sales"))?.name || "Sotuvlar"}
+                                      {t("pages.ai_agent.prefix_channel")}: @{item.channel.username.replace(/^@+/, "")} | {t("pages.ai_agent.prefix_group")}: {(() => {
+                                        const gId = item.settings.targetGroupId || "sales";
+                                        if (gId === "sales") return t("pages.automations_page.group_sales");
+                                        if (gId === "support") return t("pages.automations_page.group_support");
+                                        const g = db.getGroups().find((group) => group.id === gId);
+                                        return g ? g.name : t("pages.automations_page.group_sales");
+                                      })()}
                                     </p>
                                     <p className="text-[12px] text-[#707070] mt-1.5 leading-relaxed">
                                       {t("pages.ai_agent.labels.fb_leads_desc_card")}

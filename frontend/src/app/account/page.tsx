@@ -174,7 +174,7 @@ export default function AccountPage() {
 
   const handleBuyCredits = async (amount: number, priceUzs: number, packageName: string) => {
     if (!currentUser?.isCardLinked) {
-      showAlert(t("common.error"), "AI kredit sotib olish uchun avval to'lov kartangizni bog'lang.", "error");
+      showAlert(t("common.error"), t("pages.account.billing.link_card_prompt"), "error");
       setIsBuyCreditsModalOpen(false);
       setIsLinking(true);
       return;
@@ -192,7 +192,7 @@ export default function AccountPage() {
       if (updated) {
         setAiCreditsData(updated);
         setIsBuyCreditsModalOpen(false);
-        showAlert(t("common.success"), `Muvaffaqiyatli xarid qilindi! Hisobingizga ${amount} kredit qo'shildi.`, "success");
+        showAlert(t("common.success"), `${t("common.success")}! ${amount} ${t("pages.account.billing.unit_credits")}`, "success");
       } else {
         showAlert(t("common.error"), "Xarid amalga oshmadi. Iltimos qaytadan urunib ko'ring.", "error");
       }
@@ -307,7 +307,7 @@ export default function AccountPage() {
           setEmailOtpError("");
           setIsEmailVerificationPending(true);
           setEmailVerifyCountdown(120);
-          showAlert(t("common.success"), "Tasdiqlash kodi yangi elektron pochtangizga yuborildi.", "success");
+          showAlert(t("common.success"), t("pages.account.general.sent_otp_success"), "success");
         } else {
           showAlert(t("common.error"), mailData.error || "Email yuborishda xatolik yuz berdi.", "error");
         }
@@ -536,7 +536,7 @@ export default function AccountPage() {
                     <div className="flex flex-col gap-3 p-4 bg-[#F9F9F7] border border-[#E8E8E8] rounded-2xl">
                       <div className="flex flex-col sm:flex-row gap-3">
                         <div className="flex-1">
-                          <span className="text-[10px] font-bold text-[#707070] uppercase block mb-1">Yangi elektron pochta</span>
+                          <span className="text-[10px] font-bold text-[#707070] uppercase block mb-1">{t("pages.account.general.new_email")}</span>
                           <input
                             type="email"
                             value={email}
@@ -545,7 +545,7 @@ export default function AccountPage() {
                           />
                         </div>
                         <div className="sm:w-[180px]">
-                          <span className="text-[10px] font-bold text-[#707070] uppercase block mb-1">Tasdiqlash kodi</span>
+                          <span className="text-[10px] font-bold text-[#707070] uppercase block mb-1">{t("pages.account.general.verify_code")}</span>
                           <input
                             type="text"
                             value={emailOtpInput}
@@ -564,14 +564,14 @@ export default function AccountPage() {
                       <div className="flex flex-wrap items-center justify-between gap-3 mt-1 pt-2 border-t border-[#F0F0F0] text-[11px]">
                         <div className="text-[#707070]">
                           {emailVerifyCountdown > 0 ? (
-                            <span>Kodni qayta yuborish: <span className="font-mono text-black font-bold">{formatTimer(emailVerifyCountdown)}</span></span>
+                            <span>{t("pages.account.general.resend_code").replace("{timer}", "")}<span className="font-mono text-black font-bold">{formatTimer(emailVerifyCountdown)}</span></span>
                           ) : (
                             <button
                               type="button"
                               onClick={handleResendEmailOtp}
                               className="font-bold text-[#7CA607] hover:underline"
                             >
-                              Kodni qayta yuborish
+                              {t("pages.account.general.resend_btn")}
                             </button>
                           )}
                         </div>
@@ -590,7 +590,7 @@ export default function AccountPage() {
                             className="px-4 py-2 bg-black hover:bg-neutral-800 text-white rounded-[10px] font-bold text-[12px] transition-all disabled:opacity-50 active:scale-95 flex items-center gap-1.5"
                           >
                             {isEmailOtpVerifying && <Loader2 size={12} className="animate-spin" />}
-                            <span>Tasdiqlash</span>
+                            <span>{t("pages.account.general.confirm_btn")}</span>
                           </button>
                         </div>
                       </div>
@@ -635,7 +635,7 @@ export default function AccountPage() {
                     ) : (
                       <Save size={14} />
                     )}
-                    <span>{isSendingEmailOtp ? "Yuborilmoqda..." : t("common.save")}</span>
+                    <span>{isSendingEmailOtp ? t("pages.account.general.sending") : t("common.save")}</span>
                   </Button>
                 </div>
               </form>
@@ -685,22 +685,22 @@ export default function AccountPage() {
                 {/* Monthly cost breakdown */}
                 <div className="p-4 bg-[#F9F9F7] border border-[#E8E8E8] rounded-2xl text-[12px] flex flex-col gap-2 shadow-sm">
                   <div className="flex justify-between items-center">
-                    <span className="text-[#707070]">Asosiy tarif narxi ({includedChannels} ta ulanish bilan):</span>
+                    <span className="text-[#707070]">{t("pages.account.billing.base_price_label").replace("{count}", String(includedChannels))}</span>
                     <span className="font-bold text-black">{basePrice.toLocaleString("uz-UZ")} UZS</span>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span className="text-[#707070]">Joriy ulangan kanallar soni:</span>
-                    <span className="font-bold text-black">{connectedCount} ta</span>
+                    <span className="text-[#707070]">{t("pages.account.billing.connected_channels_count")}</span>
+                    <span className="font-bold text-black">{t("pages.account.billing.unit_channel").replace("{count}", String(connectedCount))}</span>
                   </div>
                   {extraChannels > 0 && (
                     <div className="flex justify-between items-center">
-                      <span className="text-[#707070]">Qo'shimcha kanallar ({extraChannels} ta x 150 000 UZS):</span>
+                      <span className="text-[#707070]">{t("pages.account.billing.extra_channels_label").replace("{count}", String(extraChannels)).replace("{price}", (150000).toLocaleString("uz-UZ"))}</span>
                       <span className="font-bold text-red-600">+{extraCost.toLocaleString("uz-UZ")} UZS</span>
                     </div>
                   )}
                   <div className="border-t border-[#E8E8E8] pt-2 mt-1 flex justify-between items-center text-[13px] font-extrabold">
-                    <span className="text-black">Jami oylik to'lov:</span>
-                    <span className="text-[#7CA607] font-black">{totalMonthlyPrice.toLocaleString("uz-UZ")} UZS / oy</span>
+                    <span className="text-black">{t("pages.account.billing.total_monthly_payment")}</span>
+                    <span className="text-[#7CA607] font-black">{t("pages.account.billing.unit_monthly_payment").replace("{price}", totalMonthlyPrice.toLocaleString("uz-UZ"))}</span>
                   </div>
                 </div>
 
@@ -719,7 +719,7 @@ export default function AccountPage() {
                       className="flex items-center gap-1.5 text-black hover:text-black/80 hover:underline font-semibold text-[13px] border-l border-[#E8E8E8] pl-4"
                     >
                       <Plus size={15} />
-                      <span>{"Karta bog'lash"}</span>
+                      <span>{t("pages.account.billing.link_card_btn")}</span>
                     </button>
                   )}
                 </div>
@@ -776,7 +776,7 @@ export default function AccountPage() {
 
                       <div className={isUzCardOrHumo ? "flex flex-col gap-1.5" : "grid grid-cols-2 gap-4"}>
                         <div className="flex flex-col gap-1.5">
-                          <label className="text-[10px] font-bold text-[#707070] uppercase">Muddati</label>
+                          <label className="text-[10px] font-bold text-[#707070] uppercase">{t("pages.account.billing.card_expiry_label")}</label>
                           <input
                             type="text"
                             value={cardExpiryInput}
@@ -792,7 +792,7 @@ export default function AccountPage() {
                         </div>
                         {!isUzCardOrHumo && (
                           <div className="flex flex-col gap-1.5">
-                            <label className="text-[10px] font-bold text-[#707070] uppercase">CVC / Tasdiq</label>
+                            <label className="text-[10px] font-bold text-[#707070] uppercase">{t("pages.account.billing.card_cvc_label")}</label>
                             <input
                               type="password"
                               value={cardCvcInput}
@@ -857,7 +857,7 @@ export default function AccountPage() {
                   <div className="text-[11px] text-[#707070] leading-relaxed bg-[#F9F9F7] p-3.5 rounded-[12px] border border-[#F0F0F0] mt-4 flex items-start gap-2">
                     <span className="text-black font-bold shrink-0">ⓘ</span>
                     <span>
-                      {"Kartani bog'lash mutlaqo bepul. 7 kunlik bepul sinov muddati yakunlanmaguncha kartangizdan pul yechilmaydi. Sinov muddati tugagandan so'nggina keyingi davr uchun to'lov olinadi."}
+                      {t("pages.account.billing.card_link_note")}
                     </span>
                   </div>
                 </Card>
@@ -868,17 +868,17 @@ export default function AccountPage() {
                 <div className="flex items-start justify-between">
                   <div>
                     <h3 className="text-[17px] font-bold text-black flex items-center gap-2">
-                      AI Kreditlar va Xarajatlar
+                      {t("pages.account.billing.ai_credits_title")}
                     </h3>
                     <p className="text-[12px] text-[#707070] mt-1">
-                      AI agentlarini (FAQ yordamchi va saralash botlari) ishlatish uchun zarur bo'lgan kredit balansi.
+                      {t("pages.account.billing.ai_credits_desc")}
                     </p>
                   </div>
                   <div className="text-right">
                     <div className="text-[22px] font-black text-black leading-none">
                       {(aiCreditsData.balance || 0).toLocaleString("uz-UZ")}
                     </div>
-                    <span className="text-[10px] text-[#707070] block mt-1 uppercase font-bold tracking-wider">kreditlar</span>
+                    <span className="text-[10px] text-[#707070] block mt-1 uppercase font-bold tracking-wider">{t("pages.account.billing.unit_credits")}</span>
                   </div>
                 </div>
 
@@ -886,7 +886,7 @@ export default function AccountPage() {
                 <div className="p-3.5 bg-amber-50/50 border border-amber-200/50 text-amber-800 rounded-2xl text-[11px] leading-relaxed flex items-start gap-2">
                   <Info size={14} className="text-amber-600 shrink-0 mt-0.5" />
                   <div>
-                    <strong>Eslatma:</strong> PRO tarifida bepul AI kreditlar berilmaydi. AI funksiyalardan (FAQ yordamchi yoki kvalifikatsiya) foydalanish uchun hisobingizni kreditlar bilan to'ldirishingiz lozim.
+                    <strong>{t("pages.account.billing.credits_note_bold")}</strong> {t("pages.account.billing.credits_note_text")}
                   </div>
                 </div>
 
@@ -896,21 +896,21 @@ export default function AccountPage() {
                     className="px-5 py-2.5 bg-black text-[#C7F33C] text-[12px] font-bold rounded-full hover:bg-black/90 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center gap-2 shadow-md"
                   >
                     <Plus size={14} />
-                    <span>AI Kredit sotib olish</span>
+                    <span>{t("pages.account.billing.buy_credits_btn")}</span>
                   </button>
                 </div>
 
                 {/* Transaction history */}
                 <div className="flex flex-col gap-2.5 mt-2">
-                  <h4 className="text-[11px] font-extrabold text-black uppercase tracking-wider">Xarajatlar tarixi</h4>
+                  <h4 className="text-[11px] font-extrabold text-black uppercase tracking-wider">{t("pages.account.billing.expenses_history")}</h4>
                   <div className="max-h-[220px] overflow-y-auto border border-[#E8E8E8] rounded-2xl bg-white shadow-sm">
                     <table className="w-full text-left text-[11px] border-collapse">
                       <thead>
                         <tr className="bg-[#F9F9F7] border-b border-[#E8E8E8] text-[#707070] font-bold">
-                          <th className="p-3">Amal</th>
-                          <th className="p-3 text-right">Miqdor</th>
-                          <th className="p-3">Tavsif</th>
-                          <th className="p-3 text-right">Sana</th>
+                          <th className="p-3">{t("pages.account.billing.th_action")}</th>
+                          <th className="p-3 text-right">{t("pages.account.billing.th_amount")}</th>
+                          <th className="p-3">{t("pages.account.billing.th_description")}</th>
+                          <th className="p-3 text-right">{t("pages.account.billing.th_date")}</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -919,9 +919,9 @@ export default function AccountPage() {
                             <tr key={tx.id} className="border-b border-[#F0F0F0] hover:bg-gray-50/50 transition-colors">
                               <td className="p-3 font-semibold">
                                 {tx.type === "purchase" ? (
-                                  <span className="text-[#7CA607] bg-[#C7F33C]/20 px-2 py-0.5 rounded-full text-[9px] font-bold">KIRIM</span>
+                                  <span className="text-[#7CA607] bg-[#C7F33C]/20 px-2 py-0.5 rounded-full text-[9px] font-bold">{t("pages.account.billing.tx_kirim")}</span>
                                 ) : (
-                                  <span className="text-red-600 bg-red-50 px-2 py-0.5 rounded-full text-[9px] font-bold">CHIQIM</span>
+                                  <span className="text-red-600 bg-red-50 px-2 py-0.5 rounded-full text-[9px] font-bold">{t("pages.account.billing.tx_chiqim")}</span>
                                 )}
                               </td>
                               <td className={`p-3 text-right font-extrabold text-[12px] ${tx.type === "purchase" ? "text-[#7CA607]" : "text-red-500"}`}>
@@ -934,7 +934,7 @@ export default function AccountPage() {
                         ) : (
                           <tr>
                             <td colSpan={4} className="p-6 text-center text-[#A0A0A0] italic">
-                              Hozircha xarajatlar tarixi mavjud emas.
+                              {t("pages.account.billing.no_expenses_history")}
                             </td>
                           </tr>
                         )}
@@ -976,9 +976,9 @@ export default function AccountPage() {
                 </div>
 
                 <div className="bg-[#F9F9F7] border border-[#F0F0F0] rounded-[14px] p-5 mt-2">
-                  <h4 className="text-[12px] font-bold text-black uppercase tracking-wider">Premium imkoniyatlar</h4>
+                  <h4 className="text-[12px] font-bold text-black uppercase tracking-wider">{t("pages.account.limits.premium_features_title")}</h4>
                   <p className="text-[11px] text-[#707070] mt-1.5 leading-relaxed">
-                    {"Premium tarifga o'tsangiz limitlar 10 barobarga oshiriladi. Shuningdek limitsiz Telegram broadcastlar va professional funksiyalardan to'liq foydalana olasiz."}
+                    {t("pages.account.limits.premium_features_desc")}
                   </p>
                 </div>
               </div>
@@ -1023,16 +1023,16 @@ export default function AccountPage() {
                       <p className="text-[13px] font-bold text-black">{t("pages.account.bonuses.trial_bonus")}</p>
                       <p className="text-[10px] text-[#707070] mt-0.5">{t("pages.account.bonuses.trial_bonus_desc")}</p>
                     </div>
-                    <span className="bg-[#F0F0F0] text-[#707070] text-[10px] font-bold px-2 py-0.5 rounded-full">{t("pages.settings_page.no_channel") == "Kanal ulanmagan" ? "KUTILMOQDA" : "WAITING"}</span>
+                    <span className="bg-[#F0F0F0] text-[#707070] text-[10px] font-bold px-2 py-0.5 rounded-full">{t("pages.account.bonuses.status_waiting")}</span>
                   </div>
 
                   {aiCreditsData.usedVouchers?.map((v: string) => (
                     <div key={v} className="flex items-center justify-between p-4 bg-[#EFF2FC] border border-[#D8D8D8] rounded-[14px] animate-in fade-in duration-200">
                       <div>
-                        <p className="text-[13px] font-bold text-black">{v} promokodi bonusi</p>
-                        <p className="text-[10px] text-[#707070] mt-0.5">Muvaffaqiyatli faollashtirilgan</p>
+                        <p className="text-[13px] font-bold text-black">{t("pages.account.bonuses.promo_bonus").replace("{code}", v)}</p>
+                        <p className="text-[10px] text-[#707070] mt-0.5">{t("pages.account.bonuses.promo_activated_desc")}</p>
                       </div>
-                      <span className="bg-[#EFF2FC] text-black text-[10px] font-bold px-2 py-0.5 rounded-full">FAOLLASHTIRILGAN</span>
+                      <span className="bg-[#EFF2FC] text-black text-[10px] font-bold px-2 py-0.5 rounded-full">{t("pages.account.bonuses.activated_badge")}</span>
                     </div>
                   ))}
                 </div>
@@ -1068,8 +1068,8 @@ export default function AccountPage() {
           <div className="bg-white rounded-[32px] w-full max-w-[500px] shadow-2xl overflow-hidden p-6 md:p-8 border border-[#D8D8D8] animate-in fade-in zoom-in-95 duration-200 relative">
             <div className="flex items-center justify-between pb-4 border-b border-[#F0F0F0] mb-6">
               <div>
-                <h3 className="text-[18px] font-black text-black">AI Kredit Sotib Olish</h3>
-                <p className="text-[12px] text-[#707070] mt-1">Sizga mos bo&apos;lgan kredit paketini tanlang</p>
+                <h3 className="text-[18px] font-black text-black">{t("pages.account.purchase_modal.title")}</h3>
+                <p className="text-[12px] text-[#707070] mt-1">{t("pages.account.purchase_modal.desc")}</p>
               </div>
               <button 
                 onClick={() => setIsBuyCreditsModalOpen(false)} 
@@ -1083,12 +1083,12 @@ export default function AccountPage() {
               {/* Package 1 */}
               <div 
                 className="border border-[#E8E8E8] hover:border-black rounded-[20px] p-5 flex items-center justify-between transition-all bg-[#F9F9F7] hover:shadow-md cursor-pointer group"
-                onClick={() => handleBuyCredits(10000, 100000, "Boshlang'ich")}
+                onClick={() => handleBuyCredits(10000, 100000, t("pages.account.purchase_modal.starter_pkg"))}
               >
                 <div>
-                  <h4 className="text-[15px] font-bold text-black group-hover:text-[#7CA607] transition-colors">Boshlang'ich paket</h4>
-                  <p className="text-[11px] text-[#707070] mt-1">~500 ta AI yordamchi javobi uchun</p>
-                  <span className="text-[20px] font-black text-black mt-2 block">10 000 <span className="text-[11px] font-bold text-[#707070]">kredit</span></span>
+                  <h4 className="text-[15px] font-bold text-black group-hover:text-[#7CA607] transition-colors">{t("pages.account.purchase_modal.starter_pkg")}</h4>
+                  <p className="text-[11px] text-[#707070] mt-1">{t("pages.account.purchase_modal.starter_pkg_desc")}</p>
+                  <span className="text-[20px] font-black text-black mt-2 block">10 000 <span className="text-[11px] font-bold text-[#707070]">{t("pages.account.purchase_modal.unit_credit")}</span></span>
                 </div>
                 <div className="text-right">
                   <span className="bg-black text-[#C7F33C] text-[12px] font-bold px-4 py-2 rounded-full whitespace-nowrap shadow-sm group-hover:scale-105 transition-all">
@@ -1100,15 +1100,15 @@ export default function AccountPage() {
               {/* Package 2 */}
               <div 
                 className="border border-black bg-black text-white rounded-[20px] p-5 flex items-center justify-between transition-all hover:shadow-md cursor-pointer relative overflow-hidden group"
-                onClick={() => handleBuyCredits(50000, 350000, "Standart")}
+                onClick={() => handleBuyCredits(50000, 350000, t("pages.account.purchase_modal.standard_pkg"))}
               >
                 <div className="absolute top-0 right-0 bg-[#C7F33C] text-black text-[8px] font-extrabold uppercase px-2.5 py-0.5 rounded-bl-[10px]">
-                  30% CHEGIRMA
+                  {t("pages.account.purchase_modal.discount").replace("{pct}", "30")}
                 </div>
                 <div>
-                  <h4 className="text-[15px] font-bold text-[#C7F33C]">Standart paket</h4>
-                  <p className="text-[11px] text-white/60 mt-1">~2 500 ta AI yordamchi javobi uchun</p>
-                  <span className="text-[20px] font-black text-white mt-2 block">50 000 <span className="text-[11px] font-bold text-white/60">kredit</span></span>
+                  <h4 className="text-[15px] font-bold text-[#C7F33C]">{t("pages.account.purchase_modal.standard_pkg")}</h4>
+                  <p className="text-[11px] text-white/60 mt-1">{t("pages.account.purchase_modal.standard_pkg_desc")}</p>
+                  <span className="text-[20px] font-black text-white mt-2 block">50 000 <span className="text-[11px] font-bold text-white/60">{t("pages.account.purchase_modal.unit_credit")}</span></span>
                 </div>
                 <div className="text-right">
                   <span className="bg-[#C7F33C] text-black text-[12px] font-bold px-4 py-2 rounded-full whitespace-nowrap shadow-sm group-hover:scale-105 transition-all">
@@ -1120,15 +1120,15 @@ export default function AccountPage() {
               {/* Package 3 */}
               <div 
                 className="border border-[#E8E8E8] hover:border-black rounded-[20px] p-5 flex items-center justify-between transition-all bg-[#F9F9F7] hover:shadow-md cursor-pointer group"
-                onClick={() => handleBuyCredits(150000, 700000, "Biznes")}
+                onClick={() => handleBuyCredits(150000, 700000, t("pages.account.purchase_modal.business_pkg"))}
               >
                 <div className="absolute top-0 right-0 bg-[#C7F33C] text-black text-[8px] font-extrabold uppercase px-2.5 py-0.5 rounded-bl-[10px]">
-                  53% CHEGIRMA
+                  {t("pages.account.purchase_modal.discount").replace("{pct}", "53")}
                 </div>
                 <div>
-                  <h4 className="text-[15px] font-bold text-black group-hover:text-[#7CA607] transition-colors">Biznes paket</h4>
-                  <p className="text-[11px] text-[#707070] mt-1">~7 500 ta AI yordamchi javobi uchun</p>
-                  <span className="text-[20px] font-black text-black mt-2 block">150 000 <span className="text-[11px] font-bold text-[#707070]">kredit</span></span>
+                  <h4 className="text-[15px] font-bold text-black group-hover:text-[#7CA607] transition-colors">{t("pages.account.purchase_modal.business_pkg")}</h4>
+                  <p className="text-[11px] text-[#707070] mt-1">{t("pages.account.purchase_modal.business_pkg_desc")}</p>
+                  <span className="text-[20px] font-black text-black mt-2 block">150 000 <span className="text-[11px] font-bold text-[#707070]">{t("pages.account.purchase_modal.unit_credit")}</span></span>
                 </div>
                 <div className="text-right">
                   <span className="bg-black text-[#C7F33C] text-[12px] font-bold px-4 py-2 rounded-full whitespace-nowrap shadow-sm group-hover:scale-105 transition-all">
@@ -1141,7 +1141,7 @@ export default function AccountPage() {
             {processingPurchase && (
               <div className="absolute inset-0 bg-white/80 backdrop-blur-xs flex flex-col items-center justify-center gap-3 rounded-[32px]">
                 <Loader2 className="animate-spin text-black" size={24} />
-                <p className="text-[12px] font-bold text-black">To&apos;lov amalga oshirilmoqda...</p>
+                <p className="text-[12px] font-bold text-black">{t("pages.account.purchase_modal.processing")}</p>
               </div>
             )}
           </div>

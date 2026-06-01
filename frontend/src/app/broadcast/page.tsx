@@ -18,7 +18,7 @@ export default function BroadcastPage() {
  
   // Form states
   const [title, setTitle] = useState("");
-  const [tag, setTag] = useState("Barcha faol mijozlar");
+  const [tag, setTag] = useState("all");
   const [message, setMessage] = useState("");
 
   const [addUrlButton, setAddUrlButton] = useState(false);
@@ -44,9 +44,9 @@ export default function BroadcastPage() {
  
     const contactsList = db.getContacts();
     let count = 0;
-    if (tag === "Barcha faol mijozlar") {
+    if (tag === "all") {
       count = contactsList.length;
-    } else if (tag === "VIP foydalanuvchilar") {
+    } else if (tag === "vip") {
       count = contactsList.filter((c) => c.tags.includes("VIP")).length;
     } else {
       // Qiziqqan (Leads)
@@ -56,9 +56,9 @@ export default function BroadcastPage() {
     const newBroadcast: Broadcast = {
       id: `${broadcasts.length + 1}`,
       name: title,
-      segment: tag,
+      segment: tag === "all" ? t("pages.broadcast.recipient_all") : tag === "vip" ? t("pages.broadcast.recipient_vip") : t("pages.broadcast.recipient_leads"),
       sentCount: String(count.toLocaleString("uz-UZ")),
-      date: "Hozirgina",
+      date: t("pages.broadcast.just_now"),
       status: "Completed",
     };
  
@@ -128,9 +128,9 @@ export default function BroadcastPage() {
                     className="bg-[#F0F0F0] border-none px-4 py-3 text-[13px] rounded-[14px] focus:border-none focus:shadow-none hover:bg-[#e8e8e8]/80 text-black font-semibold h-11"
                     dropdownClassName="mt-2 rounded-[16px]"
                     options={[
-                      { value: "Barcha faol mijozlar", label: t("pages.broadcast.recipient_all") },
-                      { value: "VIP foydalanuvchilar", label: t("pages.broadcast.recipient_vip") },
-                      { value: "Qiziqqan (Leads)", label: t("pages.broadcast.recipient_leads") },
+                      { value: "all", label: t("pages.broadcast.recipient_all") },
+                      { value: "vip", label: t("pages.broadcast.recipient_vip") },
+                      { value: "leads", label: t("pages.broadcast.recipient_leads") },
                     ]}
                   />
                 </div>
@@ -153,8 +153,8 @@ export default function BroadcastPage() {
                 <div className="flex flex-col gap-2 p-4 bg-[#F9F9F7] border border-[#E8E8E8] rounded-2xl w-full shadow-xs">
                   <div className="flex items-center justify-between">
                     <div>
-                      <h3 className="text-[13px] font-bold text-black">Tugma qo'shish (URL havola)</h3>
-                      <p className="text-[11px] text-[#707070] mt-0.5">Xabar tagida havola ochuvchi tugma</p>
+                      <h3 className="text-[13px] font-bold text-black">{t("pages.broadcast.add_button_title")}</h3>
+                      <p className="text-[11px] text-[#707070] mt-0.5">{t("pages.broadcast.add_button_desc")}</p>
                     </div>
                     <label className="relative inline-flex items-center cursor-pointer shrink-0">
                       <input
@@ -171,14 +171,14 @@ export default function BroadcastPage() {
                     <div className="flex flex-col gap-2 mt-2 pt-2 border-t border-[#E8E8E8] animate-in slide-in-from-top-1">
                       <input
                         type="text"
-                        placeholder="Tugma matni (masalan: Batafsil)"
+                        placeholder={t("pages.broadcast.button_text_placeholder")}
                         value={urlButtonText}
                         onChange={(e) => setUrlButtonText(e.target.value)}
                         className="w-full rounded-[12px] bg-white border border-[#D8D8D8] px-3 py-2 text-[12px] text-black outline-none focus:border-black"
                       />
                       <input
                         type="url"
-                        placeholder="Havola manzili (URL)"
+                        placeholder={t("pages.broadcast.button_url_placeholder")}
                         value={urlButtonUrl}
                         onChange={(e) => setUrlButtonUrl(e.target.value)}
                         className="w-full rounded-[12px] bg-white border border-[#D8D8D8] px-3 py-2 text-[12px] text-black outline-none focus:border-black font-mono"
@@ -191,8 +191,8 @@ export default function BroadcastPage() {
                 <div className="flex flex-col gap-2 p-4 bg-[#F9F9F7] border border-[#E8E8E8] rounded-2xl w-full shadow-xs">
                   <div className="flex items-center justify-between">
                     <div>
-                      <h3 className="text-[13px] font-bold text-black">Workflow qo'shish (Avtomatlashtirish)</h3>
-                      <p className="text-[11px] text-[#707070] mt-0.5">Xabar tugmasi bosilganda stsenariyni ishga tushirish</p>
+                      <h3 className="text-[13px] font-bold text-black">{t("pages.broadcast.add_workflow_title")}</h3>
+                      <p className="text-[11px] text-[#707070] mt-0.5">{t("pages.broadcast.add_workflow_desc")}</p>
                     </div>
                     <label className="relative inline-flex items-center cursor-pointer shrink-0">
                       <input
@@ -211,11 +211,11 @@ export default function BroadcastPage() {
                         value={selectedWorkflowId}
                         onChange={setSelectedWorkflowId}
                         className="bg-white border border-[#D8D8D8] px-3 py-2 text-[12px] rounded-[12px] text-black"
-                        placeholder="Workflow tanlang"
+                        placeholder={t("pages.broadcast.select_workflow_placeholder")}
                         options={[
-                          { value: "wf1", label: "Havola orqali o'tish (Flow 1)" },
-                          { value: "wf2", label: "Kursga obuna bo'lish" },
-                          { value: "wf3", label: "Chegirma kuponi tarqatish" },
+                          { value: "wf1", label: t("pages.broadcast.wf_flow1") },
+                          { value: "wf2", label: t("pages.broadcast.wf_subscribe") },
+                          { value: "wf3", label: t("pages.broadcast.wf_coupon") },
                         ]}
                       />
                       <button
@@ -226,7 +226,7 @@ export default function BroadcastPage() {
                         className="w-full py-2 bg-black hover:bg-neutral-800 text-white font-bold rounded-xl text-[11px] flex items-center justify-center gap-1.5 transition-colors cursor-pointer border-0"
                       >
                         <Plus size={12} />
-                        <span>Yangi workflow yaratish</span>
+                        <span>{t("pages.broadcast.create_workflow_btn")}</span>
                       </button>
                     </div>
                   )}

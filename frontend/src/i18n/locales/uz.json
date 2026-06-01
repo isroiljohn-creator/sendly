@@ -192,7 +192,19 @@
       "table_segment": "Segment",
       "status_sent": "Yuborildi",
       "status_pending": "Kutilmoqda",
-      "sent_unit": "{count} ta"
+      "sent_unit": "{count} ta",
+      "add_button_title": "Tugma qo'shish (URL havola)",
+      "add_button_desc": "Xabar tagida havola ochuvchi tugma",
+      "button_text_placeholder": "Tugma matni (masalan: Batafsil)",
+      "button_url_placeholder": "Havola manzili (URL)",
+      "add_workflow_title": "Workflow qo'shish (Avtomatlashtirish)",
+      "add_workflow_desc": "Xabar tugmasi bosilganda stsenariyni ishga tushirish",
+      "select_workflow_placeholder": "Workflow tanlang",
+      "wf_flow1": "Havola orqali o'tish (Flow 1)",
+      "wf_subscribe": "Kursga obuna bo'lish",
+      "wf_coupon": "Chegirma kuponi tarqatish",
+      "create_workflow_btn": "Yangi workflow yaratish",
+      "just_now": "Hozirgina"
     },
     "analytics": {
       "title": "Tizim tahlili",
@@ -202,7 +214,11 @@
       "avg_completion": "O'rtacha yakunlash",
       "avg_completion_sub": "Bot muloqotlari",
       "messages_sent": "Yuborilgan xabarlar",
-      "messages_sent_sub": "Jami davr"
+      "messages_sent_sub": "Jami davr",
+      "sent_volume_title": "Yuborilgan xabarlar hajmi",
+      "sent_volume_desc": "Kuni bo'yicha yuborilgan umumiy Direct xabarlar",
+      "conversion_rate_title": "Konversiyalar koeffitsiyenti",
+      "conversion_rate_desc": "Bot bilan suhbatdan mijozlikka o'tish foizi"
     },
     "lessons": {
       "title": "Mini-kurslar",
@@ -243,7 +259,15 @@
         "password": "Parol",
         "password_placeholder": "Yangi parol kiriting",
         "password_desc": "Profil ma'lumotlarini saqlaganingizda parolingiz ham o'zgaradi.",
-        "success_message": "Profil ma'lumotlari muvaffaqiyatli saqlandi!"
+        "success_message": "Profil ma'lumotlari muvaffaqiyatli saqlandi!",
+        "sending": "Yuborilmoqda...",
+        "new_email": "Yangi elektron pochta",
+        "verify_code": "Tasdiqlash kodi",
+        "resend_code": "Kodni qayta yuborish: {timer}",
+        "resend_btn": "Kodni qayta yuborish",
+        "confirm_btn": "Tasdiqlash",
+        "sent_otp_success": "Tasdiqlash kodi elektron pochtangizga yuborildi.",
+        "otp_incorrect": "Tasdiqlash kodi noto'g'ri. Iltimos qaytadan urinib ko'ring."
       },
       "billing": {
         "free_plan": "Bepul reja",
@@ -268,7 +292,35 @@
         "link_success": "Karta muvaffaqiyatli ulandi va 7 kunlik PRO faollashtirildi!",
         "otp_input_error": "Tasdiqlash kodi noto'g'ri yoki to'liq emas.",
         "card_input_error": "Karta raqami noto'g'ri yoki to'liq emas.",
-        "expiry_input_error": "Karta amal qilish muddati noto'g'ri kiritilgan."
+        "expiry_input_error": "Karta amal qilish muddati noto'g'ri kiritilgan.",
+        "base_price_label": "Asosiy tarif narxi ({count} ta ulanish bilan):",
+        "connected_channels_count": "Joriy ulangan kanallar soni:",
+        "unit_channel": "{count} ta",
+        "extra_channels_label": "Qo'shimcha kanallar ({count} ta x {price} UZS):",
+        "total_monthly_payment": "Jami oylik to'lov:",
+        "unit_monthly_payment": "{price} UZS / oy",
+        "link_card_btn": "Karta bog'lash",
+        "card_expiry_label": "Muddati",
+        "card_cvc_label": "CVC / Tasdiq",
+        "card_link_note": "Kartani bog'lash mutlaqo bepul. 7 kunlik bepul sinov muddati yakunlanmaguncha kartangizdan pul yechilmaydi. Sinov muddati tugagandan so'nggina keyingi davr uchun to'lov olinadi.",
+        "ai_credits_title": "AI Kreditlar va Xarajatlar",
+        "ai_credits_desc": "AI agentlarini (FAQ yordamchi va saralash botlari) ishlatish uchun zarur bo'lgan kredit balansi.",
+        "unit_credits": "kreditlar",
+        "credits_note_bold": "Eslatma:",
+        "credits_note_text": "PRO tarifida bepul AI kreditlar berilmaydi. AI funksiyalardan (FAQ yordamchi yoki kvalifikatsiya) foydalanish uchun hisobingizni kreditlar bilan to'ldirishingiz lozim.",
+        "buy_credits_btn": "AI Kredit sotib olish",
+        "expenses_history": "Xarajatlar tarixi",
+        "th_action": "Amal",
+        "th_amount": "Miqdor",
+        "th_description": "Tavsif",
+        "th_date": "Sana",
+        "tx_kirim": "KIRIM",
+        "tx_chiqim": "CHIQIM",
+        "no_expenses_history": "Hozircha xarajatlar tarixi mavjud emas.",
+        "active_badge": "FAOL",
+        "unit_year": "yil",
+        "unit_month": "oy",
+        "link_card_prompt": "AI kredit sotib olish uchun avval to'lov kartangizni bog'lang."
       },
       "limits": {
         "title": "Limitlar",
@@ -276,7 +328,9 @@
         "active_automations": "Faol avtomatlashtirishlar",
         "connected_channels": "Ulangan kanallar",
         "info_title": "Tarif imkoniyatlari",
-        "info_desc": "Tarifingizni yangilash orqali limitlarni oshirishingiz mumkin. Bepul tarifda 2 ta, Pro tarifda 50 ta, Premium tarifda esa 500 tagacha faol avtomatlashtirish hamda 10 tagacha kanal ulash imkoniyati mavjud."
+        "info_desc": "Tarifingizni yangilash orqali limitlarni oshirishingiz mumkin. Bepul tarifda 2 ta, Pro tarifda 50 ta, Premium tarifda esa 500 tagacha faol avtomatlashtirish hamda 10 tagacha kanal ulash imkoniyati mavjud.",
+        "premium_features_title": "Premium imkoniyatlar",
+        "premium_features_desc": "Premium tarifga o'tsangiz limitlar 10 barobarga oshiriladi. Shuningdek limitsiz Telegram broadcastlar va professional funksiyalardan to'liq foydalana olasiz."
       },
       "bonuses": {
         "title": "Bonuslar",
@@ -289,7 +343,11 @@
         "reg_bonus": "$10.00 Ro'yxatdan o'tish bonusi",
         "reg_bonus_desc": "Avtomatik hisobga o'tkazilgan",
         "trial_bonus": "7 kunlik PRO sinov muddati",
-        "trial_bonus_desc": "Karta ulanganda faollashadi"
+        "trial_bonus_desc": "Karta ulanganda faollashadi",
+        "promo_bonus": "{code} promokodi bonusi",
+        "promo_activated_desc": "Muvaffaqiyatli faollashtirilgan",
+        "activated_badge": "FAOLLASHTIRILGAN",
+        "status_waiting": "KUTILMOQDA"
       },
       "cancel_confirm": {
         "title": "Obunani bekor qilish",
@@ -310,6 +368,19 @@
         "switch_free": "Bepulga o'tish",
         "switch_pro": "Sinab ko'rish",
         "switch_premium": "Sinab ko'rish"
+      },
+      "purchase_modal": {
+        "title": "AI Kredit Sotib Olish",
+        "desc": "Sizga mos bo'lgan kredit paketini tanlang",
+        "processing": "To'lov amalga oshirilmoqda...",
+        "starter_pkg": "Boshlang'ich paket",
+        "standard_pkg": "Standart paket",
+        "business_pkg": "Biznes paket",
+        "starter_pkg_desc": "~500 ta AI yordamchi javobi uchun",
+        "standard_pkg_desc": "~2 500 ta AI yordamchi javobi uchun",
+        "business_pkg_desc": "~7 500 ta AI yordamchi javobi uchun",
+        "unit_credit": "kredit",
+        "discount": "{pct}% CHEGIRMA"
       }
     },
     "settings_page": {
@@ -497,7 +568,108 @@
       "quick_setup": "Tezkor sozlash",
       "conversion": "Konversiya",
       "quick_bot_reply_placeholder": "Foydalanuvchi kalit so'zni yozganda yuboriladigan xabar matni...",
-      "unknown_channel": "Noma'lum kanal"
+      "unknown_channel": "Noma'lum kanal",
+      "ready_templates_title": "Tayyor shablonlar (Avtomatlashtirish shablonlari)",
+      "use_template": "Foydalanish →",
+      "create_modal_title": "Yangi avtomatlashtirish",
+      "create_modal_desc": "Avtomatlashtirishni yaratish usulini tanlang",
+      "mode_scratch_title": "Noldan o'zingiz bajaring",
+      "mode_scratch_desc": "Servisning imkoniyatlari bilan tanish bo'lgan ilg'or foydalanuvchilar uchun mos keladi",
+      "mode_template_title": "Tayyor shablon bo'yicha",
+      "mode_template_desc": "5 daqiqada birinchi avtomatlashtirishni ishga tushirishni rejalashtirgan yangi boshlovchilar uchun mos keladi",
+      "next_btn": "Keyin",
+      "group_sales": "Sotuvlar",
+      "group_support": "Qo'llab-quvvatlash"
+    },
+    "templates_page": {
+      "title": "Shablonlar",
+      "desc": "Tezkor avtomatlashtirish shablonlari ro'yxati",
+      "search_placeholder": "Shablonlar bo'yicha qidir",
+      "all_channels": "Barcha kanallar",
+      "topics_header": "Mavzular",
+      "templates_header": "Shablonlar ({count} ta)",
+      "no_template_title": "Shablon topilmadi",
+      "no_template_desc": "Ushbu qidiruv mezonlariga mos keladigan shablonlar mavjud emas. Iltimos, boshqa toifa yoki platformani tanlang.",
+      "builder_badge": "Konstruktor yo'q",
+      "action_launch": "Shablonni ishga tushirish",
+      "modal_add_title": "Shablon qo'shish",
+      "modal_add_desc": "Shablon joriy loyihada saqlanadi",
+      "modal_add_placeholder": "Akkauntni tanlash",
+      "modal_add_btn": "Qo'shish",
+      "alert_no_channels": "Ulagan akkauntingiz mavjud emas. Shablonni yuklash uchun avval sozlamalardan akkaunt ulashing.",
+      "alert_limit_reached_title": "Shablon yuklanmoqda",
+      "alert_limit_reached_desc": "Sizning tarifingizda faol botlar limiti ({limit} ta) to'lgan. Yangi bot faolsiz holatda yaratiladi.",
+      "categories": {
+        "all": "Barcha mavzular",
+        "subscription": "Obunani tekshirish",
+        "ai": "AI chatbotlar",
+        "content": "Kontent faoliyati",
+        "crm": "CRM va to'lov",
+        "games": "O'yinlar va gamifikatsiya",
+        "referrals": "Referral mexanikalari"
+      },
+      "items": {
+        "quick_bot": {
+          "name": "Kalit so'zli chat-bot",
+          "desc": "Oddiy 5 daqiqalik sozlash shakl orqali. Obunani tekshiradi va foydali fayl yoki veb-sayt havolasini yuboradi"
+        },
+        "insta_sub": {
+          "name": "Instagram'da obunani tekshirish",
+          "desc": "Instagram akkauntingizga obunani tekshiradi va PDF fayl yoki boshqa kontentdan foydalanishga ruxsat beradi"
+        },
+        "tg_sub": {
+          "name": "Telegram'da obunani tekshirish",
+          "desc": "Telegram-kanaldagi obunani tekshiradi va havola yoki PDF faylga kirishni ta'minlaydi"
+        },
+        "acct_badge": {
+          "name": "Akkaunt belgisi",
+          "desc": "Instagram obunasini tekshiradi, teglarni belgilaydi va lid-magnitni yuboradi"
+        },
+        "tags_sub": {
+          "name": "Teglar va obunani tekshirish",
+          "desc": "Instagram obunasini tekshiradi, teglarni belgilaydi va lid-magnitni yuboradi"
+        },
+        "ai_chatgpt": {
+          "name": "AI · ChatGPT",
+          "desc": "ChatGPT xatti-harakatlarini takrorlaydi: jonli muloqotni imitatsiya qilgan holda OpenAI..."
+        },
+        "ai_savol": {
+          "name": "AI · Savol",
+          "desc": "Foydalanuvchi ma'lumotlarini to'playdi, murakkab so'rovni shakllantiradi va uni..."
+        },
+        "ref_link": {
+          "name": "Ref. havolalar · Havola",
+          "desc": "Telegram-kanalga taklif qilish uchun shaxsiy referral havolani yaratadi"
+        },
+        "ref_gift": {
+          "name": "Ref. havolalar · Sovrin",
+          "desc": "Telegram-kanalga referralni taklif qilganligi uchun sovrin berish..."
+        },
+        "tg_circle": {
+          "name": "Telegram'dagi doira · Referal uchun ballar",
+          "desc": "Taklif qilingan foydalanuvchilarning doiradagi kanallariga obuna bo'lgani uchun ball hisoblaydi..."
+        },
+        "ref_code": {
+          "name": "Referal kod",
+          "desc": "Referal kodini tekshirib, taklif qilgan va yangi a'zoga ball beradi"
+        },
+        "ref_check": {
+          "name": "Ref. havolalar · Referal",
+          "desc": "Sizning havolangiz orqali taklif qilingan foydalanuvchining Telegram-kanalga obuna bo'lganligini tekshiradi"
+        },
+        "content_prod": {
+          "name": "Reels orqali sotuv",
+          "desc": "Izoh yozgan mijozga avtomat ravishda direkt orqali havola yuboradi va savdoni oshiradi"
+        },
+        "crm_pay": {
+          "name": "CRM va to'lovlarni ulash",
+          "desc": "Bot orqali to'lov havolasini yuborish va mijoz holatini CRM tizimida yangilash"
+        },
+        "gamify_quiz": {
+          "name": "Gamifikatsiya testi",
+          "desc": "Mijozlarga test topshiriqlarini taklif qiladi va to'g'ri javob uchun ball beradi"
+        }
+      }
     },
     "builder": {
       "sync_btn": "Sinxronlash",
@@ -708,6 +880,8 @@
       "support_tooltip": "Qo'llab-quvvatlash"
     },
     "ai_agent": {
+      "prefix_channel": "Kanal",
+      "prefix_group": "Guruh",
       "search_placeholder": "Qidirish (modul yoki darslar)...",
       "stats_modules": "Jami modullar",
       "stats_lessons": "Jami darslar",

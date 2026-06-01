@@ -63,59 +63,59 @@ export default function TemplatesPage() {
   };
 
   const categories = [
-    { value: "all", label: "Barcha mavzular" },
-    { value: "subscription", label: "Obunani tekshirish" },
-    { value: "ai", label: "AI chatbotlar" },
-    { value: "content", label: "Kontent faoliyati" },
-    { value: "crm", label: "CRM va to'lov" },
-    { value: "games", label: "O'yinlar va gamifikatsiya" },
-    { value: "referrals", label: "Referral mexanikalari" },
+    { value: "all", label: t("pages.templates_page.categories.all") },
+    { value: "subscription", label: t("pages.templates_page.categories.subscription") },
+    { value: "ai", label: t("pages.templates_page.categories.ai") },
+    { value: "content", label: t("pages.templates_page.categories.content") },
+    { value: "crm", label: t("pages.templates_page.categories.crm") },
+    { value: "games", label: t("pages.templates_page.categories.games") },
+    { value: "referrals", label: t("pages.templates_page.categories.referrals") },
   ];
 
   const templates: TemplateItem[] = [
     // Obunani tekshirish
     {
       id: "tmpl_quick_bot",
-      name: "Kalit so'zli chat-bot",
+      name: t("pages.templates_page.items.quick_bot.name"),
       category: "subscription",
       platforms: ["instagram", "telegram"],
       hasBuilderBadge: true,
-      description: "Oddiy 5 daqiqalik sozlash shakl orqali. Obunani tekshiradi va foydali fayl yoki veb-sayt havolasini yuboradi",
+      description: t("pages.templates_page.items.quick_bot.desc"),
       actionKey: "quick_bot"
     },
     {
       id: "tmpl_insta_sub",
-      name: "Instagram'da obunani tekshirish",
+      name: t("pages.templates_page.items.insta_sub.name"),
       category: "subscription",
       platforms: ["instagram"],
-      description: "Instagram akkauntingizga obunani tekshiradi va PDF fayl yoki boshqa kontentdan foydalanishga ruxsat beradi",
+      description: t("pages.templates_page.items.insta_sub.desc"),
       actionKey: "builder_template",
       templateKey: "lead_magnet"
     },
     {
       id: "tmpl_tg_sub",
-      name: "Telegram'da obunani tekshirish",
+      name: t("pages.templates_page.items.tg_sub.name"),
       category: "subscription",
       platforms: ["telegram"],
-      description: "Telegram-kanaldagi obunani tekshiradi va havola yoki PDF faylga kirishni ta'minlaydi",
+      description: t("pages.templates_page.items.tg_sub.desc"),
       actionKey: "builder_template",
       templateKey: "lead_magnet"
     },
     {
       id: "tmpl_acct_badge",
-      name: "Akkaunt belgisi",
+      name: t("pages.templates_page.items.acct_badge.name"),
       category: "subscription",
       platforms: ["instagram"],
-      description: "Instagram obunasini tekshiradi, teglarni belgilaydi va lid-magnitni yuboradi",
+      description: t("pages.templates_page.items.acct_badge.desc"),
       actionKey: "builder_template",
       templateKey: "comment_dm"
     },
     {
       id: "tmpl_tags_sub",
-      name: "Teglar va obunani tekshirish",
+      name: t("pages.templates_page.items.tags_sub.name"),
       category: "subscription",
       platforms: ["instagram"],
-      description: "Instagram obunasini tekshiradi, teglarni belgilaydi va lid-magnitni yuboradi",
+      description: t("pages.templates_page.items.tags_sub.desc"),
       actionKey: "builder_template",
       templateKey: "comment_dm"
     },
@@ -123,149 +123,149 @@ export default function TemplatesPage() {
     // AI chatbotlar
     {
       id: "tmpl_ai_agent",
-      name: "AI kuratori",
+      name: t("pages.ai_agent.templates.kurator.name"),
       category: "ai",
       platforms: ["instagram", "telegram"],
       hasBuilderBadge: true,
-      description: "Darsliklar, dars transkriptlari va PDF hujjatlar asosida o'quvchilar va mijozlar savollariga javob beruvchi yordamchi.",
+      description: t("pages.ai_agent.templates.kurator.desc"),
       actionKey: "ai_agent",
       templateKey: "kurator"
     },
     {
       id: "tmpl_ai_sales",
-      name: "Sotuvchi AI Agent",
+      name: t("pages.ai_agent.templates.sales.name"),
       category: "ai",
       platforms: ["instagram", "telegram"],
       hasBuilderBadge: true,
-      description: "Katalog, narxlar va ish vaqti kabi ma'lumotlarni o'rganib, mijozlar bilan muloqot qiladi va mahsulot sotadi.",
+      description: t("pages.ai_agent.templates.sales.desc"),
       actionKey: "ai_agent",
       templateKey: "sales"
     },
     {
       id: "tmpl_ai_booker",
-      name: "Konsultatsiya va Band qilish AI",
+      name: t("pages.ai_agent.templates.booker.name"),
       category: "ai",
       platforms: ["instagram", "telegram"],
       hasBuilderBadge: true,
-      description: "Mutaxassis bilimlari va gaplashish ohangi asosida maslahat beradi va konsultatsiya uchun vaqt band qiladi (pullik to'lov bilan).",
+      description: t("pages.ai_agent.templates.booker.desc"),
       actionKey: "ai_agent",
       templateKey: "booker"
     },
     {
       id: "tmpl_ai_recruiter",
-      name: "HR va Vakansiyalar uchun AI",
+      name: t("pages.ai_agent.templates.recruiter.name"),
       category: "ai",
       platforms: ["instagram", "telegram"],
       hasBuilderBadge: true,
-      description: "Bo'sh ish o'rinlari va nomzodga qo'yiladigan talablar asosida nomzodlarni suhbatdan o'tkazadi, saralaydi va HR menejeriga yuboradi.",
+      description: t("pages.ai_agent.templates.recruiter.desc"),
       actionKey: "ai_agent",
       templateKey: "recruiter"
     },
     {
       id: "tmpl_ai_chatgpt",
-      name: "AI · ChatGPT",
+      name: t("pages.templates_page.items.ai_chatgpt.name"),
       category: "ai",
       platforms: ["instagram", "telegram"],
       isPro: true,
-      description: "ChatGPT xatti-harakatlarini takrorlaydi: jonli muloqotni imitatsiya qilgan holda OpenAI...",
+      description: t("pages.templates_page.items.ai_chatgpt.desc"),
       actionKey: "ai_agent"
     },
     {
       id: "tmpl_ai_savol",
-      name: "AI · Savol",
+      name: t("pages.templates_page.items.ai_savol.name"),
       category: "ai",
       platforms: ["telegram", "instagram"],
       isPro: true,
-      description: "Foydalanuvchi ma'lumotlarini to'playdi, murakkab so'rovni shakllantiradi va uni...",
+      description: t("pages.templates_page.items.ai_savol.desc"),
       actionKey: "ai_agent"
     },
     {
       id: "tmpl_fb_leads_direct",
-      name: "Lidlarni Telegramga yo'naltirish (AIsiz)",
+      name: t("pages.ai_agent.templates.fb_leads_direct.name"),
       category: "ai",
       platforms: ["telegram"],
-      description: "Facebook target arizalarini AIsiz, chiroyli ko'rinishda to'g'ridan-to'g'ri Telegram guruh yoki profilingizga yo'naltiring.",
+      description: t("pages.ai_agent.templates.fb_leads_direct.desc"),
       actionKey: "fb_leads_direct"
     },
 
     // Referral mexanikalari
     {
       id: "tmpl_ref_link",
-      name: "Ref. havolalar · Havola",
+      name: t("pages.templates_page.items.ref_link.name"),
       category: "referrals",
       platforms: ["telegram"],
       isPro: true,
-      description: "Telegram-kanalga taklif qilish uchun shaxsiy referral havolani yaratadi",
+      description: t("pages.templates_page.items.ref_link.desc"),
       actionKey: "builder_template",
       templateKey: "welcome_faq"
     },
     {
       id: "tmpl_ref_gift",
-      name: "Ref. havolalar · Sovrin",
+      name: t("pages.templates_page.items.ref_gift.name"),
       category: "referrals",
       platforms: ["telegram"],
       isPro: true,
-      description: "Telegram-kanalga referralni taklif qilganligi uchun sovrin berish...",
+      description: t("pages.templates_page.items.ref_gift.desc"),
       actionKey: "builder_template",
       templateKey: "story_coupon"
     },
     {
       id: "tmpl_tg_circle",
-      name: "Telegram'dagi doira · Referal uchun ballar",
+      name: t("pages.templates_page.items.tg_circle.name"),
       category: "referrals",
       platforms: ["telegram"],
       isPro: true,
-      description: "Taklif qilingan foydalanuvchilarning doiradagi kanallariga obuna bo'lgani uchun ball hisoblaydi...",
+      description: t("pages.templates_page.items.tg_circle.desc"),
       actionKey: "builder_template",
       templateKey: "welcome_faq"
     },
     {
       id: "tmpl_ref_code",
-      name: "Referal kod",
+      name: t("pages.templates_page.items.ref_code.name"),
       category: "referrals",
       platforms: ["instagram"],
       isPro: true,
-      description: "Referal kodini tekshirib, taklif qilgan va yangi a'zoga ball beradi",
+      description: t("pages.templates_page.items.ref_code.desc"),
       actionKey: "builder_template",
       templateKey: "comment_dm"
     },
     {
       id: "tmpl_ref_check",
-      name: "Ref. havolalar · Referal",
+      name: t("pages.templates_page.items.ref_check.name"),
       category: "referrals",
       platforms: ["telegram"],
       isPro: true,
-      description: "Sizning havolangiz orqali taklif qilingan foydalanuvchining Telegram-kanalga obuna bo'lganligini tekshiradi",
+      description: t("pages.templates_page.items.ref_check.desc"),
       actionKey: "builder_template",
       templateKey: "welcome_faq"
     },
 
-    // Placeholder content templates for remaining categories
+    // Reels orqali sotuv
     {
       id: "tmpl_content_prod",
-      name: "Reels orqali sotuv",
+      name: t("pages.templates_page.items.content_prod.name"),
       category: "content",
       platforms: ["instagram"],
-      description: "Izoh yozgan mijozga avtomat ravishda direkt orqali havola yuboradi va savdoni oshiradi",
+      description: t("pages.templates_page.items.content_prod.desc"),
       actionKey: "builder_template",
       templateKey: "comment_dm"
     },
     {
       id: "tmpl_crm_pay",
-      name: "CRM va to'lovlarni ulash",
+      name: t("pages.templates_page.items.crm_pay.name"),
       category: "crm",
       platforms: ["telegram", "instagram"],
       isPro: true,
-      description: "Bot orqali to'lov havolasini yuborish va mijoz holatini CRM tizimida yangilash",
+      description: t("pages.templates_page.items.crm_pay.desc"),
       actionKey: "builder_template",
       templateKey: "lead_magnet"
     },
     {
       id: "tmpl_gamify_quiz",
-      name: "Gamifikatsiya testi",
+      name: t("pages.templates_page.items.gamify_quiz.name"),
       category: "games",
       platforms: ["telegram"],
-      description: "Mijozlarga test topshiriqlarini taklif qiladi va to'g'ri javob uchun ball beradi",
+      description: t("pages.templates_page.items.gamify_quiz.desc"),
       actionKey: "builder_template",
       templateKey: "story_coupon"
     }
@@ -274,7 +274,7 @@ export default function TemplatesPage() {
   const handleUseTemplate = (tmpl: TemplateItem) => {
     const chs = db.getChannels();
     if (chs.length === 0) {
-      showAlert(t("common.error"), "Ulagan akkauntingiz mavjud emas. Shablonni yuklash uchun avval sozlamalardan akkaunt ulashing.");
+      showAlert(t("common.error"), t("pages.templates_page.alert_no_channels"));
       return;
     }
     setSelectedTemplate(tmpl);
@@ -318,8 +318,8 @@ export default function TemplatesPage() {
 
     if (!shouldBeActive) {
       showAlert(
-        "Shablon yuklanmoqda",
-        `Sizning tarifingizda faol botlar limiti (${maxAutos} ta) to'lgan. Yangi bot faolsiz holatda yaratiladi.`
+        t("pages.templates_page.alert_limit_reached_title"),
+        t("pages.templates_page.alert_limit_reached_desc").replace("{limit}", String(maxAutos))
       );
     }
 
@@ -398,8 +398,8 @@ export default function TemplatesPage() {
               <ArrowLeft size={16} />
             </Link>
             <div>
-              <h1 className="text-[20px] font-extrabold text-black tracking-tight">Shablonlar</h1>
-              <p className="text-[11px] text-[#707070] font-medium mt-0.5">Tezkor avtomatlashtirish shablonlari ro&apos;yxati</p>
+              <h1 className="text-[20px] font-extrabold text-black tracking-tight">{t("pages.templates_page.title")}</h1>
+              <p className="text-[11px] text-[#707070] font-medium mt-0.5">{t("pages.templates_page.desc")}</p>
             </div>
           </div>
 
@@ -408,7 +408,7 @@ export default function TemplatesPage() {
             <div className="relative">
               <input
                 type="text"
-                placeholder="Shablonlar bo'yicha qidir"
+                placeholder={t("pages.templates_page.search_placeholder")}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-[190px] sm:w-[240px] pl-8 pr-3 py-1.5 text-[11px] bg-white border border-[#E8E8E8] rounded-full focus:outline-none focus:border-black focus:ring-1 focus:ring-black transition-all font-medium text-black"
@@ -425,7 +425,7 @@ export default function TemplatesPage() {
                 onClick={() => setSelectedPlatform("all")}
                 className={`px-3 py-1 rounded-full text-[10px] font-bold transition-all ${selectedPlatform === "all" ? "bg-white text-black shadow-xs" : "text-[#707070] hover:text-black bg-transparent"}`}
               >
-                Barcha kanallar
+                {t("pages.templates_page.all_channels")}
               </button>
               <button
                 onClick={() => setSelectedPlatform("instagram")}
@@ -448,7 +448,7 @@ export default function TemplatesPage() {
           
           {/* Sidebar */}
           <div className="w-full lg:w-[240px] shrink-0 flex flex-col gap-1.5 bg-white border border-[#E8E8E8] rounded-[24px] p-4 shadow-sm">
-            <span className="text-[9px] uppercase tracking-wider font-extrabold text-[#A0A0A0] px-2.5 pb-2 border-b border-[#F0F0F0] mb-1.5">Mavzular</span>
+            <span className="text-[9px] uppercase tracking-wider font-extrabold text-[#A0A0A0] px-2.5 pb-2 border-b border-[#F0F0F0] mb-1.5">{t("pages.templates_page.topics_header")}</span>
             {categories.map((cat) => (
               <button
                 key={cat.value}
@@ -464,7 +464,7 @@ export default function TemplatesPage() {
           <div className="flex-1 w-full flex flex-col gap-4">
             <div className="flex justify-between items-center px-1">
               <span className="text-[11px] uppercase tracking-wider font-extrabold text-[#A0A0A0]">
-                Shablonlar ({filteredTemplates.length} ta)
+                {t("pages.templates_page.templates_header").replace("{count}", String(filteredTemplates.length))}
               </span>
             </div>
 
@@ -473,9 +473,9 @@ export default function TemplatesPage() {
                 <div className="grid h-12 w-12 place-items-center rounded-full bg-[#F5F5F5] text-[#A0A0A0] mb-4">
                   <Search size={20} />
                 </div>
-                <h3 className="text-[15px] font-bold text-black">Shablon topilmadi</h3>
+                <h3 className="text-[15px] font-bold text-black">{t("pages.templates_page.no_template_title")}</h3>
                 <p className="text-[11px] text-[#707070] mt-1 max-w-[280px] leading-normal font-medium">
-                  Ushbu qidiruv mezonlariga mos keladigan shablonlar mavjud emas. Iltimos, boshqa toifa yoki platformani tanlang.
+                  {t("pages.templates_page.no_template_desc")}
                 </p>
               </Card>
             ) : (
@@ -510,7 +510,7 @@ export default function TemplatesPage() {
                         )}
                         {tmpl.hasBuilderBadge && (
                           <div className="bg-slate-100 border border-slate-200 text-slate-700 font-extrabold text-[9px] uppercase tracking-wider px-2 py-0.5 rounded-md">
-                            Konstruktor yo&apos;q
+                            {t("pages.templates_page.builder_badge")}
                           </div>
                         )}
                       </div>
@@ -528,7 +528,7 @@ export default function TemplatesPage() {
 
                     {/* Arrow / Hover Helper */}
                     <div className="flex justify-end items-center text-[11px] font-bold text-[#707070] group-hover:text-black transition-colors pt-2 border-t border-[#F5F5F5] w-full">
-                      <span>Shablonni ishga tushirish</span>
+                      <span>{t("pages.templates_page.action_launch")}</span>
                       <span className="ml-1 text-[13px] group-hover:translate-x-1 transition-transform">→</span>
                     </div>
                   </div>
@@ -557,8 +557,8 @@ export default function TemplatesPage() {
 
             {/* Modal Header */}
             <div className="flex flex-col gap-1">
-              <h3 className="text-[18px] font-black text-black tracking-tight leading-none">Shablon qo&apos;shish</h3>
-              <p className="text-[11px] text-[#707070] font-medium leading-none mt-1">Shablon joriy loyihada saqlanadi</p>
+              <h3 className="text-[18px] font-black text-black tracking-tight leading-none">{t("pages.templates_page.modal_add_title")}</h3>
+              <p className="text-[11px] text-[#707070] font-medium leading-none mt-1">{t("pages.templates_page.modal_add_desc")}</p>
             </div>
 
             {/* Account Selector Dropdown */}
@@ -567,7 +567,7 @@ export default function TemplatesPage() {
                 value={selectedChannelId}
                 onChange={(val) => setSelectedChannelId(val)}
                 options={channelOptions}
-                placeholder="Akkauntni tanlash"
+                placeholder={t("pages.templates_page.modal_add_placeholder")}
                 className="h-11 rounded-[14px]"
               />
             </div>
@@ -577,7 +577,7 @@ export default function TemplatesPage() {
               onClick={handleConfirmTemplate}
               className="w-full h-11 bg-black text-white rounded-[16px] text-[12px] font-black hover:bg-black/95 active:scale-[0.98] transition-all flex items-center justify-center"
             >
-              Qo&apos;shish
+              {t("pages.templates_page.modal_add_btn")}
             </button>
           </div>
         </div>
