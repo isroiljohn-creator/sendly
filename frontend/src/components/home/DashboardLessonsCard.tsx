@@ -60,35 +60,16 @@ export function DashboardLessonsCard() {
         </Link>
       </div>
 
-      <div className="relative h-[125px] w-[265px] sm:w-[305px] mx-auto mt-3.5 select-none">
+      <div className="relative h-[125px] w-full mt-3.5 select-none [--card-width:145px] sm:[--card-width:155px]">
         {lessons.map((l, i) => {
-          // Dynamic mobile position offsets
-          let leftMobile = i * 50;
+          // Calculate the left offset percentage relative to remaining space (100% - card-width)
+          let leftPercent = i === 0 ? 0 : i === 1 ? 0.5 : 1;
+          
           if (hoveredIndex !== null) {
             if (hoveredIndex === 0) {
-              if (i === 1) leftMobile = 50 + 10;
-              if (i === 2) leftMobile = 100 + 20;
-            } else if (hoveredIndex === 1) {
-              if (i === 0) leftMobile = -6;
-              if (i === 2) leftMobile = 100 + 10;
+              if (i === 1) leftPercent = 0.5 + 0.08; // Shift middle card right slightly
             } else if (hoveredIndex === 2) {
-              if (i === 0) leftMobile = -12;
-              if (i === 1) leftMobile = 50 - 6;
-            }
-          }
-
-          // Dynamic desktop position offsets
-          let leftDesktop = i * 60;
-          if (hoveredIndex !== null) {
-            if (hoveredIndex === 0) {
-              if (i === 1) leftDesktop = 60 + 12;
-              if (i === 2) leftDesktop = 120 + 24;
-            } else if (hoveredIndex === 1) {
-              if (i === 0) leftDesktop = -8;
-              if (i === 2) leftDesktop = 120 + 12;
-            } else if (hoveredIndex === 2) {
-              if (i === 0) leftDesktop = -16;
-              if (i === 1) leftDesktop = 60 - 8;
+              if (i === 1) leftPercent = 0.5 - 0.08; // Shift middle card left slightly
             }
           }
 
@@ -113,10 +94,9 @@ export function DashboardLessonsCard() {
               onMouseLeave={() => setHoveredIndex(null)}
               style={{
                 zIndex,
-                "--left-mobile": `${leftMobile}px`,
-                "--left-desktop": `${leftDesktop}px`
-              } as React.CSSProperties}
-              className={`absolute top-1 left-[var(--left-mobile)] sm:left-[var(--left-desktop)] flex w-[145px] sm:w-[155px] h-[110px] flex-col justify-between rounded-[18px] p-3 shadow-md hover:shadow-xl hover:-translate-y-2 hover:scale-[1.02] transition-all duration-300 ease-out cursor-pointer ${l.bg}`}
+                left: `calc((100% - var(--card-width)) * ${leftPercent})`
+              }}
+              className={`absolute top-1 flex w-[145px] sm:w-[155px] h-[110px] flex-col justify-between rounded-[18px] p-3 shadow-md hover:shadow-xl hover:-translate-y-2 hover:scale-[1.02] transition-all duration-300 ease-out cursor-pointer ${l.bg}`}
             >
               <div className="flex items-center justify-between">
                 <GraduationCap size={13} className={l.iconColor} />
