@@ -25,6 +25,7 @@ import {
 } from "lucide-react";
 import { db } from "@/lib/db";
 import { useI18n } from "@/i18n/I18nProvider";
+import { BrandLoader } from "@/components/ui/BrandLoader";
 
 const LOCAL_TRANSLATIONS: Record<string, Record<string, string>> = {
   uz: {
@@ -121,7 +122,8 @@ const LOCAL_TRANSLATIONS: Record<string, Record<string, string>> = {
     lengthLimit: "Javob uzunligi",
     humorLevel: "Hazil darajasi",
     workingHours: "Ish vaqti",
-    escalationRulesLabel: "Yo'naltirish qoidalari"
+    escalationRulesLabel: "Yo'naltirish qoidalari",
+    adminLoading: "Admin panel ma'lumotlari yuklanmoqda..."
   },
   ru: {
     overview: "Общая аналитика",
@@ -217,7 +219,8 @@ const LOCAL_TRANSLATIONS: Record<string, Record<string, string>> = {
     lengthLimit: "Длина ответа",
     humorLevel: "Уровень юмора",
     workingHours: "Рабочее время",
-    escalationRulesLabel: "Правила эскалации"
+    escalationRulesLabel: "Правила эскалации",
+    adminLoading: "Данные панели администратора загружаются..."
   },
   en: {
     overview: "General Analytics",
@@ -313,7 +316,8 @@ const LOCAL_TRANSLATIONS: Record<string, Record<string, string>> = {
     lengthLimit: "Response Length",
     humorLevel: "Humor Level",
     workingHours: "Working Hours",
-    escalationRulesLabel: "Escalation Rules"
+    escalationRulesLabel: "Escalation Rules",
+    adminLoading: "Admin panel data is loading..."
   }
 };
 
@@ -413,9 +417,8 @@ export default function AdminPage() {
   if (loading) {
     return (
       <AppLayout>
-        <div className="flex flex-col items-center justify-center min-h-[400px] gap-3">
-          <Loader2 className="animate-spin text-black" size={30} />
-          <p className="text-[13px] font-bold text-black/80">Admin panel ma&apos;lumotlari yuklanmoqda...</p>
+        <div className="flex flex-col items-center justify-center min-h-[400px]">
+          <BrandLoader text={tr("adminLoading")} />
         </div>
       </AppLayout>
     );

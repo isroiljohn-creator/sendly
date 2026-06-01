@@ -48,7 +48,6 @@ const TOP_ITEMS: NavItem[] = [
   { to: "/contacts", Icon: Users, labelKey: "nav.contacts" },
   { to: "/broadcast", Icon: Send, labelKey: "nav.broadcast" },
   { to: "/analytics", Icon: BarChart3, labelKey: "nav.analytics" },
-  { to: "/lessons", Icon: GraduationCap, labelKey: "nav.lessons" },
   { to: "/settings", Icon: Settings, labelKey: "nav.settings" },
 ];
 

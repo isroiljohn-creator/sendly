@@ -8,7 +8,6 @@ import { ProPlanCard } from "@/components/home/ProPlanCard";
 import { ActivityCard } from "@/components/home/ActivityCard";
 import { RevenueCard } from "@/components/home/RevenueCard";
 import { AutomationsCard } from "@/components/home/AutomationsCard";
-import { DashboardLessonsCard } from "@/components/home/DashboardLessonsCard";
 import { Button } from "@/components/ui/primitives";
 import { useI18n } from "@/i18n/I18nProvider";
 import { ChevronDown } from "lucide-react";
@@ -355,10 +354,9 @@ export default function Home() {
           />
         </section>
 
-        {/* Row 2 — 2 columns */}
-        <section className="grid grid-cols-1 gap-4 lg:grid-cols-[1.5fr_1fr]">
+        {/* Row 2 */}
+        <section className="grid grid-cols-1 gap-4">
           <AutomationsCard />
-          <DashboardLessonsCard />
         </section>
       </div>
 

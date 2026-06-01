@@ -7,6 +7,7 @@ import { TopBar } from "./TopBar";
 import { ConnectChannelModal } from "./ConnectChannelModal";
 import { SupportWidget } from "./SupportWidget";
 import { db } from "@/lib/db";
+import { BrandLoader } from "@/components/ui/BrandLoader";
 
 export function AppLayout({ children }: { children: ReactNode }) {
   const [authorized, setAuthorized] = useState(false);
@@ -43,11 +44,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
   }, []);
 
   if (!authorized) {
-    return (
-      <div className="flex h-screen items-center justify-center bg-[#E8E8E8] text-black font-bold">
-        Yuklanmoqda...
-      </div>
-    );
+    return <BrandLoader fullScreen />;
   }
 
   return (

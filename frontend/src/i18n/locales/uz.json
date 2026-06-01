@@ -15,6 +15,7 @@
     "actions": "Amallar",
     "back": "Orqaga",
     "loading": "Yuklanmoqda...",
+    "loading_settings": "Sozlamalar yuklanmoqda...",
     "confirm": "Tasdiqlash",
     "or": "Yoki",
     "copy": "Nusxalash",
@@ -347,7 +348,8 @@
         "promo_bonus": "{code} promokodi bonusi",
         "promo_activated_desc": "Muvaffaqiyatli faollashtirilgan",
         "activated_badge": "FAOLLASHTIRILGAN",
-        "status_waiting": "KUTILMOQDA"
+        "status_waiting": "KUTILMOQDA",
+        "no_bonuses": "Hozircha faol bonuslar mavjud emas."
       },
       "cancel_confirm": {
         "title": "Obunani bekor qilish",

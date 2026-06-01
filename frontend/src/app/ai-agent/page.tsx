@@ -6,6 +6,7 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { useI18n } from "@/i18n/I18nProvider";
+import { BrandLoader } from "@/components/ui/BrandLoader";
 import { db, BotSettings, Lesson, Module } from "@/lib/db";
 import { moderateMessage } from "@/lib/ai/moderation";
 import {
@@ -3681,9 +3682,8 @@ function AIAgentContent() {
 
         {/* Main Workspace */}
         {activeTab === "settings" && !settings && (
-          <div className="flex flex-col items-center justify-center p-12 text-[#707070] gap-3">
-            <Loader2 className="animate-spin text-black" size={24} />
-            <span>Sozlamalar yuklanmoqda...</span>
+          <div className="flex flex-col items-center justify-center p-12">
+            <BrandLoader text={t("common.loading_settings")} />
           </div>
         )}
 
@@ -5415,16 +5415,18 @@ function AIAgentContent() {
   );
 }
 
+function LoadingFallback() {
+  const { t } = useI18n();
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-[#F9F9F7]">
+      <BrandLoader text={t("common.loading")} />
+    </div>
+  );
+}
+
 export default function AIAgentPage() {
   return (
-    <Suspense fallback={
-      <div className="min-h-screen flex items-center justify-center bg-[#F9F9F7]">
-        <div className="flex flex-col items-center gap-3">
-          <Loader2 className="animate-spin text-black" size={32} />
-          <span className="text-[12px] font-bold text-[#707070]">Yuklanmoqda...</span>
-        </div>
-      </div>
-    }>
+    <Suspense fallback={<LoadingFallback />}>
       <AIAgentContent />
     </Suspense>
   );

@@ -1010,31 +1010,21 @@ export default function AccountPage() {
                 <h4 className="text-[12px] font-bold text-[#707070] uppercase tracking-wider mb-3">{t("pages.account.bonuses.my_bonuses")}</h4>
                 
                 <div className="flex flex-col gap-3">
-                  <div className="flex items-center justify-between p-4 bg-[#C7F33C]/10 border border-[#C7F33C]/30 rounded-[14px]">
-                    <div>
-                      <p className="text-[13px] font-bold text-[#1A2906]">{t("pages.account.bonuses.reg_bonus")}</p>
-                      <p className="text-[10px] text-[#5A7C1E] mt-0.5">{t("pages.account.bonuses.reg_bonus_desc")}</p>
-                    </div>
-                    <span className="bg-[#C7F33C] text-[#1A2906] text-[10px] font-bold px-2 py-0.5 rounded-full">{t("common.active")}</span>
-                  </div>
-
-                  <div className="flex items-center justify-between p-4 bg-white border border-[#F0F0F0] rounded-[14px]">
-                    <div>
-                      <p className="text-[13px] font-bold text-black">{t("pages.account.bonuses.trial_bonus")}</p>
-                      <p className="text-[10px] text-[#707070] mt-0.5">{t("pages.account.bonuses.trial_bonus_desc")}</p>
-                    </div>
-                    <span className="bg-[#F0F0F0] text-[#707070] text-[10px] font-bold px-2 py-0.5 rounded-full">{t("pages.account.bonuses.status_waiting")}</span>
-                  </div>
-
-                  {aiCreditsData.usedVouchers?.map((v: string) => (
-                    <div key={v} className="flex items-center justify-between p-4 bg-[#EFF2FC] border border-[#D8D8D8] rounded-[14px] animate-in fade-in duration-200">
-                      <div>
-                        <p className="text-[13px] font-bold text-black">{t("pages.account.bonuses.promo_bonus").replace("{code}", v)}</p>
-                        <p className="text-[10px] text-[#707070] mt-0.5">{t("pages.account.bonuses.promo_activated_desc")}</p>
+                  {aiCreditsData.usedVouchers && aiCreditsData.usedVouchers.length > 0 ? (
+                    aiCreditsData.usedVouchers.map((v: string) => (
+                      <div key={v} className="flex items-center justify-between p-4 bg-[#EFF2FC] border border-[#D8D8D8] rounded-[14px] animate-in fade-in duration-200">
+                        <div>
+                          <p className="text-[13px] font-bold text-black">{t("pages.account.bonuses.promo_bonus").replace("{code}", v)}</p>
+                          <p className="text-[10px] text-[#707070] mt-0.5">{t("pages.account.bonuses.promo_activated_desc")}</p>
+                        </div>
+                        <span className="bg-[#EFF2FC] text-black text-[10px] font-bold px-2 py-0.5 rounded-full">{t("pages.account.bonuses.activated_badge")}</span>
                       </div>
-                      <span className="bg-[#EFF2FC] text-black text-[10px] font-bold px-2 py-0.5 rounded-full">{t("pages.account.bonuses.activated_badge")}</span>
+                    ))
+                  ) : (
+                    <div className="text-center p-6 border border-dashed border-[#D8D8D8] rounded-[14px] text-[12px] text-[#707070] bg-[#F9F9F7]">
+                      {t("pages.account.bonuses.no_bonuses")}
                     </div>
-                  ))}
+                  )}
                 </div>
               </div>
             </div>

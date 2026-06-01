@@ -15,6 +15,7 @@
     "actions": "Actions",
     "back": "Back",
     "loading": "Loading...",
+    "loading_settings": "Settings are loading...",
     "confirm": "Confirm",
     "or": "Or",
     "copy": "Copy",
@@ -347,7 +348,8 @@
         "promo_bonus": "{code} promo code bonus",
         "promo_activated_desc": "Successfully activated",
         "activated_badge": "ACTIVATED",
-        "status_waiting": "PENDING"
+        "status_waiting": "PENDING",
+        "no_bonuses": "No active bonuses at the moment."
       },
       "cancel_confirm": {
         "title": "Cancel Subscription",

@@ -15,6 +15,7 @@
     "actions": "Действия",
     "back": "Назад",
     "loading": "Загрузка...",
+    "loading_settings": "Загрузка настроек...",
     "confirm": "Подтвердить",
     "or": "Или",
     "copy": "Копировать",
@@ -347,7 +348,8 @@
         "promo_bonus": "Бонус по промокоду {code}",
         "promo_activated_desc": "Успешно активирован",
         "activated_badge": "АКТИВИРОВАН",
-        "status_waiting": "ОЖИДАЕТСЯ"
+        "status_waiting": "ОЖИДАЕТСЯ",
+        "no_bonuses": "Активные бонусы отсутствуют."
       },
       "cancel_confirm": {
         "title": "Отмена подписки",
