@@ -505,7 +505,7 @@ export default function AutomationsPage() {
                 >
                   <div className="flex justify-between items-start w-full">
                     <div className="bg-[#C7F33C] text-black font-black text-[10px] uppercase tracking-wider px-2.5 py-1 rounded-[6px]">
-                      QUICK
+                      {t("pages.automations_page.quick_badge")}
                     </div>
                     <span className="text-[16px] text-[#C7F33C] group-hover:translate-x-1 transition-transform font-extrabold">→</span>
                   </div>
@@ -612,7 +612,7 @@ export default function AutomationsPage() {
                 >
                   <div className="flex justify-between items-start w-full">
                     <div className="bg-[#C7F33C] text-black font-black text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-[6px] select-none">
-                      QUICK
+                      {t("pages.automations_page.quick_badge")}
                     </div>
                     <span className="text-[16px] text-[#C7F33C] group-hover:translate-x-1 transition-transform font-extrabold">→</span>
                   </div>
