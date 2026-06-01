@@ -432,8 +432,8 @@ export default function LoginPage() {
       <Card className="w-full max-w-[420px] bg-white border border-[#D8D8D8]/60 shadow-[0_8px_30px_rgba(0,0,0,0.06)] p-8 z-10 rounded-[28px]">
         
         <div className="flex flex-col items-center text-center">
-          <div className="grid h-[52px] w-[52px] place-items-center rounded-[18px] bg-[#C7F33C] text-black shadow-[0_0_20px_rgba(199,243,60,0.2)] overflow-hidden">
-            <img src="/logo.png" alt="Sendly" className="h-[28px] w-[28px] object-contain" />
+          <div className="h-[52px] w-[52px] rounded-[18px] shadow-[0_0_20px_rgba(199,243,60,0.2)] overflow-hidden">
+            <img src="/logo.png" alt="Sendly" className="h-full w-full object-cover" />
           </div>
           <h2 className="mt-4 text-[26px] font-extrabold text-black tracking-tight">
             {"Sendly"}

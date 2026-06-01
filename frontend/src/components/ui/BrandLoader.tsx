@@ -28,8 +28,8 @@ export function BrandLoader({ text, fullScreen = false, theme = "light", classNa
         <div className="absolute h-16 w-16 rounded-full border border-[#C7F33C]/25 animate-ping [animation-duration:2s]" />
 
         {/* Sendly Logo Container */}
-        <div className="relative z-10 grid h-12 w-12 place-items-center rounded-[16px] bg-[#C7F33C] text-black shadow-[0_0_20px_rgba(199,243,60,0.4)] overflow-hidden">
-          <img src="/logo.png" alt="Sendly" className="h-[24px] w-[24px] object-contain animate-pulse" />
+        <div className="relative z-10 h-12 w-12 rounded-[16px] shadow-[0_0_20px_rgba(199,243,60,0.4)] overflow-hidden">
+          <img src="/logo.png" alt="Sendly" className="h-full w-full object-cover animate-pulse" />
         </div>
       </div>
       

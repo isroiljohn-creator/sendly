@@ -13,8 +13,8 @@ export default function PrivacyPolicy() {
         {/* Top Navbar Brand & Language Switcher */}
         <div className="flex flex-col sm:flex-row items-center justify-between gap-6 border-b border-slate-100 pb-8 mb-8">
           <Link href="/" className="flex items-center gap-2.5 shrink-0">
-            <div className="grid h-8 w-8 place-items-center rounded-[10px] bg-[#C7F33C] shadow-sm overflow-hidden">
-              <img src="/logo.png" alt="Sendly" className="h-[18px] w-[18px] object-contain" />
+            <div className="h-8 w-8 rounded-[10px] shadow-sm overflow-hidden">
+              <img src="/logo.png" alt="Sendly" className="h-full w-full object-cover" />
             </div>
             <span className="text-[17px] font-extrabold tracking-tight text-black">
               {"Sendly"}
