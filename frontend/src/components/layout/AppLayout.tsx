@@ -20,7 +20,8 @@ import {
   HelpCircle, 
   LogOut, 
   Plus, 
-  Bot 
+  Bot,
+  Check
 } from "lucide-react";
 import { Instagram } from "@/components/ui/icons";
 import { Sidebar } from "./Sidebar";
@@ -350,11 +351,11 @@ export function AppLayout({ children }: { children: ReactNode }) {
             <p className="text-[9px] font-extrabold text-[#a0a0a0] uppercase tracking-wider mb-2">
               Tizim tili
             </p>
-            <div className="flex items-center gap-1.5">
+            <div className="flex flex-col gap-1.5">
               {[
-                { code: "uz", flag: "UZ", label: "O'zbekcha" },
-                { code: "ru", flag: "RU", label: "Русский" },
-                { code: "en", flag: "EN", label: "English" }
+                { code: "uz", flag: "🇺🇿", label: "O'zbekcha" },
+                { code: "ru", flag: "🇷🇺", label: "Русский" },
+                { code: "en", flag: "🇬🇧", label: "English" }
               ].map((item) => {
                 const isAct = lang === item.code;
                 return (
@@ -363,12 +364,17 @@ export function AppLayout({ children }: { children: ReactNode }) {
                     onClick={() => {
                       setLang(item.code as any);
                     }}
-                    className={`flex-1 flex items-center justify-center gap-1 py-2 rounded-xl border text-[11px] font-bold transition-colors ${
-                      isAct ? "bg-black text-[#C7F33C] border-black" : "bg-neutral-50 border-neutral-100 text-neutral-700 hover:bg-neutral-100"
+                    className={`flex items-center justify-between w-full px-3.5 py-2.5 rounded-xl border text-[12px] font-bold transition-colors ${
+                      isAct 
+                        ? "bg-black text-[#C7F33C] border-black" 
+                        : "bg-neutral-50 border-neutral-100 text-neutral-800 hover:bg-neutral-100"
                     }`}
                   >
-                    <span>{item.flag}</span>
-                    <span>{item.label}</span>
+                    <div className="flex items-center gap-2">
+                      <span className="text-[14px]">{item.flag}</span>
+                      <span>{item.label}</span>
+                    </div>
+                    {isAct && <Check size={14} className="text-[#C7F33C]" />}
                   </button>
                 );
               })}
