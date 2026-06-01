@@ -60,20 +60,20 @@ export function DashboardLessonsCard() {
         </Link>
       </div>
 
-      <div className="relative h-[125px] w-full mt-3.5 select-none overflow-hidden">
+      <div className="relative h-[125px] w-[265px] sm:w-[305px] mx-auto mt-3.5 select-none">
         {lessons.map((l, i) => {
           // Dynamic mobile position offsets
           let leftMobile = i * 50;
           if (hoveredIndex !== null) {
             if (hoveredIndex === 0) {
-              if (i === 1) leftMobile = 50 + 15;
-              if (i === 2) leftMobile = 100 + 25;
+              if (i === 1) leftMobile = 50 + 10;
+              if (i === 2) leftMobile = 100 + 20;
             } else if (hoveredIndex === 1) {
-              if (i === 0) leftMobile = -10;
-              if (i === 2) leftMobile = 100 + 15;
+              if (i === 0) leftMobile = -6;
+              if (i === 2) leftMobile = 100 + 10;
             } else if (hoveredIndex === 2) {
-              if (i === 0) leftMobile = -20;
-              if (i === 1) leftMobile = 50 - 12;
+              if (i === 0) leftMobile = -12;
+              if (i === 1) leftMobile = 50 - 6;
             }
           }
 
@@ -81,14 +81,14 @@ export function DashboardLessonsCard() {
           let leftDesktop = i * 60;
           if (hoveredIndex !== null) {
             if (hoveredIndex === 0) {
-              if (i === 1) leftDesktop = 60 + 18;
-              if (i === 2) leftDesktop = 120 + 30;
+              if (i === 1) leftDesktop = 60 + 12;
+              if (i === 2) leftDesktop = 120 + 24;
             } else if (hoveredIndex === 1) {
-              if (i === 0) leftDesktop = -12;
-              if (i === 2) leftDesktop = 120 + 18;
+              if (i === 0) leftDesktop = -8;
+              if (i === 2) leftDesktop = 120 + 12;
             } else if (hoveredIndex === 2) {
-              if (i === 0) leftDesktop = -24;
-              if (i === 1) leftDesktop = 60 - 15;
+              if (i === 0) leftDesktop = -16;
+              if (i === 1) leftDesktop = 60 - 8;
             }
           }
 

@@ -350,24 +350,25 @@ export default function AutomationsPage() {
           <div className="flex flex-col gap-2">
             <div className="flex items-center justify-between text-[10px] uppercase tracking-wider font-extrabold text-[#A0A0A0]">
               <span>{t("pages.automations_page.accounts")}</span>
-              <Link
-                href="/settings?connect=choose"
+              <button
+                onClick={() => window.dispatchEvent(new Event("replai-open-connect-modal"))}
                 className="hover:text-black transition-colors p-0.5 rounded hover:bg-[#F5F5F5]"
                 title={t("pages.settings_page.manage_channels")}
               >
                 <Plus size={14} />
-              </Link>
+              </button>
             </div>
 
             <div className="flex flex-col gap-1.5">
               {channels.length === 0 ? (
                 <div className="p-3 text-center border border-dashed border-[#E8E8E8] rounded-[16px]">
                   <p className="text-[10px] text-[#A0A0A0] leading-normal">{t("pages.automations_page.no_accounts")}</p>
-                  <Link href="/settings?connect=choose">
-                    <span className="inline-block mt-1 text-[10px] text-blue-600 font-semibold cursor-pointer hover:underline">
-                      {t("pages.automations_page.connect_channel")}
-                    </span>
-                  </Link>
+                  <button
+                    onClick={() => window.dispatchEvent(new Event("replai-open-connect-modal"))}
+                    className="inline-block text-[9.5px] bg-black hover:bg-neutral-800 text-white font-extrabold px-3 py-1 rounded-[10px] cursor-pointer shadow-sm active:scale-95 transition-all"
+                  >
+                    {t("pages.automations_page.connect_channel")}
+                  </button>
                 </div>
               ) : (
                 channels.map((ch) => {
@@ -481,11 +482,13 @@ export default function AutomationsPage() {
                   <p className="text-[10px] text-white/60">{t("pages.automations_page.no_channels_warning_desc")}</p>
                 </div>
               </div>
-              <Link href="/settings?connect=choose">
-                <Button variant="accent" className="text-[10px] py-1.5 px-3.5 rounded-full whitespace-nowrap bg-[#C7F33C] text-black hover:bg-[#b0d82f]">
-                  {t("pages.automations_page.connect_channel")}
-                </Button>
-              </Link>
+              <Button
+                onClick={() => window.dispatchEvent(new Event("replai-open-connect-modal"))}
+                variant="accent"
+                className="relative z-10 text-[10.5px] font-extrabold py-2 px-4 rounded-xl whitespace-nowrap bg-[#C7F33C] text-black hover:bg-[#b5e02c] shadow-[0_4px_12px_rgba(199,243,60,0.15)] active:scale-95 transition-all border-0"
+              >
+                {t("pages.automations_page.connect_channel")}
+              </Button>
             </div>
           )}
 

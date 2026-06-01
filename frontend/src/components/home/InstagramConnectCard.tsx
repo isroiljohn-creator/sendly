@@ -34,12 +34,12 @@ export function InstagramConnectCard() {
         </h3>
         <p className="mt-1.5 text-[12px] text-[#9CA3AF]">{t("pages.home.ig_sub")}</p>
 
-        <Link
-          href="/settings?connect=choose"
-          className="mt-5 w-full inline-flex items-center justify-center font-medium transition-all duration-150 active:scale-[0.98] text-[13px] bg-[#C7F33C] text-[#1A2906] hover:bg-[#9BC92E] px-5 py-3.5 rounded-full text-center block"
+        <button
+          onClick={() => window.dispatchEvent(new Event("replai-open-connect-modal"))}
+          className="mt-5 w-full inline-flex items-center justify-center font-medium transition-all duration-150 active:scale-[0.98] text-[13px] bg-[#C7F33C] text-[#1A2906] hover:bg-[#9BC92E] px-5 py-3.5 rounded-full text-center"
         >
           {t("common.connect_instagram")}
-        </Link>
+        </button>
       </div>
     </Card>
   );

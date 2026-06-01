@@ -30,13 +30,13 @@ export function ProPlanCard({ hasChannels = false }: { hasChannels?: boolean; va
         </div>
 
         <div className="flex flex-col gap-2 mt-auto shrink-0">
-          <Link
-            href="/settings?connect=choose"
-            className="w-full py-2.5 rounded-full text-[12px] font-bold text-black bg-[#C7F33C] hover:bg-[#9BC92E] transition-all flex items-center justify-center gap-1.5 active:scale-[0.98] text-center block"
+          <button
+            onClick={() => window.dispatchEvent(new Event("replai-open-connect-modal"))}
+            className="w-full py-2.5 rounded-full text-[12px] font-bold text-black bg-[#C7F33C] hover:bg-[#9BC92E] transition-all flex items-center justify-center gap-1.5 active:scale-[0.98] text-center"
           >
             <Plus size={14} />
             <span>{t("pages.home.connect_card_btn")}</span>
-          </Link>
+          </button>
         </div>
       </Card>
     );

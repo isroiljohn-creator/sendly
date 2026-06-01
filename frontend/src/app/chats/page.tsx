@@ -181,11 +181,12 @@ export default function ChatsPage() {
                 <p className="text-[11px] text-white/60">{t("pages.chats.no_channel_desc")}</p>
               </div>
             </div>
-            <Link href="/settings?connect=choose">
-              <button className="bg-white text-black text-[11px] font-semibold py-2 px-4 rounded-full whitespace-nowrap hover:bg-[#F0F0F0] transition-colors">
-                {t("pages.chats.connect_channel_btn")}
-              </button>
-            </Link>
+            <button 
+              onClick={() => window.dispatchEvent(new Event("replai-open-connect-modal"))}
+              className="bg-white text-black text-[11px] font-semibold py-2 px-4 rounded-full whitespace-nowrap hover:bg-[#F0F0F0] transition-colors"
+            >
+              {t("pages.chats.connect_channel_btn")}
+            </button>
           </div>
         )}
 

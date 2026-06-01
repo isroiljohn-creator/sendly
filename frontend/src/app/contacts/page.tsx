@@ -43,11 +43,12 @@ export default function ContactsPage() {
                 <p className="text-[11px] text-white/60">{t("pages.contacts.no_channel_desc")}</p>
               </div>
             </div>
-            <Link href="/settings?connect=choose">
-              <button className="bg-white text-black text-[11px] font-semibold py-2 px-4 rounded-full whitespace-nowrap hover:bg-[#F0F0F0] transition-colors">
-                {t("pages.contacts.connect_channel_btn")}
-              </button>
-            </Link>
+            <button 
+              onClick={() => window.dispatchEvent(new Event("replai-open-connect-modal"))}
+              className="bg-white text-black text-[11px] font-semibold py-2 px-4 rounded-full whitespace-nowrap hover:bg-[#F0F0F0] transition-colors"
+            >
+              {t("pages.contacts.connect_channel_btn")}
+            </button>
           </div>
         )}
 
@@ -94,9 +95,13 @@ export default function ContactsPage() {
                     : t("pages.contacts.empty_contacts_desc")}
                 </p>
                 {!activeChannel && (
-                  <Link href="/settings?connect=choose" className="mt-4">
-                    <Button variant="primary">{t("pages.contacts.connect_channel")}</Button>
-                  </Link>
+                  <Button 
+                    onClick={() => window.dispatchEvent(new Event("replai-open-connect-modal"))}
+                    variant="primary" 
+                    className="mt-4"
+                  >
+                    {t("pages.contacts.connect_channel")}
+                  </Button>
                 )}
               </div>
             ) : (
