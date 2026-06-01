@@ -62,6 +62,7 @@ export default function AutomationsPage() {
   // Custom alert / confirm states
   const [alertConfig, setAlertConfig] = useState<{ isOpen: boolean; title: string; message: string } | null>(null);
   const [groupDeleteTargetId, setGroupDeleteTargetId] = useState<string | null>(null);
+  const [isFiltersOpenMobile, setIsFiltersOpenMobile] = useState(false);
 
   const showAlert = (title: string, message: string) => {
     setAlertConfig({ isOpen: true, title, message });
@@ -258,12 +259,19 @@ export default function AutomationsPage() {
         {/* ================= LEFT SUB-SIDEBAR ================= */}
         <div className="w-full lg:w-[280px] shrink-0 flex flex-col gap-4 bg-white border border-[#E8E8E8] rounded-[24px] p-5 shadow-sm">
           {/* Header */}
-          <div className="flex items-center justify-between pb-2 border-b border-[#F0F0F0]">
-            <h2 className="text-[16px] font-extrabold text-black tracking-tight">{t("pages.automations.title")}</h2>
+          <div className="flex items-center justify-between pb-2 border-b border-[#F0F0F0] cursor-pointer lg:cursor-default" onClick={() => setIsFiltersOpenMobile(p => !p)}>
+            <h2 className="text-[16px] font-extrabold text-black tracking-tight flex items-center gap-2">
+              <span>{t("pages.automations.title")}</span>
+              <span className="lg:hidden text-[10px] bg-neutral-100 text-neutral-600 px-2 py-0.5 rounded border font-bold">
+                {isFiltersOpenMobile ? "Yopish ▲" : "Filtrlar ▼"}
+              </span>
+            </h2>
           </div>
 
-          {/* Action buttons */}
-          <div className="flex flex-col gap-2">
+          {/* Collapsible container on mobile */}
+          <div className={`flex-col gap-4 mt-2 lg:mt-0 ${isFiltersOpenMobile ? "flex animate-in fade-in duration-200" : "hidden lg:flex"}`}>
+            {/* Action buttons */}
+            <div className="flex flex-col gap-2">
             <button 
               onClick={() => setIsCreateFlowModalOpen(true)}
               className="w-full justify-center text-[12px] font-bold py-2.5 rounded-[12px] bg-black text-white hover:bg-black/90 transition-all flex items-center gap-1.5 shadow-sm"
@@ -404,9 +412,9 @@ export default function AutomationsPage() {
               )}
             </div>
           </div>
-
-
         </div>
+
+      </div>
 
         {/* ================= RIGHT CONTENT PANEL ================= */}
         <div className="flex-1 min-w-0 w-full flex flex-col gap-6">

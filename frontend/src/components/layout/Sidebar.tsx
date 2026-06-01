@@ -188,7 +188,7 @@ export function Sidebar() {
   };
 
   return (
-    <aside className="sticky top-4 z-40 flex w-[64px] shrink-0 flex-col items-center h-full bg-white border border-[#E8E8E8]/60 shadow-[0_8px_30px_rgba(0,0,0,0.03)] rounded-[24px] py-4">
+    <aside className="hidden md:flex sticky top-4 z-40 w-[64px] shrink-0 flex-col items-center h-full bg-white border border-[#E8E8E8]/60 shadow-[0_8px_30px_rgba(0,0,0,0.03)] rounded-[24px] py-4">
       {/* Logo Wrapper to align with TopBar */}
       <div className="h-[42px] flex items-center justify-center shrink-0">
         <Link href="/">

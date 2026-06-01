@@ -142,10 +142,18 @@ export function TopBar() {
   ) : null;
 
   return (
-    <div className="flex h-[42px] items-center justify-between gap-4">
+    <div className="flex h-[42px] items-center justify-between gap-4 w-full">
+      {/* Mobile Brand Logo */}
+      <div className="flex md:hidden items-center gap-2">
+        <div className="w-7 h-7 rounded-[8px] overflow-hidden shrink-0">
+          <img src="/logo.png" alt="Sendly" className="h-full w-full object-cover" />
+        </div>
+        <span className="font-black text-[14px] text-black tracking-tight">Sendly</span>
+      </div>
+
       {/* Account Selector */}
       {!isLessonsPage && (
-        <div className="flex items-center gap-2">
+        <div className="hidden md:flex items-center gap-2">
           {channels.length > 0 ? (
             <CustomDropdown
               value={activeChannelId}

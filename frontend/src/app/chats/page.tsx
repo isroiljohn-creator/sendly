@@ -5,7 +5,7 @@ import { AppLayout } from "@/components/layout/AppLayout";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Avatar, LimeBadge } from "@/components/ui/primitives";
 import { useI18n } from "@/i18n/I18nProvider";
-import { Search, Send, Clock, CheckCircle, Zap, Bot, XCircle, User, MessageSquare } from "lucide-react";
+import { Search, Send, Clock, CheckCircle, Zap, Bot, XCircle, User, MessageSquare, ChevronLeft } from "lucide-react";
 import { Instagram } from "@/components/ui/icons";
 import Link from "next/link";
 import { db } from "@/lib/db";
@@ -40,6 +40,7 @@ export default function ChatsPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [inputText, setInputText] = useState("");
   const [activeChannel, setActiveChannel] = useState<Channel | null>(null);
+  const [showChatLogMobile, setShowChatLogMobile] = useState(false);
 
   // Load and sync chats from server/localStorage
   useEffect(() => {
@@ -209,7 +210,7 @@ export default function ChatsPage() {
           ) : (
             <>
               {/* Column 1: Conversations List */}
-              <div className="w-[320px] shrink-0 border-r border-[#D8D8D8] flex flex-col">
+              <div className={`w-full md:w-[320px] shrink-0 border-r border-[#D8D8D8] flex flex-col ${showChatLogMobile ? "hidden md:flex" : "flex"}`}>
                 {/* Search Input */}
                 <div className="p-4 border-b border-[#D8D8D8]">
                   <div className="relative flex items-center">
@@ -236,6 +237,7 @@ export default function ChatsPage() {
                           setChats(
                             chats.map((c) => (c.id === chat.id ? { ...c, unread: false } : c))
                           );
+                          setShowChatLogMobile(true);
                         }}
                         className={[
                           "w-full p-4 flex items-start gap-3 text-left transition-colors",
@@ -269,12 +271,18 @@ export default function ChatsPage() {
               </div>
 
               {/* Column 2: Messaging Log */}
-              <div className="flex-1 flex flex-col bg-[#F9F9F7]">
+              <div className={`flex-1 flex flex-col bg-[#F9F9F7] ${showChatLogMobile ? "flex" : "hidden md:flex"}`}>
                 {/* Active Contact Header */}
                 {activeChat && (
-                  <div className="h-[64px] border-b border-[#D8D8D8] bg-white px-6 flex items-center justify-between shrink-0">
-                    <div className="flex items-center gap-3">
-                      <Avatar src={activeChat.avatar} size={36} />
+                  <div className="h-[64px] border-b border-[#D8D8D8] bg-white px-4 md:px-6 flex items-center justify-between shrink-0">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <button
+                        onClick={() => setShowChatLogMobile(false)}
+                        className="md:hidden p-1.5 -ml-1 mr-1 text-black hover:bg-neutral-100 rounded-full shrink-0"
+                      >
+                        <ChevronLeft size={20} />
+                      </button>
+                      <Avatar src={activeChat.avatar} size={36} className="shrink-0" />
                       <div>
                         <h3 className="text-[14px] font-medium text-black">{activeChat.name}</h3>
                         <div className="flex items-center gap-1.5 text-[11px] text-[#707070]">
