@@ -50,9 +50,9 @@ export function AppLayout({ children }: { children: ReactNode }) {
   return (
     <div className="h-screen w-full bg-[#E8E8E8] px-6 py-4 flex flex-col gap-4 overflow-hidden">
       {impersonatorEmail && (
-        <div className="w-full bg-blue-600 text-white px-6 py-3 rounded-[16px] flex justify-between items-center animate-in slide-in-from-top duration-300 shadow-sm relative overflow-hidden shrink-0">
+        <div className="w-full bg-neutral-900 border border-neutral-800 text-white px-6 py-3 rounded-[16px] flex justify-between items-center animate-in slide-in-from-top duration-300 shadow-sm relative overflow-hidden shrink-0">
           <div className="flex items-center gap-2.5 text-[12px] font-bold">
-            <span>👤</span>
+            <span className="text-[#C7F33C]">👤</span>
             <span>Siz hozirda &lt;{db.getCurrentUser()?.email}&gt; nomidan tizimdadasiz.</span>
           </div>
           <button 
@@ -62,7 +62,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
                 window.location.href = "/admin";
               }
             }}
-            className="bg-white text-blue-600 font-extrabold text-[11px] px-3.5 py-1.5 rounded-full hover:bg-blue-50 transition-colors"
+            className="bg-[#C7F33C] text-black font-extrabold text-[11px] px-3.5 py-1.5 rounded-full hover:bg-[#b0d82d] transition-colors"
           >
             Admin hisobiga qaytish
           </button>

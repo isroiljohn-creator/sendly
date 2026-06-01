@@ -1001,7 +1001,7 @@ export default function AccountPage() {
                   className="rounded-[10px] border border-[#D8D8D8] px-4 py-3 text-[13px] text-black focus:outline-none focus:border-black uppercase font-semibold w-[320px]"
                   placeholder={t("pages.account.bonuses.placeholder")}
                 />
-                <button type="submit" className="h-[44px] bg-[#2563EB] hover:bg-[#1D4ED8] text-white font-semibold text-[13px] px-6 rounded-[10px] transition-colors">
+                <button type="submit" className="h-[44px] bg-black hover:bg-neutral-800 text-white font-semibold text-[13px] px-6 rounded-[10px] transition-colors">
                   {t("pages.account.bonuses.activate")}
                 </button>
               </form>
