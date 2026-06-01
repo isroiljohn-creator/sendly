@@ -4,7 +4,6 @@ import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import {
-  Zap,
   Bot,
   ArrowRight,
   Check,
@@ -242,8 +241,8 @@ export function LandingPageView() {
 
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2.5 shrink-0">
-            <div className="grid h-9 w-9 place-items-center rounded-[12px] bg-[#C7F33C] shadow-[0_4px_15px_rgba(199,243,60,0.3)]">
-              <Zap size={18} className="fill-black text-black" />
+            <div className="grid h-9 w-9 place-items-center rounded-[12px] bg-[#C7F33C] shadow-[0_4px_15px_rgba(199,243,60,0.3)] overflow-hidden">
+              <img src="/logo.png" alt="Sendly" className="h-[20px] w-[20px] object-contain" />
             </div>
             <span className="text-[19px] font-extrabold tracking-tight text-black">
               {"Sendly"}
@@ -584,8 +583,8 @@ export function LandingPageView() {
 
           <div className="mt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-[12px] text-[#707075]">
             <div className="flex items-center gap-2">
-              <div className="grid h-5 w-5 place-items-center rounded-[6px] bg-[#C7F33C]">
-                <Zap size={11} className="fill-black text-black" />
+              <div className="grid h-5 w-5 place-items-center rounded-[6px] bg-[#C7F33C] overflow-hidden">
+                <img src="/logo.png" alt="Sendly" className="h-[12px] w-[12px] object-contain" />
               </div>
               <span className="font-extrabold text-black">{"Sendly"}</span>
               <span>{"© 2026. Barcha huquqlar himoyalangan."}</span>

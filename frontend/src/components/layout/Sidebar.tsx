@@ -189,8 +189,8 @@ export function Sidebar() {
       {/* Logo Wrapper to align with TopBar */}
       <div className="h-[42px] flex items-center justify-center shrink-0">
         <Link href="/">
-          <div className="grid h-[38px] w-[38px] place-items-center rounded-[12px] bg-[#C7F33C] hover:bg-[#B0D82D] transition-colors shadow-sm duration-150 active:scale-95">
-            <Zap size={18} className="fill-black text-black" />
+          <div className="grid h-[38px] w-[38px] place-items-center rounded-[12px] bg-[#C7F33C] hover:bg-[#B0D82D] transition-colors shadow-sm duration-150 active:scale-95 overflow-hidden">
+            <img src="/logo.png" alt="Sendly" className="h-[20px] w-[20px] object-contain" />
           </div>
         </Link>
       </div>
