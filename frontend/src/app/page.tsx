@@ -14,6 +14,7 @@ import { ChevronDown } from "lucide-react";
 import { db } from "@/lib/db";
 import type { Channel, Contact, Automation, User } from "@/lib/db";
 import { LandingPageView } from "@/components/landing/LandingPageView";
+import { BrandLoader } from "@/components/ui/BrandLoader";
 
 type RangeKey = "today" | "7days" | "30days" | "all";
 
@@ -272,11 +273,7 @@ export default function Home() {
   };
 
   if (!isAuthLoaded) {
-    return (
-      <div className="flex h-screen items-center justify-center bg-[#070708] text-white">
-        {t("common.loading")}
-      </div>
-    );
+    return <BrandLoader fullScreen theme="dark" />;
   }
 
   // Render Landing Page for guest users

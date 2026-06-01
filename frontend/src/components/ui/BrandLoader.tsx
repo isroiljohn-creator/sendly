@@ -6,12 +6,14 @@ import { Zap } from "lucide-react";
 interface BrandLoaderProps {
   text?: string;
   fullScreen?: boolean;
+  theme?: "light" | "dark";
   className?: string;
 }
 
-export function BrandLoader({ text, fullScreen = false, className = "" }: BrandLoaderProps) {
+export function BrandLoader({ text, fullScreen = false, theme = "light", className = "" }: BrandLoaderProps) {
   const { t } = useI18n();
   const loadingText = text || t("common.loading");
+  const isDark = theme === "dark";
 
   const loaderContent = (
     <div className={`flex flex-col items-center justify-center gap-5 ${className}`}>
@@ -31,7 +33,7 @@ export function BrandLoader({ text, fullScreen = false, className = "" }: BrandL
         </div>
       </div>
       
-      <p className="text-[12px] font-bold text-[#707070] tracking-wider uppercase animate-pulse">
+      <p className={`text-[12px] font-bold tracking-wider uppercase animate-pulse ${isDark ? "text-white/60" : "text-[#707070]"}`}>
         {loadingText}
       </p>
     </div>
@@ -39,7 +41,7 @@ export function BrandLoader({ text, fullScreen = false, className = "" }: BrandL
 
   if (fullScreen) {
     return (
-      <div className="flex h-screen w-screen items-center justify-center bg-[#E8E8E8] text-black overflow-hidden select-none">
+      <div className={`flex h-screen w-screen items-center justify-center overflow-hidden select-none ${isDark ? "bg-[#070708]" : "bg-[#E8E8E8]"}`}>
         {loaderContent}
       </div>
     );
