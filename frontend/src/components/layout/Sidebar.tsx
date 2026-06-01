@@ -64,10 +64,13 @@ function NavButton({ item, active }: { item: NavItem; active: boolean }) {
       className={[
         "group relative grid h-11 w-11 place-items-center rounded-full transition-all duration-150 active:scale-95",
         active
-          ? "bg-black text-[#C7F33C]"
-          : "bg-transparent text-[#595959] hover:bg-white hover:text-black",
+          ? "bg-black text-[#C7F33C] shadow-[0_4px_12px_rgba(0,0,0,0.18)]"
+          : "bg-transparent text-[#595959] hover:bg-[#F4F4F5] hover:text-black",
       ].join(" ")}
     >
+      {active && (
+        <div className="absolute left-[-10px] w-[3px] h-5 rounded-r bg-[#C7F33C]" />
+      )}
       <Icon size={18} strokeWidth={1.75} />
       
       {/* Hover Tooltip */}
@@ -185,7 +188,7 @@ export function Sidebar() {
   };
 
   return (
-    <aside className="sticky top-4 z-40 flex w-[60px] shrink-0 flex-col items-center h-full pt-0">
+    <aside className="sticky top-4 z-40 flex w-[64px] shrink-0 flex-col items-center h-full bg-white border border-[#E8E8E8]/60 shadow-[0_8px_30px_rgba(0,0,0,0.03)] rounded-[24px] py-4">
       {/* Logo Wrapper to align with TopBar */}
       <div className="h-[42px] flex items-center justify-center shrink-0">
         <Link href="/">
@@ -268,7 +271,7 @@ export function Sidebar() {
       </div>
 
       {/* Divider */}
-      <div className="mt-3 h-[1px] w-[32px] bg-[#D8D8D8]" />
+      <div className="mt-3 h-[1px] w-[32px] bg-[#F0F0F0]" />
 
       <nav className="mt-3 flex flex-1 flex-col items-center gap-2">
         {TOP_ITEMS.map((item) => (
