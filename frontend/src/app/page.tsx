@@ -6,7 +6,7 @@ import { AppLayout } from "@/components/layout/AppLayout";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { ProPlanCard } from "@/components/home/ProPlanCard";
 import { ActivityCard } from "@/components/home/ActivityCard";
-import { RevenueCard } from "@/components/home/RevenueCard";
+import { DashboardLessonsCard } from "@/components/home/DashboardLessonsCard";
 import { AutomationsCard } from "@/components/home/AutomationsCard";
 import { Button } from "@/components/ui/primitives";
 import { useI18n } from "@/i18n/I18nProvider";
@@ -343,12 +343,7 @@ export default function Home() {
             subText={activeRange.activitySub}
             values={activeRange.activityPoints}
           />
-          <RevenueCard
-            value={activeRange.revenueVal}
-            subText={activeRange.revenueSub}
-            points={activeRange.revenuePoints}
-            highlightTag={activeRange.revenueTag}
-          />
+          <DashboardLessonsCard />
         </section>
 
         {/* Row 2 */}
