@@ -361,10 +361,10 @@ export default function AutomationsPage() {
 
             <div className="flex flex-col gap-1.5">
               {channels.length === 0 ? (
-                <div className="p-3 text-center border border-dashed border-[#E8E8E8] rounded-[16px]">
-                  <p className="text-[10px] text-[#A0A0A0] leading-normal">{t("pages.automations_page.no_accounts")}</p>
+                <div className="p-3.5 text-center border border-dashed border-[#E2E2E2] bg-[#FAFAFA] hover:bg-[#F7F7F7] transition-all duration-300 rounded-[18px] flex flex-col items-center justify-center gap-1.5 shadow-[inset_0_1px_2px_rgba(0,0,0,0.02)]">
+                  <p className="text-[10px] text-[#808080] font-medium leading-normal">{t("pages.automations_page.no_accounts")}</p>
                   <Link href="/settings?connect=choose">
-                    <span className="inline-block mt-1 text-[10px] text-blue-600 font-semibold cursor-pointer hover:underline">
+                    <span className="inline-block text-[9.5px] bg-black hover:bg-neutral-800 text-white font-extrabold px-3 py-1 rounded-[10px] cursor-pointer shadow-sm active:scale-95 transition-all">
                       {t("pages.automations_page.connect_channel")}
                     </span>
                   </Link>
@@ -473,16 +473,21 @@ export default function AutomationsPage() {
 
           {/* No Channel Warn Badge */}
           {channels.length === 0 && (
-            <div className="flex items-center justify-between gap-4 p-4 rounded-[20px] bg-black text-white">
-              <div className="flex items-center gap-3">
-                <AlertCircle size={18} className="text-[#C7F33C]" />
+            <div className="flex items-center justify-between gap-4 p-4.5 rounded-[24px] bg-gradient-to-r from-zinc-950 via-neutral-900 to-zinc-950 border border-neutral-850 shadow-[0_10px_30px_rgba(0,0,0,0.08),inset_0_1px_1px_rgba(255,255,255,0.05)] text-white relative overflow-hidden group">
+              {/* Decorative radial background glow */}
+              <div className="absolute -right-16 -top-16 w-32 h-32 bg-[#C7F33C]/5 rounded-full blur-2xl group-hover:bg-[#C7F33C]/10 transition-all duration-700 pointer-events-none" />
+              
+              <div className="flex items-center gap-3.5 relative z-10">
+                <div className="h-9 w-9 rounded-xl bg-neutral-800 flex items-center justify-center border border-neutral-700 shadow-sm shrink-0">
+                  <AlertCircle size={18} className="text-[#C7F33C] animate-pulse" />
+                </div>
                 <div>
-                  <p className="text-[12px] font-bold">{t("pages.automations_page.no_channels_warning")}</p>
-                  <p className="text-[10px] text-white/60">{t("pages.automations_page.no_channels_warning_desc")}</p>
+                  <p className="text-[12.5px] font-black tracking-tight text-white">{t("pages.automations_page.no_channels_warning")}</p>
+                  <p className="text-[10.5px] text-zinc-400 mt-0.5 leading-relaxed font-medium">{t("pages.automations_page.no_channels_warning_desc")}</p>
                 </div>
               </div>
-              <Link href="/settings?connect=choose">
-                <Button variant="accent" className="text-[10px] py-1.5 px-3.5 rounded-full whitespace-nowrap bg-[#C7F33C] text-black hover:bg-[#b0d82f]">
+              <Link href="/settings?connect=choose" className="relative z-10">
+                <Button variant="accent" className="text-[10.5px] font-extrabold py-2 px-4 rounded-xl whitespace-nowrap bg-[#C7F33C] text-black hover:bg-[#b5e02c] shadow-[0_4px_12px_rgba(199,243,60,0.15)] active:scale-95 transition-all border-0">
                   {t("pages.automations_page.connect_channel")}
                 </Button>
               </Link>
@@ -507,19 +512,20 @@ export default function AutomationsPage() {
                 {/* 1. Promotional Quick Bot Card (First Card, larger version) */}
                 <Link 
                   href="/automations/quick-bot" 
-                  className="bg-black hover:bg-neutral-900 border border-neutral-800 rounded-[24px] p-6 flex flex-col justify-between gap-6 shadow-md hover:shadow-xl transition-all relative group cursor-pointer text-left"
+                  className="bg-gradient-to-br from-zinc-950 via-neutral-900 to-black hover:border-neutral-700 border border-neutral-800 rounded-[28px] p-6.5 flex flex-col justify-between gap-8 shadow-lg hover:shadow-[0_20px_40px_rgba(0,0,0,0.3),0_0_25px_rgba(199,243,60,0.08)] hover:-translate-y-1.5 hover:scale-[1.005] transition-all duration-300 relative group cursor-pointer text-left overflow-hidden"
                 >
-                  <div className="flex justify-between items-start w-full">
-                    <div className="bg-[#C7F33C] text-black font-black text-[10px] uppercase tracking-wider px-2.5 py-1 rounded-[6px]">
+                  <div className="absolute -left-12 -bottom-12 w-40 h-40 bg-[#C7F33C]/2 rounded-full blur-3xl pointer-events-none group-hover:bg-[#C7F33C]/5 transition-all duration-500" />
+                  <div className="flex justify-between items-start w-full relative z-10">
+                    <div className="bg-[#C7F33C] text-black font-extrabold text-[9.5px] uppercase tracking-wider px-3 py-1 rounded-[8px] shadow-sm select-none">
                       {t("pages.automations_page.quick_badge")}
                     </div>
-                    <span className="text-[16px] text-[#C7F33C] group-hover:translate-x-1 transition-transform font-extrabold">→</span>
+                    <span className="text-[18px] text-[#C7F33C] group-hover:translate-x-1.5 transition-transform font-black">→</span>
                   </div>
-                  <div>
-                    <h3 className="text-[16px] font-black text-white leading-tight mt-2">
+                  <div className="relative z-10">
+                    <h3 className="text-[17px] font-black text-white leading-snug tracking-tight">
                       {t("pages.automations_page.quick_bot_title")}
                     </h3>
-                    <p className="text-[12px] text-[#A0A0A0] mt-1.5 leading-relaxed font-medium">
+                    <p className="text-[12.5px] text-zinc-400 mt-2 leading-relaxed font-medium">
                       {t("pages.automations_page.quick_bot_desc")}
                     </p>
                   </div>
@@ -534,17 +540,19 @@ export default function AutomationsPage() {
                     {/* Lead Magnet Template */}
                     <div 
                       onClick={() => handleUseTemplate("lead_magnet")}
-                      className="bg-white border border-[#E8E8E8] hover:border-black rounded-[24px] p-5 flex flex-col justify-between gap-4 shadow-sm hover:shadow-md transition-all cursor-pointer group text-left"
+                      className="bg-gradient-to-b from-white to-[#FAFAFA] border border-[#E8E8E8] hover:border-black rounded-[26px] p-5 flex flex-col justify-between gap-5 shadow-sm hover:shadow-[0_12px_30px_rgba(0,0,0,0.05)] hover:-translate-y-1.5 transition-all duration-300 cursor-pointer group text-left"
                     >
                       <div className="flex justify-between items-center">
-                        <div className="w-9 h-9 rounded-xl bg-green-50 text-green-600 flex items-center justify-center">
-                          <BookOpen size={18} />
+                        <div className="w-10 h-10 rounded-2xl bg-green-50 text-green-600 flex items-center justify-center shadow-sm group-hover:scale-110 duration-350 transition-transform">
+                          <BookOpen size={19} />
                         </div>
-                        <span className="text-[12px] text-slate-400 group-hover:text-black transition-colors font-extrabold">{t("pages.automations_page.use_template")}</span>
+                        <span className="text-[11.5px] text-slate-400 group-hover:text-black transition-colors font-extrabold flex items-center gap-1">
+                          {t("pages.automations_page.use_template")} <span className="group-hover:translate-x-0.5 transition-transform">→</span>
+                        </span>
                       </div>
                       <div>
-                        <h4 className="text-[14px] font-bold text-black">{t("pages.automations_page.tmpl_lead_magnet_name")}</h4>
-                        <p className="text-[11px] text-[#707070] mt-1 leading-normal font-medium">
+                        <h4 className="text-[14.5px] font-black text-black tracking-tight">{t("pages.automations_page.tmpl_lead_magnet_name")}</h4>
+                        <p className="text-[11.5px] text-[#606060] mt-1.5 leading-relaxed font-medium">
                           {t("pages.automations_page.tmpl_lead_magnet_desc")}
                         </p>
                       </div>
@@ -553,17 +561,19 @@ export default function AutomationsPage() {
                     {/* Story Coupon Template */}
                     <div 
                       onClick={() => handleUseTemplate("story_coupon")}
-                      className="bg-white border border-[#E8E8E8] hover:border-black rounded-[24px] p-5 flex flex-col justify-between gap-4 shadow-sm hover:shadow-md transition-all cursor-pointer group text-left"
+                      className="bg-gradient-to-b from-white to-[#FAFAFA] border border-[#E8E8E8] hover:border-black rounded-[26px] p-5 flex flex-col justify-between gap-5 shadow-sm hover:shadow-[0_12px_30px_rgba(0,0,0,0.05)] hover:-translate-y-1.5 transition-all duration-300 cursor-pointer group text-left"
                     >
                       <div className="flex justify-between items-center">
-                        <div className="w-9 h-9 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center">
-                          <Gift size={18} />
+                        <div className="w-10 h-10 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center shadow-sm group-hover:scale-110 duration-350 transition-transform">
+                          <Gift size={19} />
                         </div>
-                        <span className="text-[12px] text-slate-400 group-hover:text-black transition-colors font-extrabold">{t("pages.automations_page.use_template")}</span>
+                        <span className="text-[11.5px] text-slate-400 group-hover:text-black transition-colors font-extrabold flex items-center gap-1">
+                          {t("pages.automations_page.use_template")} <span className="group-hover:translate-x-0.5 transition-transform">→</span>
+                        </span>
                       </div>
                       <div>
-                        <h4 className="text-[14px] font-bold text-black">{t("pages.automations_page.tmpl_story_coupon_name")}</h4>
-                        <p className="text-[11px] text-[#707070] mt-1 leading-normal font-medium">
+                        <h4 className="text-[14.5px] font-black text-black tracking-tight">{t("pages.automations_page.tmpl_story_coupon_name")}</h4>
+                        <p className="text-[11.5px] text-[#606060] mt-1.5 leading-relaxed font-medium">
                           {t("pages.automations_page.tmpl_story_coupon_desc")}
                         </p>
                       </div>
@@ -572,17 +582,19 @@ export default function AutomationsPage() {
                     {/* Comment DM Template */}
                     <div 
                       onClick={() => handleUseTemplate("comment_dm")}
-                      className="bg-white border border-[#E8E8E8] hover:border-black rounded-[24px] p-5 flex flex-col justify-between gap-4 shadow-sm hover:shadow-md transition-all cursor-pointer group text-left"
+                      className="bg-gradient-to-b from-white to-[#FAFAFA] border border-[#E8E8E8] hover:border-black rounded-[26px] p-5 flex flex-col justify-between gap-5 shadow-sm hover:shadow-[0_12px_30px_rgba(0,0,0,0.05)] hover:-translate-y-1.5 transition-all duration-300 cursor-pointer group text-left"
                     >
                       <div className="flex justify-between items-center">
-                        <div className="w-9 h-9 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
-                          <MessageSquare size={18} />
+                        <div className="w-10 h-10 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center shadow-sm group-hover:scale-110 duration-350 transition-transform">
+                          <MessageSquare size={19} />
                         </div>
-                        <span className="text-[12px] text-slate-400 group-hover:text-black transition-colors font-extrabold">{t("pages.automations_page.use_template")}</span>
+                        <span className="text-[11.5px] text-slate-400 group-hover:text-black transition-colors font-extrabold flex items-center gap-1">
+                          {t("pages.automations_page.use_template")} <span className="group-hover:translate-x-0.5 transition-transform">→</span>
+                        </span>
                       </div>
                       <div>
-                        <h4 className="text-[14px] font-bold text-black">{t("pages.automations_page.tmpl_comment_dm_name")}</h4>
-                        <p className="text-[11px] text-[#707070] mt-1 leading-normal font-medium">
+                        <h4 className="text-[14.5px] font-black text-black tracking-tight">{t("pages.automations_page.tmpl_comment_dm_name")}</h4>
+                        <p className="text-[11.5px] text-[#606060] mt-1.5 leading-relaxed font-medium">
                           {t("pages.automations_page.tmpl_comment_dm_desc")}
                         </p>
                       </div>
@@ -591,17 +603,19 @@ export default function AutomationsPage() {
                     {/* Welcome FAQ Template */}
                     <div 
                       onClick={() => handleUseTemplate("welcome_faq")}
-                      className="bg-white border border-[#E8E8E8] hover:border-black rounded-[24px] p-5 flex flex-col justify-between gap-4 shadow-sm hover:shadow-md transition-all cursor-pointer group text-left"
+                      className="bg-gradient-to-b from-white to-[#FAFAFA] border border-[#E8E8E8] hover:border-black rounded-[26px] p-5 flex flex-col justify-between gap-5 shadow-sm hover:shadow-[0_12px_30px_rgba(0,0,0,0.05)] hover:-translate-y-1.5 transition-all duration-300 cursor-pointer group text-left"
                     >
                       <div className="flex justify-between items-center">
-                        <div className="w-9 h-9 rounded-xl bg-orange-50 text-orange-600 flex items-center justify-center">
-                          <HelpCircle size={18} />
+                        <div className="w-10 h-10 rounded-2xl bg-orange-50 text-orange-600 flex items-center justify-center shadow-sm group-hover:scale-110 duration-350 transition-transform">
+                          <HelpCircle size={19} />
                         </div>
-                        <span className="text-[12px] text-slate-400 group-hover:text-black transition-colors font-extrabold">{t("pages.automations_page.use_template")}</span>
+                        <span className="text-[11.5px] text-slate-400 group-hover:text-black transition-colors font-extrabold flex items-center gap-1">
+                          {t("pages.automations_page.use_template")} <span className="group-hover:translate-x-0.5 transition-transform">→</span>
+                        </span>
                       </div>
                       <div>
-                        <h4 className="text-[14px] font-bold text-black">{t("pages.automations_page.tmpl_welcome_faq_name")}</h4>
-                        <p className="text-[11px] text-[#707070] mt-1 leading-normal font-medium">
+                        <h4 className="text-[14.5px] font-black text-black tracking-tight">{t("pages.automations_page.tmpl_welcome_faq_name")}</h4>
+                        <p className="text-[11.5px] text-[#606060] mt-1.5 leading-relaxed font-medium">
                           {t("pages.automations_page.tmpl_welcome_faq_desc")}
                         </p>
                       </div>
@@ -614,19 +628,20 @@ export default function AutomationsPage() {
                 {/* 1. Promotional Quick Bot Card (First Card) */}
                 <Link 
                   href="/automations/quick-bot" 
-                  className="bg-black hover:bg-neutral-900 border border-neutral-800 rounded-[24px] p-5 flex flex-col justify-between shadow-sm hover:shadow-md transition-all relative group cursor-pointer text-left h-[160px]"
+                  className="bg-gradient-to-br from-zinc-950 via-neutral-900 to-black hover:border-neutral-700 border border-neutral-800 rounded-[26px] p-5 flex flex-col justify-between shadow-sm hover:shadow-[0_15px_30px_rgba(0,0,0,0.25),0_0_20px_rgba(199,243,60,0.06)] hover:-translate-y-1.5 transition-all duration-300 relative group cursor-pointer text-left h-[160px] overflow-hidden"
                 >
-                  <div className="flex justify-between items-start w-full">
-                    <div className="bg-[#C7F33C] text-black font-black text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-[6px] select-none">
+                  <div className="absolute -left-12 -bottom-12 w-28 h-28 bg-[#C7F33C]/2 rounded-full blur-2xl pointer-events-none group-hover:bg-[#C7F33C]/4 transition-all duration-500" />
+                  <div className="flex justify-between items-start w-full relative z-10">
+                    <div className="bg-[#C7F33C] text-black font-extrabold text-[9.5px] uppercase tracking-wider px-2 py-0.5 rounded-[6px] select-none shadow-sm">
                       {t("pages.automations_page.quick_badge")}
                     </div>
-                    <span className="text-[16px] text-[#C7F33C] group-hover:translate-x-1 transition-transform font-extrabold">→</span>
+                    <span className="text-[16px] text-[#C7F33C] group-hover:translate-x-1.5 transition-transform font-black">→</span>
                   </div>
-                  <div>
-                    <h3 className="text-[14px] font-black text-white leading-tight">
+                  <div className="relative z-10">
+                    <h3 className="text-[14.5px] font-black text-white leading-tight">
                       {t("pages.automations_page.quick_bot_title")}
                     </h3>
-                    <p className="text-[11px] text-[#A0A0A0] mt-1 leading-normal font-medium line-clamp-2">
+                    <p className="text-[11.5px] text-zinc-400 mt-1 leading-normal font-medium line-clamp-2">
                       {t("pages.automations_page.quick_bot_desc")}
                     </p>
                   </div>
@@ -637,7 +652,7 @@ export default function AutomationsPage() {
                   <div
                     key={a.id}
                     onClick={() => handleEditClick(a.id, a.channelId)}
-                    className="bg-white border border-[#E8E8E8] hover:border-black rounded-[24px] p-5 flex flex-col justify-between shadow-sm hover:shadow-md transition-all relative group cursor-pointer text-left font-sans h-[160px]"
+                    className="bg-gradient-to-b from-white to-[#FAFAFA] border border-[#E8E8E8] hover:border-black rounded-[26px] p-5 flex flex-col justify-between shadow-sm hover:shadow-[0_15px_30px_rgba(0,0,0,0.05)] hover:-translate-y-1.5 transition-all duration-300 relative group cursor-pointer text-left font-sans h-[160px]"
                   >
                     {/* Header */}
                     <div className="flex items-start justify-between gap-2">
