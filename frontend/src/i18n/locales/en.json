@@ -553,6 +553,7 @@
       "add_group_desc": "Enter a name to group and sort your automation flows.",
       "group_name_label": "Group name",
       "group_name_placeholder": "Example: Marketing, Sales",
+      "delete_group_title": "Delete Group",
       "delete_group_desc": "Are you sure you want to delete this group? The automations inside will not be deleted, they will simply become uncategorized.",
       "tmpl_lead_magnet_name": "Lead Magnet (Free Guide)",
       "tmpl_lead_magnet_trigger": "book, course, bonus",

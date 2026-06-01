@@ -553,6 +553,7 @@
       "add_group_desc": "Avtomatlashtirish oqimlarini saralash uchun yangi guruh nomini kiriting.",
       "group_name_label": "Guruh nomi",
       "group_name_placeholder": "Masalan: Marketing, Sotuvlar",
+      "delete_group_title": "Guruhni o'chirish",
       "delete_group_desc": "Ushbu guruhni o'chirishni tasdiqlaysizmi? Ichidagi oqimlar o'chib ketmaydi, faqat guruhsiz bo'lib qoladi.",
       "tmpl_lead_magnet_name": "Bepul qo'llanma",
       "tmpl_lead_magnet_trigger": "kitob, kurs, bonus",

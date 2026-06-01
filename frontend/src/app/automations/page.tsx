@@ -872,7 +872,9 @@ export default function AutomationsPage() {
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-[24px] max-w-sm w-full p-6 shadow-2xl border border-[#E8E8E8] flex flex-col gap-4 animate-in fade-in zoom-in-95 duration-200">
             <div className="flex items-center justify-between pb-2 border-b border-[#F0F0F0]">
-              <h3 className="text-[13px] font-extrabold text-black uppercase tracking-wider">📂 {t("pages.automations_page.add_group_title")}</h3>
+              <h3 className="text-[13px] font-extrabold text-black uppercase tracking-wider flex items-center gap-1.5">
+                <Folder size={15} className="text-black" /> {t("pages.automations_page.add_group_title")}
+              </h3>
               <button
                 onClick={() => setIsAddGroupModalOpen(false)}
                 className="text-[#707070] hover:text-black font-semibold text-[14px] p-1"
