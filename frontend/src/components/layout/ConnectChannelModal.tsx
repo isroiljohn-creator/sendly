@@ -165,8 +165,8 @@ export function ConnectChannelModal() {
 
       {/* ── CHOOSE CHANNEL MODAL ── */}
       {modal === "choose" && (
-        <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/40 backdrop-blur-sm p-4 animate-in fade-in duration-200">
-          <div className="bg-white rounded-[24px] w-full max-w-[360px] shadow-2xl overflow-hidden p-6 border border-[#D8D8D8] scale-100 animate-in zoom-in-95 duration-250">
+        <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/35 backdrop-blur-[5px] p-4 animate-in fade-in duration-200">
+          <div className="bg-white rounded-[24px] w-full max-w-[360px] shadow-2xl overflow-hidden p-6 border border-[#E8E8E8]/70 shadow-[0_20px_50px_rgba(0,0,0,0.08)] scale-100 animate-in zoom-in-95 duration-250">
             <div className="flex items-center justify-between pb-4 border-b border-[#F0F0F0] mb-5">
               <h3 className="text-[15px] font-bold text-black">{t("pages.settings_page.choose_channel_type")}</h3>
               <button onClick={() => setModal(null)} className="grid h-8 w-8 place-items-center rounded-full hover:bg-[#F0F0F0] text-[#707070] transition-colors">
@@ -211,8 +211,8 @@ export function ConnectChannelModal() {
 
       {/* ── INSTAGRAM MODAL ── */}
       {modal === "instagram" && (
-        <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/40 backdrop-blur-sm p-4 animate-in fade-in duration-200">
-          <div className="bg-white rounded-[24px] w-full max-w-[420px] shadow-2xl overflow-hidden scale-100 animate-in zoom-in-95 duration-250 border border-[#D8D8D8]">
+        <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/35 backdrop-blur-[5px] p-4 animate-in fade-in duration-200">
+          <div className="bg-white rounded-[24px] w-full max-w-[420px] shadow-2xl overflow-hidden scale-100 animate-in zoom-in-95 duration-250 border border-[#E8E8E8]/70 shadow-[0_20px_50px_rgba(0,0,0,0.08)]">
             <div className="flex items-center gap-3 px-6 pt-6 pb-5 border-b border-[#F0F0F0]">
               <div className="grid h-10 w-10 place-items-center rounded-[12px] bg-gradient-to-br from-[#f09433] via-[#e6683c] to-[#bc1888] shrink-0">
                 <Instagram size={18} className="text-white" />
@@ -284,8 +284,8 @@ export function ConnectChannelModal() {
 
       {/* ── TELEGRAM MODAL ── */}
       {modal === "telegram" && (
-        <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/40 backdrop-blur-sm p-4 animate-in fade-in duration-200">
-          <div className="bg-white rounded-[24px] w-full max-w-[440px] shadow-2xl overflow-hidden scale-100 animate-in zoom-in-95 duration-250 border border-[#D8D8D8]">
+        <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/35 backdrop-blur-[5px] p-4 animate-in fade-in duration-200">
+          <div className="bg-white rounded-[24px] w-full max-w-[440px] shadow-2xl overflow-hidden scale-100 animate-in zoom-in-95 duration-250 border border-[#E8E8E8]/70 shadow-[0_20px_50px_rgba(0,0,0,0.08)]">
             <div className="flex items-center gap-3 px-6 pt-6 pb-5 border-b border-[#F0F0F0]">
               <div className="grid h-10 w-10 place-items-center rounded-[12px] bg-[#229ED9] shrink-0">
                 <Bot size={18} className="text-white" />

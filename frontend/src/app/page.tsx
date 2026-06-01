@@ -359,8 +359,8 @@ export default function Home() {
 
       {/* Custom Create Bot Dialog */}
       {isCreateBotOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-[4px] p-4 animate-in fade-in duration-200">
-          <div className="w-full max-w-[420px] rounded-[28px] bg-white p-7 border border-[#D8D8D8] shadow-[0_20px_50px_rgba(0,0,0,0.15)] animate-in zoom-in-95 duration-200">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/35 backdrop-blur-[5px] p-4 animate-in fade-in duration-200">
+          <div className="w-full max-w-[420px] rounded-[28px] bg-white p-7 border border-[#E8E8E8]/70 shadow-[0_20px_50px_rgba(0,0,0,0.08)] animate-in zoom-in-95 duration-200">
             <h3 className="text-[17px] font-semibold text-black leading-none">
               {t("pages.home.create_bot.title")}
             </h3>

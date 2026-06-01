@@ -294,7 +294,7 @@ export function Sidebar() {
         <div className="relative mt-1" ref={profileRef}>
           <button
             onClick={() => setProfileMenuOpen((p) => !p)}
-            className="relative h-[38px] w-[38px] rounded-full bg-[#7CA6FF] flex items-center justify-center text-[15px] font-bold text-white hover:scale-105 active:scale-95 transition-all shadow-sm shrink-0 select-none"
+            className="relative h-[38px] w-[38px] rounded-full bg-[#1A2906] text-[#C7F33C] border border-[#C7F33C]/20 flex items-center justify-center text-[14px] font-extrabold hover:scale-105 active:scale-95 transition-all shadow-sm shrink-0 select-none"
             title={currentUser?.fullName || "Isroiljon Abdullayev"}
           >
             {currentUser?.fullName?.charAt(0).toUpperCase() || "I"}
@@ -305,7 +305,7 @@ export function Sidebar() {
             <div className="absolute left-[52px] bottom-0 z-50 bg-white rounded-[20px] shadow-[0_10px_30px_rgba(0,0,0,0.08)] border border-[#E8E8E8] w-[260px] py-3 text-black animate-in fade-in slide-in-from-left-2 duration-150">
               {/* Header */}
               <div className="flex items-center gap-3 px-4 pb-2.5 pt-1 border-b border-[#F0F0F0] mb-1.5">
-                <div className="w-10 h-10 rounded-full bg-[#7CA6FF] flex items-center justify-center font-bold text-[16px] text-white shrink-0">
+                <div className="w-10 h-10 rounded-full bg-[#1A2906] text-[#C7F33C] border border-[#C7F33C]/20 flex items-center justify-center font-extrabold text-[15px] shrink-0">
                   {currentUser?.fullName?.charAt(0).toUpperCase() || "I"}
                 </div>
                 <div className="min-w-0 flex-1">

@@ -16,8 +16,8 @@ export const Card = React.forwardRef<HTMLDivElement, CardProps>(
         ref={ref}
         className={cn(
           "rounded-[28px] p-6 md:p-7 transition-all duration-200",
-          variant === "default" && "bg-white text-black",
-          variant === "dark" && "bg-black text-white",
+          variant === "default" && "bg-white text-black border border-[#E8E8E8]/60 shadow-[0_8px_30px_rgba(0,0,0,0.02)]",
+          variant === "dark" && "bg-black text-white border border-[#222222] shadow-[0_8px_30px_rgba(0,0,0,0.1)]",
           variant === "glass" && "bf-glass text-black",
           className
         )}
@@ -361,8 +361,8 @@ export function ConfirmModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-[4px] p-4">
-      <div className="w-full max-w-[380px] rounded-[28px] bg-white p-6 border border-[#D8D8D8] shadow-[0_20px_50px_rgba(0,0,0,0.15)] transition-all scale-100 animate-in fade-in zoom-in-95 duration-200">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/35 backdrop-blur-[5px] p-4">
+      <div className="w-full max-w-[380px] rounded-[28px] bg-white p-6 border border-[#E8E8E8]/70 shadow-[0_20px_50px_rgba(0,0,0,0.08)] transition-all scale-100 animate-in fade-in zoom-in-95 duration-200">
         <h3 className="text-[16px] font-semibold text-black leading-tight">
           {title}
         </h3>
@@ -425,8 +425,8 @@ export function AlertModal({
       : "success";
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-[4px] p-4 animate-in fade-in duration-200">
-      <div className="w-full max-w-[360px] rounded-[28px] bg-white p-6 border border-[#D8D8D8] shadow-[0_20px_50px_rgba(0,0,0,0.15)] scale-100 animate-in zoom-in-95 duration-200 text-center flex flex-col items-center">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/35 backdrop-blur-[5px] p-4 animate-in fade-in duration-200">
+      <div className="w-full max-w-[360px] rounded-[28px] bg-white p-6 border border-[#E8E8E8]/70 shadow-[0_20px_50px_rgba(0,0,0,0.08)] scale-100 animate-in zoom-in-95 duration-200 text-center flex flex-col items-center">
         {resolvedType === "error" ? (
           <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-red-100 text-red-600">
             <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" strokeWidth="2.5" fill="none" strokeLinecap="round" strokeLinejoin="round">

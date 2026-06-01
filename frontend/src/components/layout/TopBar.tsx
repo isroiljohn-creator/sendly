@@ -178,20 +178,20 @@ export function TopBar() {
         <div className="relative" ref={langRef}>
           <button
             onClick={() => setIsLangOpen(!isLangOpen)}
-            className="flex items-center gap-1.5 rounded-full bg-white px-3.5 py-2.5 text-[12px] font-medium text-black border border-[#D8D8D8]/60 transition-all duration-150 active:scale-95 hover:bg-white/95"
+            className="flex items-center gap-1.5 rounded-full bg-white px-3.5 py-2.5 text-[12px] font-medium text-black border border-[#E8E8E8]/60 transition-all duration-150 active:scale-95 hover:bg-[#F4F4F5] hover:border-[#D8D8D8]/60"
           >
             <span className="uppercase font-semibold">{lang}</span>
             <ChevronDown size={14} className={`transition-transform duration-200 ${isLangOpen ? "rotate-180" : ""}`} />
           </button>
 
           {isLangOpen && (
-            <div className="absolute right-0 mt-2 w-[160px] rounded-[20px] bg-white p-2 border border-[#D8D8D8] shadow-lg z-[90] animate-in fade-in slide-in-from-top-2 duration-150">
+            <div className="absolute right-0 mt-2 w-[160px] rounded-[20px] bg-white p-2 border border-[#E8E8E8]/70 shadow-[0_8px_30px_rgba(0,0,0,0.05)] z-[90] animate-in fade-in slide-in-from-top-2 duration-150">
               <div className="flex flex-col gap-1 text-[12px]">
                 {(["uz", "ru", "en"] as Lang[]).map((l) => (
                   <button
                     key={l}
                     onClick={() => handleLangSelect(l)}
-                    className="flex items-center justify-between w-full px-3 py-2 rounded-[12px] hover:bg-[#F9F9F7] text-left transition-colors text-black"
+                    className="flex items-center justify-between w-full px-3 py-2 rounded-[12px] hover:bg-[#F4F4F5] text-left transition-colors text-black"
                   >
                     <div className="flex items-center gap-2">
                       <span>{LANG_FLAGS[l]}</span>
@@ -210,14 +210,14 @@ export function TopBar() {
         <div className="relative" ref={notifRef}>
           <button
             onClick={() => setIsNotifOpen(!isNotifOpen)}
-            className="relative grid h-[38px] w-[38px] place-items-center rounded-full bg-white text-black border border-[#D8D8D8]/60 transition-all duration-150 active:scale-95 hover:bg-white/95"
+            className="relative grid h-[38px] w-[38px] place-items-center rounded-full bg-white text-black border border-[#E8E8E8]/60 transition-all duration-150 active:scale-95 hover:bg-[#F4F4F5] hover:border-[#D8D8D8]/60"
           >
             <Bell size={16} strokeWidth={1.75} />
             {/* Only show green dot when there are real notifications */}
           </button>
 
           {isNotifOpen && (
-            <div className="absolute right-0 mt-2 w-[280px] rounded-[24px] bg-white p-4 border border-[#D8D8D8] shadow-xl z-[90] animate-in fade-in slide-in-from-top-2 duration-150">
+            <div className="absolute right-0 mt-2 w-[280px] rounded-[24px] bg-white p-4 border border-[#E8E8E8]/70 shadow-[0_8px_30px_rgba(0,0,0,0.05)] z-[90] animate-in fade-in slide-in-from-top-2 duration-150">
               <h4 className="text-[13px] font-semibold text-black mb-3">
                 {t("nav.notifications")}
               </h4>
