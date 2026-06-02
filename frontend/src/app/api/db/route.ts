@@ -3,6 +3,7 @@ import fs from "fs";
 import path from "path";
 import { startTelegramBots } from "@/lib/telegramBotRunner";
 import { createClient } from "@supabase/supabase-js";
+import { verifyJwt } from "@/lib/jwt";
 
 const DB_FILE = process.env.DB_FILE_PATH || path.join(process.cwd(), "db.json");
 
@@ -42,6 +43,27 @@ function isValidUuid(id: string): boolean {
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const userId = searchParams.get("userId") || "guest";
+
+  // Check auth for non-guest userIds
+  if (userId !== "guest") {
+    const authHeader = request.headers.get("Authorization");
+    const token = authHeader?.startsWith("Bearer ") ? authHeader.substring(7) : null;
+    const jwtSecret = process.env.JWT_SECRET;
+    
+    if (!token || !jwtSecret) {
+      return NextResponse.json({ error: "Unauthorized: Missing token" }, { status: 401 });
+    }
+    
+    const payload = verifyJwt(token, jwtSecret);
+    if (!payload || payload.user_id !== userId) {
+      return NextResponse.json({ error: "Forbidden: Access denied" }, { status: 403 });
+    }
+  } else {
+    // If it's a guest, restrict global users to protect privacy
+    return NextResponse.json({
+      replai_users: "[]"
+    });
+  }
   
   // Use Supabase Cloud Database if credentials are set
   if (process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY) {
@@ -121,6 +143,24 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   const { searchParams } = new URL(request.url);
   const userId = searchParams.get("userId") || "guest";
+
+  if (userId === "guest") {
+    return NextResponse.json({ error: "Forbidden: Guests cannot write to database" }, { status: 403 });
+  }
+
+  const authHeader = request.headers.get("Authorization");
+  const token = authHeader?.startsWith("Bearer ") ? authHeader.substring(7) : null;
+  const jwtSecret = process.env.JWT_SECRET;
+  
+  if (!token || !jwtSecret) {
+    return NextResponse.json({ error: "Unauthorized: Missing token" }, { status: 401 });
+  }
+  
+  const payloadJwt = verifyJwt(token, jwtSecret);
+  if (!payloadJwt || payloadJwt.user_id !== userId) {
+    return NextResponse.json({ error: "Forbidden: Access denied" }, { status: 403 });
+  }
+
   let payload: any;
   try {
     payload = await request.json();

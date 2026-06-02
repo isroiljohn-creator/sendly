@@ -1,5 +1,6 @@
 import fs from "fs";
 import path from "path";
+import crypto from "crypto";
 import { Channel, Automation, BotSettings, Lesson, Module } from "./db";
 import { moderateMessage } from "./ai/moderation";
 import { queryRAG } from "./ai/rag";
@@ -1107,10 +1108,11 @@ export async function startTelegramBots() {
       if (useWebhooks) {
         // Production: Register Webhooks with Telegram Bot API
         const webhookUrl = `${host}/api/telegram/webhook?channelId=${channelId}`;
+        const secretToken = crypto.createHash("sha256").update(token).digest("hex").substring(0, 32);
         console.log(`[Webhooks] Registering Telegram webhook for bot ${channelId} (${channel.username}) -> ${webhookUrl}`);
         
         try {
-          const res = await fetch(`https://api.telegram.org/bot${token}/setWebhook?url=${encodeURIComponent(webhookUrl)}&drop_pending_updates=true`, { cache: "no-store" });
+          const res = await fetch(`https://api.telegram.org/bot${token}/setWebhook?url=${encodeURIComponent(webhookUrl)}&secret_token=${secretToken}&drop_pending_updates=true`, { cache: "no-store" });
           if (!res.ok) {
             const errText = await res.text();
             console.error(`[Webhooks] Failed to set Telegram webhook for bot ${channelId}: ${res.status} - ${errText}`);

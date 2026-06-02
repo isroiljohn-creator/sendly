@@ -31,10 +31,34 @@ type RangeData = {
   proVal: string;
 };
 
+const MONTHS_SHORT = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+function formatShortDate(date: Date): string {
+  return `${date.getDate()} ${MONTHS_SHORT[date.getMonth()]}`;
+}
+
+function getDynamicDateText(rangeKey: RangeKey): string {
+  const now = new Date();
+  if (rangeKey === "today") {
+    return `${formatShortDate(now)}, ${now.getFullYear()}`;
+  }
+  if (rangeKey === "7days") {
+    const start = new Date(now);
+    start.setDate(now.getDate() - 6);
+    return `${formatShortDate(start)} — ${formatShortDate(now)}`;
+  }
+  if (rangeKey === "30days") {
+    const start = new Date(now);
+    start.setDate(now.getDate() - 29);
+    return `${formatShortDate(start)} — ${formatShortDate(now)}`;
+  }
+  return "Barcha davr";
+}
+
 const RANGE_PRESETS: Record<RangeKey, RangeData> = {
   today: {
     label: "Bugun",
-    dateText: "21 May, 2026",
+    dateText: "",
     activityVal: "1,842",
     activitySub: "Bugungi faol suhbatlar soni",
     activityPoints: [20, 32, 25, 60, 48, 80, 50],
@@ -46,7 +70,7 @@ const RANGE_PRESETS: Record<RangeKey, RangeData> = {
   },
   "7days": {
     label: "Oxirgi 7 kun",
-    dateText: "15 May — 21 May",
+    dateText: "",
     activityVal: "12,486",
     activitySub: "Oxirgi 7 kundagi faol suhbatlar",
     activityPoints: [40, 55, 32, 70, 48, 90, 38],
@@ -58,7 +82,7 @@ const RANGE_PRESETS: Record<RangeKey, RangeData> = {
   },
   "30days": {
     label: "Oxirgi 30 kun",
-    dateText: "1 May — 21 May",
+    dateText: "",
     activityVal: "54,921",
     activitySub: "Oxirgi 30 kundagi faol suhbatlar",
     activityPoints: [60, 75, 58, 88, 72, 110, 85],
@@ -166,7 +190,7 @@ export default function Home() {
   const getDynamicStats = (rangeKey: RangeKey): RangeData => {
     const preset = RANGE_PRESETS[rangeKey];
     const localizedLabel = t(`pages.home.ranges.${rangeKey}` as string);
-    const localizedDateText = t(`pages.home.ranges.${rangeKey}_date` as string);
+    const dynamicDateText = getDynamicDateText(rangeKey);
     const localizedActivitySub = t(`pages.home.ranges.${rangeKey}_sub` as string);
     const localizedRevenueSub = t(`pages.home.ranges.${rangeKey}_rev` as string);
     
@@ -174,7 +198,7 @@ export default function Home() {
       return {
         ...preset,
         label: localizedLabel,
-        dateText: localizedDateText,
+        dateText: dynamicDateText,
         activitySub: localizedActivitySub,
         revenueSub: localizedRevenueSub,
         activityVal: "0",
@@ -189,7 +213,7 @@ export default function Home() {
     if (channels.length === 0 || !activeChannel) {
       return {
         label: localizedLabel,
-        dateText: localizedDateText,
+        dateText: dynamicDateText,
         activityVal: "0",
         activitySub: localizedActivitySub,
         activityPoints: [0, 0, 0, 0, 0, 0, 0],
@@ -260,7 +284,7 @@ export default function Home() {
 
     return {
       label: localizedLabel,
-      dateText: localizedDateText,
+      dateText: dynamicDateText,
       activityVal,
       activitySub: localizedActivitySub,
       activityPoints,

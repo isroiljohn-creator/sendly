@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import fs from "fs";
 import path from "path";
 import { createClient } from "@supabase/supabase-js";
+import { verifyJwt } from "@/lib/jwt";
 
 const DB_FILE = process.env.DB_FILE_PATH || path.join(process.cwd(), "db.json");
 
@@ -77,6 +78,19 @@ function generateLast30DaysData(usersCount: number, premiumCount: number, proCou
 
 export async function GET(request: Request) {
   try {
+    const authHeader = request.headers.get("Authorization");
+    const token = authHeader?.startsWith("Bearer ") ? authHeader.substring(7) : null;
+    const jwtSecret = process.env.JWT_SECRET;
+    
+    if (!token || !jwtSecret) {
+      return NextResponse.json({ error: "Unauthorized: Missing token" }, { status: 401 });
+    }
+    
+    const payload = verifyJwt(token, jwtSecret);
+    if (!payload || payload.email !== "admin@sendly.uz") {
+      return NextResponse.json({ error: "Forbidden: Access denied. System admins only." }, { status: 403 });
+    }
+
     let usersList: any[] = [];
     let userDataMap: Record<string, any> = {};
     let promoCodes: any[] = [];
@@ -436,6 +450,19 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   try {
+    const authHeader = request.headers.get("Authorization");
+    const token = authHeader?.startsWith("Bearer ") ? authHeader.substring(7) : null;
+    const jwtSecret = process.env.JWT_SECRET;
+    
+    if (!token || !jwtSecret) {
+      return NextResponse.json({ error: "Unauthorized: Missing token" }, { status: 401 });
+    }
+    
+    const payload = verifyJwt(token, jwtSecret);
+    if (!payload || payload.email !== "admin@sendly.uz") {
+      return NextResponse.json({ error: "Forbidden: Access denied. System admins only." }, { status: 403 });
+    }
+
     const body = await request.json();
     const { action } = body;
     const timestamp = new Date().toLocaleString("uz-UZ", { timeZone: "Asia/Tashkent" });

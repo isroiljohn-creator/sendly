@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import fs from "fs";
 import path from "path";
+import { verifyJwt } from "@/lib/jwt";
 
 const DB_FILE = process.env.DB_FILE_PATH || path.join(process.cwd(), "db.json");
 
@@ -63,6 +64,23 @@ export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const userId = searchParams.get("userId") || "guest";
 
+  if (userId === "guest") {
+    return NextResponse.json({ error: "Unauthorized: Guests have no credits data" }, { status: 401 });
+  }
+
+  const authHeader = request.headers.get("Authorization");
+  const token = authHeader?.startsWith("Bearer ") ? authHeader.substring(7) : null;
+  const jwtSecret = process.env.JWT_SECRET;
+  
+  if (!token || !jwtSecret) {
+    return NextResponse.json({ error: "Unauthorized: Missing token" }, { status: 401 });
+  }
+  
+  const payload = verifyJwt(token, jwtSecret);
+  if (!payload || payload.user_id !== userId) {
+    return NextResponse.json({ error: "Forbidden: Access denied" }, { status: 403 });
+  }
+
   const dbData = readDb();
   if (!dbData.userData) {
     dbData.userData = {};
@@ -96,6 +114,24 @@ export async function POST(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
     const userId = searchParams.get("userId") || "guest";
+
+    if (userId === "guest") {
+      return NextResponse.json({ error: "Unauthorized: Guests have no credits data" }, { status: 401 });
+    }
+
+    const authHeader = request.headers.get("Authorization");
+    const token = authHeader?.startsWith("Bearer ") ? authHeader.substring(7) : null;
+    const jwtSecret = process.env.JWT_SECRET;
+    
+    if (!token || !jwtSecret) {
+      return NextResponse.json({ error: "Unauthorized: Missing token" }, { status: 401 });
+    }
+    
+    const payload = verifyJwt(token, jwtSecret);
+    if (!payload || payload.user_id !== userId) {
+      return NextResponse.json({ error: "Forbidden: Access denied" }, { status: 403 });
+    }
+
     const body = await request.json();
     const { action, amount, description } = body;
 
@@ -124,6 +160,17 @@ export async function POST(request: Request) {
     const timestamp = new Date().toLocaleString("uz-UZ", { timeZone: "Asia/Tashkent" });
 
     if (action === "buy") {
+      // Prevent parameter tampering by restricting large direct client-side credit purchases
+      const userObj = dbData.users?.find((u: any) => u.id === userId);
+      const isSystemAdmin = userObj?.email === "admin@sendly.uz";
+      
+      if (!isSystemAdmin && amount > 1000) {
+        return NextResponse.json(
+          { error: "Direct purchase of large credit amounts is restricted for security. Please use official gateways." },
+          { status: 403 }
+        );
+      }
+
       creditsData.balance = (creditsData.balance || 0) + amount;
       creditsData.history.unshift({
         id: `tx-${Date.now()}-${Math.floor(Math.random() * 1000)}`,

@@ -101,10 +101,10 @@ export default function PartnerPage() {
       <div className="flex flex-col lg:flex-row gap-6 mt-2">
         {/* Left Sub-sidebar Column */}
         <div className="w-full lg:w-[240px] shrink-0">
-          <Card className="p-4 flex flex-col gap-1">
+          <Card className="p-3 lg:p-4 flex lg:flex-col gap-2 lg:gap-1 border border-[#D8D8D8] overflow-x-auto lg:overflow-x-visible [&::-webkit-scrollbar]:hidden [scrollbar-width:none]">
             <button
               onClick={() => setActiveTab("home")}
-              className={`flex items-center gap-3 w-full px-4 py-3 rounded-[16px] text-left text-[13px] font-medium transition-all ${
+              className={`flex items-center gap-3 shrink-0 whitespace-nowrap px-4 py-3 rounded-[16px] text-left text-[13px] font-medium transition-all ${
                 activeTab === "home"
                   ? "bg-black text-[#C7F33C]"
                   : "text-[#595959] hover:bg-[#F0F0F0]/50 hover:text-black"
@@ -116,7 +116,7 @@ export default function PartnerPage() {
 
             <button
               onClick={() => setActiveTab("referrals")}
-              className={`flex items-center gap-3 w-full px-4 py-3 rounded-[16px] text-left text-[13px] font-medium transition-all ${
+              className={`flex items-center gap-3 shrink-0 whitespace-nowrap px-4 py-3 rounded-[16px] text-left text-[13px] font-medium transition-all ${
                 activeTab === "referrals"
                   ? "bg-black text-[#C7F33C]"
                   : "text-[#595959] hover:bg-[#F0F0F0]/50 hover:text-black"

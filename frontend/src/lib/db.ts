@@ -956,7 +956,12 @@ export const db = {
     const currentUser = this.getCurrentUser();
     const userId = currentUser?.id || "guest";
     try {
-      const res = await fetch(`/api/db?userId=${userId}`);
+      const headers: Record<string, string> = {};
+      const token = localStorage.getItem("replai_token");
+      if (token) {
+        headers["Authorization"] = `Bearer ${token}`;
+      }
+      const res = await fetch(`/api/db?userId=${userId}`, { headers });
       if (!res.ok) return false;
       const data = await res.json();
       if (data && typeof data === "object") {
@@ -981,9 +986,14 @@ export const db = {
     const userId = currentUser?.id || "guest";
     try {
       const data = this.exportData();
+      const headers: Record<string, string> = { "Content-Type": "application/json" };
+      const token = localStorage.getItem("replai_token");
+      if (token) {
+        headers["Authorization"] = `Bearer ${token}`;
+      }
       const res = await fetch(`/api/db?userId=${userId}`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers,
         body: JSON.stringify(data),
       });
       const result = await res.json();
@@ -1002,7 +1012,12 @@ export const db = {
 
   async getAiCreditsFromServer(userId: string): Promise<any> {
     try {
-      const res = await fetch(`/api/credits?userId=${userId}`);
+      const headers: Record<string, string> = {};
+      const token = localStorage.getItem("replai_token");
+      if (token) {
+        headers["Authorization"] = `Bearer ${token}`;
+      }
+      const res = await fetch(`/api/credits?userId=${userId}`, { headers });
       if (res.ok) {
         const data = await res.json();
         localStorage.setItem("replai_ai_credits_data", JSON.stringify(data));
@@ -1026,9 +1041,14 @@ export const db = {
 
   async buyAiCreditsServer(userId: string, amount: number, description: string): Promise<any> {
     try {
+      const headers: Record<string, string> = { "Content-Type": "application/json" };
+      const token = localStorage.getItem("replai_token");
+      if (token) {
+        headers["Authorization"] = `Bearer ${token}`;
+      }
       const res = await fetch(`/api/credits?userId=${userId}`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers,
         body: JSON.stringify({ action: "buy", amount, description })
       });
       if (res.ok) {

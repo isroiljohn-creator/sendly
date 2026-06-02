@@ -376,10 +376,15 @@ export default function AdminPage() {
   const loadAdminData = async () => {
     setLoading(true);
     try {
-      const res = await fetch("/api/admin");
+      const headers: Record<string, string> = {};
+      const token = localStorage.getItem("replai_token");
+      if (token) {
+        headers["Authorization"] = `Bearer ${token}`;
+      }
+      const res = await fetch("/api/admin", { headers });
       const data = await res.json();
       if (res.ok && data.success) {
-        setStats(data.stats || { totalUsers: 0, activePremiumCount: 0, activeProCount: 0, totalChannels: 0, totalCredits: 0, totalCommissions: "$0.00", conversionsRate: { visitorToRegister: "8.4%", registerToPaid: "4.2%" } });
+        setStats(data.stats || { totalUsers: 0, activePremiumCount: 0, activeProCount: 0, totalChannels: 0, totalCredits: 0, totalCommissions: "$0.00" });
         setUsers(data.users || []);
         setPromos(data.promoCodes || []);
         setReferrals(data.referrals || []);
@@ -443,9 +448,14 @@ export default function AdminPage() {
   // ── USER MANUAL ACTIONS ──
   const handleUpdatePlan = async (userId: string, plan: string) => {
     try {
+      const headers: Record<string, string> = { "Content-Type": "application/json" };
+      const token = localStorage.getItem("replai_token");
+      if (token) {
+        headers["Authorization"] = `Bearer ${token}`;
+      }
       const res = await fetch("/api/admin", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers,
         body: JSON.stringify({ action: "update_user_plan", userId, plan })
       });
       if (res.ok) {
@@ -461,9 +471,14 @@ export default function AdminPage() {
   const handleUpdateCredits = async (userId: string, amount: number) => {
     if (isNaN(amount) || amount === 0) return;
     try {
+      const headers: Record<string, string> = { "Content-Type": "application/json" };
+      const token = localStorage.getItem("replai_token");
+      if (token) {
+        headers["Authorization"] = `Bearer ${token}`;
+      }
       const res = await fetch("/api/admin", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers,
         body: JSON.stringify({ action: "update_user_credits", userId, amount })
       });
       if (res.ok) {
@@ -480,9 +495,14 @@ export default function AdminPage() {
   const handleImpersonate = async (email: string) => {
     // Write audit log first
     try {
+      const headers: Record<string, string> = { "Content-Type": "application/json" };
+      const token = localStorage.getItem("replai_token");
+      if (token) {
+        headers["Authorization"] = `Bearer ${token}`;
+      }
       await fetch("/api/admin", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers,
         body: JSON.stringify({ 
           action: "add_audit_log", 
           user: "admin@sendly.uz", 
@@ -505,9 +525,14 @@ export default function AdminPage() {
     if (!newPromoCode || !newPromoAmount) return;
 
     try {
+      const headers: Record<string, string> = { "Content-Type": "application/json" };
+      const token = localStorage.getItem("replai_token");
+      if (token) {
+        headers["Authorization"] = `Bearer ${token}`;
+      }
       const res = await fetch("/api/admin", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers,
         body: JSON.stringify({
           action: "create_promo",
           code: newPromoCode,
@@ -535,9 +560,14 @@ export default function AdminPage() {
 
   const handleDeletePromo = async (code: string) => {
     try {
+      const headers: Record<string, string> = { "Content-Type": "application/json" };
+      const token = localStorage.getItem("replai_token");
+      if (token) {
+        headers["Authorization"] = `Bearer ${token}`;
+      }
       const res = await fetch("/api/admin", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers,
         body: JSON.stringify({ action: "delete_promo", code })
       });
       const data = await res.json();
@@ -555,9 +585,14 @@ export default function AdminPage() {
   const handleSetAnnouncement = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
+      const headers: Record<string, string> = { "Content-Type": "application/json" };
+      const token = localStorage.getItem("replai_token");
+      if (token) {
+        headers["Authorization"] = `Bearer ${token}`;
+      }
       const res = await fetch("/api/admin", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers,
         body: JSON.stringify({ action: "set_system_announcement", announcement: newAnnouncement })
       });
       if (res.ok) {
@@ -587,10 +622,10 @@ export default function AdminPage() {
       <div className="flex flex-col lg:flex-row gap-6 mt-2">
         {/* Left selector */}
         <div className="w-full lg:w-[240px] shrink-0">
-          <Card className="p-4 flex flex-col gap-1 border border-[#D8D8D8]">
+          <Card className="p-3 lg:p-4 flex lg:flex-col gap-2 lg:gap-1 border border-[#D8D8D8] overflow-x-auto lg:overflow-x-visible [&::-webkit-scrollbar]:hidden [scrollbar-width:none]">
             <button
               onClick={() => setActiveTab("overview")}
-              className={`flex items-center gap-3 w-full px-4 py-3 rounded-[16px] text-left text-[13px] font-bold transition-all ${
+              className={`flex items-center gap-3 shrink-0 whitespace-nowrap px-4 py-3 rounded-[16px] text-left text-[13px] font-bold transition-all ${
                 activeTab === "overview" ? "bg-black text-[#C7F33C]" : "text-[#595959] hover:bg-[#F0F0F0]/50 hover:text-black"
               }`}
             >
@@ -600,7 +635,7 @@ export default function AdminPage() {
 
             <button
               onClick={() => setActiveTab("users")}
-              className={`flex items-center gap-3 w-full px-4 py-3 rounded-[16px] text-left text-[13px] font-bold transition-all ${
+              className={`flex items-center gap-3 shrink-0 whitespace-nowrap px-4 py-3 rounded-[16px] text-left text-[13px] font-bold transition-all ${
                 activeTab === "users" ? "bg-black text-[#C7F33C]" : "text-[#595959] hover:bg-[#F0F0F0]/50 hover:text-black"
               }`}
             >
@@ -610,7 +645,7 @@ export default function AdminPage() {
 
             <button
               onClick={() => setActiveTab("agents")}
-              className={`flex items-center gap-3 w-full px-4 py-3 rounded-[16px] text-left text-[13px] font-bold transition-all ${
+              className={`flex items-center gap-3 shrink-0 whitespace-nowrap px-4 py-3 rounded-[16px] text-left text-[13px] font-bold transition-all ${
                 activeTab === "agents" ? "bg-black text-[#C7F33C]" : "text-[#595959] hover:bg-[#F0F0F0]/50 hover:text-black"
               }`}
             >
@@ -620,7 +655,7 @@ export default function AdminPage() {
 
             <button
               onClick={() => setActiveTab("promos")}
-              className={`flex items-center gap-3 w-full px-4 py-3 rounded-[16px] text-left text-[13px] font-bold transition-all ${
+              className={`flex items-center gap-3 shrink-0 whitespace-nowrap px-4 py-3 rounded-[16px] text-left text-[13px] font-bold transition-all ${
                 activeTab === "promos" ? "bg-black text-[#C7F33C]" : "text-[#595959] hover:bg-[#F0F0F0]/50 hover:text-black"
               }`}
             >
@@ -630,7 +665,7 @@ export default function AdminPage() {
 
             <button
               onClick={() => setActiveTab("referrals")}
-              className={`flex items-center gap-3 w-full px-4 py-3 rounded-[16px] text-left text-[13px] font-bold transition-all ${
+              className={`flex items-center gap-3 shrink-0 whitespace-nowrap px-4 py-3 rounded-[16px] text-left text-[13px] font-bold transition-all ${
                 activeTab === "referrals" ? "bg-black text-[#C7F33C]" : "text-[#595959] hover:bg-[#F0F0F0]/50 hover:text-black"
               }`}
             >
@@ -640,7 +675,7 @@ export default function AdminPage() {
 
             <button
               onClick={() => setActiveTab("bots")}
-              className={`flex items-center gap-3 w-full px-4 py-3 rounded-[16px] text-left text-[13px] font-bold transition-all ${
+              className={`flex items-center gap-3 shrink-0 whitespace-nowrap px-4 py-3 rounded-[16px] text-left text-[13px] font-bold transition-all ${
                 activeTab === "bots" ? "bg-black text-[#C7F33C]" : "text-[#595959] hover:bg-[#F0F0F0]/50 hover:text-black"
               }`}
             >
@@ -650,7 +685,7 @@ export default function AdminPage() {
 
             <button
               onClick={() => setActiveTab("logs")}
-              className={`flex items-center gap-3 w-full px-4 py-3 rounded-[16px] text-left text-[13px] font-bold transition-all ${
+              className={`flex items-center gap-3 shrink-0 whitespace-nowrap px-4 py-3 rounded-[16px] text-left text-[13px] font-bold transition-all ${
                 activeTab === "logs" ? "bg-black text-[#C7F33C]" : "text-[#595959] hover:bg-[#F0F0F0]/50 hover:text-black"
               }`}
             >

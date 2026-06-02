@@ -155,15 +155,12 @@ export default function RegisterPage() {
     // Verify email uniqueness first
     const checkRes = db.signUp(fullName, email, password);
     if (checkRes.success) {
-      const code = db.generateOtp(email);
-      setOtpCode(code);
-      
-      // Request real SMTP sending
+      // Request real SMTP sending and server-side OTP generation
       try {
         const mailRes = await fetch("/api/auth/send-otp", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email, otp: code }),
+          body: JSON.stringify({ email }),
         });
         
         const mailData = await mailRes.json();
@@ -176,6 +173,9 @@ export default function RegisterPage() {
         } else {
           // If SMTP variables are missing, fallback to simulator with warning
           if (mailRes.status === 501) {
+            if (mailData.otp) {
+              setOtpCode(mailData.otp);
+            }
             setIsFallbackMode(true);
             setIsVerifyingEmail(true);
             setCountdown(120);
@@ -195,34 +195,61 @@ export default function RegisterPage() {
     }
   };
 
-  const handleOtpVerify = (e: React.FormEvent) => {
+  const handleOtpVerify = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
     const codeString = enteredOtp.join("");
 
-    if (db.verifyOtp(email, codeString)) {
-      const res = db.completeSignUp(fullName, email, password);
-      if (res.success) {
-        window.location.href = "/";
+    try {
+      const verifyRes = await fetch("/api/auth/verify-otp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, otp: codeString }),
+      });
+
+      const verifyData = await verifyRes.json();
+
+      if (verifyRes.ok && verifyData.success) {
+        localStorage.setItem("replai_token", verifyData.token);
+        
+        const res = db.completeSignUp(fullName, email, password);
+        
+        // Sync generated userId to match server token user_id
+        if (res.success) {
+          const user = db.getCurrentUser();
+          if (user) {
+            user.id = verifyData.userId;
+            localStorage.setItem("replai_current_user", JSON.stringify(user));
+            
+            const users = db.getUsers();
+            const idx = users.findIndex(u => u.email === email);
+            if (idx > -1) {
+              users[idx].id = verifyData.userId;
+              localStorage.setItem("replai_users", JSON.stringify(users));
+            }
+          }
+          window.location.href = "/";
+        } else {
+          setError(res.error || t("error"));
+        }
       } else {
-        setError(res.error || t("error"));
+        setError(verifyData.error || t("pages.login_page.error_invalid_otp"));
       }
-    } else {
-      setError(t("pages.login_page.error_invalid_otp"));
+    } catch (err: unknown) {
+      const errMsg = err instanceof Error ? err.message : String(err);
+      setError(t("pages.login_page.error_connection") + errMsg);
     }
   };
 
   const handleResendOtp = async () => {
     setError("");
     setIsFallbackMode(false);
-    const code = db.generateOtp(email);
-    setOtpCode(code);
 
     try {
       const mailRes = await fetch("/api/auth/send-otp", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, otp: code }),
+        body: JSON.stringify({ email }),
       });
       
       const mailData = await mailRes.json();
@@ -233,6 +260,9 @@ export default function RegisterPage() {
         setShowNotification(false);
       } else {
         if (mailRes.status === 501) {
+          if (mailData.otp) {
+            setOtpCode(mailData.otp);
+          }
           setIsFallbackMode(true);
           setCountdown(120);
           setEnteredOtp(["", "", "", ""]);

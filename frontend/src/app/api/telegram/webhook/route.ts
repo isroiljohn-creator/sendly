@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import fs from "fs";
 import path from "path";
+import crypto from "crypto";
 import { getDbDataFromSupabase, handleTelegramUpdate } from "@/lib/telegramBotRunner";
 
 const DB_FILE = process.env.DB_FILE_PATH || path.join(process.cwd(), "db.json");
@@ -73,6 +74,15 @@ export async function POST(request: Request) {
     if (!token) {
       console.warn(`[Webhook] No active Telegram bot token found for channel ID: ${channelId}`);
       return NextResponse.json({ error: "Active bot token not found" }, { status: 404 });
+    }
+
+    // Origin validation: Verify Telegram Webhook Secret Token to prevent spoofing
+    const telegramSecretHeader = request.headers.get("X-Telegram-Bot-Api-Secret-Token");
+    const expectedSecretToken = crypto.createHash("sha256").update(token.trim()).digest("hex").substring(0, 32);
+
+    if (telegramSecretHeader !== expectedSecretToken) {
+      console.warn(`[Webhook] Spoofing attempt detected or invalid secret token for channel ${channelId}`);
+      return NextResponse.json({ error: "Forbidden: Request origin invalid" }, { status: 403 });
     }
 
     // 2. Process Telegram Update using the bot runner logic

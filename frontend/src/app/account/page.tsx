@@ -447,18 +447,18 @@ export default function AccountPage() {
         breadcrumbs={t("pages.account.breadcrumb")} 
       />
 
-      <div className="flex bg-white rounded-[24px] border border-[#D8D8D8] min-h-[calc(100vh-180px)] overflow-hidden shadow-sm mt-3">
+      <div className="flex flex-col md:flex-row bg-white rounded-[24px] border border-[#D8D8D8] min-h-[calc(100vh-180px)] overflow-hidden shadow-sm mt-3">
         {/* Left Column: Sub-sidebar */}
-        <div className="w-[260px] shrink-0 border-r border-[#E8E8E8] flex flex-col justify-between bg-white p-5">
-          <div className="flex flex-col gap-6">
-            <div>
+        <div className="w-full md:w-[260px] shrink-0 border-b md:border-b-0 md:border-r border-[#E8E8E8] flex flex-col justify-between bg-white p-4 md:p-5">
+          <div className="flex flex-col gap-4 md:gap-6">
+            <div className="hidden md:block">
               <h2 className="text-[17px] font-bold text-black px-2">{t("pages.account.title")}</h2>
             </div>
 
-            <div className="flex flex-col gap-1">
+            <div className="flex md:flex-col gap-2 md:gap-1 overflow-x-auto [&::-webkit-scrollbar]:hidden [scrollbar-width:none] pb-2 md:pb-0 w-full">
               <button
                 onClick={() => setActiveTab("general")}
-                className={`flex items-center w-full px-3 py-2 text-[12px] font-semibold rounded-[10px] transition-colors text-left ${
+                className={`flex items-center shrink-0 whitespace-nowrap px-3 py-2 text-[12px] font-semibold rounded-[10px] transition-colors text-left ${
                   activeTab === "general"
                     ? "bg-[#EFF2FC] text-black font-bold"
                     : "text-[#707070] hover:bg-[#F9F9F7] hover:text-black"
@@ -469,7 +469,7 @@ export default function AccountPage() {
 
               <button
                 onClick={() => setActiveTab("billing")}
-                className={`flex items-center w-full px-3 py-2 text-[12px] font-semibold rounded-[10px] transition-colors text-left ${
+                className={`flex items-center shrink-0 whitespace-nowrap px-3 py-2 text-[12px] font-semibold rounded-[10px] transition-colors text-left ${
                   activeTab === "billing"
                     ? "bg-[#EFF2FC] text-black font-bold"
                     : "text-[#707070] hover:bg-[#F9F9F7] hover:text-black"
@@ -480,7 +480,7 @@ export default function AccountPage() {
 
               <button
                 onClick={() => setActiveTab("limits")}
-                className={`flex items-center w-full px-3 py-2 text-[12px] font-semibold rounded-[10px] transition-colors text-left ${
+                className={`flex items-center shrink-0 whitespace-nowrap px-3 py-2 text-[12px] font-semibold rounded-[10px] transition-colors text-left ${
                   activeTab === "limits"
                     ? "bg-[#EFF2FC] text-black font-bold"
                     : "text-[#707070] hover:bg-[#F9F9F7] hover:text-black"
@@ -491,7 +491,7 @@ export default function AccountPage() {
 
               <button
                 onClick={() => setActiveTab("bonuses")}
-                className={`flex items-center w-full px-3 py-2 text-[12px] font-semibold rounded-[10px] transition-colors text-left ${
+                className={`flex items-center shrink-0 whitespace-nowrap px-3 py-2 text-[12px] font-semibold rounded-[10px] transition-colors text-left ${
                   activeTab === "bonuses"
                     ? "bg-[#EFF2FC] text-black font-bold"
                     : "text-[#707070] hover:bg-[#F9F9F7] hover:text-black"
@@ -501,7 +501,7 @@ export default function AccountPage() {
               </button>
             </div>
           </div>
-          <div className="text-[10px] text-[#a0a0a0] text-center pt-4 border-t border-[#F0F0F0]">
+          <div className="hidden md:block text-[10px] text-[#a0a0a0] text-center pt-4 border-t border-[#F0F0F0]">
             v1.0.0 · Sendly
           </div>
         </div>
@@ -975,7 +975,70 @@ export default function AccountPage() {
                   </div>
                 </div>
 
-                <div className="bg-[#F9F9F7] border border-[#F0F0F0] rounded-[14px] p-5 mt-2">
+                {/* AI Credits Limit Block */}
+                {(() => {
+                  const balance = aiCreditsData.balance || 0;
+                  const used = aiCreditsData.used || 0;
+                  const total = balance + used;
+                  const usedPct = total > 0 ? Math.min(100, (used / total) * 100) : 0;
+                  const isLow = balance > 0 && balance < 100;
+                  const isEmpty = balance <= 0;
+                  return (
+                    <div className={`rounded-[16px] p-5 border transition-colors ${isEmpty ? "bg-red-50 border-red-200" : isLow ? "bg-amber-50 border-amber-200" : "bg-[#EFF2FC] border-[#D8E2FC]"}`}>
+                      <div className="flex items-start justify-between gap-3 mb-4">
+                        <div>
+                          <h4 className="text-[13px] font-bold text-black">{t("pages.account.limits.ai_credits_title")}</h4>
+                          <p className="text-[11px] text-[#707070] mt-0.5">{t("pages.account.billing.ai_credits_desc")}</p>
+                        </div>
+                        <button
+                          onClick={() => setIsBuyCreditsModalOpen(true)}
+                          className="shrink-0 text-[11px] font-bold bg-black hover:bg-black/80 text-white px-3 py-1.5 rounded-full transition-all active:scale-95"
+                        >
+                          {t("pages.account.limits.ai_credits_buy_btn")}
+                        </button>
+                      </div>
+
+                      {/* Credits stats row */}
+                      <div className="flex items-center gap-4 mb-3">
+                        <div className="flex-1 bg-white/60 rounded-[10px] p-3 text-center">
+                          <p className="text-[22px] font-black text-black leading-none">{balance.toLocaleString("uz-UZ")}</p>
+                          <p className="text-[10px] text-[#707070] mt-0.5 font-semibold uppercase tracking-wide">{t("pages.account.limits.ai_credits_balance")}</p>
+                        </div>
+                        <div className="text-[#D0D0D0] font-bold text-[20px]">·</div>
+                        <div className="flex-1 bg-white/60 rounded-[10px] p-3 text-center">
+                          <p className="text-[22px] font-black text-[#707070] leading-none">{used.toLocaleString("uz-UZ")}</p>
+                          <p className="text-[10px] text-[#909090] mt-0.5 font-semibold uppercase tracking-wide">{t("pages.account.limits.ai_credits_used")}</p>
+                        </div>
+                      </div>
+
+                      {/* Progress bar */}
+                      {total > 0 && (
+                        <div className="w-full bg-white/60 rounded-full h-2 overflow-hidden">
+                          <div
+                            className={`h-full rounded-full transition-all ${isEmpty ? "bg-red-500" : isLow ? "bg-amber-400" : "bg-[#3B5FDB]"}`}
+                            style={{ width: `${usedPct}%` }}
+                          />
+                        </div>
+                      )}
+
+                      {/* Warning banners */}
+                      {isEmpty && (
+                        <div className="mt-3 flex items-center gap-2 text-red-600 bg-red-100 rounded-[10px] px-3 py-2.5">
+                          <Info size={13} className="shrink-0" />
+                          <p className="text-[11px] font-semibold">{t("pages.account.limits.ai_credits_zero")}</p>
+                        </div>
+                      )}
+                      {isLow && !isEmpty && (
+                        <div className="mt-3 flex items-center gap-2 text-amber-700 bg-amber-100 rounded-[10px] px-3 py-2.5">
+                          <Info size={13} className="shrink-0" />
+                          <p className="text-[11px] font-semibold">{t("pages.account.limits.ai_credits_low_warning")}</p>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })()}
+
+                <div className="bg-[#F9F9F7] border border-[#F0F0F0] rounded-[14px] p-5">
                   <h4 className="text-[12px] font-bold text-black uppercase tracking-wider">{t("pages.account.limits.premium_features_title")}</h4>
                   <p className="text-[11px] text-[#707070] mt-1.5 leading-relaxed">
                     {t("pages.account.limits.premium_features_desc")}

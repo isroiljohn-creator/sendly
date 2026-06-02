@@ -30,16 +30,21 @@ const HTML_TEMPLATE = (otp: string) => `
   </div>
 `;
 
+import { generateAndSaveOtp } from "@/lib/otpStore";
+
 export async function POST(request: Request) {
   try {
-    const { email, otp } = await request.json();
+    const { email } = await request.json();
 
-    if (!email || !otp) {
+    if (!email) {
       return NextResponse.json(
-        { success: false, error: "Email va OTP kod kiritilishi shart." },
+        { success: false, error: "Email kiritilishi shart." },
         { status: 400 }
       );
     }
+
+    // Generate code server-side
+    const otp = generateAndSaveOtp(email);
 
     const apiKey = process.env.RESEND_API_KEY;
     if (!apiKey) {
@@ -48,6 +53,7 @@ export async function POST(request: Request) {
         {
           success: false,
           error: "Email yuborish xizmati sozlanmagan. Railway da RESEND_API_KEY o'zgaruvchisini kiriting.",
+          otp: otp // Keep exposing in fallback mode for easy simulator testing
         },
         { status: 501 }
       );

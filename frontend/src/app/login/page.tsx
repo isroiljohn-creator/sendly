@@ -146,15 +146,12 @@ export default function LoginPage() {
     // Check password correctness
     const checkRes = db.signIn(email, password);
     if (checkRes.success) {
-      const code = db.generateOtp(email);
-      setOtpCode(code);
-      
-      // Request real SMTP sending
+      // Request real SMTP sending and server-side OTP generation
       try {
         const mailRes = await fetch("/api/auth/send-otp", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email, otp: code }),
+          body: JSON.stringify({ email }),
         });
         
         const mailData = await mailRes.json();
@@ -167,6 +164,9 @@ export default function LoginPage() {
         } else {
           // If SMTP variables are missing, fallback to simulator with warning
           if (mailRes.status === 501) {
+            if (mailData.otp) {
+              setOtpCode(mailData.otp);
+            }
             setIsFallbackMode(true);
             setIsVerifyingEmail(true);
             setCountdown(120);
@@ -186,34 +186,46 @@ export default function LoginPage() {
     }
   };
 
-  const handleOtpVerify = (e: React.FormEvent) => {
+  const handleOtpVerify = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
     const codeString = enteredOtp.join("");
     
-    if (db.verifyOtp(email, codeString)) {
-      const res = db.completeSignIn(email);
-      if (res.success) {
-        window.location.href = "/";
+    try {
+      const verifyRes = await fetch("/api/auth/verify-otp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, otp: codeString }),
+      });
+      
+      const verifyData = await verifyRes.json();
+      
+      if (verifyRes.ok && verifyData.success) {
+        localStorage.setItem("replai_token", verifyData.token);
+        const res = db.completeSignIn(email);
+        if (res.success) {
+          window.location.href = "/";
+        } else {
+          setError(res.error || t("error"));
+        }
       } else {
-        setError(res.error || t("error"));
+        setError(verifyData.error || t("pages.login_page.error_invalid_otp"));
       }
-    } else {
-      setError(t("pages.login_page.error_invalid_otp"));
+    } catch (err: unknown) {
+      const errMsg = err instanceof Error ? err.message : String(err);
+      setError(t("pages.login_page.error_connection") + errMsg);
     }
   };
 
   const handleResendOtp = async () => {
     setError("");
     setIsFallbackMode(false);
-    const code = db.generateOtp(email);
-    setOtpCode(code);
 
     try {
       const mailRes = await fetch("/api/auth/send-otp", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, otp: code }),
+        body: JSON.stringify({ email }),
       });
       
       const mailData = await mailRes.json();
@@ -224,6 +236,9 @@ export default function LoginPage() {
         setShowNotification(false);
       } else {
         if (mailRes.status === 501) {
+          if (mailData.otp) {
+            setOtpCode(mailData.otp);
+          }
           setIsFallbackMode(true);
           setCountdown(120);
           setEnteredOtp(["", "", "", ""]);
@@ -252,14 +267,11 @@ export default function LoginPage() {
       return;
     }
 
-    const code = db.generateOtp(recoveryEmail);
-    setRecoveryOtpCode(code);
-
     try {
       const mailRes = await fetch("/api/auth/send-otp", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: recoveryEmail, otp: code }),
+        body: JSON.stringify({ email: recoveryEmail }),
       });
 
       const mailData = await mailRes.json();
@@ -271,6 +283,9 @@ export default function LoginPage() {
         setShowNotification(false);
       } else {
         if (mailRes.status === 501) {
+          if (mailData.otp) {
+            setRecoveryOtpCode(mailData.otp);
+          }
           setIsFallbackMode(true);
           setRecoveryStep(2);
           setRecoveryCountdown(120);
@@ -287,31 +302,43 @@ export default function LoginPage() {
     }
   };
 
-  const handleRecoveryOtpVerify = (e: React.FormEvent) => {
+  const handleRecoveryOtpVerify = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
     const codeString = recoveryEnteredOtp.join("");
 
-    if (db.verifyOtp(recoveryEmail, codeString)) {
-      setRecoveryStep(3);
-      setNewPassword("");
-      setConfirmNewPassword("");
-    } else {
-      setError(t("pages.login_page.error_invalid_otp"));
+    try {
+      const verifyRes = await fetch("/api/auth/verify-otp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: recoveryEmail, otp: codeString }),
+      });
+
+      const verifyData = await verifyRes.json();
+
+      if (verifyRes.ok && verifyData.success) {
+        localStorage.setItem("replai_token", verifyData.token);
+        setRecoveryStep(3);
+        setNewPassword("");
+        setConfirmNewPassword("");
+      } else {
+        setError(verifyData.error || t("pages.login_page.error_invalid_otp"));
+      }
+    } catch (err: unknown) {
+      const errMsg = err instanceof Error ? err.message : String(err);
+      setError(t("pages.login_page.error_connection") + errMsg);
     }
   };
 
   const handleResendRecoveryOtp = async () => {
     setError("");
     setIsFallbackMode(false);
-    const code = db.generateOtp(recoveryEmail);
-    setRecoveryOtpCode(code);
 
     try {
       const mailRes = await fetch("/api/auth/send-otp", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: recoveryEmail, otp: code }),
+        body: JSON.stringify({ email: recoveryEmail }),
       });
 
       const mailData = await mailRes.json();
@@ -322,6 +349,9 @@ export default function LoginPage() {
         setShowNotification(false);
       } else {
         if (mailRes.status === 501) {
+          if (mailData.otp) {
+            setRecoveryOtpCode(mailData.otp);
+          }
           setIsFallbackMode(true);
           setRecoveryCountdown(120);
           setRecoveryEnteredOtp(["", "", "", ""]);

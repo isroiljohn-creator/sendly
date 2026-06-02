@@ -3637,10 +3637,10 @@ function AIAgentContent() {
         </div>
 
         {/* Tab Buttons */}
-        <div className="flex border-b border-[#E8E8E8] gap-8">
+        <div className="flex border-b border-[#E8E8E8] gap-4 md:gap-8 overflow-x-auto [&::-webkit-scrollbar]:hidden [scrollbar-width:none] w-full">
           <button
             onClick={() => setActiveTab("settings")}
-            className={`flex items-center gap-2 pb-4 text-[14px] font-bold border-b-2 transition-colors relative ${
+            className={`flex items-center gap-2 pb-4 text-[14px] font-bold border-b-2 transition-colors relative shrink-0 whitespace-nowrap ${
               activeTab === "settings"
                 ? "border-black text-black"
                 : "border-transparent text-[#707070] hover:text-black"
@@ -3654,7 +3654,7 @@ function AIAgentContent() {
             <>
               <button
                 onClick={() => setActiveTab("knowledge")}
-                className={`flex items-center gap-2 pb-4 text-[14px] font-bold border-b-2 transition-colors relative ${
+                className={`flex items-center gap-2 pb-4 text-[14px] font-bold border-b-2 transition-colors relative shrink-0 whitespace-nowrap ${
                   activeTab === "knowledge"
                     ? "border-black text-black"
                     : "border-transparent text-[#707070] hover:text-black"
@@ -3666,7 +3666,7 @@ function AIAgentContent() {
               </button>
               <button
                 onClick={() => setActiveTab("analytics")}
-                className={`flex items-center gap-2 pb-4 text-[14px] font-bold border-b-2 transition-colors relative ${
+                className={`flex items-center gap-2 pb-4 text-[14px] font-bold border-b-2 transition-colors relative shrink-0 whitespace-nowrap ${
                   activeTab === "analytics"
                     ? "border-black text-black"
                     : "border-transparent text-[#707070] hover:text-black"
