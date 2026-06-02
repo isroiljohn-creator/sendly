@@ -639,8 +639,8 @@
           "desc": "Verifies Instagram subscription, sets tags and sends lead magnet."
         },
         "ai_chatgpt": {
-          "name": "AI · ChatGPT",
-          "desc": "Duplicates ChatGPT behavior: simulating live conversation using OpenAI..."
+          "name": "AI · Gemini",
+          "desc": "Duplicates Gemini behavior: simulating live conversation using Google Gemini..."
         },
         "ai_savol": {
           "name": "AI · Question",

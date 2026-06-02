@@ -10,7 +10,11 @@ let queue: Queue.Queue | null = null;
 let broadcastsQueue: Queue.Queue | null = null;
 let webhooksQueue: Queue.Queue | null = null;
 
+const isTestEnv = process.env.NODE_ENV === "test" || (process.argv[1] && process.argv[1].includes("test"));
+const activeTimeouts = new Map<string, NodeJS.Timeout>();
+
 try {
+  if (isTestEnv) throw new Error("Test mode: Bypassing Bull queue");
   queue = new Queue("instagram-chatbot-delays", env.REDIS_URL, {
     settings: {
       backoffStrategies: {},
@@ -27,12 +31,13 @@ try {
   queue.on("error", (err) => {
     console.error("[Queue] Bull queue error:", err);
   });
-} catch (err) {
-  console.error("[Queue] Failed to initialize Bull queue:", err);
+} catch (err: any) {
+  console.log("[Queue] Delays queue not initialized:", err.message);
   queue = null;
 }
 
 try {
+  if (isTestEnv) throw new Error("Test mode: Bypassing Bull queue");
   broadcastsQueue = new Queue("broadcasts-queue", env.REDIS_URL);
 
   broadcastsQueue.process(async (job) => {
@@ -44,12 +49,13 @@ try {
   broadcastsQueue.on("error", (err) => {
     console.error("[Broadcast Queue] Bull queue error:", err);
   });
-} catch (err) {
-  console.error("[Broadcast Queue] Failed to initialize Bull broadcasts queue:", err);
+} catch (err: any) {
+  console.log("[Broadcast Queue] Broadcasts queue not initialized:", err.message);
   broadcastsQueue = null;
 }
 
 try {
+  if (isTestEnv) throw new Error("Test mode: Bypassing Bull queue");
   webhooksQueue = new Queue("webhooks-queue", env.REDIS_URL);
 
   webhooksQueue.process(async (job) => {
@@ -68,8 +74,8 @@ try {
   webhooksQueue.on("error", (err) => {
     console.error("[Webhooks Queue] Bull queue error:", err);
   });
-} catch (err) {
-  console.error("[Webhooks Queue] Failed to initialize Bull webhooks queue:", err);
+} catch (err: any) {
+  console.log("[Webhooks Queue] Webhooks queue not initialized:", err.message);
   webhooksQueue = null;
 }
 
@@ -229,7 +235,14 @@ export async function scheduleSessionDelay(
     );
     console.log(`[Queue] Delay job added to Bull queue for session ${sessionId}`);
   } else {
-    console.warn(`[Queue] Bull queue not available. Delay for session ${sessionId} could not be scheduled.`);
+    console.warn(`[Queue] Bull queue not available. Scheduling delay for session ${sessionId} via setTimeout (fallback).`);
+    const timeout = setTimeout(() => {
+      activeTimeouts.delete(sessionId);
+      resumeSession(sessionId, nextBlockId).catch((err) => {
+        console.error(`[Queue] Direct delay execution failed for session ${sessionId}:`, err);
+      });
+    }, delaySeconds * 1000);
+    activeTimeouts.set(sessionId, timeout);
   }
 }
 
@@ -250,6 +263,12 @@ export async function cancelSessionDelay(sessionId: string): Promise<void> {
     } catch (err) {
       console.error(`[Queue] Error cancelling Bull job for session ${sessionId}:`, err);
     }
+  }
+  const localTimeout = activeTimeouts.get(sessionId);
+  if (localTimeout) {
+    clearTimeout(localTimeout);
+    activeTimeouts.delete(sessionId);
+    console.log(`[Queue] Cancelled local timeout delay for session ${sessionId}`);
   }
 }
 
@@ -443,7 +462,10 @@ export async function addBroadcastToQueue(broadcastId: string, userId: string): 
     );
     console.log(`[Queue] Broadcast job ${jobId} added to Bull queue`);
   } else {
-    console.warn(`[Queue] Bull queue for broadcasts not available. Cannot add job.`);
+    console.warn(`[Queue] Bull queue for broadcasts not available. Executing broadcast directly (fallback).`);
+    processBroadcastJob(broadcastId, userId).catch((err) => {
+      console.error(`[Queue] Direct broadcast execution failed:`, err);
+    });
   }
 }
 

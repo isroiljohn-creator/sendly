@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import fs from "fs";
 import path from "path";
-import { createClient } from "@supabase/supabase-js";
+import * as pgdb from "@/lib/pgdb";
 
 const DB_FILE = process.env.DB_FILE_PATH || path.join(process.cwd(), "db.json");
 
@@ -106,17 +106,10 @@ const activeSessions = (globalThis as any).mcpSessions || new Map<string, {
 
 // Helper: Unified Tool Execution Dispatcher
 async function executeTool(tool: string, args: any, userId: string): Promise<any> {
-  const isSupabase = !!(process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY);
+  const useRailway = pgdb.isConfigured();
   
-  if (isSupabase) {
-    const supabase = createClient(process.env.SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
-    const { data: settingRow } = await supabase
-      .from("instagram_accounts")
-      .select("fb_field_mappings")
-      .eq("instagram_page_id", "global_settings_" + userId)
-      .maybeSingle();
-
-    const context = settingRow?.fb_field_mappings || {};
+  if (useRailway) {
+    const context = await pgdb.getValue("global_settings_" + userId) || {};
 
     switch (tool) {
       case "get_analytics": {
@@ -134,7 +127,7 @@ async function executeTool(tool: string, args: any, userId: string): Promise<any
           creditsBalance: credits.balance,
           channelsCount: userChannels.length,
           activeChatsCount: totalChatsCount,
-          platform: "Supabase production mode"
+          platform: "Railway production mode"
         };
       }
 
@@ -203,14 +196,7 @@ async function executeTool(tool: string, args: any, userId: string): Promise<any
           thread.unread = false;
 
           context[chatKey] = chatsList;
-          await supabase
-            .from("instagram_accounts")
-            .upsert({
-              user_id: userId,
-              instagram_page_id: "global_settings_" + userId,
-              access_token: "global_settings_token",
-              fb_field_mappings: context
-            }, { onConflict: "instagram_page_id" });
+          await pgdb.setValue("global_settings_" + userId, context);
         }
 
         return { success: true };

@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import fs from "fs";
 import path from "path";
-import { createClient } from "@supabase/supabase-js";
+import * as pgdb from "@/lib/pgdb";
 
 const DB_FILE = process.env.DB_FILE_PATH || path.join(process.cwd(), "db.json");
 
@@ -39,20 +39,12 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Unauthorized: Missing credentials" }, { status: 401 });
     }
 
-    // 1. Check if running in Supabase mode
-    const isSupabase = !!(process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY);
+    // 1. Check if running in Railway mode
+    const useRailway = pgdb.isConfigured();
 
-    if (isSupabase) {
-      const supabase = createClient(process.env.SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
-      
+    if (useRailway) {
       // Load user setting context
-      const { data: settingRow } = await supabase
-        .from("instagram_accounts")
-        .select("fb_field_mappings")
-        .eq("instagram_page_id", "global_settings_" + userId)
-        .maybeSingle();
-
-      const context = settingRow?.fb_field_mappings || {};
+      const context = await pgdb.getValue("global_settings_" + userId) || {};
 
       switch (tool) {
         case "list_contacts": {
@@ -127,14 +119,7 @@ export async function POST(request: Request) {
             thread.unread = false;
 
             context[chatKey] = chatsList;
-            await supabase
-              .from("instagram_accounts")
-              .upsert({
-                user_id: userId,
-                instagram_page_id: "global_settings_" + userId,
-                access_token: "global_settings_token",
-                fb_field_mappings: context
-              }, { onConflict: "instagram_page_id" });
+            await pgdb.setValue("global_settings_" + userId, context);
           }
 
           return NextResponse.json({ success: true });
@@ -155,7 +140,7 @@ export async function POST(request: Request) {
             creditsBalance: credits.balance,
             channelsCount: userChannels.length,
             activeChatsCount: totalChatsCount,
-            platform: "Supabase production mode"
+            platform: "Railway production mode"
           });
         }
 

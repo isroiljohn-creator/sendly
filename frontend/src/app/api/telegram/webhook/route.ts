@@ -3,6 +3,7 @@ import fs from "fs";
 import path from "path";
 import crypto from "crypto";
 import { getDbDataFromSupabase, handleTelegramUpdate } from "@/lib/telegramBotRunner";
+import * as pgdb from "@/lib/pgdb";
 
 const DB_FILE = process.env.DB_FILE_PATH || path.join(process.cwd(), "db.json");
 
@@ -20,7 +21,7 @@ export async function POST(request: Request) {
 
     // 1. Fetch config to get the token for the given channelId
     let dbData: any = {};
-    if (process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    if (pgdb.isConfigured()) {
       dbData = await getDbDataFromSupabase();
     } else {
       if (fs.existsSync(DB_FILE)) {

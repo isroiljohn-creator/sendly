@@ -84,7 +84,8 @@ export type BotSettings = {
   adminTelegramChatId?: string;
   adminTelegramUsername?: string;
   telegramBotId?: string;
-  aiAgentType?: "kurator" | "sales" | "booker" | "recruiter";
+  aiAgentType?: "kurator" | "sales" | "booker" | "recruiter" | "clinic" | "realtor" | "helpdesk" | "fb-leads" | "fb-leads-direct";
+  fbAgentMode?: "direct" | "ai";
 };
 
 export type Lesson = {

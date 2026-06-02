@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import fs from "fs";
 import path from "path";
 import { getDbDataFromSupabase } from "@/lib/telegramBotRunner";
+import * as pgdb from "@/lib/pgdb";
 
 export const dynamic = "force-dynamic";
 
@@ -10,7 +11,7 @@ const DB_FILE = process.env.DB_FILE_PATH || path.join(process.cwd(), "db.json");
 export async function GET() {
   try {
     let dbData: any = {};
-    if (process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    if (pgdb.isConfigured()) {
       dbData = await getDbDataFromSupabase();
     } else {
       if (fs.existsSync(DB_FILE)) {
@@ -18,7 +19,7 @@ export async function GET() {
       }
     }
 
-    const tgBots: Array<{ id: string; username: string; hasToken: boolean; webhookInfo?: any; error?: string }> = [];
+    const tgBots: Array<{ id: string; username: string; hasToken: boolean; webhookInfo?: any; botInfo?: any; error?: string }> = [];
 
     // Extract telegram channels
     const extractChannels = (channelsRaw: any, ownerId: string) => {
@@ -69,7 +70,7 @@ export async function GET() {
 
       if (dbData["replai_channels"]) findToken(dbData["replai_channels"]);
       if (!token && dbData.userData) {
-        for (const userVal of Object.values(dbData.userData)) {
+        for (const userVal of Object.values(dbData.userData) as any[]) {
           if (userVal && typeof userVal === "object" && userVal["replai_channels"]) {
             findToken(userVal["replai_channels"]);
           }

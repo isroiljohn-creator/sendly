@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import fs from "fs";
 import path from "path";
-import { createClient } from "@supabase/supabase-js";
+import * as pgdb from "@/lib/pgdb";
 
 const DB_FILE = process.env.DB_FILE_PATH || path.join(process.cwd(), "db.json");
 
@@ -63,19 +63,10 @@ export async function POST(request: Request) {
     let userSpecificData: Record<string, any> = {};
     let dbData: any = null;
 
-    const useSupabase = process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY;
-    const supabase = useSupabase ? createClient(process.env.SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!) : null;
-    const cleanUserId = isValidUuid(userId) ? userId : "00000000-0000-0000-0000-000000000000";
+    const useRailway = pgdb.isConfigured();
 
-    if (useSupabase && supabase) {
-      const { data: userSettings } = await supabase
-        .from("instagram_accounts")
-        .select("fb_field_mappings")
-        .eq("instagram_page_id", "global_settings_" + userId)
-        .maybeSingle();
-      if (userSettings?.fb_field_mappings) {
-        userSpecificData = userSettings.fb_field_mappings;
-      }
+    if (useRailway) {
+      userSpecificData = await pgdb.getValue("global_settings_" + userId) || {};
     } else {
       dbData = readDb();
       userSpecificData = dbData.userData?.[userId] || {};
@@ -125,15 +116,8 @@ export async function POST(request: Request) {
     delete userSpecificData[verifyCodeKey];
 
     // 3. Save back
-    if (useSupabase && supabase) {
-      await supabase
-        .from("instagram_accounts")
-        .upsert({
-          user_id: cleanUserId,
-          instagram_page_id: "global_settings_" + userId,
-          access_token: "global_settings_token",
-          fb_field_mappings: userSpecificData
-        }, { onConflict: "instagram_page_id" });
+    if (useRailway) {
+      await pgdb.setValue("global_settings_" + userId, userSpecificData);
     } else {
       if (!dbData.userData) {
         dbData.userData = {};
@@ -161,21 +145,12 @@ export async function POST(request: Request) {
 
     let userEmail = "";
     try {
-      if (useSupabase && supabase) {
-        const { data: globalUsers } = await supabase
-          .from("instagram_accounts")
-          .select("fb_field_mappings")
-          .eq("instagram_page_id", "global_users")
-          .maybeSingle();
-        if (globalUsers?.fb_field_mappings) {
-          const usersList = typeof globalUsers.fb_field_mappings === "string"
-            ? JSON.parse(globalUsers.fb_field_mappings)
-            : globalUsers.fb_field_mappings;
-          if (Array.isArray(usersList)) {
-            const userObj = usersList.find((u: any) => u.id === userId);
-            if (userObj) {
-              userEmail = userObj.email;
-            }
+      if (useRailway) {
+        const usersList = await pgdb.getValue("global_users") || [];
+        if (Array.isArray(usersList)) {
+          const userObj = usersList.find((u: any) => u.id === userId);
+          if (userObj) {
+            userEmail = userObj.email;
           }
         }
       } else {

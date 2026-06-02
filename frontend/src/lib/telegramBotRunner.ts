@@ -4,7 +4,7 @@ import crypto from "crypto";
 import { Channel, Automation, BotSettings, Lesson, Module } from "./db";
 import { moderateMessage } from "./ai/moderation";
 import { queryRAG } from "./ai/rag";
-import { createClient } from "@supabase/supabase-js";
+import * as pgdb from "./pgdb";
 
 const DB_FILE = process.env.DB_FILE_PATH || path.join(process.cwd(), "db.json");
 
@@ -39,38 +39,26 @@ function isValidUuid(id: string): boolean {
   return uuidRegex.test(id);
 }
 
-export async function getDbDataFromSupabase(): Promise<any> {
-  const supabase = createClient(
-    process.env.SUPABASE_URL || "",
-    process.env.SUPABASE_SERVICE_ROLE_KEY || ""
-  );
-
+export async function getDbDataFromRailway(): Promise<any> {
   // 1. Fetch global users
-  const { data: globalUsers } = await supabase
-    .from("instagram_accounts")
-    .select("fb_field_mappings")
-    .eq("instagram_page_id", "global_users")
-    .maybeSingle();
+  const globalUsers = await pgdb.getValue("global_users") || [];
 
   // 2. Fetch all user settings
-  const { data: allSettings } = await supabase
-    .from("instagram_accounts")
-    .select("user_id, instagram_page_id, fb_field_mappings")
-    .like("instagram_page_id", "global_settings_%");
+  const allSettings = await pgdb.getAllLike("global_settings_%") || [];
 
   const userData: Record<string, any> = {};
-  if (allSettings) {
-    allSettings.forEach((row) => {
-      const userId = row.instagram_page_id.replace("global_settings_", "");
-      userData[userId] = row.fb_field_mappings || {};
-    });
-  }
+  allSettings.forEach((row) => {
+    const userId = row.key.replace("global_settings_", "");
+    userData[userId] = row.value || {};
+  });
 
   return {
-    users: globalUsers?.fb_field_mappings || [],
+    users: globalUsers,
     userData
   };
 }
+
+export const getDbDataFromSupabase = getDbDataFromRailway;
 
 async function sendTelegramMessage(token: string, chatId: number | string, text: string, parseMode?: string, replyMarkup?: any) {
   try {
@@ -98,12 +86,10 @@ async function sendTelegramMessage(token: string, chatId: number | string, text:
 }
 
 async function updateDbFile(updater: (dbData: Record<string, any>) => Promise<void> | void) {
-  if (process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY) {
+  if (pgdb.isConfigured()) {
     try {
-      const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY);
-      
       // Load current state
-      const dbData = await getDbDataFromSupabase();
+      const dbData = await getDbDataFromRailway();
       
       const originalUserDataJson = JSON.stringify(dbData.userData);
       const originalUsersJson = JSON.stringify(dbData.users);
@@ -113,14 +99,7 @@ async function updateDbFile(updater: (dbData: Record<string, any>) => Promise<vo
 
       // Save global users
       if (JSON.stringify(dbData.users) !== originalUsersJson) {
-        await supabase
-          .from("instagram_accounts")
-          .upsert({
-            user_id: "00000000-0000-0000-0000-000000000000",
-            instagram_page_id: "global_users",
-            access_token: "global_users_token",
-            fb_field_mappings: dbData.users
-          }, { onConflict: "instagram_page_id" });
+        await pgdb.setValue("global_users", dbData.users);
       }
 
       // Save user specific data
@@ -129,20 +108,12 @@ async function updateDbFile(updater: (dbData: Record<string, any>) => Promise<vo
         const newValJson = JSON.stringify(userVal);
         
         if (newValJson !== originalValJson) {
-          const cleanUserId = isValidUuid(userId) ? userId : "00000000-0000-0000-0000-000000000000";
-          await supabase
-            .from("instagram_accounts")
-            .upsert({
-              user_id: cleanUserId,
-              instagram_page_id: "global_settings_" + userId,
-              access_token: "global_settings_token",
-              fb_field_mappings: userVal
-            }, { onConflict: "instagram_page_id" });
+          await pgdb.setValue("global_settings_" + userId, userVal);
         }
       }
       return;
     } catch (dbErr) {
-      console.error("Supabase updateDbFile failed, falling back to local file", dbErr);
+      console.error("Railway updateDbFile failed, falling back to local file", dbErr);
     }
   }
 
@@ -544,10 +515,10 @@ export async function handleTelegramUpdate(channelId: string, token: string, upd
              } else if (matchedKeyword === "narxi" || matchedKeyword === "tarif" || matchedKeyword === "kurs") {
                botReplyText =
                  userLang === "en"
-                   ? "Our pricing: \n• Pro: 150,000 UZS/month (1 account)\n• Premium: 1,200,000 UZS/month (10 accounts)\n\nOur operator will reply shortly with more details or to help you connect."
-                   : userLang === "ru"
-                   ? "Наши тарифы: \n• Pro: 150,000 сум/мес (1 аккаунт)\n• Premium: 1,200,000 сум/мес (10 аккаунтов)\n\nНаш оператор скоро свяжется с вами для подробной информации."
-                   : "Bizning tariflarimiz: \n• Pro: 150,000 so'm/oy (1ta akkaunt)\n• Premium: 1,200,000 so'm/oy (10ta akkaunt)\n\nBatafsil ma'lumot olish yoki ulanish uchun operatorimiz tez orada javob yozadi.";
+                    ? "Our pricing (50% Discount!): \n• Pro: 75,000 UZS/month (usually 150,000 UZS) — 1 account\n• Premium: 600,000 UZS/month (usually 1,200,000 UZS) — 10 accounts\n\nOur operator will reply shortly with more details."
+                    : userLang === "ru"
+                    ? "Наши тарифы (Скидка 50%!): \n• Pro: 75,000 сум/мес (обычно 150,000) — 1 аккаунт\n• Premium: 600,000 сум/мес (обычно 1,200,000) — 10 аккаунтов\n\nНаш оператор скоро свяжется с вами."
+                   : "Bizning tariflarimiz (50% Chegirma!): \n• Pro: 75,000 so'm/oy (odatda 150,000) — 1ta akkaunt\n• Premium: 600,000 so'm/oy (odatda 1,200,000) — 10ta akkaunt\n\nBatafsil ma'lumot olish uchun operatorimiz tez orada javob yozadi.";
              } else {
                botReplyText = matchedKeyword;
              }
@@ -1042,8 +1013,8 @@ async function runBotPollLoop(channelId: string, botState: TelegramBotState) {
 export async function startTelegramBots() {
   try {
     let dbData: any = {};
-    if (process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY) {
-      dbData = await getDbDataFromSupabase();
+    if (pgdb.isConfigured()) {
+      dbData = await getDbDataFromRailway();
     } else {
       if (!fs.existsSync(DB_FILE)) {
         return { success: true, message: "No db.json yet." };

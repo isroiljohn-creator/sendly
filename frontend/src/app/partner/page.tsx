@@ -47,16 +47,16 @@ export default function PartnerPage() {
 
     const mapped = myReferrals.map((u: any) => {
       let planLabel: "Premium" | "Trial" | "Bepul" = "Bepul";
-      let commissionVal = "$0.00";
+      let commissionVal = "0 UZS";
       let statusVal: "Faol" | "Kutilmoqda" = "Kutilmoqda";
 
       if (u.plan === "premium") {
         planLabel = "Premium";
-        commissionVal = "$24.00"; // 30% of $80 Premium plan
+        commissionVal = "180 000 UZS"; // 30% of 600,000 UZS Premium plan
         statusVal = "Faol";
       } else if (u.plan === "pro") {
         planLabel = "Trial";
-        commissionVal = "$3.60"; // 30% of $12 Pro plan
+        commissionVal = "22 500 UZS"; // 30% of 75,000 UZS Pro plan
         statusVal = "Faol";
       }
 
@@ -75,10 +75,10 @@ export default function PartnerPage() {
 
   const referralsCount = referrals.length;
   const totalEarnedFloat = referrals.reduce((acc, r) => {
-    const val = parseFloat(r.commission.replace("$", ""));
+    const val = parseFloat(r.commission.replace(/[^0-9]/g, ""));
     return acc + (isNaN(val) ? 0 : val);
   }, 0);
-  const totalEarned = `$${totalEarnedFloat.toFixed(2)}`;
+  const totalEarned = `${totalEarnedFloat.toLocaleString("uz-UZ")} UZS`;
   const balance = totalEarned;
 
   const referralLink = typeof window !== "undefined"

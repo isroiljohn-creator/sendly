@@ -27,3 +27,18 @@ process.on("SIGTERM", () => {
     console.log("HTTP server closed.");
   });
 });
+
+import { sendErrorToTelegram } from "./services/monitoring";
+
+process.on("uncaughtException", (err) => {
+  console.error("Uncaught Exception caught:", err);
+  sendErrorToTelegram(err, "Uncaught Exception (Process Crash)").then(() => {
+    process.exit(1);
+  });
+});
+
+process.on("unhandledRejection", (reason, promise) => {
+  console.error("Unhandled Rejection at:", promise, "reason:", reason);
+  sendErrorToTelegram(reason instanceof Error ? reason : new Error(String(reason)), "Unhandled Rejection").catch(() => {});
+});
+

@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
+import * as pgdb from "@/lib/pgdb";
 
 export async function POST(request: Request) {
   try {
@@ -8,22 +8,13 @@ export async function POST(request: Request) {
 
     const today = new Date().toISOString().split("T")[0]; // YYYY-MM-DD
 
-    if (!process.env.SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
-      // No Supabase configured – silently ignore tracking
+    if (!pgdb.isConfigured()) {
+      // No database configured – silently ignore tracking
       return NextResponse.json({ ok: true });
     }
 
-    const supabase = createClient(
-      process.env.SUPABASE_URL,
-      process.env.SUPABASE_SERVICE_ROLE_KEY
-    );
-
     // Read existing analytics
-    const { data: row } = await supabase
-      .from("instagram_accounts")
-      .select("fb_field_mappings")
-      .eq("instagram_page_id", "global_analytics_daily")
-      .maybeSingle();
+    const row = await pgdb.getValue("global_analytics_daily");
 
     let days: Array<{
       date: string;
@@ -32,14 +23,8 @@ export async function POST(request: Request) {
       newUsers: number;
     }> = [];
 
-    if (row?.fb_field_mappings) {
-      const parsed =
-        typeof row.fb_field_mappings === "string"
-          ? JSON.parse(row.fb_field_mappings)
-          : row.fb_field_mappings;
-      if (parsed.days && Array.isArray(parsed.days)) {
-        days = parsed.days;
-      }
+    if (row && row.days && Array.isArray(row.days)) {
+      days = row.days;
     }
 
     // Find or create today's entry
@@ -63,16 +48,8 @@ export async function POST(request: Request) {
       days = days.slice(days.length - 60);
     }
 
-    // Upsert back to Supabase
-    await supabase.from("instagram_accounts").upsert(
-      {
-        user_id: "00000000-0000-0000-0000-000000000000",
-        instagram_page_id: "global_analytics_daily",
-        access_token: "global_analytics_token",
-        fb_field_mappings: { days },
-      },
-      { onConflict: "instagram_page_id" }
-    );
+    // Upsert back to Railway PostgreSQL
+    await pgdb.setValue("global_analytics_daily", { days });
 
     return NextResponse.json({ ok: true });
   } catch (err) {

@@ -646,7 +646,7 @@ export default function AccountPage() {
           {activeTab === "billing" && (() => {
             const connectedCount = channelsCount;
             const userPlan = currentUser?.plan || "free";
-            const basePrice = userPlan === "premium" ? 1200000 : userPlan === "pro" ? 150000 : 0;
+            const basePrice = userPlan === "premium" ? 600000 : userPlan === "pro" ? 75000 : 0;
             const includedChannels = userPlan === "premium" ? 10 : 1;
             const extraChannels = Math.max(0, connectedCount - includedChannels);
             const extraCost = extraChannels * 150000;

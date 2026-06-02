@@ -95,6 +95,10 @@ const mockFrom = (table: string) => {
       queryState.limitVal = val;
       return chain;
     },
+    range: (from: number, to: number) => {
+      queryState.limitVal = to - from + 1;
+      return chain;
+    },
     maybeSingle: async () => {
       const data = runSelect();
       return { data: data.length > 0 ? data[0] : null, error: null };
@@ -264,7 +268,7 @@ const mockFrom = (table: string) => {
         const triggers = mockDb.automation_triggers.filter((t) => t.automation_id === item.id);
         return { ...item, automation_triggers: triggers };
       });
-    } else if (table === "gamification_scores") {
+    } else if (table === "gamification_scores" || table === "messages" || table === "automation_runs" || table === "conversions") {
       list = list.map((item) => {
         const contactRec = mockDb.contacts.find((c) => c.id === item.contact_id);
         return {

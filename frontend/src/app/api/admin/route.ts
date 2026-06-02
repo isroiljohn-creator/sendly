@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import fs from "fs";
 import path from "path";
-import { createClient } from "@supabase/supabase-js";
+import * as pgdb from "@/lib/pgdb";
 import { verifyJwt } from "@/lib/jwt";
 
 const DB_FILE = process.env.DB_FILE_PATH || path.join(process.cwd(), "db.json");
@@ -28,9 +28,8 @@ function isValidUuid(id: string): boolean {
   return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
 }
 
-// ─── Real analytics: read from Supabase global_analytics_daily ───────────────
+// ─── Real analytics: read from Railway global_analytics_daily ───────────────
 async function readRealAnalytics(
-  supabase: ReturnType<typeof createClient> | null,
   premiumCount: number,
   proCount: number
 ) {
@@ -47,23 +46,14 @@ async function readRealAnalytics(
     dates.push(d.toISOString().split("T")[0]); // YYYY-MM-DD
   }
 
-  // Read tracked analytics from Supabase
+  // Read tracked analytics from Railway PostgreSQL
   let trackedMap: Record<string, { visitors: number; dau: number; newUsers: number }> = {};
-  if (supabase) {
+  if (pgdb.isConfigured()) {
     try {
-      const { data: row } = await supabase
-        .from("instagram_accounts")
-        .select("fb_field_mappings")
-        .eq("instagram_page_id", "global_analytics_daily")
-        .maybeSingle();
-      if (row?.fb_field_mappings) {
-        const parsed = typeof row.fb_field_mappings === "string"
-          ? JSON.parse(row.fb_field_mappings)
-          : row.fb_field_mappings;
-        if (parsed.days && Array.isArray(parsed.days)) {
-          for (const day of parsed.days) {
-            if (day.date) trackedMap[day.date] = day;
-          }
+      const parsed = await pgdb.getValue("global_analytics_daily");
+      if (parsed?.days && Array.isArray(parsed.days)) {
+        for (const day of parsed.days) {
+          if (day.date) trackedMap[day.date] = day;
         }
       }
     } catch {
@@ -72,7 +62,7 @@ async function readRealAnalytics(
   }
 
   // Daily revenue based on real plan counts (SaaS monthly / 30)
-  const dailyRevenueAmount = parseFloat(((premiumCount * 80 + proCount * 12) / 30).toFixed(2));
+  const dailyRevenueAmount = Math.round((premiumCount * 600000 + proCount * 75000) / 30);
 
   for (const dateStr of dates) {
     const tracked = trackedMap[dateStr];
@@ -129,18 +119,10 @@ export async function GET(request: Request) {
     // For non-admin: only return systemAnnouncement
     if (!isAdmin) {
       let announcement = "";
-      if (process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY) {
+      if (pgdb.isConfigured()) {
         try {
-          const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY);
-          const { data: row } = await supabase
-            .from("instagram_accounts")
-            .select("fb_field_mappings")
-            .eq("instagram_page_id", "global_admin_data")
-            .maybeSingle();
-          if (row?.fb_field_mappings) {
-            const d = typeof row.fb_field_mappings === "string" ? JSON.parse(row.fb_field_mappings) : row.fb_field_mappings;
-            announcement = d.systemAnnouncement || "";
-          }
+          const adminData = await pgdb.getValue("global_admin_data");
+          announcement = adminData?.systemAnnouncement || "";
         } catch { /* ignore */ }
       } else {
         const db = readDb();
@@ -155,69 +137,42 @@ export async function GET(request: Request) {
     let promoCodes: any[] = [];
     let auditLogs: any[] = [];
     let systemAnnouncement = "";
-    let supabaseClient: ReturnType<typeof createClient> | null = null;
 
-    if (process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    if (pgdb.isConfigured()) {
       try {
-        supabaseClient = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY);
-        const { data: allRows, error: fetchErr } = await supabaseClient
-          .from("instagram_accounts")
-          .select("*");
-        if (fetchErr) throw fetchErr;
+        // 1. Get global users
+        usersList = await pgdb.getValue("global_users") || [];
 
-        if (allRows) {
-          const globalUsersRow = allRows.find(r => r.instagram_page_id === "global_users");
-          if (globalUsersRow?.fb_field_mappings) {
-            usersList = typeof globalUsersRow.fb_field_mappings === "string"
-              ? JSON.parse(globalUsersRow.fb_field_mappings)
-              : globalUsersRow.fb_field_mappings;
-          }
+        // 2. Get global admin data
+        const adminData = await pgdb.getValue("global_admin_data") || {};
+        const rawPromoCodes = adminData.promoCodes || [];
+        const rawAuditLogs = adminData.auditLogs || [];
+        promoCodes = rawPromoCodes.filter((p: any) => p && p.code !== "SENDLY10" && p.code !== "WELCOME" && p.code !== "PROMO50");
+        auditLogs = rawAuditLogs.filter((l: any) => l && !l.action?.includes("SENDLY10") && l.user !== "admin@sendly.uz" && !l.user?.includes("test.com"));
+        systemAnnouncement = adminData.systemAnnouncement || "";
 
-          const globalAdminRow = allRows.find(r => r.instagram_page_id === "global_admin_data");
-          if (globalAdminRow?.fb_field_mappings) {
-            const adminData = typeof globalAdminRow.fb_field_mappings === "string"
-              ? JSON.parse(globalAdminRow.fb_field_mappings)
-              : globalAdminRow.fb_field_mappings;
-            const rawPromoCodes = adminData.promoCodes || [];
-            const rawAuditLogs = adminData.auditLogs || [];
-            promoCodes = rawPromoCodes.filter((p: any) => p && p.code !== "SENDLY10" && p.code !== "WELCOME" && p.code !== "PROMO50");
-            auditLogs = rawAuditLogs.filter((l: any) => l && !l.action?.includes("SENDLY10") && l.user !== "admin@sendly.uz" && !l.user?.includes("test.com"));
-            systemAnnouncement = adminData.systemAnnouncement || "";
-
-            if (promoCodes.length !== rawPromoCodes.length || auditLogs.length !== rawAuditLogs.length) {
-              await supabaseClient.from("instagram_accounts").upsert({
-                user_id: "00000000-0000-0000-0000-000000000000",
-                instagram_page_id: "global_admin_data",
-                access_token: "global_admin_token",
-                fb_field_mappings: { promoCodes, auditLogs, systemAnnouncement }
-              }, { onConflict: "instagram_page_id" });
-            }
-          }
-
-          allRows.forEach(row => {
-            if (row.instagram_page_id?.startsWith("global_settings_")) {
-              const uid = row.instagram_page_id.replace("global_settings_", "");
-              try {
-                userDataMap[uid] = typeof row.fb_field_mappings === "string"
-                  ? JSON.parse(row.fb_field_mappings)
-                  : row.fb_field_mappings;
-              } catch {
-                userDataMap[uid] = row.fb_field_mappings || {};
-              }
-            }
-          });
+        if (promoCodes.length !== rawPromoCodes.length || auditLogs.length !== rawAuditLogs.length) {
+          await pgdb.setValue("global_admin_data", { promoCodes, auditLogs, systemAnnouncement });
         }
+
+        // 3. Get all user settings
+        const allSettings = await pgdb.getAllLike("global_settings_%");
+        allSettings.forEach(row => {
+          const uid = row.key.replace("global_settings_", "");
+          try {
+            userDataMap[uid] = typeof row.value === "string"
+              ? JSON.parse(row.value)
+              : row.value;
+          } catch {
+            userDataMap[uid] = row.value || {};
+          }
+        });
 
         if (promoCodes.length === 0 && auditLogs.length === 0) {
-          await supabaseClient.from("instagram_accounts").upsert({
-            user_id: "00000000-0000-0000-0000-000000000000",
-            instagram_page_id: "global_admin_data",
-            access_token: "global_admin_token",
-            fb_field_mappings: { promoCodes: [], auditLogs: [], systemAnnouncement }
-          }, { onConflict: "instagram_page_id" });
+          await pgdb.setValue("global_admin_data", { promoCodes: [], auditLogs: [], systemAnnouncement });
         }
       } catch (e) {
-        console.error("Admin Supabase fetch failed, falling back to local", e);
+        console.error("Admin Railway fetch failed, falling back to local", e);
       }
     }
 
@@ -305,7 +260,7 @@ export async function GET(request: Request) {
     usersList.forEach((u: any) => {
       if (u.referredBy) {
         const referrer = usersList.find((r: any) => r.id === u.referredBy);
-        const commission = u.plan === "premium" ? "$24.00" : u.plan === "pro" ? "$3.60" : "$0.00";
+        const commission = u.plan === "premium" ? "180 000 UZS" : u.plan === "pro" ? "22 500 UZS" : "0 UZS";
         referralsList.push({
           id: u.id,
           referrerName: referrer?.fullName || "Noma'lum Hamkor",
@@ -357,7 +312,7 @@ export async function GET(request: Request) {
     const totalChannels = richUsers.reduce((acc: number, u: any) => acc + (u.channelsCount || 0), 0);
     const totalCredits = richUsers.reduce((acc: number, u: any) => acc + (u.creditsBalance || 0), 0);
     const totalCommissionsFloat = referralsList.reduce((acc: number, r: any) => {
-      const val = parseFloat(r.commission.replace("$", ""));
+      const val = parseFloat(r.commission.replace(/[^0-9]/g, ""));
       return acc + (isNaN(val) ? 0 : val);
     }, 0);
 
@@ -385,17 +340,12 @@ export async function GET(request: Request) {
 
     // visitorToRegister: read from analytics tracker (today's data)
     let visitorToRegister: string | null = null;
-    if (supabaseClient) {
+    if (pgdb.isConfigured()) {
       try {
         const today = new Date().toISOString().split("T")[0];
-        const { data: row } = await supabaseClient
-          .from("instagram_accounts")
-          .select("fb_field_mappings")
-          .eq("instagram_page_id", "global_analytics_daily")
-          .maybeSingle();
-        if (row?.fb_field_mappings) {
-          const parsed = typeof row.fb_field_mappings === "string" ? JSON.parse(row.fb_field_mappings) : row.fb_field_mappings;
-          const todayData = parsed.days?.find((d: any) => d.date === today);
+        const parsed = await pgdb.getValue("global_analytics_daily");
+        if (parsed?.days) {
+          const todayData = parsed.days.find((d: any) => d.date === today);
           if (todayData?.visitors > 0 && todayData?.newUsers > 0) {
             visitorToRegister = ((todayData.newUsers / todayData.visitors) * 100).toFixed(1) + "%";
           } else if (todayData?.visitors > 0) {
@@ -411,7 +361,7 @@ export async function GET(request: Request) {
       activeProCount,
       totalChannels,
       totalCredits,
-      totalCommissions: `$${totalCommissionsFloat.toFixed(2)}`,
+      totalCommissions: `${totalCommissionsFloat.toLocaleString("uz-UZ")} UZS`,
       // Real growth badges (null means not enough data to show)
       userGrowthPct,
       premiumGrowthPct,
@@ -423,7 +373,7 @@ export async function GET(request: Request) {
     };
 
     // Real analytics charts
-    const analyticsData = await readRealAnalytics(supabaseClient, activePremiumCount, activeProCount);
+    const analyticsData = await readRealAnalytics(activePremiumCount, activeProCount);
 
     const topConsumersList = [...richUsers]
       .sort((a, b) => (b.creditsData?.used || 0) - (a.creditsData?.used || 0))
@@ -482,33 +432,13 @@ export async function POST(request: Request) {
     const { action } = body;
     const timestamp = new Date().toLocaleString("uz-UZ", { timeZone: "Asia/Tashkent" });
 
-    if (process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    if (pgdb.isConfigured()) {
       try {
-        const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY);
-        const { data: allRows } = await supabase.from("instagram_accounts").select("*");
-
-        let usersList: any[] = [];
-        let promoCodes: any[] = [];
-        let auditLogs: any[] = [];
-        let systemAnnouncement = "";
-
-        if (allRows) {
-          const globalUsersRow = allRows.find(r => r.instagram_page_id === "global_users");
-          if (globalUsersRow?.fb_field_mappings) {
-            usersList = typeof globalUsersRow.fb_field_mappings === "string"
-              ? JSON.parse(globalUsersRow.fb_field_mappings)
-              : globalUsersRow.fb_field_mappings;
-          }
-          const globalAdminRow = allRows.find(r => r.instagram_page_id === "global_admin_data");
-          if (globalAdminRow?.fb_field_mappings) {
-            const adminData = typeof globalAdminRow.fb_field_mappings === "string"
-              ? JSON.parse(globalAdminRow.fb_field_mappings)
-              : globalAdminRow.fb_field_mappings;
-            promoCodes = adminData.promoCodes || [];
-            auditLogs = adminData.auditLogs || [];
-            systemAnnouncement = adminData.systemAnnouncement || "";
-          }
-        }
+        let usersList = await pgdb.getValue("global_users") || [];
+        const adminData = await pgdb.getValue("global_admin_data") || {};
+        let promoCodes = adminData.promoCodes || [];
+        let auditLogs = adminData.auditLogs || [];
+        let systemAnnouncement = adminData.systemAnnouncement || "";
 
         if (action === "create_promo") {
           const { code, amount, maxUses, restrictedToEmail } = body;
@@ -550,16 +480,10 @@ export async function POST(request: Request) {
             usersList[userIdx].trialExpiresAt = expiresAt.toLocaleDateString("uz-UZ", { day: "numeric", month: "long", year: "numeric" });
           }
           auditLogs.unshift({ id: `l-${Date.now()}`, user: "admin@sendly.uz", action: `${usersList[userIdx].email} obunasi ${prevPlan.toUpperCase()} dan ${plan.toUpperCase()} ga o'zgartirildi`, date: timestamp.substring(0, 16) });
-          await supabase.from("instagram_accounts").upsert({
-            user_id: "00000000-0000-0000-0000-000000000000",
-            instagram_page_id: "global_users",
-            access_token: "global_users_token",
-            fb_field_mappings: usersList
-          }, { onConflict: "instagram_page_id" });
+          await pgdb.setValue("global_users", usersList);
 
           try {
-            const { data: userSettings } = await supabase.from("instagram_accounts").select("fb_field_mappings").eq("instagram_page_id", "global_settings_" + userId).maybeSingle();
-            const uData = userSettings?.fb_field_mappings || {};
+            const uData = await pgdb.getValue("global_settings_" + userId) || {};
             let creditsData = { balance: 100, used: 0, history: [] as any[] };
             if (uData.replai_ai_credits_data) {
               try { creditsData = typeof uData.replai_ai_credits_data === "string" ? JSON.parse(uData.replai_ai_credits_data) : uData.replai_ai_credits_data; } catch {}
@@ -570,16 +494,14 @@ export async function POST(request: Request) {
             creditsData.balance = creditBalance;
             creditsData.history.unshift({ id: `tx-${Date.now()}-${Math.floor(Math.random() * 1000)}`, type: "purchase", amount: creditBalance, description, date: timestamp });
             uData.replai_ai_credits_data = creditsData;
-            const cleanUserId = isValidUuid(userId) ? userId : "00000000-0000-0000-0000-000000000000";
-            await supabase.from("instagram_accounts").upsert({ user_id: cleanUserId, instagram_page_id: "global_settings_" + userId, access_token: "global_settings_token", fb_field_mappings: uData }, { onConflict: "instagram_page_id" });
+            await pgdb.setValue("global_settings_" + userId, uData);
           } catch (err) {
             console.error("Failed to sync user credits on admin plan change:", err);
           }
 
         } else if (action === "update_user_credits") {
           const { userId, amount } = body;
-          const { data: userSettings } = await supabase.from("instagram_accounts").select("fb_field_mappings").eq("instagram_page_id", "global_settings_" + userId).maybeSingle();
-          const uData = userSettings?.fb_field_mappings || {};
+          const uData = await pgdb.getValue("global_settings_" + userId) || {};
           let creditsData = { balance: 100, used: 0, history: [] as any[] };
           if (uData.replai_ai_credits_data) {
             try { creditsData = typeof uData.replai_ai_credits_data === "string" ? JSON.parse(uData.replai_ai_credits_data) : uData.replai_ai_credits_data; } catch {}
@@ -587,8 +509,7 @@ export async function POST(request: Request) {
           creditsData.balance = Math.max(0, (creditsData.balance || 0) + Number(amount));
           creditsData.history.unshift({ id: `tx-${Date.now()}`, type: amount >= 0 ? "purchase" : "usage", amount: Math.abs(amount), description: amount >= 0 ? "Admin tomonidan qo'shilgan kredit" : "Admin tomonidan yechib olingan kredit", date: timestamp });
           uData.replai_ai_credits_data = creditsData;
-          const cleanUserId = isValidUuid(userId) ? userId : "00000000-0000-0000-0000-000000000000";
-          await supabase.from("instagram_accounts").upsert({ user_id: cleanUserId, instagram_page_id: "global_settings_" + userId, access_token: "global_settings_token", fb_field_mappings: uData }, { onConflict: "instagram_page_id" });
+          await pgdb.setValue("global_settings_" + userId, uData);
           const userObj = usersList.find((u: any) => u.id === userId);
           auditLogs.unshift({ id: `l-${Date.now()}`, user: "admin@sendly.uz", action: `${userObj?.email || "Foydalanuvchi"} balansiga ${amount >= 0 ? "+" : ""}${amount} kredit yozildi`, date: timestamp.substring(0, 16) });
 
@@ -602,16 +523,11 @@ export async function POST(request: Request) {
           auditLogs.unshift({ id: `l-${Date.now()}`, user: user || "system", action: logAction, date: timestamp.substring(0, 16) });
         }
 
-        await supabase.from("instagram_accounts").upsert({
-          user_id: "00000000-0000-0000-0000-000000000000",
-          instagram_page_id: "global_admin_data",
-          access_token: "global_admin_token",
-          fb_field_mappings: { promoCodes, auditLogs, systemAnnouncement }
-        }, { onConflict: "instagram_page_id" });
+        await pgdb.setValue("global_admin_data", { promoCodes, auditLogs, systemAnnouncement });
 
         return NextResponse.json({ success: true, promoCodes });
       } catch (e) {
-        console.error("Admin POST Supabase failed, falling back to local", e);
+        console.error("Admin POST Railway failed, falling back to local", e);
       }
     }
 

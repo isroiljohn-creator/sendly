@@ -105,7 +105,7 @@ router.get("/automations", async (req: AuthenticatedRequest, res: Response) => {
       automation_id: auto.id,
       name: auto.name,
       runs_count: auto.launch_count || 0,
-    })).sort((a, b) => b.runs_count - a.runs_count);
+    })).sort((a: any, b: any) => b.runs_count - a.runs_count);
 
     return res.json({ automations_stats: stats });
   } catch (error: any) {

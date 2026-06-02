@@ -619,35 +619,47 @@ export async function handleIncomingLeadgenEvent(payload: LeadgenEventPayload): 
     tags.push("Yo'naltirilgan");
     summary = "Facebook forma orqali ariza (To'g'ridan-to'g'ri yo'naltirish).";
   } else {
-    // If OpenAI key is available, attempt to call OpenAI GPT models
+    // If Gemini key is available, attempt to call Gemini model
     let runRuleFallback = true;
-    if (env.OPENAI_API_KEY) {
+    if (env.GEMINI_API_KEY) {
       try {
-        const response = await fetch("https://api.openai.com/v1/chat/completions", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${env.OPENAI_API_KEY}`
-          },
-          body: JSON.stringify({
-            model: "gpt-3.5-turbo",
-            messages: [
-              {
-                role: "system",
-                content: botSettings.fbAgentPrompt || account.fb_agent_prompt || "Categorize this customer query to 'sales' or 'support' and provide tags."
+        const systemPrompt = (botSettings.fbAgentPrompt || account.fb_agent_prompt || "Categorize this customer query to 'sales' or 'support' and provide tags.") +
+          "\n\nYou MUST respond in a strict JSON format with the following keys:\n" +
+          "{\n" +
+          "  \"group\": \"sales\" | \"support\",\n" +
+          "  \"tags\": string[],\n" +
+          "  \"summary\": string\n" +
+          "}";
+
+        const response = await fetch(
+          `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${env.GEMINI_API_KEY}`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+              system_instruction: {
+                parts: [{ text: systemPrompt }]
               },
-              {
-                role: "user",
-                content: `Mijoz ismi: ${leadName}\nTelefon raqami: ${leadPhone}\nSavol/Murojaat: ${leadMessage}`
+              contents: [
+                {
+                  role: "user",
+                  parts: [{ text: `Mijoz ismi: ${leadName}\nTelefon raqami: ${leadPhone}\nSavol/Murojaat: ${leadMessage}` }]
+                }
+              ],
+              generationConfig: {
+                temperature: 0.2,
+                responseMimeType: "application/json"
               }
-            ],
-            response_format: { type: "json_object" }
-          })
-        });
+            })
+          }
+        );
 
         if (response.ok) {
           const json = await response.json();
-          const aiData = JSON.parse(json.choices[0].message.content);
+          const contentText = json?.candidates?.[0]?.content?.parts?.[0]?.text || "{}";
+          const aiData = JSON.parse(contentText);
           if (aiData.group) {
             detectedGroupId = aiData.group.toLowerCase().includes("support") || aiData.group.toLowerCase().includes("qo'llab") ? "support" : "sales";
           }
@@ -659,9 +671,11 @@ export async function handleIncomingLeadgenEvent(payload: LeadgenEventPayload): 
           }
           runRuleFallback = false;
           console.log(`[Trigger] AI Qualification Success. Group: ${detectedGroupId}, Tags: ${tags.join(", ")}, Summary: ${summary}`);
+        } else {
+          console.error(`[Trigger] Gemini API error: ${response.status}`, await response.text());
         }
-      } catch (openaiErr) {
-        console.error("[Trigger] OpenAI call failed, falling back to rule engine:", openaiErr);
+      } catch (geminiErr) {
+        console.error("[Trigger] Gemini call failed, falling back to rule engine:", geminiErr);
       }
     }
 

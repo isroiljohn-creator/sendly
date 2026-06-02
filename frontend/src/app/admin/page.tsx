@@ -21,7 +21,8 @@ import {
   ArrowRight,
   TrendingUp,
   Cpu,
-  Loader2
+  Loader2,
+  Download
 } from "lucide-react";
 import { db } from "@/lib/db";
 import { useI18n } from "@/i18n/I18nProvider";
@@ -33,7 +34,7 @@ const LOCAL_TRANSLATIONS: Record<string, Record<string, string>> = {
     users: "Foydalanuvchilar",
     promos: "Promokodlar",
     referrals: "Referallar oqimi",
-    bots: "Mijozlar menyusi (Stuck)",
+    bots: "Mijozlar menyusi",
     logs: "Tizim loglari",
     totalUsers: "Jami foydalanuvchilar",
     totalUsersDesc: "Ro'yxatdan o'tgan jami hisoblar",
@@ -57,13 +58,13 @@ const LOCAL_TRANSLATIONS: Record<string, Record<string, string>> = {
     timeRange30d: "30 kun",
     timeRangeAll: "Barchasi",
     dailyVisitors: "Kunlik tashrif buyuruvchilar",
-    dailyActiveUsers: "Kunlik faol foydalanuvchilar (DAU)",
-    dailyRevenue: "Kunlik daromad (USD)",
+    dailyActiveUsers: "Kunlik faol foydalanuvchilar",
+    dailyRevenue: "Kunlik daromad",
     conversionRates: "Konversiya ko'rsatkichlari",
     trafficToRegister: "Tashrifdan ro'yxatga",
     registerToPaid: "Ro'yxatdan to'lovga",
-    topChatbots: "Eng faol chatbotlar (Top Chatbots)",
-    topConsumers: "Kredit sarfi ko'p foydalanuvchilar (Top Consumers)",
+    topChatbots: "Eng faol chatbotlar",
+    topConsumers: "Kredit sarfi ko'p foydalanuvchilar",
     messagesCount: "Xabarlar soni",
     creditsUsed: "Kredit sarfi",
     creditsBalance: "Kredit balansi",
@@ -91,16 +92,16 @@ const LOCAL_TRANSLATIONS: Record<string, Record<string, string>> = {
     createdAt: "Yaratilgan sana",
     referralsTitle: "Taklif etilgan referallar to'liq oqimi",
     referralsDesc: "Tizimdagi barcha foydalanuvchilar hamkorlik havolasi va to'lovlar tarixi",
-    partner: "Taklif etgan (Partner)",
+    partner: "Taklif etgan",
     referredMember: "Ro'yxatdan o'tgan a'zo",
     commissionRate: "Hisoblangan komissiya (30%)",
     date: "Sana",
     noReferrals: "Hozircha referallar tarmog'ida ma'lumotlar mavjud emas.",
-    stateTrackerTitle: "Chatbot foydalanuvchilari qadamlari (State Tracker)",
+    stateTrackerTitle: "Chatbot foydalanuvchilari qadamlari",
     stateTrackerDesc: "Mijozlarning chat-menyuning qaysi bo'limida to'xtab qolganligini aniqlash va kuzatish paneli.",
-    customer: "Mijoz (Contact)",
-    botOwner: "Chatbot egasi (Sendly foydalanuvchisi)",
-    stuckStep: "To'xtab qolgan menyu qadami (Stuck step)",
+    customer: "Mijoz",
+    botOwner: "Chatbot egasi",
+    stuckStep: "To'xtab qolgan menyu qadami",
     noBotContacts: "Hozircha faol chatbot mijozlari ro'yxati yuklanmadi.",
     logsTitle: "SYSTEM AUDIT LOGS Terminal",
     update: "Yangilash",
@@ -155,7 +156,7 @@ const LOCAL_TRANSLATIONS: Record<string, Record<string, string>> = {
     timeRangeAll: "Все время",
     dailyVisitors: "Ежедневные посетители",
     dailyActiveUsers: "Активные пользователи за день (DAU)",
-    dailyRevenue: "Ежедневный доход (USD)",
+    dailyRevenue: "Ежедневный доход (UZS)",
     conversionRates: "Показатели конверсии",
     trafficToRegister: "Из визитов в регистрации",
     registerToPaid: "Из регистраций в оплаты",
@@ -252,7 +253,7 @@ const LOCAL_TRANSLATIONS: Record<string, Record<string, string>> = {
     timeRangeAll: "All time",
     dailyVisitors: "Daily Visitors",
     dailyActiveUsers: "Daily Active Users (DAU)",
-    dailyRevenue: "Daily Revenue (USD)",
+    dailyRevenue: "Daily Revenue (UZS)",
     conversionRates: "Conversion Rates",
     trafficToRegister: "Traffic to Register",
     registerToPaid: "Register to Paid",
@@ -333,7 +334,7 @@ export default function AdminPage() {
   const [isAdmin, setIsAdmin] = useState(false);
 
   // Admin Data states
-  const [stats, setStats] = useState<any>({ totalUsers: 0, activePremiumCount: 0, activeProCount: 0, totalChannels: 0, totalCredits: 0, totalCommissions: "$0.00" });
+  const [stats, setStats] = useState<any>({ totalUsers: 0, activePremiumCount: 0, activeProCount: 0, totalChannels: 0, totalCredits: 0, totalCommissions: "0 UZS" });
   const [users, setUsers] = useState<any[]>([]);
   const [promos, setPromos] = useState<any[]>([]);
   const [referrals, setReferrals] = useState<any[]>([]);
@@ -373,6 +374,36 @@ export default function AdminPage() {
     setAlertOpen(true);
   };
 
+  const handleDownloadBackup = () => {
+    try {
+      const backupData = {
+        exportedAt: new Date().toISOString(),
+        stats,
+        users,
+        promos,
+        referrals,
+        botContacts,
+        systemAnnouncement,
+        auditLogs,
+      };
+      const jsonString = `data:text/json;charset=utf-8,${encodeURIComponent(
+        JSON.stringify(backupData, null, 2)
+      )}`;
+      const downloadAnchor = document.createElement("a");
+      downloadAnchor.setAttribute("href", jsonString);
+      downloadAnchor.setAttribute(
+        "download",
+        `sendly_db_backup_${new Date().toISOString().split("T")[0]}.json`
+      );
+      document.body.appendChild(downloadAnchor);
+      downloadAnchor.click();
+      downloadAnchor.remove();
+      showAlert("Muvaffaqiyatli", "Zaxira nusxasi (JSON) muvaffaqiyatli yuklab olindi!");
+    } catch {
+      showAlert("Xatolik", "Zaxira nusxasini yaratib bo'lmadi.");
+    }
+  };
+
   const loadAdminData = async () => {
     setLoading(true);
     try {
@@ -384,7 +415,7 @@ export default function AdminPage() {
       const res = await fetch("/api/admin", { headers });
       const data = await res.json();
       if (res.ok && data.success) {
-        setStats(data.stats || { totalUsers: 0, activePremiumCount: 0, activeProCount: 0, totalChannels: 0, totalCredits: 0, totalCommissions: "$0.00" });
+        setStats(data.stats || { totalUsers: 0, activePremiumCount: 0, activeProCount: 0, totalChannels: 0, totalCredits: 0, totalCommissions: "0 UZS" });
         setUsers(data.users || []);
         setPromos(data.promoCodes || []);
         setReferrals(data.referrals || []);
@@ -881,11 +912,11 @@ export default function AdminPage() {
                       <div className="flex justify-between items-start mb-2">
                         <h3 className="text-[15px] font-bold text-black">{tr("dailyRevenue")}</h3>
                         <span className="text-[11px] text-[#7CA607] font-extrabold font-mono">
-                          +${revenuePoints.reduce((a: number, b: number) => a + b, 0).toFixed(2)}
+                          +{(revenuePoints.reduce((a: number, b: number) => a + b, 0)).toLocaleString("uz-UZ")} UZS
                         </span>
                       </div>
                       <p className="text-[11px] text-[#707070] mb-6">
-                        Obunalar va qo&apos;shimcha kredit savdosidan kunlik tushum (USD)
+                        Obunalar va qo&apos;shimcha kredit savdosidan kunlik tushum (UZS)
                       </p>
                     </div>
 
@@ -897,7 +928,7 @@ export default function AdminPage() {
                             return arr.length > 10 ? (idx % 5 === 0 ? date : "") : date;
                           })}
                           highlightIndex={revenuePoints.length - 1}
-                          highlightTag={`$${revenuePoints[revenuePoints.length - 1]}`}
+                          highlightTag={`${revenuePoints[revenuePoints.length - 1].toLocaleString("uz-UZ")} UZS`}
                           height={170}
                         />
                       </div>
@@ -987,12 +1018,12 @@ export default function AdminPage() {
                     </div>
                     <div className="flex justify-between items-center py-2 border-b border-[#F0F0F0] text-[12px]">
                       <span className="text-[#707070]">{tr("affiliateCommissions")}:</span>
-                      <span className="font-bold text-[#7CA607]">{stats?.totalCommissions ?? "$0.00"}</span>
+                      <span className="font-bold text-[#7CA607]">{stats?.totalCommissions ?? "0 UZS"}</span>
                     </div>
                     <div className="flex justify-between items-center py-2 text-[12.5px] font-extrabold mt-2">
                       <span className="text-black">{tr("totalRevenueMonthly")}:</span>
                       <span className="text-black">
-                        {(((stats?.activePremiumCount ?? 0) * 1200000) + ((stats?.activeProCount ?? 0) * 150000)).toLocaleString("uz-UZ")} UZS / oy
+                        {(((stats?.activePremiumCount ?? 0) * 600000) + ((stats?.activeProCount ?? 0) * 75000)).toLocaleString("uz-UZ")} UZS / oy
                       </span>
                     </div>
                   </Card>
@@ -1475,10 +1506,16 @@ export default function AdminPage() {
             <Card className="p-6 bg-[#0F0F0F] text-white border border-[#222] rounded-[24px] shadow-sm font-mono text-[12px]">
               <div className="flex justify-between items-center pb-4 border-b border-[#222] mb-4">
                 <span className="text-[#C7F33C] font-bold">{tr("logsTitle")}</span>
-                <button onClick={loadAdminData} className="text-white/60 hover:text-white flex items-center gap-1 font-bold text-[10px]">
-                  <RefreshCw size={10} />
-                  <span>{tr("update")}</span>
-                </button>
+                <div className="flex items-center gap-4">
+                  <button onClick={handleDownloadBackup} className="bg-[#C7F33C] text-black hover:bg-[#b5dc30] px-3 py-1.5 rounded-[8px] flex items-center gap-1.5 font-bold text-[10px] transition-all">
+                    <Download size={11} />
+                    <span>Zaxira yuklab olish (JSON)</span>
+                  </button>
+                  <button onClick={loadAdminData} className="text-white/60 hover:text-white flex items-center gap-1 font-bold text-[10px]">
+                    <RefreshCw size={10} />
+                    <span>{tr("update")}</span>
+                  </button>
+                </div>
               </div>
               <div className="flex flex-col gap-2.5 max-h-[450px] overflow-y-auto pr-2">
                 {(auditLogs || []).filter(Boolean).map((log) => (

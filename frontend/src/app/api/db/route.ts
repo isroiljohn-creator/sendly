@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import fs from "fs";
 import path from "path";
 import { startTelegramBots } from "@/lib/telegramBotRunner";
-import { createClient } from "@supabase/supabase-js";
+import * as pgdb from "@/lib/pgdb";
 import { verifyJwt } from "@/lib/jwt";
 
 const DB_FILE = process.env.DB_FILE_PATH || path.join(process.cwd(), "db.json");
@@ -65,40 +65,29 @@ export async function GET(request: Request) {
     });
   }
   
-  // Use Supabase Cloud Database if credentials are set
-  if (process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY) {
+  // Use Railway PostgreSQL if configured
+  if (pgdb.isConfigured()) {
     try {
-      const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY);
-      const cleanUserId = isValidUuid(userId) ? userId : "00000000-0000-0000-0000-000000000000";
-
       // 1. Fetch user-specific settings
-      const { data: userSettings } = await supabase
-        .from("instagram_accounts")
-        .select("fb_field_mappings")
-        .eq("instagram_page_id", "global_settings_" + userId)
-        .maybeSingle();
+      const userSettings = await pgdb.getValue("global_settings_" + userId) || {};
 
       // 2. Fetch global users
-      const { data: globalUsers } = await supabase
-        .from("instagram_accounts")
-        .select("fb_field_mappings")
-        .eq("instagram_page_id", "global_users")
-        .maybeSingle();
+      const globalUsers = await pgdb.getValue("global_users") || [];
 
       const responseData = {
-        replai_users: JSON.stringify(globalUsers?.fb_field_mappings || []),
-        ...(userSettings?.fb_field_mappings || {})
+        replai_users: JSON.stringify(globalUsers),
+        ...userSettings
       };
 
       try {
         startTelegramBots();
       } catch (err) {
-        console.error("Failed to auto-start telegram bots on db GET (Supabase):", err);
+        console.error("Failed to auto-start telegram bots on db GET (Railway):", err);
       }
 
       return NextResponse.json(responseData);
     } catch (e) {
-      console.error("Failed to fetch database from Supabase, falling back to local file", e);
+      console.error("Failed to fetch database from Railway, falling back to local file", e);
     }
   }
 
@@ -169,11 +158,8 @@ export async function POST(request: Request) {
   }
 
   try {
-    // Use Supabase Cloud Database if credentials are set
-    if (process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY) {
-      const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY);
-      const cleanUserId = isValidUuid(userId) ? userId : "00000000-0000-0000-0000-000000000000";
-
+    // Use Railway PostgreSQL if configured
+    if (pgdb.isConfigured()) {
       // 1. Channel duplication check
       if (payload.replai_channels) {
         try {
@@ -184,34 +170,28 @@ export async function POST(request: Request) {
               const channelUsernameNormalized = ch.username.toLowerCase().replace(/^@+/, "");
               
               // Query other users' settings
-              const { data: allSettings } = await supabase
-                .from("instagram_accounts")
-                .select("user_id, fb_field_mappings")
-                .neq("user_id", cleanUserId)
-                .like("instagram_page_id", "global_settings_%");
+              const allSettings = await pgdb.getAllSettingsExcept(userId);
 
-              if (allSettings) {
-                for (const row of allSettings) {
-                  const otherUserChannelsRaw = (row.fb_field_mappings as any)?.replai_channels;
-                  if (otherUserChannelsRaw) {
-                    const otherUserChannels = typeof otherUserChannelsRaw === "string"
-                      ? JSON.parse(otherUserChannelsRaw)
-                      : otherUserChannelsRaw;
-                    if (Array.isArray(otherUserChannels)) {
-                      const duplicate = otherUserChannels.find(
-                        (oCh) =>
-                          oCh.type === ch.type &&
-                          oCh.username.toLowerCase().replace(/^@+/, "") === channelUsernameNormalized
+              for (const row of allSettings) {
+                const otherUserChannelsRaw = row.value?.replai_channels;
+                if (otherUserChannelsRaw) {
+                  const otherUserChannels = typeof otherUserChannelsRaw === "string"
+                    ? JSON.parse(otherUserChannelsRaw)
+                    : otherUserChannelsRaw;
+                  if (Array.isArray(otherUserChannels)) {
+                    const duplicate = otherUserChannels.find(
+                      (oCh) =>
+                        oCh.type === ch.type &&
+                        oCh.username.toLowerCase().replace(/^@+/, "") === channelUsernameNormalized
+                    );
+                    if (duplicate) {
+                      return NextResponse.json(
+                        {
+                          success: false,
+                          error: `Ushbu ${ch.type === "telegram" ? "Telegram bot" : "Instagram sahifa"} (@${ch.username.replace(/^@+/, "")}) allaqachon boshqa foydalanuvchiga ulangan!`,
+                        },
+                        { status: 400 }
                       );
-                      if (duplicate) {
-                        return NextResponse.json(
-                          {
-                            success: false,
-                            error: `Ushbu ${ch.type === "telegram" ? "Telegram bot" : "Instagram sahifa"} (@${ch.username.replace(/^@+/, "")}) allaqachon boshqa foydalanuvchiga ulangan!`,
-                          },
-                          { status: 400 }
-                        );
-                      }
                     }
                   }
                 }
@@ -219,7 +199,7 @@ export async function POST(request: Request) {
             }
           }
         } catch (e) {
-          console.error("Failed to validate channels during Supabase POST:", e);
+          console.error("Failed to validate channels during Railway POST:", e);
         }
       }
 
@@ -233,25 +213,15 @@ export async function POST(request: Request) {
         }
 
         try {
-          const { data: prevUsersData } = await supabase
-            .from("instagram_accounts")
-            .select("fb_field_mappings")
-            .eq("instagram_page_id", "global_users")
-            .maybeSingle();
-          const prevUsersList = prevUsersData?.fb_field_mappings || [];
+          const prevUsersList = await pgdb.getValue("global_users") || [];
           
           const prevUser = prevUsersList.find((u: any) => u.id === userId || (u.email && u.email === usersList.find((x: any) => x.id === userId)?.email));
           const newUser = usersList.find((u: any) => u.id === userId);
           
           if (newUser && (!prevUser || prevUser.plan !== newUser.plan)) {
             const newPlan = newUser.plan || "free";
-            const { data: userSettings } = await supabase
-              .from("instagram_accounts")
-              .select("fb_field_mappings")
-              .eq("instagram_page_id", "global_settings_" + userId)
-              .maybeSingle();
+            const uData = await pgdb.getValue("global_settings_" + userId) || {};
 
-            const uData = userSettings?.fb_field_mappings || {};
             let creditsData = { balance: 100, used: 0, history: [] as any[] };
             if (uData.replai_ai_credits_data) {
               try {
@@ -283,31 +253,17 @@ export async function POST(request: Request) {
             });
 
             uData.replai_ai_credits_data = creditsData;
-            await supabase
-              .from("instagram_accounts")
-              .upsert({
-                user_id: cleanUserId,
-                instagram_page_id: "global_settings_" + userId,
-                access_token: "global_settings_token",
-                fb_field_mappings: uData
-              }, { onConflict: "instagram_page_id" });
+            await pgdb.setValue("global_settings_" + userId, uData);
           }
         } catch (planChangeErr) {
-          console.error("Failed to sync credits on plan change detection (Supabase API):", planChangeErr);
+          console.error("Failed to sync credits on plan change detection (Railway API):", planChangeErr);
         }
 
-        await supabase
-          .from("instagram_accounts")
-          .upsert({
-            user_id: "00000000-0000-0000-0000-000000000000",
-            instagram_page_id: "global_users",
-            access_token: "global_users_token",
-            fb_field_mappings: usersList
-          }, { onConflict: "instagram_page_id" });
+        await pgdb.setValue("global_users", usersList);
       }
 
       // 3. Extract and save user specific fields
-      const userSpecificData: Record<string, any> = {};
+      const userSpecificData = await pgdb.getValue("global_settings_" + userId) || {};
       Object.entries(payload).forEach(([key, val]) => {
         if (
           key.startsWith("replai_") &&
@@ -319,23 +275,12 @@ export async function POST(request: Request) {
         }
       });
 
-      const { error: upsertErr } = await supabase
-        .from("instagram_accounts")
-        .upsert({
-          user_id: cleanUserId,
-          instagram_page_id: "global_settings_" + userId,
-          access_token: "global_settings_token",
-          fb_field_mappings: userSpecificData
-        }, { onConflict: "instagram_page_id" });
-
-      if (upsertErr) {
-        throw upsertErr;
-      }
+      await pgdb.setValue("global_settings_" + userId, userSpecificData);
 
       try {
         startTelegramBots();
       } catch (err) {
-        console.error("Failed to auto-start telegram bots on db POST (Supabase):", err);
+        console.error("Failed to auto-start telegram bots on db POST (Railway):", err);
       }
       return NextResponse.json({ success: true });
     }

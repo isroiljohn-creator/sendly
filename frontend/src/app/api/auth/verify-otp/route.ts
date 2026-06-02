@@ -2,8 +2,8 @@ import { NextResponse } from "next/server";
 import fs from "fs";
 import path from "path";
 import crypto from "crypto";
-import { createClient } from "@supabase/supabase-js";
-import { verifyOtpCode } from "@/lib/otpStore";
+import * as pgdb from "@/lib/pgdb";
+import { verifyOtpCode, checkRateLimit } from "@/lib/otpStore";
 import { signJwt } from "@/lib/jwt";
 
 const DB_FILE = process.env.DB_FILE_PATH || path.join(process.cwd(), "db.json");
@@ -24,28 +24,16 @@ function readDb() {
 async function findUserByEmail(email: string): Promise<any | null> {
   const emailLower = email.toLowerCase().trim();
 
-  // Try Supabase first
-  if (process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY) {
+  // Try Railway PostgreSQL first
+  if (pgdb.isConfigured()) {
     try {
-      const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY);
-      const { data: globalUsers } = await supabase
-        .from("instagram_accounts")
-        .select("fb_field_mappings")
-        .eq("instagram_page_id", "global_users")
-        .maybeSingle();
-
-      if (globalUsers && globalUsers.fb_field_mappings) {
-        const users = Array.isArray(globalUsers.fb_field_mappings)
-          ? globalUsers.fb_field_mappings
-          : JSON.parse(globalUsers.fb_field_mappings as any);
-        
-        if (Array.isArray(users)) {
-          const found = users.find((u: any) => u.email && u.email.toLowerCase().trim() === emailLower);
-          if (found) return found;
-        }
+      const users = await pgdb.getValue("global_users");
+      if (Array.isArray(users)) {
+        const found = users.find((u: any) => u.email && u.email.toLowerCase().trim() === emailLower);
+        if (found) return found;
       }
     } catch (e) {
-      console.error("Supabase read failed in verify-otp, falling back to local file", e);
+      console.error("Railway read failed in verify-otp, falling back to local file", e);
     }
   }
 
@@ -63,6 +51,16 @@ export async function POST(request: Request) {
       return NextResponse.json(
         { success: false, error: "Email va OTP kod kiritilishi shart." },
         { status: 400 }
+      );
+    }
+
+    // Rate Limiting per IP: Max 10 attempts per 5 minutes
+    const ip = request.headers.get("x-forwarded-for") || "unknown";
+    const ipLimit = checkRateLimit(`verify_ip_${ip}`, 5 * 60 * 1000, 10);
+    if (!ipLimit.allowed) {
+      return NextResponse.json(
+        { success: false, error: `Ko'p so'rov yuborildi. Iltimos ${ipLimit.retryAfter} soniyadan so'ng qayta urinib ko'ring.` },
+        { status: 429 }
       );
     }
 

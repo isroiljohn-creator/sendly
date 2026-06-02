@@ -65,6 +65,10 @@ const mockFrom = (table: string) => {
       queryState.limitVal = val;
       return chain;
     },
+    range: (from: number, to: number) => {
+      queryState.limitVal = to - from + 1;
+      return chain;
+    },
     maybeSingle: async () => {
       const data = runSelect();
       return { data: data.length > 0 ? data[0] : null, error: null };
@@ -321,6 +325,87 @@ const mockFrom = (table: string) => {
 };
 
 supabase.from = mockFrom as any;
+
+// Mock global fetch for Meta OAuth Graph API calls
+const mockFetch = async (url: string, options?: any) => {
+  // Handle Meta Graph API mock responses specifically
+  if (url.includes("/oauth/access_token")) {
+    return {
+      ok: true,
+      status: 200,
+      json: async () => ({
+        access_token: "mock_page_access_token_12345",
+      }),
+      text: async () => "ok",
+    } as any;
+  }
+  if (url.includes("/me/accounts")) {
+    return {
+      ok: true,
+      status: 200,
+      json: async () => ({
+        data: [
+          {
+            id: "page_12345",
+            name: "Mock Facebook Page",
+            access_token: "mock_page_access_token_12345",
+          }
+        ]
+      }),
+      text: async () => "ok",
+    } as any;
+  }
+  if (url.includes("/page_12345")) {
+    return {
+      ok: true,
+      status: 200,
+      json: async () => ({
+        instagram_business_account: {
+          id: "ig_business_12345",
+        },
+        access_token: "mock_page_access_token_12345",
+      }),
+      text: async () => "ok",
+    } as any;
+  }
+  if (url.includes("/ig_business_12345")) {
+    return {
+      ok: true,
+      status: 200,
+      json: async () => ({
+        username: "mock_instagram_handle",
+        profile_picture_url: "https://mock.url/pic.jpg",
+      }),
+      text: async () => "ok",
+    } as any;
+  }
+  if (url.includes("/subscribed_apps")) {
+    return {
+      ok: true,
+      status: 200,
+      json: async () => ({ success: true }),
+      text: async () => "ok",
+    } as any;
+  }
+
+  return {
+    ok: true,
+    status: 200,
+    json: async () => ({ success: true }),
+    text: async () => "ok",
+  } as any;
+};
+
+Object.defineProperty(globalThis, "fetch", {
+  value: mockFetch,
+  writable: true,
+  configurable: true,
+});
+Object.defineProperty(global, "fetch", {
+  value: mockFetch,
+  writable: true,
+  configurable: true,
+});
 
 // -------------------------------------------------------------
 // 2. HTTP Helper functions

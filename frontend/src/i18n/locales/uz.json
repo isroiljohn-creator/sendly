@@ -639,8 +639,8 @@
           "desc": "Instagram obunasini tekshiradi, teglarni belgilaydi va lid-magnitni yuboradi"
         },
         "ai_chatgpt": {
-          "name": "AI · ChatGPT",
-          "desc": "ChatGPT xatti-harakatlarini takrorlaydi: jonli muloqotni imitatsiya qilgan holda OpenAI..."
+          "name": "AI · Gemini",
+          "desc": "Google Gemini xatti-harakatlarini takrorlaydi: jonli muloqotni imitatsiya qilgan holda..."
         },
         "ai_savol": {
           "name": "AI · Savol",

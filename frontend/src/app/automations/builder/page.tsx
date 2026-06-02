@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import Link from "next/link";
 import ReactFlow, {
   Background,
+  BackgroundVariant,
   Controls,
   useNodesState,
   useEdgesState,
@@ -71,6 +72,9 @@ interface NodeData {
   triggerSource?: string;
   triggerMatch?: string;
   triggerKeywords?: string;
+  flowTriggerSource?: string;
+  flowTriggerMatch?: string;
+  flowTriggerKeywords?: string;
   prohibitRestart?: boolean;
   conditionType?: string;
   conditionValue?: string;
@@ -400,7 +404,7 @@ function MessageNode({ data, id }: NodeProps<NodeData>) {
                         type="button"
                         onClick={(e) => {
                           e.stopPropagation();
-                          setNodes((nds) => nds.map((n) => n.id === id ? { ...n, data: { ...n.data, buttons: (n.data.buttons || []).filter(b => b.id !== btn.id) } } : n));
+                          setNodes((nds) => nds.map((n) => n.id === id ? { ...n, data: { ...n.data, buttons: (n.data.buttons || []).filter((b: ButtonItem) => b.id !== btn.id) } } : n));
                         }}
                         className="p-0.5 rounded hover:bg-red-50 text-[#707070] hover:text-red-500 transition-colors"
                         title={t("pages.builder.btn_delete")}
@@ -1947,7 +1951,7 @@ export default function BuilderPage() {
               proOptions={{ hideAttribution: true }}
               fitView
             >
-              <Background color="#9296AD" variant="dots" gap={20} size={1.5} style={{ opacity: 0.15 }} />
+              <Background color="#9296AD" variant={BackgroundVariant.Dots} gap={20} size={1.5} style={{ opacity: 0.15 }} />
             </ReactFlow>
 
             {/* Overlay controls rendered after ReactFlow to avoid stacking capture issues */}

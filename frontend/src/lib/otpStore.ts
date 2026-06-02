@@ -39,3 +39,25 @@ export function verifyOtpCode(email: string, code: string): boolean {
   
   return false;
 }
+
+// In-memory rate limiting store
+const rateLimitStore = new Map<string, { count: number; resetTime: number }>();
+
+export function checkRateLimit(identifier: string, windowMs: number, max: number): { allowed: boolean; retryAfter: number } {
+  const key = identifier.toLowerCase();
+  const now = Date.now();
+  const entry = rateLimitStore.get(key);
+  
+  if (!entry || now > entry.resetTime) {
+    rateLimitStore.set(key, { count: 1, resetTime: now + windowMs });
+    return { allowed: true, retryAfter: 0 };
+  }
+  
+  if (entry.count >= max) {
+    const retryAfter = Math.ceil((entry.resetTime - now) / 1000);
+    return { allowed: false, retryAfter };
+  }
+  
+  entry.count++;
+  return { allowed: true, retryAfter: 0 };
+}

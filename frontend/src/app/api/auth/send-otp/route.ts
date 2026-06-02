@@ -30,7 +30,7 @@ const HTML_TEMPLATE = (otp: string) => `
   </div>
 `;
 
-import { generateAndSaveOtp } from "@/lib/otpStore";
+import { generateAndSaveOtp, checkRateLimit } from "@/lib/otpStore";
 
 export async function POST(request: Request) {
   try {
@@ -40,6 +40,25 @@ export async function POST(request: Request) {
       return NextResponse.json(
         { success: false, error: "Email kiritilishi shart." },
         { status: 400 }
+      );
+    }
+
+    // Rate Limiting per Email: Max 3 requests per 5 minutes
+    const emailLimit = checkRateLimit(`email_${email}`, 5 * 60 * 1000, 3);
+    if (!emailLimit.allowed) {
+      return NextResponse.json(
+        { success: false, error: `Ko'p so'rov yuborildi. Iltimos ${emailLimit.retryAfter} soniyadan so'ng qayta urinib ko'ring.` },
+        { status: 429 }
+      );
+    }
+
+    // Rate Limiting per IP: Max 10 requests per 10 minutes
+    const ip = request.headers.get("x-forwarded-for") || "unknown";
+    const ipLimit = checkRateLimit(`ip_${ip}`, 10 * 60 * 1000, 10);
+    if (!ipLimit.allowed) {
+      return NextResponse.json(
+        { success: false, error: `Ko'p so'rov yuborildi. Iltimos ${ipLimit.retryAfter} soniyadan so'ng qayta urinib ko'ring.` },
+        { status: 429 }
       );
     }
 
