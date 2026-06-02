@@ -62,25 +62,32 @@ export function AppLayout({ children }: { children: ReactNode }) {
       window.location.href = "/login";
     } else {
       setAuthorized(true);
-      
+
       if (typeof window !== "undefined") {
         const imp = localStorage.getItem("replai_admin_impersonator");
-        if (imp) {
-          setImpersonatorEmail(imp);
-        }
+        if (imp) setImpersonatorEmail(imp);
       }
-      
+
+      // 🔥 Fire-and-forget visit tracking
+      try {
+        const token = typeof window !== "undefined" ? localStorage.getItem("replai_token") : null;
+        fetch("/api/track", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ userId: user.id }),
+        }).catch(() => {});
+      } catch { /* ignore */ }
+
       // Fetch global announcement banner
-      fetch("/api/admin")
+      const token = typeof window !== "undefined" ? localStorage.getItem("replai_token") : null;
+      const headers: Record<string, string> = {};
+      if (token) headers["Authorization"] = `Bearer ${token}`;
+      fetch("/api/admin", { headers })
         .then((res) => res.json())
         .then((data) => {
-          if (data && data.systemAnnouncement) {
-            setAnnouncement(data.systemAnnouncement);
-          }
+          if (data && data.systemAnnouncement) setAnnouncement(data.systemAnnouncement);
         })
-        .catch(() => {
-          // ignore
-        });
+        .catch(() => {});
     }
   }, []);
 

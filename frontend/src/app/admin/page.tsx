@@ -748,9 +748,13 @@ export default function AdminPage() {
                   <Card className="flex min-h-[140px] flex-col justify-between p-6 border border-[#D8D8D8] bg-white hover:shadow-md transition-all duration-200">
                     <div className="flex items-start justify-between gap-2">
                       <span className="text-[12px] text-[#707070] font-bold leading-tight uppercase">{tr("totalUsers")}</span>
-                      <span className="bg-[#C7F33C] text-[#1A2906] rounded-full px-2 py-0.5 text-[10px] font-bold shrink-0 whitespace-nowrap">
-                        +14%
-                      </span>
+                      {stats?.userGrowthPct && (
+                        <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold shrink-0 whitespace-nowrap ${
+                          stats.userGrowthPct.startsWith("-") ? "bg-red-100 text-red-700" : "bg-[#C7F33C] text-[#1A2906]"
+                        }`}>
+                          {stats.userGrowthPct}
+                        </span>
+                      )}
                     </div>
                     <div className="mt-4">
                       <div className="text-[28px] md:text-[32px] font-black text-black leading-none">
@@ -764,9 +768,13 @@ export default function AdminPage() {
                   <Card className="flex min-h-[140px] flex-col justify-between p-6 border border-[#D8D8D8] bg-white hover:shadow-md transition-all duration-200">
                     <div className="flex items-start justify-between gap-2">
                       <span className="text-[12px] text-[#707070] font-bold leading-tight uppercase">{tr("premiumProSubscriptions")}</span>
-                      <span className="bg-[#C7F33C] text-[#1A2906] rounded-full px-2 py-0.5 text-[10px] font-bold shrink-0 whitespace-nowrap">
-                        +8%
-                      </span>
+                      {stats?.premiumGrowthPct && (
+                        <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold shrink-0 whitespace-nowrap ${
+                          stats.premiumGrowthPct.startsWith("-") ? "bg-red-100 text-red-700" : "bg-[#C7F33C] text-[#1A2906]"
+                        }`}>
+                          {stats.premiumGrowthPct}
+                        </span>
+                      )}
                     </div>
                     <div className="mt-4">
                       <div className="text-[28px] md:text-[32px] font-black text-black leading-none">
@@ -781,12 +789,12 @@ export default function AdminPage() {
                     <div className="flex items-start justify-between gap-2">
                       <span className="text-[12px] text-[#707070] font-bold leading-tight uppercase">{tr("conversionRates")}</span>
                       <span className="bg-gray-100 text-[#707070] rounded-full px-2 py-0.5 text-[10px] font-bold shrink-0 whitespace-nowrap">
-                        Active
+                        Live
                       </span>
                     </div>
                     <div className="mt-4">
                       <div className="text-[20px] md:text-[22px] font-black text-black leading-none whitespace-nowrap">
-                        {stats?.conversionsRate?.visitorToRegister || '8.4%'} / {stats?.conversionsRate?.registerToPaid || '4.2%'}
+                        {stats?.conversionsRate?.visitorToRegister ?? "—"} / {stats?.conversionsRate?.registerToPaid ?? "—"}
                       </div>
                       <div className="mt-1.5 text-[10px] text-[#707070]">Traffic → Reg / Reg → Paid</div>
                     </div>
@@ -796,9 +804,13 @@ export default function AdminPage() {
                   <Card className="flex min-h-[140px] flex-col justify-between p-6 border border-[#D8D8D8] bg-white hover:shadow-md transition-all duration-200">
                     <div className="flex items-start justify-between gap-2">
                       <span className="text-[12px] text-[#707070] font-bold leading-tight uppercase">{tr("connectedChatbots")}</span>
-                      <span className="bg-[#C7F33C] text-[#1A2906] rounded-full px-2 py-0.5 text-[10px] font-bold shrink-0 whitespace-nowrap">
-                        +15%
-                      </span>
+                      {stats?.channelGrowthPct && (
+                        <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold shrink-0 whitespace-nowrap ${
+                          stats.channelGrowthPct.startsWith("-") ? "bg-red-100 text-red-700" : "bg-[#C7F33C] text-[#1A2906]"
+                        }`}>
+                          {stats.channelGrowthPct}
+                        </span>
+                      )}
                     </div>
                     <div className="mt-4">
                       <div className="text-[28px] md:text-[32px] font-black text-black leading-none">

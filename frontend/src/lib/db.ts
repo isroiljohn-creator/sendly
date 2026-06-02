@@ -10,6 +10,7 @@ export type User = {
   cardNumber?: string;
   trialExpiresAt?: string;
   plan?: "free" | "pro" | "premium";
+  createdAt?: string;
 };
 
 export type Automation = {
@@ -330,7 +331,8 @@ export const db = {
       fullName, 
       password,
       isCardLinked: false,
-      plan: "free"
+      plan: "free",
+      createdAt: new Date().toISOString()
     };
     if (referrerId) {
       (newUser as any).referredBy = referrerId;
@@ -394,7 +396,8 @@ export const db = {
         email,
         fullName,
         isCardLinked: false,
-        plan: "free"
+        plan: "free",
+        createdAt: new Date().toISOString()
       };
       if (referrerId) {
         (user as any).referredBy = referrerId;
