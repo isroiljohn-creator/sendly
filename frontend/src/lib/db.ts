@@ -11,6 +11,7 @@ export type User = {
   trialExpiresAt?: string;
   plan?: "free" | "pro" | "premium";
   createdAt?: string;
+  hasUsedTrial?: boolean;
 };
 
 export type Automation = {
@@ -86,6 +87,7 @@ export type BotSettings = {
   telegramBotId?: string;
   aiAgentType?: "kurator" | "sales" | "booker" | "recruiter" | "clinic" | "realtor" | "helpdesk" | "fb-leads" | "fb-leads-direct";
   fbAgentMode?: "direct" | "ai";
+  agentName?: string;
 };
 
 export type Lesson = {
@@ -102,6 +104,144 @@ export type Module = {
   order: number;
 };
 
+// Pure JavaScript synchronous SHA-256 implementation (works client-side)
+export function sha256Sync(str: string): string {
+  const ascii = unescape(encodeURIComponent(str));
+  function rightRotate(value: number, amount: number) {
+    return (value >>> amount) | (value << (32 - amount));
+  }
+  
+  const mathPow = Math.pow;
+  const maxWord = mathPow(2, 32);
+  const lengthProperty = 'length';
+  let i, j;
+
+  const words: number[] = [];
+  const asciiLength = ascii[lengthProperty] * 8;
+  
+  let hash = [
+    0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a, 0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19
+  ];
+
+  const k = [
+    0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5, 0x3956c25b, 0x59f111f1, 0x923f82a4, 0xab1c5ed5,
+    0xd807aa98, 0x12835b01, 0x243185be, 0x550c7dc3, 0x72be5d74, 0x80deb1fe, 0x9bdc06a7, 0xc19bf174,
+    0xe49b69c1, 0xefbe4786, 0x0fc19dc6, 0x240ca1cc, 0x2de92c6f, 0x4a7484aa, 0x5cb0a9dc, 0x76f988da,
+    0x983e5152, 0xa831c66d, 0xb00327c8, 0xbf597fc7, 0xc6e00bf3, 0xd5a79147, 0x06ca6351, 0x14292967,
+    0x27b70a85, 0x2e1b2138, 0x4d2c6dfc, 0x53380d13, 0x650a7354, 0x766a0abb, 0x81c2c92e, 0x92722c85,
+    0xa2bfe8a1, 0xa81a664b, 0xc24b8b70, 0xc76c51a3, 0xd192e819, 0xd6990624, 0xf40e3585, 0x106aa070,
+    0x19a4c116, 0x1e376c08, 0x2748774c, 0x34b0bcb5, 0x391c0cb3, 0x4ed8aa4a, 0x5b9cca4f, 0x682e6ff3,
+    0x748f82ee, 0x78a5636f, 0x84c87814, 0x8cc70208, 0x90befffa, 0xa4506ceb, 0xbef9a3f7, 0xc67178f2
+  ];
+
+  let wordsLength = ((asciiLength + 64) >>> 9 << 4) + 16;
+  for (i = 0; i < wordsLength; i++) {
+    words[i] = 0;
+  }
+  for (i = 0; i < ascii[lengthProperty]; i++) {
+    words[i >>> 2] |= (ascii.charCodeAt(i) & 0xff) << (24 - (i % 4) * 8);
+  }
+  words[asciiLength >>> 5] |= 0x80 << (24 - (asciiLength % 32));
+  words[wordsLength - 1] = asciiLength;
+
+  for (i = 0; i < wordsLength; i += 16) {
+    const w = [];
+    for (j = 0; j < 16; j++) {
+      w[j] = words[i + j];
+    }
+    for (j = 16; j < 64; j++) {
+      const s0 = rightRotate(w[j - 15], 7) ^ rightRotate(w[j - 15], 18) ^ (w[j - 15] >>> 3);
+      const s1 = rightRotate(w[j - 2], 17) ^ rightRotate(w[j - 2], 19) ^ (w[j - 2] >>> 10);
+      w[j] = (w[j - 16] + s0 + w[j - 7] + s1) | 0;
+    }
+
+    let a = hash[0];
+    let b = hash[1];
+    let c = hash[2];
+    let d = hash[3];
+    let e = hash[4];
+    let f = hash[5];
+    let g = hash[6];
+    let h = hash[7];
+
+    for (j = 0; j < 64; j++) {
+      const S1 = rightRotate(e, 6) ^ rightRotate(e, 11) ^ rightRotate(e, 25);
+      const ch = (e & f) ^ (~e & g);
+      const temp1 = (h + S1 + ch + k[j] + w[j]) | 0;
+      const S0 = rightRotate(a, 2) ^ rightRotate(a, 13) ^ rightRotate(a, 22);
+      const maj = (a & b) ^ (a & c) ^ (b & c);
+      const temp2 = (S0 + maj) | 0;
+
+      h = g;
+      g = f;
+      f = e;
+      e = (d + temp1) | 0;
+      d = c;
+      c = b;
+      b = a;
+      a = (temp1 + temp2) | 0;
+    }
+
+    hash[0] = (hash[0] + a) | 0;
+    hash[1] = (hash[1] + b) | 0;
+    hash[2] = (hash[2] + c) | 0;
+    hash[3] = (hash[3] + d) | 0;
+    hash[4] = (hash[4] + e) | 0;
+    hash[5] = (hash[5] + f) | 0;
+    hash[6] = (hash[6] + g) | 0;
+    hash[7] = (hash[7] + h) | 0;
+  }
+
+  let finalHex = '';
+  for (i = 0; i < 8; i++) {
+    const val = hash[i];
+    let hex = (val >>> 0).toString(16);
+    while (hex.length < 8) {
+      hex = '0' + hex;
+    }
+    finalHex += hex;
+  }
+  return finalHex;
+}
+
+export function isSha256(str: string): boolean {
+  return /^[0-9a-f]{64}$/i.test(str);
+}
+
+// Global fetch interceptor for 401/403 session expiration
+if (typeof window !== "undefined" && window.fetch) {
+  try {
+    const originalFetch = window.fetch;
+    window.fetch = async function (input, init) {
+      const response = await originalFetch(input, init);
+      let url = "";
+      if (typeof input === "string") {
+        url = input;
+      } else if (input && typeof input === "object" && "url" in input) {
+        url = (input as Request).url;
+      }
+      
+      const isAuthEndpoint = 
+        url.includes("/api/auth/") || 
+        url.includes("/login") || 
+        url.includes("/register") || 
+        url.includes("/otp") ||
+        url.includes("/api/db?userId="); // allow db call to handle it natively
+
+      if ((response.status === 401 || response.status === 403) && !isAuthEndpoint) {
+        localStorage.removeItem("replai_token");
+        localStorage.removeItem("replai_current_user");
+        if (!window.location.pathname.startsWith("/login")) {
+          window.location.href = "/login";
+        }
+      }
+      return response;
+    };
+  } catch (err) {
+    console.error("Failed to patch window.fetch", err);
+  }
+}
+
 // Initial Data (empty)
 const INITIAL_CHANNELS: Channel[] = [];
 const INITIAL_CONTACTS: Contact[] = [];
@@ -112,8 +252,9 @@ const DEFAULT_BOT_SETTINGS: BotSettings = {
   length: 40,
   humor: 30,
   aiAgentType: "kurator",
+  agentName: "Davron",
   systemPrompt: `# ROL VA IDENTIFIKATSIYA
-Sen marketing kursi o'quvchilariga yordam beruvchi "Mently" nomli shaxsiy AI kuratorsan. Xaraktering: samimiy, do'stona, qisqa va aniq gapiradigan, ortiqcha rasmiyatchilikdan xoli.
+Sen marketing kursi o'quvchilariga yordam beruvchi, ismi "{{agentName}}" bo'lgan Sendly shaxsiy AI kuratorisan. Xaraktering: samimiy, do'stona, qisqa va aniq gapiradigan, ortiqcha rasmiyatchilikdan xoli.
 
 # ASOSIY VAZIFA
 O'quvchilarning savollariga faqat va faqat quyida taqdim etilgan darslik/kurs materiallari (KURS MATERIALLARI) asosida tushunarli, qisqa va tabiiy javob berish.
@@ -167,6 +308,22 @@ const INITIAL_LESSONS: Lesson[] = [];
 
 // Helper wrapper for SSR check
 const isClient = typeof window !== "undefined";
+
+// Global LocalStorage quota limits exception guard (Issue 163)
+if (isClient && window.localStorage) {
+  try {
+    const originalSetItem = localStorage.setItem;
+    localStorage.setItem = function (key, value) {
+      try {
+        originalSetItem.apply(this, [key, value]);
+      } catch (e) {
+        console.warn("Storage quota exceeded or disabled. Storage failure ignored gracefully.", e);
+      }
+    };
+  } catch (err) {
+    console.error("Failed to patch localStorage.setItem", err);
+  }
+}
 
 const notifyUpdate = () => {
   if (isClient) {
@@ -306,6 +463,12 @@ export const db = {
     return null;
   },
 
+  hashPassword(password: string): string {
+    if (!password) return "";
+    if (isSha256(password)) return password;
+    return sha256Sync(password);
+  },
+
   signUp(fullName: string, email: string, password: string): { success: boolean; error?: string } {
     if (!isClient) return { success: false };
     const users = this.getUsers();
@@ -330,13 +493,16 @@ export const db = {
       id: typeof crypto !== "undefined" && crypto.randomUUID ? crypto.randomUUID() : "33333333-3333-4333-8333-333333333333",
       email, 
       fullName, 
-      password,
+      password: this.hashPassword(password),
       isCardLinked: false,
       plan: "free",
       createdAt: new Date().toISOString()
     };
     if (referrerId) {
-      (newUser as any).referredBy = referrerId;
+      const referrerExists = users.some((u) => u.id === referrerId);
+      if (referrerExists && referrerId !== newUser.id) {
+        (newUser as any).referredBy = referrerId;
+      }
       localStorage.removeItem("sendly_referrer_id");
     }
     this._clearLocalBusinessData();
@@ -353,7 +519,7 @@ export const db = {
     if (!isClient) return { success: false };
 
     const users = this.getUsers();
-    const user = users.find((u) => u.email === email && u.password === password);
+    const user = users.find((u) => u.email === email && (u.password === this.hashPassword(password) || u.password === password));
     if (!user) {
       return { success: false, error: "Email yoki parol noto'g'ri." };
     }
@@ -386,14 +552,14 @@ export const db = {
     return { success: true };
   },
 
-  googleSignIn(email: string, fullName: string): { success: boolean; error?: string } {
+  googleSignIn(email: string, fullName: string, serverUserId?: string): { success: boolean; error?: string } {
     if (!isClient) return { success: false };
     const users = this.getUsers();
     let user = users.find((u) => u.email === email);
     if (!user) {
       const referrerId = localStorage.getItem("sendly_referrer_id");
       user = {
-        id: typeof crypto !== "undefined" && crypto.randomUUID ? crypto.randomUUID() : "55555555-5555-5555-8555-555555555555",
+        id: serverUserId || (typeof crypto !== "undefined" && crypto.randomUUID ? crypto.randomUUID() : "55555555-5555-5555-8555-555555555555"),
         email,
         fullName,
         isCardLinked: false,
@@ -406,6 +572,13 @@ export const db = {
       }
       users.push(user);
       localStorage.setItem("replai_users", JSON.stringify(users));
+    } else if (serverUserId) {
+      user.id = serverUserId;
+      const idx = users.findIndex((u) => u.email === email);
+      if (idx > -1) {
+        users[idx] = user;
+        localStorage.setItem("replai_users", JSON.stringify(users));
+      }
     }
     this._clearLocalBusinessData();
     localStorage.setItem("replai_current_user", JSON.stringify(user));
@@ -481,19 +654,24 @@ export const db = {
       }
     }
 
-    const expiresAt = new Date();
-    expiresAt.setDate(expiresAt.getDate() + 7);
-
     currentUser.isCardLinked = true;
     currentUser.plan = "pro";
-    this.updateCreditsOnPlanChange("pro");
     const typeLabel = isUzCard ? "UzCard" : isHumo ? "Humo" : "Karta";
     currentUser.cardNumber = `${typeLabel} **** ${rawNumber.substring(rawNumber.length - 4)}`;
-    currentUser.trialExpiresAt = expiresAt.toLocaleDateString("uz-UZ", {
-      day: "numeric",
-      month: "long",
-      year: "numeric",
-    });
+
+    if (!currentUser.hasUsedTrial) {
+      currentUser.hasUsedTrial = true;
+      this.updateCreditsOnPlanChange("pro");
+      const expiresAt = new Date();
+      expiresAt.setDate(expiresAt.getDate() + 7);
+      currentUser.trialExpiresAt = expiresAt.toLocaleDateString("uz-UZ", {
+        day: "numeric",
+        month: "long",
+        year: "numeric",
+      });
+    } else {
+      delete currentUser.trialExpiresAt;
+    }
 
     // Update in users array
     const users = this.getUsers();
@@ -966,6 +1144,12 @@ export const db = {
         headers["Authorization"] = `Bearer ${token}`;
       }
       const res = await fetch(`/api/db?userId=${userId}`, { headers });
+      if (res.status === 401 || res.status === 403) {
+        localStorage.removeItem("replai_token");
+        localStorage.removeItem("replai_current_user");
+        window.location.href = "/login";
+        return false;
+      }
       if (!res.ok) return false;
       const data = await res.json();
       if (data && typeof data === "object") {
@@ -1000,6 +1184,12 @@ export const db = {
         headers,
         body: JSON.stringify(data),
       });
+      if (res.status === 401 || res.status === 403) {
+        localStorage.removeItem("replai_token");
+        localStorage.removeItem("replai_current_user");
+        window.location.href = "/login";
+        return { success: false, error: "Seans muddati tugagan" };
+      }
       const result = await res.json();
       if (!res.ok) {
         return { success: false, error: result.error || "Xatolik yuz berdi" };

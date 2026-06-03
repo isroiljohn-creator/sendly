@@ -112,7 +112,7 @@ export default function LoginPage() {
     return () => clearInterval(checkInterval);
   }, [lang]);
 
-  const handleGoogleCredentialResponse = (response: { credential: string }) => {
+  const handleGoogleCredentialResponse = async (response: { credential: string }) => {
     setError("");
     try {
       const token = response.credential;
@@ -126,14 +126,27 @@ export default function LoginPage() {
       );
       const payload = JSON.parse(jsonPayload);
       
-      const res = db.googleSignIn(payload.email, payload.name);
-      if (res.success) {
-        window.location.href = "/";
+      const responseAuth = await fetch("/api/auth/google", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ credential: token }),
+      });
+      const dataAuth = await responseAuth.json();
+      if (responseAuth.ok && dataAuth.success) {
+        localStorage.setItem("replai_token", dataAuth.token);
+        const res = db.googleSignIn(payload.email, payload.name, dataAuth.userId);
+        if (res.success) {
+          // Await server-side sync to prevent race conditions during immediate page redirect
+          await db.saveToServer();
+          window.location.href = "/";
+        } else {
+          setError(res.error || t("pages.login_page.error_google_auth"));
+        }
       } else {
-        setError(res.error || t("pages.login_page.error_google_auth"));
+        setError(dataAuth.error || t("pages.login_page.error_google_auth"));
       }
     } catch (err) {
-      console.error("Failed to decode Google ID Token:", err);
+      console.error("Failed to authenticate Google credentials:", err);
       setError(t("pages.login_page.error_google_token"));
     }
   };
@@ -378,7 +391,7 @@ export default function LoginPage() {
     const users = db.getUsers();
     const idx = users.findIndex((u) => u.email.toLowerCase() === recoveryEmail.toLowerCase());
     if (idx > -1) {
-      users[idx].password = newPassword;
+      users[idx].password = db.hashPassword(newPassword);
       localStorage.setItem("replai_users", JSON.stringify(users));
 
       const saveRes = await db.saveToServer();

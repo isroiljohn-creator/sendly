@@ -5,6 +5,21 @@ import { sendInstagramMessage } from "../utils/meta";
 import { executeSessionStep } from "./interpreter";
 import { cancelSessionDelay } from "./queue";
 
+async function fetchGeminiWithRetry(url: string, options: any, maxRetries = 3): Promise<Response> {
+  let delay = 1000;
+  for (let i = 0; i < maxRetries; i++) {
+    const response = await fetch(url, options);
+    if (response.status === 429) {
+      console.warn(`[Gemini] HTTP 429 (Rate Limit). Retrying in ${delay}ms... (Attempt ${i + 1}/${maxRetries})`);
+      await new Promise(resolve => setTimeout(resolve, delay));
+      delay *= 2;
+      continue;
+    }
+    return response;
+  }
+  return fetch(url, options);
+}
+
 export interface WebhookEventPayload {
   accountId: string;          // Database ID of instagram_accounts
   instagramPageId: string;    // Meta Page/IG ID
@@ -631,7 +646,7 @@ export async function handleIncomingLeadgenEvent(payload: LeadgenEventPayload): 
           "  \"summary\": string\n" +
           "}";
 
-        const response = await fetch(
+        const response = await fetchGeminiWithRetry(
           `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${env.GEMINI_API_KEY}`,
           {
             method: "POST",
@@ -649,7 +664,7 @@ export async function handleIncomingLeadgenEvent(payload: LeadgenEventPayload): 
                 }
               ],
               generationConfig: {
-                temperature: 0.2,
+                temperature: 0.1 + (botSettings.humor || 30) / 200,
                 responseMimeType: "application/json"
               }
             })

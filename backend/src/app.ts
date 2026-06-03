@@ -14,14 +14,35 @@ import analyticsRouter from "./routes/analytics";
 
 const app = express();
 
+// Security headers middleware
+app.use((req, res, next) => {
+  res.setHeader("X-Frame-Options", "SAMEORIGIN");
+  res.setHeader("X-Content-Type-Options", "nosniff");
+  res.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
+  res.setHeader("X-XSS-Protection", "1; mode=block");
+  res.setHeader(
+    "Content-Security-Policy",
+    "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; connect-src 'self' https://graph.facebook.com https://api.telegram.org https://generativelanguage.googleapis.com;"
+  );
+  res.setHeader("Permissions-Policy", "geolocation=(), microphone=(), camera=()");
+  next();
+});
+
 // Standard middleware
 app.use(
   cors({
-    origin: [
-      "https://www.sendly.uz",
-      "https://sendly.uz",
-      "http://localhost:3000",
-    ],
+    origin: (origin, callback) => {
+      const allowedOrigins = [
+        "https://www.sendly.uz",
+        "https://sendly.uz",
+        "http://localhost:3000",
+      ];
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
     credentials: true,
   })
 );
@@ -29,6 +50,7 @@ app.use(
 // Configure express.json to capture the raw body buffer for signature verification
 app.use(
   express.json({
+    limit: "500kb",
     verify: (req: any, res, buf) => {
       req.rawBody = buf;
     },

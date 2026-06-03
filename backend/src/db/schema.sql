@@ -266,3 +266,23 @@ BEFORE UPDATE ON broadcasts
 FOR EACH ROW
 EXECUTE FUNCTION trigger_set_timestamp();
 
+
+-- 15. Additional Performance Indexes
+CREATE INDEX IF NOT EXISTS idx_contacts_user_id ON contacts(user_id);
+CREATE INDEX IF NOT EXISTS idx_contacts_created_at ON contacts(created_at);
+CREATE INDEX IF NOT EXISTS idx_automations_user_id ON automations(user_id);
+CREATE INDEX IF NOT EXISTS idx_automations_account_id ON automations(account_id);
+CREATE INDEX IF NOT EXISTS idx_automation_runs_automation_id ON automation_runs(automation_id);
+CREATE INDEX IF NOT EXISTS idx_automation_runs_triggered_at ON automation_runs(triggered_at);
+CREATE INDEX IF NOT EXISTS idx_messages_automation_id ON messages(automation_id);
+CREATE INDEX IF NOT EXISTS idx_messages_sent_at ON messages(sent_at);
+CREATE INDEX IF NOT EXISTS idx_conversions_contact_id ON conversions(contact_id);
+CREATE INDEX IF NOT EXISTS idx_conversions_converted_at ON conversions(converted_at);
+CREATE INDEX IF NOT EXISTS idx_referral_links_automation_id ON referral_links(automation_id);
+CREATE INDEX IF NOT EXISTS idx_referral_links_user_id ON referral_links(user_id);
+CREATE INDEX IF NOT EXISTS idx_referrals_referrer_contact_id ON referrals(referrer_contact_id);
+CREATE INDEX IF NOT EXISTS idx_referrals_referred_contact_id ON referrals(referred_contact_id);
+CREATE INDEX IF NOT EXISTS idx_referrals_automation_id ON referrals(automation_id);
+CREATE INDEX IF NOT EXISTS idx_broadcasts_user_id ON broadcasts(user_id);
+CREATE INDEX IF NOT EXISTS idx_broadcasts_account_id ON broadcasts(account_id);
+

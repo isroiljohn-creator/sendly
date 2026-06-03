@@ -32,6 +32,7 @@ interface TelegramBotState {
   active: boolean;
   token: string;
   offset: number;
+  instanceId?: string;
 }
 
 function isValidUuid(id: string): boolean {
@@ -60,25 +61,55 @@ export async function getDbDataFromRailway(): Promise<any> {
 
 export const getDbDataFromSupabase = getDbDataFromRailway;
 
+function splitTelegramMessage(text: string, maxLength = 4000): string[] {
+  if (!text) return [""];
+  if (text.length <= maxLength) return [text];
+  const chunks: string[] = [];
+  let remaining = text;
+  
+  while (remaining.length > maxLength) {
+    let splitIndex = remaining.lastIndexOf("\n", maxLength);
+    if (splitIndex === -1 || splitIndex < maxLength / 2) {
+      splitIndex = remaining.lastIndexOf(" ", maxLength);
+    }
+    if (splitIndex === -1 || splitIndex < maxLength / 2) {
+      splitIndex = maxLength;
+    }
+    
+    chunks.push(remaining.substring(0, splitIndex).trim());
+    remaining = remaining.substring(splitIndex).trim();
+  }
+  if (remaining) {
+    chunks.push(remaining);
+  }
+  return chunks;
+}
+
 async function sendTelegramMessage(token: string, chatId: number | string, text: string, parseMode?: string, replyMarkup?: any) {
   try {
-    const url = `https://api.telegram.org/bot${token}/sendMessage`;
-    const payload: any = {
-      chat_id: chatId,
-      text: text,
-    };
-    if (parseMode) payload.parse_mode = parseMode;
-    if (replyMarkup) payload.reply_markup = replyMarkup;
+    const chunks = splitTelegramMessage(text);
+    for (let i = 0; i < chunks.length; i++) {
+      const chunk = chunks[i];
+      const url = `https://api.telegram.org/bot${token}/sendMessage`;
+      const payload: any = {
+        chat_id: chatId,
+        text: chunk,
+      };
+      if (parseMode) payload.parse_mode = parseMode;
+      if (replyMarkup && i === chunks.length - 1) {
+        payload.reply_markup = replyMarkup;
+      }
 
-    const res = await fetch(url, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-      cache: "no-store"
-    });
-    if (!res.ok) {
-      const errText = await res.text();
-      console.error(`Failed to send Telegram message to ${chatId}: ${res.status} - ${errText}`);
+      const res = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+        cache: "no-store"
+      });
+      if (!res.ok) {
+        const errText = await res.text();
+        console.error(`Failed to send Telegram message chunk ${i+1}/${chunks.length} to ${chatId}: ${res.status} - ${errText}`);
+      }
     }
   } catch (err) {
     console.error(`Error sending Telegram message to ${chatId}:`, err);
@@ -135,6 +166,14 @@ async function updateDbFile(updater: (dbData: Record<string, any>) => Promise<vo
 }
 
 export async function handleTelegramUpdate(channelId: string, token: string, update: any) {
+  if (!update || typeof update !== "object") {
+    console.error(`[Bot Runner] Received invalid or null update object for channel ${channelId}`);
+    return;
+  }
+  if (!token) {
+    console.error(`[Bot Runner] Missing token for channel ${channelId}`);
+    return;
+  }
   console.log(`[Bot Runner] Handling update for channel ${channelId} (token: ...${token.slice(-6)}):`, JSON.stringify(update));
   try {
     // Handle inline button callback query to copy verification code
@@ -959,14 +998,22 @@ async function runBotPollLoop(channelId: string, botState: TelegramBotState) {
   console.log(`Starting poll loop for bot channel ${channelId}`);
   
   try {
-    const deleteWebhookUrl = `https://api.telegram.org/bot${botState.token}/deleteWebhook?drop_pending_updates=true`;
+    const deleteWebhookUrl = `https://api.telegram.org/bot${botState.token}/deleteWebhook`;
     await fetch(deleteWebhookUrl, { cache: "no-store" });
     console.log(`Deleted webhook successfully for bot channel ${channelId}`);
   } catch (err) {
     console.error(`Error deleting webhook for bot channel ${channelId}:`, err);
   }
 
+  const globalBots = (global as unknown as { telegramBots?: Record<string, TelegramBotState> }).telegramBots || {};
+
   while (botState.active) {
+    // Check if this is still the active instance registered in globalBots
+    if (globalBots[channelId] && globalBots[channelId].instanceId !== botState.instanceId) {
+      console.log(`Stopping poll loop for channel ${channelId} because a newer instance is running.`);
+      botState.active = false;
+      break;
+    }
     try {
       const url = `https://api.telegram.org/bot${botState.token}/getUpdates?offset=${botState.offset}&timeout=10`;
       const res = await fetch(url, { cache: "no-store" });
@@ -1118,6 +1165,7 @@ export async function startTelegramBots() {
           active: true,
           token: token,
           offset: 0,
+          instanceId: crypto.randomUUID(),
         };
         globalBots[channelId] = botState;
         

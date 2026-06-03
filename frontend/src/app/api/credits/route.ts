@@ -2,8 +2,68 @@ import { NextResponse } from "next/server";
 import fs from "fs";
 import path from "path";
 import { verifyJwt } from "@/lib/jwt";
+import * as pgdb from "@/lib/pgdb";
 
 const DB_FILE = process.env.DB_FILE_PATH || path.join(process.cwd(), "db.json");
+
+class Mutex {
+  private queue: Promise<void> = Promise.resolve();
+
+  async acquire(): Promise<() => void> {
+    let release: () => void;
+    const pending = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    const parent = this.queue;
+    this.queue = this.queue.then(() => pending);
+    await parent;
+    return release!;
+  }
+}
+
+const voucherLocks = new Map<string, Mutex>();
+
+function getVoucherMutex(code: string): Mutex {
+  let mutex = voucherLocks.get(code);
+  if (!mutex) {
+    mutex = new Mutex();
+    voucherLocks.set(code, mutex);
+  }
+  return mutex;
+}
+
+const LOCK_DIR = path.join(process.cwd(), "db.lock");
+
+function acquireFileLock(): boolean {
+  const maxRetries = 15;
+  const retryDelay = 50; // ms
+  for (let i = 0; i < maxRetries; i++) {
+    try {
+      fs.mkdirSync(LOCK_DIR);
+      return true;
+    } catch (err: any) {
+      if (err.code === "EEXIST") {
+        const start = Date.now();
+        while (Date.now() - start < retryDelay) {
+          // block
+        }
+      } else {
+        return false;
+      }
+    }
+  }
+  return false;
+}
+
+function releaseFileLock() {
+  try {
+    if (fs.existsSync(LOCK_DIR)) {
+      fs.rmdirSync(LOCK_DIR);
+    }
+  } catch (e) {
+    // ignore
+  }
+}
 
 interface CreditTransaction {
   id: string;
@@ -37,27 +97,193 @@ function getInitialCredits(): CreditsData {
   };
 }
 
+function readDbUnlocked() {
+  if (!fs.existsSync(DB_FILE)) {
+    return {};
+  }
+  const data = fs.readFileSync(DB_FILE, "utf8");
+  return JSON.parse(data);
+}
+
+function writeDbUnlocked(data: unknown) {
+  fs.writeFileSync(DB_FILE, JSON.stringify(data, null, 2), "utf8");
+  return true;
+}
+
 function readDb() {
+  const hasLock = acquireFileLock();
   try {
-    if (!fs.existsSync(DB_FILE)) {
-      return {};
-    }
-    const data = fs.readFileSync(DB_FILE, "utf8");
-    return JSON.parse(data);
+    return readDbUnlocked();
   } catch (err) {
     console.error("Error reading database file in credits API", err);
     return {};
+  } finally {
+    if (hasLock) releaseFileLock();
   }
 }
 
 function writeDb(data: unknown) {
+  const hasLock = acquireFileLock();
   try {
-    fs.writeFileSync(DB_FILE, JSON.stringify(data, null, 2), "utf8");
-    return true;
+    return writeDbUnlocked(data);
   } catch (err) {
     console.error("Error writing to database file in credits API", err);
     return false;
+  } finally {
+    if (hasLock) releaseFileLock();
   }
+}
+
+async function readUserCredits(userId: string): Promise<CreditsData> {
+  if (pgdb.isConfigured()) {
+    try {
+      const uData = await pgdb.getValue("global_settings_" + userId) || {};
+      if (uData.replai_ai_credits_data) {
+        const creditsData = typeof uData.replai_ai_credits_data === "string"
+          ? JSON.parse(uData.replai_ai_credits_data)
+          : uData.replai_ai_credits_data;
+        if (!creditsData.usedVouchers) {
+          creditsData.usedVouchers = [];
+        }
+        return creditsData;
+      }
+    } catch (e) {
+      console.error("Failed to read user credits from pgdb", e);
+    }
+  }
+
+  // Fallback to local db.json
+  const dbData = readDb();
+  const userData = dbData.userData?.[userId] || {};
+  let creditsData: CreditsData;
+  if (!userData["replai_ai_credits_data"]) {
+    creditsData = getInitialCredits();
+  } else {
+    try {
+      creditsData = typeof userData["replai_ai_credits_data"] === "string"
+        ? JSON.parse(userData["replai_ai_credits_data"])
+        : userData["replai_ai_credits_data"];
+      if (!creditsData.usedVouchers) {
+        creditsData.usedVouchers = [];
+      }
+    } catch {
+      creditsData = getInitialCredits();
+    }
+  }
+  return creditsData;
+}
+
+async function writeUserCredits(userId: string, creditsData: CreditsData): Promise<boolean> {
+  if (pgdb.isConfigured()) {
+    try {
+      const uData = await pgdb.getValue("global_settings_" + userId) || {};
+      uData.replai_ai_credits_data = creditsData;
+      await pgdb.setValue("global_settings_" + userId, uData);
+      return true;
+    } catch (e) {
+      console.error("Failed to write user credits to pgdb", e);
+    }
+  }
+
+  // Fallback to local db.json
+  try {
+    const dbData = readDb();
+    if (!dbData.userData) dbData.userData = {};
+    if (!dbData.userData[userId]) dbData.userData[userId] = {};
+    dbData.userData[userId]["replai_ai_credits_data"] = JSON.stringify(creditsData);
+    return writeDb(dbData);
+  } catch (e) {
+    console.error("Failed to write user credits to local db", e);
+    return false;
+  }
+}
+
+async function redeemVoucher(userId: string, normalizedCode: string, creditsData: CreditsData): Promise<{ error?: string }> {
+  let promoCodes = [];
+  let usersList = [];
+  let adminData: any = {};
+
+  if (pgdb.isConfigured()) {
+    try {
+      usersList = await pgdb.getValue("global_users") || [];
+      adminData = await pgdb.getValue("global_admin_data") || {};
+      promoCodes = adminData.promoCodes || [];
+    } catch (e) {
+      console.error("Failed to read voucher data from pgdb", e);
+    }
+  } else {
+    const dbData = readDb();
+    usersList = dbData.users || [];
+    promoCodes = dbData.promoCodes || [];
+  }
+
+  // Filter legacy vouchers
+  promoCodes = promoCodes.filter((v: any) => v && v.code !== "SENDLY10" && v.code !== "WELCOME" && v.code !== "PROMO50");
+
+  const voucherInfo = promoCodes.find((v: any) => v.code === normalizedCode);
+  if (!voucherInfo) {
+    return { error: "Bunday promokod mavjud emas yoki muddati tugagan." };
+  }
+
+  if (voucherInfo.expiresAt) {
+    const expiryDate = new Date(voucherInfo.expiresAt);
+    if (expiryDate.getTime() < Date.now()) {
+      return { error: "Ushbu promokodning amal qilish muddati tugagan." };
+    }
+  }
+
+  if (creditsData.usedVouchers?.includes(normalizedCode)) {
+    return { error: "Ushbu promokod allaqachon faollashtirilgan!" };
+  }
+
+  // Check max uses limit
+  if (voucherInfo.usedCount >= (voucherInfo.maxUses || 1000)) {
+    return { error: "Ushbu promokodning faollashtirish limiti tugagan." };
+  }
+
+  // Check email restriction
+  const userObj = usersList.find((u: any) => u.id === userId);
+  const userEmail = userObj?.email || "";
+  if (
+    voucherInfo.restrictedToEmail && 
+    voucherInfo.restrictedToEmail.trim() !== "" && 
+    voucherInfo.restrictedToEmail.toLowerCase() !== userEmail.toLowerCase()
+  ) {
+    return { error: "Ushbu ramziy kod faqat maxsus ruxsat berilgan email manzili uchun amal qiladi." };
+  }
+
+  // Redeem
+  voucherInfo.usedCount = (voucherInfo.usedCount || 0) + 1;
+  creditsData.balance = (creditsData.balance || 0) + voucherInfo.amount;
+  if (!creditsData.usedVouchers) {
+    creditsData.usedVouchers = [];
+  }
+  creditsData.usedVouchers.push(normalizedCode);
+
+  const timestamp = new Date().toLocaleString("uz-UZ", { timeZone: "Asia/Tashkent" });
+  creditsData.history.unshift({
+    id: `tx-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+    type: "purchase",
+    amount: voucherInfo.amount,
+    description: `Promokod faollashtirildi: ${normalizedCode}`,
+    date: timestamp
+  });
+
+  // Save promo code status back
+  if (pgdb.isConfigured()) {
+    try {
+      adminData.promoCodes = promoCodes;
+      await pgdb.setValue("global_admin_data", adminData);
+    } catch (e) {
+      console.error("Failed to save updated vouchers to pgdb", e);
+    }
+  } else {
+    const dbData = readDb();
+    dbData.promoCodes = promoCodes;
+    writeDb(dbData);
+  }
+
+  return {};
 }
 
 export async function GET(request: Request) {
@@ -71,9 +297,10 @@ export async function GET(request: Request) {
   const authHeader = request.headers.get("Authorization");
   const token = authHeader?.startsWith("Bearer ") ? authHeader.substring(7) : null;
   const jwtSecret = process.env.JWT_SECRET;
+  const jwtPattern = /^[a-zA-Z0-9-_]+\.[a-zA-Z0-9-_]+\.[a-zA-Z0-9-_]+$/;
   
-  if (!token || !jwtSecret) {
-    return NextResponse.json({ error: "Unauthorized: Missing token" }, { status: 401 });
+  if (!token || !jwtSecret || !jwtPattern.test(token)) {
+    return NextResponse.json({ error: "Unauthorized: Missing or invalid token" }, { status: 401 });
   }
   
   const payload = verifyJwt(token, jwtSecret);
@@ -81,32 +308,7 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: "Forbidden: Access denied" }, { status: 403 });
   }
 
-  const dbData = readDb();
-  if (!dbData.userData) {
-    dbData.userData = {};
-  }
-  if (!dbData.userData[userId]) {
-    dbData.userData[userId] = {};
-  }
-
-  let creditsData: CreditsData;
-  if (!dbData.userData[userId]["replai_ai_credits_data"]) {
-    creditsData = getInitialCredits();
-    dbData.userData[userId]["replai_ai_credits_data"] = JSON.stringify(creditsData);
-    writeDb(dbData);
-  } else {
-    try {
-      creditsData = JSON.parse(dbData.userData[userId]["replai_ai_credits_data"]);
-      if (!creditsData.usedVouchers) {
-        creditsData.usedVouchers = [];
-      }
-    } catch {
-      creditsData = getInitialCredits();
-      dbData.userData[userId]["replai_ai_credits_data"] = JSON.stringify(creditsData);
-      writeDb(dbData);
-    }
-  }
-
+  const creditsData = await readUserCredits(userId);
   return NextResponse.json(creditsData);
 }
 
@@ -122,9 +324,10 @@ export async function POST(request: Request) {
     const authHeader = request.headers.get("Authorization");
     const token = authHeader?.startsWith("Bearer ") ? authHeader.substring(7) : null;
     const jwtSecret = process.env.JWT_SECRET;
+    const jwtPattern = /^[a-zA-Z0-9-_]+\.[a-zA-Z0-9-_]+\.[a-zA-Z0-9-_]+$/;
     
-    if (!token || !jwtSecret) {
-      return NextResponse.json({ error: "Unauthorized: Missing token" }, { status: 401 });
+    if (!token || !jwtSecret || !jwtPattern.test(token)) {
+      return NextResponse.json({ error: "Unauthorized: Missing or invalid token" }, { status: 401 });
     }
     
     const payload = verifyJwt(token, jwtSecret);
@@ -135,38 +338,29 @@ export async function POST(request: Request) {
     const body = await request.json();
     const { action, amount, description } = body;
 
-    const dbData = readDb();
-    if (!dbData.userData) {
-      dbData.userData = {};
-    }
-    if (!dbData.userData[userId]) {
-      dbData.userData[userId] = {};
-    }
-
-    let creditsData: CreditsData;
-    if (!dbData.userData[userId]["replai_ai_credits_data"]) {
-      creditsData = getInitialCredits();
-    } else {
-      try {
-        creditsData = JSON.parse(dbData.userData[userId]["replai_ai_credits_data"]);
-        if (!creditsData.usedVouchers) {
-          creditsData.usedVouchers = [];
-        }
-      } catch {
-        creditsData = getInitialCredits();
-      }
-    }
-
+    const creditsData = await readUserCredits(userId);
     const timestamp = new Date().toLocaleString("uz-UZ", { timeZone: "Asia/Tashkent" });
 
     if (action === "buy") {
-      // Prevent parameter tampering by restricting large direct client-side credit purchases
-      const userObj = dbData.users?.find((u: any) => u.id === userId);
-      const isSystemAdmin = userObj?.email === "admin@sendly.uz";
-      
-      if (!isSystemAdmin && amount > 1000) {
+      // Strictly prevent parameter tampering: only system admins (or gateways acting as admin) can call direct buys
+      let isSystemAdmin = false;
+      if (pgdb.isConfigured()) {
+        try {
+          const usersList = await pgdb.getValue("global_users") || [];
+          const userObj = usersList.find((u: any) => u.id === userId);
+          isSystemAdmin = userObj?.email === "admin@sendly.uz";
+        } catch (e) {
+          console.error("Failed to check admin status in pgdb", e);
+        }
+      } else {
+        const dbData = readDb();
+        const userObj = dbData.users?.find((u: any) => u.id === userId);
+        isSystemAdmin = userObj?.email === "admin@sendly.uz";
+      }
+
+      if (!isSystemAdmin) {
         return NextResponse.json(
-          { error: "Direct purchase of large credit amounts is restricted for security. Please use official gateways." },
+          { error: "Direct purchase is restricted. Please use official billing gateways." },
           { status: 403 }
         );
       }
@@ -199,63 +393,24 @@ export async function POST(request: Request) {
       }
       const normalizedCode = code.trim().toUpperCase();
 
-      // Find user's email
-      const usersList = dbData.users || [];
-      const userObj = usersList.find((u: any) => u.id === userId);
-      const userEmail = userObj?.email || "";
-
-      // Initialize promoCodes database if not present
-      if (!dbData.promoCodes) {
-        dbData.promoCodes = [];
-      } else {
-        dbData.promoCodes = dbData.promoCodes.filter((v: any) => v && v.code !== "SENDLY10" && v.code !== "WELCOME" && v.code !== "PROMO50");
+      const mutex = getVoucherMutex(normalizedCode);
+      const release = await mutex.acquire();
+      try {
+        const freshCreditsData = await readUserCredits(userId);
+        const redeemRes = await redeemVoucher(userId, normalizedCode, freshCreditsData);
+        if (redeemRes.error) {
+          return NextResponse.json({ error: redeemRes.error }, { status: 400 });
+        }
+        await writeUserCredits(userId, freshCreditsData);
+        return NextResponse.json(freshCreditsData);
+      } finally {
+        release();
       }
-
-      const voucherInfo = dbData.promoCodes.find((v: any) => v.code === normalizedCode);
-      if (!voucherInfo) {
-        return NextResponse.json({ error: "Bunday promokod mavjud emas yoki muddati tugagan." }, { status: 400 });
-      }
-
-      if (creditsData.usedVouchers?.includes(normalizedCode)) {
-        return NextResponse.json({ error: "Ushbu promokod allaqachon faollashtirilgan!" }, { status: 400 });
-      }
-
-      // Check max uses limit
-      if (voucherInfo.usedCount >= (voucherInfo.maxUses || 1000)) {
-        return NextResponse.json({ error: "Ushbu promokodning faollashtirish limiti tugagan." }, { status: 400 });
-      }
-
-      // Check email restriction
-      if (
-        voucherInfo.restrictedToEmail && 
-        voucherInfo.restrictedToEmail.trim() !== "" && 
-        voucherInfo.restrictedToEmail.toLowerCase() !== userEmail.toLowerCase()
-      ) {
-        return NextResponse.json({ error: "Ushbu promokod faqat maxsus ruxsat berilgan email manzili uchun amal qiladi." }, { status: 400 });
-      }
-
-      // Redeem
-      voucherInfo.usedCount = (voucherInfo.usedCount || 0) + 1;
-      creditsData.balance = (creditsData.balance || 0) + voucherInfo.amount;
-      if (!creditsData.usedVouchers) {
-        creditsData.usedVouchers = [];
-      }
-      creditsData.usedVouchers.push(normalizedCode);
-
-      creditsData.history.unshift({
-        id: `tx-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
-        type: "purchase",
-        amount: voucherInfo.amount,
-        description: `Promokod faollashtirildi: ${normalizedCode}`,
-        date: timestamp
-      });
     } else {
       return NextResponse.json({ error: "Invalid action" }, { status: 400 });
     }
 
-    dbData.userData[userId]["replai_ai_credits_data"] = JSON.stringify(creditsData);
-    writeDb(dbData);
-
+    await writeUserCredits(userId, creditsData);
     return NextResponse.json(creditsData);
   } catch (err: unknown) {
     const errMsg = err instanceof Error ? err.message : String(err);

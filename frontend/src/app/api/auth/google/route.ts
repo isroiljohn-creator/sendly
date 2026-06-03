@@ -3,7 +3,6 @@ import fs from "fs";
 import path from "path";
 import crypto from "crypto";
 import * as pgdb from "@/lib/pgdb";
-import { verifyOtpCode, checkRateLimit } from "@/lib/otpStore";
 import { signJwt } from "@/lib/jwt";
 
 const DB_FILE = process.env.DB_FILE_PATH || path.join(process.cwd(), "db.json");
@@ -16,7 +15,7 @@ function readDb() {
     const data = fs.readFileSync(DB_FILE, "utf8");
     return JSON.parse(data);
   } catch (err) {
-    console.error("Error reading database file in verify-otp API", err);
+    console.error("Error reading database file in google auth API", err);
     return {};
   }
 }
@@ -33,7 +32,7 @@ async function findUserByEmail(email: string): Promise<any | null> {
         if (found) return found;
       }
     } catch (e) {
-      console.error("Railway read failed in verify-otp, falling back to local file", e);
+      console.error("Railway read failed in google auth, falling back to local file", e);
     }
   }
 
@@ -45,41 +44,40 @@ async function findUserByEmail(email: string): Promise<any | null> {
 
 export async function POST(request: Request) {
   try {
-    const { email, otp } = await request.json();
+    const { credential } = await request.json();
 
-    if (!email || !otp) {
+    if (!credential) {
       return NextResponse.json(
-        { success: false, error: "Email va OTP kod kiritilishi shart." },
+        { success: false, error: "Google credential kiritilishi shart." },
         { status: 400 }
       );
     }
 
-    // Rate Limiting per IP: Max 10 attempts per 5 minutes (using secure IP extraction)
-    const rawIp = request.headers.get("x-real-ip") || request.headers.get("x-forwarded-for") || "unknown";
-    const ip = rawIp.split(",")[0].trim();
-    
-    const ipLimit = checkRateLimit(`verify_ip_${ip}`, 5 * 60 * 1000, 10);
-    if (!ipLimit.allowed) {
+    // 1. Verify Google ID token using Google TokenInfo API
+    const tokenInfoRes = await fetch(
+      `https://oauth2.googleapis.com/tokeninfo?id_token=${encodeURIComponent(credential)}`
+    );
+    if (!tokenInfoRes.ok) {
+      const errData = await tokenInfoRes.json().catch(() => ({}));
       return NextResponse.json(
-        { success: false, error: `Ko'p so'rov yuborildi. Iltimos ${ipLimit.retryAfter} soniyadan so'ng qayta urinib ko'ring.` },
-        { status: 429 }
+        { success: false, error: errData.error_description || "Google ID Token faollashtirilmadi yoki noto'g'ri." },
+        { status: 400 }
       );
     }
 
-    // Rate Limiting per Email: Max 5 verification attempts per 5 minutes to prevent brute-forcing
-    const emailLimit = checkRateLimit(`verify_email_${email}`, 5 * 60 * 1000, 5);
-    if (!emailLimit.allowed) {
+    const payload = await tokenInfoRes.json();
+    const email = payload.email?.toLowerCase().trim();
+    if (!email) {
       return NextResponse.json(
-        { success: false, error: `Ushbu elektron pochta uchun ko'p urinishlar qilindi. Iltimos ${emailLimit.retryAfter} soniyadan so'ng qayta urinib ko'ring.` },
-        { status: 429 }
+        { success: false, error: "Google tokenida elektron pochta topilmadi." },
+        { status: 400 }
       );
     }
 
-    // Verify OTP using memory cache
-    const isValid = verifyOtpCode(email, otp);
-    if (!isValid) {
+    // Check allowed domains (only @gmail.com or @icloud.com)
+    if (!email.endsWith("@gmail.com") && !email.endsWith("@icloud.com")) {
       return NextResponse.json(
-        { success: false, error: "Tasdiqlash kodi noto'g'ri yoki uning muddati tugagan." },
+        { success: false, error: "Faqat @gmail.com yoki @icloud.com elektron pochta manzillari qabul qilinadi." },
         { status: 400 }
       );
     }
@@ -105,7 +103,7 @@ export async function POST(request: Request) {
     const now = Math.floor(Date.now() / 1000);
     const tokenPayload = {
       user_id: userId,
-      email: email.toLowerCase().trim(),
+      email: email,
       iat: now,
       exp: now + 3600 // 1 hour expiration
     };
@@ -120,8 +118,8 @@ export async function POST(request: Request) {
       user: user || null
     });
   } catch (err: unknown) {
-    console.error("[verify-otp] Unexpected error:", err);
-    const errMsg = err instanceof Error ? err.message : "OTP tasdiqlashda xatolik yuz berdi.";
+    console.error("[google-auth] Unexpected error:", err);
+    const errMsg = err instanceof Error ? err.message : "Google orqali kirishda xatolik yuz berdi.";
     return NextResponse.json({ success: false, error: errMsg }, { status: 500 });
   }
 }

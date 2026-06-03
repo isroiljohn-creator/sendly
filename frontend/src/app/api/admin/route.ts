@@ -28,6 +28,24 @@ function isValidUuid(id: string): boolean {
   return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
 }
 
+async function checkIfUserIsAdmin(userId: string, email: string): Promise<boolean> {
+  let usersList = [];
+  if (pgdb.isConfigured()) {
+    try {
+      usersList = await pgdb.getValue("global_users") || [];
+    } catch (e) {
+      console.error("Failed to read users list in admin check", e);
+    }
+  } else {
+    const dbData = readDb();
+    usersList = dbData.users || [];
+  }
+  
+  const user = usersList.find((u: any) => u.id === userId || (u.email && u.email.toLowerCase().trim() === email.toLowerCase().trim()));
+  if (!user) return false;
+  return user.role === "admin" || user.email?.toLowerCase().trim() === "admin@sendly.uz";
+}
+
 // ─── Real analytics: read from Railway global_analytics_daily ───────────────
 async function readRealAnalytics(
   premiumCount: number,
@@ -113,7 +131,9 @@ export async function GET(request: Request) {
     let isAdmin = false;
     if (token && jwtSecret) {
       const payload = verifyJwt(token, jwtSecret);
-      if (payload && payload.email === "admin@sendly.uz") isAdmin = true;
+      if (payload) {
+        isAdmin = await checkIfUserIsAdmin(payload.user_id, payload.email);
+      }
     }
 
     // For non-admin: only return systemAnnouncement
@@ -424,7 +444,8 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Unauthorized: Missing token" }, { status: 401 });
     }
     const payload = verifyJwt(token, jwtSecret);
-    if (!payload || payload.email !== "admin@sendly.uz") {
+    const isAdmin = payload ? await checkIfUserIsAdmin(payload.user_id, payload.email) : false;
+    if (!isAdmin) {
       return NextResponse.json({ error: "Forbidden: Access denied. System admins only." }, { status: 403 });
     }
 

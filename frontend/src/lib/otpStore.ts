@@ -1,3 +1,5 @@
+import crypto from "crypto";
+
 // In-memory OTP store for production containers (Railway)
 interface OtpEntry {
   otp: string;
@@ -16,7 +18,7 @@ if (process.env.NODE_ENV !== "production") {
 }
 
 export function generateAndSaveOtp(email: string): string {
-  const otp = String(Math.floor(1000 + Math.random() * 9000));
+  const otp = String(crypto.randomInt(1000, 10000));
   const expires = Date.now() + 5 * 60 * 1000; // 5 minutes expiration
   otpStore.set(email.toLowerCase(), { otp, expires });
   return otp;

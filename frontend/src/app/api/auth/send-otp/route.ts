@@ -52,8 +52,10 @@ export async function POST(request: Request) {
       );
     }
 
-    // Rate Limiting per IP: Max 10 requests per 10 minutes
-    const ip = request.headers.get("x-forwarded-for") || "unknown";
+    // Rate Limiting per IP: Max 10 requests per 10 minutes (using secure IP extraction)
+    const rawIp = request.headers.get("x-real-ip") || request.headers.get("x-forwarded-for") || "unknown";
+    const ip = rawIp.split(",")[0].trim();
+    
     const ipLimit = checkRateLimit(`ip_${ip}`, 10 * 60 * 1000, 10);
     if (!ipLimit.allowed) {
       return NextResponse.json(

@@ -21,12 +21,46 @@ const server = app.listen(port, () => {
   });
 });
 
-process.on("SIGTERM", () => {
-  console.log("SIGTERM signal received. Shutting down gracefully...");
-  server.close(() => {
+import { closePool } from "./config/db";
+import { closeQueues } from "./services/queue";
+
+async function handleGracefulShutdown(signal: string) {
+  console.log(`${signal} signal received. Shutting down gracefully...`);
+  
+  const forceExitTimeout = setTimeout(() => {
+    console.warn("Graceful shutdown timed out, forcing exit.");
+    process.exit(1);
+  }, 10000);
+
+  try {
+    await new Promise<void>((resolve, reject) => {
+      server.close((err) => {
+        if (err) return reject(err);
+        resolve();
+      });
+    });
     console.log("HTTP server closed.");
-  });
-});
+
+    await closeQueues().catch((err) => {
+      console.error("Error closing Bull queues:", err);
+    });
+
+    await closePool().catch((err) => {
+      console.error("Error closing database pool:", err);
+    });
+
+    console.log("Graceful shutdown completed successfully.");
+    clearTimeout(forceExitTimeout);
+    process.exit(0);
+  } catch (err) {
+    console.error("Error during graceful shutdown:", err);
+    clearTimeout(forceExitTimeout);
+    process.exit(1);
+  }
+}
+
+process.on("SIGTERM", () => handleGracefulShutdown("SIGTERM"));
+process.on("SIGINT", () => handleGracefulShutdown("SIGINT"));
 
 import { sendErrorToTelegram } from "./services/monitoring";
 

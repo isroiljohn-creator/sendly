@@ -1,6 +1,6 @@
 import { Router, Response } from "express";
 import { AuthenticatedRequest, authMiddleware } from "../middleware/auth";
-import { supabase } from "../config/db";
+import { supabase, getPool } from "../config/db";
 
 const router = Router();
 
@@ -60,25 +60,25 @@ router.get("/contacts", async (req: AuthenticatedRequest, res: Response) => {
   const userId = req.user?.user_id;
 
   try {
-    const { data: contacts, error } = await supabase
-      .from("contacts")
-      .select("created_at")
-      .eq("user_id", userId);
+    const pool = getPool();
+    const { rows } = await pool.query(
+      `SELECT DATE(created_at) as date, COUNT(*) as count 
+       FROM contacts 
+       WHERE user_id = $1 
+       GROUP BY DATE(created_at) 
+       ORDER BY DATE(created_at) ASC`,
+      [userId]
+    );
 
-    if (error) throw error;
-
-    // Group contacts by day in JavaScript to ensure compat with mock DB client
-    const grouped: Record<string, number> = {};
-    (contacts || []).forEach((c: any) => {
-      const dateVal = c.created_at || new Date().toISOString();
-      const dateStr = new Date(dateVal).toISOString().split("T")[0];
-      grouped[dateStr] = (grouped[dateStr] || 0) + 1;
+    const contactGrowth = rows.map((r: any) => {
+      const dateStr = r.date instanceof Date 
+        ? r.date.toISOString().split("T")[0] 
+        : String(r.date).split("T")[0];
+      return {
+        date: dateStr,
+        count: parseInt(r.count, 10),
+      };
     });
-
-    const contactGrowth = Object.entries(grouped).map(([date, count]) => ({
-      date,
-      count,
-    })).sort((a, b) => a.date.localeCompare(b.date));
 
     return res.json({ contacts_growth: contactGrowth });
   } catch (error: any) {
@@ -121,42 +121,30 @@ router.get("/conversions", async (req: AuthenticatedRequest, res: Response) => {
   const userId = req.user?.user_id;
 
   try {
-    // 1. Fetch conversions using inner join on contacts
-    const { data: conversions, error } = await supabase
-      .from("conversions")
-      .select(`
-        id,
-        converted_at,
-        automation_id,
-        contact_id,
-        contacts!inner(user_id)
-      `)
-      .eq("contacts.user_id", userId)
-      .order("converted_at", { ascending: false });
+    const pool = getPool();
+    const { rows } = await pool.query(
+      `SELECT 
+         c.id, 
+         c.converted_at, 
+         c.automation_id, 
+         c.contact_id,
+         a.name as automation_name,
+         cnt.username as contact_username
+       FROM conversions c
+       INNER JOIN contacts cnt ON c.contact_id = cnt.id
+       INNER JOIN automations a ON c.automation_id = a.id
+       WHERE cnt.user_id = $1
+       ORDER BY c.converted_at DESC`,
+      [userId]
+    );
 
-    if (error) throw error;
-
-    // Fetch automations and contacts details to enrich conversions info
-    const { data: automations } = await supabase
-      .from("automations")
-      .select("id, name")
-      .eq("user_id", userId);
-
-    const { data: contacts } = await supabase
-      .from("contacts")
-      .select("id, username")
-      .eq("user_id", userId);
-
-    const autoMap = new Map((automations || []).map((a: any) => [a.id, a.name]));
-    const contactMap = new Map((contacts || []).map((c: any) => [c.id, c.username]));
-
-    const enrichedConversions = (conversions || []).map((conv: any) => ({
-      id: conv.id,
-      converted_at: conv.converted_at,
-      automation_id: conv.automation_id,
-      automation_name: autoMap.get(conv.automation_id) || "Unknown",
-      contact_id: conv.contact_id,
-      contact_username: contactMap.get(conv.contact_id) || "Unknown",
+    const enrichedConversions = rows.map((r: any) => ({
+      id: r.id,
+      converted_at: r.converted_at,
+      automation_id: r.automation_id,
+      automation_name: r.automation_name || "Unknown",
+      contact_id: r.contact_id,
+      contact_username: r.contact_username || "Unknown",
     }));
 
     return res.json({

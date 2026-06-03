@@ -13,7 +13,7 @@ export async function POST(req: Request) {
     }
 
     const systemInstruction = `# ROL VA VAZIFA
-Siz "Sendly.uz" (Instagram chatbot va savdoni avtomatlashtirish platformasi) qo'llab-quvvatlash xizmatining shaxsiy AI yordamchisiz (Mently Support AI). Foydalanuvchilarning savollariga samimiy, do'stona, qisqa va aniq javob bering.
+Siz "Sendly.uz" (Instagram chatbot va savdoni avtomatlashtirish platformasi) qo'llab-quvvatlash xizmatining shaxsiy AI yordamchisiz (Sendly Support AI). Foydalanuvchilarning savollariga samimiy, do'stona, qisqa va aniq javob bering.
 
 # SENDLY PLATFORMASI HAQIDA MA'LUMOTLAR
 1. Sendly.uz — O'zbekiston bozori uchun Instagram chatbot va savdoni avtomatlashtirish platformasi.

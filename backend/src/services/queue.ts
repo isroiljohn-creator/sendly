@@ -521,3 +521,19 @@ export async function addWebhookToQueue(payload: any, type: "standard" | "leadge
   }
 }
 
+export async function closeQueues(): Promise<void> {
+  console.log("Closing Bull queues...");
+  const closePromises: Promise<void>[] = [];
+  if (queue) {
+    closePromises.push(queue.close());
+  }
+  if (broadcastsQueue) {
+    closePromises.push(broadcastsQueue.close());
+  }
+  if (webhooksQueue) {
+    closePromises.push(webhooksQueue.close());
+  }
+  await Promise.all(closePromises);
+  console.log("All Bull queues closed.");
+}
+

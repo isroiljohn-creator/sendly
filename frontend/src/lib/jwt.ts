@@ -38,14 +38,35 @@ export function verifyJwt(token: string, secret: string): any {
     }
     
     const [encodedHeader, encodedPayload, encodedSignature] = parts;
+    
+    // Validate algorithm header (prevents none alg bypass)
+    try {
+      const headerStr = base64urlDecode(encodedHeader);
+      const header = JSON.parse(headerStr);
+      if (header.alg !== "HS256") {
+        return null;
+      }
+    } catch {
+      return null;
+    }
+
     const tokenInput = `${encodedHeader}.${encodedPayload}`;
     
     const expectedSignature = crypto.createHmac("sha256", secret)
       .update(tokenInput)
       .digest();
-    const expectedEncodedSignature = base64url(expectedSignature);
     
-    if (encodedSignature !== expectedEncodedSignature) {
+    let base64Sig = encodedSignature.replace(/-/g, "+").replace(/_/g, "/");
+    while (base64Sig.length % 4) {
+      base64Sig += "=";
+    }
+    const signatureBuffer = Buffer.from(base64Sig, "base64");
+    
+    if (signatureBuffer.length !== expectedSignature.length) {
+      return null;
+    }
+    
+    if (!crypto.timingSafeEqual(signatureBuffer, expectedSignature)) {
       return null;
     }
     

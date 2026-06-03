@@ -145,31 +145,59 @@ export async function sendInstagramMessage(
   let finalMessageId = "";
   let overallSuccess = true;
 
-  // Dispatch payloads
+  // Dispatch payloads with retry logic for rate limit exceeded errors
   for (const payload of payloads) {
     const url = `https://graph.facebook.com/v18.0/me/messages?access_token=${encodeURIComponent(token)}`;
-    try {
-      const response = await fetch(url, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(payload),
-      });
+    let attempt = 0;
+    let success = false;
+    let data: any = null;
+    let errText = "";
 
-      if (!response.ok) {
-        const errText = await response.text();
-        console.error(`[Meta API] Send message failed. HTTP ${response.status}: ${errText}`);
-        overallSuccess = false;
-        continue;
-      }
+    while (attempt < 3 && !success) {
+      attempt++;
+      try {
+        const response = await fetch(url, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(payload),
+        });
 
-      const data = await response.json();
-      if (data.message_id) {
-        finalMessageId = data.message_id;
+        if (response.ok) {
+          data = await response.json();
+          success = true;
+        } else {
+          errText = await response.text();
+          const isRateLimit = response.status === 429 || 
+                              errText.includes('"code": 17') || 
+                              errText.includes('"code": 4') || 
+                              errText.includes('"code": 32') || 
+                              errText.includes('"code": 613') ||
+                              errText.toLowerCase().includes("rate limit");
+
+          if (isRateLimit && attempt < 3) {
+            const backoffMs = attempt * 1500;
+            console.warn(`[Meta API] Rate limit hit. Retrying in ${backoffMs}ms... (Attempt ${attempt}/3)`);
+            await new Promise((resolve) => setTimeout(resolve, backoffMs));
+          } else {
+            console.error(`[Meta API] Send message failed. HTTP ${response.status}: ${errText}`);
+            break; // Not a rate limit error or max attempts reached
+          }
+        }
+      } catch (err) {
+        console.error("[Meta API] Network error when sending message:", err);
+        if (attempt < 3) {
+          await new Promise((resolve) => setTimeout(resolve, 1000));
+        } else {
+          break;
+        }
       }
-    } catch (err) {
-      console.error("[Meta API] Network error when sending message:", err);
+    }
+
+    if (success && data && data.message_id) {
+      finalMessageId = data.message_id;
+    } else {
       overallSuccess = false;
     }
   }

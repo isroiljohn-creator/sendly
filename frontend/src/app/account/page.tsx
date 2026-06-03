@@ -247,16 +247,18 @@ export default function AccountPage() {
       // Success! Update DB and states
       const users = db.getUsers();
       const idx = users.findIndex(u => u.email === currentUser?.email);
+      const hashedPass = db.hashPassword(pendingPassword);
       if (idx > -1) {
         users[idx].fullName = pendingName;
         users[idx].email = pendingEmail;
-        users[idx].password = pendingPassword;
+        users[idx].password = hashedPass;
         localStorage.setItem("replai_users", JSON.stringify(users));
       }
 
-      const updatedUser = { ...currentUser, fullName: pendingName, email: pendingEmail, password: pendingPassword };
+      const updatedUser = { ...currentUser, fullName: pendingName, email: pendingEmail, password: hashedPass };
       localStorage.setItem("replai_current_user", JSON.stringify(updatedUser));
       setCurrentUser(updatedUser as User);
+      setPassword(hashedPass);
       setIsEmailVerificationPending(false);
 
       // Persist changes to server
@@ -323,15 +325,17 @@ export default function AccountPage() {
     // Save updated name/password (no email change)
     const users = db.getUsers();
     const idx = users.findIndex(u => u.email === currentUser.email);
+    const hashedPass = db.hashPassword(password);
     if (idx > -1) {
       users[idx].fullName = name;
-      users[idx].password = password;
+      users[idx].password = hashedPass;
       localStorage.setItem("replai_users", JSON.stringify(users));
     }
     
-    const updatedUser = { ...currentUser, fullName: name, password };
+    const updatedUser = { ...currentUser, fullName: name, password: hashedPass };
     localStorage.setItem("replai_current_user", JSON.stringify(updatedUser));
     setCurrentUser(updatedUser);
+    setPassword(hashedPass);
     
     // Persist changes to server
     await db.saveToServer();

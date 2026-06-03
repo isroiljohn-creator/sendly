@@ -3779,6 +3779,21 @@ function AIAgentContent() {
                       <span>{getSystemPromptDesc()}</span>
                     </div>
                   </div>
+
+                  {/* Agent/Curator Name Input */}
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-[11px] font-bold text-[#707070] uppercase tracking-wider">
+                      {t("pages.ai_agent.agent_name_label")}
+                    </label>
+                    <input
+                      type="text"
+                      value={settings.agentName || ""}
+                      onChange={(e) => handleUpdateSettings("agentName", e.target.value)}
+                      placeholder={t("pages.ai_agent.agent_name_placeholder")}
+                      className="w-full px-4 py-2.5 text-[12px] bg-[#F9F9F7] border border-[#E8E8E8] rounded-[12px] focus:outline-none focus:border-black focus:ring-1 focus:ring-black text-black"
+                    />
+                  </div>
+
                   <textarea
                     value={settings.systemPrompt}
                     onChange={(e) => handleUpdateSettings("systemPrompt", e.target.value)}

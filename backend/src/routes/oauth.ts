@@ -1,9 +1,22 @@
 import { Router } from "express";
 import jwt from "jsonwebtoken";
+import crypto from "crypto";
 import { env } from "../config/env";
 import { authMiddleware, AuthenticatedRequest } from "../middleware/auth";
 import { encrypt } from "../utils/crypto";
 import { supabase } from "../config/db";
+
+const usedStateJtis = new Set<string>();
+
+function escapeHtml(text: string): string {
+  if (!text) return "";
+  return text
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
 
 const router = Router();
 
@@ -22,8 +35,9 @@ router.get("/start", authMiddleware, (req: AuthenticatedRequest, res) => {
     return res.status(400).json({ error: "User ID not found in token payload." });
   }
 
-  // Generate 15-minute expiration state token
-  const state = jwt.sign({ user_id: userId }, env.JWT_SECRET, { expiresIn: "15m" });
+  // Generate 15-minute expiration state token with a secure random JTI
+  const stateJti = crypto.randomUUID();
+  const state = jwt.sign({ user_id: userId, jti: stateJti }, env.JWT_SECRET, { expiresIn: "15m" });
   const redirectUri = getRedirectUri(req);
 
   const fbAuthUrl = `https://www.facebook.com/v18.0/dialog/oauth?client_id=${
@@ -41,6 +55,8 @@ router.get("/start", authMiddleware, (req: AuthenticatedRequest, res) => {
  */
 // Helper function to send HTML error page in popup
 const sendErrorHtml = (res: any, title: string, message: string) => {
+  const cleanTitle = escapeHtml(title);
+  const cleanMessage = escapeHtml(message);
   res.setHeader("Content-Type", "text/html");
   return res.status(400).send(`
     <!DOCTYPE html>
@@ -83,8 +99,8 @@ const sendErrorHtml = (res: any, title: string, message: string) => {
       </head>
       <body>
         <div class="error-icon">⚠️</div>
-        <h1>${title}</h1>
-        <p>${message}</p>
+        <h1>${cleanTitle}</h1>
+        <p>${cleanMessage}</p>
         <button onclick="window.close()">Oynani yopish</button>
       </body>
     </html>
@@ -110,8 +126,18 @@ router.get("/callback", async (req, res, next) => {
     // 1. Verify state parameter to prevent CSRF
     let userId = "";
     try {
-      const decoded = jwt.verify(state as string, env.JWT_SECRET) as { user_id: string };
+      const decoded = jwt.verify(state as string, env.JWT_SECRET) as { user_id: string; jti?: string };
       userId = decoded.user_id;
+      if (decoded.jti) {
+        if (usedStateJtis.has(decoded.jti)) {
+          return sendErrorHtml(res, "Xavfsizlik xatosi", "Xavfsizlik tokeni allaqachon ishlatilgan. Qaytadan urinib ko'ring.");
+        }
+        usedStateJtis.add(decoded.jti);
+        // Expire state token from tracking after 15 minutes
+        setTimeout(() => {
+          usedStateJtis.delete(decoded.jti!);
+        }, 15 * 60 * 1000);
+      }
     } catch (jwtErr) {
       return sendErrorHtml(res, "Xavfsizlik xatosi", "Xavfsizlik tokeni eskirgan yoki haqiqiy emas. Iltimos, qaytadan urinib ko'ring.");
     }

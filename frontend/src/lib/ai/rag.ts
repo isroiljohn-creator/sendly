@@ -56,16 +56,9 @@ export function retrieveContext(
     .sort((a, b) => b.score - a.score)
     .slice(0, 3);
 
-  // If no lessons matched, take the first 3 lessons as default context
+  // If no lessons matched, return empty context
   if (topLessons.length === 0) {
-    const generalContext = lessons
-      .slice(0, 3)
-      .map((l) => {
-        const mod = modules.find((m) => m.id === l.moduleId);
-        return `[${mod?.title || "Modul"} - ${l.title}]: ${l.transcript || ""}`;
-      })
-      .join("\n\n");
-    return { context: generalContext, sources: [], lessonCount: lessons.length };
+    return { context: "", sources: [], lessonCount: lessons.length };
   }
 
   const sources: string[] = [];
@@ -125,13 +118,13 @@ async function callGemini(
   studentName: string,
   settings: BotSettings
 ): Promise<string | null> {
-  const apiKey = process.env.GEMINI_API_KEY || process.env.NEXT_PUBLIC_GEMINI_API_KEY;
+  const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) return null;
 
   let promptTemplate = settings.systemPrompt;
   if (!promptTemplate) {
     promptTemplate = `# ROL VA IDENTIFIKATSIYA
-Sen marketing kursi o'quvchilariga yordam beruvchi "Mently" nomli shaxsiy AI kuratorsan.
+Sen marketing kursi o'quvchilariga yordam beruvchi, ismi "{{agentName}}" bo'lgan Sendly shaxsiy AI kuratorisan.
 
 # ASOSIY VAZIFA
 O'quvchilarning savollariga faqat dars materiallari (KURS MATERIALLARI) asosida javob berish.
@@ -153,6 +146,9 @@ O'quvchilarning savollariga faqat dars materiallari (KURS MATERIALLARI) asosida 
   }
 
   let systemPrompt = promptTemplate;
+  const agentName = settings.agentName || "Sendly";
+  systemPrompt = systemPrompt.replace(/\{\{agentName\}\}/g, agentName);
+
   if (systemPrompt.includes("{{context}}")) {
     systemPrompt = systemPrompt.replace("{{context}}", context);
   } else {
@@ -162,23 +158,64 @@ O'quvchilarning savollariga faqat dars materiallari (KURS MATERIALLARI) asosida 
   systemPrompt = `O'quvchining ismi: ${studentName}\n` + characterInstructions + "\n\n" + systemPrompt;
 
   try {
-    const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          system_instruction: {
-            parts: [{ text: systemPrompt }],
-          },
-          contents: contents,
-          generationConfig: {
-            temperature: 0.5 + (settings.humor || 30) / 200, // Dynamic temperature
-            maxOutputTokens: 1024,
-          },
-        }),
+    let response: Response | null = null;
+    let delay = 1000;
+    const maxRetries = 3;
+
+    for (let i = 0; i < maxRetries; i++) {
+      try {
+        response = await fetch(
+          `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              system_instruction: {
+                parts: [{ text: systemPrompt }],
+              },
+              contents: contents,
+              generationConfig: {
+                temperature: Math.min(0.95, 0.5 + (settings.humor || 30) / 200),
+                maxOutputTokens: 1024,
+              },
+            }),
+          }
+        );
+
+        if (response.status === 429) {
+          console.warn(`[Gemini] RAG API rate limited (429). Retrying in ${delay}ms... (Attempt ${i + 1}/${maxRetries})`);
+          await new Promise((resolve) => setTimeout(resolve, delay));
+          delay *= 2;
+          continue;
+        }
+        break;
+      } catch (err) {
+        console.error(`[Gemini] RAG fetch error during attempt ${i + 1}:`, err);
+        if (i === maxRetries - 1) throw err;
+        await new Promise((resolve) => setTimeout(resolve, delay));
+        delay *= 2;
       }
-    );
+    }
+
+    if (!response || response.status === 429) {
+      response = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            system_instruction: {
+              parts: [{ text: systemPrompt }],
+            },
+            contents: contents,
+            generationConfig: {
+              temperature: Math.min(0.95, 0.5 + (settings.humor || 30) / 200),
+              maxOutputTokens: 1024,
+            },
+          }),
+        }
+      );
+    }
 
     if (!response.ok) {
       console.error("Gemini API error:", response.status, await response.text());
@@ -230,7 +267,7 @@ export async function queryRAG(
   }
 
   // Real fallback check: If Gemini API Key is missing or the response is empty
-  const apiKey = process.env.GEMINI_API_KEY || process.env.NEXT_PUBLIC_GEMINI_API_KEY;
+  const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {
     return {
       text: "Tizim sozlamalarida xatolik: Gemini API Key sozlanmagan. Iltimos platforma administratoriga xabar bering.",

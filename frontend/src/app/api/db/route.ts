@@ -7,31 +7,97 @@ import { verifyJwt } from "@/lib/jwt";
 
 const DB_FILE = process.env.DB_FILE_PATH || path.join(process.cwd(), "db.json");
 
+const LOCK_DIR = path.join(process.cwd(), "db.lock");
+
+// Clean any dangling lock directories on startup (module initialization)
+try {
+  if (fs.existsSync(LOCK_DIR)) {
+    fs.rmdirSync(LOCK_DIR);
+    console.log("[Startup] Cleaned dangling database lock directory.");
+  }
+} catch (e) {
+  // ignore
+}
+
+async function acquireFileLock(): Promise<boolean> {
+  const maxRetries = 15;
+  const retryDelay = 50; // ms
+  for (let i = 0; i < maxRetries; i++) {
+    try {
+      fs.mkdirSync(LOCK_DIR);
+      return true;
+    } catch (err: any) {
+      if (err.code === "EEXIST") {
+        await new Promise((resolve) => setTimeout(resolve, retryDelay));
+      } else {
+        return false;
+      }
+    }
+  }
+  return false;
+}
+
+function releaseFileLock() {
+  try {
+    if (fs.existsSync(LOCK_DIR)) {
+      fs.rmdirSync(LOCK_DIR);
+    }
+  } catch (e) {
+    // ignore
+  }
+}
+
 function getInitialData() {
   return {};
 }
 
-function readDb() {
+function readDbUnlocked() {
+  if (!fs.existsSync(DB_FILE)) {
+    const initial = getInitialData();
+    fs.writeFileSync(DB_FILE, JSON.stringify(initial, null, 2), "utf8");
+    return initial;
+  }
+  const data = fs.readFileSync(DB_FILE, "utf8");
+  return JSON.parse(data);
+}
+
+function writeDbUnlocked(data: unknown) {
+  fs.writeFileSync(DB_FILE, JSON.stringify(data, null, 2), "utf8");
+  return true;
+}
+
+async function readDb() {
+  const hasLock = await acquireFileLock();
   try {
-    if (!fs.existsSync(DB_FILE)) {
-      fs.writeFileSync(DB_FILE, JSON.stringify(getInitialData(), null, 2), "utf8");
-      return getInitialData();
+    let dbData = readDbUnlocked();
+    if (dbData && !dbData.userData && !dbData.users) {
+      const users = dbData.replai_users ? JSON.parse(dbData.replai_users) : [];
+      dbData = {
+        users: users,
+        userData: {}
+      };
+      writeDbUnlocked(dbData);
     }
-    const data = fs.readFileSync(DB_FILE, "utf8");
-    return JSON.parse(data);
+    if (!dbData.users) dbData.users = [];
+    if (!dbData.userData) dbData.userData = {};
+    return dbData;
   } catch (err) {
     console.error("Error reading database file, returning empty state", err);
     return getInitialData();
+  } finally {
+    if (hasLock) releaseFileLock();
   }
 }
 
-function writeDb(data: unknown) {
+async function writeDb(data: unknown) {
+  const hasLock = await acquireFileLock();
   try {
-    fs.writeFileSync(DB_FILE, JSON.stringify(data, null, 2), "utf8");
-    return true;
+    return writeDbUnlocked(data);
   } catch (err) {
     console.error("Error writing to database file", err);
     return false;
+  } finally {
+    if (hasLock) releaseFileLock();
   }
 }
 
@@ -49,9 +115,10 @@ export async function GET(request: Request) {
     const authHeader = request.headers.get("Authorization");
     const token = authHeader?.startsWith("Bearer ") ? authHeader.substring(7) : null;
     const jwtSecret = process.env.JWT_SECRET;
+    const jwtPattern = /^[a-zA-Z0-9-_]+\.[a-zA-Z0-9-_]+\.[a-zA-Z0-9-_]+$/;
     
-    if (!token || !jwtSecret) {
-      return NextResponse.json({ error: "Unauthorized: Missing token" }, { status: 401 });
+    if (!token || !jwtSecret || !jwtPattern.test(token)) {
+      return NextResponse.json({ error: "Unauthorized: Missing or invalid token" }, { status: 401 });
     }
     
     const payload = verifyJwt(token, jwtSecret);
@@ -92,25 +159,7 @@ export async function GET(request: Request) {
   }
 
   // Fallback: Read from local db.json file
-  let dbData = readDb();
-  
-  // Migration support for old format without userData/users
-  if (dbData && !dbData.userData && !dbData.users) {
-    const users = dbData.replai_users ? JSON.parse(dbData.replai_users) : [];
-    dbData = {
-      users: users,
-      userData: {}
-    };
-    writeDb(dbData);
-  }
-
-  if (!dbData.users) {
-    dbData.users = [];
-  }
-  if (!dbData.userData) {
-    dbData.userData = {};
-  }
-  writeDb(dbData);
+  let dbData = await readDb();
   
   // Extract user's specific data
   const userSpecificData = dbData.userData?.[userId] || {};
@@ -129,6 +178,41 @@ export async function GET(request: Request) {
   return NextResponse.json(responseData);
 }
 
+function countActiveAutomations(payload: any): number {
+  let count = 0;
+  if (!payload || typeof payload !== "object") return 0;
+  Object.entries(payload).forEach(([key, val]) => {
+    if (key === "replai_automations" || key.startsWith("replai_automations_")) {
+      try {
+        const autos = typeof val === "string" ? JSON.parse(val) : val;
+        if (Array.isArray(autos)) {
+          autos.forEach((a: any) => {
+            if (a && a.active === true) {
+              count++;
+            }
+          });
+        }
+      } catch (e) {
+        console.error("Failed to parse automations for active count", e);
+      }
+    }
+  });
+  return count;
+}
+
+function pruneOrphanSettings(settings: any, activeChannelIds: string[]) {
+  if (!settings || typeof settings !== "object") return;
+  const activeIdsSet = new Set(activeChannelIds);
+  Object.keys(settings).forEach((key) => {
+    if (key.startsWith("replai_automations_") || key.startsWith("replai_bot_settings_") || key.startsWith("replai_chats_")) {
+      const suffix = key.replace("replai_automations_", "").replace("replai_bot_settings_", "").replace("replai_chats_", "");
+      if (!activeIdsSet.has(suffix)) {
+        delete settings[key];
+      }
+    }
+  });
+}
+
 export async function POST(request: Request) {
   const { searchParams } = new URL(request.url);
   const userId = searchParams.get("userId") || "guest";
@@ -140,9 +224,10 @@ export async function POST(request: Request) {
   const authHeader = request.headers.get("Authorization");
   const token = authHeader?.startsWith("Bearer ") ? authHeader.substring(7) : null;
   const jwtSecret = process.env.JWT_SECRET;
+  const jwtPattern = /^[a-zA-Z0-9-_]+\.[a-zA-Z0-9-_]+\.[a-zA-Z0-9-_]+$/;
   
-  if (!token || !jwtSecret) {
-    return NextResponse.json({ error: "Unauthorized: Missing token" }, { status: 401 });
+  if (!token || !jwtSecret || !jwtPattern.test(token)) {
+    return NextResponse.json({ error: "Unauthorized: Missing or invalid token" }, { status: 401 });
   }
   
   const payloadJwt = verifyJwt(token, jwtSecret);
@@ -155,6 +240,60 @@ export async function POST(request: Request) {
     payload = await request.json();
   } catch (err) {
     return NextResponse.json({ error: "Invalid JSON payload" }, { status: 400 });
+  }
+
+  // --- Plan Limits & Orphan Pruning ---
+  let plan = "free";
+  if (pgdb.isConfigured()) {
+    try {
+      const usersList = await pgdb.getValue("global_users") || [];
+      const userObj = usersList.find((u: any) => u.id === userId);
+      plan = userObj?.plan || "free";
+    } catch (e) {
+      console.error("Failed to fetch user plan in pgdb limits check", e);
+    }
+  } else {
+    try {
+      const dbData = readDbUnlocked();
+      const userObj = dbData.users?.find((u: any) => u.id === userId);
+      plan = userObj?.plan || "free";
+    } catch (e) {
+      console.error("Failed to fetch user plan in local db limits check", e);
+    }
+  }
+
+  const maxChannels = plan === "premium" ? 10 : 1;
+  const maxActiveAutomations = plan === "premium" ? 50 : 5;
+
+  let activeChannelIds: string[] = [];
+  if (payload.replai_channels) {
+    try {
+      const incomingChannels = JSON.parse(payload.replai_channels);
+      if (Array.isArray(incomingChannels)) {
+        if (incomingChannels.length > maxChannels) {
+          return NextResponse.json({
+            success: false,
+            error: `Sizning tarifingizda kanallar soni cheklangan (Maksimal: ${maxChannels}). Iltimos, tarifingizni yangilang.`
+          }, { status: 400 });
+        }
+        activeChannelIds = incomingChannels.map((c: any) => c.id).filter(Boolean);
+      }
+    } catch (e) {
+      console.error("Failed to parse channels for limits check", e);
+    }
+  }
+
+  const activeAutosCount = countActiveAutomations(payload);
+  if (activeAutosCount > maxActiveAutomations) {
+    return NextResponse.json({
+      success: false,
+      error: `Sizning tarifingizda faol avtomatlashtirishlar soni cheklangan (Maksimal: ${maxActiveAutomations}). Iltimos, tarifingizni yangilang.`
+    }, { status: 400 });
+  }
+
+  // Prune orphans from payload
+  if (payload.replai_channels && activeChannelIds.length > 0) {
+    pruneOrphanSettings(payload, activeChannelIds);
   }
 
   try {
@@ -218,7 +357,19 @@ export async function POST(request: Request) {
           const prevUser = prevUsersList.find((u: any) => u.id === userId || (u.email && u.email === usersList.find((x: any) => x.id === userId)?.email));
           const newUser = usersList.find((u: any) => u.id === userId);
           
-          if (newUser && (!prevUser || prevUser.plan !== newUser.plan)) {
+          if (newUser) {
+            if (prevUser) {
+              newUser.plan = prevUser.plan || "free";
+              newUser.trialExpiresAt = prevUser.trialExpiresAt;
+              newUser.role = prevUser.role || "user";
+            } else {
+              newUser.plan = "free";
+              newUser.role = "user";
+              newUser.trialExpiresAt = undefined;
+            }
+          }
+          
+          if (newUser && prevUser && prevUser.plan !== newUser.plan) {
             const newPlan = newUser.plan || "free";
             const uData = await pgdb.getValue("global_settings_" + userId) || {};
 
@@ -275,6 +426,9 @@ export async function POST(request: Request) {
         }
       });
 
+      if (payload.replai_channels && activeChannelIds.length > 0) {
+        pruneOrphanSettings(userSpecificData, activeChannelIds);
+      }
       await pgdb.setValue("global_settings_" + userId, userSpecificData);
 
       try {
@@ -290,7 +444,7 @@ export async function POST(request: Request) {
 
   // Fallback: Read and write to local db.json file
   try {
-    let dbData = readDb();
+    let dbData = await readDb();
     
     // Migration support for old format
     if (dbData && !dbData.userData && !dbData.users) {
@@ -314,11 +468,22 @@ export async function POST(request: Request) {
         const prevUsers = [...(dbData.users || [])];
         dbData.users = JSON.parse(payload.replai_users);
         
-        // Detect plan change to sync credits in local mode
         const prevUser = prevUsers.find((u: any) => u.id === userId || (u.email && u.email === dbData.users.find((x: any) => x.id === userId)?.email));
         const newUser = dbData.users.find((u: any) => u.id === userId);
         
-        if (newUser && (!prevUser || prevUser.plan !== newUser.plan)) {
+        if (newUser) {
+          if (prevUser) {
+            newUser.plan = prevUser.plan || "free";
+            newUser.trialExpiresAt = prevUser.trialExpiresAt;
+            newUser.role = prevUser.role || "user";
+          } else {
+            newUser.plan = "free";
+            newUser.role = "user";
+            newUser.trialExpiresAt = undefined;
+          }
+        }
+        
+        if (newUser && prevUser && prevUser.plan !== newUser.plan) {
           const newPlan = newUser.plan || "free";
           if (!dbData.userData[userId]) dbData.userData[userId] = {};
           
@@ -401,6 +566,9 @@ export async function POST(request: Request) {
         console.error("Failed to validate channels during POST:", e);
       }
     }
+    if (payload.replai_channels && activeChannelIds.length > 0) {
+      pruneOrphanSettings(dbData.userData[userId], activeChannelIds);
+    }
 
     Object.entries(payload).forEach(([key, val]) => {
       if (
@@ -413,7 +581,7 @@ export async function POST(request: Request) {
       }
     });
 
-    const success = writeDb(dbData);
+    const success = await writeDb(dbData);
     
     if (success) {
       try {

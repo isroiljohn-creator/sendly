@@ -12,13 +12,20 @@ export function authMiddleware(req: AuthenticatedRequest, res: Response, next: N
   let token = "";
   const authHeader = req.headers.authorization;
   
+  const jwtPattern = /^[a-zA-Z0-9-_]+\.[a-zA-Z0-9-_]+\.[a-zA-Z0-9-_]+$/;
   if (authHeader) {
     const parts = authHeader.split(" ");
     if (parts.length === 2 && parts[0] === "Bearer") {
-      token = parts[1];
+      const candidate = parts[1];
+      if (jwtPattern.test(candidate)) {
+        token = candidate;
+      }
     }
   } else if (req.query.token) {
-    token = req.query.token as string;
+    const candidate = req.query.token as string;
+    if (jwtPattern.test(candidate)) {
+      token = candidate;
+    }
   }
 
   if (!token) {

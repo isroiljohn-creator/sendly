@@ -235,8 +235,10 @@ function MessageNode({ data, id }: NodeProps<NodeData>) {
           type="button"
           onClick={(e) => {
             e.stopPropagation();
-            setNodes((nds) => nds.filter((n) => n.id !== id));
-            setEdges((eds) => eds.filter((edge) => edge.source !== id && edge.target !== id));
+            if (confirm(t("pages.builder.delete_node_confirm") || "Ushbu blokni o'chirishni tasdiqlaysizmi?")) {
+              setNodes((nds) => nds.filter((n) => n.id !== id));
+              setEdges((eds) => eds.filter((edge) => edge.source !== id && edge.target !== id));
+            }
           }}
           className="p-1 text-[#C7C7CC] hover:text-red-500 hover:bg-red-50 rounded transition-colors cursor-pointer"
           title={t("pages.builder.btn_delete")}
@@ -596,8 +598,10 @@ function ActionNode({ data, id }: NodeProps<NodeData>) {
           type="button"
           onClick={(e) => {
             e.stopPropagation();
-            setNodes((nds) => nds.filter((n) => n.id !== id));
-            setEdges((eds) => eds.filter((edge) => edge.source !== id && edge.target !== id));
+            if (confirm(t("pages.builder.delete_node_confirm") || "Ushbu blokni o'chirishni tasdiqlaysizmi?")) {
+              setNodes((nds) => nds.filter((n) => n.id !== id));
+              setEdges((eds) => eds.filter((edge) => edge.source !== id && edge.target !== id));
+            }
           }}
           className="p-1 text-[#C7C7CC] hover:text-red-500 hover:bg-red-50 rounded transition-colors cursor-pointer"
           title={t("pages.builder.btn_delete")}
@@ -757,8 +761,10 @@ function ConditionNode({ data, id }: NodeProps<NodeData>) {
           type="button"
           onClick={(e) => {
             e.stopPropagation();
-            setNodes((nds) => nds.filter((n) => n.id !== id));
-            setEdges((eds) => eds.filter((edge) => edge.source !== id && edge.target !== id));
+            if (confirm(t("pages.builder.delete_node_confirm") || "Ushbu blokni o'chirishni tasdiqlaysizmi?")) {
+              setNodes((nds) => nds.filter((n) => n.id !== id));
+              setEdges((eds) => eds.filter((edge) => edge.source !== id && edge.target !== id));
+            }
           }}
           className="p-1 text-[#C7C7CC] hover:text-red-500 hover:bg-red-50 rounded transition-colors cursor-pointer"
           title={t("pages.builder.btn_delete")}
@@ -924,8 +930,10 @@ function NoteNode({ data, id }: NodeProps<NodeData>) {
           type="button"
           onClick={(e) => {
             e.stopPropagation();
-            setNodes((nds) => nds.filter((n) => n.id !== id));
-            setEdges((eds) => eds.filter((edge) => edge.source !== id && edge.target !== id));
+            if (confirm(t("pages.builder.delete_node_confirm") || "Ushbu blokni o'chirishni tasdiqlaysizmi?")) {
+              setNodes((nds) => nds.filter((n) => n.id !== id));
+              setEdges((eds) => eds.filter((edge) => edge.source !== id && edge.target !== id));
+            }
           }}
           className="p-1 text-[#C7C7CC] hover:text-red-500 hover:bg-red-50 rounded transition-colors cursor-pointer"
           title={t("pages.builder.btn_delete")}
@@ -1494,9 +1502,42 @@ export default function BuilderPage() {
   }, [setNodes, setEdges, t]);
 
   const onConnect = useCallback(
-    (params: Edge | Connection) =>
-      setEdges((eds) => addEdge({ ...params, animated: true, style: { stroke: "#9296AD", strokeWidth: 1.5 }, markerEnd: { type: MarkerType.ArrowClosed, color: "#9296AD" } }, eds)),
-    [setEdges]
+    (params: Edge | Connection) => {
+      const { source, target } = params;
+      if (!source || !target) return;
+      
+      if (source === target) {
+        setToastMsg("Blokni o'z-o'ziga ulab bo'lmaydi.");
+        setShowToast(true);
+        setTimeout(() => setShowToast(false), 3000);
+        return;
+      }
+
+      // Depth First Search to check if target can reach source (creating a loop)
+      const canReach = (current: string, destination: string, visited: Set<string>): boolean => {
+        if (current === destination) return true;
+        if (visited.has(current)) return false;
+        visited.add(current);
+
+        const outgoing = edges.filter((e) => e.source === current);
+        for (const edge of outgoing) {
+          if (canReach(edge.target, destination, visited)) {
+            return true;
+          }
+        }
+        return false;
+      };
+
+      if (canReach(target, source, new Set<string>())) {
+        setToastMsg("Siklli bog'lanish (infinite loop) aniqlandi. Ulanish rad etildi.");
+        setShowToast(true);
+        setTimeout(() => setShowToast(false), 3500);
+        return;
+      }
+
+      setEdges((eds) => addEdge({ ...params, animated: true, style: { stroke: "#9296AD", strokeWidth: 1.5 }, markerEnd: { type: MarkerType.ArrowClosed, color: "#9296AD" } }, eds));
+    },
+    [edges, setEdges]
   );
 
   useEffect(() => {
@@ -1950,6 +1991,8 @@ export default function BuilderPage() {
               connectionLineStyle={{ stroke: "#9296AD", strokeWidth: 1.5 }}
               proOptions={{ hideAttribution: true }}
               fitView
+              minZoom={0.2}
+              maxZoom={2.0}
             >
               <Background color="#9296AD" variant={BackgroundVariant.Dots} gap={20} size={1.5} style={{ opacity: 0.15 }} />
             </ReactFlow>
@@ -2013,6 +2056,13 @@ export default function BuilderPage() {
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                   <path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7" />
                 </svg>
+              </button>
+              <button
+                onClick={() => reactFlowInstance?.zoomTo(1)}
+                className="w-8 h-8 rounded-[10px] flex items-center justify-center text-[#707070] hover:text-black hover:bg-[#F5F5F5] transition-all font-black text-[10px] cursor-pointer"
+                title={t("pages.builder.reset_zoom_tooltip") || "100% ga qaytarish"}
+              >
+                1:1
               </button>
             </div>
 
