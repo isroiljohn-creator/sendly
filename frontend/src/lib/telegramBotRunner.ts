@@ -462,8 +462,8 @@ export async function handleTelegramUpdate(channelId: string, token: string, upd
         chatsList.push(chat);
       }
 
-      // Reset liveTakeover if user restarts the bot with /start
-      if (text.trim() === "/start") {
+      // Reset liveTakeover if user restarts the bot with /start or boshlash
+      if (text.trim().toLowerCase() === "/start" || text.trim().toLowerCase().startsWith("/start ") || text.trim().toLowerCase() === "boshlash") {
         chat.liveTakeover = false;
       }
       
@@ -566,6 +566,13 @@ export async function handleTelegramUpdate(channelId: string, token: string, upd
              } else {
                botReplyText = matchedKeyword;
              }
+          } else if (text.trim().toLowerCase() === "/start" || text.trim().toLowerCase().startsWith("/start ") || text.trim().toLowerCase() === "boshlash") {
+            botReplyText =
+              userLang === "en"
+                ? "Hello! Welcome to the Sendly chatbot service. Our system is successfully connected."
+                : userLang === "ru"
+                ? "Здравствуйте! Добро пожаловать в сервис чат-ботов Sendly. Наша система успешно подключена."
+                : "Assalomu alaykum! Sendly chatbot xizmatiga xush kelibsiz. Tizimimiz muvaffaqiyatli ulangan.";
           } else if (settings.aiCuratorEnabled && settings.telegramBotId === channelId) {
             // 3. AI Curator RAG Logic
             const rawLessons = context["replai_lessons"];
