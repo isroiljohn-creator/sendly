@@ -274,7 +274,10 @@ export async function handleTelegramUpdate(channelId: string, token: string, upd
     const firstName = message.chat.first_name;
     const lastName = message.chat.last_name;
     const text = message.text;
-    const userLang = (message.from?.language_code || "").startsWith("ru") ? "ru" : (message.from?.language_code || "").startsWith("en") ? "en" : "uz";
+    const isSystemBot = channelId === "system_bot";
+    const userLang = isSystemBot
+      ? ((message.from?.language_code || "").startsWith("ru") ? "ru" : (message.from?.language_code || "").startsWith("en") ? "en" : "uz")
+      : "uz";
     
     // Handle start command to get verification code for admin linking (ONLY for system bot)
     if (channelId === "system_bot" && (text.trim() === "/start" || text.trim().startsWith("/start "))) {

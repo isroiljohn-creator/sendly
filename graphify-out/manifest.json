@@ -810,8 +810,8 @@
     "semantic_hash": ""
   },
   "frontend/src/lib/telegramBotRunner.ts": {
-    "mtime": 1782408955.7830603,
-    "ast_hash": "ab52565bf70048ac2b181fa0e0197802",
+    "mtime": 1782409740.3391747,
+    "ast_hash": "3e2801181d2a2c352ede6c28756c7edb",
     "semantic_hash": ""
   },
   "frontend/src/lib/utils.ts": {

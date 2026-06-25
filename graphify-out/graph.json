@@ -8877,7 +8877,7 @@
       "label": "lastOutreachChecks",
       "file_type": "code",
       "source_file": "frontend/src/lib/telegramBotRunner.ts",
-      "source_location": "L856",
+      "source_location": "L859",
       "_origin": "ast",
       "id": "lib_telegrambotrunner_lastoutreachchecks",
       "community": 0,
@@ -8887,7 +8887,7 @@
       "label": "checkAndRunAutoOutreach()",
       "file_type": "code",
       "source_file": "frontend/src/lib/telegramBotRunner.ts",
-      "source_location": "L858",
+      "source_location": "L861",
       "_origin": "ast",
       "id": "lib_telegrambotrunner_checkandrunautooutreach",
       "community": 0,
@@ -8897,7 +8897,7 @@
       "label": "runBotPollLoop()",
       "file_type": "code",
       "source_file": "frontend/src/lib/telegramBotRunner.ts",
-      "source_location": "L1009",
+      "source_location": "L1012",
       "_origin": "ast",
       "id": "lib_telegrambotrunner_runbotpollloop",
       "community": 0,
@@ -8907,7 +8907,7 @@
       "label": "startTelegramBots()",
       "file_type": "code",
       "source_file": "frontend/src/lib/telegramBotRunner.ts",
-      "source_location": "L1072",
+      "source_location": "L1075",
       "_origin": "ast",
       "id": "lib_telegrambotrunner_starttelegrambots",
       "community": 0,
@@ -26741,5 +26741,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "bf4295b2a2bdd00e8371ffaa7a2883e68b2ee7ab"
+  "built_at_commit": "017705c1bf35a04928bac65535da6cb573a3a071"
 }
