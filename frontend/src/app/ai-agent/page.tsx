@@ -264,8 +264,6 @@ function AIAgentContent() {
   // Telegram Connect Modal States
   const [showTgConnectModal, setShowTgConnectModal] = useState(false);
   const [tgToken, setTgToken] = useState("");
-  const [tgUsername, setTgUsername] = useState("");
-  const [tgName, setTgName] = useState("");
   const [isTgSaving, setIsTgSaving] = useState(false);
   
   // Curator Analyzed Messages for CustDev Analytics
@@ -1023,27 +1021,49 @@ function AIAgentContent() {
   };
 
   const handleAddTelegram = async () => {
-    if (!tgToken.trim()) return;
+    const cleanToken = tgToken.trim();
+    if (!cleanToken) return;
+
+    // Telegram token pattern validation (e.g. 123456:ABC-DEF...)
+    const tokenPattern = /^[0-9]+:[a-zA-Z0-9_-]+$/;
+    if (!tokenPattern.test(cleanToken)) {
+      showToast(t("pages.ai_agent.toasts.tg_invalid_token_format") || "Token formati noto'g'ri!", "error");
+      return;
+    }
+
     setIsTgSaving(true);
     
-    let finalUsername = tgUsername.trim();
-    let finalName = tgName.trim();
+    let finalUsername = "";
+    let finalName = "";
     
     try {
-      const getMeRes = await fetch(`https://api.telegram.org/bot${tgToken.trim()}/getMe`);
-      if (getMeRes.ok) {
-        const getMeData = await getMeRes.json();
-        if (getMeData.ok && getMeData.result) {
-          finalUsername = getMeData.result.username;
-          finalName = getMeData.result.first_name;
-        }
+      const getMeRes = await fetch(`https://api.telegram.org/bot${cleanToken}/getMe`);
+      if (!getMeRes.ok) {
+        const errorText = await getMeRes.text();
+        console.error("Telegram API returned error:", getMeRes.status, errorText);
+        showToast(t("pages.ai_agent.toasts.tg_invalid_token") || "Noto'g'ri Telegram Token. Iltimos, tekshirib qaytadan urinib ko'ring.", "error");
+        setIsTgSaving(false);
+        return;
+      }
+      
+      const getMeData = await getMeRes.json();
+      if (getMeData.ok && getMeData.result) {
+        finalUsername = getMeData.result.username;
+        finalName = getMeData.result.first_name;
+      } else {
+        showToast(t("pages.ai_agent.toasts.tg_invalid_token") || "Noto'g'ri Telegram Token. Iltimos, tekshirib qaytadan urinib ko'ring.", "error");
+        setIsTgSaving(false);
+        return;
       }
     } catch (err) {
       console.error("Failed to fetch bot info from Telegram:", err);
+      showToast("Telegram serveriga ulanishda xatolik yuz berdi. Tarmoqni tekshiring.", "error");
+      setIsTgSaving(false);
+      return;
     }
     
     if (!finalUsername) {
-      showToast(t("pages.ai_agent.toasts.tg_bot_username_error"), "error");
+      showToast(t("pages.ai_agent.toasts.tg_bot_username_error") || "Bot foydalanuvchi nomini aniqlab bo'lmadi.", "error");
       setIsTgSaving(false);
       return;
     }
@@ -1054,7 +1074,7 @@ function AIAgentContent() {
       type: "telegram",
       name: finalName || finalUsername,
       username: formattedUsername,
-      telegramToken: tgToken.trim(),
+      telegramToken: cleanToken,
       isConnected: true,
       followersCount: "0",
     });
@@ -1062,8 +1082,6 @@ function AIAgentContent() {
     db.setActiveChannel(newCh.id);
     
     setTgToken("");
-    setTgName("");
-    setTgUsername("");
     setShowTgConnectModal(false);
     setIsTgSaving(false);
     
@@ -5232,28 +5250,6 @@ function AIAgentContent() {
                     {t("pages.ai_agent.labels.get_token_desc")}
                   </span>
                 </div>
-
-                <div className="flex flex-col gap-1">
-                  <span className="text-[10px] font-bold text-black">{t("pages.ai_agent.labels.bot_username")}</span>
-                  <input
-                    type="text"
-                    value={tgUsername}
-                    onChange={(e) => setTgUsername(e.target.value)}
-                    placeholder={t("pages.ai_agent.placeholders.username_example")}
-                    className="w-full px-4 py-2.5 text-[12px] bg-[#F9F9F7] border border-[#E8E8E8] rounded-xl focus:outline-none focus:border-black text-black"
-                  />
-                </div>
-
-                <div className="flex flex-col gap-1">
-                  <span className="text-[10px] font-bold text-black">{t("pages.ai_agent.labels.bot_name_optional")}</span>
-                  <input
-                    type="text"
-                    value={tgName}
-                    onChange={(e) => setTgName(e.target.value)}
-                    placeholder={t("pages.ai_agent.placeholders.bot_name_example")}
-                    className="w-full px-4 py-2.5 text-[12px] bg-[#F9F9F7] border border-[#E8E8E8] rounded-xl focus:outline-none focus:border-black text-black"
-                  />
-                </div>
               </div>
 
               <div className="flex items-center justify-end gap-3 mt-2">
@@ -5261,8 +5257,6 @@ function AIAgentContent() {
                   onClick={() => {
                     setShowTgConnectModal(false);
                     setTgToken("");
-                    setTgUsername("");
-                    setTgName("");
                   }}
                   className="px-4 py-2 rounded-xl border border-[#D8D8D8] text-[12px] font-bold text-[#595959] hover:bg-[#F9F9F7] transition-all"
                   disabled={isTgSaving}
