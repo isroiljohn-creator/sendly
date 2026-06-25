@@ -398,14 +398,14 @@ export function AppLayout({ children }: { children: ReactNode }) {
 
           {/* AI limits card in mobile side drawer */}
           {currentUser && (
-            <div className="mt-8 bg-neutral-50/50 border border-neutral-100 rounded-2xl p-4 flex flex-col gap-2">
+            <div className="mt-8 bg-neutral-50/50 border border-neutral-100 rounded-2xl p-4 flex flex-col gap-2.5">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-1.5 text-black font-extrabold text-[12px]">
                   <Coins size={13} className="text-black fill-black/10" />
-                  <span>AI limiti</span>
+                  <span>{t("pages.account.limits.ai_credits_title") || "AI limiti"}</span>
                 </div>
                 <span className="text-[12px] text-[#707070] font-bold">
-                  {credits.balance} kredit
+                  {credits.balance} {t("pages.account.billing.unit_credits") || "kredit"}
                 </span>
               </div>
               <div className="w-full h-1.5 bg-[#F0F0F0] rounded-full overflow-hidden">
@@ -414,9 +414,19 @@ export function AppLayout({ children }: { children: ReactNode }) {
                   style={{ width: `${credits.balance + credits.used > 0 ? Math.round((credits.balance / (credits.balance + credits.used)) * 100) : 100}%` }}
                 />
               </div>
-              <div className="flex justify-between items-center text-[10px] text-[#808080] font-bold mt-1">
-                <span>Balans: {credits.balance} kredit</span>
-                <span>(~{Math.round(credits.balance / 50)} daqiqa)</span>
+              <div className="border-t border-neutral-200/60 pt-2 flex flex-col gap-1 text-[10px] text-[#707070]">
+                <div className="flex justify-between font-bold">
+                  <span>{t("pages.account.limits.balance_label") || "Balans:"}</span>
+                  <span className="text-black">{credits.balance} {t("pages.account.billing.unit_credits") || "kredit"}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>{t("pages.account.limits.bot_cost_label") || "Bot javobi:"}</span>
+                  <span className="font-semibold text-black">{t("pages.account.limits.bot_cost_val") || "~20 kr / xabar"}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>{t("pages.account.limits.audio_cost_label") || "Audio tahlil:"}</span>
+                  <span className="font-semibold text-black">{t("pages.account.limits.audio_cost_val") || "50 kr / daqiqa"}</span>
+                </div>
               </div>
             </div>
           )}

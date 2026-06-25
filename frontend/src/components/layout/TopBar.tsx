@@ -215,13 +215,13 @@ export function TopBar() {
             </div>
             
             {/* Tooltip on hover */}
-            <div className="absolute right-0 top-11 pointer-events-none opacity-0 translate-y-[-8px] group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-200 ease-out z-50 whitespace-nowrap bg-white p-3.5 rounded-[20px] border border-[#E8E8E8] shadow-[0_8px_30px_rgba(0,0,0,0.08)] flex flex-col gap-1.5 w-[200px] text-left">
+            <div className="absolute right-0 top-11 pointer-events-none opacity-0 translate-y-[-8px] group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-200 ease-out z-50 whitespace-nowrap bg-white p-3.5 rounded-[20px] border border-[#E8E8E8] shadow-[0_8px_30px_rgba(0,0,0,0.08)] flex flex-col gap-1.5 w-[220px] text-left">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-1.5 text-black font-extrabold text-[12px]">
                   <Coins size={13} className="text-black fill-black/10" />
-                  <span>AI limiti</span>
+                  <span>{t("pages.account.limits.ai_credits_title") || "AI limiti"}</span>
                 </div>
-                <span className="text-[12px] text-[#707070] font-bold">{credits.balance} kredit</span>
+                <span className="text-[12px] text-[#707070] font-bold">{credits.balance} {t("pages.account.billing.unit_credits") || "kredit"}</span>
               </div>
               <div className="w-full h-1.5 bg-[#F0F0F0] rounded-full overflow-hidden">
                 <div 
@@ -229,8 +229,19 @@ export function TopBar() {
                   style={{ width: `${percent}%` }}
                 />
               </div>
-              <div className="text-[9.5px] text-[#A0A0A0] font-bold text-center mt-0.5">
-                Balans: {credits.balance} kredit (~{Math.round(credits.balance / 50)} daqiqa audio)
+              <div className="border-t border-[#F0F0F0] mt-1 pt-1.5 flex flex-col gap-1 text-[10px] text-[#707070]">
+                <div className="flex justify-between font-bold">
+                  <span>{t("pages.account.limits.balance_label") || "Balans:"}</span>
+                  <span className="text-black">{credits.balance} {t("pages.account.billing.unit_credits") || "kredit"}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>{t("pages.account.limits.bot_cost_label") || "Bot javobi:"}</span>
+                  <span className="font-semibold text-black">{t("pages.account.limits.bot_cost_val") || "~20 kr / xabar"}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>{t("pages.account.limits.audio_cost_label") || "Audio tahlil:"}</span>
+                  <span className="font-semibold text-black">{t("pages.account.limits.audio_cost_val") || "50 kr / daqiqa"}</span>
+                </div>
               </div>
             </div>
           </div>

@@ -5297,7 +5297,7 @@
       "label": "MOBILE_TABS",
       "file_type": "code",
       "source_file": "frontend/src/components/layout/AppLayout.tsx",
-      "source_location": "L36",
+      "source_location": "L37",
       "_origin": "ast",
       "id": "layout_applayout_mobile_tabs",
       "community": 4,
@@ -5307,7 +5307,7 @@
       "label": "AppLayout()",
       "file_type": "code",
       "source_file": "frontend/src/components/layout/AppLayout.tsx",
-      "source_location": "L43",
+      "source_location": "L44",
       "_origin": "ast",
       "id": "layout_applayout_applayout",
       "community": 4,
@@ -5377,7 +5377,7 @@
       "label": "NavItem",
       "file_type": "code",
       "source_file": "frontend/src/components/layout/Sidebar.tsx",
-      "source_location": "L36",
+      "source_location": "L37",
       "_origin": "ast",
       "id": "layout_sidebar_navitem",
       "community": 11,
@@ -5387,7 +5387,7 @@
       "label": "TOP_ITEMS",
       "file_type": "code",
       "source_file": "frontend/src/components/layout/Sidebar.tsx",
-      "source_location": "L43",
+      "source_location": "L44",
       "_origin": "ast",
       "id": "layout_sidebar_top_items",
       "community": 11,
@@ -5397,7 +5397,7 @@
       "label": "BOTTOM_ITEMS",
       "file_type": "code",
       "source_file": "frontend/src/components/layout/Sidebar.tsx",
-      "source_location": "L54",
+      "source_location": "L55",
       "_origin": "ast",
       "id": "layout_sidebar_bottom_items",
       "community": 11,
@@ -5407,7 +5407,7 @@
       "label": "NavButton()",
       "file_type": "code",
       "source_file": "frontend/src/components/layout/Sidebar.tsx",
-      "source_location": "L56",
+      "source_location": "L57",
       "_origin": "ast",
       "id": "layout_sidebar_navbutton",
       "community": 11,
@@ -5417,7 +5417,7 @@
       "label": "ChannelAvatar()",
       "file_type": "code",
       "source_file": "frontend/src/components/layout/Sidebar.tsx",
-      "source_location": "L84",
+      "source_location": "L85",
       "_origin": "ast",
       "id": "layout_sidebar_channelavatar",
       "community": 11,
@@ -5427,7 +5427,7 @@
       "label": "Sidebar()",
       "file_type": "code",
       "source_file": "frontend/src/components/layout/Sidebar.tsx",
-      "source_location": "L104",
+      "source_location": "L105",
       "_origin": "ast",
       "id": "layout_sidebar_sidebar",
       "community": 11,
@@ -5477,7 +5477,7 @@
       "label": "LANG_NAMES",
       "file_type": "code",
       "source_file": "frontend/src/components/layout/TopBar.tsx",
-      "source_location": "L27",
+      "source_location": "L29",
       "_origin": "ast",
       "id": "layout_topbar_lang_names",
       "community": 4,
@@ -5487,7 +5487,7 @@
       "label": "LANG_FLAGS",
       "file_type": "code",
       "source_file": "frontend/src/components/layout/TopBar.tsx",
-      "source_location": "L33",
+      "source_location": "L35",
       "_origin": "ast",
       "id": "layout_topbar_lang_flags",
       "community": 4,
@@ -5497,7 +5497,7 @@
       "label": "TopBar()",
       "file_type": "code",
       "source_file": "frontend/src/components/layout/TopBar.tsx",
-      "source_location": "L35",
+      "source_location": "L37",
       "_origin": "ast",
       "id": "layout_topbar_topbar",
       "community": 4,
@@ -5810,7 +5810,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "ui_badge",
-      "community": 8,
+      "community": 18,
       "norm_label": "badge.tsx"
     },
     {
@@ -5820,7 +5820,7 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "ui_badge_badgevariants",
-      "community": 8,
+      "community": 18,
       "norm_label": "badgevariants"
     },
     {
@@ -5830,7 +5830,7 @@
       "source_location": "L25",
       "_origin": "ast",
       "id": "ui_badge_badgeprops",
-      "community": 8,
+      "community": 18,
       "norm_label": "badgeprops"
     },
     {
@@ -5840,7 +5840,7 @@
       "source_location": "L28",
       "_origin": "ast",
       "id": "ui_badge_badge",
-      "community": 8,
+      "community": 18,
       "norm_label": "badge()"
     },
     {
@@ -7540,7 +7540,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "ui_radio_group",
-      "community": 75,
+      "community": 3,
       "norm_label": "radio-group.tsx"
     },
     {
@@ -7550,7 +7550,7 @@
       "source_location": "L7",
       "_origin": "ast",
       "id": "ui_radio_group_radiogroup",
-      "community": 75,
+      "community": 3,
       "norm_label": "radiogroup"
     },
     {
@@ -7560,7 +7560,7 @@
       "source_location": "L15",
       "_origin": "ast",
       "id": "ui_radio_group_radiogroupitem",
-      "community": 75,
+      "community": 3,
       "norm_label": "radiogroupitem"
     },
     {
@@ -7600,7 +7600,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "ui_scroll_area",
-      "community": 78,
+      "community": 3,
       "norm_label": "scroll-area.tsx"
     },
     {
@@ -7610,7 +7610,7 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "ui_scroll_area_scrollarea",
-      "community": 78,
+      "community": 3,
       "norm_label": "scrollarea"
     },
     {
@@ -7620,7 +7620,7 @@
       "source_location": "L24",
       "_origin": "ast",
       "id": "ui_scroll_area_scrollbar",
-      "community": 78,
+      "community": 3,
       "norm_label": "scrollbar"
     },
     {
@@ -8000,7 +8000,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "ui_tabs",
-      "community": 3,
+      "community": 75,
       "norm_label": "tabs.tsx"
     },
     {
@@ -8010,7 +8010,7 @@
       "source_location": "L8",
       "_origin": "ast",
       "id": "ui_tabs_tabslist",
-      "community": 3,
+      "community": 75,
       "norm_label": "tabslist"
     },
     {
@@ -8020,7 +8020,7 @@
       "source_location": "L23",
       "_origin": "ast",
       "id": "ui_tabs_tabstrigger",
-      "community": 3,
+      "community": 75,
       "norm_label": "tabstrigger"
     },
     {
@@ -8030,7 +8030,7 @@
       "source_location": "L38",
       "_origin": "ast",
       "id": "ui_tabs_tabscontent",
-      "community": 3,
+      "community": 75,
       "norm_label": "tabscontent"
     },
     {
@@ -26801,5 +26801,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "a385acef71ddf0026d0fc89d7a90ee46b882f267"
+  "built_at_commit": "0ace1f7fe07c3f5956171a4b94564bc5f2c9422c"
 }

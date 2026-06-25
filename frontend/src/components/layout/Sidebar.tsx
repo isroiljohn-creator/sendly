@@ -326,14 +326,14 @@ export function Sidebar() {
               </div>
 
               {/* AI Limits widget directly inside the profile dropdown */}
-              <div className="px-4 py-2 border-b border-[#F0F0F0] mb-2 flex flex-col gap-1.5">
+              <div className="px-4 py-2.5 border-b border-[#F0F0F0] mb-2 flex flex-col gap-2">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-1.5 text-black font-extrabold text-[11px]">
                     <Coins size={12} className="text-black fill-black/10" />
-                    <span>AI limiti</span>
+                    <span>{t("pages.account.limits.ai_credits_title") || "AI limiti"}</span>
                   </div>
                   <span className="text-[11px] text-[#707070] font-bold">
-                    {credits.balance} kredit
+                    {credits.balance} {t("pages.account.billing.unit_credits") || "kredit"}
                   </span>
                 </div>
                 <div className="w-full h-1.5 bg-[#F0F0F0] rounded-full overflow-hidden">
@@ -342,9 +342,19 @@ export function Sidebar() {
                     style={{ width: `${credits.balance + credits.used > 0 ? Math.round((credits.balance / (credits.balance + credits.used)) * 100) : 100}%` }}
                   />
                 </div>
-                <div className="flex justify-between items-center text-[9px] text-[#909090] font-bold mt-0.5">
-                  <span>Balans: {credits.balance} kredit</span>
-                  <span>(~{Math.round(credits.balance / 50)} daqiqa audio)</span>
+                <div className="border-t border-[#F5F5F5] pt-1.5 flex flex-col gap-1 text-[9px] text-[#707070]">
+                  <div className="flex justify-between font-bold">
+                    <span>{t("pages.account.limits.balance_label") || "Balans:"}</span>
+                    <span className="text-black">{credits.balance} {t("pages.account.billing.unit_credits") || "kredit"}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>{t("pages.account.limits.bot_cost_label") || "Bot javobi:"}</span>
+                    <span className="font-semibold text-black">{t("pages.account.limits.bot_cost_val") || "~20 kr / xabar"}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>{t("pages.account.limits.audio_cost_label") || "Audio tahlil:"}</span>
+                    <span className="font-semibold text-black">{t("pages.account.limits.audio_cost_val") || "50 kr / daqiqa"}</span>
+                  </div>
                 </div>
               </div>
 
