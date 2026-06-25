@@ -206,7 +206,7 @@ export function TopBar() {
         {currentUser && (
           <div className="group relative hidden lg:flex items-center gap-2.5 px-3.5 py-2 rounded-full bg-white border border-[#E8E8E8]/60 text-black text-[12px] font-bold shadow-xs select-none hover:bg-[#F9F9F7] hover:border-[#D8D8D8] transition-all cursor-pointer h-[38px]">
             <Coins size={13} className="text-[#8CB807] fill-[#8CB807]/10" />
-            <span>AI: {credits.balance} kr</span>
+            <span>AI: {credits.balance.toLocaleString()} {t("pages.account.limits.unit_credit_short") || "kredit"}</span>
             <div className="w-12 h-1 bg-[#F0F0F0] rounded-full overflow-hidden">
               <div 
                 className="h-full bg-[#16A34A] rounded-full" 

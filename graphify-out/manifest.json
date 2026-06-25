@@ -520,8 +520,8 @@
     "semantic_hash": ""
   },
   "frontend/src/components/layout/TopBar.tsx": {
-    "mtime": 1782415483.1367571,
-    "ast_hash": "e626a944350bf3152eab1de867770eaf",
+    "mtime": 1782415692.8182962,
+    "ast_hash": "e99e545e9142445161c7cdaaf6553e35",
     "semantic_hash": ""
   },
   "frontend/src/components/ui/BrandLoader.tsx": {
@@ -765,18 +765,18 @@
     "semantic_hash": ""
   },
   "frontend/src/i18n/locales/en.json": {
-    "mtime": 1782415463.1851518,
-    "ast_hash": "5f8cc809304990ed3c5ac5f5a90de19d",
+    "mtime": 1782415680.2199473,
+    "ast_hash": "63880c6b511da5af2749870263fa6005",
     "semantic_hash": ""
   },
   "frontend/src/i18n/locales/ru.json": {
-    "mtime": 1782415468.4490917,
-    "ast_hash": "13a6ce33664cd94016f8f79b814038ec",
+    "mtime": 1782415687.44262,
+    "ast_hash": "2a3060d7211acb7e53e8ee60ae60b56b",
     "semantic_hash": ""
   },
   "frontend/src/i18n/locales/uz.json": {
-    "mtime": 1782415460.2017028,
-    "ast_hash": "2394eccd1518516c247467e167fbdb61",
+    "mtime": 1782415674.162245,
+    "ast_hash": "b45edc111e879615aacadfb2a1e00bab",
     "semantic_hash": ""
   },
   "frontend/src/lib/ai/moderation.ts": {
