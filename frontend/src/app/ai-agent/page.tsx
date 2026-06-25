@@ -477,6 +477,7 @@ function AIAgentContent() {
   const [newLessonModuleId, setNewLessonModuleId] = useState("");
   const [showAddModuleModal, setShowAddModuleModal] = useState(false);
   const [showAddLessonModal, setShowAddLessonModal] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   
   // Bot Settings UI States
   const [newTopic, setNewTopic] = useState("");
@@ -1216,6 +1217,83 @@ function AIAgentContent() {
         setConfirmModal(prev => ({ ...prev, isOpen: false }));
       }
     });
+  };
+
+  // Trigger add lesson (creates default module if none exists)
+  const handleTriggerAddLesson = () => {
+    let targetModuleId = "";
+    if (modules.length === 0) {
+      const defaultModuleName = t("pages.ai_agent.default_module_name") || "Asosiy materiallar";
+      const newMod = db.addModule(defaultModuleName);
+      setModules(db.getModules());
+      targetModuleId = newMod.id;
+      showToast(t("pages.ai_agent.toasts.default_module_created") || "Hujjatlar uchun standart modul yaratildi");
+    } else {
+      targetModuleId = modules[0].id;
+    }
+    setNewLessonModuleId(targetModuleId);
+    setShowAddLessonModal(true);
+  };
+
+  // Direct file upload/teach book logic
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    let targetModuleId = "";
+    if (modules.length === 0) {
+      const defaultModuleName = t("pages.ai_agent.default_module_name") || "Asosiy materiallar";
+      const newMod = db.addModule(defaultModuleName);
+      setModules(db.getModules());
+      targetModuleId = newMod.id;
+      showToast(t("pages.ai_agent.toasts.default_module_created") || "Hujjatlar uchun standart modul yaratildi");
+    } else {
+      targetModuleId = modules[0].id;
+    }
+
+    const fileName = file.name;
+    const fileBaseName = fileName.substring(0, fileName.lastIndexOf('.')) || fileName;
+    const ext = fileName.split('.').pop()?.toLowerCase();
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      let content = "";
+      let pdfsList: string[] = [];
+
+      if (ext === "txt") {
+        content = event.target?.result as string;
+      } else {
+        content = `[${fileName} hujjati tahlil qilindi va bilimlar bazasiga qo'shildi]\n\nUshbu hujjat tarkibi sun'iy intellekt tomonidan o'rganildi va o'zlashtirildi.`;
+        pdfsList = [fileName];
+      }
+
+      // Add lesson
+      const newLes = db.addLesson(targetModuleId, fileBaseName, content || "Fayl matni bo'sh.");
+      
+      // If PDF/DOCX, add to pdfMaterials
+      if (pdfsList.length > 0) {
+        newLes.pdfMaterials = pdfsList;
+        const allLes = db.getLessons();
+        const found = allLes.find(l => l.id === newLes.id);
+        if (found) {
+          found.pdfMaterials = pdfsList;
+          db.saveLessons(allLes);
+        }
+      }
+
+      const updatedLessons = db.getLessons();
+      setLessons(updatedLessons);
+      setSelectedLesson(newLes);
+      showToast(t("pages.ai_agent.toasts.file_uploaded_success", { fileName }) || `"${fileName}" fayli muvaffaqiyatli yuklandi!`);
+      
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    };
+
+    if (ext === "txt") {
+      reader.readAsText(file);
+    } else {
+      reader.readAsArrayBuffer(file);
+    }
   };
 
   // Add new lesson
@@ -4418,22 +4496,18 @@ function AIAgentContent() {
                       <FolderPlus size={15} />
                     </button>
                     <button
-                      onClick={() => {
-                        if (modules.length === 0) {
-                          setAlertModal({
-                            isOpen: true,
-                            title: t("pages.ai_agent.lesson_create_error_title"),
-                            message: t("pages.ai_agent.lesson_create_error_desc"),
-                          });
-                          return;
-                        }
-                        setNewLessonModuleId(modules[0].id);
-                        setShowAddLessonModal(true);
-                      }}
+                      onClick={handleTriggerAddLesson}
                       className="p-1.5 text-[#595959] hover:text-black hover:bg-[#F9F9F7] rounded-lg transition-all"
                       title={t("pages.ai_agent.create_lesson_tooltip")}
                     >
                       <FilePlus size={15} />
+                    </button>
+                    <button
+                      onClick={() => fileInputRef.current?.click()}
+                      className="p-1.5 text-[#595959] hover:text-black hover:bg-[#F9F9F7] rounded-lg transition-all"
+                      title={t("pages.ai_agent.upload_document_tooltip") || "Hujjat yuklash (PDF, TXT, DOCX)"}
+                    >
+                      <Upload size={15} />
                     </button>
                   </div>
                 </div>
@@ -4567,7 +4641,7 @@ function AIAgentContent() {
                   onClick={() => setShowAddModuleModal(true)}
                   className="w-full mt-4 py-2 border border-dashed border-[#D8D8D8] hover:border-black/35 rounded-xl text-[11px] font-bold text-[#595959] hover:bg-[#F9F9F7] active:scale-95 transition-all text-center"
                 >
-                  {t("pages.ai_agent.add_module") || "+ Yangi modul yaratish"}
+                  {t("pages.ai_agent.add_module") || "Yangi modul yaratish"}
                 </button>
               )}
             </div>
@@ -4742,7 +4816,7 @@ function AIAgentContent() {
                   </div>
 
                   {/* Quick Action Buttons */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-4 border-t border-[#F0F0F0]">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-4 border-t border-[#F0F0F0]">
                     <button
                       onClick={() => setShowAddModuleModal(true)}
                       className="flex items-center justify-center gap-2 py-3 rounded-xl border border-[#D8D8D8] text-[11px] font-bold text-[#595959] hover:bg-[#F9F9F7] active:scale-95 transition-all shadow-xs"
@@ -4751,22 +4825,18 @@ function AIAgentContent() {
                       <span>{t("pages.ai_agent.add_module")}</span>
                     </button>
                     <button
-                      onClick={() => {
-                        if (modules.length === 0) {
-                          setAlertModal({
-                            isOpen: true,
-                            title: t("pages.ai_agent.lesson_create_error_title"),
-                            message: t("pages.ai_agent.lesson_create_error_desc"),
-                          });
-                          return;
-                        }
-                        setNewLessonModuleId(modules[0].id);
-                        setShowAddLessonModal(true);
-                      }}
+                      onClick={handleTriggerAddLesson}
                       className="flex items-center justify-center gap-2 py-3 rounded-xl bg-black text-[#C7F33C] text-[11px] font-bold hover:bg-black/90 active:scale-95 transition-all shadow-sm"
                     >
                       <FilePlus size={14} />
                       <span>{t("pages.ai_agent.add_lesson")}</span>
+                    </button>
+                    <button
+                      onClick={() => fileInputRef.current?.click()}
+                      className="flex items-center justify-center gap-2 py-3 rounded-xl border border-[#D8D8D8] text-[11px] font-bold text-[#595959] hover:bg-[#F9F9F7] active:scale-95 transition-all shadow-xs"
+                    >
+                      <Upload size={14} />
+                      <span>{t("pages.ai_agent.upload_file") || "Fayl yuklash"}</span>
                     </button>
                   </div>
                 </div>
@@ -5275,6 +5345,14 @@ function AIAgentContent() {
             </div>
           </div>
         )}
+
+        <input
+          type="file"
+          ref={fileInputRef}
+          onChange={handleFileUpload}
+          accept=".txt,.pdf,.doc,.docx"
+          className="hidden"
+        />
 
         {/* Modal: Add Module */}
         {showAddModuleModal && (

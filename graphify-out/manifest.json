@@ -250,8 +250,8 @@
     "semantic_hash": ""
   },
   "frontend/src/app/ai-agent/page.tsx": {
-    "mtime": 1782391306.1746833,
-    "ast_hash": "3ddd087b31dbaa28294e3f7d17f4f1a9",
+    "mtime": 1782411820.2419474,
+    "ast_hash": "595d7e4880dd89eba1f91240fcb654c7",
     "semantic_hash": ""
   },
   "frontend/src/app/analytics/page.tsx": {
@@ -765,18 +765,18 @@
     "semantic_hash": ""
   },
   "frontend/src/i18n/locales/en.json": {
-    "mtime": 1780495182.0,
-    "ast_hash": "3ea757c13015cd68e4f24b7c228d0316",
+    "mtime": 1782411725.2822692,
+    "ast_hash": "52b64c92ea9bc0eecab5b827f481acf6",
     "semantic_hash": ""
   },
   "frontend/src/i18n/locales/ru.json": {
-    "mtime": 1780495184.0,
-    "ast_hash": "f0573f29004c881307e44f17e574d0d1",
+    "mtime": 1782411776.3701212,
+    "ast_hash": "ce5f2c214233f343bc3b688354018e25",
     "semantic_hash": ""
   },
   "frontend/src/i18n/locales/uz.json": {
-    "mtime": 1780495179.0,
-    "ast_hash": "2a384a4a164ac83e959a2f8a8b839f27",
+    "mtime": 1782411709.5612326,
+    "ast_hash": "9df0cd43e3cf5d39d5f87524b1748bcb",
     "semantic_hash": ""
   },
   "frontend/src/lib/ai/moderation.ts": {
