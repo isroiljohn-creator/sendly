@@ -232,7 +232,7 @@ export function TopBar() {
               <div className="border-t border-[#F0F0F0] mt-1 pt-1.5 flex flex-col gap-1 text-[10px] text-[#707070]">
                 <div className="flex justify-between font-bold">
                   <span>{t("pages.account.limits.balance_label") || "Balans:"}</span>
-                  <span className="text-black">{credits.balance} {t("pages.account.billing.unit_credits") || "kredit"}</span>
+                  <span className="text-black">{credits.balance.toLocaleString()} {t("pages.account.billing.unit_credits") || "kredit"}</span>
                 </div>
                 <div className="flex justify-between">
                   <span>{t("pages.account.limits.bot_cost_label") || "Bot javobi:"}</span>
@@ -241,6 +241,10 @@ export function TopBar() {
                 <div className="flex justify-between">
                   <span>{t("pages.account.limits.audio_cost_label") || "Audio tahlil:"}</span>
                   <span className="font-semibold text-black">{t("pages.account.limits.audio_cost_val") || "50 kr / daqiqa"}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>{t("pages.account.limits.doc_cost_label") || "Hujjat tahlili:"}</span>
+                  <span className="font-semibold text-black">{t("pages.account.limits.doc_cost_val") || "50 kr / hujjat"}</span>
                 </div>
               </div>
             </div>

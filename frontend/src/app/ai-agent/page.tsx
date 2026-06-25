@@ -1276,30 +1276,42 @@ function AIAgentContent() {
 
       durationInMinutes = Math.max(1, audioDuration / 60);
       creditCost = Math.ceil(durationInMinutes * 50);
+    } else {
+      // Document parsing cost is a flat 50 credits
+      creditCost = 50;
+    }
 
-      // Check current user credit balance
-      let currentBalance = 0;
-      const localCredits = localStorage.getItem("replai_ai_credits_data");
-      if (localCredits) {
-        try {
-          const parsed = JSON.parse(localCredits);
-          currentBalance = parsed.balance || 0;
-        } catch (e) {
-          // ignore
-        }
+    // Check current user credit balance
+    let currentBalance = 0;
+    const localCredits = localStorage.getItem("replai_ai_credits_data");
+    if (localCredits) {
+      try {
+        const parsed = JSON.parse(localCredits);
+        currentBalance = parsed.balance || 0;
+      } catch (e) {
+        // ignore
       }
+    }
 
-      const userId = db.getCurrentUser()?.id || "guest";
-      if (userId !== "guest" && currentBalance < creditCost) {
+    const userId = db.getCurrentUser()?.id || "guest";
+    if (userId !== "guest" && currentBalance < creditCost) {
+      if (isAudio) {
         showToast(
           (t("pages.ai_agent.toasts.insufficient_credits_audio") || `Balansingizda yetarli kredit mavjud emas. Audio transkripsiya qilish uchun kamida {cost} ta kredit (5,000 so'm/10 daqiqa) talab qilinadi. Sizda: {balance} ta kredit.`)
             .replace("{cost}", creditCost.toString())
             .replace("{balance}", currentBalance.toString()),
           "error"
         );
-        if (fileInputRef.current) fileInputRef.current.value = "";
-        return;
+      } else {
+        showToast(
+          (t("pages.ai_agent.toasts.insufficient_credits_doc") || `Balansingizda yetarli kredit mavjud emas. Hujjatni tahlil qilish uchun kamida {cost} ta kredit talab qilinadi. Sizda: {balance} ta kredit.`)
+            .replace("{cost}", creditCost.toString())
+            .replace("{balance}", currentBalance.toString()),
+          "error"
+        );
       }
+      if (fileInputRef.current) fileInputRef.current.value = "";
+      return;
     }
 
     // Determine target API endpoint
@@ -1345,27 +1357,27 @@ function AIAgentContent() {
       const data = await res.json();
       const extractedText = data.text;
 
-      // 3. Deduct credits for audio files
-      if (isAudio) {
-        const userId = db.getCurrentUser()?.id || "guest";
-        if (userId !== "guest") {
-          const token = localStorage.getItem("replai_token");
-          const headers: Record<string, string> = { "Content-Type": "application/json" };
-          if (token) {
-            headers["Authorization"] = `Bearer ${token}`;
-          }
-          await fetch(`/api/credits?userId=${userId}`, {
-            method: "POST",
-            headers,
-            body: JSON.stringify({
-              action: "deduct",
-              amount: creditCost,
-              description: `Audio dars transkripsiyasi: "${fileName}" (${Math.ceil(durationInMinutes)} daqiqa)`
-            })
-          });
-          // Refresh local credits data
-          await db.getAiCreditsFromServer(userId);
+      // 3. Deduct credits for files (both audio and document)
+      const currentUserId = db.getCurrentUser()?.id || "guest";
+      if (currentUserId !== "guest") {
+        const token = localStorage.getItem("replai_token");
+        const headers: Record<string, string> = { "Content-Type": "application/json" };
+        if (token) {
+          headers["Authorization"] = `Bearer ${token}`;
         }
+        await fetch(`/api/credits?userId=${currentUserId}`, {
+          method: "POST",
+          headers,
+          body: JSON.stringify({
+            action: "deduct",
+            amount: creditCost,
+            description: isAudio 
+              ? `Audio dars transkripsiyasi: "${fileName}" (${Math.ceil(durationInMinutes)} daqiqa)`
+              : `Hujjat tahlili: "${fileName}"`
+          })
+        });
+        // Refresh local credits data
+        await db.getAiCreditsFromServer(currentUserId);
       }
 
       // 4. Create default module if none exists
