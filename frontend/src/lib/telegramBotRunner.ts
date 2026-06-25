@@ -461,6 +461,11 @@ export async function handleTelegramUpdate(channelId: string, token: string, upd
         };
         chatsList.push(chat);
       }
+
+      // Reset liveTakeover if user restarts the bot with /start
+      if (text.trim() === "/start") {
+        chat.liveTakeover = false;
+      }
       
       // 3. Add incoming message
       const timestamp = new Date().toLocaleTimeString("uz-UZ", { hour: "2-digit", minute: "2-digit" });
