@@ -526,16 +526,29 @@ export const db = {
     return { success: true };
   },
 
-  completeSignIn(email: string): { success: boolean; error?: string } {
+  completeSignIn(email: string, serverUser?: any): { success: boolean; error?: string } {
     if (!isClient) return { success: false };
 
     const users = this.getUsers();
-    const user = users.find((u) => u.email === email);
+    let user = users.find((u) => u.email === email);
     if (!user) {
-      return { success: false, error: "Foydalanuvchi topilmadi." };
+      if (serverUser) {
+        user = {
+          id: serverUser.id || (typeof crypto !== "undefined" && crypto.randomUUID ? crypto.randomUUID() : "44444444-4444-4444-8444-444444444444"),
+          email,
+          fullName: serverUser.fullName || "Foydalanuvchi",
+          isCardLinked: serverUser.isCardLinked || false,
+          plan: serverUser.plan || "free",
+          createdAt: serverUser.createdAt || new Date().toISOString()
+        };
+        users.push(user);
+        localStorage.setItem("replai_users", JSON.stringify(users));
+      } else {
+        return { success: false, error: "Foydalanuvchi topilmadi." };
+      }
     }
-    if (!user.id) {
-      user.id = typeof crypto !== "undefined" && crypto.randomUUID ? crypto.randomUUID() : "44444444-4444-4444-8444-444444444444";
+    if (serverUser && serverUser.id) {
+      user.id = serverUser.id;
       const idx = users.findIndex((u) => u.email === email);
       if (idx > -1) {
         users[idx] = user;

@@ -99,13 +99,13 @@ export async function POST(request: Request) {
       userId = crypto.randomUUID();
     }
 
-    // Sign 1 hour JWT token
+    // Sign 30 days JWT token
     const now = Math.floor(Date.now() / 1000);
     const tokenPayload = {
       user_id: userId,
       email: email,
       iat: now,
-      exp: now + 3600 // 1 hour expiration
+      exp: now + 30 * 24 * 3600 // 30 days expiration
     };
 
     const token = signJwt(tokenPayload, jwtSecret);

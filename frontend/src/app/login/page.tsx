@@ -215,7 +215,7 @@ export default function LoginPage() {
       
       if (verifyRes.ok && verifyData.success) {
         localStorage.setItem("replai_token", verifyData.token);
-        const res = db.completeSignIn(email);
+        const res = db.completeSignIn(email, verifyData.user || { id: verifyData.userId, email });
         if (res.success) {
           window.location.href = "/";
         } else {
