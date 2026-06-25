@@ -55,6 +55,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
   const [channels, setChannels] = useState<Channel[]>([]);
   const [activeChannel, setActiveChannel] = useState<Channel | null>(null);
   const [currentUser, setCurrentUser] = useState<DBUser | null>(null);
+  const [credits, setCredits] = useState<{ balance: number; used: number }>({ balance: 100, used: 0 });
 
   useEffect(() => {
     const user = db.getCurrentUser();
@@ -95,7 +96,13 @@ export function AppLayout({ children }: { children: ReactNode }) {
     const load = () => {
       setChannels(db.getChannels());
       setActiveChannel(db.getActiveChannel());
-      setCurrentUser(db.getCurrentUser());
+      const user = db.getCurrentUser();
+      setCurrentUser(user);
+      if (user) {
+        db.getAiCreditsFromServer(user.id).then((data) => {
+          if (data) setCredits(data);
+        });
+      }
     };
     const handleToggle = () => setIsMobileMenuOpen(prev => !prev);
     const handleClose = () => setIsMobileMenuOpen(false);
@@ -387,6 +394,31 @@ export function AppLayout({ children }: { children: ReactNode }) {
               })}
             </div>
           </div>
+
+          {/* AI limits card in mobile side drawer */}
+          {currentUser && (
+            <div className="mt-8 bg-neutral-50/50 border border-neutral-100 rounded-2xl p-4 flex flex-col gap-2">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-1.5 text-black font-extrabold text-[12px]">
+                  <Zap size={13} className="text-black fill-black animate-pulse" />
+                  <span>AI limiti</span>
+                </div>
+                <span className="text-[12px] text-[#707070] font-bold">
+                  {credits.balance + credits.used > 0 ? Math.round((credits.balance / (credits.balance + credits.used)) * 100) : 100}% qoldi
+                </span>
+              </div>
+              <div className="w-full h-1.5 bg-[#F0F0F0] rounded-full overflow-hidden">
+                <div 
+                  className="h-full bg-[#16A34A] rounded-full transition-all duration-300"
+                  style={{ width: `${credits.balance + credits.used > 0 ? Math.round((credits.balance / (credits.balance + credits.used)) * 100) : 100}%` }}
+                />
+              </div>
+              <div className="flex justify-between items-center text-[10px] text-[#808080] font-bold mt-1">
+                <span>Balans: {credits.balance} kredit</span>
+                <span>(~{Math.round(credits.balance / 50)} daqiqa)</span>
+              </div>
+            </div>
+          )}
 
           {/* Logout button */}
           <div className="mt-8 border-t border-[#F0F0F0] pt-4 shrink-0">

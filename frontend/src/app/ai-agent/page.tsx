@@ -1289,12 +1289,8 @@ function AIAgentContent() {
         }
       }
 
-      const currentUser = db.getCurrentUser();
-      const userId = currentUser?.id || "guest";
-      const userEmail = currentUser?.email || "";
-      const isAdmin = userEmail === "admin@sendly.uz";
-
-      if (userId !== "guest" && !isAdmin && currentBalance < creditCost) {
+      const userId = db.getCurrentUser()?.id || "guest";
+      if (userId !== "guest" && currentBalance < creditCost) {
         showToast(
           (t("pages.ai_agent.toasts.insufficient_credits_audio") || `Balansingizda yetarli kredit mavjud emas. Audio transkripsiya qilish uchun kamida {cost} ta kredit (5,000 so'm/10 daqiqa) talab qilinadi. Sizda: {balance} ta kredit.`)
             .replace("{cost}", creditCost.toString())

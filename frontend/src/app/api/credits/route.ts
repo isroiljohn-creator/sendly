@@ -374,22 +374,7 @@ export async function POST(request: Request) {
         date: timestamp
       });
     } else if (action === "deduct") {
-      let isSystemAdmin = false;
-      if (pgdb.isConfigured()) {
-        try {
-          const usersList = await pgdb.getValue("global_users") || [];
-          const userObj = usersList.find((u: any) => u.id === userId);
-          isSystemAdmin = userObj?.email === "admin@sendly.uz";
-        } catch (e) {
-          console.error("Failed to check admin status in pgdb", e);
-        }
-      } else {
-        const dbData = readDb();
-        const userObj = dbData.users?.find((u: any) => u.id === userId);
-        isSystemAdmin = userObj?.email === "admin@sendly.uz";
-      }
-
-      if (!isSystemAdmin && creditsData.balance < amount) {
+      if (creditsData.balance < amount) {
         return NextResponse.json({ error: "Insufficient credits" }, { status: 400 });
       }
       creditsData.balance = Math.max(0, creditsData.balance - amount);

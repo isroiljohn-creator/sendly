@@ -15,7 +15,8 @@ import {
   Users,
   Languages,
   HelpCircle,
-  Menu
+  Menu,
+  Zap
 } from "lucide-react";
 import { Instagram } from "@/components/ui/icons";
 import { useI18n } from "@/i18n/I18nProvider";
@@ -42,6 +43,7 @@ export function TopBar() {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isLangSubOpen, setIsLangSubOpen] = useState(false);
   const [currentUser, setCurrentUser] = useState<DBUser | null>(null);
+  const [credits, setCredits] = useState<{ balance: number; used: number }>({ balance: 100, used: 0 });
 
   const langRef = useRef<HTMLDivElement>(null);
   const notifRef = useRef<HTMLDivElement>(null);
@@ -58,7 +60,13 @@ export function TopBar() {
       const active = db.getActiveChannel();
       setActiveChannelId(active ? active.id : "");
       setActiveChannel(active);
-      setCurrentUser(db.getCurrentUser());
+      const user = db.getCurrentUser();
+      setCurrentUser(user);
+      if (user) {
+        db.getAiCreditsFromServer(user.id).then((data) => {
+          if (data) setCredits(data);
+        });
+      }
     };
     loadData();
     window.addEventListener("focus", loadData);
@@ -131,6 +139,9 @@ export function TopBar() {
 
   const isLessonsPage = pathname.startsWith("/lessons");
 
+  const total = credits.balance + credits.used;
+  const percent = total > 0 ? Math.round((credits.balance / total) * 100) : 100;
+
   const customTrigger = activeChannel ? (
     <div className="flex items-center gap-2.5 px-3.5 py-2 rounded-[14px] bg-white border border-[#E8E8E8] w-fit shrink-0 hover:border-black transition-all select-none shadow-sm hover:shadow-md duration-150 cursor-pointer">
       <div className={`grid h-6 w-6 place-items-center rounded-full shrink-0 ${activeChannel.type === "instagram" ? "bg-gradient-to-br from-[#f09433] via-[#e6683c] to-[#bc1888]" : "bg-[#229ED9]"}`}>
@@ -190,11 +201,45 @@ export function TopBar() {
 
       {/* Action buttons */}
       <div className="flex items-center gap-3">
+        {/* Desktop AI Limits TopBar Pill with Tooltip */}
+        {currentUser && (
+          <div className="group relative hidden lg:flex items-center gap-2.5 px-3.5 py-2 rounded-full bg-white border border-[#E8E8E8]/60 text-black text-[12px] font-bold shadow-xs select-none hover:bg-[#F9F9F7] hover:border-[#D8D8D8] transition-all cursor-pointer h-[38px]">
+            <Zap size={13} className="text-[#8CB807] fill-[#8CB807]/20 animate-pulse animate-duration-1000" />
+            <span>AI: {credits.balance} kr</span>
+            <div className="w-12 h-1 bg-[#F0F0F0] rounded-full overflow-hidden">
+              <div 
+                className="h-full bg-[#16A34A] rounded-full" 
+                style={{ width: `${percent}%` }}
+              />
+            </div>
+            
+            {/* Tooltip on hover */}
+            <div className="absolute right-0 top-11 pointer-events-none opacity-0 translate-y-[-8px] group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-200 ease-out z-50 whitespace-nowrap bg-white p-3.5 rounded-[20px] border border-[#E8E8E8] shadow-[0_8px_30px_rgba(0,0,0,0.08)] flex flex-col gap-1.5 w-[200px] text-left">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-1.5 text-black font-extrabold text-[12px]">
+                  <Zap size={13} className="text-black fill-black" />
+                  <span>AI limiti</span>
+                </div>
+                <span className="text-[12px] text-[#707070] font-bold">{percent}% qoldi</span>
+              </div>
+              <div className="w-full h-1.5 bg-[#F0F0F0] rounded-full overflow-hidden">
+                <div 
+                  className="h-full bg-[#16A34A] rounded-full transition-all duration-300"
+                  style={{ width: `${percent}%` }}
+                />
+              </div>
+              <div className="text-[9.5px] text-[#A0A0A0] font-bold text-center mt-0.5">
+                Balans: {credits.balance} kredit (~{Math.round(credits.balance / 50)} daqiqa audio)
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Language selector dropdown */}
         <div className="relative" ref={langRef}>
           <button
             onClick={() => setIsLangOpen(!isLangOpen)}
-            className="flex items-center gap-1.5 rounded-full bg-white px-3.5 py-2.5 text-[12px] font-medium text-black border border-[#E8E8E8]/60 transition-all duration-150 active:scale-95 hover:bg-[#F4F4F5] hover:border-[#D8D8D8]/60"
+            className="flex items-center gap-1.5 rounded-full bg-white px-3.5 py-2.5 text-[12px] font-medium text-black border border-[#E8E8E8]/60 transition-all duration-150 active:scale-95 hover:bg-[#F4F4F5] hover:border-[#D8D8D8]/60 h-[38px]"
           >
             <span className="uppercase font-semibold">{lang}</span>
             <ChevronDown size={14} className={`transition-transform duration-200 ${isLangOpen ? "rotate-180" : ""}`} />
