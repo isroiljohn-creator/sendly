@@ -1,16 +1,16 @@
 # Graph Report - Sendly  (2026-06-25)
 
 ## Corpus Check
-- 169 files · ~450,937 words
+- 170 files · ~451,472 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 928 nodes · 1659 edges · 77 communities (67 shown, 10 thin omitted)
+- 930 nodes · 1660 edges · 78 communities (68 shown, 10 thin omitted)
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS · INFERRED: 2 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `144c63df`
+- Built from commit: `19357458`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -108,7 +108,7 @@
 - 2-file cycle: `backend/src/services/queue.ts -> backend/src/services/trigger.ts -> backend/src/services/queue.ts`
 - 3-file cycle: `backend/src/services/interpreter.ts -> backend/src/services/queue.ts -> backend/src/services/trigger.ts -> backend/src/services/interpreter.ts`
 
-## Communities (77 total, 10 thin omitted)
+## Communities (78 total, 10 thin omitted)
 
 ### Community 0 - "Community 0"
 Cohesion: 0.05
@@ -119,12 +119,12 @@ Cohesion: 0.04
 Nodes (54): dependencies, class-variance-authority, clsx, cmdk, date-fns, embla-carousel-react, framer-motion, @hookform/resolvers (+46 more)
 
 ### Community 2 - "Community 2"
-Cohesion: 0.07
+Cohesion: 0.08
 Nodes (45): calcGrowthPct(), checkIfUserIsAdmin(), GET(), POST(), readDb(), readRealAnalytics(), writeDb(), acquireFileLock() (+37 more)
 
 ### Community 3 - "Community 3"
 Cohesion: 0.06
-Nodes (21): AccordionContent, AccordionItem, AccordionTrigger, Alert, AlertDescription, AlertTitle, alertVariants, Checkbox (+13 more)
+Nodes (17): AccordionContent, AccordionItem, AccordionTrigger, Checkbox, HoverCardContent, Input, PopoverContent, Progress (+9 more)
 
 ### Community 4 - "Community 4"
 Cohesion: 0.14
@@ -167,8 +167,8 @@ Cohesion: 0.10
 Nodes (20): devDependencies, eslint, eslint-config-next, postcss, tailwindcss, @types/node, @types/nodemailer, @types/pg (+12 more)
 
 ### Community 15 - "Community 15"
-Cohesion: 0.30
-Nodes (11): acquireFileLock(), ChatMessage, ChatThread, LOCK_DIR, POST(), readDb(), readDbUnlocked(), releaseFileLock() (+3 more)
+Cohesion: 0.26
+Nodes (11): checkRateLimit(), generateAndSaveOtp(), globalForOtp, OtpEntry, rateLimitStore, verifyOtpCode(), HTML_TEMPLATE(), POST() (+3 more)
 
 ### Community 16 - "Community 16"
 Cohesion: 0.13
@@ -179,8 +179,8 @@ Cohesion: 0.11
 Nodes (18): compilerOptions, allowJs, esModuleInterop, incremental, isolatedModules, jsx, lib, module (+10 more)
 
 ### Community 18 - "Community 18"
-Cohesion: 0.22
-Nodes (8): SheetContent, SheetContentProps, SheetDescription, SheetFooter(), SheetHeader(), SheetOverlay, SheetTitle, sheetVariants
+Cohesion: 0.15
+Nodes (11): Badge(), BadgeProps, badgeVariants, SheetContent, SheetContentProps, SheetDescription, SheetFooter(), SheetHeader() (+3 more)
 
 ### Community 19 - "Community 19"
 Cohesion: 0.12
@@ -319,8 +319,8 @@ Cohesion: 0.50
 Nodes (3): Avatar, AvatarFallback, AvatarImage
 
 ### Community 54 - "Community 54"
-Cohesion: 0.67
-Nodes (3): Badge(), BadgeProps, badgeVariants
+Cohesion: 0.40
+Nodes (4): Alert, AlertDescription, AlertTitle, alertVariants
 
 ### Community 75 - "Community 75"
 Cohesion: 0.50
@@ -335,7 +335,7 @@ Nodes (3): TabsContent, TabsList, TabsTrigger
 _Questions this graph is uniquely positioned to answer:_
 
 - **Why does `cn()` connect `Community 8` to `Community 3`, `Community 4`, `Community 5`, `Community 16`, `Community 18`, `Community 19`, `Community 20`, `Community 22`, `Community 23`, `Community 24`, `Community 28`, `Community 29`, `Community 32`, `Community 35`, `Community 36`, `Community 37`, `Community 43`, `Community 44`, `Community 48`, `Community 49`, `Community 53`, `Community 54`, `Community 75`?**
-  _High betweenness centrality (0.150) - this node is a cross-community bridge._
+  _High betweenness centrality (0.149) - this node is a cross-community bridge._
 - **Why does `Channel` connect `Community 4` to `Community 0`, `Community 11`, `Community 12`, `Community 52`, `Community 22`?**
   _High betweenness centrality (0.036) - this node is a cross-community bridge._
 - **Why does `useI18n()` connect `Community 11` to `Community 0`, `Community 4`, `Community 5`, `Community 12`, `Community 16`, `Community 52`, `Community 21`, `Community 22`?**
@@ -347,4 +347,4 @@ _Questions this graph is uniquely positioned to answer:_
 - **Should `Community 1` be split into smaller, more focused modules?**
   _Cohesion score 0.037037037037037035 - nodes in this community are weakly interconnected._
 - **Should `Community 2` be split into smaller, more focused modules?**
-  _Cohesion score 0.07407407407407407 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.07692307692307693 - nodes in this community are weakly interconnected._

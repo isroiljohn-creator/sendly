@@ -1235,78 +1235,86 @@ function AIAgentContent() {
     setShowAddLessonModal(true);
   };
 
-  // Direct file upload/teach book logic
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  // Direct file upload/teach book/audio transcription logic
+  const [isFileUploading, setIsFileUploading] = useState(false);
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-
-    let targetModuleId = "";
-    if (modules.length === 0) {
-      const defaultModuleName = t("pages.ai_agent.default_module_name") || "Asosiy materiallar";
-      const newMod = db.addModule(defaultModuleName);
-      setModules(db.getModules());
-      targetModuleId = newMod.id;
-      showToast(t("pages.ai_agent.toasts.default_module_created") || "Hujjatlar uchun standart modul yaratildi");
-    } else {
-      targetModuleId = modules[0].id;
-    }
 
     const fileName = file.name;
     const fileBaseName = fileName.substring(0, fileName.lastIndexOf('.')) || fileName;
     const ext = fileName.split('.').pop()?.toLowerCase();
+    
+    // Check if it is an audio file
+    const audioExtensions = ["mp3", "wav", "m4a", "ogg", "wma", "amr", "flac", "aac", "mp4", "m4v"];
+    const isAudio = audioExtensions.includes(ext || "") || file.type.startsWith("audio/");
+    
+    // Determine target API endpoint
+    const endpoint = isAudio ? "/api/ai/transcribe-audio" : "/api/ai/parse-document";
 
-    const reader = new FileReader();
-    reader.onload = async (event) => {
-      let content = "";
-      let pdfsList: string[] = [];
+    setIsFileUploading(true);
+    showToast(
+      isAudio 
+        ? (t("pages.ai_agent.toasts.transcribing_audio") || "Audio transkripsiya qilinmoqda (bu biroz vaqt olishi mumkin)...")
+        : (t("pages.ai_agent.toasts.parsing_document") || "Hujjat sun'iy intellekt tomonidan tahlil qilinmoqda..."), 
+      "success"
+    );
 
-      if (ext === "txt") {
-        content = event.target?.result as string;
-      } else {
-        // PDF, DOC, DOCX
-        setIsStructuring(true);
-        try {
-          const base64String = (event.target?.result as string).split(",")[1];
-          const response = await fetch("/api/ai/parse-file", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              base64Data: base64String,
-              mimeType: file.type || "application/pdf",
-              fileName: fileName,
-            }),
-          });
+    try {
+      // 1. Read file as base64
+      const base64Data = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+          const dataUrl = reader.result as string;
+          const base64 = dataUrl.split(",")[1];
+          resolve(base64);
+        };
+        reader.onerror = (err) => reject(err);
+        reader.readAsDataURL(file);
+      });
 
-          if (!response.ok) {
-            const errData = await response.json();
-            throw new Error(errData.error || "Faylni tahlil qilishda xatolik yuz berdi");
-          }
+      // 2. Call API
+      const res = await fetch(endpoint, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          fileName,
+          fileType: file.type,
+          base64Data
+        })
+      });
 
-          const resData = await response.json();
-          content = resData.text;
-          pdfsList = [fileName];
-        } catch (err: any) {
-          showToast(err.message || "Faylni tahlil qilishda texnik xatolik yuz berdi", "error");
-          setIsStructuring(false);
-          if (fileInputRef.current) fileInputRef.current.value = "";
-          return;
-        } finally {
-          setIsStructuring(false);
-        }
+      if (!res.ok) {
+        const errData = await res.json();
+        throw new Error(errData.error || t("pages.ai_agent.toasts.upload_error") || "Faylni yuklash/tahlil qilishda xatolik yuz berdi.");
       }
 
-      // Add lesson
-      const newLes = db.addLesson(targetModuleId, fileBaseName, content || "Fayl matni bo'sh.");
+      const data = await res.json();
+      const extractedText = data.text;
+
+      // 3. Create default module if none exists
+      let targetModuleId = "";
+      if (modules.length === 0) {
+        const defaultModuleName = t("pages.ai_agent.default_module_name") || "Asosiy materiallar";
+        const newMod = db.addModule(defaultModuleName);
+        setModules(db.getModules());
+        targetModuleId = newMod.id;
+      } else {
+        targetModuleId = modules[0].id;
+      }
+
+      // 4. Add new lesson/document
+      const newLes = db.addLesson(targetModuleId, fileBaseName, extractedText);
       
-      // If PDF/DOCX, add to pdfMaterials
-      if (pdfsList.length > 0) {
-        newLes.pdfMaterials = pdfsList;
+      // If it was a PDF document, also link it in pdfMaterials
+      const isPdf = ext === "pdf" || file.type === "application/pdf";
+      if (isPdf) {
+        newLes.pdfMaterials = [fileName];
         const allLes = db.getLessons();
         const found = allLes.find(l => l.id === newLes.id);
         if (found) {
-          found.pdfMaterials = pdfsList;
+          found.pdfMaterials = [fileName];
           db.saveLessons(allLes);
         }
       }
@@ -1314,15 +1322,18 @@ function AIAgentContent() {
       const updatedLessons = db.getLessons();
       setLessons(updatedLessons);
       setSelectedLesson(newLes);
-      showToast(t("pages.ai_agent.toasts.file_uploaded_success", { fileName }) || `"${fileName}" fayli muvaffaqiyatli yuklandi!`);
-      
-      if (fileInputRef.current) fileInputRef.current.value = "";
-    };
+      showToast(
+        isAudio 
+          ? (t("pages.ai_agent.toasts.audio_transcribed_success") || "Audio muvaffaqiyatli transkripsiya qilindi va dars qo'shildi!")
+          : (t("pages.ai_agent.toasts.file_uploaded_success", { fileName }) || `"${fileName}" fayli muvaffaqiyatli yuklandi!`)
+      );
 
-    if (ext === "txt") {
-      reader.readAsText(file);
-    } else {
-      reader.readAsDataURL(file);
+    } catch (err: any) {
+      console.error("[File Upload/Transcription Error]:", err);
+      showToast(err.message || t("pages.ai_agent.toasts.error_occurred"), "error");
+    } finally {
+      setIsFileUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
     }
   };
 
@@ -5380,9 +5391,29 @@ function AIAgentContent() {
           type="file"
           ref={fileInputRef}
           onChange={handleFileUpload}
-          accept=".txt,.pdf,.doc,.docx"
+          accept=".txt,.pdf,.doc,.docx,.mp3,.wav,.m4a,.ogg,.wma,.amr,.flac,.aac"
           className="hidden"
         />
+
+        {/* Full-screen Loading Overlay for File Upload / Transcription */}
+        {isFileUploading && (
+          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[9999] flex items-center justify-center p-4">
+            <div className="bg-white border border-[#E8E8E8] rounded-[24px] max-w-[320px] w-full p-6 shadow-2xl flex flex-col items-center justify-center gap-4 animate-in zoom-in-95 duration-150 text-center">
+              <div className="relative flex items-center justify-center">
+                <div className="w-12 h-12 rounded-full border-4 border-[#C7F33C]/20 border-t-[#8CB807] animate-spin" />
+                <Brain size={20} className="absolute text-[#8CB807] animate-pulse" />
+              </div>
+              <div className="flex flex-col gap-1">
+                <h4 className="text-[13px] font-bold text-black">
+                  AI tahlil jarayoni...
+                </h4>
+                <p className="text-[11px] text-[#707070] leading-relaxed">
+                  Hujjat yoki audio faylingiz sun'iy intellekt tomonidan o'rganilmoqda. Iltimos, kuting...
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Modal: Add Module */}
         {showAddModuleModal && (

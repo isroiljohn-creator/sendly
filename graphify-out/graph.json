@@ -3237,7 +3237,7 @@
       "label": "LoadingFallback()",
       "file_type": "code",
       "source_file": "frontend/src/app/ai-agent/page.tsx",
-      "source_location": "L5535",
+      "source_location": "L5566",
       "_origin": "ast",
       "id": "ai_agent_page_loadingfallback",
       "community": 0,
@@ -3247,7 +3247,7 @@
       "label": "AIAgentPage()",
       "file_type": "code",
       "source_file": "frontend/src/app/ai-agent/page.tsx",
-      "source_location": "L5544",
+      "source_location": "L5575",
       "_origin": "ast",
       "id": "ai_agent_page_aiagentpage",
       "community": 0,
@@ -3366,20 +3366,20 @@
     {
       "label": "route.ts",
       "file_type": "code",
-      "source_file": "frontend/src/app/api/ai/parse-file/route.ts",
+      "source_file": "frontend/src/app/api/ai/parse-document/route.ts",
       "source_location": "L1",
       "_origin": "ast",
-      "id": "parse_file_route",
+      "id": "parse_document_route",
       "community": 76,
       "norm_label": "route.ts"
     },
     {
       "label": "POST()",
       "file_type": "code",
-      "source_file": "frontend/src/app/api/ai/parse-file/route.ts",
+      "source_file": "frontend/src/app/api/ai/parse-document/route.ts",
       "source_location": "L3",
       "_origin": "ast",
-      "id": "parse_file_route_post",
+      "id": "parse_document_route_post",
       "community": 76,
       "norm_label": "post()"
     },
@@ -3421,6 +3421,26 @@
       "_origin": "ast",
       "id": "structure_route_post",
       "community": 69,
+      "norm_label": "post()"
+    },
+    {
+      "label": "route.ts",
+      "file_type": "code",
+      "source_file": "frontend/src/app/api/ai/transcribe-audio/route.ts",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "transcribe_audio_route",
+      "community": 77,
+      "norm_label": "route.ts"
+    },
+    {
+      "label": "POST()",
+      "file_type": "code",
+      "source_file": "frontend/src/app/api/ai/transcribe-audio/route.ts",
+      "source_location": "L3",
+      "_origin": "ast",
+      "id": "transcribe_audio_route_post",
+      "community": 77,
       "norm_label": "post()"
     },
     {
@@ -3470,7 +3490,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "send_otp_route",
-      "community": 2,
+      "community": 15,
       "norm_label": "route.ts"
     },
     {
@@ -3480,7 +3500,7 @@
       "source_location": "L4",
       "_origin": "ast",
       "id": "send_otp_route_html_template",
-      "community": 2,
+      "community": 15,
       "norm_label": "html_template()"
     },
     {
@@ -3490,7 +3510,7 @@
       "source_location": "L35",
       "_origin": "ast",
       "id": "send_otp_route_post",
-      "community": 2,
+      "community": 15,
       "norm_label": "post()"
     },
     {
@@ -3530,7 +3550,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "verify_otp_route",
-      "community": 2,
+      "community": 15,
       "norm_label": "route.ts"
     },
     {
@@ -3540,7 +3560,7 @@
       "source_location": "L11",
       "_origin": "ast",
       "id": "verify_otp_route_readdb",
-      "community": 2,
+      "community": 15,
       "norm_label": "readdb()"
     },
     {
@@ -3550,7 +3570,7 @@
       "source_location": "L24",
       "_origin": "ast",
       "id": "verify_otp_route_finduserbyemail",
-      "community": 2,
+      "community": 15,
       "norm_label": "finduserbyemail()"
     },
     {
@@ -3560,7 +3580,7 @@
       "source_location": "L46",
       "_origin": "ast",
       "id": "verify_otp_route_post",
-      "community": 2,
+      "community": 15,
       "norm_label": "post()"
     },
     {
@@ -4090,7 +4110,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "send_route",
-      "community": 15,
+      "community": 2,
       "norm_label": "route.ts"
     },
     {
@@ -4100,7 +4120,7 @@
       "source_location": "L9",
       "_origin": "ast",
       "id": "send_route_chatmessage",
-      "community": 15,
+      "community": 2,
       "norm_label": "chatmessage"
     },
     {
@@ -4110,7 +4130,7 @@
       "source_location": "L16",
       "_origin": "ast",
       "id": "send_route_chatthread",
-      "community": 15,
+      "community": 2,
       "norm_label": "chatthread"
     },
     {
@@ -4120,7 +4140,7 @@
       "source_location": "L29",
       "_origin": "ast",
       "id": "send_route_lock_dir",
-      "community": 15,
+      "community": 2,
       "norm_label": "lock_dir"
     },
     {
@@ -4130,7 +4150,7 @@
       "source_location": "L31",
       "_origin": "ast",
       "id": "send_route_acquirefilelock",
-      "community": 15,
+      "community": 2,
       "norm_label": "acquirefilelock()"
     },
     {
@@ -4140,7 +4160,7 @@
       "source_location": "L52",
       "_origin": "ast",
       "id": "send_route_releasefilelock",
-      "community": 15,
+      "community": 2,
       "norm_label": "releasefilelock()"
     },
     {
@@ -4150,7 +4170,7 @@
       "source_location": "L62",
       "_origin": "ast",
       "id": "send_route_readdbunlocked",
-      "community": 15,
+      "community": 2,
       "norm_label": "readdbunlocked()"
     },
     {
@@ -4160,7 +4180,7 @@
       "source_location": "L68",
       "_origin": "ast",
       "id": "send_route_writedbunlocked",
-      "community": 15,
+      "community": 2,
       "norm_label": "writedbunlocked()"
     },
     {
@@ -4170,7 +4190,7 @@
       "source_location": "L73",
       "_origin": "ast",
       "id": "send_route_readdb",
-      "community": 15,
+      "community": 2,
       "norm_label": "readdb()"
     },
     {
@@ -4180,7 +4200,7 @@
       "source_location": "L85",
       "_origin": "ast",
       "id": "send_route_writedb",
-      "community": 15,
+      "community": 2,
       "norm_label": "writedb()"
     },
     {
@@ -4190,7 +4210,7 @@
       "source_location": "L97",
       "_origin": "ast",
       "id": "send_route_splittelegrammessage",
-      "community": 15,
+      "community": 2,
       "norm_label": "splittelegrammessage()"
     },
     {
@@ -4200,7 +4220,7 @@
       "source_location": "L121",
       "_origin": "ast",
       "id": "send_route_post",
-      "community": 15,
+      "community": 2,
       "norm_label": "post()"
     },
     {
@@ -5690,7 +5710,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "ui_alert",
-      "community": 3,
+      "community": 54,
       "norm_label": "alert.tsx"
     },
     {
@@ -5700,7 +5720,7 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "ui_alert_alertvariants",
-      "community": 3,
+      "community": 54,
       "norm_label": "alertvariants"
     },
     {
@@ -5710,7 +5730,7 @@
       "source_location": "L22",
       "_origin": "ast",
       "id": "ui_alert_alert",
-      "community": 3,
+      "community": 54,
       "norm_label": "alert"
     },
     {
@@ -5720,7 +5740,7 @@
       "source_location": "L30",
       "_origin": "ast",
       "id": "ui_alert_alerttitle",
-      "community": 3,
+      "community": 54,
       "norm_label": "alerttitle"
     },
     {
@@ -5730,7 +5750,7 @@
       "source_location": "L41",
       "_origin": "ast",
       "id": "ui_alert_alertdescription",
-      "community": 3,
+      "community": 54,
       "norm_label": "alertdescription"
     },
     {
@@ -5790,7 +5810,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "ui_badge",
-      "community": 54,
+      "community": 18,
       "norm_label": "badge.tsx"
     },
     {
@@ -5800,7 +5820,7 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "ui_badge_badgevariants",
-      "community": 54,
+      "community": 18,
       "norm_label": "badgevariants"
     },
     {
@@ -5810,7 +5830,7 @@
       "source_location": "L25",
       "_origin": "ast",
       "id": "ui_badge_badgeprops",
-      "community": 54,
+      "community": 18,
       "norm_label": "badgeprops"
     },
     {
@@ -5820,7 +5840,7 @@
       "source_location": "L28",
       "_origin": "ast",
       "id": "ui_badge_badge",
-      "community": 54,
+      "community": 18,
       "norm_label": "badge()"
     },
     {
@@ -8630,7 +8650,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "lib_otpstore",
-      "community": 2,
+      "community": 15,
       "norm_label": "otpstore.ts"
     },
     {
@@ -8640,7 +8660,7 @@
       "source_location": "L4",
       "_origin": "ast",
       "id": "lib_otpstore_otpentry",
-      "community": 2,
+      "community": 15,
       "norm_label": "otpentry"
     },
     {
@@ -8650,7 +8670,7 @@
       "source_location": "L10",
       "_origin": "ast",
       "id": "lib_otpstore_globalforotp",
-      "community": 2,
+      "community": 15,
       "norm_label": "globalforotp"
     },
     {
@@ -8660,7 +8680,7 @@
       "source_location": "L20",
       "_origin": "ast",
       "id": "lib_otpstore_generateandsaveotp",
-      "community": 2,
+      "community": 15,
       "norm_label": "generateandsaveotp()"
     },
     {
@@ -8670,7 +8690,7 @@
       "source_location": "L27",
       "_origin": "ast",
       "id": "lib_otpstore_verifyotpcode",
-      "community": 2,
+      "community": 15,
       "norm_label": "verifyotpcode()"
     },
     {
@@ -8680,7 +8700,7 @@
       "source_location": "L46",
       "_origin": "ast",
       "id": "lib_otpstore_ratelimitstore",
-      "community": 2,
+      "community": 15,
       "norm_label": "ratelimitstore"
     },
     {
@@ -8690,7 +8710,7 @@
       "source_location": "L48",
       "_origin": "ast",
       "id": "lib_otpstore_checkratelimit",
-      "community": 2,
+      "community": 15,
       "norm_label": "checkratelimit()"
     },
     {
@@ -15293,11 +15313,11 @@
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
-      "source_file": "frontend/src/app/api/ai/parse-file/route.ts",
+      "source_file": "frontend/src/app/api/ai/parse-document/route.ts",
       "source_location": "L3",
       "weight": 1.0,
-      "source": "parse_file_route",
-      "target": "parse_file_route_post",
+      "source": "parse_document_route",
+      "target": "parse_document_route_post",
       "confidence_score": 1.0
     },
     {
@@ -15352,6 +15372,16 @@
       "confidence_score": 1.0,
       "source": "structure_route",
       "target": "structure_route_post"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/src/app/api/ai/transcribe-audio/route.ts",
+      "source_location": "L3",
+      "weight": 1.0,
+      "source": "transcribe_audio_route",
+      "target": "transcribe_audio_route_post",
+      "confidence_score": 1.0
     },
     {
       "relation": "contains",
@@ -26771,5 +26801,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "144c63df2a04dc27ba833acd03c1074fcbcb2e7e"
+  "built_at_commit": "19357458d3b6f6937f74187f6663db8b1cd24a6b"
 }

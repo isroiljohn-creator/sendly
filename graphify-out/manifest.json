@@ -250,8 +250,8 @@
     "semantic_hash": ""
   },
   "frontend/src/app/ai-agent/page.tsx": {
-    "mtime": 1782412173.3370953,
-    "ast_hash": "47c02fbf2fd788c1f4f11f3f210b6095",
+    "mtime": 1782412497.051092,
+    "ast_hash": "e7896478f29e77059d9ef2f46671ce4e",
     "semantic_hash": ""
   },
   "frontend/src/app/analytics/page.tsx": {
@@ -979,9 +979,14 @@
     "ast_hash": "d65e6aa1a5d8e7e1cfb09482cae85362",
     "semantic_hash": ""
   },
-  "frontend/src/app/api/ai/parse-file/route.ts": {
-    "mtime": 1782412158.8338747,
-    "ast_hash": "7179058c28525b3d5dae871a2cfc8f69",
+  "frontend/src/app/api/ai/parse-document/route.ts": {
+    "mtime": 1782412464.8594937,
+    "ast_hash": "ea2b03d4d5eaa193aa8211d8de6f3348",
+    "semantic_hash": ""
+  },
+  "frontend/src/app/api/ai/transcribe-audio/route.ts": {
+    "mtime": 1782412469.149397,
+    "ast_hash": "015da7f935029d74e76a1c74a0b3999c",
     "semantic_hash": ""
   }
 }
