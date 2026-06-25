@@ -21,7 +21,8 @@ import {
   LogOut, 
   Plus, 
   Bot,
-  Check
+  Check,
+  Coins
 } from "lucide-react";
 import { Instagram } from "@/components/ui/icons";
 import { Sidebar } from "./Sidebar";

@@ -384,9 +384,9 @@
         "starter_pkg": "Starter package",
         "standard_pkg": "Standard package",
         "business_pkg": "Business package",
-        "starter_pkg_desc": "For ~500 AI assistant replies",
-        "standard_pkg_desc": "For ~2,500 AI assistant replies",
-        "business_pkg_desc": "For ~7,500 AI assistant replies",
+        "starter_pkg_desc": "For ~500 AI replies or 200 minutes of audio transcription",
+        "standard_pkg_desc": "For ~2,500 AI replies or 1,000 minutes of audio transcription",
+        "business_pkg_desc": "For ~7,500 AI replies or 3,000 minutes of audio transcription",
         "unit_credit": "credits",
         "discount": "{pct}% DISCOUNT"
       }

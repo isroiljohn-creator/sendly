@@ -16,7 +16,8 @@ import {
   Languages,
   HelpCircle,
   Menu,
-  Zap
+  Zap,
+  Coins
 } from "lucide-react";
 import { Instagram } from "@/components/ui/icons";
 import { useI18n } from "@/i18n/I18nProvider";

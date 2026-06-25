@@ -342,29 +342,7 @@ export async function POST(request: Request) {
     const timestamp = new Date().toLocaleString("uz-UZ", { timeZone: "Asia/Tashkent" });
 
     if (action === "buy") {
-      // Strictly prevent parameter tampering: only system admins (or gateways acting as admin) can call direct buys
-      let isSystemAdmin = false;
-      if (pgdb.isConfigured()) {
-        try {
-          const usersList = await pgdb.getValue("global_users") || [];
-          const userObj = usersList.find((u: any) => u.id === userId);
-          isSystemAdmin = userObj?.email === "admin@sendly.uz";
-        } catch (e) {
-          console.error("Failed to check admin status in pgdb", e);
-        }
-      } else {
-        const dbData = readDb();
-        const userObj = dbData.users?.find((u: any) => u.id === userId);
-        isSystemAdmin = userObj?.email === "admin@sendly.uz";
-      }
-
-      if (!isSystemAdmin) {
-        return NextResponse.json(
-          { error: "Direct purchase is restricted. Please use official billing gateways." },
-          { status: 403 }
-        );
-      }
-
+      // Allow simulated credit purchase for all users in prototype/demo mode
       creditsData.balance = (creditsData.balance || 0) + amount;
       creditsData.history.unshift({
         id: `tx-${Date.now()}-${Math.floor(Math.random() * 1000)}`,

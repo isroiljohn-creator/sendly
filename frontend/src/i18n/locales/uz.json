@@ -384,9 +384,9 @@
         "starter_pkg": "Boshlang'ich paket",
         "standard_pkg": "Standart paket",
         "business_pkg": "Biznes paket",
-        "starter_pkg_desc": "~500 ta AI yordamchi javobi uchun",
-        "standard_pkg_desc": "~2 500 ta AI yordamchi javobi uchun",
-        "business_pkg_desc": "~7 500 ta AI yordamchi javobi uchun",
+        "starter_pkg_desc": "~500 ta AI javobi yoki 200 daqiqa audio transkripsiyasi uchun",
+        "standard_pkg_desc": "~2 500 ta AI javobi yoki 1 000 daqiqa audio transkripsiyasi uchun",
+        "business_pkg_desc": "~7 500 ta AI javobi yoki 3 000 daqiqa audio transkripsiyasi uchun",
         "unit_credit": "kredit",
         "discount": "{pct}% CHEGIRMA"
       }
