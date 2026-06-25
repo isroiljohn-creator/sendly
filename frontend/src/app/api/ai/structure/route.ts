@@ -25,7 +25,8 @@ VAZIFANGIZ:
 1. Matndagi muhim faktlar, savol va javob zanjirlari, narxlar, shartlar va qoidalarni aniqlang.
 2. Ularni aniq savol-javob (Q&A) yoki qisqa faktlar ko'rinishida tartiblang.
 3. Ortiqcha so'zbozlik, salomlashishlar va takrorlanishlarni olib tashlang.
-4. Javob matni faqat toza, tushunarli va professional o'zbek tilida (lotin alifbosida) bo'lishi shart.`;
+4. Javob matnida umuman Markdown formatlash belgilaridan (qalin matn uchun ** belgilari, sarlavhalar uchun # belgilari va boshqalar) foydalanmang. Qalin bo'lishi kerak bo'lgan so'zlarni oddiy matn ko'rinishida yozing (masalan, "**Savol:**" emas, balki oddiy "Savol:" shaklida).
+5. Javob matni faqat toza, tushunarli va professional o'zbek tilida (lotin alifbosida) bo'lishi shart.`;
 
     const response = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent?key=${apiKey}`,
@@ -60,8 +61,16 @@ VAZIFANGIZ:
     }
 
     const data = await response.json();
-    const resultText = data?.candidates?.[0]?.content?.parts?.[0]?.text || "";
-    return NextResponse.json({ text: resultText.trim() });
+    let resultText = data?.candidates?.[0]?.content?.parts?.[0]?.text || "";
+    
+    // Programmatically strip markdown symbols that look bad in plain text area
+    resultText = resultText
+      .replace(/\*\*/g, "")      // Strip ** (bold)
+      .replace(/###?\s+/g, "")   // Strip ### (headers)
+      .replace(/-\s+\*\*/g, "- ") // Strip bold from list items if any left
+      .trim();
+
+    return NextResponse.json({ text: resultText });
   } catch (err: unknown) {
     console.error("[AI Structure Route Error]:", err);
     const errMsg = err instanceof Error ? err.message : String(err);

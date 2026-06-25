@@ -61,7 +61,7 @@ export async function POST(request: Request) {
       ];
     }
 
-    const systemPrompt = `Siz darsliklar va hujjatlarni tahlil qiluvchi professional yordamchisiz. Maqsadingiz: yuklangan hujjat (PDF yoki matn) ichidagi barcha ma'lumotlarni o'qib, ularni chatbot oson tushunadigan va aniq javob qaytara oladigan shaklda strukturalash va to'liq o'zbek tilida (lotin alifbosida) yozib berish.`;
+    const systemPrompt = `Siz darsliklar va hujjatlarni tahlil qiluvchi professional yordamchisiz. Maqsadingiz: yuklangan hujjat (PDF yoki matn) ichidagi barcha ma'lumotlarni o'qib, ularni chatbot oson tushunadigan va aniq javob qaytara oladigan shaklda strukturalash va to'liq o'zbek tilida (lotin alifbosida) yozib berish. Javob matnida umuman Markdown formatlash belgilaridan (masalan, qalin matn uchun ** belgilari, sarlavhalar uchun # belgilari va boshqalar) foydalanmang. Qalin bo'lishi kerak bo'lgan so'zlarni oddiy matn ko'rinishida yozing (masalan, "**Savol:**" emas, balki oddiy "Savol:" shaklida).`;
 
     const response = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
@@ -96,16 +96,23 @@ export async function POST(request: Request) {
     }
 
     const data = await response.json();
-    const resultText = data?.candidates?.[0]?.content?.parts?.[0]?.text || "";
+    let resultText = data?.candidates?.[0]?.content?.parts?.[0]?.text || "";
     
-    if (!resultText.trim()) {
+    // Programmatically strip markdown symbols that look bad in plain text area
+    resultText = resultText
+      .replace(/\*\*/g, "")      // Strip ** (bold)
+      .replace(/###?\s+/g, "")   // Strip ### (headers)
+      .replace(/-\s+\*\*/g, "- ") // Strip bold from list items if any left
+      .trim();
+
+    if (!resultText) {
       return NextResponse.json(
         { error: "Hujjatdan hech qanday matn ajratib olib bo'lmadi." },
         { status: 422 }
       );
     }
 
-    return NextResponse.json({ text: resultText.trim() });
+    return NextResponse.json({ text: resultText });
   } catch (err: unknown) {
     console.error("[Parse Document Route Error]:", err);
     const errMsg = err instanceof Error ? err.message : String(err);
