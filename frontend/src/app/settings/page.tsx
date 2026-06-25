@@ -329,7 +329,7 @@ export default function SettingsPage() {
     // Validate token format
     const tokenRegex = /^[0-9]+:[a-zA-Z0-9_-]+$/;
     if (!tokenRegex.test(cleanToken)) {
-      showAlert(t("common.error"), "Token formati noto'g'ri!");
+      showAlert(t("common.error"), "Noto'g'ri Telegram Token. Iltimos, haqiqiy token kiriting.");
       return;
     }
 
@@ -339,7 +339,7 @@ export default function SettingsPage() {
       if (!getMeRes.ok) {
         const errorText = await getMeRes.text();
         console.error("Telegram API returned error:", getMeRes.status, errorText);
-        showAlert(t("common.error"), "Noto'g'ri Telegram Token. Iltimos, tekshirib qaytadan urinib ko'ring.");
+        showAlert(t("common.error"), "Kiritilgan token bo'yicha bot topilmadi. Iltimos, haqiqiy token kiriting.");
         setSaving(false);
         return;
       }

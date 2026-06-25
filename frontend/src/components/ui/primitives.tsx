@@ -425,7 +425,7 @@ export function AlertModal({
       : "success";
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/35 backdrop-blur-[5px] p-4 animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-[150] flex items-center justify-center bg-black/35 backdrop-blur-[5px] p-4 animate-in fade-in duration-200">
       <div className="w-full max-w-[360px] rounded-[28px] bg-white p-6 border border-[#E8E8E8]/70 shadow-[0_20px_50px_rgba(0,0,0,0.08)] scale-100 animate-in zoom-in-95 duration-200 text-center flex flex-col items-center">
         {resolvedType === "error" ? (
           <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-red-100 text-red-600">
