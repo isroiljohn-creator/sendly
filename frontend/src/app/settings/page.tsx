@@ -322,28 +322,58 @@ export default function SettingsPage() {
 
   // Instagram connection is now handled securely via Facebook login flow
 
-  const handleAddTelegram = () => {
-    if (!tgToken.trim() || !tgUsername.trim()) return;
-    // Limit checks removed. Channel pricing dynamically increases by 150,000 UZS/month for each additional account.
+  const handleAddTelegram = async () => {
+    const cleanToken = tgToken.trim();
+    if (!cleanToken) return;
+
+    // Validate token format
+    const tokenRegex = /^[0-9]+:[a-zA-Z0-9_-]+$/;
+    if (!tokenRegex.test(cleanToken)) {
+      showAlert(t("common.error"), "Token formati noto'g'ri!");
+      return;
+    }
+
     setSaving(true);
-    setTimeout(() => {
-      const newCh = db.addChannel({
-        type: "telegram",
-        name: tgName || tgUsername,
-        username: tgUsername.startsWith("@") ? tgUsername : `@${tgUsername}`,
-        telegramToken: tgToken,
-        isConnected: true,
-        followersCount: "0",
-      });
-      setTgToken("");
-      setTgName("");
-      setTgUsername("");
-      setModal(null);
+    try {
+      const getMeRes = await fetch(`https://api.telegram.org/bot${cleanToken}/getMe`);
+      if (!getMeRes.ok) {
+        const errorText = await getMeRes.text();
+        console.error("Telegram API returned error:", getMeRes.status, errorText);
+        showAlert(t("common.error"), "Noto'g'ri Telegram Token. Iltimos, tekshirib qaytadan urinib ko'ring.");
+        setSaving(false);
+        return;
+      }
+      
+      const getMeData = await getMeRes.json();
+      if (getMeData.ok && getMeData.result) {
+        const botUsername = getMeData.result.username;
+        const botName = getMeData.result.first_name;
+
+        const newCh = db.addChannel({
+          type: "telegram",
+          name: botName || botUsername,
+          username: botUsername.startsWith("@") ? botUsername : `@${botUsername}`,
+          telegramToken: cleanToken,
+          isConnected: true,
+          followersCount: "0",
+        });
+        setTgToken("");
+        setTgName("");
+        setTgUsername("");
+        setModal(null);
+        setSaving(false);
+        refreshChannels();
+        setActiveSection(newCh.id);
+        showAlert(t("common.success"), t("pages.settings_page.tg_link_success"));
+      } else {
+        showAlert(t("common.error"), "Noto'g'ri Telegram Token. Iltimos, tekshirib qaytadan urinib ko'ring.");
+        setSaving(false);
+      }
+    } catch (err) {
+      console.error("Failed to fetch bot info from Telegram:", err);
+      showAlert(t("common.error"), "Telegram serveriga ulanishda xatolik yuz berdi. Tarmoqni tekshiring.");
       setSaving(false);
-      refreshChannels();
-      setActiveSection(newCh.id);
-      showAlert(t("common.success"), t("pages.settings_page.tg_link_success"));
-    }, 800);
+    }
   };
 
   const handleConfirmDeleteChannel = () => {
@@ -1316,29 +1346,6 @@ export default function SettingsPage() {
                 />
               </div>
 
-              <div className="flex flex-col gap-1.5">
-                <label className="text-[10px] font-bold text-[#707070] uppercase tracking-widest">{t("pages.settings_page.bot_username_label")}</label>
-                <div className="flex items-center gap-0 rounded-[12px] bg-[#F0F0F0] overflow-hidden focus-within:bg-[#e8e8e8] transition-colors">
-                  <span className="pl-4 text-[13px] text-[#707070] font-medium select-none">@</span>
-                  <input
-                    value={tgUsername.replace(/^@/, "")}
-                    onChange={(e) => setTgUsername(e.target.value)}
-                    placeholder="mybrandbot"
-                    className="flex-1 bg-transparent px-2 py-3 text-[13px] text-black outline-none"
-                  />
-                </div>
-              </div>
-
-              <div className="flex flex-col gap-1.5">
-                <label className="text-[10px] font-bold text-[#707070] uppercase tracking-widest">{t("pages.settings_page.channel_name_optional")}</label>
-                <input
-                  value={tgName}
-                  onChange={(e) => setTgName(e.target.value)}
-                  placeholder={t("pages.settings_page.channel_name_placeholder")}
-                  className="w-full rounded-[12px] bg-[#F0F0F0] px-4 py-3 text-[13px] text-black outline-none focus:bg-[#e8e8e8] transition-colors"
-                />
-              </div>
-
               {/* Steps */}
               <div className="p-3 rounded-[12px] bg-[#F9F9F7] border border-[#E8E8E8] flex flex-col gap-2">
                 <p className="text-[10px] font-bold text-[#707070] uppercase tracking-widest">{t("pages.settings_page.how_to_get_title")}</p>
@@ -1362,7 +1369,7 @@ export default function SettingsPage() {
               </Button>
               <button
                 onClick={handleAddTelegram}
-                disabled={!tgToken.trim() || !tgUsername.trim() || saving}
+                disabled={!tgToken.trim() || saving}
                 className="flex-1 py-3 rounded-full bg-[#229ED9] text-white text-[12px] font-semibold disabled:opacity-40 hover:bg-[#1a8ec4] transition-all flex items-center justify-center gap-2"
               >
                 {saving ? (
