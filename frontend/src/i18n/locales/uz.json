@@ -1483,7 +1483,11 @@
         "json_downloaded": "JSON hisoboti muvaffaqiyatli yuklab olindi! 💻",
         "history_cleared": "Tahlillar tarixi muvaffaqiyatli tozalandi! 🧹",
         "analysis_updated": "AI CustDev tahlillari yangilandi! 🚀",
-        "tg_bot_linked_success": "Telegram bot ({username}) muvaffaqiyatli ulandi!"
+        "tg_bot_linked_success": "Telegram bot ({username}) muvaffaqiyatli ulandi!",
+        "insufficient_credits_audio": "Balansingizda yetarli kredit mavjud emas. Audio transkripsiya qilish uchun kamida {cost} ta kredit (5,000 so'm/10 daqiqa) talab qilinadi. Sizda: {balance} ta kredit.",
+        "transcribing_audio": "Audio transkripsiya qilinmoqda (bu biroz vaqt olishi mumkin)...",
+        "parsing_document": "Hujjat sun'iy intellekt tomonidan tahlil qilinmoqda...",
+        "upload_error": "Faylni yuklash yoki tahlil qilishda xatolik yuz berdi."
       },
       "now": "Hozir",
       "errors": {

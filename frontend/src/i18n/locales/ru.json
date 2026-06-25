@@ -1483,7 +1483,11 @@
         "json_downloaded": "Отчет JSON успешно скачан! 💻",
         "history_cleared": "История анализа успешно очищена! 🧹",
         "analysis_updated": "Анализ AI CustDev обновлен! 🚀",
-        "tg_bot_linked_success": "Telegram-бот ({username}) успешно подключен!"
+        "tg_bot_linked_success": "Telegram-бот ({username}) успешно подключен!",
+        "insufficient_credits_audio": "Недостаточно кредитов на балансе. Для транскрипции аудио требуется не менее {cost} кредитов (5,000 сум/10 минут). У вас: {balance} кредитов.",
+        "transcribing_audio": "Аудио транскрибируется (это может занять некоторое время)...",
+        "parsing_document": "Документ анализируется искусственным интеллектом...",
+        "upload_error": "Произошла ошибка при загрузке или анализе файла."
       },
       "now": "Сейчас",
       "errors": {
