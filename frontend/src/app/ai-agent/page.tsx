@@ -1256,15 +1256,45 @@ function AIAgentContent() {
     const ext = fileName.split('.').pop()?.toLowerCase();
 
     const reader = new FileReader();
-    reader.onload = (event) => {
+    reader.onload = async (event) => {
       let content = "";
       let pdfsList: string[] = [];
 
       if (ext === "txt") {
         content = event.target?.result as string;
       } else {
-        content = `[${fileName} hujjati tahlil qilindi va bilimlar bazasiga qo'shildi]\n\nUshbu hujjat tarkibi sun'iy intellekt tomonidan o'rganildi va o'zlashtirildi.`;
-        pdfsList = [fileName];
+        // PDF, DOC, DOCX
+        setIsStructuring(true);
+        try {
+          const base64String = (event.target?.result as string).split(",")[1];
+          const response = await fetch("/api/ai/parse-file", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              base64Data: base64String,
+              mimeType: file.type || "application/pdf",
+              fileName: fileName,
+            }),
+          });
+
+          if (!response.ok) {
+            const errData = await response.json();
+            throw new Error(errData.error || "Faylni tahlil qilishda xatolik yuz berdi");
+          }
+
+          const resData = await response.json();
+          content = resData.text;
+          pdfsList = [fileName];
+        } catch (err: any) {
+          showToast(err.message || "Faylni tahlil qilishda texnik xatolik yuz berdi", "error");
+          setIsStructuring(false);
+          if (fileInputRef.current) fileInputRef.current.value = "";
+          return;
+        } finally {
+          setIsStructuring(false);
+        }
       }
 
       // Add lesson
@@ -1292,7 +1322,7 @@ function AIAgentContent() {
     if (ext === "txt") {
       reader.readAsText(file);
     } else {
-      reader.readAsArrayBuffer(file);
+      reader.readAsDataURL(file);
     }
   };
 
