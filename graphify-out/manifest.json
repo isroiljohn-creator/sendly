@@ -500,8 +500,8 @@
     "semantic_hash": ""
   },
   "frontend/src/components/layout/ConnectChannelModal.tsx": {
-    "mtime": 1780344120.0,
-    "ast_hash": "49f3dca58f9dc2a57b7c36ef6b0b8a6f",
+    "mtime": 1782392439.541343,
+    "ast_hash": "a8a593248c77ac3cf3ac40e075fe059c",
     "semantic_hash": ""
   },
   "frontend/src/components/layout/PageHeader.tsx": {
