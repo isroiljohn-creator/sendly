@@ -326,6 +326,16 @@ export default function SettingsPage() {
     const cleanToken = tgToken.trim();
     if (!cleanToken) return;
 
+    // 1. Check plan limits beforehand
+    const user = db.getCurrentUser();
+    const plan = user?.plan || "free";
+    const maxChannels = plan === "premium" ? 10 : 1;
+    const currentChannels = db.getChannels();
+    if (currentChannels.length >= maxChannels) {
+      showAlert(t("common.error"), `Sizning tarifingizda kanallar soni cheklangan (Maksimal: ${maxChannels}). Iltimos, tarifingizni yangilang.`);
+      return;
+    }
+
     // Validate token format
     const tokenRegex = /^[0-9]+:[a-zA-Z0-9_-]+$/;
     if (!tokenRegex.test(cleanToken)) {
@@ -357,6 +367,18 @@ export default function SettingsPage() {
           isConnected: true,
           followersCount: "0",
         });
+
+        // Await server-side sync to verify it was saved successfully
+        const saveRes = await db.saveToServer();
+        if (saveRes && !saveRes.success) {
+          // Revert locally
+          db.removeChannel(newCh.id);
+          refreshChannels();
+          showAlert(t("common.error"), saveRes.error || "Saqlashda xatolik yuz berdi");
+          setSaving(false);
+          return;
+        }
+
         setTgToken("");
         setTgName("");
         setTgUsername("");

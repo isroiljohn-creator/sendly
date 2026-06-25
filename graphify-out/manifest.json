@@ -450,8 +450,8 @@
     "semantic_hash": ""
   },
   "frontend/src/app/settings/page.tsx": {
-    "mtime": 1782405686.4554157,
-    "ast_hash": "cd737b1615bf537b1c5181ed3459ce09",
+    "mtime": 1782406501.53593,
+    "ast_hash": "46ff5d3a8253709d5a68d57ba6857a03",
     "semantic_hash": ""
   },
   "frontend/src/app/terms/page.tsx": {
@@ -500,8 +500,8 @@
     "semantic_hash": ""
   },
   "frontend/src/components/layout/ConnectChannelModal.tsx": {
-    "mtime": 1782405678.8175776,
-    "ast_hash": "ef8156a07187221a82103d7a8ca9c1c3",
+    "mtime": 1782406479.7566485,
+    "ast_hash": "b5f779c9019ca081120451ae89c76fd0",
     "semantic_hash": ""
   },
   "frontend/src/components/layout/PageHeader.tsx": {

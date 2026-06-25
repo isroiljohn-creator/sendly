@@ -126,6 +126,16 @@ export function ConnectChannelModal() {
     const cleanToken = tgToken.trim();
     if (!cleanToken) return;
 
+    // 1. Check plan limits beforehand
+    const user = db.getCurrentUser();
+    const plan = user?.plan || "free";
+    const maxChannels = plan === "premium" ? 10 : 1;
+    const currentChannels = db.getChannels();
+    if (currentChannels.length >= maxChannels) {
+      showAlert(t("common.error"), `Sizning tarifingizda kanallar soni cheklangan (Maksimal: ${maxChannels}). Iltimos, tarifingizni yangilang.`);
+      return;
+    }
+
     // Validate token format
     const tokenRegex = /^[0-9]+:[a-zA-Z0-9_-]+$/;
     if (!tokenRegex.test(cleanToken)) {
@@ -149,7 +159,7 @@ export function ConnectChannelModal() {
         const botUsername = getMeData.result.username;
         const botName = getMeData.result.first_name;
 
-        db.addChannel({
+        const newCh = db.addChannel({
           type: "telegram",
           name: botName || botUsername,
           username: botUsername.startsWith("@") ? botUsername : `@${botUsername}`,
@@ -157,6 +167,17 @@ export function ConnectChannelModal() {
           isConnected: true,
           followersCount: "0",
         });
+
+        // Await server-side sync to verify it was saved successfully
+        const saveRes = await db.saveToServer();
+        if (saveRes && !saveRes.success) {
+          // Revert the channel addition locally if server rejected it
+          db.removeChannel(newCh.id);
+          showAlert(t("common.error"), saveRes.error || "Saqlashda xatolik yuz berdi");
+          setSaving(false);
+          return;
+        }
+
         setTgToken("");
         setTgName("");
         setTgUsername("");
