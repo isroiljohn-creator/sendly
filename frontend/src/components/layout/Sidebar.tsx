@@ -24,6 +24,7 @@ import {
   Check,
   Brain,
   Shield,
+  Coins
 } from "lucide-react";
 import { Instagram } from "@/components/ui/icons";
 import type { ComponentType } from "react";
@@ -296,43 +297,6 @@ export function Sidebar() {
           <NavButton key={item.to} item={item} active={isActive(item.to)} />
         ))}
 
-        {/* Compact AI Limits Indicator */}
-        {currentUser && (
-          <div className="group relative grid h-11 w-11 place-items-center rounded-full bg-neutral-50 border border-[#E8E8E8]/60 hover:bg-[#F4F4F5] hover:border-[#D8D8D8]/60 hover:text-black text-[#595959] cursor-pointer transition-all duration-150 active:scale-95 shadow-sm">
-            <Zap size={16} className="text-[#8CB807] fill-[#8CB807]/20 animate-pulse" />
-            
-            {/* Tiny progress bar overlay inside the circle */}
-            <div className="absolute bottom-1.5 w-6 h-1 bg-[#F0F0F0] rounded-full overflow-hidden">
-              <div 
-                className="h-full bg-[#16A34A] rounded-full" 
-                style={{ width: `${credits.balance + credits.used > 0 ? Math.round((credits.balance / (credits.balance + credits.used)) * 100) : 100}%` }}
-              />
-            </div>
-
-            {/* Hover Tooltip - exact design from user's image */}
-            <div className="absolute left-[54px] bottom-0 pointer-events-none opacity-0 translate-x-[-8px] group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-200 ease-out z-50 whitespace-nowrap bg-white p-3.5 rounded-[20px] border border-[#E8E8E8] shadow-[0_8px_30px_rgba(0,0,0,0.08)] flex flex-col gap-1.5 w-[200px]">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-1.5 text-black font-extrabold text-[12px]">
-                  <Zap size={13} className="text-black fill-black" />
-                  <span>AI limiti</span>
-                </div>
-                <span className="text-[12px] text-[#707070] font-bold">
-                  {credits.balance + credits.used > 0 ? Math.round((credits.balance / (credits.balance + credits.used)) * 100) : 100}% qoldi
-                </span>
-              </div>
-              <div className="w-full h-1.5 bg-[#F0F0F0] rounded-full overflow-hidden">
-                <div 
-                  className="h-full bg-[#16A34A] rounded-full transition-all duration-300"
-                  style={{ width: `${credits.balance + credits.used > 0 ? Math.round((credits.balance / (credits.balance + credits.used)) * 100) : 100}%` }}
-                />
-              </div>
-              <div className="text-[9.5px] text-[#A0A0A0] font-bold text-center mt-0.5">
-                Balans: {credits.balance} kredit (~{Math.round(credits.balance / 50)} daqiqa audio)
-              </div>
-            </div>
-          </div>
-        )}
-
         {/* User profile avatar trigger and dropdown */}
         <div className="relative mt-1" ref={profileRef}>
           <button
@@ -365,11 +329,11 @@ export function Sidebar() {
               <div className="px-4 py-2 border-b border-[#F0F0F0] mb-2 flex flex-col gap-1.5">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-1.5 text-black font-extrabold text-[11px]">
-                    <Zap size={12} className="text-black fill-black" />
+                    <Coins size={12} className="text-black fill-black/10" />
                     <span>AI limiti</span>
                   </div>
                   <span className="text-[11px] text-[#707070] font-bold">
-                    {credits.balance + credits.used > 0 ? Math.round((credits.balance / (credits.balance + credits.used)) * 100) : 100}% qoldi
+                    {credits.balance} kredit
                   </span>
                 </div>
                 <div className="w-full h-1.5 bg-[#F0F0F0] rounded-full overflow-hidden">

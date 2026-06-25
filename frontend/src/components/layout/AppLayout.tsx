@@ -400,11 +400,11 @@ export function AppLayout({ children }: { children: ReactNode }) {
             <div className="mt-8 bg-neutral-50/50 border border-neutral-100 rounded-2xl p-4 flex flex-col gap-2">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-1.5 text-black font-extrabold text-[12px]">
-                  <Zap size={13} className="text-black fill-black animate-pulse" />
+                  <Coins size={13} className="text-black fill-black/10" />
                   <span>AI limiti</span>
                 </div>
                 <span className="text-[12px] text-[#707070] font-bold">
-                  {credits.balance + credits.used > 0 ? Math.round((credits.balance / (credits.balance + credits.used)) * 100) : 100}% qoldi
+                  {credits.balance} kredit
                 </span>
               </div>
               <div className="w-full h-1.5 bg-[#F0F0F0] rounded-full overflow-hidden">
