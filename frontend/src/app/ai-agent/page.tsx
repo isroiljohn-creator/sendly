@@ -1250,6 +1250,58 @@ function AIAgentContent() {
     const audioExtensions = ["mp3", "wav", "m4a", "ogg", "wma", "amr", "flac", "aac", "mp4", "m4v"];
     const isAudio = audioExtensions.includes(ext || "") || file.type.startsWith("audio/");
     
+    let audioDuration = 0;
+    let creditCost = 0;
+    let durationInMinutes = 0;
+
+    // Check credits for audio files (10 minutes = 5000 UZS = 500 credits -> 50 credits/minute)
+    if (isAudio) {
+      setIsFileUploading(true);
+      try {
+        audioDuration = await new Promise<number>((resolve) => {
+          const audio = new Audio();
+          audio.src = URL.createObjectURL(file);
+          audio.addEventListener('loadedmetadata', () => {
+            resolve(audio.duration || 0);
+          });
+          audio.addEventListener('error', () => {
+            resolve(0); // fallback
+          });
+        });
+      } catch (e) {
+        audioDuration = 0;
+      } finally {
+        setIsFileUploading(false);
+      }
+
+      durationInMinutes = Math.max(1, audioDuration / 60);
+      creditCost = Math.ceil(durationInMinutes * 50);
+
+      // Check current user credit balance
+      let currentBalance = 0;
+      const localCredits = localStorage.getItem("replai_ai_credits_data");
+      if (localCredits) {
+        try {
+          const parsed = JSON.parse(localCredits);
+          currentBalance = parsed.balance || 0;
+        } catch (e) {
+          // ignore
+        }
+      }
+
+      const userId = db.getCurrentUser()?.id || "guest";
+      if (userId !== "guest" && currentBalance < creditCost) {
+        showToast(
+          (t("pages.ai_agent.toasts.insufficient_credits_audio") || `Balansingizda yetarli kredit mavjud emas. Audio transkripsiya qilish uchun kamida {cost} ta kredit (5,000 so'm/10 daqiqa) talab qilinadi. Sizda: {balance} ta kredit.`)
+            .replace("{cost}", creditCost.toString())
+            .replace("{balance}", currentBalance.toString()),
+          "error"
+        );
+        if (fileInputRef.current) fileInputRef.current.value = "";
+        return;
+      }
+    }
+
     // Determine target API endpoint
     const endpoint = isAudio ? "/api/ai/transcribe-audio" : "/api/ai/parse-document";
 
@@ -1293,7 +1345,30 @@ function AIAgentContent() {
       const data = await res.json();
       const extractedText = data.text;
 
-      // 3. Create default module if none exists
+      // 3. Deduct credits for audio files
+      if (isAudio) {
+        const userId = db.getCurrentUser()?.id || "guest";
+        if (userId !== "guest") {
+          const token = localStorage.getItem("replai_token");
+          const headers: Record<string, string> = { "Content-Type": "application/json" };
+          if (token) {
+            headers["Authorization"] = `Bearer ${token}`;
+          }
+          await fetch(`/api/credits?userId=${userId}`, {
+            method: "POST",
+            headers,
+            body: JSON.stringify({
+              action: "deduct",
+              amount: creditCost,
+              description: `Audio dars transkripsiyasi: "${fileName}" (${Math.ceil(durationInMinutes)} daqiqa)`
+            })
+          });
+          // Refresh local credits data
+          await db.getAiCreditsFromServer(userId);
+        }
+      }
+
+      // 4. Create default module if none exists
       let targetModuleId = "";
       if (modules.length === 0) {
         const defaultModuleName = t("pages.ai_agent.default_module_name") || "Asosiy materiallar";
