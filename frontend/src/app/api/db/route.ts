@@ -493,7 +493,10 @@ export async function POST(request: Request) {
           let creditsData = { balance: 100, used: 0, history: [] as any[] };
           if (dbData.userData[userId]["replai_ai_credits_data"]) {
             try {
-              creditsData = JSON.parse(dbData.userData[userId]["replai_ai_credits_data"]);
+              const rawCreds = dbData.userData[userId]["replai_ai_credits_data"];
+              creditsData = typeof rawCreds === "string"
+                ? JSON.parse(rawCreds)
+                : rawCreds;
             } catch {
               // ignore
             }

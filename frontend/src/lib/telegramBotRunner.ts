@@ -8,6 +8,18 @@ import * as pgdb from "./pgdb";
 
 const DB_FILE = process.env.DB_FILE_PATH || path.join(process.cwd(), "db.json");
 
+function safeParse(val: any, fallback: any = null) {
+  if (val === undefined || val === null) return fallback;
+  if (typeof val === "string") {
+    try {
+      return JSON.parse(val);
+    } catch {
+      return fallback;
+    }
+  }
+  return val;
+}
+
 interface ChatMessage {
   id: string;
   sender: "user" | "bot" | "agent";
@@ -215,7 +227,7 @@ export async function handleTelegramUpdate(channelId: string, token: string, upd
             for (const userVal of Object.values(dbData.userData)) {
               if (userVal && typeof userVal === "object") {
                 const rawUserChannels = (userVal as Record<string, string>)["replai_channels"];
-                const userChannels: Channel[] = rawUserChannels ? JSON.parse(rawUserChannels) : [];
+                const userChannels: Channel[] = safeParse(rawUserChannels, []);
                 const foundChIdx = userChannels.findIndex(c => c.id === channelId);
                 if (foundChIdx > -1) {
                   const ch = userChannels[foundChIdx];
@@ -245,7 +257,7 @@ export async function handleTelegramUpdate(channelId: string, token: string, upd
             for (const userVal of Object.values(dbData.userData)) {
               if (userVal && typeof userVal === "object") {
                 const rawUserChannels = (userVal as Record<string, string>)["replai_channels"];
-                const userChannels: Channel[] = rawUserChannels ? JSON.parse(rawUserChannels) : [];
+                const userChannels: Channel[] = safeParse(rawUserChannels, []);
                 const foundChIdx = userChannels.findIndex(c => c.id === channelId);
                 if (foundChIdx > -1) {
                   const ch = userChannels[foundChIdx];
@@ -310,7 +322,7 @@ export async function handleTelegramUpdate(channelId: string, token: string, upd
           for (const userVal of Object.values(dbData.userData)) {
             if (userVal && typeof userVal === "object") {
               const rawUserChannels = (userVal as Record<string, string>)["replai_channels"];
-              const userChannels: Channel[] = rawUserChannels ? JSON.parse(rawUserChannels) : [];
+              const userChannels: Channel[] = safeParse(rawUserChannels, []);
               if (userChannels.some(c => c.id === targetChannelId)) {
                 context = userVal as Record<string, string>;
                 matched = true;
@@ -370,7 +382,7 @@ export async function handleTelegramUpdate(channelId: string, token: string, upd
           for (const [userId, userVal] of Object.entries(dbData.userData)) {
             if (userVal && typeof userVal === "object") {
               const rawUserChannels = (userVal as Record<string, string>)["replai_channels"];
-              const userChannels: Channel[] = rawUserChannels ? JSON.parse(rawUserChannels) : [];
+              const userChannels: Channel[] = safeParse(rawUserChannels, []);
               if (userChannels.some(c => c.id === channelId)) {
                 context = userVal as Record<string, string>;
                 matchedUserId = userId;
@@ -391,7 +403,7 @@ export async function handleTelegramUpdate(channelId: string, token: string, upd
         }
         
         const rawSettings = context[`replai_bot_settings_${channelId}`];
-        const settings: BotSettings = rawSettings ? JSON.parse(rawSettings) : {
+        const settings: BotSettings = safeParse(rawSettings, {
           tone: 60,
           length: 40,
           humor: 30,
@@ -401,7 +413,7 @@ export async function handleTelegramUpdate(channelId: string, token: string, upd
           outreachStart: "09:00",
           outreachEnd: "21:00",
           escalationRules: []
-        };
+        });
         
         settings.adminTelegramChatId = String(chatId);
         settings.adminTelegramUsername = username || firstName || "Admin";
@@ -433,7 +445,7 @@ export async function handleTelegramUpdate(channelId: string, token: string, upd
         for (const userVal of Object.values(dbData.userData)) {
           if (userVal && typeof userVal === "object") {
             const rawUserChannels = (userVal as Record<string, string>)["replai_channels"];
-            const userChannels: Channel[] = rawUserChannels ? JSON.parse(rawUserChannels) : [];
+            const userChannels: Channel[] = safeParse(rawUserChannels, []);
             if (userChannels.some(c => c.id === channelId)) {
               context = userVal as Record<string, string>;
               break;
@@ -445,7 +457,7 @@ export async function handleTelegramUpdate(channelId: string, token: string, upd
       // 1. Get chats key
       const chatsKey = `replai_chats_${channelId}`;
       const rawChats = context[chatsKey];
-      const chatsList: ChatThread[] = rawChats ? JSON.parse(rawChats) : [];
+      const chatsList: ChatThread[] = safeParse(rawChats, []);
       
       // 2. Find or create chat
       let chat = chatsList.find((c: ChatThread) => c.id === String(chatId));
@@ -487,7 +499,7 @@ export async function handleTelegramUpdate(channelId: string, token: string, upd
       if (!chat.liveTakeover) {
         // Load Settings
         const rawSettings = context[`replai_bot_settings_${channelId}`];
-        const settings: BotSettings = rawSettings ? JSON.parse(rawSettings) : {
+        const settings: BotSettings = safeParse(rawSettings, {
           tone: 60,
           length: 40,
           humor: 30,
@@ -497,7 +509,7 @@ export async function handleTelegramUpdate(channelId: string, token: string, upd
           outreachStart: "09:00",
           outreachEnd: "21:00",
           escalationRules: []
-        };
+        });
 
         // 1. Moderate message
         const moderation = moderateMessage(text, settings.topics || []);
@@ -508,7 +520,7 @@ export async function handleTelegramUpdate(channelId: string, token: string, upd
         } else {
           // 2. Check keyword automations
           const rawAutos = context[`replai_automations_${channelId}`];
-          const automations: Automation[] = rawAutos ? JSON.parse(rawAutos) : [];
+          const automations: Automation[] = safeParse(rawAutos, []);
           let matchedAutomation: Automation | null = null;
           let matchedKeyword = "";
           
@@ -579,19 +591,13 @@ export async function handleTelegramUpdate(channelId: string, token: string, upd
           } else if (settings.aiCuratorEnabled && settings.telegramBotId === channelId) {
             // 3. AI Curator RAG Logic
             const rawLessons = context["replai_lessons"];
-            const lessons: Lesson[] = rawLessons ? JSON.parse(rawLessons) : [];
+            const lessons: Lesson[] = safeParse(rawLessons, []);
             const rawModules = context["replai_modules"];
-            const modules: Module[] = rawModules ? JSON.parse(rawModules) : [];
+            const modules: Module[] = safeParse(rawModules, []);
 
             let credits = { balance: 100, used: 0, history: [] as any[] };
             if (context["replai_ai_credits_data"]) {
-              try {
-                credits = typeof context["replai_ai_credits_data"] === "string"
-                  ? JSON.parse(context["replai_ai_credits_data"])
-                  : context["replai_ai_credits_data"];
-              } catch (e) {
-                console.error("Failed to parse credits data in runner", e);
-              }
+              credits = safeParse(context["replai_ai_credits_data"], { balance: 100, used: 0, history: [] });
             }
 
             if ((credits.balance || 0) < 5) {
@@ -608,7 +614,7 @@ export async function handleTelegramUpdate(channelId: string, token: string, upd
                   for (const userVal of Object.values(dbData.userData)) {
                     if (userVal && typeof userVal === "object") {
                       const rawUserChannels = (userVal as Record<string, string>)["replai_channels"];
-                      const userChannels: Channel[] = rawUserChannels ? JSON.parse(rawUserChannels) : [];
+                      const userChannels: Channel[] = safeParse(rawUserChannels, []);
                       const ch = userChannels.find(c => c.id === channelId);
                       if (ch) {
                         channelUsername = ch.username;
@@ -619,7 +625,7 @@ export async function handleTelegramUpdate(channelId: string, token: string, upd
                 }
                 if (!channelUsername) {
                   const rawChannels = dbData["replai_channels"];
-                  const legacyChannels: Channel[] = rawChannels ? JSON.parse(rawChannels) : [];
+                  const legacyChannels: Channel[] = safeParse(rawChannels, []);
                   const ch = legacyChannels.find(c => c.id === channelId);
                   if (ch) {
                     channelUsername = ch.username;
@@ -725,7 +731,7 @@ export async function handleTelegramUpdate(channelId: string, token: string, upd
                       for (const userVal of Object.values(dbData.userData)) {
                         if (userVal && typeof userVal === "object") {
                           const rawUserChannels = (userVal as Record<string, string>)["replai_channels"];
-                          const userChannels: Channel[] = rawUserChannels ? JSON.parse(rawUserChannels) : [];
+                          const userChannels: Channel[] = safeParse(rawUserChannels, []);
                           const ch = userChannels.find(c => c.id === channelId);
                           if (ch) {
                             channelUsername = ch.username;
@@ -736,7 +742,7 @@ export async function handleTelegramUpdate(channelId: string, token: string, upd
                     }
                     if (!channelUsername) {
                       const rawChannels = dbData["replai_channels"];
-                      const legacyChannels: Channel[] = rawChannels ? JSON.parse(rawChannels) : [];
+                      const legacyChannels: Channel[] = safeParse(rawChannels, []);
                       const ch = legacyChannels.find(c => c.id === channelId);
                       if (ch) {
                         channelUsername = ch.username;
@@ -810,7 +816,7 @@ export async function handleTelegramUpdate(channelId: string, token: string, upd
       // 5. Update CRM Contacts list with parsed lead information (phone, email, company name)
       const contactsKey = "replai_contacts";
       const rawContacts = context[contactsKey];
-      let contactsList: any[] = rawContacts ? JSON.parse(rawContacts) : [];
+      let contactsList: any[] = safeParse(rawContacts, []);
       if (!Array.isArray(contactsList)) {
         contactsList = [];
       }
@@ -904,7 +910,7 @@ async function checkAndRunAutoOutreach(channelId: string, token: string) {
         for (const userVal of Object.values(dbData.userData)) {
           if (userVal && typeof userVal === "object") {
             const rawUserChannels = (userVal as Record<string, string>)["replai_channels"];
-            const userChannels: Channel[] = rawUserChannels ? JSON.parse(rawUserChannels) : [];
+            const userChannels: Channel[] = safeParse(rawUserChannels, []);
             if (userChannels.some(c => c.id === channelId)) {
               context = userVal as Record<string, string>;
               break;
@@ -916,8 +922,8 @@ async function checkAndRunAutoOutreach(channelId: string, token: string) {
       // Check if bot settings enable autoOutreach
       const rawSettings = context[`replai_bot_settings_${channelId}`];
       if (!rawSettings) return;
-      const settings: BotSettings = JSON.parse(rawSettings);
-      if (!settings.autoOutreach) return;
+      const settings: BotSettings = safeParse(rawSettings, null);
+      if (!settings || !settings.autoOutreach) return;
 
       // Check active hours
       const now = new Date();
@@ -938,19 +944,15 @@ async function checkAndRunAutoOutreach(channelId: string, token: string) {
       const chatsKey = `replai_chats_${channelId}`;
       const rawChats = context[chatsKey];
       if (!rawChats) return;
-      const chatsList: ChatThread[] = JSON.parse(rawChats);
+      const chatsList: ChatThread[] = safeParse(rawChats, []);
 
       let credits = { balance: 100, used: 0, history: [] as any[] };
       if (context["replai_ai_credits_data"]) {
-        try {
-          credits = JSON.parse(context["replai_ai_credits_data"]);
-        } catch (e) {
-          // ignore
-        }
+        credits = safeParse(context["replai_ai_credits_data"], { balance: 100, used: 0, history: [] });
       }
 
-      const lessons: Lesson[] = context["replai_lessons"] ? JSON.parse(context["replai_lessons"]) : [];
-      const modules: Module[] = context["replai_modules"] ? JSON.parse(context["replai_modules"]) : [];
+      const lessons: Lesson[] = safeParse(context["replai_lessons"], []);
+      const modules: Module[] = safeParse(context["replai_modules"], []);
 
       let hasUpdates = false;
 
@@ -1124,7 +1126,7 @@ export async function startTelegramBots() {
     const activeTelegramChannels: Channel[] = [];
     
     const rawChannels = dbData["replai_channels"];
-    const legacyChannels: Channel[] = rawChannels ? JSON.parse(rawChannels) : [];
+    const legacyChannels: Channel[] = safeParse(rawChannels, []);
     legacyChannels.forEach((c: Channel) => {
       if (c.type === "telegram" && c.isConnected && c.telegramToken) {
         activeTelegramChannels.push(c);
@@ -1135,7 +1137,7 @@ export async function startTelegramBots() {
       Object.values(dbData.userData).forEach((userVal: unknown) => {
         if (userVal && typeof userVal === "object") {
           const rawUserChannels = (userVal as Record<string, string>)["replai_channels"];
-          const userChannels: Channel[] = rawUserChannels ? JSON.parse(rawUserChannels) : [];
+          const userChannels: Channel[] = safeParse(rawUserChannels, []);
           userChannels.forEach((c: Channel) => {
             if (c.type === "telegram" && c.isConnected && c.telegramToken) {
               if (!activeTelegramChannels.some(ac => ac.id === c.id)) {

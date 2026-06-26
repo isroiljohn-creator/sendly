@@ -25,6 +25,18 @@ function writeDb(data: any) {
   }
 }
 
+function safeParse(val: any, fallback: any = null) {
+  if (val === undefined || val === null) return fallback;
+  if (typeof val === "string") {
+    try {
+      return JSON.parse(val);
+    } catch {
+      return fallback;
+    }
+  }
+  return val;
+}
+
 const tools = [
   {
     name: "get_analytics",
@@ -113,13 +125,13 @@ async function executeTool(tool: string, args: any, userId: string): Promise<any
 
     switch (tool) {
       case "get_analytics": {
-        const credits = context.replai_ai_credits_data ? (typeof context.replai_ai_credits_data === "string" ? JSON.parse(context.replai_ai_credits_data) : context.replai_ai_credits_data) : { balance: 0 };
-        const userChannels = context.replai_channels ? (typeof context.replai_channels === "string" ? JSON.parse(context.replai_channels) : context.replai_channels) : [];
+        const credits = safeParse(context.replai_ai_credits_data, { balance: 0 });
+        const userChannels = safeParse(context.replai_channels, []);
         
         let totalChatsCount = 0;
         for (const ch of userChannels) {
           const list = context[`replai_chats_${ch.id}`];
-          const parsed = list ? (typeof list === "string" ? JSON.parse(list) : list) : [];
+          const parsed = safeParse(list, []);
           totalChatsCount += parsed.length;
         }
 
@@ -133,19 +145,19 @@ async function executeTool(tool: string, args: any, userId: string): Promise<any
 
       case "list_contacts": {
         const rawContacts = context.replai_contacts;
-        const contacts = rawContacts ? (typeof rawContacts === "string" ? JSON.parse(rawContacts) : rawContacts) : [];
+        const contacts = safeParse(rawContacts, []);
         return { contacts };
       }
 
       case "get_chats": {
         const channelId = args?.channelId;
-        const userChannels = context.replai_channels ? (typeof context.replai_channels === "string" ? JSON.parse(context.replai_channels) : context.replai_channels) : [];
+        const userChannels = safeParse(context.replai_channels, []);
         
         const chats: Record<string, any> = {};
         for (const ch of userChannels) {
           if (channelId && ch.id !== channelId) continue;
           const chatKey = `replai_chats_${ch.id}`;
-          chats[ch.id] = context[chatKey] ? (typeof context[chatKey] === "string" ? JSON.parse(context[chatKey]) : context[chatKey]) : [];
+          chats[ch.id] = safeParse(context[chatKey], []);
         }
         return { chats };
       }
@@ -157,7 +169,7 @@ async function executeTool(tool: string, args: any, userId: string): Promise<any
         }
         const chatKey = `replai_chats_${channelId}`;
         const rawChats = context[chatKey];
-        const chatsList = rawChats ? (typeof rawChats === "string" ? JSON.parse(rawChats) : rawChats) : [];
+        const chatsList = safeParse(rawChats, []);
         const thread = chatsList.find((c: any) => c.id === String(chatId));
         return { thread: thread || null };
       }
@@ -168,7 +180,7 @@ async function executeTool(tool: string, args: any, userId: string): Promise<any
           throw new Error("Missing parameters channelId, chatId, or text");
         }
 
-        const userChannels = context.replai_channels ? (typeof context.replai_channels === "string" ? JSON.parse(context.replai_channels) : context.replai_channels) : [];
+        const userChannels = safeParse(context.replai_channels, []);
         const targetChannel = userChannels.find((c: any) => c.id === channelId);
         if (!targetChannel) throw new Error("Channel not found");
 
@@ -183,7 +195,7 @@ async function executeTool(tool: string, args: any, userId: string): Promise<any
 
         const chatKey = `replai_chats_${channelId}`;
         const rawChats = context[chatKey];
-        const chatsList = rawChats ? (typeof rawChats === "string" ? JSON.parse(rawChats) : rawChats) : [];
+        const chatsList = safeParse(rawChats, []);
         let thread = chatsList.find((c: any) => c.id === String(chatId));
         if (thread) {
           thread.messages.push({
@@ -213,13 +225,13 @@ async function executeTool(tool: string, args: any, userId: string): Promise<any
 
     switch (tool) {
       case "get_analytics": {
-        const credits = context.replai_ai_credits_data ? JSON.parse(context.replai_ai_credits_data) : { balance: 0 };
-        const userChannels = context.replai_channels ? JSON.parse(context.replai_channels) : [];
+        const credits = safeParse(context.replai_ai_credits_data, { balance: 0 });
+        const userChannels = safeParse(context.replai_channels, []);
         
         let totalChatsCount = 0;
         for (const ch of userChannels) {
           const list = context[`replai_chats_${ch.id}`];
-          const parsed = list ? JSON.parse(list) : [];
+          const parsed = safeParse(list, []);
           totalChatsCount += parsed.length;
         }
 
@@ -233,19 +245,19 @@ async function executeTool(tool: string, args: any, userId: string): Promise<any
 
       case "list_contacts": {
         const rawContacts = context.replai_contacts;
-        const contacts = rawContacts ? JSON.parse(rawContacts) : [];
+        const contacts = safeParse(rawContacts, []);
         return { contacts };
       }
 
       case "get_chats": {
         const channelId = args?.channelId;
-        const userChannels = context.replai_channels ? JSON.parse(context.replai_channels) : [];
+        const userChannels = safeParse(context.replai_channels, []);
         
         const chats: Record<string, any> = {};
         for (const ch of userChannels) {
           if (channelId && ch.id !== channelId) continue;
           const chatKey = `replai_chats_${ch.id}`;
-          chats[ch.id] = context[chatKey] ? JSON.parse(context[chatKey]) : [];
+          chats[ch.id] = safeParse(context[chatKey], []);
         }
         return { chats };
       }
@@ -257,7 +269,7 @@ async function executeTool(tool: string, args: any, userId: string): Promise<any
         }
         const chatKey = `replai_chats_${channelId}`;
         const rawChats = context[chatKey];
-        const chatsList = rawChats ? JSON.parse(rawChats) : [];
+        const chatsList = safeParse(rawChats, []);
         const thread = chatsList.find((c: any) => c.id === String(chatId));
         return { thread: thread || null };
       }
@@ -268,7 +280,7 @@ async function executeTool(tool: string, args: any, userId: string): Promise<any
           throw new Error("Missing parameters channelId, chatId, or text");
         }
 
-        const userChannels = context.replai_channels ? JSON.parse(context.replai_channels) : [];
+        const userChannels = safeParse(context.replai_channels, []);
         const targetChannel = userChannels.find((c: any) => c.id === channelId);
         if (!targetChannel) throw new Error("Channel not found");
 
@@ -283,7 +295,7 @@ async function executeTool(tool: string, args: any, userId: string): Promise<any
 
         const chatKey = `replai_chats_${channelId}`;
         const rawChats = context[chatKey];
-        const chatsList = rawChats ? JSON.parse(rawChats) : [];
+        const chatsList = safeParse(rawChats, []);
         let thread = chatsList.find((c: any) => c.id === String(chatId));
         if (thread) {
           thread.messages.push({
