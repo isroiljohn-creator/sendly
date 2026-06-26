@@ -586,19 +586,56 @@ export async function handleTelegramUpdate(channelId: string, token: string, upd
             let credits = { balance: 100, used: 0, history: [] as any[] };
             if (context["replai_ai_credits_data"]) {
               try {
-                credits = JSON.parse(context["replai_ai_credits_data"]);
+                credits = typeof context["replai_ai_credits_data"] === "string"
+                  ? JSON.parse(context["replai_ai_credits_data"])
+                  : context["replai_ai_credits_data"];
               } catch (e) {
                 console.error("Failed to parse credits data in runner", e);
               }
             }
 
             if ((credits.balance || 0) < 5) {
-              botReplyText =
+              const errMsg =
                 userLang === "en"
                   ? "You do not have enough AI credits on your account. Please top up your AI credits balance in your replai.uz panel."
                   : userLang === "ru"
                   ? "На вашем балансе недостаточно AI кредитов. Пожалуйста, пополните баланс AI кредитов в личном кабинете replai.uz."
                   : "Hisobingizda AI kreditlar yetarli emas. Iltimos, replai.uz hisobingiz orqali AI kreditlarni to'ldiring.";
+
+              if (settings.adminTelegramChatId) {
+                let channelUsername = "";
+                if (dbData.userData && typeof dbData.userData === "object") {
+                  for (const userVal of Object.values(dbData.userData)) {
+                    if (userVal && typeof userVal === "object") {
+                      const rawUserChannels = (userVal as Record<string, string>)["replai_channels"];
+                      const userChannels: Channel[] = rawUserChannels ? JSON.parse(rawUserChannels) : [];
+                      const ch = userChannels.find(c => c.id === channelId);
+                      if (ch) {
+                        channelUsername = ch.username;
+                        break;
+                      }
+                    }
+                  }
+                }
+                if (!channelUsername) {
+                  const rawChannels = dbData["replai_channels"];
+                  const legacyChannels: Channel[] = rawChannels ? JSON.parse(rawChannels) : [];
+                  const ch = legacyChannels.find(c => c.id === channelId);
+                  if (ch) {
+                    channelUsername = ch.username;
+                  }
+                }
+
+                const sysToken = process.env.SYSTEM_BOT_TOKEN || process.env.TELEGRAM_BOT_TOKEN;
+                const notifyToken = sysToken || token;
+                const channelInfoStr = channelUsername ? ` (@${channelUsername.replace(/^@+/, "")})` : "";
+                
+                const adminNotification = `⚠️ [Sendly AI Balans]${channelInfoStr}:\n\n${errMsg}`;
+                sendTelegramMessage(notifyToken, settings.adminTelegramChatId, adminNotification)
+                  .catch(err => console.error("Failed to notify admin on Telegram about low credits:", err));
+              }
+
+              botReplyText = "";
             } else {
               const studentName = chat.name || "Talaba";
               const chatHistory = chat.messages
