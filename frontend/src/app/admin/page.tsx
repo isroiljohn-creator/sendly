@@ -330,6 +330,22 @@ export default function AdminPage() {
   };
 
   const [activeTab, setActiveTab] = useState<"overview" | "users" | "agents" | "promos" | "referrals" | "bots" | "logs">("overview");
+
+  // Preserve activeTab state on reload
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const savedTab = localStorage.getItem("admin_active_tab");
+      if (savedTab && ["overview", "users", "agents", "promos", "referrals", "bots", "logs"].includes(savedTab)) {
+        setActiveTab(savedTab as any);
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      localStorage.setItem("admin_active_tab", activeTab);
+    }
+  }, [activeTab]);
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
 

@@ -259,6 +259,23 @@ function AIAgentContent() {
 
   const [sliderPreviewType, setSliderPreviewType] = useState<"tone" | "length" | "humor">("tone");
   const [activeTab, setActiveTab] = useState<"settings" | "knowledge" | "analytics">("settings");
+
+  // Preserve activeTab state on reload
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const savedTab = localStorage.getItem("ai_agent_active_tab");
+      if (savedTab && (savedTab === "settings" || savedTab === "knowledge" || savedTab === "analytics")) {
+        setActiveTab(savedTab as any);
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      localStorage.setItem("ai_agent_active_tab", activeTab);
+    }
+  }, [activeTab]);
+
   const [searchQuery, setSearchQuery] = useState("");
 
   // Telegram Connect Modal States

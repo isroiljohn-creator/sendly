@@ -53,6 +53,22 @@ export default function SettingsPage() {
   };
   const [activeSection, setActiveSection] = useState<string>("general");
 
+  // Preserve activeSection state on reload
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const savedSection = localStorage.getItem("settings_active_section");
+      if (savedSection) {
+        setActiveSection(savedSection);
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      localStorage.setItem("settings_active_section", activeSection);
+    }
+  }, [activeSection]);
+
   // User state
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [apiKey, setApiKey] = useState("");
