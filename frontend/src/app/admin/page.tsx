@@ -38,7 +38,7 @@ const LOCAL_TRANSLATIONS: Record<string, Record<string, string>> = {
     logs: "Tizim loglari",
     totalUsers: "Jami foydalanuvchilar",
     totalUsersDesc: "Ro'yxatdan o'tgan jami hisoblar",
-    premiumProSubscriptions: "Premium / Pro obunalar",
+    premiumProSubscriptions: "VIP / Premium / Pro obunalar",
     premiumProSubscriptionsDesc: "Faol to'lov qiluvchi foydalanuvchilar",
     connectedChatbots: "Ulangan chatbotlar",
     connectedChatbotsDesc: "Faol Telegram va Instagram ulanishlari",
@@ -135,7 +135,7 @@ const LOCAL_TRANSLATIONS: Record<string, Record<string, string>> = {
     logs: "Системные логи",
     totalUsers: "Всего пользователей",
     totalUsersDesc: "Всего зарегистрированных аккаунтов",
-    premiumProSubscriptions: "Подписки Premium / Pro",
+    premiumProSubscriptions: "Подписки VIP / Premium / Pro",
     premiumProSubscriptionsDesc: "Активные платящие пользователи",
     connectedChatbots: "Подключенные чат-боты",
     connectedChatbotsDesc: "Активные Telegram и Instagram подключения",
@@ -232,7 +232,7 @@ const LOCAL_TRANSLATIONS: Record<string, Record<string, string>> = {
     logs: "System Logs",
     totalUsers: "Total Users",
     totalUsersDesc: "Total registered accounts",
-    premiumProSubscriptions: "Premium / Pro Subscriptions",
+    premiumProSubscriptions: "VIP / Premium / Pro Subscriptions",
     premiumProSubscriptionsDesc: "Active paying users",
     connectedChatbots: "Connected Chatbots",
     connectedChatbotsDesc: "Active Telegram & Instagram connections",
@@ -809,7 +809,7 @@ export default function AdminPage() {
                     </div>
                     <div className="mt-4">
                       <div className="text-[28px] md:text-[32px] font-black text-black leading-none">
-                        {stats?.activePremiumCount ?? 0} / {stats?.activeProCount ?? 0}
+                        {stats?.activeVipCount ?? 0} / {stats?.activePremiumCount ?? 0} / {stats?.activeProCount ?? 0}
                       </div>
                       <div className="mt-1.5 text-[10px] text-[#707070]">{tr("premiumProSubscriptionsDesc")}</div>
                     </div>
@@ -989,7 +989,8 @@ export default function AdminPage() {
                               <div className="font-bold text-[12.5px] text-black flex items-center gap-1.5 truncate">
                                 {u.fullName || "Foydalanuvchi"}
                                 <span className={`text-[8.5px] font-black px-1.5 py-0.5 rounded-full uppercase shrink-0 ${
-                                  u.plan === "premium" ? "bg-black text-[#C7F33C]" :
+                                  u.plan === "vip" ? "bg-black text-[#C7F33C] border border-[#C7F33C]" :
+                                  u.plan === "premium" ? "bg-black text-white" :
                                   u.plan === "pro" ? "bg-blue-100 text-blue-800" : "bg-gray-100 text-gray-500"
                                 }`}>
                                   {u.plan}
@@ -1023,7 +1024,7 @@ export default function AdminPage() {
                     <div className="flex justify-between items-center py-2 text-[12.5px] font-extrabold mt-2">
                       <span className="text-black">{tr("totalRevenueMonthly")}:</span>
                       <span className="text-black">
-                        {(((stats?.activePremiumCount ?? 0) * 600000) + ((stats?.activeProCount ?? 0) * 75000)).toLocaleString("uz-UZ")} UZS / oy
+                        {(((stats?.activeVipCount ?? 0) * 600000) + ((stats?.activePremiumCount ?? 0) * 150000) + ((stats?.activeProCount ?? 0) * 75000)).toLocaleString("uz-UZ")} UZS / oy
                       </span>
                     </div>
                   </Card>
@@ -1102,7 +1103,8 @@ export default function AdminPage() {
                         </td>
                         <td className="px-6 py-3.5">
                           <span className={`inline-block text-[9px] font-extrabold px-2 py-0.5 rounded-full uppercase ${
-                            u.plan === "premium" ? "bg-black text-[#C7F33C]" :
+                            u.plan === "vip" ? "bg-black text-[#C7F33C] border border-[#C7F33C]" :
+                            u.plan === "premium" ? "bg-black text-white" :
                             u.plan === "pro" ? "bg-blue-100 text-blue-800" :
                             "bg-gray-100 text-gray-500"
                           }`}>
@@ -1421,7 +1423,8 @@ export default function AdminPage() {
                         </td>
                         <td className="py-3.5 px-6">
                           <span className={`inline-block text-[9px] font-bold px-2 py-0.5 rounded-full uppercase ${
-                            ref.plan === "premium" ? "bg-black text-[#C7F33C]" :
+                            ref.plan === "vip" ? "bg-black text-[#C7F33C] border border-[#C7F33C]" :
+                            ref.plan === "premium" ? "bg-black text-white" :
                             ref.plan === "pro" ? "bg-blue-100 text-blue-800" :
                             "bg-gray-100 text-gray-500"
                           }`}>
@@ -1551,6 +1554,7 @@ export default function AdminPage() {
                     <option value="free">FREE Plan</option>
                     <option value="pro">PRO Plan</option>
                     <option value="premium">PREMIUM Plan</option>
+                    <option value="vip">VIP Plan</option>
                   </select>
                   <button
                     onClick={() => handleUpdatePlan(selectedUser.id, manualPlanInput)}

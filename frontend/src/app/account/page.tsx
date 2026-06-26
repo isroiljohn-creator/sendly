@@ -120,7 +120,7 @@ export default function AccountPage() {
         email: "isroiljohnabdullayev@gmail.com",
         isCardLinked: true,
         cardNumber: "Visa, *1402",
-        plan: "premium" as const
+        plan: "vip" as const
       };
       setCurrentUser(mockUser);
       setName(mockUser.fullName);
@@ -398,7 +398,7 @@ export default function AccountPage() {
     showAlert(t("common.cancel"), t("pages.account.billing.card_unlink_success"));
   };
 
-  const handleSelectPlan = (plan: "free" | "pro" | "premium") => {
+  const handleSelectPlan = (plan: "free" | "pro" | "premium" | "vip") => {
     if (plan !== "free" && !currentUser?.isCardLinked) {
       setIsPricingOpen(false);
       setIsLinking(true);
@@ -650,8 +650,8 @@ export default function AccountPage() {
           {activeTab === "billing" && (() => {
             const connectedCount = channelsCount;
             const userPlan = currentUser?.plan || "free";
-            const basePrice = userPlan === "premium" ? 600000 : userPlan === "pro" ? 75000 : 0;
-            const includedChannels = userPlan === "premium" ? 10 : 1;
+            const basePrice = userPlan === "vip" ? 600000 : userPlan === "premium" ? 150000 : userPlan === "pro" ? 75000 : 0;
+            const includedChannels = userPlan === "vip" ? 10 : 1;
             const extraChannels = Math.max(0, connectedCount - includedChannels);
             const extraCost = extraChannels * 150000;
             const totalMonthlyPrice = basePrice + extraCost;
@@ -663,7 +663,7 @@ export default function AccountPage() {
                   <div>
                     <div className="flex items-center gap-3">
                       <h3 className="text-[20px] font-bold text-black">
-                        {userPlan === "premium" ? t("pages.account.billing.premium_plan") : userPlan === "pro" ? t("pages.account.billing.pro_plan") : t("pages.account.billing.free_plan")}
+                        {userPlan === "vip" ? t("pages.account.billing.vip_plan") : userPlan === "premium" ? t("pages.account.billing.premium_plan") : userPlan === "pro" ? t("pages.account.billing.pro_plan") : t("pages.account.billing.free_plan")}
                       </h3>
                     </div>
                     <p className="text-[12px] text-[#707070] mt-1.5">
@@ -962,20 +962,20 @@ export default function AccountPage() {
                 <div>
                   <div className="flex justify-between items-center text-[12px] text-black font-semibold mb-2">
                     <span>{t("pages.account.limits.active_automations")}</span>
-                    <span>{`${activeAutomationsCount} / ${currentUser?.plan === "premium" ? 50 : 5}`}</span>
+                    <span>{`${activeAutomationsCount} / ${currentUser?.plan === "vip" ? 50 : 5}`}</span>
                   </div>
                   <div className="w-full bg-[#E5E5E5] rounded-full h-2 overflow-hidden">
-                    <div className="bg-[#C7F33C] h-full rounded-full" style={{ width: `${Math.min(100, (activeAutomationsCount / (currentUser?.plan === "premium" ? 50 : 5)) * 100)}%` }} />
+                    <div className="bg-[#C7F33C] h-full rounded-full" style={{ width: `${Math.min(100, (activeAutomationsCount / (currentUser?.plan === "vip" ? 50 : 5)) * 100)}%` }} />
                   </div>
                 </div>
 
                 <div>
                   <div className="flex justify-between items-center text-[12px] text-black font-semibold mb-2">
                     <span>{t("pages.account.limits.connected_channels")}</span>
-                    <span>{`${channelsCount} / ${currentUser?.plan === "premium" ? 10 : 1}`}</span>
+                    <span>{`${channelsCount} / ${currentUser?.plan === "vip" ? 10 : 1}`}</span>
                   </div>
                   <div className="w-full bg-[#E5E5E5] rounded-full h-2 overflow-hidden">
-                    <div className="bg-black h-full rounded-full" style={{ width: `${Math.min(100, (channelsCount / (currentUser?.plan === "premium" ? 10 : 1)) * 100)}%` }} />
+                    <div className="bg-black h-full rounded-full" style={{ width: `${Math.min(100, (channelsCount / (currentUser?.plan === "vip" ? 10 : 1)) * 100)}%` }} />
                   </div>
                 </div>
 
@@ -1273,7 +1273,7 @@ export default function AccountPage() {
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
                     {/* Pro Card */}
                     <div className={`rounded-[24px] border p-6 flex flex-col justify-between transition-all ${
                       currentUser?.plan === "pro"
@@ -1306,6 +1306,7 @@ export default function AccountPage() {
                           {[
                             "1 ta ulangan kanal (Instagram / Telegram)",
                             "5 ta faol avtomatlashtirish oqimi",
+                            "1 000 ta bepul AI kreditlari (tokens)",
                             "Barcha asosiy bloklar va triggerlar",
                             "Statistika va tahlillar paneli",
                           ].map((feat) => (
@@ -1334,10 +1335,10 @@ export default function AccountPage() {
                     </div>
 
                     {/* Premium Card */}
-                    <div className={`rounded-[24px] border p-6 flex flex-col justify-between bg-[#0F0F0F] text-white transition-all relative overflow-hidden ${
+                    <div className={`rounded-[24px] border p-6 flex flex-col justify-between transition-all relative overflow-hidden ${
                       currentUser?.plan === "premium"
-                        ? "border-[#C7F33C] ring-2 ring-[#C7F33C]/20"
-                        : "border-white/10 hover:border-white/20"
+                        ? "border-black bg-white ring-2 ring-black/5"
+                        : "border-[#E8E8E8] bg-white hover:border-[#CCCCCC]"
                     }`}>
                       <div className="absolute top-0 right-0 bg-[#C7F33C] text-black text-[9px] font-extrabold uppercase px-3.5 py-1 rounded-bl-[14px]">
                         {t("pages.account.pricing.recommended")}
@@ -1346,10 +1347,70 @@ export default function AccountPage() {
                       <div>
                         <div className="flex justify-between items-start">
                           <div>
-                            <h4 className="text-[16px] font-bold text-[#C7F33C] uppercase tracking-wider">SENDLY PREMIUM</h4>
-                            <p className="text-[11px] text-white/60 mt-1">{t("pages.account.pricing.premium_desc")}</p>
+                            <h4 className="text-[16px] font-bold text-black uppercase tracking-wider">SENDLY PREMIUM</h4>
+                            <p className="text-[11px] text-[#707070] mt-1">{t("pages.account.pricing.premium_desc")}</p>
                           </div>
                           {currentUser?.plan === "premium" && (
+                            <span className="bg-[#EFF2FC] text-black text-[9px] font-bold px-2 py-0.5 rounded-full">
+                              FAOL
+                            </span>
+                          )}
+                        </div>
+                        
+                        <div className="my-6">
+                          <span className="text-[26px] font-black text-black leading-none">
+                            {billingCycle === "monthly" ? "300 000" : "2 880 000"}
+                          </span>
+                          <span className="text-[12px] text-[#707070] ml-1">UZS / {billingCycle === "monthly" ? "oy" : "yil"}</span>
+                        </div>
+
+                        <hr className="border-[#F0F0F0] my-4" />
+
+                        <ul className="flex flex-col gap-3">
+                          {[
+                            "1 ta ulangan kanal (Instagram / Telegram)",
+                            "5 ta faol avtomatlashtirish oqimi",
+                            "30 000 ta bepul AI kreditlari (tokens)",
+                            "Barcha pro imkoniyatlari",
+                            "Statistika va tahlillar paneli",
+                          ].map((feat) => (
+                            <li key={feat} className="flex items-start gap-2 text-[12px] text-[#505050]">
+                              <span className="text-[#10B981] font-bold mt-0.5">✓</span>
+                              <span>{feat}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+
+                      <div className="mt-8">
+                        <button
+                          type="button"
+                          disabled={currentUser?.plan === "premium"}
+                          onClick={() => handleSelectPlan("premium")}
+                          className={`w-full py-3 rounded-full text-[12px] font-bold transition-all active:scale-[0.98] ${
+                            currentUser?.plan === "premium"
+                              ? "bg-[#EFF2FC] text-[#707070] cursor-default"
+                              : "bg-[#EFF2FC] text-black hover:bg-[#e4e8f5]"
+                          }`}
+                        >
+                          {currentUser?.plan === "premium" ? t("pages.account.pricing.current_plan") : t("pages.account.pricing.switch_premium")}
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* VIP Card */}
+                    <div className={`rounded-[24px] border p-6 flex flex-col justify-between bg-[#0F0F0F] text-white transition-all relative overflow-hidden ${
+                      currentUser?.plan === "vip"
+                        ? "border-[#C7F33C] ring-2 ring-[#C7F33C]/20"
+                        : "border-white/10 hover:border-white/20"
+                    }`}>
+                      <div>
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <h4 className="text-[16px] font-bold text-[#C7F33C] uppercase tracking-wider">SENDLY VIP</h4>
+                            <p className="text-[11px] text-white/60 mt-1">{t("pages.account.pricing.vip_desc")}</p>
+                          </div>
+                          {currentUser?.plan === "vip" && (
                             <span className="bg-white/10 text-[#C7F33C] text-[9px] font-bold px-2 py-0.5 rounded-full">
                               FAOL
                             </span>
@@ -1369,6 +1430,7 @@ export default function AccountPage() {
                           {[
                             "10 ta ulangan kanal (Instagram + Telegram)",
                             "50 ta faol avtomatlashtirish oqimi",
+                            "150 000 ta bepul AI kreditlari (tokens)",
                             "Limitsiz Telegram broadcast xabarlari",
                             "Yuqori tezlikdagi serverlar",
                             "24/7 VIP shaxsiy menejer yordami",
@@ -1384,15 +1446,15 @@ export default function AccountPage() {
                       <div className="mt-8">
                         <button
                           type="button"
-                          disabled={currentUser?.plan === "premium"}
-                          onClick={() => handleSelectPlan("premium")}
+                          disabled={currentUser?.plan === "vip"}
+                          onClick={() => handleSelectPlan("vip")}
                           className={`w-full py-3 rounded-full text-[12px] font-bold transition-all active:scale-[0.98] ${
-                            currentUser?.plan === "premium"
+                            currentUser?.plan === "vip"
                               ? "bg-white/10 text-white/40 cursor-default"
                               : "bg-[#C7F33C] text-black hover:bg-[#b0d82f]"
                           }`}
                         >
-                          {currentUser?.plan === "premium" ? t("pages.account.pricing.current_plan") : t("pages.account.pricing.switch_premium")}
+                          {currentUser?.plan === "vip" ? t("pages.account.pricing.current_plan") : t("pages.account.pricing.switch_vip")}
                         </button>
                       </div>
                     </div>

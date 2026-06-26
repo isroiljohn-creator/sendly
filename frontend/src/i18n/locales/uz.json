@@ -274,6 +274,7 @@
         "free_plan": "Bepul reja",
         "pro_plan": "Pro rejasi",
         "premium_plan": "Premium rejasi",
+        "vip_plan": "VIP rejasi",
         "next_payment": "Keyingi to'lov: {date}",
         "upgrade_desc": "Avtomatlashtirish imkoniyatlarini kengaytirish uchun tarifingizni yangilang.",
         "cancel_sub": "Obunani bekor qilish",

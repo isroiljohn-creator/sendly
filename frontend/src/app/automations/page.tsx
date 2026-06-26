@@ -95,7 +95,7 @@ export default function AutomationsPage() {
       // Activating: check active automations limit
       const user = db.getCurrentUser();
       const plan = user?.plan || "free";
-      const maxAutos = plan === "premium" ? 500 : plan === "pro" ? 50 : 2;
+      const maxAutos = plan === "vip" ? 500 : (plan === "premium" || plan === "pro") ? 50 : 2;
       const currentActiveCount = db.getAllAutomations().filter((a) => a.active).length;
 
       if (currentActiveCount >= maxAutos) {
@@ -184,7 +184,7 @@ export default function AutomationsPage() {
 
     const user = db.getCurrentUser();
     const plan = user?.plan || "free";
-    const maxAutos = plan === "premium" ? 500 : plan === "pro" ? 50 : 2;
+    const maxAutos = plan === "vip" ? 500 : (plan === "premium" || plan === "pro") ? 50 : 2;
     const currentActiveCount = db.getAllAutomations().filter((a) => a.active).length;
     const shouldBeActive = currentActiveCount < maxAutos;
 

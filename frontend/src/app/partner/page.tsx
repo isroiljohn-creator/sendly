@@ -22,7 +22,7 @@ type ReferredUser = {
   name: string;
   username: string;
   date: string;
-  plan: "Premium" | "Trial" | "Bepul";
+  plan: "VIP" | "Premium" | "Trial" | "Bepul";
   commission: string;
   status: "Faol" | "Kutilmoqda";
 };
@@ -46,17 +46,21 @@ export default function PartnerPage() {
     const myReferrals = allUsers.filter((u: any) => u.referredBy === user?.id);
 
     const mapped = myReferrals.map((u: any) => {
-      let planLabel: "Premium" | "Trial" | "Bepul" = "Bepul";
+      let planLabel: "VIP" | "Premium" | "Trial" | "Bepul" = "Bepul";
       let commissionVal = "0 UZS";
       let statusVal: "Faol" | "Kutilmoqda" = "Kutilmoqda";
 
-      if (u.plan === "premium") {
+      if (u.plan === "vip") {
+        planLabel = "VIP";
+        commissionVal = "180 000 UZS";
+        statusVal = "Faol";
+      } else if (u.plan === "premium") {
         planLabel = "Premium";
-        commissionVal = "180 000 UZS"; // 30% of 600,000 UZS Premium plan
+        commissionVal = "45 000 UZS";
         statusVal = "Faol";
       } else if (u.plan === "pro") {
         planLabel = "Trial";
-        commissionVal = "22 500 UZS"; // 30% of 75,000 UZS Pro plan
+        commissionVal = "22 500 UZS";
         statusVal = "Faol";
       }
 
@@ -285,6 +289,7 @@ export default function PartnerPage() {
                         <td className="py-3.5 px-6 text-[#707070]">{ref.date}</td>
                         <td className="py-3.5 px-6">
                           <span className={`inline-block text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                            ref.plan === "VIP" ? "bg-black text-[#C7F33C] border border-[#C7F33C]" :
                             ref.plan === "Premium" ? "bg-[#C7F33C]/20 text-[#1A2906]" :
                             ref.plan === "Trial" ? "bg-blue-50 text-blue-600" :
                             "bg-gray-100 text-gray-500"

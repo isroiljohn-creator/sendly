@@ -1,16 +1,16 @@
 # Graph Report - Sendly  (2026-06-26)
 
 ## Corpus Check
-- 170 files · ~452,884 words
+- 170 files · ~453,519 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 930 nodes · 1660 edges · 79 communities (67 shown, 12 thin omitted)
+- 930 nodes · 1660 edges · 78 communities (68 shown, 10 thin omitted)
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS · INFERRED: 2 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `c7f07451`
+- Built from commit: `bdf49b20`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -79,7 +79,6 @@
 - [[_COMMUNITY_Community 66|Community 66]]
 - [[_COMMUNITY_Community 67|Community 67]]
 - [[_COMMUNITY_Community 75|Community 75]]
-- [[_COMMUNITY_Community 78|Community 78]]
 
 ## God Nodes (most connected - your core abstractions)
 1. `useI18n()` - 73 edges
@@ -109,7 +108,7 @@
 - 2-file cycle: `backend/src/services/queue.ts -> backend/src/services/trigger.ts -> backend/src/services/queue.ts`
 - 3-file cycle: `backend/src/services/interpreter.ts -> backend/src/services/queue.ts -> backend/src/services/trigger.ts -> backend/src/services/interpreter.ts`
 
-## Communities (79 total, 12 thin omitted)
+## Communities (78 total, 10 thin omitted)
 
 ### Community 0 - "Community 0"
 Cohesion: 0.05
@@ -124,8 +123,8 @@ Cohesion: 0.08
 Nodes (45): calcGrowthPct(), checkIfUserIsAdmin(), GET(), POST(), readDb(), readRealAnalytics(), writeDb(), acquireFileLock() (+37 more)
 
 ### Community 3 - "Community 3"
-Cohesion: 0.07
-Nodes (16): AccordionContent, AccordionItem, AccordionTrigger, Checkbox, HoverCardContent, Input, PopoverContent, Progress (+8 more)
+Cohesion: 0.06
+Nodes (17): AccordionContent, AccordionItem, AccordionTrigger, Checkbox, HoverCardContent, Input, PopoverContent, Progress (+9 more)
 
 ### Community 4 - "Community 4"
 Cohesion: 0.14
@@ -144,8 +143,8 @@ Cohesion: 0.19
 Nodes (16): getPool(), supabase, AuthenticatedRequest, authMiddleware(), router, router, router, router (+8 more)
 
 ### Community 8 - "Community 8"
-Cohesion: 0.09
-Nodes (27): cn(), AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter(), AlertDialogHeader(), AlertDialogOverlay (+19 more)
+Cohesion: 0.11
+Nodes (24): cn(), AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter(), AlertDialogHeader(), AlertDialogOverlay (+16 more)
 
 ### Community 9 - "Community 9"
 Cohesion: 0.07
@@ -180,8 +179,8 @@ Cohesion: 0.11
 Nodes (18): compilerOptions, allowJs, esModuleInterop, incremental, isolatedModules, jsx, lib, module (+10 more)
 
 ### Community 18 - "Community 18"
-Cohesion: 0.22
-Nodes (8): SheetContent, SheetContentProps, SheetDescription, SheetFooter(), SheetHeader(), SheetOverlay, SheetTitle, sheetVariants
+Cohesion: 0.15
+Nodes (11): Badge(), BadgeProps, badgeVariants, SheetContent, SheetContentProps, SheetDescription, SheetFooter(), SheetHeader() (+3 more)
 
 ### Community 19 - "Community 19"
 Cohesion: 0.12
@@ -323,15 +322,19 @@ Nodes (3): Avatar, AvatarFallback, AvatarImage
 Cohesion: 0.40
 Nodes (4): Alert, AlertDescription, AlertTitle, alertVariants
 
+### Community 75 - "Community 75"
+Cohesion: 0.50
+Nodes (3): TabsContent, TabsList, TabsTrigger
+
 ## Knowledge Gaps
 - **413 isolated node(s):** `name`, `version`, `description`, `main`, `dev` (+408 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **12 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **10 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `cn()` connect `Community 8` to `Community 3`, `Community 4`, `Community 5`, `Community 16`, `Community 18`, `Community 19`, `Community 20`, `Community 22`, `Community 23`, `Community 24`, `Community 28`, `Community 29`, `Community 32`, `Community 35`, `Community 36`, `Community 37`, `Community 43`, `Community 44`, `Community 48`, `Community 49`, `Community 53`, `Community 54`, `Community 75`, `Community 78`?**
+- **Why does `cn()` connect `Community 8` to `Community 3`, `Community 4`, `Community 5`, `Community 16`, `Community 18`, `Community 19`, `Community 20`, `Community 22`, `Community 23`, `Community 24`, `Community 28`, `Community 29`, `Community 32`, `Community 35`, `Community 36`, `Community 37`, `Community 43`, `Community 44`, `Community 48`, `Community 49`, `Community 53`, `Community 54`, `Community 75`?**
   _High betweenness centrality (0.149) - this node is a cross-community bridge._
 - **Why does `Channel` connect `Community 4` to `Community 0`, `Community 11`, `Community 12`, `Community 52`, `Community 22`?**
   _High betweenness centrality (0.036) - this node is a cross-community bridge._

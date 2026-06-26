@@ -274,6 +274,7 @@
         "free_plan": "Free Plan",
         "pro_plan": "Pro Plan",
         "premium_plan": "Premium Plan",
+        "vip_plan": "VIP Plan",
         "next_payment": "Next payment: {date}",
         "upgrade_desc": "Upgrade your plan to unlock more automation capabilities.",
         "cancel_sub": "Cancel Subscription",
@@ -378,12 +379,14 @@
         "yearly": "Yearly",
         "free_desc": "To start and test",
         "pro_desc": "For small businesses",
-        "premium_desc": "For large & growing projects",
+        "premium_desc": "For businesses needing more AI credits",
+        "vip_desc": "For large & growing projects",
         "recommended": "Recommended",
         "current_plan": "Current Plan",
         "switch_free": "Switch to Free",
         "switch_pro": "Try Pro",
-        "switch_premium": "Try Premium"
+        "switch_premium": "Try Premium",
+        "switch_vip": "Try VIP"
       },
       "purchase_modal": {
         "title": "Buy AI Credits",

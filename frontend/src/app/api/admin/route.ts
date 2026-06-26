@@ -280,7 +280,7 @@ export async function GET(request: Request) {
     usersList.forEach((u: any) => {
       if (u.referredBy) {
         const referrer = usersList.find((r: any) => r.id === u.referredBy);
-        const commission = u.plan === "premium" ? "180 000 UZS" : u.plan === "pro" ? "22 500 UZS" : "0 UZS";
+        const commission = u.plan === "vip" ? "180 000 UZS" : u.plan === "premium" ? "45 000 UZS" : u.plan === "pro" ? "22 500 UZS" : "0 UZS";
         referralsList.push({
           id: u.id,
           referrerName: referrer?.fullName || "Noma'lum Hamkor",
@@ -327,6 +327,7 @@ export async function GET(request: Request) {
 
     // Real platform metrics
     const totalUsers = richUsers.length;
+    const activeVipCount = richUsers.filter((u: any) => u.plan === "vip").length;
     const activePremiumCount = richUsers.filter((u: any) => u.plan === "premium").length;
     const activeProCount = richUsers.filter((u: any) => u.plan === "pro").length;
     const totalChannels = richUsers.reduce((acc: number, u: any) => acc + (u.channelsCount || 0), 0);
@@ -338,7 +339,7 @@ export async function GET(request: Request) {
 
     // Real growth % based on createdAt
     const userGrowthPct = calcGrowthPct(usersList, 7);
-    const premiumGrowthPct = calcGrowthPct(usersList.filter((u: any) => u.plan === "premium"), 7);
+    const premiumGrowthPct = calcGrowthPct(usersList.filter((u: any) => u.plan === "vip" || u.plan === "premium"), 7);
 
     // Real channel growth: compare channels created in last 7 days vs prev 7 days
     const allChannels: any[] = [];
@@ -353,7 +354,7 @@ export async function GET(request: Request) {
     const channelGrowthPct = calcGrowthPct(allChannels.map(ch => ({ createdAt: ch.createdAt })), 7);
 
     // Real conversion rates
-    const paidCount = activePremiumCount + activeProCount;
+    const paidCount = activeVipCount + activePremiumCount + activeProCount;
     const registerToPaid = totalUsers > 0
       ? ((paidCount / totalUsers) * 100).toFixed(1) + "%"
       : "0%";
@@ -377,6 +378,7 @@ export async function GET(request: Request) {
 
     const stats = {
       totalUsers,
+      activeVipCount,
       activePremiumCount,
       activeProCount,
       totalChannels,
@@ -511,7 +513,8 @@ export async function POST(request: Request) {
             }
             let creditBalance = 100, description = "Hisob bepul tarifga o'tkazildi (Free reset)";
             if (plan === "pro") { creditBalance = 1000; description = "PRO tarif obunasi uchun 1000 ta kredit taqdim etildi"; }
-            else if (plan === "premium") { creditBalance = 150000; description = "PREMIUM tarif obunasi uchun 150 000 ta kredit taqdim etildi"; }
+            else if (plan === "premium") { creditBalance = 30000; description = "PREMIUM tarif obunasi uchun 30 000 ta kredit taqdim etildi"; }
+            else if (plan === "vip") { creditBalance = 150000; description = "VIP tarif obunasi uchun 150 000 ta kredit taqdim etildi"; }
             creditsData.balance = creditBalance;
             creditsData.history.unshift({ id: `tx-${Date.now()}-${Math.floor(Math.random() * 1000)}`, type: "purchase", amount: creditBalance, description, date: timestamp });
             uData.replai_ai_credits_data = creditsData;
@@ -586,7 +589,8 @@ export async function POST(request: Request) {
       if (rawCreds) { try { creditsData = typeof rawCreds === "string" ? JSON.parse(rawCreds) : rawCreds; } catch {} }
       let creditBalance = 100, description = "Hisob bepul tarifga o'tkazildi (Free reset)";
       if (plan === "pro") { creditBalance = 1000; description = "PRO tarif obunasi uchun 1000 ta kredit taqdim etildi"; }
-      else if (plan === "premium") { creditBalance = 150000; description = "PREMIUM tarif obunasi uchun 150 000 ta kredit taqdim etildi"; }
+      else if (plan === "premium") { creditBalance = 30000; description = "PREMIUM tarif obunasi uchun 30 000 ta kredit taqdim etildi"; }
+      else if (plan === "vip") { creditBalance = 150000; description = "VIP tarif obunasi uchun 150 000 ta kredit taqdim etildi"; }
       creditsData.balance = creditBalance;
       if (!creditsData.history) creditsData.history = [];
       creditsData.history.unshift({ id: `tx-${Date.now()}-${Math.floor(Math.random() * 1000)}`, type: "purchase", amount: creditBalance, description, date: timestamp });

@@ -274,6 +274,7 @@
         "free_plan": "Бесплатный план",
         "pro_plan": "Pro тариф",
         "premium_plan": "Premium тариф",
+        "vip_plan": "VIP тариф",
         "next_payment": "Следующий платеж: {date}",
         "upgrade_desc": "Обновите тариф, чтобы расширить возможности автоматизации.",
         "cancel_sub": "Отменить подписку",
@@ -378,12 +379,14 @@
         "yearly": "Ежегодно",
         "free_desc": "Для старта и тестирования",
         "pro_desc": "Для малого бизнеса",
-        "premium_desc": "Для крупных проектов",
+        "premium_desc": "Для бизнеса с повышенными AI кредитами",
+        "vip_desc": "Для крупных проектов",
         "recommended": "Рекомендуется",
         "current_plan": "Текущий тариф",
         "switch_free": "Перейти на бесплатный",
         "switch_pro": "Попробовать Pro",
-        "switch_premium": "Попробовать Premium"
+        "switch_premium": "Попробовать Premium",
+        "switch_vip": "Попробовать VIP"
       },
       "purchase_modal": {
         "title": "Купить AI Кредиты",

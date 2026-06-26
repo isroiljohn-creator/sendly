@@ -121,7 +121,7 @@ export function LandingPageView() {
       let reply = "";
       let next: string[] = [];
       if (btnText.includes("Narxi")) {
-        reply = "Sendly tariflari (50% Chegirma!):\n• PRO: 75,000 so'm/oy (odatda 150,000 UZS) — 1 akkaunt\n• PREMIUM: 600,000 so'm/oy (odatda 1,200,000 UZS) — 10 akkaunt\n\n7 kun bepul sinab ko'ring! Sinash uchun karta bog'lash shart.";
+        reply = "Sendly tariflari (50% Chegirma!):\n• PRO: 75,000 so'm/oy (odatda 150,000 UZS) — 1 akkaunt, 1,000 token\n• PREMIUM: 150,000 so'm/oy (odatda 300,000 UZS) — 1 akkaunt, 30,000 token\n• VIP: 600,000 so'm/oy (odatda 1,200,000 UZS) — 10 akkaunt, 150,000 token\n\n7 kun bepul sinab ko'ring! Sinash uchun karta bog'lash shart.";
         next = ["Bepul boshlash", "Boshqa savol"];
       } else if (btnText.includes("ishlaydi")) {
         reply = "Juda oson:\n1. Ro'yxatdan o'ting\n2. Instagram professional akkauntingizni ulang\n3. Bot oqimlarini yarating\n\nBot 24/7 avtomatik javob beradi!";
@@ -219,7 +219,7 @@ export function LandingPageView() {
     },
     {
       q: "Bir nechta Instagram akkauntni ulasa bo'ladimi?",
-      a: "Ha. PRO tarifida 1 ta, PREMIUM tarifida esa 10 tagacha Instagram professional akkauntini ulashingiz mumkin.",
+      a: "Ha. PRO va PREMIUM tarifida 1 ta, VIP tarifida esa 10 tagacha Instagram professional akkauntini ulashingiz mumkin.",
     },
     {
       q: "To'lovni qanday amalga oshiraman?",
@@ -481,10 +481,10 @@ export function LandingPageView() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
 
           {/* PRO */}
-          <div className="relative rounded-[24px] border border-red-500 bg-white p-8 flex flex-col overflow-hidden shadow-sm">
+          <div className="relative rounded-[24px] border border-[#D8D8D8]/60 bg-white p-8 flex flex-col overflow-hidden shadow-sm">
             <div className="absolute top-0 right-0 bg-red-500 text-white text-[10px] font-extrabold uppercase px-4 py-1.5 rounded-bl-[16px] tracking-wider">{"50% CHEGIRMA"}</div>
             <h3 className="text-[20px] font-extrabold text-black">{"PRO"}</h3>
             <p className="text-[12px] text-[#707075] mt-1">{"Kichik va o'rta bizneslar uchun"}</p>
@@ -497,7 +497,37 @@ export function LandingPageView() {
             </div>
             <div className="h-px bg-black/5 my-6" />
             <ul className="flex flex-col gap-3 text-[13px] text-black flex-1">
-              {["1 ta Instagram professional akkaunti", "Cheksiz avtomatlashtirish oqimlari", "Shaxsiy xabarlar va izohlar uchun avtomatik javoblar", "Referral tizimi va ballar", "1 ta Telegram bot ulash", "Analitika paneli"].map((item, i) => (
+              {["1 ta Instagram professional akkaunti", "1 ta Telegram bot ulash", "1 000 ta bepul AI kreditlari (tokens)", "Cheksiz avtomatlashtirish oqimlari", "Shaxsiy xabarlar va izohlar uchun avtomatik javoblar", "Analitika paneli"].map((item, i) => (
+                <li key={i} className="flex items-center gap-2.5">
+                  <div className="h-5 w-5 rounded-full bg-[#C7F33C]/20 flex items-center justify-center shrink-0">
+                    <Check size={11} className="text-[#7CA607]" />
+                  </div>
+                  {item}
+                </li>
+              ))}
+            </ul>
+            <Link href="/register" className="mt-8">
+              <button className="w-full rounded-full bg-[#EFF2FC] text-black py-4 text-[14px] font-extrabold hover:bg-[#e4e8f5] active:scale-[0.98] transition-all">
+                {"Bepul sinab ko'rish"}
+              </button>
+            </Link>
+          </div>
+
+          {/* PREMIUM */}
+          <div className="relative rounded-[24px] border border-red-500 bg-white p-8 flex flex-col overflow-hidden shadow-sm relative">
+            <div className="absolute top-0 right-0 bg-red-500 text-white text-[10px] font-extrabold uppercase px-4 py-1.5 rounded-bl-[16px] tracking-wider">{"TAVSIYA ETILADI"}</div>
+            <h3 className="text-[20px] font-extrabold text-black">{"PREMIUM"}</h3>
+            <p className="text-[12px] text-[#707075] mt-1">{"O'rta va tez o'suvchi bizneslar uchun"}</p>
+            <div className="mt-5 flex flex-col gap-1">
+              <span className="text-[12px] text-red-500 font-semibold line-through">300,000 so'm</span>
+              <div className="flex items-baseline gap-1.5">
+                <span className="text-[46px] font-[900] text-black tracking-tight leading-none">{"150,000"}</span>
+                <span className="text-[#515154] text-[13px] font-semibold">{"so'm / oy"}</span>
+              </div>
+            </div>
+            <div className="h-px bg-black/5 my-6" />
+            <ul className="flex flex-col gap-3 text-[13px] text-black flex-1">
+              {["1 ta Instagram professional akkaunti", "1 ta Telegram bot ulash", "30 000 ta bepul AI kreditlari (tokens)", "PRO dagi barcha imkoniyatlar", "Referral tizimi va afzalliklar", "Kengaytirilgan analitika"].map((item, i) => (
                 <li key={i} className="flex items-center gap-2.5">
                   <div className="h-5 w-5 rounded-full bg-[#C7F33C]/20 flex items-center justify-center shrink-0">
                     <Check size={11} className="text-[#7CA607]" />
@@ -508,37 +538,36 @@ export function LandingPageView() {
             </ul>
             <Link href="/register" className="mt-8">
               <button className="w-full rounded-full bg-[#C7F33C] text-black py-4 text-[14px] font-extrabold hover:bg-[#B0D82D] active:scale-[0.98] transition-all shadow-[0_8px_25px_rgba(199,243,60,0.2)]">
-                {"Bepul sinab ko'rish"}
+                {"Ulash va boshlash"}
               </button>
             </Link>
           </div>
 
-          {/* PREMIUM */}
-          <div className="relative rounded-[24px] border border-[#D8D8D8]/60 bg-white p-8 flex flex-col shadow-sm overflow-hidden">
-            <div className="absolute top-0 right-0 bg-red-500 text-white text-[10px] font-extrabold uppercase px-4 py-1.5 rounded-bl-[16px] tracking-wider">{"50% CHEGIRMA"}</div>
-            <h3 className="text-[20px] font-extrabold text-black">{"PREMIUM"}</h3>
-            <p className="text-[12px] text-[#707075] mt-1">{"Agentliklar va katta bizneslar uchun"}</p>
+          {/* VIP */}
+          <div className="relative rounded-[24px] border border-white/10 bg-[#0F0F0F] text-white p-8 flex flex-col shadow-lg overflow-hidden">
+            <h3 className="text-[20px] font-extrabold text-[#C7F33C]">{"VIP"}</h3>
+            <p className="text-[12px] text-white/60 mt-1">{"Agentliklar va yirik loyihalar uchun"}</p>
             <div className="mt-5 flex flex-col gap-1">
               <span className="text-[12px] text-red-500 font-semibold line-through">1,200,000 so'm</span>
               <div className="flex items-baseline gap-1.5">
-                <span className="text-[46px] font-[900] text-black tracking-tight leading-none">{"600,000"}</span>
-                <span className="text-[#515154] text-[13px] font-semibold">{"so'm / oy"}</span>
+                <span className="text-[46px] font-[900] text-[#C7F33C] tracking-tight leading-none">{"600,000"}</span>
+                <span className="text-white/60 text-[13px] font-semibold">{"so'm / oy"}</span>
               </div>
             </div>
-            <div className="h-px bg-black/5 my-6" />
-            <ul className="flex flex-col gap-3 text-[13px] text-black flex-1">
-              {["10 ta Instagram professional akkaunti", "PRO dagi barcha imkoniyatlar", "Google Gemini va AI agent saralash", "VIP qo'llab-quvvatlash (24/7)", "10 tagacha Telegram bot ulash", "Shaxsiy menejer"].map((item, i) => (
+            <div className="h-px bg-white/10 my-6" />
+            <ul className="flex flex-col gap-3 text-[13px] text-white/95 flex-1">
+              {["10 ta Instagram professional akkaunti", "10 tagacha Telegram bot ulash", "150 000 ta bepul AI kreditlari (tokens)", "Google Gemini va AI agent saralash", "VIP qo'llab-quvvatlash (24/7)", "Shaxsiy menejer"].map((item, i) => (
                 <li key={i} className="flex items-center gap-2.5">
-                  <div className="h-5 w-5 rounded-full bg-purple-50 flex items-center justify-center shrink-0">
-                    <Check size={11} className="text-purple-600" />
+                  <div className="h-5 w-5 rounded-full bg-white/10 flex items-center justify-center shrink-0">
+                    <Check size={11} className="text-[#C7F33C]" />
                   </div>
                   {item}
                 </li>
               ))}
             </ul>
             <Link href="/register" className="mt-8">
-              <button className="w-full rounded-full bg-black text-[#C7F33C] py-4 text-[14px] font-extrabold hover:bg-black/90 active:scale-[0.98] transition-all shadow-[0_8px_25px_rgba(0,0,0,0.1)]">
-                {"Ulash va boshlash"}
+              <button className="w-full rounded-full bg-white text-black py-4 text-[14px] font-extrabold hover:bg-white/90 active:scale-[0.98] transition-all">
+                {"VIP Boshlash"}
               </button>
             </Link>
           </div>

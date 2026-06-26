@@ -129,7 +129,7 @@ export function ConnectChannelModal() {
     // 1. Check plan limits beforehand
     const user = db.getCurrentUser();
     const plan = user?.plan || "free";
-    const maxChannels = plan === "premium" ? 10 : 1;
+    const maxChannels = plan === "vip" ? 10 : 1;
     const currentChannels = db.getChannels();
     if (currentChannels.length >= maxChannels) {
       showAlert(t("common.error"), `Sizning tarifingizda kanallar soni cheklangan (Maksimal: ${maxChannels}). Iltimos, tarifingizni yangilang.`);

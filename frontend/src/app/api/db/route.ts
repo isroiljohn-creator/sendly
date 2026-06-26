@@ -262,8 +262,8 @@ export async function POST(request: Request) {
     }
   }
 
-  const maxChannels = plan === "premium" ? 10 : 1;
-  const maxActiveAutomations = plan === "premium" ? 50 : 5;
+  const maxChannels = plan === "vip" ? 10 : 1;
+  const maxActiveAutomations = plan === "vip" ? 50 : 5;
 
   let activeChannelIds: string[] = [];
   if (payload.replai_channels) {
@@ -390,8 +390,11 @@ export async function POST(request: Request) {
               creditBalance = 1000;
               description = "PRO tarif obunasi uchun 1000 ta kredit taqdim etildi";
             } else if (newPlan === "premium") {
+              creditBalance = 30000;
+              description = "PREMIUM tarif obunasi uchun 30 000 ta kredit taqdim etildi";
+            } else if (newPlan === "vip") {
               creditBalance = 150000;
-              description = "PREMIUM tarif obunasi uchun 150 000 ta kredit taqdim etildi";
+              description = "VIP tarif obunasi uchun 150 000 ta kredit taqdim etildi";
             }
 
             creditsData.balance = creditBalance;
@@ -502,8 +505,11 @@ export async function POST(request: Request) {
             creditBalance = 1000;
             description = "PRO tarif obunasi uchun 1000 ta kredit taqdim etildi";
           } else if (newPlan === "premium") {
+            creditBalance = 30000;
+            description = "PREMIUM tarif obunasi uchun 30 000 ta kredit taqdim etildi";
+          } else if (newPlan === "vip") {
             creditBalance = 150000;
-            description = "PREMIUM tarif obunasi uchun 150 000 ta kredit taqdim etildi";
+            description = "VIP tarif obunasi uchun 150 000 ta kredit taqdim etildi";
           }
 
           creditsData.balance = creditBalance;
