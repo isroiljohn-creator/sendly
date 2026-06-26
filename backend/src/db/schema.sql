@@ -25,6 +25,9 @@ CREATE TABLE IF NOT EXISTS instagram_accounts (
   fb_welcome_message TEXT,
   fb_field_mappings JSONB DEFAULT '[]'::jsonb,
   fb_tags TEXT[] DEFAULT '{}',
+  is_custom_meta BOOLEAN DEFAULT false,
+  custom_meta_app_id TEXT,
+  custom_meta_app_secret TEXT,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );

@@ -63,6 +63,8 @@ export type Channel = {
   followersCount?: string;
   createdAt: string;
   telegramChannels?: Array<{ username: string; name: string }>;
+  isCustomMeta?: boolean;
+  customMetaAppId?: string;
 };
 
 export type BotSettings = {

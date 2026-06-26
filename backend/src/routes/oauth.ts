@@ -352,4 +352,104 @@ router.get("/callback", async (req, res, next) => {
   }
 });
 
+/**
+ * POST /oauth/instagram/custom
+ * Links a custom Meta B2B App configuration to the user's account.
+ */
+router.post("/custom", authMiddleware, async (req: AuthenticatedRequest, res) => {
+  const userId = req.user?.user_id;
+  if (!userId) {
+    return res.status(401).json({ error: "Unauthorized" });
+  }
+
+  const {
+    instagramPageId,
+    username,
+    customMetaAppId,
+    customMetaAppSecret,
+    customMetaAccessToken,
+  } = req.body;
+
+  if (!instagramPageId || !username || !customMetaAppId || !customMetaAppSecret || !customMetaAccessToken) {
+    return res.status(400).json({ error: "Barcha majburiy maydonlarni to'ldiring." });
+  }
+
+  try {
+    // Encrypt the custom Meta access token to store it securely
+    const encryptedToken = encrypt(customMetaAccessToken);
+
+    // 1. Try to subscribe the page to the custom Meta App automatically
+    try {
+      const subUrl = `https://graph.facebook.com/v18.0/${instagramPageId}/subscribed_apps?subscribed_fields=messages,messaging_postbacks,comments,mention,story_insights&access_token=${customMetaAccessToken}`;
+      const subRes = await fetch(subUrl, { method: "POST" });
+      if (subRes.ok) {
+        console.log(`[Oauth Custom] Page ${instagramPageId} successfully subscribed to custom Meta App.`);
+      } else {
+        const errText = await subRes.text();
+        console.warn(`[Oauth Custom] Webhook subscription warning for Page ${instagramPageId}:`, errText);
+      }
+    } catch (subErr: any) {
+      console.error("[Oauth Custom] Webhook subscription API call failed:", subErr.message);
+    }
+
+    // 2. Check if page already linked
+    const { data: existing } = await supabase
+      .from("instagram_accounts")
+      .select("id, user_id")
+      .eq("instagram_page_id", instagramPageId)
+      .maybeSingle();
+
+    if (existing) {
+      if (existing.user_id !== userId) {
+        return res.status(400).json({ error: "Ushbu Instagram sahifasi allaqachon boshqa foydalanuvchiga ulangan!" });
+      }
+
+      // Update existing account
+      const { error: updateErr } = await supabase
+        .from("instagram_accounts")
+        .update({
+          username,
+          access_token: encryptedToken,
+          is_custom_meta: true,
+          custom_meta_app_id: customMetaAppId,
+          custom_meta_app_secret: customMetaAppSecret,
+          is_active: true
+        })
+        .eq("id", existing.id);
+
+      if (updateErr) throw updateErr;
+
+      return res.json({ 
+        success: true, 
+        message: "Custom Meta akkaunti muvaffaqiyatli yangilandi.", 
+        accountId: existing.id 
+      });
+    } else {
+      // Create new account
+      const { error: insertErr } = await supabase
+        .from("instagram_accounts")
+        .insert({
+          user_id: userId,
+          instagram_page_id: instagramPageId,
+          username,
+          access_token: encryptedToken,
+          is_custom_meta: true,
+          custom_meta_app_id: customMetaAppId,
+          custom_meta_app_secret: customMetaAppSecret,
+          is_active: true
+        });
+
+      if (insertErr) throw insertErr;
+
+      return res.json({ 
+        success: true, 
+        message: "Custom Meta akkaunti muvaffaqiyatli ulandi." 
+      });
+    }
+  } catch (err: any) {
+    console.error("[Oauth Custom] Failed to link custom Meta account:", err.message);
+    return res.status(500).json({ error: "Tizim xatoligi: " + err.message });
+  }
+});
+
 export default router;

@@ -93,6 +93,15 @@ export default function SettingsPage() {
   const [deleteConfirmInput, setDeleteConfirmInput] = useState("");
   const [refreshingPermissions, setRefreshingPermissions] = useState(false);
 
+  // Custom Meta App States for B2B
+  const [showCustomMeta, setShowCustomMeta] = useState(false);
+  const [customMetaPageId, setCustomMetaPageId] = useState("");
+  const [customMetaUsername, setCustomMetaUsername] = useState("");
+  const [customMetaAppId, setCustomMetaAppId] = useState("");
+  const [customMetaAppSecret, setCustomMetaAppSecret] = useState("");
+  const [customMetaAccessToken, setCustomMetaAccessToken] = useState("");
+  const [customMetaLoading, setCustomMetaLoading] = useState(false);
+
   // Instagram OAuth states
   const [oAuthWaiting, setOAuthWaiting] = useState(false);
 
@@ -170,6 +179,72 @@ export default function SettingsPage() {
     } catch (err: unknown) {
       setOAuthWaiting(false);
       showAlert(t("common.error"), t("pages.settings_page.ig_link_error") + ": " + (err instanceof Error ? err.message : String(err)));
+    }
+  };
+
+  const handleConnectCustomMeta = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!customMetaPageId || !customMetaUsername || !customMetaAppId || !customMetaAppSecret || !customMetaAccessToken) {
+      showAlert(t("common.error"), "Barcha majburiy maydonlarni to'ldiring.");
+      return;
+    }
+
+    setCustomMetaLoading(true);
+    const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "https://api.sendly.uz";
+    const jwtToken = typeof window !== "undefined" ? localStorage.getItem("replai_token") : "";
+
+    try {
+      const response = await fetch(`${backendUrl}/oauth/instagram/custom`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${jwtToken}`,
+        },
+        body: JSON.stringify({
+          instagramPageId: customMetaPageId.trim(),
+          username: customMetaUsername.trim().replace(/^@+/, ""),
+          customMetaAppId: customMetaAppId.trim(),
+          customMetaAppSecret: customMetaAppSecret.trim(),
+          customMetaAccessToken: customMetaAccessToken.trim(),
+        }),
+      });
+
+      const resData = await response.json();
+      if (!response.ok) {
+        throw new Error(resData.error || "Ulanishda xatolik yuz berdi");
+      }
+
+      // Add channel locally on frontend database
+      const newCh = db.addChannel({
+        type: "instagram",
+        name: customMetaUsername.trim().replace(/^@+/, ""),
+        username: customMetaUsername.trim().replace(/^@+/, ""),
+        isConnected: true,
+        followersCount: "0",
+        isCustomMeta: true,
+        customMetaAppId: customMetaAppId.trim(),
+      });
+
+      // Sync settings database to server
+      await db.saveToServer();
+
+      setModal(null);
+      setShowCustomMeta(false);
+      // Reset form states
+      setCustomMetaPageId("");
+      setCustomMetaUsername("");
+      setCustomMetaAppId("");
+      setCustomMetaAppSecret("");
+      setCustomMetaAccessToken("");
+
+      refreshChannels();
+      setActiveSection(newCh.id);
+      showAlert(t("common.success"), "B2B Custom Meta akkaunti muvaffaqiyatli ulandi!");
+    } catch (err: any) {
+      console.error("[Connect Custom Meta] Error:", err);
+      showAlert(t("common.error"), err.message || "Xatolik yuz berdi");
+    } finally {
+      setCustomMetaLoading(false);
     }
   };
 
@@ -1101,7 +1176,14 @@ export default function SettingsPage() {
                     >
                       {isInstagram ? <Instagram size={18} /> : <Bot size={18} />}
                     </div>
-                    <span className="text-[13px] font-medium text-[#707070]">{selectedCh.username}</span>
+                    <div className="flex items-center gap-2">
+                      <span className="text-[13px] font-medium text-[#707070]">{selectedCh.username}</span>
+                      {selectedCh.isCustomMeta && (
+                        <span className="bg-green-50 text-green-700 border border-green-200 text-[9px] font-extrabold px-2 py-0.5 rounded-full uppercase tracking-wider select-none">
+                          B2B Meta App
+                        </span>
+                      )}
+                    </div>
                   </div>
 
                   <div>
@@ -1280,77 +1362,176 @@ export default function SettingsPage() {
 
       {/* ── INSTAGRAM MODAL ── */}
       {modal === "instagram" && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
-          <div className="bg-white rounded-[24px] w-full max-w-[420px] shadow-2xl overflow-hidden">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+          <div className="bg-white rounded-[24px] w-full max-w-[420px] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200">
             {/* Header */}
             <div className="flex items-center gap-3 px-6 pt-6 pb-5 border-b border-[#F0F0F0]">
               <div className="grid h-10 w-10 place-items-center rounded-[12px] bg-gradient-to-br from-[#f09433] via-[#e6683c] to-[#bc1888]">
                 <Instagram size={18} className="text-white" />
               </div>
-              <div className="flex-1">
-                <h2 className="text-[15px] font-bold text-black">{t("pages.settings_page.link_ig_title")}</h2>
-                <p className="text-[11px] text-[#707070]">{t("pages.settings_page.link_ig_subtitle")}</p>
+              <div className="flex-1 text-left">
+                <h2 className="text-[15px] font-bold text-black">
+                  {showCustomMeta ? "Shaxsiy Meta API (B2B) ulanishi" : t("pages.settings_page.link_ig_title")}
+                </h2>
+                <p className="text-[11px] text-[#707070]">
+                  {showCustomMeta ? "O'z Meta App ma'lumotlaringizni kiriting" : t("pages.settings_page.link_ig_subtitle")}
+                </p>
               </div>
-              <button onClick={() => setModal(null)} className="grid h-8 w-8 place-items-center rounded-full hover:bg-[#F0F0F0] text-[#707070]">
+              <button 
+                onClick={() => {
+                  setModal(null);
+                  setShowCustomMeta(false);
+                }} 
+                className="grid h-8 w-8 place-items-center rounded-full hover:bg-[#F0F0F0] text-[#707070]"
+              >
                 <X size={16} />
               </button>
             </div>
 
-            <div className="px-6 py-8 flex flex-col items-center text-center gap-5">
-              {/* Connected Icons Illustration */}
-              <div className="flex items-center justify-center gap-4">
-                <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-[#f09433] via-[#bc1888] to-[#e6683c] flex items-center justify-center shadow-lg text-white">
-                  <Instagram size={28} />
+            {showCustomMeta ? (
+              <form onSubmit={handleConnectCustomMeta} className="px-6 py-5 flex flex-col gap-4 text-left">
+                <div className="flex flex-col gap-1">
+                  <label className="text-[10px] font-bold text-[#707070] uppercase tracking-wide">Instagram Akkaunt ID (Business Account ID)</label>
+                  <input
+                    type="text"
+                    value={customMetaPageId}
+                    onChange={(e) => setCustomMetaPageId(e.target.value)}
+                    placeholder="Masalan: 17841401234567890"
+                    required
+                    className="w-full rounded-[10px] border border-[#D8D8D8] px-3.5 py-2 text-[12px] focus:outline-none focus:border-black font-semibold text-black bg-white"
+                  />
                 </div>
-                <div className="text-[#a0a0a0] font-bold text-[20px]">⇄</div>
-                <div className="w-14 h-14 rounded-2xl bg-[#0095f6]/10 flex items-center justify-center shadow-sm border border-[#0095f6]/20 text-[#0095f6]">
-                  <span className="font-bold text-[22px]">S</span>
+                <div className="flex flex-col gap-1">
+                  <label className="text-[10px] font-bold text-[#707070] uppercase tracking-wide">Instagram Username (Foydalanuvchi nomi)</label>
+                  <input
+                    type="text"
+                    value={customMetaUsername}
+                    onChange={(e) => setCustomMetaUsername(e.target.value)}
+                    placeholder="Masalan: @my_business_page"
+                    required
+                    className="w-full rounded-[10px] border border-[#D8D8D8] px-3.5 py-2 text-[12px] focus:outline-none focus:border-black font-semibold text-black bg-white"
+                  />
                 </div>
-              </div>
+                <div className="flex flex-col gap-1">
+                  <label className="text-[10px] font-bold text-[#707070] uppercase tracking-wide">Meta App ID (Ilova ID)</label>
+                  <input
+                    type="text"
+                    value={customMetaAppId}
+                    onChange={(e) => setCustomMetaAppId(e.target.value)}
+                    placeholder="Masalan: 485912345678901"
+                    required
+                    className="w-full rounded-[10px] border border-[#D8D8D8] px-3.5 py-2 text-[12px] focus:outline-none focus:border-black font-semibold text-black bg-white"
+                  />
+                </div>
+                <div className="flex flex-col gap-1">
+                  <label className="text-[10px] font-bold text-[#707070] uppercase tracking-wide">Meta App Secret (Ilova maxfiy kaliti)</label>
+                  <input
+                    type="password"
+                    value={customMetaAppSecret}
+                    onChange={(e) => setCustomMetaAppSecret(e.target.value)}
+                    placeholder="Meta App Secret kalitingiz"
+                    required
+                    className="w-full rounded-[10px] border border-[#D8D8D8] px-3.5 py-2 text-[12px] focus:outline-none focus:border-black font-semibold text-black bg-white"
+                  />
+                </div>
+                <div className="flex flex-col gap-1">
+                  <label className="text-[10px] font-bold text-[#707070] uppercase tracking-wide">Long-Lived Page Access Token</label>
+                  <textarea
+                    value={customMetaAccessToken}
+                    onChange={(e) => setCustomMetaAccessToken(e.target.value)}
+                    placeholder="Meta Graph API'dan olingan Page Access Token"
+                    required
+                    rows={3}
+                    className="w-full rounded-[10px] border border-[#D8D8D8] px-3.5 py-2 text-[12px] focus:outline-none focus:border-black font-semibold text-black resize-none bg-white"
+                  />
+                </div>
+                <div className="flex flex-col gap-2 mt-2">
+                  <button
+                    type="submit"
+                    disabled={customMetaLoading}
+                    className="w-full py-3 rounded-full bg-[#16A34A] hover:bg-[#15803d] text-white text-[12px] font-bold shadow-md transition-all flex items-center justify-center gap-1.5"
+                  >
+                    {customMetaLoading ? (
+                      <>
+                        <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                        <span>Ulanmoqda...</span>
+                      </>
+                    ) : (
+                      <span>Ulash</span>
+                    )}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setShowCustomMeta(false)}
+                    className="w-full py-3 rounded-full bg-gray-100 hover:bg-gray-200 text-black text-[12px] font-bold transition-all"
+                  >
+                    Orqaga
+                  </button>
+                </div>
+              </form>
+            ) : (
+              <div className="px-6 py-8 flex flex-col items-center text-center gap-5">
+                {/* Connected Icons Illustration */}
+                <div className="flex items-center justify-center gap-4">
+                  <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-[#f09433] via-[#bc1888] to-[#e6683c] flex items-center justify-center shadow-lg text-white">
+                    <Instagram size={28} />
+                  </div>
+                  <div className="text-[#a0a0a0] font-bold text-[20px]">⇄</div>
+                  <div className="w-14 h-14 rounded-2xl bg-[#0095f6]/10 flex items-center justify-center shadow-sm border border-[#0095f6]/20 text-[#0095f6]">
+                    <span className="font-bold text-[22px]">S</span>
+                  </div>
+                </div>
 
-              <div>
-                <h3 className="text-[16px] font-bold text-black leading-snug">
-                  {t("pages.settings_page.link_ig_title")}
-                </h3>
-                <p className="text-[12px] text-[#707070] mt-2 max-w-[320px] mx-auto leading-relaxed">
-                  {t("pages.settings_page.ig_connect_desc")}
-                </p>
-              </div>
-
-              {oAuthWaiting ? (
-                <div className="w-full p-4 rounded-2xl bg-[#EFF2FC] border border-[#EFF2FC] flex flex-col items-center gap-3 animate-pulse">
-                  <span className="w-6 h-6 border-3 border-[#0095f6]/30 border-t-[#0095f6] rounded-full animate-spin" />
-                  <p className="text-[12px] font-medium text-[#0095f6]">
-                    {t("pages.settings_page.waiting_for_account")}
+                <div>
+                  <h3 className="text-[16px] font-bold text-black leading-snug">
+                    {t("pages.settings_page.link_ig_title")}
+                  </h3>
+                  <p className="text-[12px] text-[#707070] mt-2 max-w-[320px] mx-auto leading-relaxed">
+                    {t("pages.settings_page.ig_connect_desc")}
                   </p>
                 </div>
-              ) : (
-                <div className="w-full flex flex-col gap-3">
-                  {/* Primary Instagram Button */}
-                  <button
-                    onClick={handleInstagramLogin}
-                    className="w-full flex items-center justify-center gap-2.5 py-3.5 rounded-full bg-gradient-to-r from-[#f09433] via-[#bc1888] to-[#e6683c] hover:opacity-95 text-white text-[13px] font-bold shadow-md hover:shadow-lg active:scale-[0.98] transition-all"
-                  >
-                    <Instagram size={18} className="shrink-0" />
-                    <span>{t("pages.settings_page.connect_via_ig")}</span>
-                  </button>
 
+                {oAuthWaiting ? (
+                  <div className="w-full p-4 rounded-2xl bg-[#EFF2FC] border border-[#EFF2FC] flex flex-col items-center gap-3 animate-pulse">
+                    <span className="w-6 h-6 border-3 border-[#0095f6]/30 border-t-[#0095f6] rounded-full animate-spin" />
+                    <p className="text-[12px] font-medium text-[#0095f6]">
+                      {t("pages.settings_page.waiting_for_account")}
+                    </p>
+                  </div>
+                ) : (
+                  <div className="w-full flex flex-col gap-3">
+                    {/* Primary Instagram Button */}
+                    <button
+                      onClick={handleInstagramLogin}
+                      className="w-full flex items-center justify-center gap-2.5 py-3.5 rounded-full bg-gradient-to-r from-[#f09433] via-[#bc1888] to-[#e6683c] hover:opacity-95 text-white text-[13px] font-bold shadow-md hover:shadow-lg active:scale-[0.98] transition-all"
+                    >
+                      <Instagram size={18} className="shrink-0" />
+                      <span>{t("pages.settings_page.connect_via_ig")}</span>
+                    </button>
+
+                    <button
+                      onClick={() => setShowCustomMeta(true)}
+                      className="text-[11px] text-[#0095f6] hover:underline font-bold mt-1"
+                    >
+                      B2B: Shaxsiy Meta API (App ID/Secret) orqali ulash
+                    </button>
+                  </div>
+                )}
+
+                <div className="p-3.5 rounded-xl bg-[#F9F9F7] border border-[#E8E8E8] flex items-start gap-2.5 text-left w-full">
+                  <CheckCircle size={14} className="text-[#16A34A] mt-0.5 shrink-0" />
+                  <p className="text-[11px] text-[#505050] leading-relaxed">
+                    {t("pages.settings_page.ig_personal_warning")}
+                  </p>
                 </div>
-              )}
 
-              <div className="p-3.5 rounded-xl bg-[#F9F9F7] border border-[#E8E8E8] flex items-start gap-2.5 text-left w-full">
-                <CheckCircle size={14} className="text-[#16A34A] mt-0.5 shrink-0" />
-                <p className="text-[11px] text-[#505050] leading-relaxed">
-                  {t("pages.settings_page.ig_personal_warning")}
-                </p>
+                <div className="w-full flex gap-3 mt-2">
+                  <Button onClick={() => setModal(null)} variant="secondary" className="w-full py-3 text-[12px] border border-[#E8E8E8]">
+                    {t("common.cancel")}
+                  </Button>
+                </div>
               </div>
-            </div>
-
-            <div className="px-6 pb-6 flex gap-3">
-              <Button onClick={() => setModal(null)} variant="secondary" className="w-full py-3 text-[12px] border border-[#E8E8E8]">
-                {t("common.cancel")}
-              </Button>
-            </div>
+            )}
           </div>
         </div>
       )}
