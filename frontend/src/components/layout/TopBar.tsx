@@ -204,15 +204,9 @@ export function TopBar() {
       <div className="flex items-center gap-3">
         {/* Desktop AI Limits TopBar Pill with Tooltip */}
         {currentUser && (
-          <div className="group relative hidden lg:flex items-center gap-2.5 px-3.5 py-2 rounded-full bg-white border border-[#E8E8E8]/60 text-black text-[12px] font-bold shadow-xs select-none hover:bg-[#F9F9F7] hover:border-[#D8D8D8] transition-all cursor-pointer h-[38px]">
+          <div className="group relative hidden lg:flex items-center gap-2 px-3.5 py-2 rounded-full bg-white border border-[#E8E8E8]/60 text-black text-[12px] font-bold shadow-xs select-none hover:bg-[#F9F9F7] hover:border-[#D8D8D8] transition-all cursor-pointer h-[38px]">
             <Coins size={13} className="text-[#8CB807] fill-[#8CB807]/10" />
-            <span>AI: {credits.balance.toLocaleString()} {t("pages.account.limits.unit_credit_short") || "kredit"}</span>
-            <div className="w-12 h-1 bg-[#F0F0F0] rounded-full overflow-hidden">
-              <div 
-                className="h-full bg-[#16A34A] rounded-full" 
-                style={{ width: `${percent}%` }}
-              />
-            </div>
+            <span>AI: {credits.balance.toLocaleString()}</span>
             
             {/* Tooltip on hover */}
             <div className="absolute right-0 top-11 pointer-events-none opacity-0 translate-y-[-8px] group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-200 ease-out z-50 whitespace-nowrap bg-white p-3.5 rounded-[20px] border border-[#E8E8E8] shadow-[0_8px_30px_rgba(0,0,0,0.08)] flex flex-col gap-1.5 w-[220px] text-left">
