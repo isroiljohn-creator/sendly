@@ -1463,7 +1463,6 @@ function AIAgentContent() {
     setSelectedLesson(updated);
     setLessons(prev => prev.map(l => l.id === selectedLesson.id ? updated : l));
   };
-
   const handleAiStructureTranscript = async () => {
     if (!selectedLesson || !selectedLesson.transcript || selectedLesson.transcript.trim() === "") {
       showToast("Tahlil qilish uchun matn bo'sh bo'lmasligi kerak", "error");
@@ -1479,8 +1478,19 @@ function AIAgentContent() {
       });
       const data = await res.json();
       if (res.ok && data.text) {
-        handleUpdateSelectedLesson("transcript", data.text);
-        showToast("Matn sun'iy intellekt (Gemini 3.5) yordamida muvaffaqiyatli tahlil qilindi va strukturalandi!");
+        const originalText = selectedLesson.transcript || "";
+        const separator = "\n\n=== AI TAHLILI VA STRUKTURA ===\n\n";
+        
+        let newText = "";
+        if (originalText.includes("=== AI TAHLILI VA STRUKTURA ===")) {
+          const parts = originalText.split("=== AI TAHLILI VA STRUKTURA ===");
+          newText = parts[0].trim() + separator + data.text;
+        } else {
+          newText = originalText.trim() + separator + data.text;
+        }
+
+        handleUpdateSelectedLesson("transcript", newText);
+        showToast("Matn muvaffaqiyatli tahlil qilindi va matn oxiriga qo'shildi!");
       } else {
         showToast(data.error || "Tahlil qilishda xatolik yuz berdi", "error");
       }
@@ -1490,7 +1500,6 @@ function AIAgentContent() {
       setIsStructuring(false);
     }
   };
-
   // Settings: Add dynamic forbidden topic badge
   const handleAddTopic = (e: React.FormEvent) => {
     e.preventDefault();
