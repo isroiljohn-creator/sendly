@@ -85,7 +85,7 @@ export async function POST(request: Request) {
     let resultText = "";
 
     if (isV2) {
-      const taskId = Number(data.task_id || data.id);
+      const taskId = Number(data.id || data.task_id);
       if (!taskId || isNaN(taskId)) {
         return NextResponse.json(
           { error: "Aisha STT v2 orqali yuklash muvaffaqiyatsiz bo'ldi: task_id olinmadi." },
