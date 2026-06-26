@@ -240,8 +240,8 @@
     "semantic_hash": ""
   },
   "frontend/src/app/account/page.tsx": {
-    "mtime": 1782461360.0705123,
-    "ast_hash": "808756ac1165c3a04464c1adc99792f8",
+    "mtime": 1782462141.472751,
+    "ast_hash": "9e2c30ec8c914bdee9ddcdfb4469f023",
     "semantic_hash": ""
   },
   "frontend/src/app/admin/page.tsx": {
@@ -670,8 +670,8 @@
     "semantic_hash": ""
   },
   "frontend/src/components/ui/primitives.tsx": {
-    "mtime": 1782405665.4714851,
-    "ast_hash": "d45fc9e671b9955449ba9b28573abb55",
+    "mtime": 1782462112.773563,
+    "ast_hash": "08f44ef75eda392d443cb3a15c2788e0",
     "semantic_hash": ""
   },
   "frontend/src/components/ui/progress.tsx": {

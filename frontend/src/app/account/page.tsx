@@ -1051,21 +1051,9 @@ export default function AccountPage() {
 
                       {/* Pricing Details */}
                       <div className="mt-4 pt-3 border-t border-black/5 flex flex-col gap-1.5 text-[11px] text-[#707070]">
-                        <div className="flex justify-between font-bold">
+                        <div className="flex justify-between font-bold text-[12px]">
                           <span>{t("pages.account.limits.balance_label") || "Balans:"}</span>
                           <span className="text-black">{balance.toLocaleString("uz-UZ")} {t("pages.account.billing.unit_credits") || "kredit"}</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span>{t("pages.account.limits.bot_cost_label") || "Bot javobi:"}</span>
-                          <span className="font-semibold text-black">{t("pages.account.limits.bot_cost_val") || "~20 kredit / xabar"}</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span>{t("pages.account.limits.audio_cost_label") || "Audio tahlil:"}</span>
-                          <span className="font-semibold text-black">{t("pages.account.limits.audio_cost_val") || "50 kredit / daqiqa"}</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span>{t("pages.account.limits.doc_cost_label") || "Hujjat tahlili:"}</span>
-                          <span className="font-semibold text-black">{t("pages.account.limits.doc_cost_val") || "50 kredit / hujjat"}</span>
                         </div>
                       </div>
 
