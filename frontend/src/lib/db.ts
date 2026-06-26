@@ -90,6 +90,7 @@ export type BotSettings = {
   aiAgentType?: "kurator" | "sales" | "booker" | "recruiter" | "clinic" | "realtor" | "helpdesk" | "fb-leads" | "fb-leads-direct";
   fbAgentMode?: "direct" | "ai";
   agentName?: string;
+  autoLearnEnabled?: boolean;
 };
 
 export type Lesson = {
@@ -303,6 +304,7 @@ Kelgan ariza ma'lumotlarini (ism, telefon, foydalanuvchi yozgan savollar yoki ja
   adminTelegramChatId: "",
   adminTelegramUsername: "",
   telegramBotId: "",
+  autoLearnEnabled: false,
 };
 
 const INITIAL_MODULES: Module[] = [];

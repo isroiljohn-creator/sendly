@@ -432,6 +432,7 @@ export async function POST(request: Request) {
       if (payload.replai_channels && activeChannelIds.length > 0) {
         pruneOrphanSettings(userSpecificData, activeChannelIds);
       }
+      await runAutoLearningPipeline(userSpecificData);
       await pgdb.setValue("global_settings_" + userId, userSpecificData);
 
       try {
@@ -590,6 +591,8 @@ export async function POST(request: Request) {
       }
     });
 
+    await runAutoLearningPipeline(dbData.userData[userId]);
+
     const success = await writeDb(dbData);
     
     if (success) {
@@ -603,5 +606,118 @@ export async function POST(request: Request) {
   } catch (err: unknown) {
     const errMsg = err instanceof Error ? err.message : String(err);
     return NextResponse.json({ success: false, error: errMsg }, { status: 400 });
+  }
+}
+
+async function runAutoLearningPipeline(userData: Record<string, any>) {
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey) return;
+
+  const botSettingsKeys = Object.keys(userData).filter(k => k.startsWith("replai_bot_settings_"));
+  let lessonsUpdated = false;
+
+  const rawLessons = userData["replai_lessons"];
+  const lessons: any[] = typeof rawLessons === "string" ? JSON.parse(rawLessons) : (rawLessons || []);
+  const rawModules = userData["replai_modules"];
+  const modules: any[] = typeof rawModules === "string" ? JSON.parse(rawModules) : (rawModules || []);
+
+  for (const settingsKey of botSettingsKeys) {
+    const botId = settingsKey.replace("replai_bot_settings_", "");
+    const rawSettings = userData[settingsKey];
+    const settings = typeof rawSettings === "string" ? JSON.parse(rawSettings) : rawSettings;
+
+    if (settings && settings.autoLearnEnabled === true) {
+      const chatsKey = `replai_chats_${botId}`;
+      const rawChats = userData[chatsKey];
+      const chatsList: any[] = typeof rawChats === "string" ? JSON.parse(rawChats) : (rawChats || []);
+
+      let chatsUpdated = false;
+
+      for (const chat of chatsList) {
+        if (chat.liveTakeover === false && !chat.autoLearned && chat.messages && chat.messages.length > 0) {
+          const msgs = chat.messages.filter((m: any) => m.text);
+          if (msgs.length < 2) continue;
+
+          const conversationText = msgs.map((m: any) => `${m.sender === "user" ? "Mijoz" : "Operator"}: ${m.text}`).join("\n");
+
+          try {
+            const systemPrompt = `Siz professional marketing darsliklari va savol-javob (Q&A) qo'llanmalari tuzuvchisiz.\n` +
+              `Sizga operator va mijoz o'rtasidagi chat yozishmalari taqdim etiladi. Yozishmalardan foydali savol va unga berilgan aniq javobni (fakt, ma'lumot yoki qoida) topib, foydali marketing darsligi shakllantiring.\n` +
+              `Agar suhbatda hech qanday foydali darslik darajasidagi ma'lumot (masalan, narxlar, kurs tafsilotlari, qoidalar) bo'lmasa, bo'sh JSON {} qaytaring.\n` +
+              `Javobni FAQAT quyidagi JSON formatida qaytaring, boshqa hech qanday matn qo'shmang:\n` +
+              `{\n` +
+              `  "title": "Mavzu nomi (masalan: Kurs narxi va to'lov turlari)",\n` +
+              `  "transcript": "Darslik/tushuntirish matni (mijoz so'ragan masalaga to'liq javob, batafsil yoritilgan)"\n` +
+              `}`;
+
+            const res = await fetch(
+              `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
+              {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  system_instruction: {
+                    parts: [{ text: systemPrompt }],
+                  },
+                  contents: [
+                    {
+                      role: "user",
+                      parts: [{ text: `SUHBAT:\n${conversationText}` }],
+                    }
+                  ],
+                  generationConfig: {
+                    temperature: 0.1,
+                    responseMimeType: "application/json",
+                  },
+                }),
+              }
+            );
+
+            if (res.ok) {
+              const data = await res.json();
+              const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+              if (text) {
+                const parsed = JSON.parse(text);
+                if (parsed.title && parsed.transcript) {
+                  let autoModule = modules.find(m => m.title === "Avtomatik o'rganilgan bilimlar");
+                  if (!autoModule) {
+                    autoModule = {
+                      id: "mod-auto-" + Date.now(),
+                      title: "Avtomatik o'rganilgan bilimlar",
+                      description: "Mijozlar bilan suhbatlar asosida avtomatik shakllantirilgan bilimlar bazasi."
+                    };
+                    modules.push(autoModule);
+                  }
+
+                  const newLesson = {
+                    id: "les-auto-" + Date.now() + "-" + Math.floor(Math.random() * 1000),
+                    moduleId: autoModule.id,
+                    title: parsed.title,
+                    transcript: parsed.transcript
+                  };
+
+                  lessons.push(newLesson);
+                  lessonsUpdated = true;
+                }
+              }
+            }
+          } catch (err) {
+            console.error("[AutoLearn] Error running AI summarization:", err);
+          }
+
+          chat.autoLearned = true;
+          chatsUpdated = true;
+        }
+      }
+
+      if (chatsUpdated) {
+        userData[chatsKey] = JSON.stringify(chatsList);
+      }
+    }
+  }
+
+  if (lessonsUpdated) {
+    userData["replai_lessons"] = JSON.stringify(lessons);
+    userData["replai_modules"] = JSON.stringify(modules);
   }
 }

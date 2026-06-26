@@ -1023,6 +1023,11 @@ function AIAgentContent() {
     }
     handleUpdateSettings("aiCuratorEnabled", enabled);
   };
+  
+  const handleToggleAutoLearn = (enabled: boolean) => {
+    if (!settings) return;
+    handleUpdateSettings("autoLearnEnabled", enabled);
+  };
 
   const handleToggleFbAgent = (enabled: boolean) => {
     if (!settings) return;
@@ -3942,6 +3947,32 @@ function AIAgentContent() {
                         type="checkbox"
                         checked={settings.aiCuratorEnabled || false}
                         onChange={(e) => handleToggleAiCurator(e.target.checked)}
+                        className="sr-only peer"
+                      />
+                      <div className="w-11 h-6 bg-[#E8E8E8] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-[#D8D8D8] after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-black"></div>
+                    </label>
+                  </div>
+                  
+                  {/* Auto-learning Toggle */}
+                  <div className="flex items-center justify-between pt-4 border-t border-[#F0F0F0] mt-1">
+                    <div className="flex items-center gap-3">
+                      <div className={`w-10 h-10 rounded-full flex items-center justify-center ${settings.autoLearnEnabled ? "bg-[#C7F33C]/25 text-[#7CA607]" : "bg-gray-100 text-[#707070]"}`}>
+                        <TrendingUp size={20} className={settings.autoLearnEnabled ? "animate-pulse" : ""} />
+                      </div>
+                      <div>
+                        <h3 className="text-[14px] font-bold text-black">{t("pages.ai_agent.auto_learn_status")}</h3>
+                        <p className="text-[11px] text-[#707070] mt-0.5">
+                          {settings.autoLearnEnabled 
+                            ? t("pages.ai_agent.auto_learn_active_desc") 
+                            : t("pages.ai_agent.auto_learn_inactive_desc")}
+                        </p>
+                      </div>
+                    </div>
+                    <label className="relative inline-flex items-center cursor-pointer shrink-0">
+                      <input
+                        type="checkbox"
+                        checked={settings.autoLearnEnabled || false}
+                        onChange={(e) => handleToggleAutoLearn(e.target.checked)}
                         className="sr-only peer"
                       />
                       <div className="w-11 h-6 bg-[#E8E8E8] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-[#D8D8D8] after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-black"></div>
