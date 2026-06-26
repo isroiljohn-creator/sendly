@@ -210,11 +210,15 @@ export function ConnectChannelModal() {
       return;
     }
     setCustomMetaLoading(true);
+    const jwtToken = typeof window !== "undefined" ? localStorage.getItem("replai_token") : "";
     try {
       const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "https://api.sendly.uz";
       const response = await fetch(`${backendUrl}/oauth/instagram/custom`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${jwtToken}`
+        },
         body: JSON.stringify({
           instagramPageId: customMetaPageId.trim(),
           username: customMetaUsername.trim().replace(/^@+/, ""),
