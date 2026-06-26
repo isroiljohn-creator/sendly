@@ -973,6 +973,22 @@ function AIAgentContent() {
     if (loadedLessons.length > 0 && !selectedLesson) {
       setSelectedLesson(loadedLessons[0]);
     }
+
+    if (typeof window !== "undefined") {
+      const stored = localStorage.getItem("replai_curator_analyzed_messages");
+      if (stored) {
+        try {
+          const parsed = JSON.parse(stored);
+          if (Array.isArray(parsed)) {
+            setAnalyzedMessages(parsed);
+          }
+        } catch (e) {
+          console.error("Failed to parse stored analyzed messages inside loadDatabase", e);
+        }
+      } else {
+        setAnalyzedMessages([]);
+      }
+    }
   };
 
   const showToast = (message: string, type: "success" | "error" = "success") => {

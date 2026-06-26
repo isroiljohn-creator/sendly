@@ -791,6 +791,49 @@ export async function handleTelegramUpdate(channelId: string, token: string, upd
                 });
                 context["replai_ai_credits_data"] = JSON.stringify(credits);
 
+                // 3.5. CustDev analysis for curator messages
+                try {
+                  const detectedIntent = classifyIntentForCustDev(text);
+                  const sentiment = detectSentiment(text);
+                  const painPoint = extractPainPoint(text, detectedIntent, userLang);
+                  
+                  const now = new Date();
+                  const dateStr = now.getFullYear() + "-" + 
+                    String(now.getMonth() + 1).padStart(2, '0') + "-" + 
+                    String(now.getDate()).padStart(2, '0') + " " + 
+                    String(now.getHours()).padStart(2, '0') + ":" + 
+                    String(now.getMinutes()).padStart(2, '0') + ":" + 
+                    String(now.getSeconds()).padStart(2, '0');
+
+                  const newAnalyzedMsg = {
+                    id: `cur-msg-${Date.now()}`,
+                    username: username || `tg_${chatId}`,
+                    message: text,
+                    response: botReplyText,
+                    intent: detectedIntent,
+                    sentiment: sentiment,
+                    confidence: ragResult.confidence || 75,
+                    date: dateStr,
+                    painPoint: painPoint
+                  };
+
+                  let analyzedList = [];
+                  if (context["replai_curator_analyzed_messages"]) {
+                    try {
+                      analyzedList = JSON.parse(context["replai_curator_analyzed_messages"]);
+                      if (!Array.isArray(analyzedList)) {
+                        analyzedList = [];
+                      }
+                    } catch (e) {
+                      analyzedList = [];
+                    }
+                  }
+                  analyzedList.unshift(newAnalyzedMsg);
+                  context["replai_curator_analyzed_messages"] = JSON.stringify(analyzedList);
+                } catch (analysisErr) {
+                  console.error("CustDev analysis failed in bot runner:", analysisErr);
+                }
+
               } catch (ragError) {
                 console.error("RAG logic error in bot runner:", ragError);
                 botReplyText = "Murojaatingiz uchun rahmat! Tizimda kichik uzilish yuz berdi. Tez orada operatorimiz sizga bog'lanadi.";
@@ -1249,4 +1292,209 @@ export async function startTelegramBots() {
     console.error("Error starting bots:", error);
     return { success: false, error: errMsg };
   }
+}
+
+function classifyIntentForCustDev(text: string): string {
+  const msg = text.toLowerCase();
+  if (
+    msg.includes("pul") ||
+    msg.includes("narx") ||
+    msg.includes("to'lov") ||
+    msg.includes("dollar") ||
+    msg.includes("click") ||
+    msg.includes("payme") ||
+    msg.includes("karta") ||
+    msg.includes("obuna") ||
+    msg.includes("tarif") ||
+    msg.includes("price") ||
+    msg.includes("billing") ||
+    msg.includes("pay") ||
+    msg.includes("payment") ||
+    msg.includes("cost") ||
+    msg.includes("money") ||
+    msg.includes("card") ||
+    msg.includes("subscription") ||
+    msg.includes("tariff") ||
+    msg.includes("цена") ||
+    msg.includes("оплата") ||
+    msg.includes("платить") ||
+    msg.includes("деньги") ||
+    msg.includes("карта") ||
+    msg.includes("подписка") ||
+    msg.includes("тариф") ||
+    msg.includes("платеж") ||
+    msg.includes("стоимость")
+  ) {
+    return "billing";
+  }
+  if (
+    msg.includes("bot") ||
+    msg.includes("telegram") ||
+    msg.includes("kanal") ||
+    msg.includes("token") ||
+    msg.includes("ulash") ||
+    msg.includes("xatolik") ||
+    msg.includes("muammo") ||
+    msg.includes("ishlamayapti") ||
+    msg.includes("channel") ||
+    msg.includes("connect") ||
+    msg.includes("error") ||
+    msg.includes("issue") ||
+    msg.includes("bug") ||
+    msg.includes("problem") ||
+    msg.includes("broken") ||
+    msg.includes("not working") ||
+    msg.includes("телеграм") ||
+    msg.includes("канал") ||
+    msg.includes("токен") ||
+    msg.includes("подключить") ||
+    msg.includes("ошибка") ||
+    msg.includes("проблема") ||
+    msg.includes("баг") ||
+    msg.includes("не работает") ||
+    msg.includes("сбой")
+  ) {
+    return "support";
+  }
+  if (
+    msg.includes("dars") ||
+    msg.includes("modul") ||
+    msg.includes("kirish") ||
+    msg.includes("o'qish") ||
+    msg.includes("kurs") ||
+    msg.includes("dastur") ||
+    msg.includes("lesson") ||
+    msg.includes("module") ||
+    msg.includes("access") ||
+    msg.includes("study") ||
+    msg.includes("course") ||
+    msg.includes("program") ||
+    msg.includes("learn") ||
+    msg.includes("classes") ||
+    msg.includes("login") ||
+    msg.includes("урок") ||
+    msg.includes("модуль") ||
+    msg.includes("доступ") ||
+    msg.includes("учеба") ||
+    msg.includes("курс") ||
+    msg.includes("программа") ||
+    msg.includes("учиться") ||
+    msg.includes("войти")
+  ) {
+    return "faq";
+  }
+  if (
+    msg.includes("hamkor") ||
+    msg.includes("referal") ||
+    msg.includes("pul ishlash") ||
+    msg.includes("komissiya") ||
+    msg.includes("partner") ||
+    msg.includes("affiliate") ||
+    msg.includes("referral") ||
+    msg.includes("earn") ||
+    msg.includes("commission") ||
+    msg.includes("invite") ||
+    msg.includes("партнер") ||
+    msg.includes("реферал") ||
+    msg.includes("заработать") ||
+    msg.includes("заработок") ||
+    msg.includes("комиссия") ||
+    msg.includes("пригласить")
+  ) {
+    return "affiliate";
+  }
+  return "general";
+}
+
+function detectSentiment(text: string): "positive" | "neutral" | "negative" {
+  const msg = text.toLowerCase();
+  if (
+    msg.includes("yaxshi") ||
+    msg.includes("zo'r") ||
+    msg.includes("rahmat") ||
+    msg.includes("ajoyib") ||
+    msg.includes("muvaffaqiyat") ||
+    msg.includes("😊") ||
+    msg.includes("👍") ||
+    msg.includes("good") ||
+    msg.includes("great") ||
+    msg.includes("thanks") ||
+    msg.includes("thank you") ||
+    msg.includes("awesome") ||
+    msg.includes("cool") ||
+    msg.includes("success") ||
+    msg.includes("perfect") ||
+    msg.includes("nice") ||
+    msg.includes("хорошо") ||
+    msg.includes("отлично") ||
+    msg.includes("спасибо") ||
+    msg.includes("супер") ||
+    msg.includes("круто") ||
+    msg.includes("успех") ||
+    msg.includes("прекрасно") ||
+    msg.includes("классно")
+  ) {
+    return "positive";
+  }
+  if (
+    msg.includes("xatolik") ||
+    msg.includes("ishlamadi") ||
+    msg.includes("muammo") ||
+    msg.includes("afsus") ||
+    msg.includes("yomon") ||
+    msg.includes("tushunmadim") ||
+    msg.includes("qiyin") ||
+    msg.includes("😡") ||
+    msg.includes("👎") ||
+    msg.includes("error") ||
+    msg.includes("broken") ||
+    msg.includes("problem") ||
+    msg.includes("unfortunately") ||
+    msg.includes("bad") ||
+    msg.includes("didn't understand") ||
+    msg.includes("hard") ||
+    msg.includes("difficult") ||
+    msg.includes("failure") ||
+    msg.includes("ошибка") ||
+    msg.includes("сломалось") ||
+    msg.includes("проблема") ||
+    msg.includes("к сожалению") ||
+    msg.includes("плохо") ||
+    msg.includes("не понял") ||
+    msg.includes("сложно") ||
+    msg.includes("трудно") ||
+    msg.includes("фигня")
+  ) {
+    return "negative";
+  }
+  return "neutral";
+}
+
+function extractPainPoint(text: string, intent: string, lang: string): string {
+  const uzPainPoints: Record<string, string> = {
+    billing: "To'lov usullari yoki kartani bog'lash jarayonidagi qiyinchiliklar",
+    support: "Platformani ijtimoiy tarmoqlar yoki Telegram botga bog'lashdagi texnik muammolar",
+    faq: "Dars transkriptlari ichidan kerakli mavzuni mustaqil topa olmaslik",
+    affiliate: "Hamkorlik komissiyalari va taklif etish havolasi ishlash qoidalarini aniqlashtirish",
+    default: "Platformaning ishlash imkoniyatlari haqida qo'shimcha ma'lumot olish"
+  };
+
+  const ruPainPoints: Record<string, string> = {
+    billing: "Трудности со способами оплаты или процессом привязки карты",
+    support: "Технические проблемы с привязкой платформы к социальным сетям или Telegram-боту",
+    faq: "Невозможность самостоятельно найти нужную тему в транскриптах уроков",
+    affiliate: "Уточнение партнерских комиссионных и правил работы реферальной ссылки",
+    default: "Получение дополнительной информации о возможностях работы платформы"
+  };
+
+  const enPainPoints: Record<string, string> = {
+    billing: "Difficulties with payment methods or the card binding process",
+    support: "Technical issues with linking the platform to social networks or Telegram bot",
+    faq: "Inability to independently find the required topic in lesson transcripts",
+    affiliate: "Clarifying affiliate commissions and referral link rules",
+    default: "Getting additional information about the platform's capabilities"
+  };
+
+  const map = lang === "ru" ? ruPainPoints : lang === "en" ? enPainPoints : uzPainPoints;
+  return map[intent] || map["default"];
 }
