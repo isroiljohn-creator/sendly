@@ -25,7 +25,7 @@ export async function POST(request: Request) {
     // Create native Blob and FormData for fetch
     const blob = new Blob([buffer], { type: fileType || "audio/wav" });
     const formData = new FormData();
-    formData.append("file", blob, fileName || "audio.wav");
+    formData.append("audio", blob, fileName || "audio.wav");
 
     console.log(`[Aisha STT] Sending audio file to Aisha STT API (${fileName}, size: ${buffer.length} bytes)...`);
 
