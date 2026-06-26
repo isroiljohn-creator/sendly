@@ -1481,6 +1481,7 @@
         "admin_unlinked": "Admin profil muvaffaqiyatli o'chirildi!",
         "default_module_created": "Hujjatlar uchun standart modul yaratildi",
         "file_uploaded_success": "\"{fileName}\" fayli muvaffaqiyatli yuklandi!",
+        "audio_transcribed_success": "Audio muvaffaqiyatli transkripsiya qilindi va dars qo'shildi!",
         "module_created": "\"{title}\" moduli yaratildi",
         "module_deleted": "Modul o'chirildi",
         "lesson_created": "\"{title}\" darsi yaratildi",

@@ -1481,6 +1481,7 @@
         "admin_unlinked": "Профиль администратора успешно удален!",
         "default_module_created": "Создан стандартный модуль для документов",
         "file_uploaded_success": "Файл \"{fileName}\" успешно загружен!",
+        "audio_transcribed_success": "Аудио успешно транскрибировано, и урок добавлен!",
         "module_created": "Модуль \"{title}\" создан",
         "module_deleted": "Модуль удален",
         "lesson_created": "Урок \"{title}\" создан",

@@ -1481,6 +1481,7 @@
         "admin_unlinked": "Admin profile successfully unlinked!",
         "default_module_created": "Default module created for documents",
         "file_uploaded_success": "File \"{fileName}\" successfully uploaded!",
+        "audio_transcribed_success": "Audio successfully transcribed and lesson added!",
         "module_created": "Module \"{title}\" created",
         "module_deleted": "Module deleted",
         "lesson_created": "Lesson \"{title}\" created",
