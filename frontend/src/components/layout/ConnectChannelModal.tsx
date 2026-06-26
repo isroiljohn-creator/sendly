@@ -351,8 +351,8 @@ export function ConnectChannelModal() {
                 onClick={() => setModal("instagram-form")}
                 className="flex items-center gap-3 w-full p-4 rounded-[16px] border border-[#E8E8E8] hover:border-black text-[13px] font-medium transition-all text-left bg-white hover:shadow-sm"
               >
-                <div className="grid h-8 w-8 place-items-center rounded-[10px] bg-[#16A34A] text-white shrink-0">
-                  <Instagram size={16} />
+                <div className="grid h-8 w-8 place-items-center rounded-[10px] bg-black text-[#C7F33C] shrink-0">
+                  <Instagram size={16} className="text-[#C7F33C]" />
                 </div>
                 <div>
                   <p className="font-bold text-black">Ulab bering (B2B)</p>
@@ -369,8 +369,8 @@ export function ConnectChannelModal() {
         <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/35 backdrop-blur-[5px] p-4 animate-in fade-in duration-200">
           <div className="bg-white rounded-[24px] w-full max-w-[420px] shadow-2xl overflow-hidden scale-100 animate-in zoom-in-95 duration-250 border border-[#E8E8E8]/70 shadow-[0_20px_50px_rgba(0,0,0,0.08)]">
             <div className="flex items-center gap-3 px-6 pt-6 pb-5 border-b border-[#F0F0F0]">
-              <div className="grid h-10 w-10 place-items-center rounded-[12px] bg-[#16A34A] shrink-0">
-                <Instagram size={18} className="text-white" />
+              <div className="grid h-10 w-10 place-items-center rounded-[12px] bg-black shrink-0">
+                <Instagram size={18} className="text-[#C7F33C]" />
               </div>
               <div className="flex-1 min-w-0">
                 <h2 className="text-[15px] font-bold text-black truncate">Shaxsiy Meta API (B2B) ulanishi</h2>
@@ -383,7 +383,7 @@ export function ConnectChannelModal() {
 
             <form onSubmit={handleConnectCustomMeta} className="px-6 py-5 flex flex-col gap-4 text-left">
               <div className="flex flex-col gap-1">
-                <label className="text-[10px] font-bold text-[#707070] uppercase tracking-wide">Instagram Akkaunt ID (Business Account ID)</label>
+                <label className="text-[10px] font-bold text-[#707070] uppercase tracking-wide">Instagram biznes akkaunt ID (ID)</label>
                 <input
                   type="text"
                   value={customMetaPageId}
@@ -394,7 +394,7 @@ export function ConnectChannelModal() {
                 />
               </div>
               <div className="flex flex-col gap-1">
-                <label className="text-[10px] font-bold text-[#707070] uppercase tracking-wide">Instagram Username (Foydalanuvchi nomi)</label>
+                <label className="text-[10px] font-bold text-[#707070] uppercase tracking-wide">Instagram foydalanuvchi nomi</label>
                 <input
                   type="text"
                   value={customMetaUsername}
@@ -405,7 +405,7 @@ export function ConnectChannelModal() {
                 />
               </div>
               <div className="flex flex-col gap-1">
-                <label className="text-[10px] font-bold text-[#707070] uppercase tracking-wide">Meta App ID (Ilova ID)</label>
+                <label className="text-[10px] font-bold text-[#707070] uppercase tracking-wide">Meta ilova ID (ID)</label>
                 <input
                   type="text"
                   value={customMetaAppId}
@@ -416,22 +416,22 @@ export function ConnectChannelModal() {
                 />
               </div>
               <div className="flex flex-col gap-1">
-                <label className="text-[10px] font-bold text-[#707070] uppercase tracking-wide">Meta App Secret (Ilova maxfiy kaliti)</label>
+                <label className="text-[10px] font-bold text-[#707070] uppercase tracking-wide">Meta ilova maxfiy kaliti (Secret)</label>
                 <input
                   type="password"
                   value={customMetaAppSecret}
                   onChange={(e) => setCustomMetaAppSecret(e.target.value)}
-                  placeholder="Meta App Secret kalitingiz"
+                  placeholder="Meta ilovangiz maxfiy kaliti"
                   required
                   className="w-full rounded-[10px] border border-[#D8D8D8] px-3.5 py-2 text-[12px] focus:outline-none focus:border-black font-semibold text-black bg-white"
                 />
               </div>
               <div className="flex flex-col gap-1">
-                <label className="text-[10px] font-bold text-[#707070] uppercase tracking-wide">Long-Lived Page Access Token</label>
+                <label className="text-[10px] font-bold text-[#707070] uppercase tracking-wide">Doimiy sahifa kirish tokeni</label>
                 <textarea
                   value={customMetaAccessToken}
                   onChange={(e) => setCustomMetaAccessToken(e.target.value)}
-                  placeholder="Meta Graph API'dan olingan Page Access Token"
+                  placeholder="Meta Graph API'dan olingan doimiy sahifa kirish tokeni"
                   required
                   rows={3}
                   className="w-full rounded-[10px] border border-[#D8D8D8] px-3.5 py-2 text-[12px] focus:outline-none focus:border-black font-semibold text-black resize-none bg-white"
@@ -441,11 +441,11 @@ export function ConnectChannelModal() {
                 <button
                   type="submit"
                   disabled={customMetaLoading}
-                  className="w-full py-3 rounded-full bg-[#16A34A] hover:bg-[#15803d] text-white text-[12px] font-bold shadow-md transition-all flex items-center justify-center gap-1.5"
+                  className="w-full py-3 rounded-full bg-[#C7F33C] hover:bg-[#b0d82f] text-black text-[12px] font-extrabold shadow-md transition-all flex items-center justify-center gap-1.5"
                 >
                   {customMetaLoading ? (
                     <>
-                      <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                      <span className="w-4 h-4 border-2 border-black/30 border-t-black rounded-full animate-spin" />
                       <span>Ulanmoqda...</span>
                     </>
                   ) : (
