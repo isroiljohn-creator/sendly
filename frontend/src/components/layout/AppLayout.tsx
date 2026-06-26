@@ -56,7 +56,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
   const [channels, setChannels] = useState<Channel[]>([]);
   const [activeChannel, setActiveChannel] = useState<Channel | null>(null);
   const [currentUser, setCurrentUser] = useState<DBUser | null>(null);
-  const [credits, setCredits] = useState<{ balance: number; used: number }>({ balance: 100, used: 0 });
+  const [credits, setCredits] = useState<{ balance: number; used: number } | null>(null);
 
   useEffect(() => {
     const user = db.getCurrentUser();
@@ -100,6 +100,14 @@ export function AppLayout({ children }: { children: ReactNode }) {
       const user = db.getCurrentUser();
       setCurrentUser(user);
       if (user) {
+        if (typeof window !== "undefined") {
+          const local = localStorage.getItem("replai_ai_credits_data");
+          if (local) {
+            try {
+              setCredits(JSON.parse(local));
+            } catch {}
+          }
+        }
         db.getAiCreditsFromServer(user.id).then((data) => {
           if (data) setCredits(data);
         });
@@ -125,6 +133,8 @@ export function AppLayout({ children }: { children: ReactNode }) {
   if (!authorized) {
     return <BrandLoader fullScreen />;
   }
+
+  const activeCredits = credits || { balance: 0, used: 0 };
 
   return (
     <div className="h-[100dvh] md:h-screen w-full bg-[#E8E8E8] p-3 md:px-6 md:py-4 flex flex-col gap-3 md:gap-4 overflow-hidden relative">
@@ -405,19 +415,19 @@ export function AppLayout({ children }: { children: ReactNode }) {
                   <span>{t("pages.account.limits.ai_credits_title") || "AI limiti"}</span>
                 </div>
                 <span className="text-[12px] text-[#707070] font-bold">
-                  {credits.balance} {t("pages.account.billing.unit_credits") || "kredit"}
+                  {credits ? activeCredits.balance.toLocaleString() : "..."} {t("pages.account.billing.unit_credits") || "kredit"}
                 </span>
               </div>
               <div className="w-full h-1.5 bg-[#F0F0F0] rounded-full overflow-hidden">
                 <div 
                   className="h-full bg-[#16A34A] rounded-full transition-all duration-300"
-                  style={{ width: `${credits.balance + credits.used > 0 ? Math.round((credits.balance / (credits.balance + credits.used)) * 100) : 100}%` }}
+                  style={{ width: `${activeCredits.balance + activeCredits.used > 0 ? Math.round((activeCredits.balance / (activeCredits.balance + activeCredits.used)) * 100) : 100}%` }}
                 />
               </div>
               <div className="border-t border-neutral-200/60 pt-2 flex flex-col gap-1 text-[10px] text-[#707070]">
                 <div className="flex justify-between font-bold">
                   <span>{t("pages.account.limits.balance_label") || "Balans:"}</span>
-                  <span className="text-black">{credits.balance.toLocaleString()} {t("pages.account.billing.unit_credits") || "kredit"}</span>
+                  <span className="text-black">{credits ? activeCredits.balance.toLocaleString() : "..."} {t("pages.account.billing.unit_credits") || "kredit"}</span>
                 </div>
               </div>
             </div>

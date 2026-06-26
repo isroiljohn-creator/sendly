@@ -116,7 +116,7 @@ export function Sidebar() {
   const [langMenuOpen, setLangMenuOpen] = useState(false);
   const [currentUser, setCurrentUser] = useState<DBUser | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
-  const [credits, setCredits] = useState<{ balance: number; used: number }>({ balance: 100, used: 0 });
+  const [credits, setCredits] = useState<{ balance: number; used: number } | null>(null);
 
   const dropdownRef = useRef<HTMLDivElement>(null);
   const profileRef = useRef<HTMLDivElement>(null);
@@ -128,6 +128,14 @@ export function Sidebar() {
       const user = db.getCurrentUser();
       setCurrentUser(user);
       if (user) {
+        if (typeof window !== "undefined") {
+          const local = localStorage.getItem("replai_ai_credits_data");
+          if (local) {
+            try {
+              setCredits(JSON.parse(local));
+            } catch {}
+          }
+        }
         db.getAiCreditsFromServer(user.id).then((data) => {
           if (data) setCredits(data);
         });
@@ -193,6 +201,8 @@ export function Sidebar() {
     // Refresh current page data via a full reload to sync all client state
     window.location.reload();
   };
+
+  const activeCredits = credits || { balance: 0, used: 0 };
 
   return (
     <aside className="hidden md:flex sticky top-4 z-40 w-[64px] shrink-0 flex-col items-center h-full bg-white border border-[#E8E8E8]/60 shadow-[0_8px_30px_rgba(0,0,0,0.03)] rounded-[24px] py-4">
@@ -333,19 +343,19 @@ export function Sidebar() {
                     <span>{t("pages.account.limits.ai_credits_title") || "AI limiti"}</span>
                   </div>
                   <span className="text-[11px] text-[#707070] font-bold">
-                    {credits.balance} {t("pages.account.billing.unit_credits") || "kredit"}
+                    {credits ? activeCredits.balance.toLocaleString() : "..."} {t("pages.account.billing.unit_credits") || "kredit"}
                   </span>
                 </div>
                 <div className="w-full h-1.5 bg-[#F0F0F0] rounded-full overflow-hidden">
                   <div 
                     className="h-full bg-[#16A34A] rounded-full transition-all duration-300"
-                    style={{ width: `${credits.balance + credits.used > 0 ? Math.round((credits.balance / (credits.balance + credits.used)) * 100) : 100}%` }}
+                    style={{ width: `${activeCredits.balance + activeCredits.used > 0 ? Math.round((activeCredits.balance / (activeCredits.balance + activeCredits.used)) * 100) : 100}%` }}
                   />
                 </div>
                 <div className="border-t border-[#F5F5F5] pt-1.5 flex flex-col gap-1 text-[9px] text-[#707070]">
                   <div className="flex justify-between font-bold">
                     <span>{t("pages.account.limits.balance_label") || "Balans:"}</span>
-                    <span className="text-black">{credits.balance.toLocaleString()} {t("pages.account.billing.unit_credits") || "kredit"}</span>
+                    <span className="text-black">{credits ? activeCredits.balance.toLocaleString() : "..."} {t("pages.account.billing.unit_credits") || "kredit"}</span>
                   </div>
                 </div>
               </div>
