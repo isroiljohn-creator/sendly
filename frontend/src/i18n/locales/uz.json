@@ -379,12 +379,14 @@
         "yearly": "Yillik",
         "free_desc": "Boshlash va sinab ko'rish",
         "pro_desc": "Kichik bizneslar uchun",
-        "premium_desc": "Katta va tez o'suvchi loyihalar",
+        "premium_desc": "Ko'proq AI kreditlariga ega bo'lgan bizneslar",
+        "vip_desc": "Katta va tez o'suvchi loyihalar",
         "recommended": "Tavsiya etiladi",
         "current_plan": "Joriy tarif",
         "switch_free": "Bepulga o'tish",
         "switch_pro": "Sinab ko'rish",
-        "switch_premium": "Sinab ko'rish"
+        "switch_premium": "Sinab ko'rish",
+        "switch_vip": "Sinab ko'rish"
       },
       "purchase_modal": {
         "title": "AI Kredit Sotib Olish",

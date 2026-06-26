@@ -1227,8 +1227,8 @@ export default function AccountPage() {
       {/* ── PRICING MODAL ── */}
       {isPricingOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 overflow-y-auto">
-          <div className="bg-white rounded-[32px] w-full max-w-[720px] shadow-2xl overflow-hidden p-8 border border-[#D8D8D8] my-8 animate-in fade-in zoom-in-95 duration-200">
-            <div className="flex items-center justify-between pb-4 border-b border-[#F0F0F0] mb-6">
+          <div className="bg-white rounded-[32px] w-full max-w-[1000px] shadow-2xl overflow-hidden border border-[#D8D8D8] my-4 animate-in fade-in zoom-in-95 duration-200 flex flex-col max-h-[92vh]">
+            <div className="flex items-center justify-between px-6 md:px-8 pt-6 pb-4 border-b border-[#F0F0F0] flex-shrink-0">
               <div>
                 <h3 className="text-[18px] font-black text-black">{t("pages.account.pricing.title")}</h3>
                 <p className="text-[12px] text-[#707070] mt-1">{t("pages.account.pricing.desc")}</p>
@@ -1241,11 +1241,16 @@ export default function AccountPage() {
               </button>
             </div>
 
-            {/* Monthly / Yearly Toggle */}
+            {/* Monthly / Yearly Toggle & Cards Container */}
             {(() => {
+              const getTranslation = (key: string, fallback: string) => {
+                const val = t(key);
+                return (val === key || val.includes("pages.account.pricing")) ? fallback : val;
+              };
+
               return (
-                <>
-                  <div className="flex justify-center mb-6">
+                <div className="flex-1 overflow-y-auto px-6 md:px-8 pb-8 pt-4 min-h-0 custom-scrollbar">
+                  <div className="flex justify-center mb-5">
                     <div className="bg-[#EFF2FC] p-1 rounded-full flex items-center gap-1">
                       <button
                         type="button"
@@ -1273,9 +1278,9 @@ export default function AccountPage() {
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-6xl mx-auto">
                     {/* Pro Card */}
-                    <div className={`rounded-[24px] border p-6 flex flex-col justify-between transition-all ${
+                    <div className={`rounded-[24px] border p-4 flex flex-col justify-between transition-all ${
                       currentUser?.plan === "pro"
                         ? "border-black bg-white ring-2 ring-black/5"
                         : "border-[#E8E8E8] bg-white hover:border-[#CCCCCC]"
@@ -1283,123 +1288,123 @@ export default function AccountPage() {
                       <div>
                         <div className="flex justify-between items-start">
                           <div>
-                            <h4 className="text-[16px] font-bold text-black uppercase tracking-wider">SENDLY PRO</h4>
-                            <p className="text-[11px] text-[#707070] mt-1">{t("pages.account.pricing.pro_desc")}</p>
+                            <h4 className="text-[14px] font-bold text-black uppercase tracking-wider">SENDLY PRO</h4>
+                            <p className="text-[11px] text-[#707070] mt-1">{getTranslation("pages.account.pricing.pro_desc", "Kichik bizneslar uchun")}</p>
                           </div>
                           {currentUser?.plan === "pro" && (
-                            <span className="bg-[#EFF2FC] text-black text-[9px] font-bold px-2 py-0.5 rounded-full">
+                            <span className="bg-[#EFF2FC] text-black text-[9px] font-bold px-2 py-0.5 rounded-full shrink-0">
                               FAOL
                             </span>
                           )}
                         </div>
                         
-                        <div className="my-6">
-                          <span className="text-[26px] font-black text-black leading-none">
+                        <div className="my-3">
+                          <span className="text-[22px] font-black text-black leading-none">
                             {billingCycle === "monthly" ? "150 000" : "1 440 000"}
                           </span>
-                          <span className="text-[12px] text-[#707070] ml-1">UZS / {billingCycle === "monthly" ? "oy" : "yil"}</span>
+                          <span className="text-[11px] text-[#707070] ml-1">UZS / {billingCycle === "monthly" ? "oy" : "yil"}</span>
                         </div>
 
-                        <hr className="border-[#F0F0F0] my-4" />
+                        <hr className="border-[#F0F0F0] my-2.5" />
 
-                        <ul className="flex flex-col gap-3">
+                        <ul className="flex flex-col gap-1.5">
                           {[
-                            "1 ta ulangan kanal (Instagram / Telegram)",
-                            "5 ta faol avtomatlashtirish oqimi",
-                            "1 000 ta bepul AI kreditlari (tokens)",
-                            "Barcha asosiy bloklar va triggerlar",
+                            "1 ta ulangan kanal (IG / TG)",
+                            "5 ta avtomatlashtirish oqimi",
+                            "1 000 ta bepul AI kreditlari",
+                            "Asosiy bloklar va triggerlar",
                             "Statistika va tahlillar paneli",
                           ].map((feat) => (
-                            <li key={feat} className="flex items-start gap-2 text-[12px] text-[#505050]">
-                              <span className="text-[#10B981] font-bold mt-0.5">✓</span>
+                            <li key={feat} className="flex items-start gap-2 text-[11px] text-[#505050]">
+                              <span className="text-[#10B981] font-bold mt-0.5 shrink-0">✓</span>
                               <span>{feat}</span>
                             </li>
                           ))}
                         </ul>
                       </div>
 
-                      <div className="mt-8">
+                      <div className="mt-4">
                         <button
                           type="button"
                           disabled={currentUser?.plan === "pro"}
                           onClick={() => handleSelectPlan("pro")}
-                          className={`w-full py-3 rounded-full text-[12px] font-bold transition-all active:scale-[0.98] ${
+                          className={`w-full py-2 rounded-full text-[12px] font-bold transition-all active:scale-[0.98] ${
                             currentUser?.plan === "pro"
                               ? "bg-[#EFF2FC] text-[#707070] cursor-default"
                               : "bg-[#EFF2FC] text-black hover:bg-[#e4e8f5]"
                           }`}
                         >
-                          {currentUser?.plan === "pro" ? t("pages.account.pricing.current_plan") : t("pages.account.pricing.switch_pro")}
+                          {currentUser?.plan === "pro" ? getTranslation("pages.account.pricing.current_plan", "Joriy tarif") : getTranslation("pages.account.pricing.switch_pro", "Sinab ko'rish")}
                         </button>
                       </div>
                     </div>
 
                     {/* Premium Card */}
-                    <div className={`rounded-[24px] border p-6 flex flex-col justify-between transition-all relative overflow-hidden ${
+                    <div className={`rounded-[24px] border p-4 flex flex-col justify-between transition-all relative overflow-hidden ${
                       currentUser?.plan === "premium"
                         ? "border-black bg-white ring-2 ring-black/5"
                         : "border-[#E8E8E8] bg-white hover:border-[#CCCCCC]"
                     }`}>
-                      <div className="absolute top-0 right-0 bg-[#C7F33C] text-black text-[9px] font-extrabold uppercase px-3.5 py-1 rounded-bl-[14px]">
-                        {t("pages.account.pricing.recommended")}
+                      <div className="absolute top-0 right-0 bg-[#C7F33C] text-black text-[9px] font-extrabold uppercase px-3 py-0.5 rounded-bl-[12px]">
+                        {getTranslation("pages.account.pricing.recommended", "Tavsiya etiladi")}
                       </div>
 
                       <div>
-                        <div className="flex justify-between items-start">
+                        <div className="flex justify-between items-start mt-2">
                           <div>
-                            <h4 className="text-[16px] font-bold text-black uppercase tracking-wider">SENDLY PREMIUM</h4>
-                            <p className="text-[11px] text-[#707070] mt-1">{t("pages.account.pricing.premium_desc")}</p>
+                            <h4 className="text-[14px] font-bold text-black uppercase tracking-wider">SENDLY PREMIUM</h4>
+                            <p className="text-[11px] text-[#707070] mt-1">{getTranslation("pages.account.pricing.premium_desc", "Ko'proq AI kreditlariga ega bo'lgan bizneslar")}</p>
                           </div>
                           {currentUser?.plan === "premium" && (
-                            <span className="bg-[#EFF2FC] text-black text-[9px] font-bold px-2 py-0.5 rounded-full">
+                            <span className="bg-[#EFF2FC] text-black text-[9px] font-bold px-2 py-0.5 rounded-full shrink-0">
                               FAOL
                             </span>
                           )}
                         </div>
                         
-                        <div className="my-6">
-                          <span className="text-[26px] font-black text-black leading-none">
+                        <div className="my-3">
+                          <span className="text-[22px] font-black text-black leading-none">
                             {billingCycle === "monthly" ? "300 000" : "2 880 000"}
                           </span>
-                          <span className="text-[12px] text-[#707070] ml-1">UZS / {billingCycle === "monthly" ? "oy" : "yil"}</span>
+                          <span className="text-[11px] text-[#707070] ml-1">UZS / {billingCycle === "monthly" ? "oy" : "yil"}</span>
                         </div>
 
-                        <hr className="border-[#F0F0F0] my-4" />
+                        <hr className="border-[#F0F0F0] my-2.5" />
 
-                        <ul className="flex flex-col gap-3">
+                        <ul className="flex flex-col gap-1.5">
                           {[
-                            "1 ta ulangan kanal (Instagram / Telegram)",
-                            "5 ta faol avtomatlashtirish oqimi",
-                            "30 000 ta bepul AI kreditlari (tokens)",
-                            "Barcha pro imkoniyatlari",
+                            "1 ta ulangan kanal (IG / TG)",
+                            "5 ta avtomatlashtirish oqimi",
+                            "30 000 ta bepul AI kreditlari",
+                            "Barcha PRO imkoniyatlari",
                             "Statistika va tahlillar paneli",
                           ].map((feat) => (
-                            <li key={feat} className="flex items-start gap-2 text-[12px] text-[#505050]">
-                              <span className="text-[#10B981] font-bold mt-0.5">✓</span>
+                            <li key={feat} className="flex items-start gap-2 text-[11px] text-[#505050]">
+                              <span className="text-[#10B981] font-bold mt-0.5 shrink-0">✓</span>
                               <span>{feat}</span>
                             </li>
                           ))}
                         </ul>
                       </div>
 
-                      <div className="mt-8">
+                      <div className="mt-4">
                         <button
                           type="button"
                           disabled={currentUser?.plan === "premium"}
                           onClick={() => handleSelectPlan("premium")}
-                          className={`w-full py-3 rounded-full text-[12px] font-bold transition-all active:scale-[0.98] ${
+                          className={`w-full py-2 rounded-full text-[12px] font-bold transition-all active:scale-[0.98] ${
                             currentUser?.plan === "premium"
                               ? "bg-[#EFF2FC] text-[#707070] cursor-default"
                               : "bg-[#EFF2FC] text-black hover:bg-[#e4e8f5]"
                           }`}
                         >
-                          {currentUser?.plan === "premium" ? t("pages.account.pricing.current_plan") : t("pages.account.pricing.switch_premium")}
+                          {currentUser?.plan === "premium" ? getTranslation("pages.account.pricing.current_plan", "Joriy tarif") : getTranslation("pages.account.pricing.switch_premium", "Sinab ko'rish")}
                         </button>
                       </div>
                     </div>
 
                     {/* VIP Card */}
-                    <div className={`rounded-[24px] border p-6 flex flex-col justify-between bg-[#0F0F0F] text-white transition-all relative overflow-hidden ${
+                    <div className={`rounded-[24px] border p-4 flex flex-col justify-between bg-[#0F0F0F] text-white transition-all relative overflow-hidden ${
                       currentUser?.plan === "vip"
                         ? "border-[#C7F33C] ring-2 ring-[#C7F33C]/20"
                         : "border-white/10 hover:border-white/20"
@@ -1407,59 +1412,59 @@ export default function AccountPage() {
                       <div>
                         <div className="flex justify-between items-start">
                           <div>
-                            <h4 className="text-[16px] font-bold text-[#C7F33C] uppercase tracking-wider">SENDLY VIP</h4>
-                            <p className="text-[11px] text-white/60 mt-1">{t("pages.account.pricing.vip_desc")}</p>
+                            <h4 className="text-[14px] font-bold text-[#C7F33C] uppercase tracking-wider">SENDLY VIP</h4>
+                            <p className="text-[11px] text-white/60 mt-1">{getTranslation("pages.account.pricing.vip_desc", "Katta va tez o'suvchi loyihalar")}</p>
                           </div>
                           {currentUser?.plan === "vip" && (
-                            <span className="bg-white/10 text-[#C7F33C] text-[9px] font-bold px-2 py-0.5 rounded-full">
+                            <span className="bg-white/10 text-[#C7F33C] text-[9px] font-bold px-2 py-0.5 rounded-full shrink-0">
                               FAOL
                             </span>
                           )}
                         </div>
                         
-                        <div className="my-6">
-                          <span className="text-[26px] font-black text-[#C7F33C] leading-none">
+                        <div className="my-3">
+                          <span className="text-[22px] font-black text-[#C7F33C] leading-none">
                             {billingCycle === "monthly" ? "1 200 000" : "11 520 000"}
                           </span>
-                          <span className="text-[12px] text-white/60 ml-1">UZS / {billingCycle === "monthly" ? "oy" : "yil"}</span>
+                          <span className="text-[11px] text-white/60 ml-1">UZS / {billingCycle === "monthly" ? "oy" : "yil"}</span>
                         </div>
 
-                        <hr className="border-white/10 my-4" />
+                        <hr className="border-white/10 my-2.5" />
 
-                        <ul className="flex flex-col gap-3">
+                        <ul className="flex flex-col gap-1.5">
                           {[
-                            "10 ta ulangan kanal (Instagram + Telegram)",
-                            "50 ta faol avtomatlashtirish oqimi",
-                            "150 000 ta bepul AI kreditlari (tokens)",
-                            "Limitsiz Telegram broadcast xabarlari",
+                            "10 ta ulangan kanal (IG + TG)",
+                            "50 ta avtomatlashtirish oqimi",
+                            "150 000 ta bepul AI kreditlari",
+                            "Limitsiz Telegram broadcastlar",
                             "Yuqori tezlikdagi serverlar",
-                            "24/7 VIP shaxsiy menejer yordami",
+                            "24/7 shaxsiy menejer yordami",
                           ].map((feat) => (
-                            <li key={feat} className="flex items-start gap-2 text-[12px] text-white/90">
-                              <span className="text-[#C7F33C] font-bold mt-0.5">✓</span>
+                            <li key={feat} className="flex items-start gap-2 text-[11px] text-white/90">
+                              <span className="text-[#C7F33C] font-bold mt-0.5 shrink-0">✓</span>
                               <span>{feat}</span>
                             </li>
                           ))}
                         </ul>
                       </div>
 
-                      <div className="mt-8">
+                      <div className="mt-4">
                         <button
                           type="button"
                           disabled={currentUser?.plan === "vip"}
                           onClick={() => handleSelectPlan("vip")}
-                          className={`w-full py-3 rounded-full text-[12px] font-bold transition-all active:scale-[0.98] ${
+                          className={`w-full py-2 rounded-full text-[12px] font-bold transition-all active:scale-[0.98] ${
                             currentUser?.plan === "vip"
                               ? "bg-white/10 text-white/40 cursor-default"
                               : "bg-[#C7F33C] text-black hover:bg-[#b0d82f]"
                           }`}
                         >
-                          {currentUser?.plan === "vip" ? t("pages.account.pricing.current_plan") : t("pages.account.pricing.switch_vip")}
+                          {currentUser?.plan === "vip" ? getTranslation("pages.account.pricing.current_plan", "Joriy tarif") : getTranslation("pages.account.pricing.switch_vip", "Sinab ko'rish")}
                         </button>
                       </div>
                     </div>
                   </div>
-                </>
+                </div>
               );
             })()}
           </div>
