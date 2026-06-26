@@ -4,7 +4,7 @@
       "email": "isroiljohnabdullayev@gmail.com",
       "fullName": "Isroiljon Abdullayev",
       "plan": "vip",
-      "id": "22222222-2222-4222-8222-222222222222"
+      "id": "946f735a-f462-410d-9cb7-568da9c96be8"
     }
   ],
   "userData": {
@@ -53,6 +53,39 @@
       "replai_fb_tags": "[\"Meta Lead\",\"AI Saralangan\"]",
       "replai_fb_field_mappings": "[{\"id\":\"map-1\",\"metaField\":\"full_name\",\"sendlyField\":\"name\",\"description\":\"Mijozning to'liq ismi (Ism)\"},{\"id\":\"map-2\",\"metaField\":\"phone_number\",\"sendlyField\":\"phone\",\"description\":\"Telefon raqami (Telefon)\"},{\"id\":\"map-3\",\"metaField\":\"user_question\",\"sendlyField\":\"message\",\"description\":\"Murojaat matni / Savol (Izoh)\"}]",
       "replai_db_version": "v11"
+    },
+    "946f735a-f462-410d-9cb7-568da9c96be8": {
+      "replai_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiOTQ2ZjczNWEtZjQ2Mi00MTBkLTljYjctNTY4ZGE5Yzk2YmU4IiwiZW1haWwiOiJpc3JvaWxqb2huYWJkdWxsYXlldkBnbWFpbC5jb20iLCJpYXQiOjE3ODIzOTIzMDMsImV4cCI6MTc4MjM5NTkwM30.P-5dkvDsmOGz1ijK9BvIArGcb3jCgMRb6bgY9pX4SO0",
+      "replai_groups": "[{\"id\":\"sales\",\"name\":\"Sotuvlar\"},{\"id\":\"support\",\"name\":\"Qo'llab-quvvatlash\"}]",
+      "replai_api_key": "sk_test_25fa6325525a01ad6db8e0f2f6894a7c",
+      "replai_fb_tags": "[\"Meta Lead\",\"AI Saralangan\"]",
+      "replai_lessons": "[]",
+      "replai_modules": "[]",
+      "replai_channels": "[]",
+      "replai_contacts": "[{\"id\":\"7792095631\",\"name\":\"Isroiljon\",\"username\":\"isroiljohn\",\"status\":true,\"messagesCount\":1,\"tags\":[\"Telegram\"],\"lastActive\":\"11:39\",\"phone\":\"\",\"email\":\"\",\"companyName\":\"\",\"lastMessage\":\"/start\"}]",
+      "replai_broadcasts": "[]",
+      "replai_db_version": "v11",
+      "replai_active_channel": "ch_1782392382480",
+      "replai_flow_diagram_1": "{\"nodes\":[],\"edges\":[],\"entryPointId\":\"n1\",\"flowTriggerSource\":\"dm\",\"flowTriggerMatch\":\"contains\",\"flowTriggerKeywords\":\"salom, narx\",\"flowProhibitRestart\":false}",
+      "replai_flow_diagram_3": "{\"nodes\":[{\"id\":\"n1\",\"type\":\"message\",\"data\":{\"label\":\"Salom\",\"nodeType\":\"message\",\"isEntryPoint\":true,\"buttons\":[{\"id\":\"btn-1779736514448\",\"label\":\"Tugma\",\"type\":\"action\"}],\"imageUrl\":\"/logo.svg\",\"flowTriggerSource\":\"dm\",\"flowTriggerMatch\":\"contains\",\"flowTriggerKeywords\":\"salom, narx\",\"triggerSource\":\"dm\",\"triggerMatch\":\"contains\",\"triggerKeywords\":\"\",\"prohibitRestart\":false,\"conditionType\":\"is_follower\",\"conditionValue\":\"\",\"actionType\":\"add_tag\",\"actionValue\":\"\",\"aiPrompt\":\"\",\"aiOutputVar\":\"ai_response\"},\"position\":{\"x\":-79.50988785756607,\"y\":-160.83638504199038},\"width\":280,\"height\":377,\"selected\":false,\"dragging\":false,\"positionAbsolute\":{\"x\":-79.50988785756607,\"y\":-160.83638504199038}},{\"id\":\"node-1779734866016-999\",\"type\":\"message\",\"data\":{\"label\":\"Xabar\",\"nodeType\":\"message\",\"buttons\":[],\"isEntryPoint\":false},\"position\":{\"x\":380.51394168511274,\"y\":-76.10721139039026},\"width\":280,\"height\":226,\"selected\":true,\"positionAbsolute\":{\"x\":380.51394168511274,\"y\":-76.10721139039026},\"dragging\":false}],\"edges\":[{\"source\":\"n1\",\"sourceHandle\":\"btn-btn-1779736514448\",\"target\":\"node-1779734866016-999\",\"targetHandle\":null,\"animated\":true,\"style\":{\"stroke\":\"#9296AD\",\"strokeWidth\":1.5},\"markerEnd\":{\"type\":\"arrowclosed\",\"color\":\"#9296AD\"},\"id\":\"reactflow__edge-n1btn-btn-1779736514448-node-1779734866016-999\"}],\"entryPointId\":\"n1\",\"flowTriggerSource\":\"dm\",\"flowTriggerMatch\":\"contains\",\"flowTriggerKeywords\":\"salom, narx\",\"flowProhibitRestart\":false}",
+      "replai_fb_field_mappings": "[{\"id\":\"map-1\",\"metaField\":\"full_name\",\"sendlyField\":\"name\",\"description\":\"Mijozning to'liq ismi (Ism)\"},{\"id\":\"map-2\",\"metaField\":\"phone_number\",\"sendlyField\":\"phone\",\"description\":\"Telefon raqami (Telefon)\"},{\"id\":\"map-3\",\"metaField\":\"user_question\",\"sendlyField\":\"message\",\"description\":\"Murojaat matni / Savol (Izoh)\"}]",
+      "replai_chats_ch_1782385474180": "[{\"id\":\"7792095631\",\"name\":\"Isroiljon\",\"username\":\"isroiljohn\",\"avatar\":\"https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&auto=format&fit=crop\",\"lastMessage\":\"/start\",\"time\":\"Hozir\",\"unread\":true,\"messages\":[{\"id\":\"msg-1782387568637-0cann4baa\",\"sender\":\"user\",\"text\":\"/start\",\"timestamp\":\"11:39\"}],\"tags\":[\"Telegram\"],\"liveTakeover\":false}]",
+      "replai_curator_analyzed_messages": "[]",
+      "replai_flow_diagram_tmpl_1779729826533": "{\"nodes\":[],\"edges\":[],\"entryPointId\":\"n1\",\"flowTriggerSource\":\"dm\",\"flowTriggerMatch\":\"contains\",\"flowTriggerKeywords\":\"test, dars\",\"flowProhibitRestart\":false}",
+      "replai_otp_isroiljohnabdullayev@gmail.com": "3079",
+      "replai_ai_credits_data": {
+        "balance": 50028,
+        "used": 0,
+        "history": [
+          {
+            "id": "tx-1782463947501",
+            "type": "purchase",
+            "amount": 50000,
+            "description": "Admin tomonidan qo'shilgan 50 000 bepul kredit",
+            "date": "26/06/2026, 13:52:27"
+          }
+        ]
+      }
     }
   },
   "promoCodes": [],

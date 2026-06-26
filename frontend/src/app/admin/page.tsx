@@ -358,6 +358,11 @@ export default function AdminPage() {
   // Announcement creator state
   const [newAnnouncement, setNewAnnouncement] = useState("");
 
+  // Quick Add Credits state
+  const [quickEmail, setQuickEmail] = useState("");
+  const [quickCredits, setQuickCredits] = useState("");
+  const [loadingQuickCredits, setLoadingQuickCredits] = useState(false);
+
   // User search query state
   const [userQuery, setUserQuery] = useState("");
   const [agentQuery, setAgentQuery] = useState("");
@@ -520,6 +525,49 @@ export default function AdminPage() {
       }
     } catch {
       showAlert("Xato", "Kreditni yangilab bo'lmadi.");
+    }
+  };
+
+  const handleQuickAddCredits = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const email = quickEmail.trim().toLowerCase();
+    const amount = Number(quickCredits);
+    if (!email || isNaN(amount) || amount === 0) return;
+
+    setLoadingQuickCredits(true);
+    try {
+      const targetUser = (users || []).find((u: any) => u.email?.toLowerCase() === email);
+      if (!targetUser) {
+        showAlert("Xato", "Ushbu elektron pochta manzili bilan ro'yxatdan o'tgan foydalanuvchi topilmadi.");
+        setLoadingQuickCredits(false);
+        return;
+      }
+
+      const headers: Record<string, string> = { "Content-Type": "application/json" };
+      const token = localStorage.getItem("replai_token");
+      if (token) {
+        headers["Authorization"] = `Bearer ${token}`;
+      }
+
+      const res = await fetch("/api/admin", {
+        method: "POST",
+        headers,
+        body: JSON.stringify({ action: "update_user_credits", userId: targetUser.id, amount })
+      });
+
+      if (res.ok) {
+        showAlert("Muvaffaqiyatli", `${email} balansiga ${amount.toLocaleString("uz-UZ")} kredit muvaffaqiyatli qo'shildi!`);
+        setQuickEmail("");
+        setQuickCredits("");
+        loadAdminData();
+      } else {
+        const errData = await res.json();
+        showAlert("Xato", errData.error || "Kreditni yangilab bo'lmadi.");
+      }
+    } catch {
+      showAlert("Xato", "Kreditni yangilashda tarmoq xatoligi yuz berdi.");
+    } finally {
+      setLoadingQuickCredits(false);
     }
   };
 
@@ -1065,7 +1113,44 @@ export default function AdminPage() {
 
           {/* ── USERS TAB ── */}
           {activeTab === "users" && (
-            <Card className="p-0 overflow-hidden border border-[#D8D8D8]">
+            <>
+              {/* ── QUICK ADD CREDITS FORM ── */}
+              <Card className="border border-[#D8D8D8] p-5 mb-5 rounded-[24px] bg-white">
+                <h3 className="text-[13px] font-extrabold text-black mb-3 uppercase tracking-wider">Tezkor Kredit Qo&apos;shish</h3>
+                <form onSubmit={handleQuickAddCredits} className="flex flex-wrap gap-4 items-end">
+                  <div className="flex-1 min-w-[200px] flex flex-col gap-1.5">
+                    <label className="text-[10px] font-bold text-[#707070] uppercase">Foydalanuvchi pochtasi (Email)</label>
+                    <input
+                      type="email"
+                      required
+                      placeholder="Masalan: isroiljohnabdullayev@gmail.com"
+                      value={quickEmail}
+                      onChange={(e) => setQuickEmail(e.target.value)}
+                      className="w-full rounded-[10px] border border-[#D8D8D8] px-3.5 py-2 text-[12.5px] text-black outline-none focus:border-black font-semibold"
+                    />
+                  </div>
+                  <div className="w-[180px] flex flex-col gap-1.5">
+                    <label className="text-[10px] font-bold text-[#707070] uppercase">Kredit soni</label>
+                    <input
+                      type="number"
+                      required
+                      placeholder="Masalan: 50000"
+                      value={quickCredits}
+                      onChange={(e) => setQuickCredits(e.target.value)}
+                      className="w-full rounded-[10px] border border-[#D8D8D8] px-3.5 py-2 text-[12.5px] text-black outline-none focus:border-black font-semibold"
+                    />
+                  </div>
+                  <button
+                    type="submit"
+                    disabled={loadingQuickCredits}
+                    className="px-6 rounded-full text-[12px] font-extrabold active:scale-95 transition-all bg-black hover:bg-black/90 text-[#C7F33C] border border-[#C7F33C]/20 shrink-0 h-[38px] flex items-center justify-center disabled:opacity-50 font-sans"
+                  >
+                    {loadingQuickCredits ? "Qo'shilmoqda..." : "Kredit Qo'shish"}
+                  </button>
+                </form>
+              </Card>
+
+              <Card className="p-0 overflow-hidden border border-[#D8D8D8]">
               <div className="p-5 border-b border-[#F0F0F0] flex flex-wrap gap-4 items-center justify-between bg-white">
                 <div className="relative flex items-center w-full max-w-[320px]">
                   <Search size={16} className="absolute left-4 text-[#707070]" />
@@ -1146,6 +1231,7 @@ export default function AdminPage() {
                 </table>
               </div>
             </Card>
+            </>
           )}
 
           {/* ── AGENTS TAB ── */}

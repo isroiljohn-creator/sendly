@@ -190,8 +190,8 @@
     "semantic_hash": ""
   },
   "frontend/db.json": {
-    "mtime": 1782416612.6336055,
-    "ast_hash": "caf9d1995430b6e5a68b131cb1e806c7",
+    "mtime": 1782463210.5165353,
+    "ast_hash": "3e344d7ef55980eb718555acaf7f282e",
     "semantic_hash": ""
   },
   "frontend/debug_console.js": {
@@ -520,8 +520,8 @@
     "semantic_hash": ""
   },
   "frontend/src/components/layout/TopBar.tsx": {
-    "mtime": 1782462574.0032516,
-    "ast_hash": "b5c8042acef2de0da22f051204810d73",
+    "mtime": 1782463217.505875,
+    "ast_hash": "421032880665fb9bb7f90e1f92291e4c",
     "semantic_hash": ""
   },
   "frontend/src/components/ui/BrandLoader.tsx": {

@@ -249,7 +249,7 @@ export default function SettingsPage() {
       if (stored) {
         setApiKey(stored);
       } else {
-        const newKey = `sk_live_${Array.from({ length: 32 }, () => Math.floor(Math.random() * 16).toString(16)).join("")}`;
+        const newKey = `sk_test_${Array.from({ length: 32 }, () => Math.floor(Math.random() * 16).toString(16)).join("")}`;
         localStorage.setItem("replai_api_key", newKey);
         setApiKey(newKey);
         db.saveToServer();
@@ -278,7 +278,7 @@ export default function SettingsPage() {
   }, []);
 
   const handleRegenerateKey = () => {
-    const newKey = `sk_live_${Array.from({ length: 32 }, () => Math.floor(Math.random() * 16).toString(16)).join("")}`;
+    const newKey = `sk_test_${Array.from({ length: 32 }, () => Math.floor(Math.random() * 16).toString(16)).join("")}`;
     localStorage.setItem("replai_api_key", newKey);
     setApiKey(newKey);
     db.saveToServer();
