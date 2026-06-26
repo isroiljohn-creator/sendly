@@ -19,14 +19,20 @@ export async function POST(request: Request) {
       );
     }
 
-    const systemPrompt = `Siz professional kontent tahlilchisisiz (AI Content Structurer). Maqsadingiz: tartibsiz, xom dars konspektlari yoki kompaniya hujjatlari matnini chatbot oson tushunadigan va aniq javob qaytara oladigan shaklda strukturalash va tartibga solish.
+    const systemPrompt = `Siz professional kontent tahlilchisisiz (AI Content Structurer). Maqsadingiz: operator va mijoz o'rtasidagi suhbat matnini (transcript) chatbot va operatorlar uchun tushunarli, har tomonlama to'liq va mukammal tahlil ko'rinishida strukturalash.
 
-VAZIFANGIZ:
-1. Matndagi muhim faktlar, savol va javob zanjirlari, narxlar, shartlar va qoidalarni aniqlang.
-2. Ularni aniq savol-javob (Q&A) yoki qisqa faktlar ko'rinishida tartiblang.
-3. Ortiqcha so'zbozlik, salomlashishlar va takrorlanishlarni olib tashlang.
-4. Javob matnida umuman Markdown formatlash belgilaridan (qalin matn uchun ** belgilari, sarlavhalar uchun # belgilari va boshqalar) foydalanmang. Qalin bo'lishi kerak bo'lgan so'zlarni oddiy matn ko'rinishida yozing (masalan, "**Savol:**" emas, balki oddiy "Savol:" shaklida).
-5. Javob matni faqat toza, tushunarli va professional o'zbek tilida (lotin alifbosida) bo'lishi shart.`;
+QAT'IY VAZIFANGIZ:
+1. Suhbatdagi BARCHA ma'lumotlarni to'liq qamrab oling. Hech qanday muhim fakt, ehtiyoj, muammo yoki e'tiroz yo'qolib ketmasligi kerak. Tahlil juda batafsil bo'lishi shart.
+2. Ma'lumotlarni quyidagi alohida va aniq bloklarga ajrating:
+   - "=== AI TAHLILI VA STRUKTURA ==="
+   - "=== MIJOZ HAQIDA UMUMIY MA'LUMOT ===" (Ismi, yoshi, kasbi, manzili, kuzatish davri va h.k.)
+   - "=== ASOSIY MUAMMOLAR VA QIYINCHILIKLAR ===" (Mijoz nimalardan qiynaladi, avvalgi xatoliklari, nima uchun o'rgana olmagan)
+   - "=== MAQSADLAR VA QIZIQISHLAR ===" (AI-ni qayerda va qanday ishlatmoqchi, qanaqa kontent/video yoki loyihalar qilmoqchi)
+   - "=== SOTUV VA MOLIYAVIY HOLAT ===" (Mijozning moliyaviy imkoniyati, kurs sotib olishga tayyorligi, to'lov yoki oylik kutish sharoiti, e'tirozlari)
+   - "=== TAVSIYALAR VA KEYINGI QADAMLAR ===" (Keyingi aloqada nimalarga e'tibor berish lozimligi haqida tavsiyalar)
+3. Ortiqcha so'zbozliklarni olib tashlang, lekin suhbat mazmunidagi ma'lumotlarni mutlaqo qisqartirmang.
+4. Javob matnida Markdown belgilaridan (masalan, **qalin**, # sarlavhalar va h.k.) foydalanmang. Blok sarlavhalarini "=== BLOK NOMI ===" ko'rinishida va ro'yxatlarni oddiy matn ko'rinishida yozing.
+5. Javob faqat toza, tushunarli va professional o'zbek tilida (lotin alifbosida) bo'lishi shart.`;
 
     const response = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent?key=${apiKey}`,

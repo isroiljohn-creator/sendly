@@ -1312,7 +1312,7 @@ function AIAgentContent() {
       }
 
       durationInMinutes = Math.max(1, audioDuration / 60);
-      creditCost = Math.ceil(durationInMinutes * 50);
+      creditCost = Math.ceil(durationInMinutes * 100);
     } else {
       // Document parsing cost is a flat 50 credits
       creditCost = 50;
@@ -1334,7 +1334,7 @@ function AIAgentContent() {
     if (userId !== "guest" && currentBalance < creditCost) {
       if (isAudio) {
         showToast(
-          (t("pages.ai_agent.toasts.insufficient_credits_audio") || `Balansingizda yetarli kredit mavjud emas. Audio transkripsiya qilish uchun kamida {cost} ta kredit (5,000 so'm/10 daqiqa) talab qilinadi. Sizda: {balance} ta kredit.`)
+          (t("pages.ai_agent.toasts.insufficient_credits_audio") || `Balansingizda yetarli kredit mavjud emas. Audio transkripsiya qilish uchun kamida {cost} ta kredit (10,000 so'm/10 daqiqa) talab qilinadi. Sizda: {balance} ta kredit.`)
             .replace("{cost}", creditCost.toString())
             .replace("{balance}", currentBalance.toString()),
           "error"
@@ -1375,14 +1375,22 @@ function AIAgentContent() {
         reader.readAsDataURL(file);
       });
 
+      // Get Authorization token
+      const token = localStorage.getItem("replai_token");
+      const headers: Record<string, string> = { "Content-Type": "application/json" };
+      if (token) {
+        headers["Authorization"] = `Bearer ${token}`;
+      }
+
       // 2. Call API
       const res = await fetch(endpoint, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers,
         body: JSON.stringify({
           fileName,
           fileType: file.type,
-          base64Data
+          base64Data,
+          durationInMinutes
         })
       });
 
@@ -1394,25 +1402,25 @@ function AIAgentContent() {
       const data = await res.json();
       const extractedText = data.text;
 
-      // 3. Deduct credits for files (both audio and document)
+      // 3. Deduct credits for files (Documents are deducted on client side, audio on server side)
       const currentUserId = db.getCurrentUser()?.id || "guest";
       if (currentUserId !== "guest") {
-        const token = localStorage.getItem("replai_token");
-        const headers: Record<string, string> = { "Content-Type": "application/json" };
-        if (token) {
-          headers["Authorization"] = `Bearer ${token}`;
+        if (!isAudio) {
+          const token = localStorage.getItem("replai_token");
+          const headers: Record<string, string> = { "Content-Type": "application/json" };
+          if (token) {
+            headers["Authorization"] = `Bearer ${token}`;
+          }
+          await fetch(`/api/credits?userId=${currentUserId}`, {
+            method: "POST",
+            headers,
+            body: JSON.stringify({
+              action: "deduct",
+              amount: creditCost,
+              description: `Hujjat tahlili: "${fileName}"`
+            })
+          });
         }
-        await fetch(`/api/credits?userId=${currentUserId}`, {
-          method: "POST",
-          headers,
-          body: JSON.stringify({
-            action: "deduct",
-            amount: creditCost,
-            description: isAudio 
-              ? `Audio dars transkripsiyasi: "${fileName}" (${Math.ceil(durationInMinutes)} daqiqa)`
-              : `Hujjat tahlili: "${fileName}"`
-          })
-        });
         // Refresh local credits data
         await db.getAiCreditsFromServer(currentUserId);
       }
@@ -1455,6 +1463,11 @@ function AIAgentContent() {
     } catch (err: any) {
       console.error("[File Upload/Transcription Error]:", err);
       showToast(err.message || t("pages.ai_agent.toasts.error_occurred"), "error");
+      // Refresh credits data on failure in case of backend refund
+      const currentUserId = db.getCurrentUser()?.id || "guest";
+      if (currentUserId !== "guest") {
+        await db.getAiCreditsFromServer(currentUserId);
+      }
     } finally {
       setIsFileUploading(false);
       if (fileInputRef.current) fileInputRef.current.value = "";

@@ -85,6 +85,15 @@ export default function SettingsPage() {
   const [webhookUrl, setWebhookUrl] = useState("https://api.sendly.uz/webhooks/instagram");
   const [isIgConnected] = useState(true);
 
+  // CRM/Sheets states
+  const [selectedBotId, setSelectedBotId] = useState<string>("");
+  const [sheetsEnabled, setSheetsEnabled] = useState(false);
+  const [sheetsUrl, setSheetsUrl] = useState("");
+  const [bitrixEnabled, setBitrixEnabled] = useState(false);
+  const [bitrixUrl, setBitrixUrl] = useState("");
+  const [amoEnabled, setAmoEnabled] = useState(false);
+  const [amoUrl, setAmoUrl] = useState("");
+
   // Channels state
   const [channels, setChannels] = useState<Channel[]>([]);
   const [modal, setModal] = useState<ModalType>(null);
@@ -317,7 +326,48 @@ export default function SettingsPage() {
   };
 
   const refreshChannels = () => {
-    setChannels(db.getChannels());
+    const chs = db.getChannels();
+    setChannels(chs);
+    if (chs.length > 0 && !selectedBotId) {
+      setSelectedBotId(chs[0].id);
+    }
+  };
+
+  // Load integration settings when selected bot changes
+  useEffect(() => {
+    const botId = selectedBotId || undefined;
+    const botSettings = db.getBotSettings(botId);
+    setSheetsEnabled(botSettings.sheetsEnabled || false);
+    setSheetsUrl(botSettings.sheetsWebhookUrl || "");
+    setBitrixEnabled(botSettings.bitrixEnabled || false);
+    setBitrixUrl(botSettings.bitrixWebhookUrl || "");
+    setAmoEnabled(botSettings.amoEnabled || false);
+    setAmoUrl(botSettings.amoWebhookUrl || "");
+  }, [selectedBotId]);
+
+  const handleSaveIntegration = async (type: "sheets" | "bitrix" | "amo") => {
+    const botId = selectedBotId || undefined;
+    const loadedSettings = db.getBotSettings(botId);
+    
+    if (type === "sheets") {
+      loadedSettings.sheetsEnabled = sheetsEnabled;
+      loadedSettings.sheetsWebhookUrl = sheetsUrl.trim();
+    } else if (type === "bitrix") {
+      loadedSettings.bitrixEnabled = bitrixEnabled;
+      loadedSettings.bitrixWebhookUrl = bitrixUrl.trim();
+    } else if (type === "amo") {
+      loadedSettings.amoEnabled = amoEnabled;
+      loadedSettings.amoWebhookUrl = amoUrl.trim();
+    }
+
+    db.saveBotSettings(loadedSettings, botId);
+    const saveRes = await db.saveToServer();
+    
+    if (saveRes && saveRes.success) {
+      showAlert(t("common.success"), t("pages.settings_page.integration_saved") || "Integratsiya sozlamalari muvaffaqiyatli saqlandi");
+    } else {
+      showAlert(t("common.error"), saveRes.error || "Xatolik yuz berdi");
+    }
   };
 
   useEffect(() => {
@@ -843,68 +893,205 @@ export default function SettingsPage() {
             {/* Integrations Tab */}
             {activeSection === "integrations" && (
               <div className="flex flex-col gap-6 max-w-[650px]">
-                {/* Instagram Connection Status */}
+                {/* Bot selection dropdown if multiple channels exist */}
+                {channels.length > 0 ? (
+                  <Card className="border border-[#D8D8D8] bg-[#F9F9F7] p-5">
+                    <div className="flex flex-col gap-2">
+                      <label className="text-[12px] font-bold text-black uppercase tracking-wider">
+                        {t("pages.settings_page.integrations_select_bot") || "Kanal/Botni tanlang"}
+                      </label>
+                      <CustomDropdown
+                        value={selectedBotId}
+                        onChange={(val) => setSelectedBotId(val)}
+                        options={channels.map((ch) => ({
+                          value: ch.id,
+                          label: `${ch.type === "telegram" ? "Telegram" : "Instagram"}: ${ch.username}`
+                        }))}
+                      />
+                    </div>
+                  </Card>
+                ) : (
+                  <div className="p-4 rounded-xl bg-amber-50 text-amber-700 border border-amber-200 text-[12px] text-center">
+                    Integratsiyalarni sozlash uchun avval hisobingizga bitta kanal/bot ulanishi kerak.
+                  </div>
+                )}
+
+                {/* Google Sheets Card */}
                 <Card className="border border-[#D8D8D8]">
-                  <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                    <div className="flex items-start gap-4">
-                      <div className="grid h-12 w-12 place-items-center rounded-[16px] bg-[#E1306C]/10 text-[#E1306C] shrink-0">
-                        <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" strokeWidth="1.75" fill="none" strokeLinecap="round" strokeLinejoin="round">
-                          <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
-                          <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
-                          <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" />
-                        </svg>
-                      </div>
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <h3 className="text-[16px] font-medium text-black">{tr("ig_direct_api")}</h3>
-                          <StatusPill status={isIgConnected} activeText={t("common.active")} inactiveText={t("common.inactive")} />
+                  <div className="flex flex-col gap-5">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-start gap-4">
+                        <div className="grid h-12 w-12 place-items-center rounded-[16px] bg-green-500/10 text-green-600 shrink-0">
+                          <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" strokeWidth="1.75" fill="none" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                            <polyline points="14 2 14 8 20 8" />
+                            <line x1="16" y1="13" x2="8" y2="13" />
+                            <line x1="16" y1="17" x2="8" y2="17" />
+                            <polyline points="10 9 9 9 8 9" />
+                          </svg>
                         </div>
-                        <p className="mt-1 text-[12px] text-[#707070]">
-                          {t("pages.settings_page.ig_direct_desc")}
-                        </p>
+                        <div>
+                          <h3 className="text-[16px] font-medium text-black">{t("pages.settings_page.sheets_title") || "Google Sheets Integratsiyasi"}</h3>
+                          <p className="mt-1 text-[12px] text-[#707070]">
+                            {t("pages.settings_page.sheets_desc") || "Lid ma'lumotlarini avtomatik Google jadvalingizga yuboring"}
+                          </p>
+                        </div>
                       </div>
+
+                      <label className="relative inline-flex items-center cursor-pointer select-none shrink-0">
+                        <input
+                          type="checkbox"
+                          checked={sheetsEnabled}
+                          onChange={(e) => setSheetsEnabled(e.target.checked)}
+                          className="sr-only peer"
+                        />
+                        <div className="w-11 h-6 bg-[#E8E8E8] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-[#D8D8D8] after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-black"></div>
+                      </label>
                     </div>
 
-                    <div className="px-4 py-2 rounded-full text-[12px] font-medium bg-[#C7F33C]/10 text-[#5A7C1E]">
-                      {t("pages.settings_page.ig_direct_active")}
-                    </div>
+                    {sheetsEnabled && (
+                      <div className="flex flex-col gap-4 border-t border-[#F0F0F0] pt-4">
+                        <div className="flex flex-col gap-1.5">
+                          <label className="text-[11px] font-medium text-[#707070] px-1">
+                            {t("pages.settings_page.webhook_url_label") || "Webhook URL manzili"}
+                          </label>
+                          <input
+                            type="url"
+                            value={sheetsUrl}
+                            onChange={(e) => setSheetsUrl(e.target.value)}
+                            placeholder="https://oapi.make.com/... yoki https://script.google.com/..."
+                            className="w-full rounded-[14px] bg-[#F0F0F0] px-4 py-3 text-[13px] text-black outline-none placeholder:text-[#a0a0a0] transition-colors focus:bg-[#e8e8e8]"
+                          />
+                        </div>
+
+                        <Button
+                          onClick={() => handleSaveIntegration("sheets")}
+                          variant="accent"
+                          className="flex items-center justify-center gap-1.5 py-3 self-start text-[12px]"
+                        >
+                          <Save size={14} />
+                          <span>{t("common.save") || "Saqlash"}</span>
+                        </Button>
+                      </div>
+                    )}
                   </div>
                 </Card>
 
-                {/* Custom Webhooks Info */}
+                {/* Bitrix24 Card */}
                 <Card className="border border-[#D8D8D8]">
-                  <form onSubmit={handleSave} className="flex flex-col gap-5">
-                    <div>
-                      <div className="flex items-center gap-1.5">
-                        <Database size={16} className="text-black" />
-                        <h3 className="text-[15px] font-medium text-black">{tr("webhook_api")}</h3>
+                  <div className="flex flex-col gap-5">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-start gap-4">
+                        <div className="grid h-12 w-12 place-items-center rounded-[16px] bg-blue-500/10 text-blue-600 shrink-0">
+                          <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" strokeWidth="1.75" fill="none" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                            <polyline points="22 4 12 14.01 9 11.01" />
+                          </svg>
+                        </div>
+                        <div>
+                          <h3 className="text-[16px] font-medium text-black">{t("pages.settings_page.bitrix_title") || "Bitrix24 Integratsiyasi"}</h3>
+                          <p className="mt-1 text-[12px] text-[#707070]">
+                            {t("pages.settings_page.bitrix_desc") || "Kontaktlarni Bitrix24 CRM tizimiga inbound webhook orqali yuboring"}
+                          </p>
+                        </div>
                       </div>
-                      <p className="text-[12px] text-[#707070] mt-0.5">
-                        {t("pages.settings_page.webhook_desc")}
-                      </p>
-                    </div>
 
-                    <div className="flex flex-col gap-1.5">
-                      <label className="text-[11px] font-medium text-[#707070] px-1">
-                        {t("pages.settings_page.webhook_url_label")}
+                      <label className="relative inline-flex items-center cursor-pointer select-none shrink-0">
+                        <input
+                          type="checkbox"
+                          checked={bitrixEnabled}
+                          onChange={(e) => setBitrixEnabled(e.target.checked)}
+                          className="sr-only peer"
+                        />
+                        <div className="w-11 h-6 bg-[#E8E8E8] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-[#D8D8D8] after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-black"></div>
                       </label>
-                      <input
-                        type="url"
-                        value={webhookUrl}
-                        onChange={(e) => setWebhookUrl(e.target.value)}
-                        className="w-full rounded-[14px] bg-[#F0F0F0] px-4 py-3 text-[13px] text-black outline-none placeholder:text-[#a0a0a0] transition-colors focus:bg-[#e8e8e8]"
-                      />
                     </div>
 
-                    <Button
-                      type="submit"
-                      variant="accent"
-                      className="flex items-center justify-center gap-1.5 py-3 self-start text-[12px]"
-                    >
-                      <Save size={14} />
-                      <span>{t("pages.settings_page.webhook_update_btn")}</span>
-                    </Button>
-                  </form>
+                    {bitrixEnabled && (
+                      <div className="flex flex-col gap-4 border-t border-[#F0F0F0] pt-4">
+                        <div className="flex flex-col gap-1.5">
+                          <label className="text-[11px] font-medium text-[#707070] px-1">
+                            {t("pages.settings_page.webhook_url_label") || "Webhook URL manzili"}
+                          </label>
+                          <input
+                            type="url"
+                            value={bitrixUrl}
+                            onChange={(e) => setBitrixUrl(e.target.value)}
+                            placeholder="https://b24-xxxxxx.bitrix24.ru/rest/1/xxxxxxxx/crm.lead.add.json"
+                            className="w-full rounded-[14px] bg-[#F0F0F0] px-4 py-3 text-[13px] text-black outline-none placeholder:text-[#a0a0a0] transition-colors focus:bg-[#e8e8e8]"
+                          />
+                        </div>
+
+                        <Button
+                          onClick={() => handleSaveIntegration("bitrix")}
+                          variant="accent"
+                          className="flex items-center justify-center gap-1.5 py-3 self-start text-[12px]"
+                        >
+                          <Save size={14} />
+                          <span>{t("common.save") || "Saqlash"}</span>
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                </Card>
+
+                {/* AmoCRM Card */}
+                <Card className="border border-[#D8D8D8]">
+                  <div className="flex flex-col gap-5">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-start gap-4">
+                        <div className="grid h-12 w-12 place-items-center rounded-[16px] bg-indigo-500/10 text-indigo-600 shrink-0">
+                          <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" strokeWidth="1.75" fill="none" strokeLinecap="round" strokeLinejoin="round">
+                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                            <line x1="9" y1="9" x2="15" y2="15" />
+                            <line x1="15" y1="9" x2="9" y2="15" />
+                          </svg>
+                        </div>
+                        <div>
+                          <h3 className="text-[16px] font-medium text-black">{t("pages.settings_page.amo_title") || "AmoCRM Integratsiyasi"}</h3>
+                          <p className="mt-1 text-[12px] text-[#707070]">
+                            {t("pages.settings_page.amo_desc") || "Kontaktlarni AmoCRM tizimiga webhook orqali yo'naltiring"}
+                          </p>
+                        </div>
+                      </div>
+
+                      <label className="relative inline-flex items-center cursor-pointer select-none shrink-0">
+                        <input
+                          type="checkbox"
+                          checked={amoEnabled}
+                          onChange={(e) => setAmoEnabled(e.target.checked)}
+                          className="sr-only peer"
+                        />
+                        <div className="w-11 h-6 bg-[#E8E8E8] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-[#D8D8D8] after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-black"></div>
+                      </label>
+                    </div>
+
+                    {amoEnabled && (
+                      <div className="flex flex-col gap-4 border-t border-[#F0F0F0] pt-4">
+                        <div className="flex flex-col gap-1.5">
+                          <label className="text-[11px] font-medium text-[#707070] px-1">
+                            {t("pages.settings_page.webhook_url_label") || "Webhook URL manzili"}
+                          </label>
+                          <input
+                            type="url"
+                            value={amoUrl}
+                            onChange={(e) => setAmoUrl(e.target.value)}
+                            placeholder="https://xxxxxx.amocrm.ru/api/v4/leads"
+                            className="w-full rounded-[14px] bg-[#F0F0F0] px-4 py-3 text-[13px] text-black outline-none placeholder:text-[#a0a0a0] transition-colors focus:bg-[#e8e8e8]"
+                          />
+                        </div>
+
+                        <Button
+                          onClick={() => handleSaveIntegration("amo")}
+                          variant="accent"
+                          className="flex items-center justify-center gap-1.5 py-3 self-start text-[12px]"
+                        >
+                          <Save size={14} />
+                          <span>{t("common.save") || "Saqlash"}</span>
+                        </Button>
+                      </div>
+                    )}
+                  </div>
                 </Card>
               </div>
             )}

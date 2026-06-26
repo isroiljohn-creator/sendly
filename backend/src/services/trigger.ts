@@ -5,6 +5,82 @@ import { sendInstagramMessage } from "../utils/meta";
 import { executeSessionStep } from "./interpreter";
 import { cancelSessionDelay } from "./queue";
 
+/**
+ * Sends lead/contact data to external integrations (Google Sheets, Bitrix24, AmoCRM).
+ */
+async function sendToExternalWebhooks(botSettings: any, leadData: any): Promise<void> {
+  if (!botSettings) return;
+
+  const payload = {
+    full_name: leadData.full_name || "Noma'lum Mijoz",
+    phone: leadData.phone || "Noma'lum Telefon",
+    email: leadData.email || "",
+    company: leadData.company || "",
+    message: leadData.message || "",
+    source: leadData.source || "web",
+    created_at: new Date().toISOString(),
+    assigned_group: leadData.assigned_group || "sales",
+    tags: leadData.tags || []
+  };
+
+  // 1. Google Sheets webhook
+  if (botSettings.sheetsEnabled && botSettings.sheetsWebhookUrl) {
+    try {
+      console.log(`[Integration] Sending lead to Google Sheets: ${botSettings.sheetsWebhookUrl}`);
+      const res = await fetch(botSettings.sheetsWebhookUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+      if (!res.ok) console.error(`[Integration] Google Sheets returned HTTP ${res.status}`);
+    } catch (err) {
+      console.error("[Integration] Failed to send to Google Sheets:", err);
+    }
+  }
+
+  // 2. Bitrix24 webhook (crm.lead.add format)
+  if (botSettings.bitrixEnabled && botSettings.bitrixWebhookUrl) {
+    try {
+      console.log(`[Integration] Sending lead to Bitrix24: ${botSettings.bitrixWebhookUrl}`);
+      
+      const bitrixPayload = {
+        fields: {
+          TITLE: `Sendly: ${payload.full_name}`,
+          NAME: payload.full_name,
+          PHONE: [{ VALUE: payload.phone, VALUE_TYPE: "WORK" }],
+          EMAIL: payload.email ? [{ VALUE: payload.email, VALUE_TYPE: "WORK" }] : [],
+          COMMENTS: `${payload.message}\n\nManba: ${payload.source}\nGuruh: ${payload.assigned_group}\nTeglar: ${payload.tags.join(", ")}`
+        }
+      };
+
+      const res = await fetch(botSettings.bitrixWebhookUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(bitrixPayload)
+      });
+      if (!res.ok) console.error(`[Integration] Bitrix24 returned HTTP ${res.status}`);
+    } catch (err) {
+      console.error("[Integration] Failed to send to Bitrix24:", err);
+    }
+  }
+
+  // 3. AmoCRM webhook
+  if (botSettings.amoEnabled && botSettings.amoWebhookUrl) {
+    try {
+      console.log(`[Integration] Sending lead to AmoCRM: ${botSettings.amoWebhookUrl}`);
+      const res = await fetch(botSettings.amoWebhookUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+      if (!res.ok) console.error(`[Integration] AmoCRM returned HTTP ${res.status}`);
+    } catch (err) {
+      console.error("[Integration] Failed to send to AmoCRM:", err);
+    }
+  }
+}
+
+
 async function fetchGeminiWithRetry(url: string, options: any, maxRetries = 3): Promise<Response> {
   let delay = 1000;
   for (let i = 0; i < maxRetries; i++) {
@@ -207,6 +283,66 @@ export async function handleIncomingWebhookEvent(payload: WebhookEventPayload): 
           contact.variables = updatedVars; // Update local copy
           
           await supabase.from("contacts").update({ variables: updatedVars }).eq("id", contact.id);
+
+          // Trigger integrations on user input update
+          try {
+            const { data: account } = await supabase
+              .from("instagram_accounts")
+              .select("*")
+              .eq("id", contact.account_id)
+              .maybeSingle();
+              
+            if (account) {
+              const { data: globalSettingsRow } = await supabase
+                .from("instagram_accounts")
+                .select("*")
+                .eq("instagram_page_id", "global_settings_" + account.user_id)
+                .maybeSingle();
+
+              const userSettings = (globalSettingsRow?.fb_field_mappings || {}) as Record<string, any>;
+              
+              // Find botSettings
+              let botSettings: any = null;
+              if (userSettings.replai_channels) {
+                const channelsList = typeof userSettings.replai_channels === "string"
+                  ? JSON.parse(userSettings.replai_channels)
+                  : userSettings.replai_channels;
+                
+                if (Array.isArray(channelsList)) {
+                  const tgChannel = channelsList.find((c: any) => c.type === "telegram" && c.isConnected);
+                  const igChannel = channelsList.find((c: any) => c.type === "instagram" && c.isConnected);
+                  const activeChannel = tgChannel || igChannel;
+                  
+                  if (activeChannel) {
+                    const botSettingsKey = `replai_bot_settings_${activeChannel.id}`;
+                    const botSettingsRaw = userSettings[botSettingsKey];
+                    botSettings = typeof botSettingsRaw === "string"
+                      ? JSON.parse(botSettingsRaw)
+                      : (botSettingsRaw || {});
+                  }
+                }
+              }
+
+              if (botSettings) {
+                const leadData = {
+                  full_name: contact.full_name || "Noma'lum Mijoz",
+                  phone: updatedVars.lead_phone || updatedVars.phone || updatedVars.telefon || updatedVars.nomer || contact.variables?.lead_phone || "",
+                  email: updatedVars.lead_email || updatedVars.email || contact.variables?.lead_email || "",
+                  company: updatedVars.lead_company || updatedVars.company || contact.variables?.lead_company || "",
+                  message: text || contact.last_message || "",
+                  source: account.username ? "instagram" : "telegram",
+                  assigned_group: "sales",
+                  tags: contact.tags || []
+                };
+
+                sendToExternalWebhooks(botSettings, leadData).catch((err) => {
+                  console.error("[Trigger] Error sending lead to integrations from user input:", err);
+                });
+              }
+            }
+          } catch (err) {
+            console.error("[Trigger] Error preparing integrations on user input:", err);
+          }
 
           await executeSessionStep(activeSession.id, { text }, commentId);
           return; // Stop further matching
@@ -852,6 +988,22 @@ export async function handleIncomingLeadgenEvent(payload: LeadgenEventPayload): 
       console.error("[Trigger] Lead welcome message outbound logging failed:", logErr);
     }
   }
+
+  // Trigger integrations for new leads
+  const leadData = {
+    full_name: leadName,
+    phone: leadPhone,
+    email: leadEmail,
+    company: leadCompany,
+    message: leadMessage,
+    source: "facebook_leads",
+    assigned_group: detectedGroupId,
+    tags: tags
+  };
+
+  sendToExternalWebhooks(botSettings, leadData).catch((err) => {
+    console.error("[Trigger] Error forwarding Facebook lead to integrations:", err);
+  });
 
   // 8. If direct forwarding mode and Telegram connection info is available, notify the admin chat ID
   if (fbAgentMode === "direct" && telegramBotToken && botSettings.adminTelegramChatId) {

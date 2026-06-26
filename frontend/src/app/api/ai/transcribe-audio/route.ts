@@ -1,8 +1,17 @@
 import { NextResponse } from "next/server";
+import { verifyJwt } from "@/lib/jwt";
+import { readUserCredits, writeUserCredits } from "../../credits/route";
 
 export async function POST(request: Request) {
+  let userId: string | null = null;
+  let creditCost = 0;
+  let didDeduct = false;
+  let bodyFileName = "audio.wav";
+
   try {
-    const { fileName, fileType, base64Data } = await request.json();
+    const body = await request.json();
+    const { fileName, fileType, base64Data, durationInMinutes } = body;
+    bodyFileName = fileName || "audio.wav";
     const apiKey = process.env.AISHA_API_KEY;
 
     if (!apiKey) {
@@ -19,15 +28,67 @@ export async function POST(request: Request) {
       );
     }
 
+    // ─── CREDITS TRANSACTIONS LOGIC ───
+    const authHeader = request.headers.get("Authorization");
+    const token = authHeader?.startsWith("Bearer ") ? authHeader.substring(7) : null;
+    const jwtSecret = process.env.JWT_SECRET;
+    const jwtPattern = /^[a-zA-Z0-9-_]+\.[a-zA-Z0-9-_]+\.[a-zA-Z0-9-_]+$/;
+
+    if (!token || !jwtSecret || !jwtPattern.test(token)) {
+      return NextResponse.json(
+        { error: "Ruxsat etilmagan: JWT token kiritilmagan yoki noto'g'ri." },
+        { status: 401 }
+      );
+    }
+
+    const payload = verifyJwt(token, jwtSecret);
+    if (!payload || !payload.user_id) {
+      return NextResponse.json(
+        { error: "Ruxsat etilmagan: Foydalanuvchi ma'lumotlari haqiqiy emas." },
+        { status: 403 }
+      );
+    }
+
+    userId = payload.user_id;
+    const isAdmin = payload.email === "admin@sendly.uz" || payload.email === "isroiljohnabdullayev@gmail.com" || payload.role === "admin";
+    const duration = durationInMinutes || 1;
+    creditCost = Math.ceil(duration * 100); // 100 credits per minute (1,000 UZS)
+
+    // Check balance
+    const creditsData = await readUserCredits(userId);
+    if (creditsData.balance < creditCost && !isAdmin) {
+      return NextResponse.json(
+        { error: `Balansingizda yetarli kreditlar mavjud emas. Transkripsiya uchun ${creditCost} ta kredit (1,000 so'm/daqiqa) talab qilinadi. Joriy balans: ${creditsData.balance} kredit.` },
+        { status: 400 }
+      );
+    }
+
+    // Deduct upfront (only if balance is sufficient, or if they are admin we let it run and deduct down to 0 if needed)
+    if (creditsData.balance >= creditCost || isAdmin) {
+      creditsData.balance = Math.max(0, creditsData.balance - creditCost);
+      creditsData.used = (creditsData.used || 0) + creditCost;
+      const timestamp = new Date().toLocaleString("uz-UZ", { timeZone: "Asia/Tashkent" });
+      creditsData.history.unshift({
+        id: `tx-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+        type: "usage",
+        amount: creditCost,
+        description: `Audio transkripsiya boshlandi: "${bodyFileName}" (${Math.ceil(duration)} daqiqa)`,
+        date: timestamp
+      });
+
+      await writeUserCredits(userId, creditsData);
+      didDeduct = true;
+    }
+
     // Decode base64 to Buffer
     const buffer = Buffer.from(base64Data, "base64");
     
     // Create native Blob and FormData for fetch
     const blob = new Blob([buffer], { type: fileType || "audio/wav" });
     const formData = new FormData();
-    formData.append("audio", blob, fileName || "audio.wav");
+    formData.append("audio", blob, bodyFileName);
 
-    console.log(`[Aisha STT] Sending audio file to Aisha STT API (${fileName}, size: ${buffer.length} bytes)...`);
+    console.log(`[Aisha STT] Sending audio file to Aisha STT API (${bodyFileName}, size: ${buffer.length} bytes)...`);
 
     let response = await fetch("https://back.aisha.group/api/v1/stt/post/", {
       method: "POST",
@@ -50,7 +111,7 @@ export async function POST(request: Request) {
         isV2 = true;
 
         const v2FormData = new FormData();
-        v2FormData.append("audio", blob, fileName || "audio.wav");
+        v2FormData.append("audio", blob, bodyFileName);
 
         response = await fetch("https://back.aisha.group/api/v2/stt/post/", {
           method: "POST",
@@ -63,19 +124,13 @@ export async function POST(request: Request) {
         if (!response.ok) {
           const v2ErrText = await response.text();
           console.error("[Aisha STT v2 API Error]:", response.status, v2ErrText);
-          return NextResponse.json(
-            { error: `Aisha API nutqni matnga o'girishda xatoga yo'l qo'ydi (v2 Status: ${response.status}).` },
-            { status: 500 }
-          );
+          throw new Error(`Aisha API nutqni matnga o'girishda xatoga yo'l qo'ydi (v2 Status: ${response.status}).`);
         }
 
         data = await response.json();
         console.log("[Aisha STT v2 Async Response]:", JSON.stringify(data));
       } else {
-        return NextResponse.json(
-          { error: `Aisha API nutqni matnga o'girishda xatoga yo'l qo'ydi (Status: ${response.status}).` },
-          { status: 500 }
-        );
+        throw new Error(`Aisha API nutqni matnga o'girishda xatoga yo'l qo'ydi (Status: ${response.status}).`);
       }
     } else {
       data = await response.json();
@@ -87,10 +142,7 @@ export async function POST(request: Request) {
     if (isV2) {
       const taskId = Number(data.id || data.task_id);
       if (!taskId || isNaN(taskId)) {
-        return NextResponse.json(
-          { error: "Aisha STT v2 orqali yuklash muvaffaqiyatsiz bo'ldi: task_id olinmadi." },
-          { status: 500 }
-        );
+        throw new Error("Aisha STT v2 orqali yuklash muvaffaqiyatsiz bo'ldi: task_id olinmadi.");
       }
 
       console.log(`[Aisha STT v2] Polling started for Task ID: ${taskId}...`);
@@ -119,23 +171,21 @@ export async function POST(request: Request) {
                 break;
               }
               if (task.status === "ERROR" || task.status === "FAILED") {
-                return NextResponse.json(
-                  { error: "Aisha STT nutqni matnga o'girishda xatoga yo'l qo'ydi (v2 status error)." },
-                  { status: 500 }
-                );
+                throw new Error("Aisha STT nutqni matnga o'girishda xatoga yo'l qo'ydi (v2 status error).");
               }
             }
           }
-        } catch (pollErr) {
+        } catch (pollErr: any) {
           console.error(`[Aisha STT v2] Polling error on attempt ${attempt}:`, pollErr);
+          // If pollErr is our custom STT status error, propagate it
+          if (pollErr.message && pollErr.message.includes("v2 status error")) {
+            throw pollErr;
+          }
         }
       }
 
       if (!completed) {
-        return NextResponse.json(
-          { error: "Aisha STT transkripsiya qilish vaqti tugadi (Timeout: 2 daqiqa)." },
-          { status: 504 }
-        );
+        throw new Error("Aisha STT transkripsiya qilish vaqti tugadi (Timeout: 2 daqiqa).");
       }
     } else {
       // Extract text from potential response keys for v1
@@ -143,6 +193,26 @@ export async function POST(request: Request) {
     }
 
     if (!resultText.trim()) {
+      // Refund empty transcription
+      if (didDeduct && userId) {
+        try {
+          const refundData = await readUserCredits(userId);
+          refundData.balance = (refundData.balance || 0) + creditCost;
+          refundData.used = Math.max(0, (refundData.used || 0) - creditCost);
+          const timestamp = new Date().toLocaleString("uz-UZ", { timeZone: "Asia/Tashkent" });
+          refundData.history.unshift({
+            id: `refund-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+            type: "purchase",
+            amount: creditCost,
+            description: `Transkripsiya matni bo'sh bo'lgani uchun kreditlar qaytarildi: "${bodyFileName}"`,
+            date: timestamp
+          });
+          await writeUserCredits(userId, refundData);
+        } catch (refundErr) {
+          console.error("[Refund Error]:", refundErr);
+        }
+      }
+
       return NextResponse.json(
         { error: "Audiodan hech qanday matn ajratib olib bo'lmadi yoki audio bo'sh." },
         { status: 422 }
@@ -153,8 +223,30 @@ export async function POST(request: Request) {
   } catch (err: unknown) {
     console.error("[Transcribe Audio Route Error]:", err);
     const errMsg = err instanceof Error ? err.message : String(err);
+
+    // ─── REFUND LOGIC ON ERROR ───
+    if (didDeduct && userId) {
+      try {
+        const refundData = await readUserCredits(userId);
+        refundData.balance = (refundData.balance || 0) + creditCost;
+        refundData.used = Math.max(0, (refundData.used || 0) - creditCost);
+        const timestamp = new Date().toLocaleString("uz-UZ", { timeZone: "Asia/Tashkent" });
+        refundData.history.unshift({
+          id: `refund-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+          type: "purchase",
+          amount: creditCost,
+          description: `Transkripsiya xatoligi sababli kreditlar qaytarildi: "${bodyFileName}"`,
+          date: timestamp
+        });
+        await writeUserCredits(userId, refundData);
+        console.log(`[Aisha STT] Successfully refunded ${creditCost} credits to user ${userId}.`);
+      } catch (refundErr) {
+        console.error("[Refund Error]:", refundErr);
+      }
+    }
+
     return NextResponse.json(
-      { error: "Audioni transkripsiya qilishda texnik xatolik yuz berdi: " + errMsg },
+      { error: "Audioni transkripsiya qilishda xatolik yuz berdi: " + errMsg },
       { status: 500 }
     );
   }

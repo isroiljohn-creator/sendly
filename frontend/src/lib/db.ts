@@ -91,6 +91,12 @@ export type BotSettings = {
   fbAgentMode?: "direct" | "ai";
   agentName?: string;
   autoLearnEnabled?: boolean;
+  sheetsEnabled?: boolean;
+  sheetsWebhookUrl?: string;
+  bitrixEnabled?: boolean;
+  bitrixWebhookUrl?: string;
+  amoEnabled?: boolean;
+  amoWebhookUrl?: string;
 };
 
 export type Lesson = {
@@ -256,6 +262,12 @@ const DEFAULT_BOT_SETTINGS: BotSettings = {
   humor: 30,
   aiAgentType: "kurator",
   agentName: "Davron",
+  sheetsEnabled: false,
+  sheetsWebhookUrl: "",
+  bitrixEnabled: false,
+  bitrixWebhookUrl: "",
+  amoEnabled: false,
+  amoWebhookUrl: "",
   systemPrompt: `# ROL VA IDENTIFIKATSIYA
 Sen marketing kursi o'quvchilariga yordam beruvchi, ismi "{{agentName}}" bo'lgan Sendly shaxsiy AI kuratorisan. Xaraktering: samimiy, do'stona, qisqa va aniq gapiradigan, ortiqcha rasmiyatchilikdan xoli.
 

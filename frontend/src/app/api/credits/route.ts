@@ -65,7 +65,7 @@ function releaseFileLock() {
   }
 }
 
-interface CreditTransaction {
+export interface CreditTransaction {
   id: string;
   type: "purchase" | "usage";
   amount: number;
@@ -73,7 +73,7 @@ interface CreditTransaction {
   date: string;
 }
 
-interface CreditsData {
+export interface CreditsData {
   balance: number;
   used: number;
   history: CreditTransaction[];
@@ -134,7 +134,7 @@ function writeDb(data: unknown) {
   }
 }
 
-async function readUserCredits(userId: string): Promise<CreditsData> {
+export async function readUserCredits(userId: string): Promise<CreditsData> {
   if (pgdb.isConfigured()) {
     try {
       const uData = await pgdb.getValue("global_settings_" + userId) || {};
@@ -173,7 +173,7 @@ async function readUserCredits(userId: string): Promise<CreditsData> {
   return creditsData;
 }
 
-async function writeUserCredits(userId: string, creditsData: CreditsData): Promise<boolean> {
+export async function writeUserCredits(userId: string, creditsData: CreditsData): Promise<boolean> {
   if (pgdb.isConfigured()) {
     try {
       const uData = await pgdb.getValue("global_settings_" + userId) || {};
