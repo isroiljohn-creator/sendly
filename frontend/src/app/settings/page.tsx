@@ -11,7 +11,7 @@ import { db } from "@/lib/db";
 import type { User, Channel } from "@/lib/db";
 import { CustomDropdown } from "@/components/ui/CustomDropdown";
 
-type ModalType = "instagram" | "telegram" | "choose" | null;
+type ModalType = "instagram" | "telegram" | "choose" | "instagram-choice" | null;
 
 const LOCAL_TRANSLATIONS = {
   uz: {
@@ -1326,21 +1326,16 @@ export default function SettingsPage() {
             </div>
             <div className="flex flex-col gap-3">
               <button
-                disabled
+                onClick={() => setModal("instagram-choice")}
                 type="button"
-                className="flex items-center gap-3 w-full p-3.5 rounded-[16px] border border-[#E8E8E8] text-[13px] font-medium transition-all text-left grayscale opacity-60 cursor-not-allowed select-none"
+                className="flex items-center gap-3 w-full p-3.5 rounded-[16px] border border-[#E8E8E8] hover:border-black text-[13px] font-medium transition-all text-left bg-white hover:shadow-sm"
               >
                 <div className="grid h-8 w-8 place-items-center rounded-[10px] bg-gradient-to-br from-[#f09433] via-[#e6683c] to-[#bc1888] text-white shrink-0">
                   <Instagram size={16} />
                 </div>
-                <div className="flex-1 flex justify-between items-center min-w-0">
-                  <div className="truncate pr-2">
-                    <p className="font-semibold text-black">{t("pages.settings_page.ig_direct_api")}</p>
-                    <p className="text-[11px] text-[#707070] truncate">{t("pages.settings_page.ig_direct_subtitle")}</p>
-                  </div>
-                  <span className="text-[9px] font-extrabold text-white bg-black/60 px-2 py-0.5 rounded-md shrink-0 uppercase tracking-wide">
-                    Tez kunda
-                  </span>
+                <div>
+                  <p className="font-semibold text-black">{t("pages.settings_page.ig_direct_api")}</p>
+                  <p className="text-[11px] text-[#707070]">{t("pages.settings_page.ig_direct_subtitle")}</p>
                 </div>
               </button>
               <button
@@ -1353,6 +1348,56 @@ export default function SettingsPage() {
                 <div>
                   <p className="font-semibold text-black">{t("pages.settings_page.tg_bot_title")}</p>
                   <p className="text-[11px] text-[#707070]">{t("pages.settings_page.tg_bot_subtitle")}</p>
+                </div>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── INSTAGRAM CHOICE MODAL ── */}
+      {modal === "instagram-choice" && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+          <div className="bg-white rounded-[24px] w-full max-w-[360px] shadow-2xl overflow-hidden p-6 border border-[#D8D8D8]">
+            <div className="flex items-center justify-between pb-4 border-b border-[#F0F0F0] mb-5">
+              <h3 className="text-[15px] font-bold text-black">Instagram ulash usuli</h3>
+              <button onClick={() => setModal("choose")} className="grid h-8 w-8 place-items-center rounded-full hover:bg-[#F0F0F0] text-[#707070]">
+                <X size={16} />
+              </button>
+            </div>
+            <div className="flex flex-col gap-3">
+              <button
+                disabled
+                type="button"
+                className="flex items-center gap-3 w-full p-4 rounded-[16px] border border-[#E8E8E8] text-[13px] font-medium transition-all text-left bg-white grayscale opacity-60 cursor-not-allowed select-none"
+              >
+                <div className="grid h-8 w-8 place-items-center rounded-[10px] bg-gradient-to-br from-[#f09433] via-[#e6683c] to-[#bc1888] text-white shrink-0">
+                  <Instagram size={16} />
+                </div>
+                <div className="flex-1 flex justify-between items-center min-w-0">
+                  <div>
+                    <p className="font-bold text-black">O'zim ulayman</p>
+                    <p className="text-[10px] text-[#707070]">Tizim orqali to'g'ridan-to'g'ri ulash</p>
+                  </div>
+                  <span className="text-[9px] font-extrabold text-white bg-red-500 px-2 py-0.5 rounded-md shrink-0 uppercase tracking-wide">
+                    Yopiq
+                  </span>
+                </div>
+              </button>
+
+              <button
+                onClick={() => {
+                  setShowCustomMeta(true);
+                  setModal("instagram");
+                }}
+                className="flex items-center gap-3 w-full p-4 rounded-[16px] border border-[#E8E8E8] hover:border-black text-[13px] font-medium transition-all text-left bg-white hover:shadow-sm"
+              >
+                <div className="grid h-8 w-8 place-items-center rounded-[10px] bg-[#16A34A] text-white shrink-0">
+                  <Instagram size={16} />
+                </div>
+                <div>
+                  <p className="font-bold text-black">Ulab bering (B2B)</p>
+                  <p className="text-[10px] text-[#707070]">Shaxsiy Meta App va token orqali ulash</p>
                 </div>
               </button>
             </div>
@@ -1462,7 +1507,10 @@ export default function SettingsPage() {
                   </button>
                   <button
                     type="button"
-                    onClick={() => setShowCustomMeta(false)}
+                    onClick={() => {
+                      setShowCustomMeta(false);
+                      setModal("instagram-choice");
+                    }}
                     className="w-full py-3 rounded-full bg-gray-100 hover:bg-gray-200 text-black text-[12px] font-bold transition-all"
                   >
                     Orqaga
