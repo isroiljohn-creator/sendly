@@ -1639,7 +1639,7 @@ export default function AdminPage() {
       {/* ── SELECT USER OVERRIDE DIALOG ── */}
       {selectedUser && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4">
-          <div className="bg-white rounded-[28px] w-full max-w-[460px] p-7 border border-[#D8D8D8] shadow-2xl animate-in zoom-in-95 duration-200">
+          <div className="bg-white rounded-[28px] w-full max-w-[520px] p-7 border border-[#D8D8D8] shadow-2xl animate-in zoom-in-95 duration-200">
             <h3 className="text-[17px] font-black text-black leading-none mb-2">{tr("manageUser")}</h3>
             <p className="text-[12px] text-[#707070] mb-5">{selectedUser.fullName} ({selectedUser.email})</p>
 
@@ -1684,6 +1684,28 @@ export default function AdminPage() {
                   >
                     {tr("enter")}
                   </button>
+                </div>
+              </div>
+
+              {/* Option 3: Credit Transactions History */}
+              <div className="p-4 bg-[#F9F9F7] rounded-2xl border border-[#F0F0F0] flex flex-col gap-2.5">
+                <label className="text-[10px] font-bold text-[#707070] uppercase">Kirim-chiqim tarixi (Tokenlar logi)</label>
+                <div className="flex flex-col gap-2 max-h-[180px] overflow-y-auto pr-1">
+                  {!selectedUser.creditsData?.history || selectedUser.creditsData.history.length === 0 ? (
+                    <div className="text-center py-4 text-[#A0A0A0] text-[11px]">Kirim-chiqim tarixi mavjud emas</div>
+                  ) : (
+                    selectedUser.creditsData.history.map((tx: any, idx: number) => (
+                      <div key={tx.id || idx} className="flex justify-between items-start border-b border-[#EAEAEA] pb-2 last:border-b-0 text-[11px]">
+                        <div className="flex flex-col gap-0.5">
+                          <span className="font-bold text-black">{tx.description || "Izohsiz"}</span>
+                          <span className="text-[9px] text-[#A0A0A0]">{tx.date}</span>
+                        </div>
+                        <span className={`font-black whitespace-nowrap ml-2 ${tx.type === "purchase" ? "text-green-600" : "text-red-500"}`}>
+                          {tx.type === "purchase" ? "+" : "-"}{Number(tx.amount || 0).toLocaleString("uz-UZ")}
+                        </span>
+                      </div>
+                    ))
+                  )}
                 </div>
               </div>
             </div>
