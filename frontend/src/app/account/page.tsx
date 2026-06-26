@@ -67,7 +67,8 @@ export default function AccountPage() {
   const [isBuyCreditsModalOpen, setIsBuyCreditsModalOpen] = useState(false);
   const [processingPurchase, setProcessingPurchase] = useState(false);
 
-  const [alertType, setAlertType] = useState<"success" | "error">("success");
+  const [alertType, setAlertType] = useState<"success" | "error" | "warning">("success");
+  const [alertCallback, setAlertCallback] = useState<(() => void) | null>(null);
 
   // Email verification OTP states
   const [isEmailVerificationPending, setIsEmailVerificationPending] = useState(false);
@@ -165,18 +166,34 @@ export default function AccountPage() {
     return () => window.removeEventListener("replai-db-update", handleDbUpdate);
   }, []);
 
-  const showAlert = (title: string, message: string, type: "success" | "error" = "success") => {
+  const showAlert = (title: string, message: string, type: "success" | "error" | "warning" = "success", callback: (() => void) | null = null) => {
     setAlertTitle(title);
     setAlertMessage(message);
     setAlertType(type);
+    setAlertCallback(() => callback);
     setIsAlertOpen(true);
+  };
+
+  const handleAlertClose = () => {
+    setIsAlertOpen(false);
+    if (alertCallback) {
+      alertCallback();
+      setAlertCallback(null);
+    }
   };
 
   const handleBuyCredits = async (amount: number, priceUzs: number, packageName: string) => {
     if (!currentUser?.isCardLinked) {
-      showAlert(t("common.error"), t("pages.account.billing.link_card_prompt"), "error");
       setIsBuyCreditsModalOpen(false);
-      setIsLinking(true);
+      showAlert(
+        t("pages.account.billing.card_required_title"), 
+        t("pages.account.billing.link_card_prompt"), 
+        "warning",
+        () => {
+          setActiveTab("billing");
+          setIsLinking(true);
+        }
+      );
       return;
     }
     setProcessingPurchase(true);
@@ -401,8 +418,15 @@ export default function AccountPage() {
   const handleSelectPlan = (plan: "free" | "pro" | "premium" | "vip") => {
     if (plan !== "free" && !currentUser?.isCardLinked) {
       setIsPricingOpen(false);
-      setIsLinking(true);
-      showAlert(t("pages.account.billing.card_required_title"), t("pages.account.billing.card_required_msg"));
+      showAlert(
+        t("pages.account.billing.card_required_title"), 
+        t("pages.account.billing.card_required_msg"),
+        "warning",
+        () => {
+          setActiveTab("billing");
+          setIsLinking(true);
+        }
+      );
       return;
     }
     db.updatePlan(plan);
@@ -1121,10 +1145,11 @@ export default function AccountPage() {
 
       <AlertModal
         isOpen={isAlertOpen}
-        onClose={() => setIsAlertOpen(false)}
+        onClose={handleAlertClose}
         title={alertTitle}
         message={alertMessage}
         type={alertType}
+        buttonText={alertTitle.toLowerCase().includes("karta") ? "Karta bog'lash" : undefined}
       />
 
 

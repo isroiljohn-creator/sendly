@@ -400,7 +400,7 @@ interface AlertModalProps {
   title: string;
   message: string;
   buttonText?: string;
-  type?: "success" | "error";
+  type?: "success" | "error" | "warning";
 }
 
 export function AlertModal({
@@ -409,38 +409,67 @@ export function AlertModal({
   title,
   message,
   buttonText,
-  type = "success",
+  type,
 }: AlertModalProps) {
   const { t } = useI18n();
   const resolvedButtonText = buttonText || t("common.close") || "Close";
 
   if (!isOpen) return null;
 
-  const resolvedType = type === "error" || 
+  const resolvedType = type || (
     title.toLowerCase().includes("xato") || 
     title.toLowerCase().includes("error") || 
     title.toLowerCase().includes("fail") || 
     title.toLowerCase().includes("muammo")
       ? "error"
-      : "success";
+      : "success"
+  );
+
+  const isCardPrompt = title.toLowerCase().includes("karta") || message.toLowerCase().includes("kartangizni");
+
+  let iconNode;
+  if (isCardPrompt) {
+    iconNode = (
+      <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-amber-100 text-amber-600">
+        <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" strokeWidth="2.5" fill="none" strokeLinecap="round" strokeLinejoin="round">
+          <rect x="2" y="5" width="20" height="14" rx="2" ry="2" />
+          <line x1="2" y1="10" x2="22" y2="10" />
+        </svg>
+      </div>
+    );
+  } else if (resolvedType === "error") {
+    iconNode = (
+      <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-red-100 text-red-600">
+        <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" strokeWidth="2.5" fill="none" strokeLinecap="round" strokeLinejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18" />
+          <line x1="6" y1="6" x2="18" y2="18" />
+        </svg>
+      </div>
+    );
+  } else if (resolvedType === "warning") {
+    iconNode = (
+      <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-amber-100 text-amber-600">
+        <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" strokeWidth="2.5" fill="none" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+          <line x1="12" y1="9" x2="12" y2="13" />
+          <line x1="12" y1="17" x2="12.01" y2="17" />
+        </svg>
+      </div>
+    );
+  } else {
+    iconNode = (
+      <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-[#C7F33C]/20 text-black">
+        <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" strokeWidth="2.5" fill="none" strokeLinecap="round" strokeLinejoin="round">
+          <polyline points="20 6 9 17 4 12" />
+        </svg>
+      </div>
+    );
+  }
 
   return (
     <div className="fixed inset-0 z-[150] flex items-center justify-center bg-black/35 backdrop-blur-[5px] p-4 animate-in fade-in duration-200">
       <div className="w-full max-w-[360px] rounded-[28px] bg-white p-6 border border-[#E8E8E8]/70 shadow-[0_20px_50px_rgba(0,0,0,0.08)] scale-100 animate-in zoom-in-95 duration-200 text-center flex flex-col items-center">
-        {resolvedType === "error" ? (
-          <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-red-100 text-red-600">
-            <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" strokeWidth="2.5" fill="none" strokeLinecap="round" strokeLinejoin="round">
-              <line x1="18" y1="6" x2="6" y2="18" />
-              <line x1="6" y1="6" x2="18" y2="18" />
-            </svg>
-          </div>
-        ) : (
-          <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-[#C7F33C]/20 text-black">
-            <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" strokeWidth="2.5" fill="none" strokeLinecap="round" strokeLinejoin="round">
-              <polyline points="20 6 9 17 4 12" />
-            </svg>
-          </div>
-        )}
+        {iconNode}
         <h3 className="text-[16px] font-semibold text-black leading-tight">
           {title}
         </h3>

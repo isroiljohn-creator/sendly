@@ -240,8 +240,8 @@
     "semantic_hash": ""
   },
   "frontend/src/app/account/page.tsx": {
-    "mtime": 1782416565.8627443,
-    "ast_hash": "a1a571515239e0ee2a99f8ebafe39326",
+    "mtime": 1782461360.0705123,
+    "ast_hash": "808756ac1165c3a04464c1adc99792f8",
     "semantic_hash": ""
   },
   "frontend/src/app/admin/page.tsx": {
@@ -775,8 +775,8 @@
     "semantic_hash": ""
   },
   "frontend/src/i18n/locales/uz.json": {
-    "mtime": 1782416416.6297562,
-    "ast_hash": "740493a7efa784be613b04f573da9dc8",
+    "mtime": 1782461238.8584533,
+    "ast_hash": "8314eca776fd0870e7bade423be15c23",
     "semantic_hash": ""
   },
   "frontend/src/lib/ai/moderation.ts": {
