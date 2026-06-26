@@ -507,7 +507,6 @@ function AIAgentContent() {
   const [analyticsSearch, setAnalyticsSearch] = useState("");
   const [analyticsFilter, setAnalyticsFilter] = useState("All");
   const [isRefreshingAnalysis, setIsRefreshingAnalysis] = useState(false);
-  const [isStructuring, setIsStructuring] = useState(false);
 
   // Telegram Bot Verification States
   const [isTelegramLinked, setIsTelegramLinked] = useState(false);
@@ -1479,43 +1478,6 @@ function AIAgentContent() {
     const updated = { ...selectedLesson, [field]: value };
     setSelectedLesson(updated);
     setLessons(prev => prev.map(l => l.id === selectedLesson.id ? updated : l));
-  };
-  const handleAiStructureTranscript = async () => {
-    if (!selectedLesson || !selectedLesson.transcript || selectedLesson.transcript.trim() === "") {
-      showToast("Tahlil qilish uchun matn bo'sh bo'lmasligi kerak", "error");
-      return;
-    }
-
-    setIsStructuring(true);
-    try {
-      const res = await fetch("/api/ai/structure", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ transcript: selectedLesson.transcript })
-      });
-      const data = await res.json();
-      if (res.ok && data.text) {
-        const originalText = selectedLesson.transcript || "";
-        const separator = "\n\n=== AI TAHLILI VA STRUKTURA ===\n\n";
-        
-        let newText = "";
-        if (originalText.includes("=== AI TAHLILI VA STRUKTURA ===")) {
-          const parts = originalText.split("=== AI TAHLILI VA STRUKTURA ===");
-          newText = parts[0].trim() + separator + data.text;
-        } else {
-          newText = originalText.trim() + separator + data.text;
-        }
-
-        handleUpdateSelectedLesson("transcript", newText);
-        showToast("Matn muvaffaqiyatli tahlil qilindi va matn oxiriga qo'shildi!");
-      } else {
-        showToast(data.error || "Tahlil qilishda xatolik yuz berdi", "error");
-      }
-    } catch (err) {
-      showToast("Tarmoq ulanishida xatolik yuz berdi", "error");
-    } finally {
-      setIsStructuring(false);
-    }
   };
   // Settings: Add dynamic forbidden topic badge
   const handleAddTopic = (e: React.FormEvent) => {
@@ -4824,25 +4786,6 @@ function AIAgentContent() {
                         <label className="text-[12px] font-extrabold text-black">
                           {t("pages.ai_agent.lesson_transcript_label")}
                         </label>
-                        <button
-                          type="button"
-                          disabled={isStructuring || !selectedLesson.transcript || selectedLesson.transcript.trim() === ""}
-                          onClick={handleAiStructureTranscript}
-                          className="px-3 py-1 text-[10px] font-bold rounded-lg bg-gradient-to-r from-[#C7F33C] to-[#9BC92E] hover:scale-[1.02] disabled:scale-100 disabled:opacity-50 disabled:from-gray-100 disabled:to-gray-100 disabled:text-gray-400 text-black transition-all flex items-center gap-1 active:scale-95 shadow-xs border border-[#7CA607]/20"
-                          title="Ushbu matnni Gemini 3.5 yordamida savol-javob ko'rinishida strukturalash va ortiqcha gaplardan tozalash"
-                        >
-                          {isStructuring ? (
-                            <>
-                              <Loader2 className="h-3 w-3 animate-spin" />
-                              <span>Tahlil qilinmoqda...</span>
-                            </>
-                          ) : (
-                            <>
-                              <Brain size={11} className="text-black" />
-                              <span>AI Tahlil (Gemini 3.5)</span>
-                            </>
-                          )}
-                        </button>
                       </div>
                       <span className="text-[10px] text-[#707070] font-bold">
                         {t("pages.ai_agent.chars_count").replace("{count}", (selectedLesson.transcript?.length || 0).toString())}
