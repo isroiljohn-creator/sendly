@@ -103,29 +103,26 @@ export async function POST(request: Request) {
         await new Promise((resolve) => setTimeout(resolve, 3000));
 
         try {
-          const pollRes = await fetch("https://back.aisha.group/api/v2/stt/get/", {
+          const pollRes = await fetch(`https://back.aisha.group/api/v2/stt/get/${taskId}/`, {
             headers: {
               "X-Api-Key": apiKey.trim()
             }
           });
 
           if (pollRes.ok) {
-            const history = await pollRes.json();
-            if (Array.isArray(history)) {
-              const task = history.find((t: any) => Number(t.id) === taskId);
-              if (task) {
-                console.log(`[Aisha STT v2] Task ${taskId} status: ${task.status}`);
-                if (task.status === "SUCCESS") {
-                  resultText = task.transcript || "";
-                  completed = true;
-                  break;
-                }
-                if (task.status === "ERROR" || task.status === "FAILED") {
-                  return NextResponse.json(
-                    { error: "Aisha STT nutqni matnga o'girishda xatoga yo'l qo'ydi (v2 status error)." },
-                    { status: 500 }
-                  );
-                }
+            const task = await pollRes.json();
+            if (task) {
+              console.log(`[Aisha STT v2] Task ${taskId} status: ${task.status}`);
+              if (task.status === "SUCCESS") {
+                resultText = task.transcript || "";
+                completed = true;
+                break;
+              }
+              if (task.status === "ERROR" || task.status === "FAILED") {
+                return NextResponse.json(
+                  { error: "Aisha STT nutqni matnga o'girishda xatoga yo'l qo'ydi (v2 status error)." },
+                  { status: 500 }
+                );
               }
             }
           }
