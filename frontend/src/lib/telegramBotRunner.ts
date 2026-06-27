@@ -671,7 +671,7 @@ export async function handleTelegramUpdate(channelId: string, token: string, upd
                   shouldEscalate = true;
                 }
 
-                if (!shouldEscalate) {
+                if (!shouldEscalate && ragResult.intent !== "general") {
                   for (const rule of settings.escalationRules || []) {
                     if (!rule.enabled) continue;
 
@@ -680,25 +680,12 @@ export async function handleTelegramUpdate(channelId: string, token: string, upd
                       break;
                     }
 
-                    if (rule.text.includes("shikoyat") && (
-                      text.toLowerCase().includes("shikoyat") || 
-                      text.toLowerCase().includes("norozi") || 
-                      text.toLowerCase().includes("yomon") || 
-                      text.toLowerCase().includes("ishlamayapti") || 
-                      text.toLowerCase().includes("aldashdi")
-                    )) {
+                    if (rule.text.includes("shikoyat") && ragResult.sentiment === "negative") {
                       shouldEscalate = true;
                       break;
                     }
 
-                    if (rule.text.includes("To'lov") && (
-                      text.toLowerCase().includes("to'lov") || 
-                      text.toLowerCase().includes("tolov") || 
-                      text.toLowerCase().includes("sertifikat") || 
-                      text.toLowerCase().includes("diplom") || 
-                      text.toLowerCase().includes("narxi") || 
-                      text.toLowerCase().includes("pul")
-                    )) {
+                    if (rule.text.includes("To'lov") && (ragResult.intent === "billing" || ragResult.intent === "affiliate")) {
                       shouldEscalate = true;
                       break;
                     }
@@ -853,6 +840,30 @@ export async function handleTelegramUpdate(channelId: string, token: string, upd
           };
           chat.messages.push(botMsg);
           chat.lastMessage = botReplyText;
+        }
+      } else {
+        // Chat is in liveTakeover mode. Warn the user once so they know how to resume AI.
+        const lastTwo = chat.messages.slice(-2);
+        const wasJustEscalated = lastTwo.length === 2 && lastTwo[0].sender === "user" && lastTwo[1].sender === "bot" && (lastTwo[1].text.includes("inson-kurator") || lastTwo[1].text.includes("человеку-куратору") || lastTwo[1].text.includes("human curator"));
+        
+        if (!wasJustEscalated && text.trim().toLowerCase() !== "/start" && text.trim().toLowerCase() !== "boshlash") {
+          const reminderMsg =
+            userLang === "en"
+              ? "This conversation is currently transferred to an operator. To resume talking to the AI assistant, please write /start."
+              : userLang === "ru"
+              ? "Этот чат переведен на оператора. Чтобы возобновить общение с ИИ-помощником, напишите /start."
+              : "Suhbat operatorga yo'naltirilgan. AI yordamchi bilan gaplashishni davom ettirish uchun /start deb yozing.";
+          
+          await sendTelegramMessage(token, chatId, reminderMsg);
+          
+          const botMsg: ChatMessage = {
+            id: `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+            sender: "bot",
+            text: reminderMsg,
+            timestamp: new Date().toLocaleTimeString("uz-UZ", { hour: "2-digit", minute: "2-digit" }),
+          };
+          chat.messages.push(botMsg);
+          chat.lastMessage = reminderMsg;
         }
       }
       
