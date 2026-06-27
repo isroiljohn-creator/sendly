@@ -189,7 +189,7 @@ O'quvchilarning savollariga faqat dars materiallari (KURS MATERIALLARI) asosida 
               contents: contents,
               generationConfig: {
                 temperature: Math.min(0.95, 0.5 + (settings.humor || 30) / 200),
-                maxOutputTokens: 1024,
+                maxOutputTokens: 8192,
               },
             }),
           }
@@ -223,7 +223,7 @@ O'quvchilarning savollariga faqat dars materiallari (KURS MATERIALLARI) asosida 
             contents: contents,
             generationConfig: {
               temperature: Math.min(0.95, 0.5 + (settings.humor || 30) / 200),
-              maxOutputTokens: 1024,
+              maxOutputTokens: 8192,
             },
           }),
         }
@@ -368,7 +368,7 @@ Quyidagi qoidalarga amal qil:
           body: JSON.stringify({
             system_instruction: { parts: [{ text: smallTalkPrompt }] },
             contents: [{ role: "user", parts: [{ text: question }] }],
-            generationConfig: { temperature: 0.7, maxOutputTokens: 200 },
+            generationConfig: { temperature: 0.7, maxOutputTokens: 4096 },
           }),
         }
       );

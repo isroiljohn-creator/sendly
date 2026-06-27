@@ -270,8 +270,8 @@
     "semantic_hash": ""
   },
   "frontend/src/app/api/ai/structure/route.ts": {
-    "mtime": 1782544031.9993994,
-    "ast_hash": "dce77c04a9db77479c06f7bea7669b14",
+    "mtime": 1782544763.8119786,
+    "ast_hash": "7a8cf34bbd86fa9e204628dce5ae1f1e",
     "semantic_hash": ""
   },
   "frontend/src/app/api/auth/google/route.ts": {
@@ -320,8 +320,8 @@
     "semantic_hash": ""
   },
   "frontend/src/app/api/support/route.ts": {
-    "mtime": 1782544048.1035273,
-    "ast_hash": "48468cf0cefffd2cb6af8a53de57127e",
+    "mtime": 1782544771.7291403,
+    "ast_hash": "8b2cc2295c1ba4294cb3e6006c8625f5",
     "semantic_hash": ""
   },
   "frontend/src/app/api/telegram/send/route.ts": {
@@ -785,8 +785,8 @@
     "semantic_hash": ""
   },
   "frontend/src/lib/ai/rag.ts": {
-    "mtime": 1782543960.2813387,
-    "ast_hash": "ee8060e7c50706c7a3fe94c9fd21af39",
+    "mtime": 1782544757.291512,
+    "ast_hash": "b91fe85b371a6b8e43470027af117119",
     "semantic_hash": ""
   },
   "frontend/src/lib/db.ts": {

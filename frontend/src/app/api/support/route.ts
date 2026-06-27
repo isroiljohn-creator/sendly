@@ -61,7 +61,7 @@ Siz "Sendly.uz" (Instagram chatbot va savdoni avtomatlashtirish platformasi) qo'
           contents: contents,
           generationConfig: {
             temperature: 0.3,
-            maxOutputTokens: 600,
+            maxOutputTokens: 8192,
           },
         }),
       }
