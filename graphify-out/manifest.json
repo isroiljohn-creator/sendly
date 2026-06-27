@@ -250,8 +250,8 @@
     "semantic_hash": ""
   },
   "frontend/src/app/ai-agent/page.tsx": {
-    "mtime": 1782535490.1813087,
-    "ast_hash": "a6228601b157bd3705fb3b29c77518f0",
+    "mtime": 1782536736.4314086,
+    "ast_hash": "c2e9510e0f38a8fad34aaf9d3c2c1eb5",
     "semantic_hash": ""
   },
   "frontend/src/app/analytics/page.tsx": {
@@ -790,8 +790,8 @@
     "semantic_hash": ""
   },
   "frontend/src/lib/db.ts": {
-    "mtime": 1782496018.7830727,
-    "ast_hash": "70912886f3b1608c42a67d714b9c395d",
+    "mtime": 1782536634.2503986,
+    "ast_hash": "ffc51ba9a451a6ccffe19f75ef850885",
     "semantic_hash": ""
   },
   "frontend/src/lib/jwt.ts": {

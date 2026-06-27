@@ -1031,62 +1031,73 @@ export const db = {
   },
 
   // 8. Modules Database
-  getModules(): Module[] {
+  getModules(botId?: string): Module[] {
     if (!isClient) return [];
-    const stored = localStorage.getItem("replai_modules");
+    const cid = botId || this.getActiveChannel()?.id || "default";
+    const key = `replai_modules_${cid}`;
+    const stored = localStorage.getItem(key);
     if (!stored) {
-      localStorage.setItem("replai_modules", JSON.stringify(INITIAL_MODULES));
+      localStorage.setItem(key, JSON.stringify(INITIAL_MODULES));
       return INITIAL_MODULES;
     }
     return safeParse<Module[]>(stored, INITIAL_MODULES);
   },
 
-  saveModules(list: Module[]): void {
+  saveModules(list: Module[], botId?: string): void {
     if (!isClient) return;
-    localStorage.setItem("replai_modules", JSON.stringify(list));
+    const cid = botId || this.getActiveChannel()?.id || "default";
+    const key = `replai_modules_${cid}`;
+    localStorage.setItem(key, JSON.stringify(list));
     notifyUpdate();
   },
 
-  addModule(title: string): Module {
-    const modules = this.getModules();
+  addModule(title: string, botId?: string): Module {
+    const cid = botId || this.getActiveChannel()?.id || "default";
+    const modules = this.getModules(cid);
     const newModule: Module = {
       id: `mod-${Date.now()}`,
       title,
       order: modules.length + 1
     };
     modules.push(newModule);
-    this.saveModules(modules);
+    this.saveModules(modules, cid);
     return newModule;
   },
 
-  deleteModule(id: string): void {
-    const modules = this.getModules().filter(m => m.id !== id);
-    this.saveModules(modules);
+  deleteModule(id: string, botId?: string): void {
+    const cid = botId || this.getActiveChannel()?.id || "default";
+    const modules = this.getModules(cid).filter(m => m.id !== id);
+    this.saveModules(modules, cid);
     // Also delete associated lessons
-    const lessons = this.getLessons().filter(l => l.moduleId !== id);
-    this.saveLessons(lessons);
+    const lessons = this.getLessons(cid).filter(l => l.moduleId !== id);
+    this.saveLessons(lessons, cid);
     notifyUpdate();
   },
 
   // 9. Lessons Database
-  getLessons(): Lesson[] {
+  getLessons(botId?: string): Lesson[] {
     if (!isClient) return [];
-    const stored = localStorage.getItem("replai_lessons");
+    const cid = botId || this.getActiveChannel()?.id || "default";
+    const key = `replai_lessons_${cid}`;
+    const stored = localStorage.getItem(key);
     if (!stored) {
-      localStorage.setItem("replai_lessons", JSON.stringify(INITIAL_LESSONS));
+      localStorage.setItem(key, JSON.stringify(INITIAL_LESSONS));
       return INITIAL_LESSONS;
     }
     return safeParse<Lesson[]>(stored, INITIAL_LESSONS);
   },
 
-  saveLessons(list: Lesson[]): void {
+  saveLessons(list: Lesson[], botId?: string): void {
     if (!isClient) return;
-    localStorage.setItem("replai_lessons", JSON.stringify(list));
+    const cid = botId || this.getActiveChannel()?.id || "default";
+    const key = `replai_lessons_${cid}`;
+    localStorage.setItem(key, JSON.stringify(list));
     notifyUpdate();
   },
 
-  addLesson(moduleId: string, title: string, transcript: string): Lesson {
-    const lessons = this.getLessons();
+  addLesson(moduleId: string, title: string, transcript: string, botId?: string): Lesson {
+    const cid = botId || this.getActiveChannel()?.id || "default";
+    const lessons = this.getLessons(cid);
     const newLesson: Lesson = {
       id: `les-${Date.now()}`,
       moduleId,
@@ -1095,13 +1106,14 @@ export const db = {
       pdfMaterials: []
     };
     lessons.push(newLesson);
-    this.saveLessons(lessons);
+    this.saveLessons(lessons, cid);
     return newLesson;
   },
 
-  deleteLesson(id: string): void {
-    const lessons = this.getLessons().filter(l => l.id !== id);
-    this.saveLessons(lessons);
+  deleteLesson(id: string, botId?: string): void {
+    const cid = botId || this.getActiveChannel()?.id || "default";
+    const lessons = this.getLessons(cid).filter(l => l.id !== id);
+    this.saveLessons(lessons, cid);
   },
 
   getAllAutomations(): (Automation & { channel?: Channel })[] {

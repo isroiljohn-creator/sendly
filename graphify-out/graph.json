@@ -3257,7 +3257,7 @@
       "label": "LoadingFallback()",
       "file_type": "code",
       "source_file": "frontend/src/app/ai-agent/page.tsx",
-      "source_location": "L5852",
+      "source_location": "L5919",
       "_origin": "ast",
       "id": "ai_agent_page_loadingfallback",
       "community": 0,
@@ -3267,7 +3267,7 @@
       "label": "AIAgentPage()",
       "file_type": "code",
       "source_file": "frontend/src/app/ai-agent/page.tsx",
-      "source_location": "L5861",
+      "source_location": "L5928",
       "_origin": "ast",
       "id": "ai_agent_page_aiagentpage",
       "community": 0,
@@ -13520,9 +13520,9 @@
       "source_file": "frontend/package.json",
       "source_location": "L13",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "frontend_package_dependencies",
-      "target": "frontend_package_dependencies_danielxceron_youtube_transcript",
-      "confidence_score": 1.0
+      "target": "frontend_package_dependencies_danielxceron_youtube_transcript"
     },
     {
       "relation": "contains",
@@ -15521,9 +15521,9 @@
       "source_file": "frontend/src/app/api/ai/parse-link/route.ts",
       "source_location": "L3",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "parse_link_route",
-      "target": "credits_route",
-      "confidence_score": 1.0
+      "target": "credits_route"
     },
     {
       "relation": "imports",
@@ -15532,9 +15532,9 @@
       "source_file": "frontend/src/app/api/ai/parse-link/route.ts",
       "source_location": "L3",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "parse_link_route",
-      "target": "credits_route_readusercredits",
-      "confidence_score": 1.0
+      "target": "credits_route_readusercredits"
     },
     {
       "relation": "imports",
@@ -15543,9 +15543,9 @@
       "source_file": "frontend/src/app/api/ai/parse-link/route.ts",
       "source_location": "L3",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "parse_link_route",
-      "target": "credits_route_writeusercredits",
-      "confidence_score": 1.0
+      "target": "credits_route_writeusercredits"
     },
     {
       "relation": "imports_from",
@@ -15554,9 +15554,9 @@
       "source_file": "frontend/src/app/api/ai/parse-link/route.ts",
       "source_location": "L2",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "parse_link_route",
-      "target": "lib_jwt",
-      "confidence_score": 1.0
+      "target": "lib_jwt"
     },
     {
       "relation": "imports",
@@ -15565,9 +15565,9 @@
       "source_file": "frontend/src/app/api/ai/parse-link/route.ts",
       "source_location": "L2",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "parse_link_route",
-      "target": "lib_jwt_verifyjwt",
-      "confidence_score": 1.0
+      "target": "lib_jwt_verifyjwt"
     },
     {
       "relation": "contains",
@@ -15575,9 +15575,9 @@
       "source_file": "frontend/src/app/api/ai/parse-link/route.ts",
       "source_location": "L5",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "parse_link_route",
-      "target": "parse_link_route_cleanhtml",
-      "confidence_score": 1.0
+      "target": "parse_link_route_cleanhtml"
     },
     {
       "relation": "contains",
@@ -15585,9 +15585,9 @@
       "source_file": "frontend/src/app/api/ai/parse-link/route.ts",
       "source_location": "L52",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "parse_link_route",
-      "target": "parse_link_route_cleanyoutubetranscript",
-      "confidence_score": 1.0
+      "target": "parse_link_route_cleanyoutubetranscript"
     },
     {
       "relation": "contains",
@@ -15595,9 +15595,9 @@
       "source_file": "frontend/src/app/api/ai/parse-link/route.ts",
       "source_location": "L75",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "parse_link_route",
-      "target": "parse_link_route_post",
-      "confidence_score": 1.0
+      "target": "parse_link_route_post"
     },
     {
       "relation": "calls",
@@ -15606,9 +15606,9 @@
       "source_file": "frontend/src/app/api/ai/parse-link/route.ts",
       "source_location": "L188",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "parse_link_route_post",
-      "target": "parse_link_route_cleanhtml",
-      "confidence_score": 1.0
+      "target": "parse_link_route_cleanhtml"
     },
     {
       "relation": "calls",
@@ -15617,9 +15617,9 @@
       "source_file": "frontend/src/app/api/ai/parse-link/route.ts",
       "source_location": "L167",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "parse_link_route_post",
-      "target": "parse_link_route_cleanyoutubetranscript",
-      "confidence_score": 1.0
+      "target": "parse_link_route_cleanyoutubetranscript"
     },
     {
       "relation": "calls",
@@ -27337,5 +27337,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "c966bd512411e01a3ca2844fe854f14c3d012a01"
+  "built_at_commit": "678371953973d893ebba5ef182a8fb0a25044487"
 }

@@ -916,6 +916,19 @@ function AIAgentContent() {
     }
   }, [selectedAgentType, t]);
 
+  const resetSandboxChat = (agentType: string) => {
+    const welcomeText = t(`pages.ai_agent.defaults.${agentType}.welcome`) || "Salom!";
+    setChatMessages([
+      {
+        id: "welcome",
+        sender: "bot",
+        text: welcomeText,
+        time: t("pages.ai_agent.now"),
+        confidence: 100
+      }
+    ]);
+  };
+
   const loadDatabase = () => {
     // Clean up any lingering demo @sendly_robot channel from localStorage
     const allChannels = db.getChannels();
@@ -944,8 +957,8 @@ function AIAgentContent() {
     }
 
     const loadedSettings = db.getBotSettings(initialBotId);
-    const loadedModules = db.getModules();
-    const loadedLessons = db.getLessons();
+    const loadedModules = db.getModules(initialBotId);
+    const loadedLessons = db.getLessons(initialBotId);
 
     if (initialBotId && loadedSettings.telegramBotId !== initialBotId) {
       loadedSettings.telegramBotId = initialBotId;
@@ -1050,6 +1063,18 @@ function AIAgentContent() {
     loadedSettings.telegramBotId = botId;
     setSettings(loadedSettings);
     db.saveBotSettings(loadedSettings, botId);
+
+    // Reload scoped modules, lessons, and reset sandbox chat
+    const loadedModules = db.getModules(botId);
+    const loadedLessons = db.getLessons(botId);
+    setModules(loadedModules);
+    setLessons(loadedLessons);
+    if (loadedLessons.length > 0) {
+      setSelectedLesson(loadedLessons[0]);
+    } else {
+      setSelectedLesson(null);
+    }
+    resetSandboxChat(loadedSettings.aiAgentType || "kurator");
 
     const channels = db.getChannels();
     const ch = channels.find(c => c.id === botId);
@@ -1459,6 +1484,7 @@ function AIAgentContent() {
       const updatedLessons = db.getLessons();
       setLessons(updatedLessons);
       setSelectedLesson(newLes);
+      resetSandboxChat(settings?.aiAgentType || "kurator");
       showToast(
         isAudio 
           ? (t("pages.ai_agent.toasts.audio_transcribed_success") || "Audio muvaffaqiyatli transkripsiya qilindi va dars qo'shildi!")
@@ -1488,6 +1514,7 @@ function AIAgentContent() {
     setSelectedLesson(newLes);
     setNewLessonName("");
     setShowAddLessonModal(false);
+    resetSandboxChat(settings?.aiAgentType || "kurator");
     showToast(t("pages.ai_agent.toasts.lesson_created").replace("{title}", newLes.title));
   };
 
@@ -1562,6 +1589,7 @@ function AIAgentContent() {
       setSelectedLesson(newLes);
       setNewLinkUrl("");
       setShowAddLinkModal(false);
+      resetSandboxChat(settings?.aiAgentType || "kurator");
 
       // Refresh credits balance
       if (userId !== "guest") {
@@ -2292,11 +2320,24 @@ function AIAgentContent() {
                                 <button
                                   onClick={() => {
                                     // Switch active editing context to this channel
+                                    db.setActiveChannel(item.channel.id);
                                     const loadedSettings = db.getBotSettings(item.channel.id);
                                     loadedSettings.telegramBotId = item.channel.id;
                                     setSettings(loadedSettings);
                                     setTelegramBotUsername(item.channel.username);
                                     setIsTelegramLinked(true);
+
+                                    // Reload modules and lessons scoped to this channel
+                                    const loadedModules = db.getModules(item.channel.id);
+                                    const loadedLessons = db.getLessons(item.channel.id);
+                                    setModules(loadedModules);
+                                    setLessons(loadedLessons);
+                                    if (loadedLessons.length > 0) {
+                                      setSelectedLesson(loadedLessons[0]);
+                                    } else {
+                                      setSelectedLesson(null);
+                                    }
+                                    resetSandboxChat(loadedSettings.aiAgentType || "kurator");
 
                                     useRouterObj.push(`/ai-agent?type=${agentType}`);
                                   }}
@@ -2341,11 +2382,24 @@ function AIAgentContent() {
                                 <button
                                   onClick={() => {
                                     // Switch active editing context to this channel
+                                    db.setActiveChannel(item.channel.id);
                                     const loadedSettings = db.getBotSettings(item.channel.id);
                                     loadedSettings.telegramBotId = item.channel.id;
                                     setSettings(loadedSettings);
                                     setTelegramBotUsername(item.channel.username);
                                     setIsTelegramLinked(true);
+
+                                    // Reload modules and lessons scoped to this channel
+                                    const loadedModules = db.getModules(item.channel.id);
+                                    const loadedLessons = db.getLessons(item.channel.id);
+                                    setModules(loadedModules);
+                                    setLessons(loadedLessons);
+                                    if (loadedLessons.length > 0) {
+                                      setSelectedLesson(loadedLessons[0]);
+                                    } else {
+                                      setSelectedLesson(null);
+                                    }
+                                    resetSandboxChat(loadedSettings.aiAgentType || "kurator");
 
                                     useRouterObj.push("/ai-agent?type=fb-leads-direct");
                                   }}
@@ -2394,11 +2448,24 @@ function AIAgentContent() {
                                 <button
                                   onClick={() => {
                                     // Switch active editing context to this channel
+                                    db.setActiveChannel(item.channel.id);
                                     const loadedSettings = db.getBotSettings(item.channel.id);
                                     loadedSettings.telegramBotId = item.channel.id;
                                     setSettings(loadedSettings);
                                     setTelegramBotUsername(item.channel.username);
                                     setIsTelegramLinked(true);
+
+                                    // Reload modules and lessons scoped to this channel
+                                    const loadedModules = db.getModules(item.channel.id);
+                                    const loadedLessons = db.getLessons(item.channel.id);
+                                    setModules(loadedModules);
+                                    setLessons(loadedLessons);
+                                    if (loadedLessons.length > 0) {
+                                      setSelectedLesson(loadedLessons[0]);
+                                    } else {
+                                      setSelectedLesson(null);
+                                    }
+                                    resetSandboxChat(loadedSettings.aiAgentType || "kurator");
 
                                     useRouterObj.push("/ai-agent?type=fb-leads");
                                   }}
