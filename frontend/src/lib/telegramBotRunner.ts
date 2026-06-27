@@ -128,35 +128,71 @@ async function sendTelegramMessage(token: string, chatId: number | string, text:
   }
 }
 
-async function updateDbFile(updater: (dbData: Record<string, any>) => Promise<void> | void) {
-  if (pgdb.isConfigured()) {
-    try {
-      // Load current state
-      const dbData = await getDbDataFromRailway();
-      
-      const originalUserDataJson = JSON.stringify(dbData.userData);
-      const originalUsersJson = JSON.stringify(dbData.users);
+class TaskQueue {
+  private queue: Promise<void> = Promise.resolve();
 
-      // Run updater
-      await updater(dbData);
-
-      // Save global users
-      if (JSON.stringify(dbData.users) !== originalUsersJson) {
-        await pgdb.setValue("global_users", dbData.users);
+  async add(task: () => Promise<void> | void): Promise<void> {
+    this.queue = this.queue.then(async () => {
+      try {
+        await task();
+      } catch (err) {
+        console.error("Queue task execution error:", err);
       }
+    });
+    return this.queue;
+  }
+}
 
-      // Save user specific data
-      for (const [userId, userVal] of Object.entries(dbData.userData)) {
-        const originalValJson = JSON.stringify((JSON.parse(originalUserDataJson) as Record<string, any>)[userId] || {});
-        const newValJson = JSON.stringify(userVal);
-        
-        if (newValJson !== originalValJson) {
-          await pgdb.setValue("global_settings_" + userId, userVal);
+const chatQueues: Map<string, TaskQueue> = new Map();
+
+export function getChatQueue(chatId: string): TaskQueue {
+  let q = chatQueues.get(chatId);
+  if (!q) {
+    q = new TaskQueue();
+    chatQueues.set(chatId, q);
+  }
+  return q;
+}
+
+export async function getUserIdForChannel(channelId: string): Promise<string> {
+  if (pgdb.isConfigured()) {
+    const userId = await pgdb.getUserIdByChannelId(channelId);
+    if (userId) return userId;
+  }
+  
+  if (fs.existsSync(DB_FILE)) {
+    try {
+      const dbData = JSON.parse(fs.readFileSync(DB_FILE, "utf-8"));
+      if (dbData.userData) {
+        for (const [userId, userVal] of Object.entries(dbData.userData)) {
+          if (userVal && typeof userVal === "object") {
+            const rawUserChannels = (userVal as Record<string, string>)["replai_channels"];
+            const userChannels: Channel[] = safeParse(rawUserChannels, []);
+            if (userChannels.some(c => c.id === channelId)) {
+              return userId;
+            }
+          }
         }
       }
+    } catch (e) {
+      console.error("Failed to read db.json for channelId search:", e);
+    }
+  }
+  return "guest";
+}
+
+async function updateUserDbFile(
+  userId: string,
+  updater: (userVal: Record<string, any>) => Promise<void> | void
+) {
+  if (pgdb.isConfigured()) {
+    try {
+      const userVal = await pgdb.getUserSettings(userId) || {};
+      await updater(userVal);
+      await pgdb.setValue("global_settings_" + userId, userVal);
       return;
     } catch (dbErr) {
-      console.error("Railway updateDbFile failed, falling back to local file", dbErr);
+      console.error(`Railway updateUserDbFile failed for user ${userId}, falling back to local`, dbErr);
     }
   }
 
@@ -166,14 +202,18 @@ async function updateDbFile(updater: (dbData: Record<string, any>) => Promise<vo
     try {
       dbData = JSON.parse(fs.readFileSync(DB_FILE, "utf-8"));
     } catch (e) {
-      console.error("Failed to read/parse db.json in updater", e);
+      console.error("Failed to read/parse db.json in fallback updater", e);
     }
   }
-  await updater(dbData);
+  if (!dbData.userData) dbData.userData = {};
+  if (!dbData.userData[userId]) dbData.userData[userId] = {};
+  
+  await updater(dbData.userData[userId]);
+  
   try {
     fs.writeFileSync(DB_FILE, JSON.stringify(dbData, null, 2), "utf-8");
   } catch (e) {
-    console.error("Failed to write db.json in updater", e);
+    console.error("Failed to write db.json in fallback updater", e);
   }
 }
 
@@ -222,24 +262,18 @@ export async function handleTelegramUpdate(channelId: string, token: string, upd
       if (chat && (chat.type === "channel" || chat.type === "group" || chat.type === "supergroup") && newMember && newMember.status === "administrator") {
         const username = chat.username || String(chat.id);
         const name = chat.title || chat.username || `Kanal ${chat.id}`;
-        await updateDbFile(async (dbData) => {
-          if (dbData.userData && typeof dbData.userData === "object") {
-            for (const userVal of Object.values(dbData.userData)) {
-              if (userVal && typeof userVal === "object") {
-                const rawUserChannels = (userVal as Record<string, string>)["replai_channels"];
-                const userChannels: Channel[] = safeParse(rawUserChannels, []);
-                const foundChIdx = userChannels.findIndex(c => c.id === channelId);
-                if (foundChIdx > -1) {
-                  const ch = userChannels[foundChIdx];
-                  const newChannels = [...(ch.telegramChannels || [])];
-                  if (!newChannels.some(c => c.username === username)) {
-                    newChannels.push({ username, name });
-                    ch.telegramChannels = newChannels;
-                    (userVal as Record<string, string>)["replai_channels"] = JSON.stringify(userChannels);
-                  }
-                  break;
-                }
-              }
+        const userId = await getUserIdForChannel(channelId);
+        await updateUserDbFile(userId, async (userVal) => {
+          const rawUserChannels = userVal["replai_channels"];
+          const userChannels: Channel[] = safeParse(rawUserChannels, []);
+          const foundChIdx = userChannels.findIndex(c => c.id === channelId);
+          if (foundChIdx > -1) {
+            const ch = userChannels[foundChIdx];
+            const newChannels = [...(ch.telegramChannels || [])];
+            if (!newChannels.some(c => c.username === username)) {
+              newChannels.push({ username, name });
+              ch.telegramChannels = newChannels;
+              userVal["replai_channels"] = JSON.stringify(userChannels);
             }
           }
         });
@@ -252,24 +286,18 @@ export async function handleTelegramUpdate(channelId: string, token: string, upd
       if (chat.type === "channel") {
         const username = chat.username || String(chat.id);
         const name = chat.title || chat.username || `Kanal ${chat.id}`;
-        await updateDbFile(async (dbData) => {
-          if (dbData.userData && typeof dbData.userData === "object") {
-            for (const userVal of Object.values(dbData.userData)) {
-              if (userVal && typeof userVal === "object") {
-                const rawUserChannels = (userVal as Record<string, string>)["replai_channels"];
-                const userChannels: Channel[] = safeParse(rawUserChannels, []);
-                const foundChIdx = userChannels.findIndex(c => c.id === channelId);
-                if (foundChIdx > -1) {
-                  const ch = userChannels[foundChIdx];
-                  const newChannels = [...(ch.telegramChannels || [])];
-                  if (!newChannels.some(c => c.username === username)) {
-                    newChannels.push({ username, name });
-                    ch.telegramChannels = newChannels;
-                    (userVal as Record<string, string>)["replai_channels"] = JSON.stringify(userChannels);
-                  }
-                  break;
-                }
-              }
+        const userId = await getUserIdForChannel(channelId);
+        await updateUserDbFile(userId, async (userVal) => {
+          const rawUserChannels = userVal["replai_channels"];
+          const userChannels: Channel[] = safeParse(rawUserChannels, []);
+          const foundChIdx = userChannels.findIndex(c => c.id === channelId);
+          if (foundChIdx > -1) {
+            const ch = userChannels[foundChIdx];
+            const newChannels = [...(ch.telegramChannels || [])];
+            if (!newChannels.some(c => c.username === username)) {
+              newChannels.push({ username, name });
+              ch.telegramChannels = newChannels;
+              userVal["replai_channels"] = JSON.stringify(userChannels);
             }
           }
         });
@@ -315,33 +343,19 @@ export async function handleTelegramUpdate(channelId: string, token: string, upd
 
       // 5-digit verification code like Telegram
       const verifyCode = Math.floor(10000 + Math.random() * 90000).toString();
-      let matched = false;
-      await updateDbFile(async (dbData) => {
-        let context: Record<string, string> = dbData as unknown as Record<string, string>;
-        if (dbData.userData && typeof dbData.userData === "object") {
-          for (const userVal of Object.values(dbData.userData)) {
-            if (userVal && typeof userVal === "object") {
-              const rawUserChannels = (userVal as Record<string, string>)["replai_channels"];
-              const userChannels: Channel[] = safeParse(rawUserChannels, []);
-              if (userChannels.some(c => c.id === targetChannelId)) {
-                context = userVal as Record<string, string>;
-                matched = true;
-                break;
-              }
-            }
-          }
-        }
-        
-        if (matched) {
+      const userId = await getUserIdForChannel(targetChannelId);
+      if (userId !== "guest") {
+        matched = true;
+        await updateUserDbFile(userId, async (userVal) => {
           const verifyData = {
             code: verifyCode,
             chatId: String(chatId),
             username: username || firstName || "Admin",
             timestamp: Date.now()
           };
-          context[`replai_tg_verify_code_${targetChannelId}`] = JSON.stringify(verifyData);
-        }
-      });
+          userVal[`replai_tg_verify_code_${targetChannelId}`] = JSON.stringify(verifyData);
+        });
+      }
 
       if (!matched) {
         const errorMsg =
@@ -375,50 +389,34 @@ export async function handleTelegramUpdate(channelId: string, token: string, upd
     // Handle curator command /admin to link admin account (legacy fallback, only for non-system bots)
     if (channelId !== "system_bot" && (text.trim() === "/admin" || text.trim().startsWith("/admin "))) {
       let userEmail = "";
-      await updateDbFile(async (dbData) => {
-        let context: Record<string, string> = dbData as unknown as Record<string, string>;
-        let matchedUserId = "";
-        if (dbData.userData && typeof dbData.userData === "object") {
-          for (const [userId, userVal] of Object.entries(dbData.userData)) {
-            if (userVal && typeof userVal === "object") {
-              const rawUserChannels = (userVal as Record<string, string>)["replai_channels"];
-              const userChannels: Channel[] = safeParse(rawUserChannels, []);
-              if (userChannels.some(c => c.id === channelId)) {
-                context = userVal as Record<string, string>;
-                matchedUserId = userId;
-                break;
-              }
-            }
+      const userId = await getUserIdForChannel(channelId);
+      if (userId !== "guest") {
+        const globalUsers = pgdb.isConfigured() ? await pgdb.getValue("global_users") : null;
+        if (globalUsers && Array.isArray(globalUsers)) {
+          const userObj = globalUsers.find((u: any) => u.id === userId);
+          if (userObj) {
+            userEmail = userObj.email;
           }
         }
-        
-        if (matchedUserId) {
-          const usersList = dbData.users || [];
-          if (Array.isArray(usersList)) {
-            const userObj = usersList.find((u: any) => u.id === matchedUserId);
-            if (userObj) {
-              userEmail = userObj.email;
-            }
-          }
-        }
-        
-        const rawSettings = context[`replai_bot_settings_${channelId}`];
-        const settings: BotSettings = safeParse(rawSettings, {
-          tone: 60,
-          length: 40,
-          humor: 30,
-          systemPrompt: "",
-          topics: [],
-          autoOutreach: true,
-          outreachStart: "09:00",
-          outreachEnd: "21:00",
-          escalationRules: []
+        await updateUserDbFile(userId, async (userVal) => {
+          const rawSettings = userVal[`replai_bot_settings_${channelId}`];
+          const settings: BotSettings = safeParse(rawSettings, {
+            tone: 60,
+            length: 40,
+            humor: 30,
+            systemPrompt: "",
+            topics: [],
+            autoOutreach: true,
+            outreachStart: "09:00",
+            outreachEnd: "21:00",
+            escalationRules: []
+          });
+          
+          settings.adminTelegramChatId = String(chatId);
+          settings.adminTelegramUsername = username || firstName || "Admin";
+          userVal[`replai_bot_settings_${channelId}`] = JSON.stringify(settings);
         });
-        
-        settings.adminTelegramChatId = String(chatId);
-        settings.adminTelegramUsername = username || firstName || "Admin";
-        context[`replai_bot_settings_${channelId}`] = JSON.stringify(settings);
-      });
+      }
       
       const accountInfo =
         userLang === "en"
@@ -438,21 +436,9 @@ export async function handleTelegramUpdate(channelId: string, token: string, upd
       return;
     }
     
-    await updateDbFile(async (dbData) => {
-      let context: Record<string, string> = dbData as unknown as Record<string, string>;
-
-      if (dbData.userData && typeof dbData.userData === "object") {
-        for (const userVal of Object.values(dbData.userData)) {
-          if (userVal && typeof userVal === "object") {
-            const rawUserChannels = (userVal as Record<string, string>)["replai_channels"];
-            const userChannels: Channel[] = safeParse(rawUserChannels, []);
-            if (userChannels.some(c => c.id === channelId)) {
-              context = userVal as Record<string, string>;
-              break;
-            }
-          }
-        }
-      }
+    const userId = await getUserIdForChannel(channelId);
+    await updateUserDbFile(userId, async (userVal) => {
+      let context: Record<string, string> = userVal as unknown as Record<string, string>;
 
       // 1. Get chats key
       const chatsKey = `replai_chats_${channelId}`;
@@ -957,21 +943,10 @@ const lastOutreachChecks: Record<string, number> = {};
 
 async function checkAndRunAutoOutreach(channelId: string, token: string) {
   try {
-    await updateDbFile(async (dbData) => {
-      let context: Record<string, string> = dbData as unknown as Record<string, string>;
-
-      if (dbData.userData && typeof dbData.userData === "object") {
-        for (const userVal of Object.values(dbData.userData)) {
-          if (userVal && typeof userVal === "object") {
-            const rawUserChannels = (userVal as Record<string, string>)["replai_channels"];
-            const userChannels: Channel[] = safeParse(rawUserChannels, []);
-            if (userChannels.some(c => c.id === channelId)) {
-              context = userVal as Record<string, string>;
-              break;
-            }
-          }
-        }
-      }
+    const userId = await getUserIdForChannel(channelId);
+    if (userId === "guest") return;
+    await updateUserDbFile(userId, async (userVal) => {
+      let context: Record<string, string> = userVal as unknown as Record<string, string>;
 
       // Check if bot settings enable autoOutreach
       const rawSettings = context[`replai_bot_settings_${channelId}`];

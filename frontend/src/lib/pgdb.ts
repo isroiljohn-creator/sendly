@@ -106,3 +106,51 @@ export async function getAllSettingsExcept(
 export function isConfigured(): boolean {
   return !!process.env.DATABASE_URL;
 }
+
+/** Query only the bot token for a channelId directly using JSONB text check. */
+export async function getBotToken(channelId: string): Promise<string | null> {
+  await initDb();
+  const { rows } = await getPool().query(
+    `SELECT value->>'replai_channels' as channels_str FROM kv_store 
+     WHERE key LIKE 'global_settings_%' 
+       AND value->>'replai_channels' LIKE $1`,
+    [`%"id":"${channelId}"%`]
+  );
+  if (rows.length > 0) {
+    const channelsStr = rows[0].channels_str;
+    if (channelsStr) {
+      try {
+        const channels = JSON.parse(channelsStr);
+        if (Array.isArray(channels)) {
+          const c = channels.find((x: any) => x.id === channelId);
+          if (c && c.isConnected && c.telegramToken) {
+            return c.telegramToken;
+          }
+        }
+      } catch (e) {
+        console.error("Failed to parse channels JSON in getBotToken:", e);
+      }
+    }
+  }
+  return null;
+}
+
+/** Resolve the owner userId for a channelId directly. */
+export async function getUserIdByChannelId(channelId: string): Promise<string | null> {
+  await initDb();
+  const { rows } = await getPool().query(
+    `SELECT key FROM kv_store 
+     WHERE key LIKE 'global_settings_%' 
+       AND value->>'replai_channels' LIKE $1`,
+    [`%"id":"${channelId}"%`]
+  );
+  if (rows.length > 0) {
+    return rows[0].key.replace("global_settings_", "");
+  }
+  return null;
+}
+
+/** Get only a single user settings row. */
+export async function getUserSettings(userId: string): Promise<any | null> {
+  return getValue("global_settings_" + userId);
+}
