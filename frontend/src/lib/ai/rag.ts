@@ -4,6 +4,8 @@ export type RAGResult = {
   text: string;
   confidence: number;
   sources: string[];
+  flagged?: boolean;
+  warningMessage?: string;
 };
 
 /**
@@ -145,6 +147,9 @@ O'quvchilarning savollariga faqat dars materiallari (KURS MATERIALLARI) asosida 
     characterInstructions += `\n- Hazil darajasi: ${settings.humor > 70 ? "Hazil-mutoyiba va qiziqarli hazillardan ko'p foydalan (hech qanday emoji ishlatma)." : settings.humor < 30 ? "Jiddiy va ilmiy yondash." : "Me'yorda, iliq munosabat."}`;
   }
 
+  // Dynamic Natural tone instructions to avoid robot-like template patterns
+  characterInstructions += `\n- MULOQOT USLUBI VA TABIIYLIK: Suhbatdosh bilan juda tabiiy, samimiy va jonli muloqot qil. Robotga o'xshash qoliplardan mutlaqo qoch. Quyidagi jumlalarni yoki shunga o'xshash sun'iy iboralarni aslo ishlatma: "Darslik materiallariga ko'ra", "Kurs materiallariga ko'ra", "Hujjatga ko'ra", "Men shaxsiy tanlov qila olmayman". Javoblaringni xuddi haqiqiy kurator kabi samimiy va o'zbekona tilda ravon shakllantir.`;
+
   let systemPrompt = promptTemplate;
   const agentName = settings.agentName || "Sendly";
   systemPrompt = systemPrompt.replace(/\{\{agentName\}\}/g, agentName);
@@ -239,6 +244,62 @@ O'quvchilarning savollariga faqat dars materiallari (KURS MATERIALLARI) asosida 
 /**
  * Grounded query generation using retrieveContext and Gemini API with a mock fallback.
  */
+async function checkSemanticModeration(
+  question: string,
+  restrictedTopics: string[],
+  apiKey: string
+): Promise<{ flagged: boolean; matchedTopic?: string }> {
+  if (!restrictedTopics || restrictedTopics.length === 0 || !apiKey) {
+    return { flagged: false };
+  }
+  
+  const systemPrompt = `Siz chat xabarlarini tahlil qiluvchi moderation yordamchisiz.
+Sizga foydalanuvchining xabari va taqiqlangan mavzular ro'yxati taqdim etiladi.
+Vazifangiz: Foydalanuvchining xabari semantik jihatdan (bilvosita bo'lsa ham) ushbu taqiqlangan mavzulardan biriga tegishli ekanligini aniqlash.
+Taqiqlangan mavzular: ${restrictedTopics.join(", ")}.
+
+Qoidalar:
+- Agar xabar taqiqlangan mavzulardan biriga tegishli bo'lsa (masalan, din haqida, ibodatlar, payg'ambarlar, diniy bayramlar, siyosiy arboblar, davlat boshqaruvi, urushlar, siyosat, boshqa raqobatchi kurslar va h.k.), JSON qaytaring: {"flagged": true, "topic": "Mavzu nomi"}
+- Agar xabarda hech qanday taqiqlangan mavzu bo'lmasa, JSON qaytaring: {"flagged": false}
+- Faqat toza JSON qaytaring, boshqa yozuv qo'shmang.`;
+
+  try {
+    const res = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          system_instruction: {
+            parts: [{ text: systemPrompt }],
+          },
+          contents: [{ role: "user", parts: [{ text: question }] }],
+          generationConfig: {
+            temperature: 0.1,
+            responseMimeType: "application/json",
+          },
+        }),
+      }
+    );
+    if (res.ok) {
+      const data = await res.json();
+      const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+      if (text) {
+        const parsed = JSON.parse(text);
+        if (parsed.flagged === true) {
+          return { flagged: true, matchedTopic: parsed.topic };
+        }
+      }
+    }
+  } catch (e) {
+    console.error("Semantic moderation failed:", e);
+  }
+  return { flagged: false };
+}
+
+/**
+ * Grounded query generation using retrieveContext and Gemini API with a mock fallback.
+ */
 export async function queryRAG(
   question: string,
   studentName: string,
@@ -247,6 +308,32 @@ export async function queryRAG(
   settings: BotSettings,
   history: { role: "user" | "model"; parts: { text: string }[] }[] = []
 ): Promise<RAGResult> {
+  const apiKey = process.env.GEMINI_API_KEY || "";
+
+  // 1. Semantic moderation check for restricted topics
+  if (settings.topics && settings.topics.length > 0 && apiKey) {
+    const moderation = await checkSemanticModeration(question, settings.topics, apiKey);
+    if (moderation.flagged) {
+      const topicLower = (moderation.matchedTopic || "taqiqlangan").toLowerCase();
+      let warningMessage = "";
+      
+      if (topicLower.includes("din") || topicLower.includes("relig")) {
+        warningMessage = "Suhbatimiz mavzusidan chetlashdik. Biz hozirda bu mavzuda (\"din\") ma'lumot bera olmaymiz. Iltimos darsliklar bo'yicha savol bering.";
+      } else if (topicLower.includes("siyosat") || topicLower.includes("polit")) {
+        warningMessage = "Suhbatimiz mavzusidan chetlashdik. Biz hozirda bu mavzuda (\"siyosat\") ma'lumot bera olmaymiz. Iltimos darsliklar bo'yicha savol bering.";
+      } else {
+        warningMessage = `Suhbatimiz mavzusidan chetlashdik. Biz hozirda bu mavzuda ("${moderation.matchedTopic}") ma'lumot bera olmaymiz. Iltimos darsliklar bo'yicha savol bering.`;
+      }
+      return {
+        text: warningMessage,
+        confidence: 0,
+        sources: [],
+        flagged: true,
+        warningMessage
+      };
+    }
+  }
+
   // Accumulate text from last 2 user messages to enrich context retrieval keywords
   let enrichedQuestion = question;
   if (history && history.length > 0) {
@@ -285,7 +372,6 @@ export async function queryRAG(
   }
 
   // Real fallback check: If Gemini API Key is missing or the response is empty
-  const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {
     return {
       text: "Tizim sozlamalarida xatolik: Gemini API Key sozlanmagan. Iltimos platforma administratoriga xabar bering.",

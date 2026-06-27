@@ -102,25 +102,5 @@ export function moderateMessage(text: string, restrictedTopics: string[] = []): 
     }
   }
 
-  // 4. Dynamic Restricted topics check
-  const defaultOffTopics = ["kripto", "bitcoin", "siyosat", "urush", "kino telegram", "futbol", "crypto", "politics", "war", "крипта", "политика", "война"];
-  const allOffTopics = Array.from(new Set([...defaultOffTopics, ...restrictedTopics.map(t => t.toLowerCase())]));
-
-  for (const topic of allOffTopics) {
-    if (topic && matchTopicPrefix(clean, topic)) {
-      const warningMessage =
-        lang === "en"
-          ? `We have strayed from our topic. We cannot provide information on this topic ("${topic}") at the moment. Please ask a question related to the course materials.`
-          : lang === "ru"
-          ? `Мы отклонились от темы нашего разговора. Мы не можем предоставить информацию по этой теме ("${topic}") в данный момент. Пожалуйста, задайте вопрос по учебным материалам.`
-          : `Suhbatimiz mavzusidan chetlashdik. Biz hozirda bu mavzuda ("${topic}") ma'lumot bera olmaymiz. Iltimos darsliklar bo'yicha savol bering.`;
-      return {
-        flagged: true,
-        reason: "off_topic",
-        warningMessage,
-      };
-    }
-  }
-
   return { flagged: false };
 }

@@ -1905,7 +1905,7 @@ function AIAgentContent() {
         ...prev,
         {
           id: `bot-${Date.now()}`,
-          sender: "bot",
+          sender: ragResult.flagged ? "warning" : "bot",
           text: ragResult.text,
           time: timeString,
           confidence: ragResult.confidence,
