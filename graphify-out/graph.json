@@ -3257,7 +3257,7 @@
       "label": "LoadingFallback()",
       "file_type": "code",
       "source_file": "frontend/src/app/ai-agent/page.tsx",
-      "source_location": "L5923",
+      "source_location": "L5948",
       "_origin": "ast",
       "id": "ai_agent_page_loadingfallback",
       "community": 0,
@@ -3267,7 +3267,7 @@
       "label": "AIAgentPage()",
       "file_type": "code",
       "source_file": "frontend/src/app/ai-agent/page.tsx",
-      "source_location": "L5932",
+      "source_location": "L5957",
       "_origin": "ast",
       "id": "ai_agent_page_aiagentpage",
       "community": 0,
@@ -27337,5 +27337,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "0e3444731e19bab7ff0bc4f836d15da0ec0762c6"
+  "built_at_commit": "63a811af262338fe7040938060404c6e00957920"
 }

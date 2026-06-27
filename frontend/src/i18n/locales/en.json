@@ -1205,6 +1205,61 @@
         "helpdesk": "Home / AI Agent / AI Technical Support",
         "default": "Home / AI Agent"
       },
+      "settings_tab_names": {
+        "kurator": "AI Curator Settings",
+        "sales": "AI Sales Settings",
+        "booker": "AI Booking Settings",
+        "recruiter": "AI HR Settings",
+        "clinic": "AI Clinic Settings",
+        "realtor": "AI Realtor Settings",
+        "helpdesk": "AI Support Settings",
+        "fb-leads": "Lead Flow Settings",
+        "fb-leads-direct": "Settings"
+      },
+      "agent_status_titles": {
+        "kurator": "AI Curator Status",
+        "sales": "AI Sales Status",
+        "booker": "AI Consultant Status",
+        "recruiter": "AI HR Status",
+        "clinic": "AI Clinic Assistant Status",
+        "realtor": "AI Realtor Assistant Status",
+        "helpdesk": "AI Support Status",
+        "fb-leads": "Lead Assistant Status",
+        "fb-leads-direct": "Flow Status"
+      },
+      "agent_active_descs": {
+        "kurator": "The AI Curator is currently actively replying to students via the Telegram bot.",
+        "sales": "The AI Sales Agent is currently actively replying to customers via the Telegram bot.",
+        "booker": "The AI Consultant is currently actively replying to customers via the Telegram bot.",
+        "recruiter": "The AI HR Agent is currently actively replying to candidates via the Telegram bot.",
+        "clinic": "The AI Clinic Assistant is currently actively replying to patients via the Telegram bot.",
+        "realtor": "The AI Realtor Assistant is currently actively replying to clients via the Telegram bot.",
+        "helpdesk": "The AI Support Agent is currently actively replying to users via the Telegram bot.",
+        "fb-leads": "The Lead Assistant is currently automatically processing leads.",
+        "fb-leads-direct": "The integration is currently active."
+      },
+      "agent_inactive_descs": {
+        "kurator": "The AI Curator is disabled. Automated keyword replies will respond on Telegram.",
+        "sales": "The AI Sales Agent is disabled. Automated keyword replies will respond on Telegram.",
+        "booker": "The AI Consultant is disabled. Automated keyword replies will respond on Telegram.",
+        "recruiter": "The AI HR Agent is disabled. Automated keyword replies will respond on Telegram.",
+        "clinic": "The AI Clinic Assistant is disabled. Automated keyword replies will respond on Telegram.",
+        "realtor": "The AI Realtor Assistant is disabled. Automated keyword replies will respond on Telegram.",
+        "helpdesk": "The AI Support Agent is disabled. Automated keyword replies will respond on Telegram.",
+        "fb-leads": "The Lead Assistant is disabled.",
+        "fb-leads-direct": "The integration is disabled."
+      },
+      "agent_sandbox_titles": {
+        "kurator": "AI Curator Sandbox",
+        "sales": "AI Sales Sandbox",
+        "booker": "AI Consultant Sandbox",
+        "recruiter": "AI HR Sandbox",
+        "clinic": "AI Clinic Assistant Sandbox",
+        "realtor": "AI Realtor Assistant Sandbox",
+        "helpdesk": "AI Support Sandbox",
+        "fb-leads": "Lead Assistant Sandbox",
+        "fb-leads-direct": "Flow Sandbox"
+      },
       "knowledge_tab_names": {
         "kurator": "Knowledge Base",
         "sales": "Product Catalog",

@@ -1205,6 +1205,61 @@
         "helpdesk": "Bosh sahifa / AI Agent / Texnik yordam AI",
         "default": "Bosh sahifa / AI Agent"
       },
+      "settings_tab_names": {
+        "kurator": "AI kurator sozlamalari",
+        "sales": "Sotuvchi sozlamalari",
+        "booker": "Bron sozlamalari",
+        "recruiter": "HR sozlamalari",
+        "clinic": "Klinika sozlamalari",
+        "realtor": "Rieltor sozlamalari",
+        "helpdesk": "Yordam stoli sozlamalari",
+        "fb-leads": "Lidlar oqimi sozlamalari",
+        "fb-leads-direct": "Sozlamalar"
+      },
+      "agent_status_titles": {
+        "kurator": "AI kuratori holati",
+        "sales": "Sotuvchi AI holati",
+        "booker": "Konsultant AI holati",
+        "recruiter": "HR AI holati",
+        "clinic": "Klinika yordamchisi holati",
+        "realtor": "Rieltor yordamchisi holati",
+        "helpdesk": "Yordam stoli holati",
+        "fb-leads": "Lidlar yordamchisi holati",
+        "fb-leads-direct": "Ssenariy holati"
+      },
+      "agent_active_descs": {
+        "kurator": "AI kuratori hozirda Telegram bot orqali faol ravishda o'quvchilarga javob bermoqda.",
+        "sales": "Sotuvchi AI agenti hozirda Telegram bot orqali faol ravishda mijozlarga javob bermoqda.",
+        "booker": "Konsultant AI agenti hozirda Telegram bot orqali faol ravishda mijozlarga javob bermoqda.",
+        "recruiter": "HR AI agenti hozirda Telegram bot orqali faol ravishda nomzodlarga javob bermoqda.",
+        "clinic": "Klinika yordamchisi hozirda Telegram bot orqali faol ravishda bemorlarga javob bermoqda.",
+        "realtor": "Rieltor yordamchisi hozirda Telegram bot orqali faol ravishda mijozlarga javob bermoqda.",
+        "helpdesk": "Yordam stoli hozirda Telegram bot orqali faol ravishda foydalanuvchilarga javob bermoqda.",
+        "fb-leads": "Lid yordamchisi hozirda arizalarni avtomatik tarzda qayta ishlamoqda.",
+        "fb-leads-direct": "Integratsiya hozirda faol ishlamoqda."
+      },
+      "agent_inactive_descs": {
+        "kurator": "AI kuratori o'chirilgan. Savollaringizga Telegram'da avtomatlashtirilgan kalit so'zlar javob beradi.",
+        "sales": "Sotuvchi AI agenti o'chirilgan. Telegram'da avtomatlashtirilgan kalit so'zlar javob beradi.",
+        "booker": "Konsultant AI agenti o'chirilgan. Telegram'da avtomatlashtirilgan kalit so'zlar javob beradi.",
+        "recruiter": "HR AI agenti o'chirilgan. Telegram'da avtomatlashtirilgan kalit so'zlar javob beradi.",
+        "clinic": "Klinika yordamchisi o'chirilgan. Telegram'da avtomatlashtirilgan kalit so'zlar javob beradi.",
+        "realtor": "Rieltor yordamchisi o'chirilgan. Telegram'da avtomatlashtirilgan kalit so'zlar javob beradi.",
+        "helpdesk": "Yordam stoli o'chirilgan. Telegram'da avtomatlashtirilgan kalit so'zlar javob beradi.",
+        "fb-leads": "Lid yordamchisi o'chirilgan.",
+        "fb-leads-direct": "Integratsiya o'chirilgan."
+      },
+      "agent_sandbox_titles": {
+        "kurator": "AI kuratori sinov maydonchasi",
+        "sales": "Sotuvchi AI sinov maydonchasi",
+        "booker": "Konsultant AI sinov maydonchasi",
+        "recruiter": "HR AI sinov maydonchasi",
+        "clinic": "Klinika yordamchisi sinov maydonchasi",
+        "realtor": "Rieltor yordamchisi sinov maydonchasi",
+        "helpdesk": "Yordam stoli sinov maydonchasi",
+        "fb-leads": "Lidlar yordamchisi sinov maydonchasi",
+        "fb-leads-direct": "Ssenariy sinov maydonchasi"
+      },
       "knowledge_tab_names": {
         "kurator": "Bilimlar bazasi",
         "sales": "Mahsulotlar katalogi",

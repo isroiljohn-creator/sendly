@@ -933,6 +933,31 @@ function AIAgentContent() {
     ]);
   };
 
+  const getAgentSettingsTabTitle = () => {
+    if (!selectedAgentType) return t("pages.ai_agent.curator_settings_tab");
+    return t(`pages.ai_agent.settings_tab_names.${selectedAgentType}`) || t("pages.ai_agent.curator_settings_tab");
+  };
+
+  const getAgentStatusTitle = () => {
+    if (!selectedAgentType) return t("pages.ai_agent.curator_status");
+    return t(`pages.ai_agent.agent_status_titles.${selectedAgentType}`) || t("pages.ai_agent.curator_status");
+  };
+
+  const getAgentActiveDesc = () => {
+    if (!selectedAgentType) return t("pages.ai_agent.curator_active_desc");
+    return t(`pages.ai_agent.agent_active_descs.${selectedAgentType}`) || t("pages.ai_agent.curator_active_desc");
+  };
+
+  const getAgentInactiveDesc = () => {
+    if (!selectedAgentType) return t("pages.ai_agent.curator_inactive_desc");
+    return t(`pages.ai_agent.agent_inactive_descs.${selectedAgentType}`) || t("pages.ai_agent.curator_inactive_desc");
+  };
+
+  const getAgentSandboxTitle = () => {
+    if (!selectedAgentType) return t("pages.ai_agent.curator_sandbox_title");
+    return t(`pages.ai_agent.agent_sandbox_titles.${selectedAgentType}`) || t("pages.ai_agent.curator_sandbox_title");
+  };
+
   const loadDatabase = () => {
     // Clean up any lingering demo @sendly_robot channel from localStorage
     const allChannels = db.getChannels();
@@ -4059,7 +4084,7 @@ function AIAgentContent() {
             }`}
           >
             <Brain size={16} />
-            <span>{selectedAgentType === "fb-leads-direct" ? "Sozlamalar" : t("pages.ai_agent.curator_settings_tab")}</span>
+            <span>{getAgentSettingsTabTitle()}</span>
             {activeTab === "settings" && <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-black" />}
           </button>
           {selectedAgentType === "kurator" && (
@@ -4113,11 +4138,11 @@ function AIAgentContent() {
                         <Brain size={20} className={settings.aiCuratorEnabled ? "animate-pulse" : ""} />
                       </div>
                       <div>
-                        <h3 className="text-[14px] font-bold text-black">{t("pages.ai_agent.curator_status")}</h3>
+                        <h3 className="text-[14px] font-bold text-black">{getAgentStatusTitle()}</h3>
                         <p className="text-[11px] text-[#707070] mt-0.5">
                           {settings.aiCuratorEnabled 
-                            ? t("pages.ai_agent.curator_active_desc") 
-                            : t("pages.ai_agent.curator_inactive_desc")}
+                            ? getAgentActiveDesc() 
+                            : getAgentInactiveDesc()}
                         </p>
                       </div>
                     </div>
@@ -4252,7 +4277,7 @@ function AIAgentContent() {
                         <Brain size={16} />
                       </div>
                       <div>
-                        <h4 className="text-[12px] font-bold text-black">{t("pages.ai_agent.curator_sandbox_title")}</h4>
+                        <h4 className="text-[12px] font-bold text-black">{getAgentSandboxTitle()}</h4>
                         <span className="text-[10px] text-green-600 flex items-center gap-1">
                           <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
                           {t("pages.ai_agent.curator_sandbox_active")}
