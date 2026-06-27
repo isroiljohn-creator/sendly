@@ -970,82 +970,82 @@ function AIAgentContent() {
   };
 
   const getModuleNamePlaceholder = () => {
-    const lang = i18n.language || "uz";
+    const langVal = lang || "uz";
     
     if (selectedAgentType === "sales") {
-      if (lang === "uz") return `Katalog bo'limi nomi (masalan: Smartfonlar)`;
-      if (lang === "ru") return `Название раздела каталога (например: Смартфоны)`;
+      if (langVal === "uz") return `Katalog bo'limi nomi (masalan: Smartfonlar)`;
+      if (langVal === "ru") return `Название раздела каталога (например: Смартфоны)`;
       return `Catalog section name (e.g., Smartphones)`;
     }
     if (selectedAgentType === "booker") {
-      if (lang === "uz") return `Yo'nalish nomi (masalan: Biznes Konsultatsiya)`;
-      if (lang === "ru") return `Название направления (например: Бизнес-консультации)`;
+      if (langVal === "uz") return `Yo'nalish nomi (masalan: Biznes Konsultatsiya)`;
+      if (langVal === "ru") return `Название направления (например: Бизнес-консультации)`;
       return `Direction name (e.g., Business Consulting)`;
     }
     if (selectedAgentType === "recruiter") {
-      if (lang === "uz") return `Bo'lim nomi (masalan: IT bo'limi)`;
-      if (lang === "ru") return `Название отдела (например: IT-отдел)`;
+      if (langVal === "uz") return `Bo'lim nomi (masalan: IT bo'limi)`;
+      if (langVal === "ru") return `Название отдела (например: IT-отдел)`;
       return `Department name (e.g., IT Department)`;
     }
     if (selectedAgentType === "clinic") {
-      if (lang === "uz") return `Bo'lim nomi (masalan: Kardiologiya)`;
-      if (lang === "ru") return `Название отделения (например: Кардиология)`;
+      if (langVal === "uz") return `Bo'lim nomi (masalan: Kardiologiya)`;
+      if (langVal === "ru") return `Название отделения (например: Кардиология)`;
       return `Department name (e.g., Cardiology)`;
     }
     if (selectedAgentType === "realtor") {
-      if (lang === "uz") return `Hudud nomi (masalan: Yunusobod tumani)`;
-      if (lang === "ru") return `Название района (например: Юнусабадский район)`;
+      if (langVal === "uz") return `Hudud nomi (masalan: Yunusobod tumani)`;
+      if (langVal === "ru") return `Название района (например: Юнусабадский район)`;
       return `District name (e.g., Yunusabad District)`;
     }
     if (selectedAgentType === "helpdesk") {
-      if (lang === "uz") return `Kategoriya nomi (masalan: To'lov muammolari)`;
-      if (lang === "ru") return `Название категории (например: Проблемы с оплатой)`;
+      if (langVal === "uz") return `Kategoriya nomi (masalan: To'lov muammolari)`;
+      if (langVal === "ru") return `Название категории (например: Проблемы с оплатой)`;
       return `Category name (e.g., Payment Issues)`;
     }
     
     // Default / Curator
-    if (lang === "uz") return `Modul nomi (masalan: 5-Modul. Tahlillar)`;
-    if (lang === "ru") return `Название модуля (например: Модуль 5. Аналитика)`;
+    if (langVal === "uz") return `Modul nomi (masalan: 5-Modul. Tahlillar)`;
+    if (langVal === "ru") return `Название модуля (например: Модуль 5. Аналитика)`;
     return `Module name (e.g., Module 5. Analytics)`;
   };
 
   const getLessonNamePlaceholder = () => {
-    const lang = i18n.language || "uz";
+    const langVal = lang || "uz";
     
     if (selectedAgentType === "sales") {
-      if (lang === "uz") return `Mahsulot nomi (masalan: iPhone 15 Pro Max)`;
-      if (lang === "ru") return `Название товара (например: iPhone 15 Pro Max)`;
+      if (langVal === "uz") return `Mahsulot nomi (masalan: iPhone 15 Pro Max)`;
+      if (langVal === "ru") return `Название товара (например: iPhone 15 Pro Max)`;
       return `Product name (e.g., iPhone 15 Pro Max)`;
     }
     if (selectedAgentType === "booker") {
-      if (lang === "uz") return `Xizmat nomi (masalan: 1:1 Strategik sessiya)`;
-      if (lang === "ru") return `Название услуги (например: 1:1 Стратегическая сессия)`;
+      if (langVal === "uz") return `Xizmat nomi (masalan: 1:1 Strategik sessiya)`;
+      if (langVal === "ru") return `Название услуги (например: 1:1 Стратегическая сессия)`;
       return `Service name (e.g., 1:1 Strategy Session)`;
     }
     if (selectedAgentType === "recruiter") {
-      if (lang === "uz") return `Vakansiya nomi (masalan: Senior React Developer)`;
-      if (lang === "ru") return `Название вакансии (например: Senior React Developer)`;
+      if (langVal === "uz") return `Vakansiya nomi (masalan: Senior React Developer)`;
+      if (langVal === "ru") return `Название вакансии (например: Senior React Developer)`;
       return `Vacancy name (e.g., Senior React Developer)`;
     }
     if (selectedAgentType === "clinic") {
-      if (lang === "uz") return `Shifokor/Xizmat (masalan: Dr. Davronov (Kardiolog))`;
-      if (lang === "ru") return `Врач/Услуга (например: Д-р Давронов (Кардиолог))`;
+      if (langVal === "uz") return `Shifokor/Xizmat (masalan: Dr. Davronov (Kardiolog))`;
+      if (langVal === "ru") return `Врач/Услуга (например: Д-р Давронов (Кардиолог))`;
       return `Doctor/Service (e.g., Dr. Davronov (Cardiologist))`;
     }
     if (selectedAgentType === "realtor") {
-      if (lang === "uz") return `E'lon nomi (masalan: 3 xonali kvartira, 72 kv.m)`;
-      if (lang === "ru") return `Название объявления (например: 3-комнатная квартира, 72 кв.м)`;
+      if (langVal === "uz") return `E'lon nomi (masalan: 3 xonali kvartira, 72 kv.m)`;
+      if (langVal === "ru") return `Название объявления (например: 3-комнатная квартира, 72 кв.м)`;
       return `Listing title (e.g., 3-room apartment, 72 sq.m)`;
     }
     if (selectedAgentType === "helpdesk") {
-      if (lang === "uz") return `Savol-javob nomi (masalan: Karta to'lovi rad etilganda)`;
-      if (lang === "ru") return `Тема вопроса (например: Ошибка оплаты картой)`;
+      if (langVal === "uz") return `Savol-javob nomi (masalan: Karta to'lovi rad etilganda)`;
+      if (langVal === "ru") return `Тема вопроса (например: Ошибка оплаты картой)`;
       return `Q&A title (e.g., Card payment decline)`;
     }
     
     // Default / Curator
-    if (lang === "uz") return `Dars nomi (masalan: 3-Dars. Funnel sozlash)`;
-    if (lang === "ru") return `Название урока (например: Урок 3. Настройка воронок)`;
+    if (langVal === "uz") return `Dars nomi (masalan: 3-Dars. Funnel sozlash)`;
+    if (langVal === "ru") return `Название урока (например: Урок 3. Настройка воронок)`;
     return `Lesson name (e.g., Lesson 3. Setting up funnels)`;
   };
 
