@@ -874,6 +874,10 @@ function AIAgentContent() {
   useEffect(() => {
     if (!settings || !selectedAgentType) return;
     
+    if (selectedAgentType !== "kurator" && activeTab === "knowledge") {
+      setActiveTab("settings");
+    }
+    
     const isSpecialType = ["kurator", "sales", "booker", "recruiter", "clinic", "realtor", "helpdesk"].includes(selectedAgentType);
     if (isSpecialType && settings.aiAgentType !== selectedAgentType) {
       const defaultPrompt = t(`pages.ai_agent.defaults.${selectedAgentType}.prompt`);
@@ -4058,33 +4062,33 @@ function AIAgentContent() {
             <span>{selectedAgentType === "fb-leads-direct" ? "Sozlamalar" : t("pages.ai_agent.curator_settings_tab")}</span>
             {activeTab === "settings" && <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-black" />}
           </button>
+          {selectedAgentType === "kurator" && (
+            <button
+              onClick={() => setActiveTab("knowledge")}
+              className={`flex items-center gap-2 pb-4 text-[14px] font-bold border-b-2 transition-colors relative shrink-0 whitespace-nowrap ${
+                activeTab === "knowledge"
+                  ? "border-black text-black"
+                  : "border-transparent text-[#707070] hover:text-black"
+              }`}
+            >
+              <Database size={16} />
+              <span>{getKnowledgeTabName()}</span>
+              {activeTab === "knowledge" && <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-black" />}
+            </button>
+          )}
           {selectedAgentType !== "fb-leads-direct" && (
-            <>
-              <button
-                onClick={() => setActiveTab("knowledge")}
-                className={`flex items-center gap-2 pb-4 text-[14px] font-bold border-b-2 transition-colors relative shrink-0 whitespace-nowrap ${
-                  activeTab === "knowledge"
-                    ? "border-black text-black"
-                    : "border-transparent text-[#707070] hover:text-black"
-                }`}
-              >
-                <Database size={16} />
-                <span>{getKnowledgeTabName()}</span>
-                {activeTab === "knowledge" && <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-black" />}
-              </button>
-              <button
-                onClick={() => setActiveTab("analytics")}
-                className={`flex items-center gap-2 pb-4 text-[14px] font-bold border-b-2 transition-colors relative shrink-0 whitespace-nowrap ${
-                  activeTab === "analytics"
-                    ? "border-black text-black"
-                    : "border-transparent text-[#707070] hover:text-black"
-                }`}
-              >
-                <BarChart2 size={16} />
-                <span>{t("pages.ai_agent.curator_analytics_tab")}</span>
-                {activeTab === "analytics" && <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-black" />}
-              </button>
-            </>
+            <button
+              onClick={() => setActiveTab("analytics")}
+              className={`flex items-center gap-2 pb-4 text-[14px] font-bold border-b-2 transition-colors relative shrink-0 whitespace-nowrap ${
+                activeTab === "analytics"
+                  ? "border-black text-black"
+                  : "border-transparent text-[#707070] hover:text-black"
+              }`}
+            >
+              <BarChart2 size={16} />
+              <span>{t("pages.ai_agent.curator_analytics_tab")}</span>
+              {activeTab === "analytics" && <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-black" />}
+            </button>
           )}
         </div>
 
