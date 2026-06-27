@@ -874,7 +874,7 @@ function AIAgentContent() {
   useEffect(() => {
     if (!settings || !selectedAgentType) return;
     
-    if (selectedAgentType !== "kurator" && activeTab === "knowledge") {
+    if (selectedAgentType === "fb-leads-direct" && activeTab === "knowledge") {
       setActiveTab("settings");
     }
     
@@ -956,6 +956,17 @@ function AIAgentContent() {
   const getAgentSandboxTitle = () => {
     if (!selectedAgentType) return t("pages.ai_agent.curator_sandbox_title");
     return t(`pages.ai_agent.agent_sandbox_titles.${selectedAgentType}`) || t("pages.ai_agent.curator_sandbox_title");
+  };
+
+  const getSearchPlaceholder = () => {
+    const m = getModuleLabel().toLowerCase();
+    const l = getLessonLabel().toLowerCase();
+    return `Qidirish (${m} yoki ${l}lar)...`;
+  };
+
+  const getLessonCountText = (count: number) => {
+    const l = getLessonLabel().toLowerCase();
+    return `${count} ta ${l}`;
   };
 
   const loadDatabase = () => {
@@ -4087,7 +4098,7 @@ function AIAgentContent() {
             <span>{getAgentSettingsTabTitle()}</span>
             {activeTab === "settings" && <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-black" />}
           </button>
-          {selectedAgentType === "kurator" && (
+          {selectedAgentType !== "fb-leads-direct" && (
             <button
               onClick={() => setActiveTab("knowledge")}
               className={`flex items-center gap-2 pb-4 text-[14px] font-bold border-b-2 transition-colors relative shrink-0 whitespace-nowrap ${
@@ -4896,7 +4907,7 @@ function AIAgentContent() {
                   <Search size={13} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#707070]" />
                   <input
                     type="text"
-                    placeholder={t("pages.ai_agent.search_placeholder") || "Qidirish (modul yoki darslar)..."}
+                    placeholder={getSearchPlaceholder()}
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     className="w-full pl-9 pr-8 py-2 text-[11px] bg-[#F9F9F7] border border-[#E8E8E8] rounded-xl focus:outline-none focus:border-black/35 transition-all text-black placeholder:text-[#A0A0A0] font-semibold"
@@ -4929,7 +4940,7 @@ function AIAgentContent() {
                             <span className="shrink-0">{React.createElement(getModuleIcon(), { size: 14, className: "text-[#707070] shrink-0" })}</span>
                             <span className="text-[12px] font-bold text-black truncate">{mod.title}</span>
                             <span className="text-[9px] bg-[#F0F0F0] px-1.5 py-0.5 rounded-full text-[#707070] font-bold shrink-0">
-                              {t("pages.ai_agent.lesson_count_badge").replace("{count}", modLessons.length.toString())}
+                              {getLessonCountText(modLessons.length)}
                             </span>
                           </div>
                           
@@ -4988,7 +4999,7 @@ function AIAgentContent() {
                               );
                             })}
                             {modLessons.length === 0 && (
-                              <p className="text-[10px] text-[#A0A0A0] italic p-2">{t("pages.ai_agent.no_lessons_yet")}</p>
+                              <p className="text-[10px] text-[#A0A0A0] italic p-2">{t("pages.ai_agent.no_lessons_yet").replace("Darslar", getLessonLabel() + "lar")}</p>
                             )}
                           </div>
                         )}
@@ -4999,14 +5010,14 @@ function AIAgentContent() {
                   {filteredModules.length === 0 && (
                     <div className="text-center py-8">
                       <p className="text-[11px] text-[#707070] italic">
-                        {searchQuery ? t("pages.ai_agent.kb_search_no_results") || "Qidiruv bo'yicha hech narsa topilmadi" : t("pages.ai_agent.no_modules_yet")}
+                        {searchQuery ? t("pages.ai_agent.kb_search_no_results") || "Qidiruv bo'yicha hech narsa topilmadi" : t("pages.ai_agent.no_modules_yet").replace("Modullar", getModuleLabel() + "lar")}
                       </p>
                       {!searchQuery && (
                         <button
                           onClick={() => setShowAddModuleModal(true)}
                           className="text-[11px] font-extrabold text-black underline mt-2"
                         >
-                          {t("pages.ai_agent.create_first_module")}
+                          {t("pages.ai_agent.create_first_module").replace("modulni", getModuleLabel().toLowerCase() + "ni")}
                         </button>
                       )}
                     </div>
@@ -5047,7 +5058,7 @@ function AIAgentContent() {
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <label className="text-[12px] font-extrabold text-black">
-                          {t("pages.ai_agent.lesson_transcript_label")}
+                          {t("pages.ai_agent.lesson_transcript_label").replace("Dars", getLessonLabel()).replace("darslik", getLessonLabel().toLowerCase() + "lik")}
                         </label>
                       </div>
                       <span className="text-[10px] text-[#707070] font-bold">
@@ -5058,7 +5069,7 @@ function AIAgentContent() {
                       value={selectedLesson.transcript || ""}
                       onChange={(e) => handleUpdateSelectedLesson("transcript", e.target.value)}
                       className="w-full flex-1 min-h-[250px] p-4 text-[12px] leading-relaxed bg-[#F9F9F7] border border-[#E8E8E8] rounded-[16px] focus:outline-none focus:border-black resize-y"
-                      placeholder={t("pages.ai_agent.lesson_transcript_placeholder")}
+                      placeholder={t("pages.ai_agent.lesson_transcript_placeholder").replace("Dars", getLessonLabel()).replace("darslik", getLessonLabel().toLowerCase() + "lik")}
                     />
                   </div>
 
@@ -5126,10 +5137,10 @@ function AIAgentContent() {
                   <div className="flex flex-col gap-1.5 pb-4 border-b border-[#F0F0F0]">
                     <h4 className="text-[15px] font-extrabold text-black flex items-center gap-2">
                       <Database size={16} className="text-black" />
-                      <span>{t("pages.ai_agent.kb_dashboard_title") || "Bilimlar bazasi paneli"}</span>
+                      <span>{getKnowledgeTabName()} paneli</span>
                     </h4>
                     <p className="text-[11px] text-[#707070] leading-relaxed">
-                      {t("pages.ai_agent.kb_dashboard_desc") || "Chap tomondagi darslik yoki mavzulardan birini tanlang, qidiruvdan foydalaning yoki yangi modul va darslar qo'shib bilim bazasini kengaytiring."}
+                      {t("pages.ai_agent.kb_dashboard_desc").replace("bilim bazasini", getKnowledgeTabName().toLowerCase()).replace("modul", getModuleLabel().toLowerCase()).replace("darslar", getLessonLabel().toLowerCase() + "lar")}
                     </p>
                   </div>
 
@@ -5138,7 +5149,7 @@ function AIAgentContent() {
                     <div className="bg-[#F9F9F7] border border-[#E8E8E8] rounded-2xl p-4 flex flex-col gap-1 relative overflow-hidden">
                       <FolderPlus size={16} className="text-[#707070] absolute right-4 top-4 opacity-40" />
                       <span className="text-[9px] font-extrabold text-[#707070] uppercase tracking-wider">
-                        {t("pages.ai_agent.stats_modules") || "Jami modullar"}
+                        {`Jami ${getModuleLabel().toLowerCase()}lar`}
                       </span>
                       <span className="text-[20px] font-extrabold text-black">{modules.length}</span>
                     </div>
@@ -5146,7 +5157,7 @@ function AIAgentContent() {
                     <div className="bg-[#F9F9F7] border border-[#E8E8E8] rounded-2xl p-4 flex flex-col gap-1 relative overflow-hidden">
                       <BookOpen size={16} className="text-[#707070] absolute right-4 top-4 opacity-40" />
                       <span className="text-[9px] font-extrabold text-[#707070] uppercase tracking-wider">
-                        {t("pages.ai_agent.stats_lessons") || "Jami darslar"}
+                        {`Jami ${getLessonLabel().toLowerCase()}lar`}
                       </span>
                       <span className="text-[20px] font-extrabold text-black">{lessons.length}</span>
                     </div>
@@ -5168,10 +5179,10 @@ function AIAgentContent() {
                       {React.createElement(getModuleIcon(), { size: 30, className: "text-[#7CA607]" })}
                     </div>
                     <p className="text-[12px] font-extrabold text-black">
-                      {t("pages.ai_agent.no_lesson_selected") || "Darslik tanlanmagan"}
+                      {`${getLessonLabel()} tanlanmagan`}
                     </p>
                     <p className="text-[11px] text-[#707070] mt-1 max-w-[280px] leading-relaxed">
-                      {t("pages.ai_agent.no_lesson_selected_desc") || "Chap tomondagi ro'yxatdan darsni tanlang yoki bilim bazasini to'ldirish uchun yangi modul/dars yarating."}
+                      {t("pages.ai_agent.no_lesson_selected_desc").replace("darsni", getLessonLabel().toLowerCase() + "ni").replace("bilim bazasini", getKnowledgeTabName().toLowerCase()).replace("modul/dars", getModuleLabel().toLowerCase() + "/" + getLessonLabel().toLowerCase())}
                     </p>
                   </div>
 
@@ -5182,14 +5193,14 @@ function AIAgentContent() {
                       className="flex items-center justify-center gap-2 py-3 rounded-xl border border-[#D8D8D8] text-[11px] font-bold text-[#595959] hover:bg-[#F9F9F7] active:scale-95 transition-all shadow-xs"
                     >
                       <FolderPlus size={14} />
-                      <span>{t("pages.ai_agent.add_module")}</span>
+                      <span>{`${getModuleLabel()} qo'shish`}</span>
                     </button>
                     <button
                       onClick={handleTriggerAddLesson}
                       className="flex items-center justify-center gap-2 py-3 rounded-xl bg-black text-[#C7F33C] text-[11px] font-bold hover:bg-black/90 active:scale-95 transition-all shadow-sm"
                     >
                       <FilePlus size={14} />
-                      <span>{t("pages.ai_agent.add_lesson")}</span>
+                      <span>{`${getLessonLabel()} qo'shish`}</span>
                     </button>
                     <button
                       onClick={() => fileInputRef.current?.click()}
@@ -5752,12 +5763,12 @@ function AIAgentContent() {
         {showAddModuleModal && (
           <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[999] flex items-center justify-center p-4">
             <div className="bg-white border border-[#E8E8E8] rounded-[24px] max-w-[400px] w-full p-6 shadow-2xl flex flex-col gap-4 animate-in zoom-in-95 duration-150">
-              <h3 className="text-[15px] font-bold text-black">{t("pages.ai_agent.create_new_module_title")}</h3>
+              <h3 className="text-[15px] font-bold text-black">{t("pages.ai_agent.create_new_module_title").replace("modul", getModuleLabel().toLowerCase())}</h3>
               <input
                 type="text"
                 value={newModuleName}
                 onChange={(e) => setNewModuleName(e.target.value)}
-                placeholder={t("pages.ai_agent.module_name_placeholder")}
+                placeholder={t("pages.ai_agent.module_name_placeholder").replace("Modul", getModuleLabel()).replace("modul", getModuleLabel().toLowerCase())}
                 className="w-full px-4 py-2.5 text-[12px] bg-[#F9F9F7] border border-[#E8E8E8] rounded-xl focus:outline-none focus:border-black"
               />
               <div className="flex items-center justify-end gap-3 mt-2">
@@ -5783,10 +5794,10 @@ function AIAgentContent() {
         {showAddLessonModal && (
           <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[999] flex items-center justify-center p-4">
             <div className="bg-white border border-[#E8E8E8] rounded-[24px] max-w-[400px] w-full p-6 shadow-2xl flex flex-col gap-4 animate-in zoom-in-95 duration-150">
-              <h3 className="text-[15px] font-bold text-black">{t("pages.ai_agent.create_new_lesson_title")}</h3>
+              <h3 className="text-[15px] font-bold text-black">{t("pages.ai_agent.create_new_lesson_title").replace("dars", getLessonLabel().toLowerCase())}</h3>
               
               <div className="flex flex-col gap-1.5">
-                <span className="text-[10px] font-bold text-black">{t("pages.ai_agent.related_module_label")}</span>
+                <span className="text-[10px] font-bold text-black">{t("pages.ai_agent.related_module_label").replace("modul", getModuleLabel().toLowerCase())}</span>
                 <CustomDropdown
                   value={newLessonModuleId}
                   onChange={(val) => setNewLessonModuleId(val)}
@@ -5795,12 +5806,12 @@ function AIAgentContent() {
               </div>
 
               <div className="flex flex-col gap-1.5">
-                <span className="text-[10px] font-bold text-black">{t("pages.ai_agent.lesson_name_label")}</span>
+                <span className="text-[10px] font-bold text-black">{t("pages.ai_agent.lesson_name_label").replace("Dars", getLessonLabel())}</span>
                 <input
                   type="text"
                   value={newLessonName}
                   onChange={(e) => setNewLessonName(e.target.value)}
-                  placeholder={t("pages.ai_agent.lesson_name_placeholder")}
+                  placeholder={t("pages.ai_agent.lesson_name_placeholder").replace("dars", getLessonLabel().toLowerCase())}
                   className="w-full px-4 py-2.5 text-[12px] bg-[#F9F9F7] border border-[#E8E8E8] rounded-xl focus:outline-none focus:border-black"
                 />
               </div>
@@ -5830,7 +5841,7 @@ function AIAgentContent() {
               <h3 className="text-[15px] font-bold text-black">{t("pages.ai_agent.learn_from_link_title") || "Havoladan o'rganish"}</h3>
               
               <div className="flex flex-col gap-1.5">
-                <span className="text-[10px] font-bold text-black">{t("pages.ai_agent.related_module_label")}</span>
+                <span className="text-[10px] font-bold text-black">{t("pages.ai_agent.related_module_label").replace("modul", getModuleLabel().toLowerCase())}</span>
                 <CustomDropdown
                   value={newLinkModuleId}
                   onChange={(val) => setNewLinkModuleId(val)}
