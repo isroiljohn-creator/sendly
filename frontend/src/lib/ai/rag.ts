@@ -150,6 +150,9 @@ O'quvchilarning savollariga faqat dars materiallari (KURS MATERIALLARI) asosida 
   // Dynamic Natural tone instructions to avoid robot-like template patterns
   characterInstructions += `\n- MULOQOT USLUBI VA TABIIYLIK: Suhbatdosh bilan juda tabiiy, samimiy va jonli muloqot qil. Robotga o'xshash qoliplardan mutlaqo qoch. Quyidagi jumlalarni yoki shunga o'xshash sun'iy iboralarni aslo ishlatma: "Darslik materiallariga ko'ra", "Kurs materiallariga ko'ra", "Hujjatga ko'ra", "Men shaxsiy tanlov qila olmayman". Javoblaringni xuddi haqiqiy kurator kabi samimiy va o'zbekona tilda ravon shakllantir.`;
 
+  // Small talk / greeting allowance rule
+  characterInstructions += `\n- SALOMLASHISH VA ODDISY SUHBAT (SMALL TALK): Foydalanuvchining "salom", "assalomu alaykum", "rahmat", "xayr", "ok", "yaxshimisiz" kabi salomlashish, minnatdorchilik bildirish yoki oddiy suhbatlariga tabiiy va do'stona javob bering (Masalan: "Assalomu alaykum! Savolingiz bo'lsa bering, yordam berishdan xursandman!"). Bunday umumiy gaplarga hech qachon "darslikda javob topilmadi" deb aytmang va inson-kuratorga yo'naltirmang.`;
+
   let systemPrompt = promptTemplate;
   const agentName = settings.agentName || "Sendly";
   systemPrompt = systemPrompt.replace(/\{\{agentName\}\}/g, agentName);

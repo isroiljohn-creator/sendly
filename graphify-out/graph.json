@@ -8477,7 +8477,7 @@
       "label": "checkSemanticModeration()",
       "file_type": "code",
       "source_file": "frontend/src/lib/ai/rag.ts",
-      "source_location": "L247",
+      "source_location": "L250",
       "_origin": "ast",
       "id": "ai_rag_checksemanticmoderation",
       "community": 54,
@@ -8487,7 +8487,7 @@
       "label": "queryRAG()",
       "file_type": "code",
       "source_file": "frontend/src/lib/ai/rag.ts",
-      "source_location": "L303",
+      "source_location": "L306",
       "_origin": "ast",
       "id": "ai_rag_queryrag",
       "community": 54,
@@ -26019,9 +26019,9 @@
       "source_file": "frontend/src/lib/ai/rag.ts",
       "source_location": "L247",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "ai_rag",
-      "target": "ai_rag_checksemanticmoderation",
-      "confidence_score": 1.0
+      "target": "ai_rag_checksemanticmoderation"
     },
     {
       "relation": "contains",
@@ -26158,9 +26158,9 @@
       "source_file": "frontend/src/lib/ai/rag.ts",
       "source_location": "L315",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "ai_rag_queryrag",
-      "target": "ai_rag_checksemanticmoderation",
-      "confidence_score": 1.0
+      "target": "ai_rag_checksemanticmoderation"
     },
     {
       "relation": "imports",
@@ -27399,5 +27399,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "cb4c7325a0acc28b37268c68aaa4fcc2370af698"
+  "built_at_commit": "2c8c095328191c41a95028e7003db3710fd5ce3d"
 }
