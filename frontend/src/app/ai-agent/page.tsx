@@ -474,10 +474,20 @@ function AIAgentContent() {
   };
 
   const extractPainPoint = (text: string, intent: string): string => {
-    if (intent === "billing" || intent === "support" || intent === "faq" || intent === "affiliate") {
-      return t("pages.ai_agent.pain_points_details." + intent);
+    const agentType = settings?.aiAgentType || "kurator";
+    if (agentType === "sales") {
+      if (intent === "billing") return "Mahsulot narxi, to'lov shartlari yoki chegirmalarni bilish istagi";
+      if (intent === "support") return "Mahsulot/xizmat bo'yicha yordam yoki qo'llab-quvvatlash ehtiyoji";
+      if (intent === "faq") return "Mahsulot/xizmat tarkibi yoki kafolati bo'yicha batafsil ma'lumot izlash";
+      if (intent === "affiliate") return "Hamkorlik shartlari yoki ulush olish masalasini aniqlashtirish";
+      return "Mahsulot haqida qo'shimcha umumiy ma'lumot olish istagi";
+    } else {
+      if (intent === "billing") return "Kurs to'lovi, chegirma yoki narxlar bo'yicha ma'lumot olish istagi";
+      if (intent === "support") return "Botga ulanish, token olish yoki platformadagi texnik to'siqlar";
+      if (intent === "faq") return "Darslik materiallari yoki darslar mazmuni bo'yicha ma'lumot qidirish";
+      if (intent === "affiliate") return "Hamkorlik komissiyalari va referal tizim shartlarini aniqlashtirish";
+      return "Kurs yoki darslar haqida qo'shimcha umumiy ma'lumot olish istagi";
     }
-    return t("pages.ai_agent.pain_points_details.default");
   };
   
   // Database States
@@ -5577,9 +5587,20 @@ function AIAgentContent() {
                         if (msgs.length === 0) return null;
                         const sampleMsg = msgs[0];
                         
-                        let solution = t("pages.ai_agent.solutions.default");
-                        if (intent === "billing" || intent === "support" || intent === "faq" || intent === "affiliate") {
-                          solution = t("pages.ai_agent.solutions." + intent);
+                        const agentType = settings?.aiAgentType || "kurator";
+                        let solution = "";
+                        if (agentType === "sales") {
+                          if (intent === "billing") solution = "To'lov usullarini osonlashtirish, narxlarni aniq ko'rsatish va chegirmalarni taqdim etish.";
+                          else if (intent === "support") solution = "Mijozlarga to'g'ri yordam ko'rsatish uchun FAQ bo'limini boyitish yoki inson-kurator bilan bog'lanish tugmasini qo'shish.";
+                          else if (intent === "faq") solution = "Katalog va mahsulotlar ro'yxatini soddalashtirish, qulay qidiruv tizimini joriy qilish.";
+                          else if (intent === "affiliate") solution = "Hamkorlik shartlari, komissiya foizlari va referal havolasini shaffof ko'rsatish.";
+                          else solution = "Mahsulot tavsifiga qo'shimcha visual rasmlar va qo'llanmalar qo'shish.";
+                        } else {
+                          if (intent === "billing") solution = "Kurs to'lovlari bo'yicha to'liq bosqichma-bosqich qo'llanma qo'shish va to'lov xatoliklari bo'yicha ogohlantirish.";
+                          else if (intent === "support") solution = "Botga ulanish, token olish jarayonini darslikning 1-modulida visual animatsiyalar bilan boyitish.";
+                          else if (intent === "faq") solution = "Darslik bilimlar bazasiga (RAG) o'quvchilar tomonidan eng ko'p so'ralgan FAQ javoblarni yangi modul sifatida kiritish.";
+                          else if (intent === "affiliate") solution = "Hamkor kabineti sahifasiga komissiya yechib olish va referal tizim shartlari bo'yicha FAQ bo'limini qo'shish.";
+                          else solution = "Tavsif yoki qo'llanmaga qo'shimcha ma'lumotlar qo'shish.";
                         }
 
                         return (
@@ -5613,28 +5634,65 @@ function AIAgentContent() {
                   <p className="text-[11px] text-[#A0A0A0] italic text-center py-6">{t("pages.ai_agent.no_analytics_yet")}</p>
                 ) : (
                   <div className="flex flex-col gap-3">
-                    {[
-                      { text: t("pages.ai_agent.pain_points.billing"), count: 32, priority: "high", color: "red" },
-                      { text: t("pages.ai_agent.pain_points.support"), count: 24, priority: "medium", color: "amber" },
-                      { text: t("pages.ai_agent.pain_points.instagram"), count: 19, priority: "medium", color: "amber" },
-                      { text: t("pages.ai_agent.pain_points.affiliate"), count: 12, priority: "low", color: "blue" }
-                    ].map((item, idx) => (
-                      <div key={idx} className="p-3 bg-[#F9F9F7] rounded-xl border border-[#E8E8E8] flex flex-col gap-1.5 text-[11px]">
-                        <div className="flex items-center justify-between">
-                          <span className={`px-2 py-0.5 rounded text-[8px] font-extrabold uppercase ${
-                            item.priority === "high" ? "bg-red-50 text-red-600 border border-red-200" :
-                            item.priority === "medium" ? "bg-amber-50 text-amber-600 border border-amber-200" :
-                            "bg-blue-50 text-blue-600 border border-blue-200"
-                          }`}>
-                            {item.priority === "high" ? "Yuqori" : item.priority === "medium" ? "O'rta" : "Past"}
-                          </span>
-                          <span className="text-[10px] font-bold text-[#707070]">
-                            {item.count} {t("pages.ai_agent.count_unit")}
-                          </span>
-                        </div>
-                        <p className="text-black font-semibold leading-relaxed text-[10px]">{item.text}</p>
-                      </div>
-                    ))}
+                    {(() => {
+                      const counts: Record<string, number> = {};
+                      analyzedMessages.forEach(m => {
+                        if (m && m.intent) {
+                          counts[m.intent] = (counts[m.intent] || 0) + 1;
+                        }
+                      });
+                      
+                      const sortedIntents = Object.entries(counts)
+                        .sort((a, b) => b[1] - a[1]);
+                      
+                      if (sortedIntents.length === 0) {
+                        return <p className="text-[11px] text-[#A0A0A0] italic text-center py-6">{t("pages.ai_agent.no_analytics_yet")}</p>;
+                      }
+                      
+                      const agentType = settings?.aiAgentType || "kurator";
+                      
+                      return sortedIntents.map(([intent, count]) => {
+                        let priority = "medium";
+                        if (intent === "billing" || intent === "support") {
+                          priority = "high";
+                        } else if (intent === "general") {
+                          priority = "low";
+                        }
+                        
+                        let text = "";
+                        if (agentType === "sales") {
+                          if (intent === "billing") text = "Mahsulot narxi, to'lov shartlari yoki chegirmalarni bilish istagi";
+                          else if (intent === "support") text = "Mahsulot/xizmat bo'yicha yordam yoki qo'llab-quvvatlash ehtiyoji";
+                          else if (intent === "faq") text = "Mahsulot/xizmat tarkibi yoki kafolati bo'yicha batafsil ma'lumot izlash";
+                          else if (intent === "affiliate") text = "Hamkorlik shartlari yoki ulush olish masalasini aniqlashtirish";
+                          else text = "Mahsulot haqida qo'shimcha umumiy savollar va qiziqishlar";
+                        } else {
+                          if (intent === "billing") text = "Kurs to'lovlari, tariflar va narxlar bo'yicha savollar";
+                          else if (intent === "support") text = "Botga ulanish, token olish yoki platformadagi texnik to'siqlar";
+                          else if (intent === "faq") text = "Darslik materiallari va darslar mazmuni bo'yicha savollar";
+                          else if (intent === "affiliate") text = "Hamkorlik komissiyasi va referal tizim shartlari";
+                          else text = "Kurs yoki darslar haqida qo'shimcha umumiy ma'lumot olish istagi";
+                        }
+                        
+                        return (
+                          <div key={intent} className="p-3 bg-[#F9F9F7] rounded-xl border border-[#E8E8E8] flex flex-col gap-1.5 text-[11px]">
+                            <div className="flex items-center justify-between">
+                              <span className={`px-2 py-0.5 rounded text-[8px] font-extrabold uppercase ${
+                                priority === "high" ? "bg-red-50 text-red-600 border border-red-200" :
+                                priority === "medium" ? "bg-amber-50 text-amber-600 border border-amber-200" :
+                                "bg-blue-50 text-blue-600 border border-blue-200"
+                              }`}>
+                                {priority === "high" ? "Yuqori" : priority === "medium" ? "O'rta" : "Past"}
+                              </span>
+                              <span className="text-[10px] font-bold text-[#707070]">
+                                {count} {t("pages.ai_agent.count_unit")}
+                              </span>
+                            </div>
+                            <p className="text-black font-semibold leading-relaxed text-[10px]">{text}</p>
+                          </div>
+                        );
+                      });
+                    })()}
                   </div>
                 )}
               </div>

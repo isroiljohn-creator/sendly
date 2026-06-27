@@ -795,7 +795,7 @@ export async function handleTelegramUpdate(channelId: string, token: string, upd
                 try {
                   const detectedIntent = classifyIntentForCustDev(text);
                   const sentiment = detectSentiment(text);
-                  const painPoint = extractPainPoint(text, detectedIntent, userLang);
+                  const painPoint = extractPainPoint(text, detectedIntent, userLang, settings.aiAgentType);
                   
                   const now = new Date();
                   const dateStr = now.getFullYear() + "-" + 
@@ -1470,29 +1470,31 @@ function detectSentiment(text: string): "positive" | "neutral" | "negative" {
   return "neutral";
 }
 
-function extractPainPoint(text: string, intent: string, lang: string): string {
+function extractPainPoint(text: string, intent: string, lang: string, agentType?: string): string {
+  const isSales = agentType === "sales";
+
   const uzPainPoints: Record<string, string> = {
-    billing: "To'lov usullari yoki kartani bog'lash jarayonidagi qiyinchiliklar",
-    support: "Platformani ijtimoiy tarmoqlar yoki Telegram botga bog'lashdagi texnik muammolar",
-    faq: "Dars transkriptlari ichidan kerakli mavzuni mustaqil topa olmaslik",
-    affiliate: "Hamkorlik komissiyalari va taklif etish havolasi ishlash qoidalarini aniqlashtirish",
-    default: "Platformaning ishlash imkoniyatlari haqida qo'shimcha ma'lumot olish"
+    billing: isSales ? "Mahsulot narxi, to'lov shartlari yoki chegirmalarni bilish istagi" : "Kurs to'lovi, chegirma yoki narxlar bo'yicha ma'lumot olish istagi",
+    support: isSales ? "Mahsulot/xizmat bo'yicha yordam yoki qo'llab-quvvatlash ehtiyoji" : "Botga ulanish, token olish yoki platformadagi texnik to'siqlar",
+    faq: isSales ? "Mahsulot/xizmat tarkibi yoki kafolati bo'yicha batafsil ma'lumot izlash" : "Darslik materiallari yoki darslar mazmuni bo'yicha ma'lumot qidirish",
+    affiliate: isSales ? "Hamkorlik shartlari yoki ulush olish masalasini aniqlashtirish" : "Hamkorlik komissiyalari va referal tizim shartlarini aniqlashtirish",
+    default: isSales ? "Mahsulot haqida qo'shimcha umumiy ma'lumot olish istagi" : "Kurs yoki darslar haqida qo'shimcha umumiy ma'lumot olish istagi"
   };
 
   const ruPainPoints: Record<string, string> = {
-    billing: "Трудности со способами оплаты или процессом привязки карты",
-    support: "Технические проблемы с привязкой платформы к социальным сетям или Telegram-боту",
-    faq: "Невозможность самостоятельно найти нужную тему в транскриптах уроков",
-    affiliate: "Уточнение партнерских комиссионных и правил работы реферальной ссылки",
-    default: "Получение дополнительной информации о возможностях работы платформы"
+    billing: isSales ? "Желание узнать цену товара, условия оплаты или скидки" : "Желание узнать о стоимости курса, скидках или тарифах",
+    support: isSales ? "Необходимость в помощи или поддержке по продукту/услуге" : "Проблемы с подключением бота, получением токена или технические преграды",
+    faq: isSales ? "Поиск подробной информации о составе товара или гарантии" : "Поиск информации по учебным материалам или содержанию уроков",
+    affiliate: isSales ? "Уточнение условий партнерства или получения доли" : "Уточнение партнерских комиссионных и условий реферальной системы",
+    default: isSales ? "Желание получить дополнительную общую информацию о продукте" : "Желание получить дополнительную общую информацию о курсе"
   };
 
   const enPainPoints: Record<string, string> = {
-    billing: "Difficulties with payment methods or the card binding process",
-    support: "Technical issues with linking the platform to social networks or Telegram bot",
-    faq: "Inability to independently find the required topic in lesson transcripts",
-    affiliate: "Clarifying affiliate commissions and referral link rules",
-    default: "Getting additional information about the platform's capabilities"
+    billing: isSales ? "Desire to know the product price, payment terms, or discounts" : "Desire to get information about course fees, discounts, or pricing",
+    support: isSales ? "Need for assistance or support regarding the product/service" : "Issues with connecting the bot, getting a token, or technical barriers",
+    faq: isSales ? "Searching for detailed information about product content or warranty" : "Searching for information in course materials or lesson content",
+    affiliate: isSales ? "Clarifying partnership terms or commission share issues" : "Clarifying affiliate commissions and referral system terms",
+    default: isSales ? "Desire to get additional general information about the product" : "Desire to get additional general information about the course"
   };
 
   const map = lang === "ru" ? ruPainPoints : lang === "en" ? enPainPoints : uzPainPoints;
