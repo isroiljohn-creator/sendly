@@ -1,6 +1,7 @@
 {
   "common": {
     "create": "Yaratish",
+    "select": "Tanlang...",
     "save": "Saqlash",
     "cancel": "Bekor qilish",
     "delete": "O'chirish",

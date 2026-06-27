@@ -765,18 +765,18 @@
     "semantic_hash": ""
   },
   "frontend/src/i18n/locales/en.json": {
-    "mtime": 1782537436.6927056,
-    "ast_hash": "e7284d6f40bf40b8debd119ea4ce09b1",
+    "mtime": 1782539856.1450944,
+    "ast_hash": "12d127be2275149803786d2bf426afef",
     "semantic_hash": ""
   },
   "frontend/src/i18n/locales/ru.json": {
-    "mtime": 1782537424.9122515,
-    "ast_hash": "a1ec01f4d58836845792a300681d4aa4",
+    "mtime": 1782539860.6943014,
+    "ast_hash": "0d86ec29d29da2e6f0ecc284bcbf501c",
     "semantic_hash": ""
   },
   "frontend/src/i18n/locales/uz.json": {
-    "mtime": 1782537411.8502707,
-    "ast_hash": "54a4af247181b1c6737eee2d21780dc3",
+    "mtime": 1782539851.8136678,
+    "ast_hash": "80786f12f01543617da2559b59f8c854",
     "semantic_hash": ""
   },
   "frontend/src/lib/ai/moderation.ts": {
