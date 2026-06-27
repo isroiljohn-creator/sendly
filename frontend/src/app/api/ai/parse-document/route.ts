@@ -64,7 +64,7 @@ export async function POST(request: Request) {
     const systemPrompt = `Siz darsliklar va hujjatlarni tahlil qiluvchi professional yordamchisiz. Maqsadingiz: yuklangan hujjat (PDF yoki matn) ichidagi barcha ma'lumotlarni o'qib, ularni chatbot oson tushunadigan va aniq javob qaytara oladigan shaklda strukturalash va to'liq o'zbek tilida (lotin alifbosida) yozib berish. Javob matnida umuman Markdown formatlash belgilaridan (masalan, qalin matn uchun ** belgilari, sarlavhalar uchun # belgilari va boshqalar) foydalanmang. Qalin bo'lishi kerak bo'lgan so'zlarni oddiy matn ko'rinishida yozing (masalan, "**Savol:**" emas, balki oddiy "Savol:" shaklida).`;
 
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },

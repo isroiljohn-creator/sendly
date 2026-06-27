@@ -155,7 +155,12 @@ O'quvchilarning savollariga faqat dars materiallari (KURS MATERIALLARI) asosida 
     systemPrompt = systemPrompt + "\n\nKURS MATERIALLARI:\n" + context;
   }
 
-  systemPrompt = `O'quvchining ismi: ${studentName}\n` + characterInstructions + "\n\n" + systemPrompt;
+  let conversationGreetingRule = "";
+  if (contents && contents.length > 1) {
+    conversationGreetingRule = "\n- MUHIM: Foydalanuvchi bilan allaqachon salomlashgansiz. Javobingizni salomlashuv so'zlarisiz (masalan, \"Salom\", \"Salom, Isroiljon\" deb yozmasdan) to'g'ridan-to'g'ri darslik ma'lumotlari asosida boshlang.";
+  }
+
+  systemPrompt = `O'quvchining ismi: ${studentName}\n` + characterInstructions + conversationGreetingRule + "\n\n" + systemPrompt;
 
   try {
     let response: Response | null = null;
@@ -165,7 +170,7 @@ O'quvchilarning savollariga faqat dars materiallari (KURS MATERIALLARI) asosida 
     for (let i = 0; i < maxRetries; i++) {
       try {
         response = await fetch(
-          `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
+          `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
           {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -199,7 +204,7 @@ O'quvchilarning savollariga faqat dars materiallari (KURS MATERIALLARI) asosida 
 
     if (!response || response.status === 429) {
       response = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -242,7 +247,20 @@ export async function queryRAG(
   settings: BotSettings,
   history: { role: "user" | "model"; parts: { text: string }[] }[] = []
 ): Promise<RAGResult> {
-  const { context, sources, lessonCount } = retrieveContext(question, lessons, modules);
+  // Accumulate text from last 2 user messages to enrich context retrieval keywords
+  let enrichedQuestion = question;
+  if (history && history.length > 0) {
+    const lastUserMsgs = history
+      .filter(h => h.role === "user")
+      .slice(-2)
+      .map(h => h.parts.map(p => p.text).join(" "))
+      .join(" ");
+    if (lastUserMsgs) {
+      enrichedQuestion = lastUserMsgs + " " + question;
+    }
+  }
+
+  const { context, sources, lessonCount } = retrieveContext(enrichedQuestion, lessons, modules);
 
   if (lessonCount === 0) {
     return {

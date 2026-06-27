@@ -3090,7 +3090,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "account_page",
-      "community": 4,
+      "community": 16,
       "norm_label": "page.tsx"
     },
     {
@@ -3100,7 +3100,7 @@
       "source_location": "L19",
       "_origin": "ast",
       "id": "account_page_accountpage",
-      "community": 4,
+      "community": 16,
       "norm_label": "accountpage()"
     },
     {
@@ -3140,7 +3140,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "ai_agent_page",
-      "community": 0,
+      "community": 49,
       "norm_label": "page.tsx"
     },
     {
@@ -3150,7 +3150,7 @@
       "source_location": "L47",
       "_origin": "ast",
       "id": "ai_agent_page_facebook",
-      "community": 0,
+      "community": 49,
       "norm_label": "facebook()"
     },
     {
@@ -3160,7 +3160,7 @@
       "source_location": "L64",
       "_origin": "ast",
       "id": "ai_agent_page_copyicon",
-      "community": 0,
+      "community": 49,
       "norm_label": "copyicon()"
     },
     {
@@ -3170,7 +3170,7 @@
       "source_location": "L82",
       "_origin": "ast",
       "id": "ai_agent_page_playicon",
-      "community": 0,
+      "community": 49,
       "norm_label": "playicon()"
     },
     {
@@ -3180,7 +3180,7 @@
       "source_location": "L99",
       "_origin": "ast",
       "id": "ai_agent_page_fieldmapping",
-      "community": 0,
+      "community": 49,
       "norm_label": "fieldmapping"
     },
     {
@@ -3190,7 +3190,7 @@
       "source_location": "L106",
       "_origin": "ast",
       "id": "ai_agent_page_generatejsonpayload",
-      "community": 0,
+      "community": 49,
       "norm_label": "generatejsonpayload()"
     },
     {
@@ -3200,7 +3200,7 @@
       "source_location": "L142",
       "_origin": "ast",
       "id": "ai_agent_page_parsejsonpayload",
-      "community": 0,
+      "community": 49,
       "norm_label": "parsejsonpayload()"
     },
     {
@@ -3210,7 +3210,7 @@
       "source_location": "L178",
       "_origin": "ast",
       "id": "ai_agent_page_customdropdownprops",
-      "community": 0,
+      "community": 49,
       "norm_label": "customdropdownprops"
     },
     {
@@ -3220,7 +3220,7 @@
       "source_location": "L186",
       "_origin": "ast",
       "id": "ai_agent_page_customdropdown",
-      "community": 0,
+      "community": 49,
       "norm_label": "customdropdown()"
     },
     {
@@ -3230,7 +3230,7 @@
       "source_location": "L238",
       "_origin": "ast",
       "id": "ai_agent_page_simulatedmessage",
-      "community": 0,
+      "community": 49,
       "norm_label": "simulatedmessage"
     },
     {
@@ -3240,7 +3240,7 @@
       "source_location": "L247",
       "_origin": "ast",
       "id": "ai_agent_page_mock_fb_forms",
-      "community": 0,
+      "community": 49,
       "norm_label": "mock_fb_forms"
     },
     {
@@ -3250,7 +3250,7 @@
       "source_location": "L253",
       "_origin": "ast",
       "id": "ai_agent_page_aiagentcontent",
-      "community": 0,
+      "community": 49,
       "norm_label": "aiagentcontent()"
     },
     {
@@ -3260,7 +3260,7 @@
       "source_location": "L6040",
       "_origin": "ast",
       "id": "ai_agent_page_loadingfallback",
-      "community": 0,
+      "community": 49,
       "norm_label": "loadingfallback()"
     },
     {
@@ -3270,7 +3270,7 @@
       "source_location": "L6049",
       "_origin": "ast",
       "id": "ai_agent_page_aiagentpage",
-      "community": 0,
+      "community": 49,
       "norm_label": "aiagentpage()"
     },
     {
@@ -3450,7 +3450,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "rag_route",
-      "community": 0,
+      "community": 54,
       "norm_label": "route.ts"
     },
     {
@@ -3460,7 +3460,7 @@
       "source_location": "L4",
       "_origin": "ast",
       "id": "rag_route_post",
-      "community": 0,
+      "community": 54,
       "norm_label": "post()"
     },
     {
@@ -3510,7 +3510,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "google_route",
-      "community": 2,
+      "community": 15,
       "norm_label": "route.ts"
     },
     {
@@ -3520,7 +3520,7 @@
       "source_location": "L10",
       "_origin": "ast",
       "id": "google_route_readdb",
-      "community": 2,
+      "community": 15,
       "norm_label": "readdb()"
     },
     {
@@ -3530,7 +3530,7 @@
       "source_location": "L23",
       "_origin": "ast",
       "id": "google_route_finduserbyemail",
-      "community": 2,
+      "community": 15,
       "norm_label": "finduserbyemail()"
     },
     {
@@ -3540,7 +3540,7 @@
       "source_location": "L45",
       "_origin": "ast",
       "id": "google_route_post",
-      "community": 2,
+      "community": 15,
       "norm_label": "post()"
     },
     {
@@ -3850,7 +3850,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "db_route",
-      "community": 2,
+      "community": 53,
       "norm_label": "route.ts"
     },
     {
@@ -3860,7 +3860,7 @@
       "source_location": "L10",
       "_origin": "ast",
       "id": "db_route_lock_dir",
-      "community": 2,
+      "community": 53,
       "norm_label": "lock_dir"
     },
     {
@@ -3870,7 +3870,7 @@
       "source_location": "L22",
       "_origin": "ast",
       "id": "db_route_acquirefilelock",
-      "community": 2,
+      "community": 53,
       "norm_label": "acquirefilelock()"
     },
     {
@@ -3880,7 +3880,7 @@
       "source_location": "L40",
       "_origin": "ast",
       "id": "db_route_releasefilelock",
-      "community": 2,
+      "community": 53,
       "norm_label": "releasefilelock()"
     },
     {
@@ -3890,7 +3890,7 @@
       "source_location": "L50",
       "_origin": "ast",
       "id": "db_route_getinitialdata",
-      "community": 2,
+      "community": 53,
       "norm_label": "getinitialdata()"
     },
     {
@@ -3900,7 +3900,7 @@
       "source_location": "L54",
       "_origin": "ast",
       "id": "db_route_readdbunlocked",
-      "community": 2,
+      "community": 53,
       "norm_label": "readdbunlocked()"
     },
     {
@@ -3910,7 +3910,7 @@
       "source_location": "L64",
       "_origin": "ast",
       "id": "db_route_writedbunlocked",
-      "community": 2,
+      "community": 53,
       "norm_label": "writedbunlocked()"
     },
     {
@@ -3920,7 +3920,7 @@
       "source_location": "L69",
       "_origin": "ast",
       "id": "db_route_readdb",
-      "community": 2,
+      "community": 53,
       "norm_label": "readdb()"
     },
     {
@@ -3930,7 +3930,7 @@
       "source_location": "L92",
       "_origin": "ast",
       "id": "db_route_writedb",
-      "community": 2,
+      "community": 53,
       "norm_label": "writedb()"
     },
     {
@@ -3940,7 +3940,7 @@
       "source_location": "L104",
       "_origin": "ast",
       "id": "db_route_isvaliduuid",
-      "community": 2,
+      "community": 53,
       "norm_label": "isvaliduuid()"
     },
     {
@@ -3950,7 +3950,7 @@
       "source_location": "L109",
       "_origin": "ast",
       "id": "db_route_get",
-      "community": 2,
+      "community": 53,
       "norm_label": "get()"
     },
     {
@@ -3960,7 +3960,7 @@
       "source_location": "L181",
       "_origin": "ast",
       "id": "db_route_countactiveautomations",
-      "community": 2,
+      "community": 53,
       "norm_label": "countactiveautomations()"
     },
     {
@@ -3970,7 +3970,7 @@
       "source_location": "L203",
       "_origin": "ast",
       "id": "db_route_pruneorphansettings",
-      "community": 2,
+      "community": 53,
       "norm_label": "pruneorphansettings()"
     },
     {
@@ -3980,7 +3980,7 @@
       "source_location": "L216",
       "_origin": "ast",
       "id": "db_route_post",
-      "community": 2,
+      "community": 53,
       "norm_label": "post()"
     },
     {
@@ -3990,7 +3990,7 @@
       "source_location": "L612",
       "_origin": "ast",
       "id": "db_route_runautolearningpipeline",
-      "community": 2,
+      "community": 53,
       "norm_label": "runautolearningpipeline()"
     },
     {
@@ -4200,7 +4200,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "send_route",
-      "community": 49,
+      "community": 2,
       "norm_label": "route.ts"
     },
     {
@@ -4210,7 +4210,7 @@
       "source_location": "L9",
       "_origin": "ast",
       "id": "send_route_chatmessage",
-      "community": 49,
+      "community": 2,
       "norm_label": "chatmessage"
     },
     {
@@ -4220,7 +4220,7 @@
       "source_location": "L16",
       "_origin": "ast",
       "id": "send_route_chatthread",
-      "community": 49,
+      "community": 2,
       "norm_label": "chatthread"
     },
     {
@@ -4230,7 +4230,7 @@
       "source_location": "L29",
       "_origin": "ast",
       "id": "send_route_lock_dir",
-      "community": 49,
+      "community": 2,
       "norm_label": "lock_dir"
     },
     {
@@ -4240,7 +4240,7 @@
       "source_location": "L31",
       "_origin": "ast",
       "id": "send_route_acquirefilelock",
-      "community": 49,
+      "community": 2,
       "norm_label": "acquirefilelock()"
     },
     {
@@ -4250,7 +4250,7 @@
       "source_location": "L52",
       "_origin": "ast",
       "id": "send_route_releasefilelock",
-      "community": 49,
+      "community": 2,
       "norm_label": "releasefilelock()"
     },
     {
@@ -4260,7 +4260,7 @@
       "source_location": "L62",
       "_origin": "ast",
       "id": "send_route_readdbunlocked",
-      "community": 49,
+      "community": 2,
       "norm_label": "readdbunlocked()"
     },
     {
@@ -4270,7 +4270,7 @@
       "source_location": "L68",
       "_origin": "ast",
       "id": "send_route_writedbunlocked",
-      "community": 49,
+      "community": 2,
       "norm_label": "writedbunlocked()"
     },
     {
@@ -4280,7 +4280,7 @@
       "source_location": "L73",
       "_origin": "ast",
       "id": "send_route_readdb",
-      "community": 49,
+      "community": 2,
       "norm_label": "readdb()"
     },
     {
@@ -4290,7 +4290,7 @@
       "source_location": "L85",
       "_origin": "ast",
       "id": "send_route_writedb",
-      "community": 49,
+      "community": 2,
       "norm_label": "writedb()"
     },
     {
@@ -4300,7 +4300,7 @@
       "source_location": "L97",
       "_origin": "ast",
       "id": "send_route_splittelegrammessage",
-      "community": 49,
+      "community": 2,
       "norm_label": "splittelegrammessage()"
     },
     {
@@ -4310,7 +4310,7 @@
       "source_location": "L121",
       "_origin": "ast",
       "id": "send_route_post",
-      "community": 49,
+      "community": 2,
       "norm_label": "post()"
     },
     {
@@ -4320,7 +4320,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "start_route",
-      "community": 0,
+      "community": 78,
       "norm_label": "route.ts"
     },
     {
@@ -4330,7 +4330,7 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "start_route_get",
-      "community": 0,
+      "community": 78,
       "norm_label": "get()"
     },
     {
@@ -4340,7 +4340,7 @@
       "source_location": "L11",
       "_origin": "ast",
       "id": "start_route_post",
-      "community": 0,
+      "community": 78,
       "norm_label": "post()"
     },
     {
@@ -4580,7 +4580,7 @@
       "source_location": "L32",
       "_origin": "ast",
       "id": "automations_page_automationspage",
-      "community": 11,
+      "community": 4,
       "norm_label": "automationspage()"
     },
     {
@@ -4590,7 +4590,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "quick_bot_page",
-      "community": 22,
+      "community": 82,
       "norm_label": "page.tsx"
     },
     {
@@ -4600,7 +4600,7 @@
       "source_location": "L24",
       "_origin": "ast",
       "id": "quick_bot_page_local_translations",
-      "community": 22,
+      "community": 82,
       "norm_label": "local_translations"
     },
     {
@@ -4610,7 +4610,7 @@
       "source_location": "L264",
       "_origin": "ast",
       "id": "quick_bot_page_default_templates",
-      "community": 22,
+      "community": 82,
       "norm_label": "default_templates"
     },
     {
@@ -4620,7 +4620,7 @@
       "source_location": "L315",
       "_origin": "ast",
       "id": "quick_bot_page_quickbotwizardpage",
-      "community": 22,
+      "community": 82,
       "norm_label": "quickbotwizardpage()"
     },
     {
@@ -4660,7 +4660,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "broadcast_page",
-      "community": 4,
+      "community": 22,
       "norm_label": "page.tsx"
     },
     {
@@ -4670,7 +4670,7 @@
       "source_location": "L13",
       "_origin": "ast",
       "id": "broadcast_page_broadcastpage",
-      "community": 4,
+      "community": 22,
       "norm_label": "broadcastpage()"
     },
     {
@@ -4700,7 +4700,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "chats_page",
-      "community": 16,
+      "community": 4,
       "norm_label": "page.tsx"
     },
     {
@@ -4710,7 +4710,7 @@
       "source_location": "L14",
       "_origin": "ast",
       "id": "chats_page_message",
-      "community": 16,
+      "community": 4,
       "norm_label": "message"
     },
     {
@@ -4720,7 +4720,7 @@
       "source_location": "L21",
       "_origin": "ast",
       "id": "chats_page_chat",
-      "community": 16,
+      "community": 4,
       "norm_label": "chat"
     },
     {
@@ -4730,7 +4730,7 @@
       "source_location": "L34",
       "_origin": "ast",
       "id": "chats_page_initial_chats",
-      "community": 16,
+      "community": 4,
       "norm_label": "initial_chats"
     },
     {
@@ -4740,7 +4740,7 @@
       "source_location": "L36",
       "_origin": "ast",
       "id": "chats_page_chatspage",
-      "community": 16,
+      "community": 4,
       "norm_label": "chatspage()"
     },
     {
@@ -5150,7 +5150,7 @@
       "source_location": "L49",
       "_origin": "ast",
       "id": "settings_page_settingspage",
-      "community": 11,
+      "community": 4,
       "norm_label": "settingspage()"
     },
     {
@@ -5220,7 +5220,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "home_automationscard",
-      "community": 22,
+      "community": 12,
       "norm_label": "automationscard.tsx"
     },
     {
@@ -5230,7 +5230,7 @@
       "source_location": "L10",
       "_origin": "ast",
       "id": "home_automationscard_automationscard",
-      "community": 22,
+      "community": 12,
       "norm_label": "automationscard()"
     },
     {
@@ -7410,7 +7410,7 @@
       "source_location": "L36",
       "_origin": "ast",
       "id": "ui_primitives_button",
-      "community": 4,
+      "community": 21,
       "norm_label": "button"
     },
     {
@@ -7430,7 +7430,7 @@
       "source_location": "L61",
       "_origin": "ast",
       "id": "ui_primitives_pilltab",
-      "community": 5,
+      "community": 8,
       "norm_label": "pilltab()"
     },
     {
@@ -7450,7 +7450,7 @@
       "source_location": "L81",
       "_origin": "ast",
       "id": "ui_primitives_statuspill",
-      "community": 4,
+      "community": 22,
       "norm_label": "statuspill()"
     },
     {
@@ -7480,7 +7480,7 @@
       "source_location": "L124",
       "_origin": "ast",
       "id": "ui_primitives_avatar",
-      "community": 16,
+      "community": 4,
       "norm_label": "avatar()"
     },
     {
@@ -7580,7 +7580,7 @@
       "source_location": "L348",
       "_origin": "ast",
       "id": "ui_primitives_confirmmodal",
-      "community": 4,
+      "community": 16,
       "norm_label": "confirmmodal()"
     },
     {
@@ -7600,7 +7600,7 @@
       "source_location": "L406",
       "_origin": "ast",
       "id": "ui_primitives_alertmodal",
-      "community": 4,
+      "community": 16,
       "norm_label": "alertmodal()"
     },
     {
@@ -8370,7 +8370,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "ai_moderation",
-      "community": 0,
+      "community": 77,
       "norm_label": "moderation.ts"
     },
     {
@@ -8380,7 +8380,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "ai_moderation_moderationresult",
-      "community": 0,
+      "community": 77,
       "norm_label": "moderationresult"
     },
     {
@@ -8390,7 +8390,7 @@
       "source_location": "L7",
       "_origin": "ast",
       "id": "ai_moderation_offensive_words",
-      "community": 0,
+      "community": 77,
       "norm_label": "offensive_words"
     },
     {
@@ -8400,17 +8400,27 @@
       "source_location": "L12",
       "_origin": "ast",
       "id": "ai_moderation_detectlanguage",
-      "community": 0,
+      "community": 77,
       "norm_label": "detectlanguage()"
+    },
+    {
+      "label": "matchTopicPrefix()",
+      "file_type": "code",
+      "source_file": "frontend/src/lib/ai/moderation.ts",
+      "source_location": "L39",
+      "_origin": "ast",
+      "id": "ai_moderation_matchtopicprefix",
+      "community": 77,
+      "norm_label": "matchtopicprefix()"
     },
     {
       "label": "moderateMessage()",
       "file_type": "code",
       "source_file": "frontend/src/lib/ai/moderation.ts",
-      "source_location": "L43",
+      "source_location": "L49",
       "_origin": "ast",
       "id": "ai_moderation_moderatemessage",
-      "community": 0,
+      "community": 77,
       "norm_label": "moderatemessage()"
     },
     {
@@ -8420,7 +8430,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "ai_rag",
-      "community": 0,
+      "community": 54,
       "norm_label": "rag.ts"
     },
     {
@@ -8430,7 +8440,7 @@
       "source_location": "L3",
       "_origin": "ast",
       "id": "ai_rag_ragresult",
-      "community": 0,
+      "community": 54,
       "norm_label": "ragresult"
     },
     {
@@ -8440,7 +8450,7 @@
       "source_location": "L13",
       "_origin": "ast",
       "id": "ai_rag_retrievecontext",
-      "community": 0,
+      "community": 54,
       "norm_label": "retrievecontext()"
     },
     {
@@ -8450,7 +8460,7 @@
       "source_location": "L82",
       "_origin": "ast",
       "id": "ai_rag_sanitizehistoryforgemini",
-      "community": 0,
+      "community": 54,
       "norm_label": "sanitizehistoryforgemini()"
     },
     {
@@ -8460,17 +8470,17 @@
       "source_location": "L115",
       "_origin": "ast",
       "id": "ai_rag_callgemini",
-      "community": 0,
+      "community": 54,
       "norm_label": "callgemini()"
     },
     {
       "label": "queryRAG()",
       "file_type": "code",
       "source_file": "frontend/src/lib/ai/rag.ts",
-      "source_location": "L237",
+      "source_location": "L242",
       "_origin": "ast",
       "id": "ai_rag_queryrag",
-      "community": 0,
+      "community": 54,
       "norm_label": "queryrag()"
     },
     {
@@ -8500,7 +8510,7 @@
       "source_location": "L17",
       "_origin": "ast",
       "id": "lib_db_automation",
-      "community": 22,
+      "community": 12,
       "norm_label": "automation"
     },
     {
@@ -8510,7 +8520,7 @@
       "source_location": "L30",
       "_origin": "ast",
       "id": "lib_db_group",
-      "community": 22,
+      "community": 4,
       "norm_label": "group"
     },
     {
@@ -8530,7 +8540,7 @@
       "source_location": "L45",
       "_origin": "ast",
       "id": "lib_db_broadcast",
-      "community": 4,
+      "community": 22,
       "norm_label": "broadcast"
     },
     {
@@ -8550,7 +8560,7 @@
       "source_location": "L70",
       "_origin": "ast",
       "id": "lib_db_botsettings",
-      "community": 0,
+      "community": 54,
       "norm_label": "botsettings"
     },
     {
@@ -8560,7 +8570,7 @@
       "source_location": "L102",
       "_origin": "ast",
       "id": "lib_db_lesson",
-      "community": 0,
+      "community": 54,
       "norm_label": "lesson"
     },
     {
@@ -8570,7 +8580,7 @@
       "source_location": "L110",
       "_origin": "ast",
       "id": "lib_db_module",
-      "community": 0,
+      "community": 49,
       "norm_label": "module"
     },
     {
@@ -8700,7 +8710,7 @@
       "source_location": "L3",
       "_origin": "ast",
       "id": "lib_jwt_base64url",
-      "community": 2,
+      "community": 15,
       "norm_label": "base64url()"
     },
     {
@@ -8720,7 +8730,7 @@
       "source_location": "L19",
       "_origin": "ast",
       "id": "lib_jwt_signjwt",
-      "community": 2,
+      "community": 15,
       "norm_label": "signjwt()"
     },
     {
@@ -8920,7 +8930,7 @@
       "source_location": "L11",
       "_origin": "ast",
       "id": "lib_telegrambotrunner_safeparse",
-      "community": 0,
+      "community": 78,
       "norm_label": "safeparse()"
     },
     {
@@ -9050,7 +9060,7 @@
       "source_location": "L1157",
       "_origin": "ast",
       "id": "lib_telegrambotrunner_starttelegrambots",
-      "community": 0,
+      "community": 78,
       "norm_label": "starttelegrambots()"
     },
     {
@@ -25903,6 +25913,16 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "frontend/src/lib/ai/moderation.ts",
+      "source_location": "L39",
+      "weight": 1.0,
+      "source": "ai_moderation",
+      "target": "ai_moderation_matchtopicprefix",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/src/lib/ai/moderation.ts",
       "source_location": "L43",
       "weight": 1.0,
       "confidence_score": 1.0,
@@ -25950,6 +25970,17 @@
       "confidence_score": 1.0,
       "source": "ai_moderation_moderatemessage",
       "target": "ai_moderation_detectlanguage"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/src/lib/ai/moderation.ts",
+      "source_location": "L110",
+      "weight": 1.0,
+      "source": "ai_moderation_moderatemessage",
+      "target": "ai_moderation_matchtopicprefix",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports",
@@ -27337,5 +27368,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "bbe67a1f0eff14a3d74675eddb28ec1ef98fe1eb"
+  "built_at_commit": "462779dd785b7edbae3d635973162b4bd698c79f"
 }

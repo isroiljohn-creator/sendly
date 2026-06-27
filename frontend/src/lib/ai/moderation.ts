@@ -36,6 +36,12 @@ function detectLanguage(text: string): "uz" | "ru" | "en" {
   return enScore > uzScore ? "en" : "uz";
 }
 
+function matchTopicPrefix(text: string, topic: string): boolean {
+  const escapedTopic = topic.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+  const pattern = new RegExp(`(?:^|[^a-z0-9'’‘\`’а-яё])${escapedTopic}`, 'i');
+  return pattern.test(text);
+}
+
 /**
  * Xabarlarni moderation filtridan o'tkazish.
  * Spam, reklama havolalari, haqoratlar va taqiqlangan (off-topic) mavzularni tekshiradi.
@@ -101,7 +107,7 @@ export function moderateMessage(text: string, restrictedTopics: string[] = []): 
   const allOffTopics = Array.from(new Set([...defaultOffTopics, ...restrictedTopics.map(t => t.toLowerCase())]));
 
   for (const topic of allOffTopics) {
-    if (topic && clean.includes(topic)) {
+    if (topic && matchTopicPrefix(clean, topic)) {
       const warningMessage =
         lang === "en"
           ? `We have strayed from our topic. We cannot provide information on this topic ("${topic}") at the moment. Please ask a question related to the course materials.`

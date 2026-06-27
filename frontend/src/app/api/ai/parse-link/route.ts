@@ -204,7 +204,7 @@ export async function POST(request: Request) {
     const promptText = `Quyidagi matn tarkibini o'qib, o'quv chatbotining bilimlar bazasi uchun batafsil strukturalangan o'zbekcha matnga o'giring:\n\n${rawText.substring(0, 15000)}`;
 
     const geminiRes = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${geminiKey}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${geminiKey}`,
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
