@@ -270,8 +270,8 @@
     "semantic_hash": ""
   },
   "frontend/src/app/api/ai/structure/route.ts": {
-    "mtime": 1782541416.7682939,
-    "ast_hash": "dcaaafc876420b68266de6cf5672703d",
+    "mtime": 1782544031.9993994,
+    "ast_hash": "dce77c04a9db77479c06f7bea7669b14",
     "semantic_hash": ""
   },
   "frontend/src/app/api/auth/google/route.ts": {
@@ -300,8 +300,8 @@
     "semantic_hash": ""
   },
   "frontend/src/app/api/db/route.ts": {
-    "mtime": 1782541422.6650395,
-    "ast_hash": "21c458107677896f32b53d68562a364b",
+    "mtime": 1782544041.3783603,
+    "ast_hash": "bc4e78cc1da2e7eeedceaf83f0f133cd",
     "semantic_hash": ""
   },
   "frontend/src/app/api/invite/route.ts": {
@@ -320,8 +320,8 @@
     "semantic_hash": ""
   },
   "frontend/src/app/api/support/route.ts": {
-    "mtime": 1782541432.5128202,
-    "ast_hash": "e6cd5015c34d137acd447e407cf8c88e",
+    "mtime": 1782544048.1035273,
+    "ast_hash": "48468cf0cefffd2cb6af8a53de57127e",
     "semantic_hash": ""
   },
   "frontend/src/app/api/telegram/send/route.ts": {
@@ -775,8 +775,8 @@
     "semantic_hash": ""
   },
   "frontend/src/i18n/locales/uz.json": {
-    "mtime": 1782539851.8136678,
-    "ast_hash": "80786f12f01543617da2559b59f8c854",
+    "mtime": 1782542883.6274686,
+    "ast_hash": "8acfc782d0b33a8b0ff98874dc3cec7c",
     "semantic_hash": ""
   },
   "frontend/src/lib/ai/moderation.ts": {
@@ -785,13 +785,13 @@
     "semantic_hash": ""
   },
   "frontend/src/lib/ai/rag.ts": {
-    "mtime": 1782542482.6995833,
-    "ast_hash": "da0488d6317a79b3790c721252d35d93",
+    "mtime": 1782543960.2813387,
+    "ast_hash": "ee8060e7c50706c7a3fe94c9fd21af39",
     "semantic_hash": ""
   },
   "frontend/src/lib/db.ts": {
-    "mtime": 1782536634.2503986,
-    "ast_hash": "ffc51ba9a451a6ccffe19f75ef850885",
+    "mtime": 1782542849.2393522,
+    "ast_hash": "906e873253215daa9597bc0a6410ef9a",
     "semantic_hash": ""
   },
   "frontend/src/lib/jwt.ts": {
@@ -980,8 +980,8 @@
     "semantic_hash": ""
   },
   "frontend/src/app/api/ai/parse-document/route.ts": {
-    "mtime": 1782541402.2531378,
-    "ast_hash": "0d090cffff58619dfd43182a9a90146c",
+    "mtime": 1782543970.2796214,
+    "ast_hash": "f27ff4795fa0b1d290617f47f81a7c1c",
     "semantic_hash": ""
   },
   "frontend/src/app/api/ai/transcribe-audio/route.ts": {
@@ -990,8 +990,8 @@
     "semantic_hash": ""
   },
   "frontend/src/app/api/ai/parse-link/route.ts": {
-    "mtime": 1782541409.8840058,
-    "ast_hash": "aa7a04a044e4e18610eb85bfba720463",
+    "mtime": 1782544023.0906632,
+    "ast_hash": "0880760fa38cb723b67e385775231bac",
     "semantic_hash": ""
   }
 }
