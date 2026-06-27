@@ -337,6 +337,63 @@ export async function queryRAG(
     }
   }
 
+  // 2. Small talk detection — greetings, thanks, etc. should NOT go through RAG retrieval
+  const smallTalkPatterns = [
+    /^(salom|assalomu?\s*alaykum|hi|hello|hey|privet|привет|здравствуйте)[\s!.,?]*$/i,
+    /^(rahmat|raxmat|tashakkur|thanks|thank\s*you|спасибо)[\s!.,?]*$/i,
+    /^(xayr|ko'rishguncha|hayr|bye|goodbye|пока|до\s*свидания)[\s!.,?]*$/i,
+    /^(yaxshimisiz|qalaysiz|nima\s*gap|how\s*are\s*you|как\s*дела)[\s!.,?]*$/i,
+    /^(ok|ha|yo'q|bor|yoq|albatta|tushunarli|davom\s*et|bo'ldi|хорошо|ладно|понятно)[\s!.,?]*$/i,
+    /^(kechirasiz|uzr|sorry|извините)[\s!.,?]*$/i,
+  ];
+  
+  const cleanQ = question.trim();
+  const isSmallTalk = smallTalkPatterns.some(p => p.test(cleanQ));
+  
+  if (isSmallTalk && apiKey) {
+    // Use Gemini directly for small talk without RAG context
+    const smallTalkPrompt = `Sen samimiy va do'stona yordamchisan. Ismingiz: ${settings.agentName || "Sendly"}. O'quvchining ismi: ${studentName}.
+Quyidagi qoidalarga amal qil:
+- Foydalanuvchining oddiy salomlashish, minnatdorchilik yoki xayrlashuv xabariga tabiiy, samimiy va qisqa javob ber.
+- Xuddi do'stingga javob yozayotgandek tabiiy gapir.
+- Hech qanday emoji ishlatma.
+- Javob 1-2 gap bo'lsin.`;
+
+    try {
+      const res = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            system_instruction: { parts: [{ text: smallTalkPrompt }] },
+            contents: [{ role: "user", parts: [{ text: question }] }],
+            generationConfig: { temperature: 0.7, maxOutputTokens: 200 },
+          }),
+        }
+      );
+      if (res.ok) {
+        const data = await res.json();
+        const reply = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+        if (reply) {
+          return {
+            text: reply.trim(),
+            confidence: 95,
+            sources: []
+          };
+        }
+      }
+    } catch (e) {
+      console.error("Small talk Gemini call failed:", e);
+    }
+    // Fallback for small talk
+    return {
+      text: `Assalomu alaykum, ${studentName}! Savolingiz bo'lsa bering, yordam berishdan xursandman!`,
+      confidence: 95,
+      sources: []
+    };
+  }
+
   // Accumulate text from last 2 user messages to enrich context retrieval keywords
   let enrichedQuestion = question;
   if (history && history.length > 0) {
