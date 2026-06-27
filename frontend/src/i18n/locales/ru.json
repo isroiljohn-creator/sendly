@@ -955,6 +955,12 @@
       "default_module_name": "Основные материалы",
       "upload_document_tooltip": "Загрузить документ (PDF, TXT, DOCX)",
       "upload_file": "Загрузить файл",
+      "add_link": "Добавить ссылку",
+      "learn_from_link_title": "Обучение по ссылке",
+      "link_label": "Ссылка (Сайт, YouTube или Википедия)",
+      "link_placeholder": "https://ru.wikipedia.org/... или ссылка на YouTube",
+      "link_cost_note": "Для анализа ссылки будет списано 50 кредитов.",
+      "add_link_tooltip": "Добавить ссылку (Сайт, YouTube, Википедия)",
       "module_placeholder": "Название модуля",
       "lesson_placeholder": "Название документа",
       "select_module": "Выберите модуль",
@@ -1511,7 +1517,10 @@
         "insufficient_credits_doc": "Недостаточно кредитов на балансе. Для анализа документа требуется не менее {cost} кредитов. У вас: {balance} кредитов.",
         "transcribing_audio": "Аудио транскрибируется (это может занять некоторое время)...",
         "parsing_document": "Документ анализируется искусственным интеллектом...",
-        "upload_error": "Произошла ошибка при загрузке или анализе файла."
+        "upload_error": "Произошла ошибка при загрузке или анализе файла.",
+        "parsing_link": "Анализ ссылки...",
+        "link_parsed_success": "Ссылка успешно проанализирована, и урок добавлен!",
+        "invalid_link": "Пожалуйста, введите корректную ссылку."
       },
       "now": "Сейчас",
       "errors": {

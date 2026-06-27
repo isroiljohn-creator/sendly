@@ -955,6 +955,12 @@
       "default_module_name": "Asosiy materiallar",
       "upload_document_tooltip": "Hujjat yuklash (PDF, TXT, DOCX)",
       "upload_file": "Fayl yuklash",
+      "add_link": "Havola qo'shish",
+      "learn_from_link_title": "Havoladan o'rganish",
+      "link_label": "Havola (Sayt, YouTube yoki Vikipediya)",
+      "link_placeholder": "https://uz.wikipedia.org/... yoki YouTube havolasi",
+      "link_cost_note": "Havolani tahlil qilish uchun 50 kredit yechiladi.",
+      "add_link_tooltip": "Havola qo'shish (Veb-sahifa, YouTube, Vikipediya)",
       "module_placeholder": "Modul nomi",
       "lesson_placeholder": "Dars nomi",
       "select_module": "Modulni tanlang",
@@ -1511,7 +1517,10 @@
         "insufficient_credits_doc": "Balansingizda yetarli kredit mavjud emas. Hujjatni tahlil qilish uchun kamida {cost} ta kredit talab qilinadi. Sizda: {balance} ta kredit.",
         "transcribing_audio": "Audio transkripsiya qilinmoqda (bu biroz vaqt olishi mumkin)...",
         "parsing_document": "Hujjat sun'iy intellekt tomonidan tahlil qilinmoqda...",
-        "upload_error": "Faylni yuklash yoki tahlil qilishda xatolik yuz berdi."
+        "upload_error": "Faylni yuklash yoki tahlil qilishda xatolik yuz berdi.",
+        "parsing_link": "Havola tahlil qilinmoqda...",
+        "link_parsed_success": "Havola muvaffaqiyatli tahlil qilindi va dars qo'shildi!",
+        "invalid_link": "Iltimos, to'g'ri havolani kiriting."
       },
       "now": "Hozir",
       "errors": {

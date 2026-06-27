@@ -955,6 +955,12 @@
       "default_module_name": "Main Materials",
       "upload_document_tooltip": "Upload Document (PDF, TXT, DOCX)",
       "upload_file": "Upload File",
+      "add_link": "Add Link",
+      "learn_from_link_title": "Learn from Link",
+      "link_label": "Link (Website, YouTube or Wikipedia)",
+      "link_placeholder": "https://en.wikipedia.org/... or YouTube video link",
+      "link_cost_note": "50 credits will be deducted for analyzing the link.",
+      "add_link_tooltip": "Add Link (Webpage, YouTube, Wikipedia)",
       "module_placeholder": "Module name",
       "lesson_placeholder": "Document name",
       "select_module": "Select module",
@@ -1511,7 +1517,10 @@
         "insufficient_credits_doc": "Insufficient credits on your balance. Document analysis requires at least {cost} credits. You have: {balance} credits.",
         "transcribing_audio": "Audio is being transcribed (this may take some time)...",
         "parsing_document": "Document is being analyzed by artificial intelligence...",
-        "upload_error": "An error occurred while uploading or analyzing the file."
+        "upload_error": "An error occurred while uploading or analyzing the file.",
+        "parsing_link": "Analyzing link...",
+        "link_parsed_success": "Link successfully analyzed and lesson added!",
+        "invalid_link": "Please enter a valid link."
       },
       "now": "Now",
       "errors": {

@@ -40,7 +40,8 @@ import {
   Key,
   LifeBuoy,
   HelpCircle,
-  GraduationCap
+  GraduationCap,
+  Link2
 } from "lucide-react";
 
 const Facebook = ({ size = 24, className, ...props }: React.SVGProps<SVGSVGElement> & { size?: number }) => (
@@ -494,6 +495,10 @@ function AIAgentContent() {
   const [newLessonModuleId, setNewLessonModuleId] = useState("");
   const [showAddModuleModal, setShowAddModuleModal] = useState(false);
   const [showAddLessonModal, setShowAddLessonModal] = useState(false);
+  const [showAddLinkModal, setShowAddLinkModal] = useState(false);
+  const [newLinkUrl, setNewLinkUrl] = useState("");
+  const [newLinkModuleId, setNewLinkModuleId] = useState("");
+  const [isLinkParsing, setIsLinkParsing] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   
   // Bot Settings UI States
@@ -1484,6 +1489,96 @@ function AIAgentContent() {
     setNewLessonName("");
     setShowAddLessonModal(false);
     showToast(t("pages.ai_agent.toasts.lesson_created").replace("{title}", newLes.title));
+  };
+
+  // Learn from link
+  const handleLearnFromLink = async () => {
+    if (!newLinkUrl.trim() || !newLinkModuleId) return;
+
+    let urlStr = newLinkUrl.trim();
+    if (!/^https?:\/\//i.test(urlStr)) {
+      urlStr = "https://" + urlStr;
+    }
+
+    try {
+      new URL(urlStr);
+    } catch (e) {
+      showToast(t("pages.ai_agent.toasts.invalid_link") || "Iltimos, to'g'ri havolani kiriting.", "error");
+      return;
+    }
+
+    const creditCost = 50; // flat cost of 50 credits
+    let currentBalance = 0;
+    const localCredits = localStorage.getItem("replai_ai_credits_data");
+    if (localCredits) {
+      try {
+        const parsed = JSON.parse(localCredits);
+        currentBalance = parsed.balance || 0;
+      } catch (e) {
+        // ignore
+      }
+    }
+
+    const userId = db.getCurrentUser()?.id || "guest";
+    const isAdmin = db.getCurrentUser()?.email === "admin@sendly.uz" || db.getCurrentUser()?.email === "isroiljohnabdullayev@gmail.com" || db.getCurrentUser()?.role === "admin";
+    if (userId !== "guest" && currentBalance < creditCost && !isAdmin) {
+      showToast(
+        (t("pages.ai_agent.toasts.insufficient_credits_doc") || "Balansingizda yetarli kreditlar mavjud emas. Havolani tahlil qilish uchun kamida {cost} ta kredit talab qilinadi. Sizda: {balance} ta kredit.")
+          .replace("{cost}", creditCost.toString())
+          .replace("{balance}", currentBalance.toString()),
+        "error"
+      );
+      return;
+    }
+
+    setIsLinkParsing(true);
+    showToast(t("pages.ai_agent.toasts.parsing_link") || "Havola tahlil qilinmoqda...", "success");
+
+    try {
+      const token = localStorage.getItem("replai_token");
+      const headers: Record<string, string> = { "Content-Type": "application/json" };
+      if (token) {
+        headers["Authorization"] = `Bearer ${token}`;
+      }
+
+      const res = await fetch("/api/ai/parse-link", {
+        method: "POST",
+        headers,
+        body: JSON.stringify({ url: urlStr })
+      });
+
+      if (!res.ok) {
+        const errData = await res.json();
+        throw new Error(errData.error || t("pages.ai_agent.toasts.upload_error") || "Havolani tahlil qilishda xatolik yuz berdi.");
+      }
+
+      const data = await res.json();
+      const { title, text } = data;
+
+      // Create new lesson
+      const newLes = db.addLesson(newLinkModuleId, title, text);
+      const updatedLessons = db.getLessons();
+      setLessons(updatedLessons);
+      setSelectedLesson(newLes);
+      setNewLinkUrl("");
+      setShowAddLinkModal(false);
+
+      // Refresh credits balance
+      if (userId !== "guest") {
+        await db.getAiCreditsFromServer(userId);
+      }
+
+      showToast(t("pages.ai_agent.toasts.link_parsed_success") || "Havola muvaffaqiyatli tahlil qilindi va dars qo'shildi!", "success");
+
+    } catch (err: any) {
+      console.error("[Learn From Link Error]:", err);
+      showToast(err.message || t("pages.ai_agent.toasts.error_occurred"), "error");
+      if (userId !== "guest") {
+        await db.getAiCreditsFromServer(userId);
+      }
+    } finally {
+      setIsLinkParsing(false);
+    }
   };
 
   // Delete lesson
@@ -4685,6 +4780,18 @@ function AIAgentContent() {
                     >
                       <Upload size={15} />
                     </button>
+                    <button
+                      onClick={() => {
+                        if (modules.length > 0) {
+                          setNewLinkModuleId(modules[0].id);
+                        }
+                        setShowAddLinkModal(true);
+                      }}
+                      className="p-1.5 text-[#595959] hover:text-black hover:bg-[#F9F9F7] rounded-lg transition-all"
+                      title={t("pages.ai_agent.add_link_tooltip") || "Havola qo'shish (Veb-sahifa, YouTube, Vikipediya)"}
+                    >
+                      <Link2 size={15} />
+                    </button>
                   </div>
                 </div>
 
@@ -4973,7 +5080,7 @@ function AIAgentContent() {
                   </div>
 
                   {/* Quick Action Buttons */}
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-4 border-t border-[#F0F0F0]">
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-4 border-t border-[#F0F0F0]">
                     <button
                       onClick={() => setShowAddModuleModal(true)}
                       className="flex items-center justify-center gap-2 py-3 rounded-xl border border-[#D8D8D8] text-[11px] font-bold text-[#595959] hover:bg-[#F9F9F7] active:scale-95 transition-all shadow-xs"
@@ -4994,6 +5101,18 @@ function AIAgentContent() {
                     >
                       <Upload size={14} />
                       <span>{t("pages.ai_agent.upload_file") || "Fayl yuklash"}</span>
+                    </button>
+                    <button
+                      onClick={() => {
+                        if (modules.length > 0) {
+                          setNewLinkModuleId(modules[0].id);
+                        }
+                        setShowAddLinkModal(true);
+                      }}
+                      className="flex items-center justify-center gap-2 py-3 rounded-xl border border-[#D8D8D8] text-[11px] font-bold text-[#595959] hover:bg-[#F9F9F7] active:scale-95 transition-all shadow-xs"
+                    >
+                      <Link2 size={14} />
+                      <span>{t("pages.ai_agent.add_link") || "Havola qo'shish"}</span>
                     </button>
                   </div>
                 </div>
@@ -5511,8 +5630,8 @@ function AIAgentContent() {
           className="hidden"
         />
 
-        {/* Full-screen Loading Overlay for File Upload / Transcription */}
-        {isFileUploading && (
+        {/* Full-screen Loading Overlay for File Upload / Transcription / Link Parsing */}
+        {(isFileUploading || isLinkParsing) && (
           <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[9999] flex items-center justify-center p-4">
             <div className="bg-white border border-[#E8E8E8] rounded-[24px] max-w-[320px] w-full p-6 shadow-2xl flex flex-col items-center justify-center gap-4 animate-in zoom-in-95 duration-150 text-center">
               <div className="relative flex items-center justify-center">
@@ -5521,10 +5640,12 @@ function AIAgentContent() {
               </div>
               <div className="flex flex-col gap-1">
                 <h4 className="text-[13px] font-bold text-black">
-                  AI tahlil jarayoni...
+                  {isLinkParsing ? (t("pages.ai_agent.toasts.parsing_link") || "Havola tahlil qilinmoqda...") : "AI tahlil jarayoni..."}
                 </h4>
                 <p className="text-[11px] text-[#707070] leading-relaxed">
-                  Hujjat yoki audio faylingiz sun'iy intellekt tomonidan o'rganilmoqda. Iltimos, kuting...
+                  {isLinkParsing 
+                    ? "Veb-sahifa yoki YouTube videosi matni sun'iy intellekt tomonidan o'rganilmoqda. Iltimos, kuting..."
+                    : "Hujjat yoki audio faylingiz sun'iy intellekt tomonidan o'rganilmoqda. Iltimos, kuting..."}
                 </p>
               </div>
             </div>
@@ -5606,6 +5727,55 @@ function AIAgentContent() {
             </div>
           </div>
         )}
+        {/* Modal: Add Link */}
+        {showAddLinkModal && (
+          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[999] flex items-center justify-center p-4">
+            <div className="bg-white border border-[#E8E8E8] rounded-[24px] max-w-[400px] w-full p-6 shadow-2xl flex flex-col gap-4 animate-in zoom-in-95 duration-150">
+              <h3 className="text-[15px] font-bold text-black">{t("pages.ai_agent.learn_from_link_title") || "Havoladan o'rganish"}</h3>
+              
+              <div className="flex flex-col gap-1.5">
+                <span className="text-[10px] font-bold text-black">{t("pages.ai_agent.related_module_label")}</span>
+                <CustomDropdown
+                  value={newLinkModuleId}
+                  onChange={(val) => setNewLinkModuleId(val)}
+                  options={modules.map(m => ({ value: m.id, label: m.title }))}
+                />
+              </div>
+
+              <div className="flex flex-col gap-1.5">
+                <span className="text-[10px] font-bold text-black">{t("pages.ai_agent.link_label") || "Havola (Sayt, YouTube yoki Vikipediya)"}</span>
+                <input
+                  type="text"
+                  value={newLinkUrl}
+                  onChange={(e) => setNewLinkUrl(e.target.value)}
+                  placeholder={t("pages.ai_agent.link_placeholder") || "https://uz.wikipedia.org/... yoki YouTube havolasi"}
+                  className="w-full px-4 py-2.5 text-[12px] bg-[#F9F9F7] border border-[#E8E8E8] rounded-xl focus:outline-none focus:border-black text-black"
+                />
+              </div>
+
+              <div className="text-[10px] text-[#707070] bg-[#F9F9F7] border border-[#E8E8E8] rounded-lg p-2.5 leading-relaxed">
+                {t("pages.ai_agent.link_cost_note") || "Havolani tahlil qilish uchun 50 kredit yechiladi."}
+              </div>
+
+              <div className="flex items-center justify-end gap-3 mt-2">
+                <button
+                  onClick={() => setShowAddLinkModal(false)}
+                  className="px-4 py-2 rounded-xl border border-[#D8D8D8] text-[12px] text-[#595959] hover:bg-[#F9F9F7] transition-all"
+                >
+                  {t("pages.ai_agent.confirm_modal_cancel_btn")}
+                </button>
+                <button
+                  onClick={handleLearnFromLink}
+                  disabled={!newLinkUrl.trim() || !newLinkModuleId || isLinkParsing}
+                  className="px-4 py-2 rounded-xl bg-black text-[#C7F33C] text-[12px] font-bold hover:bg-black/90 disabled:opacity-50 transition-all"
+                >
+                  {t("common.create")}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
 
         {/* Custom Confirmation Modal */}
         {confirmModal.isOpen && (
