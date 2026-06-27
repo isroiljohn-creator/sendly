@@ -250,8 +250,8 @@
     "semantic_hash": ""
   },
   "frontend/src/app/ai-agent/page.tsx": {
-    "mtime": 1782539491.9325976,
-    "ast_hash": "376b0b2c2c786e769448d37f3eb83351",
+    "mtime": 1782540534.4964077,
+    "ast_hash": "630e3325f59cf44363163a65239e5792",
     "semantic_hash": ""
   },
   "frontend/src/app/analytics/page.tsx": {
@@ -810,8 +810,8 @@
     "semantic_hash": ""
   },
   "frontend/src/lib/telegramBotRunner.ts": {
-    "mtime": 1782481174.8532493,
-    "ast_hash": "5c49e339f204b80ac44a9fb1163e24fb",
+    "mtime": 1782540496.7353141,
+    "ast_hash": "fc0456b8ea96cb7ff0a46eba04e57dca",
     "semantic_hash": ""
   },
   "frontend/src/lib/utils.ts": {

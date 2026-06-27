@@ -1297,6 +1297,7 @@ function AIAgentContent() {
       // Sync client state with local server JSON file db.json
       await db.saveToServer();
       showToast(t("pages.ai_agent.toasts.save_success"));
+      setSelectedLesson(null);
     } catch (err) {
       console.error(err);
       showToast(t("pages.ai_agent.toasts.error_occurred"), "error");

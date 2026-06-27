@@ -1,7 +1,7 @@
 # Graph Report - Sendly  (2026-06-27)
 
 ## Corpus Check
-- 171 files · ~465,029 words
+- 171 files · ~465,044 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
@@ -10,7 +10,7 @@
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `054d8657`
+- Built from commit: `bbe67a1f`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
