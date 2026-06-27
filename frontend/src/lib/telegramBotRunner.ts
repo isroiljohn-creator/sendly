@@ -575,11 +575,10 @@ export async function handleTelegramUpdate(channelId: string, token: string, upd
                 ? "Здравствуйте! Добро пожаловать в сервис чат-ботов Sendly. Наша система успешно подключена."
                 : "Assalomu alaykum! Sendly chatbot xizmatiga xush kelibsiz. Tizimimiz muvaffaqiyatli ulangan.";
           } else if (settings.aiCuratorEnabled && settings.telegramBotId === channelId) {
-            // 3. AI Curator RAG Logic
-            const rawLessons = context[`replai_lessons_${channelId}`] || context["replai_lessons"];
-            const lessons: Lesson[] = safeParse(rawLessons, []);
-            const rawModules = context[`replai_modules_${channelId}`] || context["replai_modules"];
-            const modules: Module[] = safeParse(rawModules, []);
+             const rawLessons = context[`replai_lessons_${channelId}`];
+             const lessons: Lesson[] = safeParse(rawLessons, []);
+             const rawModules = context[`replai_modules_${channelId}`];
+             const modules: Module[] = safeParse(rawModules, []);
 
             let credits = { balance: 100, used: 0, history: [] as any[] };
             if (context["replai_ai_credits_data"]) {
@@ -980,8 +979,8 @@ async function checkAndRunAutoOutreach(channelId: string, token: string) {
         credits = safeParse(context["replai_ai_credits_data"], { balance: 100, used: 0, history: [] });
       }
 
-      const lessons: Lesson[] = safeParse(context[`replai_lessons_${channelId}`] || context["replai_lessons"], []);
-      const modules: Module[] = safeParse(context[`replai_modules_${channelId}`] || context["replai_modules"], []);
+      const lessons: Lesson[] = safeParse(context[`replai_lessons_${channelId}`], []);
+      const modules: Module[] = safeParse(context[`replai_modules_${channelId}`], []);
 
       let hasUpdates = false;
 

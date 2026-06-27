@@ -245,19 +245,23 @@ export async function GET(request: Request) {
       }
 
       let lessonsCount = 0;
-      if (uData.replai_lessons) {
-        try {
-          const l = typeof uData.replai_lessons === "string" ? JSON.parse(uData.replai_lessons) : uData.replai_lessons;
-          if (Array.isArray(l)) lessonsCount = l.length;
-        } catch {}
-      }
+      Object.entries(uData).forEach(([key, val]) => {
+        if (key === "replai_lessons" || key.startsWith("replai_lessons_")) {
+          try {
+            const l = typeof val === "string" ? JSON.parse(val) : val;
+            if (Array.isArray(l)) lessonsCount += l.length;
+          } catch {}
+        }
+      });
       let modulesCount = 0;
-      if (uData.replai_modules) {
-        try {
-          const m = typeof uData.replai_modules === "string" ? JSON.parse(uData.replai_modules) : uData.replai_modules;
-          if (Array.isArray(m)) modulesCount = m.length;
-        } catch {}
-      }
+      Object.entries(uData).forEach(([key, val]) => {
+        if (key === "replai_modules" || key.startsWith("replai_modules_")) {
+          try {
+            const m = typeof val === "string" ? JSON.parse(val) : val;
+            if (Array.isArray(m)) modulesCount += m.length;
+          } catch {}
+        }
+      });
 
       let credits = { balance: 100, used: 0, history: [] };
       if (uData.replai_ai_credits_data) {
