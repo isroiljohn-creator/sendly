@@ -969,6 +969,86 @@ function AIAgentContent() {
     return `${count} ta ${l}`;
   };
 
+  const getModuleNamePlaceholder = () => {
+    const lang = i18n.language || "uz";
+    
+    if (selectedAgentType === "sales") {
+      if (lang === "uz") return `Katalog bo'limi nomi (masalan: Smartfonlar)`;
+      if (lang === "ru") return `Название раздела каталога (например: Смартфоны)`;
+      return `Catalog section name (e.g., Smartphones)`;
+    }
+    if (selectedAgentType === "booker") {
+      if (lang === "uz") return `Yo'nalish nomi (masalan: Biznes Konsultatsiya)`;
+      if (lang === "ru") return `Название направления (например: Бизнес-консультации)`;
+      return `Direction name (e.g., Business Consulting)`;
+    }
+    if (selectedAgentType === "recruiter") {
+      if (lang === "uz") return `Bo'lim nomi (masalan: IT bo'limi)`;
+      if (lang === "ru") return `Название отдела (например: IT-отдел)`;
+      return `Department name (e.g., IT Department)`;
+    }
+    if (selectedAgentType === "clinic") {
+      if (lang === "uz") return `Bo'lim nomi (masalan: Kardiologiya)`;
+      if (lang === "ru") return `Название отделения (например: Кардиология)`;
+      return `Department name (e.g., Cardiology)`;
+    }
+    if (selectedAgentType === "realtor") {
+      if (lang === "uz") return `Hudud nomi (masalan: Yunusobod tumani)`;
+      if (lang === "ru") return `Название района (например: Юнусабадский район)`;
+      return `District name (e.g., Yunusabad District)`;
+    }
+    if (selectedAgentType === "helpdesk") {
+      if (lang === "uz") return `Kategoriya nomi (masalan: To'lov muammolari)`;
+      if (lang === "ru") return `Название категории (например: Проблемы с оплатой)`;
+      return `Category name (e.g., Payment Issues)`;
+    }
+    
+    // Default / Curator
+    if (lang === "uz") return `Modul nomi (masalan: 5-Modul. Tahlillar)`;
+    if (lang === "ru") return `Название модуля (например: Модуль 5. Аналитика)`;
+    return `Module name (e.g., Module 5. Analytics)`;
+  };
+
+  const getLessonNamePlaceholder = () => {
+    const lang = i18n.language || "uz";
+    
+    if (selectedAgentType === "sales") {
+      if (lang === "uz") return `Mahsulot nomi (masalan: iPhone 15 Pro Max)`;
+      if (lang === "ru") return `Название товара (например: iPhone 15 Pro Max)`;
+      return `Product name (e.g., iPhone 15 Pro Max)`;
+    }
+    if (selectedAgentType === "booker") {
+      if (lang === "uz") return `Xizmat nomi (masalan: 1:1 Strategik sessiya)`;
+      if (lang === "ru") return `Название услуги (например: 1:1 Стратегическая сессия)`;
+      return `Service name (e.g., 1:1 Strategy Session)`;
+    }
+    if (selectedAgentType === "recruiter") {
+      if (lang === "uz") return `Vakansiya nomi (masalan: Senior React Developer)`;
+      if (lang === "ru") return `Название вакансии (например: Senior React Developer)`;
+      return `Vacancy name (e.g., Senior React Developer)`;
+    }
+    if (selectedAgentType === "clinic") {
+      if (lang === "uz") return `Shifokor/Xizmat (masalan: Dr. Davronov (Kardiolog))`;
+      if (lang === "ru") return `Врач/Услуга (например: Д-р Давронов (Кардиолог))`;
+      return `Doctor/Service (e.g., Dr. Davronov (Cardiologist))`;
+    }
+    if (selectedAgentType === "realtor") {
+      if (lang === "uz") return `E'lon nomi (masalan: 3 xonali kvartira, 72 kv.m)`;
+      if (lang === "ru") return `Название объявления (например: 3-комнатная квартира, 72 кв.м)`;
+      return `Listing title (e.g., 3-room apartment, 72 sq.m)`;
+    }
+    if (selectedAgentType === "helpdesk") {
+      if (lang === "uz") return `Savol-javob nomi (masalan: Karta to'lovi rad etilganda)`;
+      if (lang === "ru") return `Тема вопроса (например: Ошибка оплаты картой)`;
+      return `Q&A title (e.g., Card payment decline)`;
+    }
+    
+    // Default / Curator
+    if (lang === "uz") return `Dars nomi (masalan: 3-Dars. Funnel sozlash)`;
+    if (lang === "ru") return `Название урока (например: Урок 3. Настройка воронок)`;
+    return `Lesson name (e.g., Lesson 3. Setting up funnels)`;
+  };
+
   const loadDatabase = () => {
     // Clean up any lingering demo @sendly_robot channel from localStorage
     const allChannels = db.getChannels();
@@ -5031,7 +5111,7 @@ function AIAgentContent() {
                   onClick={() => setShowAddModuleModal(true)}
                   className="w-full mt-4 py-2 border border-dashed border-[#D8D8D8] hover:border-black/35 rounded-xl text-[11px] font-bold text-[#595959] hover:bg-[#F9F9F7] active:scale-95 transition-all text-center"
                 >
-                  {t("pages.ai_agent.add_module") || "Yangi modul yaratish"}
+                  {`Yangi ${getModuleLabel().toLowerCase()} yaratish`}
                 </button>
               )}
             </div>
@@ -5187,20 +5267,20 @@ function AIAgentContent() {
                   </div>
 
                   {/* Quick Action Buttons */}
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-4 border-t border-[#F0F0F0]">
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-2 pt-4 border-t border-[#F0F0F0]">
                     <button
                       onClick={() => setShowAddModuleModal(true)}
                       className="flex items-center justify-center gap-2 py-3 rounded-xl border border-[#D8D8D8] text-[11px] font-bold text-[#595959] hover:bg-[#F9F9F7] active:scale-95 transition-all shadow-xs"
                     >
                       <FolderPlus size={14} />
-                      <span>{`${getModuleLabel()} qo'shish`}</span>
+                      <span>{`+ ${getModuleLabel().split(" / ")[0]}`}</span>
                     </button>
                     <button
                       onClick={handleTriggerAddLesson}
                       className="flex items-center justify-center gap-2 py-3 rounded-xl bg-black text-[#C7F33C] text-[11px] font-bold hover:bg-black/90 active:scale-95 transition-all shadow-sm"
                     >
                       <FilePlus size={14} />
-                      <span>{`${getLessonLabel()} qo'shish`}</span>
+                      <span>{`+ ${getLessonLabel().split(" / ")[0]}`}</span>
                     </button>
                     <button
                       onClick={() => fileInputRef.current?.click()}
@@ -5768,7 +5848,7 @@ function AIAgentContent() {
                 type="text"
                 value={newModuleName}
                 onChange={(e) => setNewModuleName(e.target.value)}
-                placeholder={t("pages.ai_agent.module_name_placeholder").replace("Modul", getModuleLabel()).replace("modul", getModuleLabel().toLowerCase())}
+                placeholder={getModuleNamePlaceholder()}
                 className="w-full px-4 py-2.5 text-[12px] bg-[#F9F9F7] border border-[#E8E8E8] rounded-xl focus:outline-none focus:border-black"
               />
               <div className="flex items-center justify-end gap-3 mt-2">
@@ -5811,7 +5891,7 @@ function AIAgentContent() {
                   type="text"
                   value={newLessonName}
                   onChange={(e) => setNewLessonName(e.target.value)}
-                  placeholder={t("pages.ai_agent.lesson_name_placeholder").replace("dars", getLessonLabel().toLowerCase())}
+                  placeholder={getLessonNamePlaceholder()}
                   className="w-full px-4 py-2.5 text-[12px] bg-[#F9F9F7] border border-[#E8E8E8] rounded-xl focus:outline-none focus:border-black"
                 />
               </div>
