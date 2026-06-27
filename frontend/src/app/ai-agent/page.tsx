@@ -1924,9 +1924,9 @@ function AIAgentContent() {
       ]);
 
       // Classify the message for CustDev
-      const detectedIntent = classifyIntentForCustDev(userText);
-      const sentiment = detectSentiment(userText);
-      const painPoint = extractPainPoint(userText, detectedIntent);
+      const detectedIntent = ragResult.intent || classifyIntentForCustDev(userText);
+      const sentiment = ragResult.sentiment || detectSentiment(userText);
+      const painPoint = ragResult.painPoint || extractPainPoint(userText, detectedIntent);
       
       const randomUsernames = [
         "umid_growth", "kamola_smm", "shoxrux_biz", "dilnoza_ad", 

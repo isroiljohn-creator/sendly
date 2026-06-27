@@ -793,9 +793,9 @@ export async function handleTelegramUpdate(channelId: string, token: string, upd
 
                 // 3.5. CustDev analysis for curator messages
                 try {
-                  const detectedIntent = classifyIntentForCustDev(text);
-                  const sentiment = detectSentiment(text);
-                  const painPoint = extractPainPoint(text, detectedIntent, userLang, settings.aiAgentType);
+                  const detectedIntent = ragResult.intent || classifyIntentForCustDev(text);
+                  const sentiment = ragResult.sentiment || detectSentiment(text);
+                  const painPoint = ragResult.painPoint || extractPainPoint(text, detectedIntent, userLang, settings.aiAgentType);
                   
                   const now = new Date();
                   const dateStr = now.getFullYear() + "-" + 

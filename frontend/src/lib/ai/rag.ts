@@ -6,6 +6,9 @@ export type RAGResult = {
   sources: string[];
   flagged?: boolean;
   warningMessage?: string;
+  intent?: string;
+  sentiment?: string;
+  painPoint?: string;
 };
 
 /**
@@ -244,27 +247,29 @@ O'quvchilarning savollariga faqat dars materiallari (KURS MATERIALLARI) asosida 
   }
 }
 
-/**
- * Grounded query generation using retrieveContext and Gemini API with a mock fallback.
- */
 async function checkSemanticModeration(
   question: string,
   restrictedTopics: string[],
   apiKey: string
-): Promise<{ flagged: boolean; matchedTopic?: string }> {
-  if (!restrictedTopics || restrictedTopics.length === 0 || !apiKey) {
-    return { flagged: false };
+): Promise<{ flagged: boolean; matchedTopic?: string; isGeneralTalk?: boolean }> {
+  if (!apiKey) {
+    return { flagged: false, isGeneralTalk: false };
   }
   
-  const systemPrompt = `Siz chat xabarlarini tahlil qiluvchi moderation yordamchisiz.
+  const systemPrompt = `Siz chat xabarlarini tahlil qiluvchi moderation va til yordamchisiz.
 Sizga foydalanuvchining xabari va taqiqlangan mavzular ro'yxati taqdim etiladi.
-Vazifangiz: Foydalanuvchining xabari semantik jihatdan (bilvosita bo'lsa ham) ushbu taqiqlangan mavzulardan biriga tegishli ekanligini aniqlash.
 Taqiqlangan mavzular: ${restrictedTopics.join(", ")}.
 
+Vazifalaringiz:
+1. Xabarning taqiqlangan mavzulardan biriga (masalan, din, siyosat, raqobatchi kurslar va h.k.) semantik jihatdan (bilvosita bo'lsa ham) tegishli ekanligini aniqlang.
+2. Xabarning darslik/kurs mazmuniga oid bo'lmagan oddiy suhbat (small talk, salom, xayr, rahmat, xayrli kun), botning o'ziga nisbatan hissiy feedback/fikr (masalan: "sen yomonsan", "tentak bot", "zo'r ekansan", "javobing chala", "yaxshi ishlamayapsan", "rahmat", "ok", "tushundim", "chala") yoki umumiy gap-so'z ekanligini aniqlang.
+
 Qoidalar:
-- Agar xabar taqiqlangan mavzulardan biriga tegishli bo'lsa (masalan, din haqida, ibodatlar, payg'ambarlar, diniy bayramlar, siyosiy arboblar, davlat boshqaruvi, urushlar, siyosat, boshqa raqobatchi kurslar va h.k.), JSON qaytaring: {"flagged": true, "topic": "Mavzu nomi"}
-- Agar xabarda hech qanday taqiqlangan mavzu bo'lmasa, JSON qaytaring: {"flagged": false}
-- Faqat toza JSON qaytaring, boshqa yozuv qo'shmang.`;
+- Agar taqiqlangan mavzu bo'lsa: {"flagged": true, "topic": "Mavzu nomi", "isGeneralTalk": false}
+- Agar dars mavzusiga doir bo'lmagan oddiy suhbat, bot haqidagi gap yoki hissiy fikr bo'lsa: {"flagged": false, "isGeneralTalk": true}
+- Agar darslik/kurs mavzusiga oid haqiqiy savol bo'lsa (RAG orqali darslikdan javob izlash kerak bo'lsa): {"flagged": false, "isGeneralTalk": false}
+
+Faqat toza JSON qaytaring, boshqa yozuv qo'shmang.`;
 
   try {
     const res = await fetch(
@@ -280,6 +285,7 @@ Qoidalar:
           generationConfig: {
             temperature: 0.1,
             responseMimeType: "application/json",
+            maxOutputTokens: 1000,
           },
         }),
       }
@@ -289,15 +295,89 @@ Qoidalar:
       const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
       if (text) {
         const parsed = JSON.parse(text);
-        if (parsed.flagged === true) {
-          return { flagged: true, matchedTopic: parsed.topic };
-        }
+        return {
+          flagged: parsed.flagged === true,
+          matchedTopic: parsed.topic,
+          isGeneralTalk: parsed.isGeneralTalk === true
+        };
       }
     }
   } catch (e) {
     console.error("Semantic moderation failed:", e);
   }
-  return { flagged: false };
+  return { flagged: false, isGeneralTalk: false };
+}
+
+async function analyzeMessageForCustDev(
+  text: string,
+  agentType: string,
+  apiKey: string
+): Promise<{ intent: string; sentiment: "positive" | "neutral" | "negative"; painPoint: string }> {
+  const isSales = agentType === "sales";
+  
+  const systemPrompt = `Siz chat xabarlarini tahlil qiluvchi CustDev (Customer Development) tahlilchisisiz.
+Xabarni o'qib, quyidagi JSON formatida tahlil natijasini qaytaring:
+{
+  "intent": "billing" | "support" | "faq" | "affiliate" | "general",
+  "sentiment": "positive" | "neutral" | "negative",
+  "painPoint": "..."
+}
+
+Qoidalar:
+1. "intent" tasnifi:
+   - "billing": Narxlar, to'lovlar, chegirmalar, tariflar yoki kartani bog'lash haqida.
+   - "support": Texnik yordam, xatoliklar, bot ulanishi, Instagram ulanishi, token olish yoki platformadagi muammolar haqida.
+   - "faq": Mahsulot/kurs tarkibi, darslar mazmuni yoki darslik ma'lumotlari haqida savollar.
+   - "affiliate": Hamkorlik, referal tizimi, ulush olish yoki komissiya shartlari.
+   - "general": Yuqoridagilarga kirmaydigan umumiy gaplar, salomlashish, xayrlashish yoki hissiy fikrlar (maqtov/norozilik).
+2. "sentiment" tasnifi:
+   - "positive": Minnatdorchilik, maqtovlar, ijobiy fikrlar (masalan: "rahmat", "ajoyib", "zo'r bot").
+   - "negative": Noroziliklar, shikoyatlar, xatoliklar haqida xabarlar, asabiylashish (masalan: "yomon", "ishlamayapti", "tentak", "chala").
+   - "neutral": Oddiy savollar, faktik so'rovlar yoki betaraf gaplar.
+3. "painPoint":
+   - Mijozning xabaridan kelib chiqqan **haqiqiy qiyinchilik yoki savolni** o'zbek tilida (lotin yozuvida), qisqa (1 ta gapda) shakllantiring.
+   - Masalan: Agar xabar "Codex nima" bo'lsa, painPoint: "Codex vositasi haqida ma'lumot olish istagi".
+   - Barcha painPoint'larni chiroyli o'zbek tilida yozing.
+
+Faqat toza JSON qaytaring.`;
+
+  try {
+    const res = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          system_instruction: { parts: [{ text: systemPrompt }] },
+          contents: [{ role: "user", parts: [{ text: text }] }],
+          generationConfig: {
+            temperature: 0.1,
+            responseMimeType: "application/json",
+            maxOutputTokens: 1000,
+          },
+        }),
+      }
+    );
+    if (res.ok) {
+      const data = await res.json();
+      const resText = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+      if (resText) {
+        const parsed = JSON.parse(resText);
+        if (parsed.intent && parsed.sentiment && parsed.painPoint) {
+          return parsed;
+        }
+      }
+    }
+  } catch (e) {
+    console.error("AI CustDev analysis failed inside RAG:", e);
+  }
+  
+  // Fallback
+  return {
+    intent: "general",
+    sentiment: "neutral",
+    painPoint: isSales ? "Mahsulot haqida qo'shimcha umumiy ma'lumot olish istagi" : "Kurs yoki darslar haqida qo'shimcha umumiy ma'lumot olish istagi"
+  };
 }
 
 /**
@@ -313,50 +393,70 @@ export async function queryRAG(
 ): Promise<RAGResult> {
   const apiKey = process.env.GEMINI_API_KEY || "";
 
-  // 1. Semantic moderation check for restricted topics
-  if (settings.topics && settings.topics.length > 0 && apiKey) {
-    const moderation = await checkSemanticModeration(question, settings.topics, apiKey);
-    if (moderation.flagged) {
-      const topicLower = (moderation.matchedTopic || "taqiqlangan").toLowerCase();
-      let warningMessage = "";
-      
-      if (topicLower.includes("din") || topicLower.includes("relig")) {
-        warningMessage = "Suhbatimiz mavzusidan chetlashdik. Biz hozirda bu mavzuda (\"din\") ma'lumot bera olmaymiz. Iltimos darsliklar bo'yicha savol bering.";
-      } else if (topicLower.includes("siyosat") || topicLower.includes("polit")) {
-        warningMessage = "Suhbatimiz mavzusidan chetlashdik. Biz hozirda bu mavzuda (\"siyosat\") ma'lumot bera olmaymiz. Iltimos darsliklar bo'yicha savol bering.";
-      } else {
-        warningMessage = `Suhbatimiz mavzusidan chetlashdik. Biz hozirda bu mavzuda ("${moderation.matchedTopic}") ma'lumot bera olmaymiz. Iltimos darsliklar bo'yicha savol bering.`;
-      }
-      return {
-        text: warningMessage,
-        confidence: 0,
-        sources: [],
-        flagged: true,
-        warningMessage
-      };
+  // 1. Semantic moderation & General talk check
+  let flagged = false;
+  let isGeneralTalk = false;
+  let matchedTopic = "";
+  
+  if (apiKey) {
+    try {
+      const moderation = await checkSemanticModeration(question, settings.topics || [], apiKey);
+      flagged = moderation.flagged;
+      matchedTopic = moderation.matchedTopic || "";
+      isGeneralTalk = moderation.isGeneralTalk === true;
+    } catch (e) {
+      console.error("Semantic check failed:", e);
     }
   }
 
-  // 2. Small talk detection — greetings, thanks, etc. should NOT go through RAG retrieval
-  const smallTalkPatterns = [
-    /^(salom|assalomu?\s*alaykum|hi|hello|hey|privet|привет|здравствуйте)[\s!.,?]*$/i,
-    /^(rahmat|raxmat|tashakkur|thanks|thank\s*you|спасибо)[\s!.,?]*$/i,
-    /^(xayr|ko'rishguncha|hayr|bye|goodbye|пока|до\s*свидания)[\s!.,?]*$/i,
-    /^(yaxshimisiz|qalaysiz|nima\s*gap|how\s*are\s*you|как\s*дела)[\s!.,?]*$/i,
-    /^(ok|ha|yo'q|bor|yoq|albatta|tushunarli|davom\s*et|bo'ldi|хорошо|ладно|понятно)[\s!.,?]*$/i,
-    /^(kechirasiz|uzr|sorry|извините)[\s!.,?]*$/i,
-  ];
+  // AI CustDev Analysis (run concurrently or fast)
+  let intent = "general";
+  let sentiment: "positive" | "neutral" | "negative" = "neutral";
+  let painPoint = settings.aiAgentType === "sales" ? "Mahsulot haqida qo'shimcha umumiy ma'lumot olish istagi" : "Kurs yoki darslar haqida qo'shimcha umumiy ma'lumot olish istagi";
   
-  const cleanQ = question.trim();
-  const isSmallTalk = smallTalkPatterns.some(p => p.test(cleanQ));
-  
-  if (isSmallTalk && apiKey) {
-    // Use Gemini directly for small talk without RAG context
-    const smallTalkPrompt = `Sen samimiy va do'stona yordamchisan. Ismingiz: ${settings.agentName || "Sendly"}. O'quvchining ismi: ${studentName}.
-Quyidagi qoidalarga amal qil:
-- Foydalanuvchining oddiy salomlashish, minnatdorchilik yoki xayrlashuv xabariga tabiiy, samimiy va qisqa javob ber.
-- Xuddi do'stingga javob yozayotgandek tabiiy gapir.
-- Hech qanday emoji ishlatma.
+  if (apiKey) {
+    try {
+      const analysis = await analyzeMessageForCustDev(question, settings.aiAgentType || "kurator", apiKey);
+      intent = analysis.intent;
+      sentiment = analysis.sentiment;
+      painPoint = analysis.painPoint;
+    } catch (e) {
+      console.error("CustDev analysis failed:", e);
+    }
+  }
+
+  // Handle restricted topics
+  if (flagged && apiKey) {
+    const topicLower = matchedTopic.toLowerCase();
+    let warningMessage = "";
+    if (topicLower.includes("din") || topicLower.includes("relig")) {
+      warningMessage = "Suhbatimiz mavzusidan chetlashdik. Biz hozirda bu mavzuda (\"din\") ma'lumot bera olmaymiz. Iltimos darsliklar bo'yicha savol bering.";
+    } else if (topicLower.includes("siyosat") || topicLower.includes("polit")) {
+      warningMessage = "Suhbatimiz mavzusidan chetlashdik. Biz hozirda bu mavzuda (\"siyosat\") ma'lumot bera olmaymiz. Iltimos darsliklar bo'yicha savol bering.";
+    } else {
+      warningMessage = `Suhbatimiz mavzusidan chetlashdik. Biz hozirda bu mavzuda ("${matchedTopic}") ma'lumot bera olmaymiz. Iltimos darsliklar bo'yicha savol bering.`;
+    }
+    return {
+      text: warningMessage,
+      confidence: 0,
+      sources: [],
+      flagged: true,
+      warningMessage,
+      intent,
+      sentiment,
+      painPoint
+    };
+  }
+
+  // Handle general talk / emotional chat / feedback (Bypasses RAG completely)
+  if (isGeneralTalk && apiKey) {
+    const generalPrompt = `Sen samimiy, do'stona va insoniy yordamchisan. Isming: ${settings.agentName || "Sendly"}. Foydalanuvchining ismi: ${studentName}.
+Murojaat turi: Foydalanuvchi oddiy salomlashdi, minnatdorchilik bildirdi, xayrlashdi yoki bot/yordamchi haqida hissiy fikr (yaxshi/yomon ekanligi, chala javob bo'lganligi, norozilik kabi fikrlar) bildirdi.
+Qoidalar:
+- Foydalanuvchiga xuddi yaqin do'stingga javob berayotgandek tabiiy, samimiy va insoniy javob qaytar (ortiqcha rasmiy bo'lma).
+- Agar foydalanuvchi norozi bo'lsa (masalan: "sen yomonsan", "chala javob", "ishlamayapti"), kamchiliklar uchun samimiy uzr so'ra va yordam berishga tayyorligingni bildir.
+- Hech qachon "darslikda javob topilmadi" deb aytma va inson-kuratorga yo'naltirma.
+- Emojilar ishlatma.
 - Javob 1-2 gap bo'lsin.`;
 
     try {
@@ -366,9 +466,9 @@ Quyidagi qoidalarga amal qil:
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            system_instruction: { parts: [{ text: smallTalkPrompt }] },
+            system_instruction: { parts: [{ text: generalPrompt }] },
             contents: [{ role: "user", parts: [{ text: question }] }],
-            generationConfig: { temperature: 0.7, maxOutputTokens: 4096 },
+            generationConfig: { temperature: 0.7, maxOutputTokens: 8192 },
           }),
         }
       );
@@ -379,18 +479,24 @@ Quyidagi qoidalarga amal qil:
           return {
             text: reply.trim(),
             confidence: 95,
-            sources: []
+            sources: [],
+            intent,
+            sentiment,
+            painPoint
           };
         }
       }
     } catch (e) {
-      console.error("Small talk Gemini call failed:", e);
+      console.error("General talk Gemini call failed:", e);
     }
-    // Fallback for small talk
+    // Fallback for general talk
     return {
-      text: `Assalomu alaykum, ${studentName}! Savolingiz bo'lsa bering, yordam berishdan xursandman!`,
+      text: `Tushunarli, ${studentName}. Savolingiz bo'lsa bering, darsliklar bo'yicha yordam berishdan xursandman!`,
       confidence: 95,
-      sources: []
+      sources: [],
+      intent,
+      sentiment,
+      painPoint
     };
   }
 
@@ -413,7 +519,10 @@ Quyidagi qoidalarga amal qil:
     return {
       text: "Bilimlar bazasi hali bo'sh. Iltimos, boshqaruv panelidan dars materiallarini kiriting.",
       confidence: 20,
-      sources: []
+      sources: [],
+      intent,
+      sentiment,
+      painPoint
     };
   }
 
@@ -427,7 +536,10 @@ Quyidagi qoidalarga amal qil:
     return {
       text: aiAnswer.trim(),
       confidence: 95,
-      sources
+      sources,
+      intent,
+      sentiment,
+      painPoint
     };
   }
 
@@ -436,13 +548,19 @@ Quyidagi qoidalarga amal qil:
     return {
       text: "Tizim sozlamalarida xatolik: Gemini API Key sozlanmagan. Iltimos platforma administratoriga xabar bering.",
       confidence: 0,
-      sources: []
+      sources: [],
+      intent,
+      sentiment,
+      painPoint
     };
   }
 
   return {
     text: "Kechirasiz, sun'iy intellekt xizmati vaqtincha band yoki javob berishda uzilish yuz berdi. Iltimos qaytadan urinib ko'ring.",
     confidence: 0,
-    sources: []
+    sources: [],
+    intent,
+    sentiment,
+    painPoint
   };
 }

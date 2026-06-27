@@ -4320,7 +4320,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "start_route",
-      "community": 78,
+      "community": 0,
       "norm_label": "route.ts"
     },
     {
@@ -4330,7 +4330,7 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "start_route_get",
-      "community": 78,
+      "community": 0,
       "norm_label": "get()"
     },
     {
@@ -4340,7 +4340,7 @@
       "source_location": "L11",
       "_origin": "ast",
       "id": "start_route_post",
-      "community": 78,
+      "community": 0,
       "norm_label": "post()"
     },
     {
@@ -4410,7 +4410,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "webhook_info_route",
-      "community": 0,
+      "community": 81,
       "norm_label": "route.ts"
     },
     {
@@ -4420,7 +4420,7 @@
       "source_location": "L11",
       "_origin": "ast",
       "id": "webhook_info_route_get",
-      "community": 0,
+      "community": 81,
       "norm_label": "get()"
     },
     {
@@ -4430,7 +4430,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "webhook_route",
-      "community": 0,
+      "community": 81,
       "norm_label": "route.ts"
     },
     {
@@ -4440,7 +4440,7 @@
       "source_location": "L10",
       "_origin": "ast",
       "id": "webhook_route_post",
-      "community": 0,
+      "community": 81,
       "norm_label": "post()"
     },
     {
@@ -5710,7 +5710,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "ui_alert_dialog",
-      "community": 8,
+      "community": 78,
       "norm_label": "alert-dialog.tsx"
     },
     {
@@ -5720,7 +5720,7 @@
       "source_location": "L13",
       "_origin": "ast",
       "id": "ui_alert_dialog_alertdialogoverlay",
-      "community": 8,
+      "community": 78,
       "norm_label": "alertdialogoverlay"
     },
     {
@@ -5730,7 +5730,7 @@
       "source_location": "L28",
       "_origin": "ast",
       "id": "ui_alert_dialog_alertdialogcontent",
-      "community": 8,
+      "community": 78,
       "norm_label": "alertdialogcontent"
     },
     {
@@ -5740,7 +5740,7 @@
       "source_location": "L46",
       "_origin": "ast",
       "id": "ui_alert_dialog_alertdialogheader",
-      "community": 8,
+      "community": 78,
       "norm_label": "alertdialogheader()"
     },
     {
@@ -5750,7 +5750,7 @@
       "source_location": "L51",
       "_origin": "ast",
       "id": "ui_alert_dialog_alertdialogfooter",
-      "community": 8,
+      "community": 78,
       "norm_label": "alertdialogfooter()"
     },
     {
@@ -5760,7 +5760,7 @@
       "source_location": "L59",
       "_origin": "ast",
       "id": "ui_alert_dialog_alertdialogtitle",
-      "community": 8,
+      "community": 78,
       "norm_label": "alertdialogtitle"
     },
     {
@@ -5770,7 +5770,7 @@
       "source_location": "L71",
       "_origin": "ast",
       "id": "ui_alert_dialog_alertdialogdescription",
-      "community": 8,
+      "community": 78,
       "norm_label": "alertdialogdescription"
     },
     {
@@ -5780,7 +5780,7 @@
       "source_location": "L83",
       "_origin": "ast",
       "id": "ui_alert_dialog_alertdialogaction",
-      "community": 8,
+      "community": 78,
       "norm_label": "alertdialogaction"
     },
     {
@@ -5790,7 +5790,7 @@
       "source_location": "L91",
       "_origin": "ast",
       "id": "ui_alert_dialog_alertdialogcancel",
-      "community": 8,
+      "community": 78,
       "norm_label": "alertdialogcancel"
     },
     {
@@ -5860,7 +5860,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "ui_avatar",
-      "community": 81,
+      "community": 3,
       "norm_label": "avatar.tsx"
     },
     {
@@ -5870,7 +5870,7 @@
       "source_location": "L8",
       "_origin": "ast",
       "id": "ui_avatar_avatar",
-      "community": 81,
+      "community": 3,
       "norm_label": "avatar"
     },
     {
@@ -5880,7 +5880,7 @@
       "source_location": "L20",
       "_origin": "ast",
       "id": "ui_avatar_avatarimage",
-      "community": 81,
+      "community": 3,
       "norm_label": "avatarimage"
     },
     {
@@ -5890,7 +5890,7 @@
       "source_location": "L32",
       "_origin": "ast",
       "id": "ui_avatar_avatarfallback",
-      "community": 81,
+      "community": 3,
       "norm_label": "avatarfallback"
     },
     {
@@ -5900,7 +5900,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "ui_badge",
-      "community": 18,
+      "community": 83,
       "norm_label": "badge.tsx"
     },
     {
@@ -5910,7 +5910,7 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "ui_badge_badgevariants",
-      "community": 18,
+      "community": 83,
       "norm_label": "badgevariants"
     },
     {
@@ -5920,7 +5920,7 @@
       "source_location": "L25",
       "_origin": "ast",
       "id": "ui_badge_badgeprops",
-      "community": 18,
+      "community": 83,
       "norm_label": "badgeprops"
     },
     {
@@ -5930,7 +5930,7 @@
       "source_location": "L28",
       "_origin": "ast",
       "id": "ui_badge_badge",
-      "community": 18,
+      "community": 83,
       "norm_label": "badge()"
     },
     {
@@ -7630,7 +7630,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "ui_radio_group",
-      "community": 3,
+      "community": 84,
       "norm_label": "radio-group.tsx"
     },
     {
@@ -7640,7 +7640,7 @@
       "source_location": "L7",
       "_origin": "ast",
       "id": "ui_radio_group_radiogroup",
-      "community": 3,
+      "community": 84,
       "norm_label": "radiogroup"
     },
     {
@@ -7650,7 +7650,7 @@
       "source_location": "L15",
       "_origin": "ast",
       "id": "ui_radio_group_radiogroupitem",
-      "community": 3,
+      "community": 84,
       "norm_label": "radiogroupitem"
     },
     {
@@ -8447,7 +8447,7 @@
       "label": "retrieveContext()",
       "file_type": "code",
       "source_file": "frontend/src/lib/ai/rag.ts",
-      "source_location": "L15",
+      "source_location": "L18",
       "_origin": "ast",
       "id": "ai_rag_retrievecontext",
       "community": 54,
@@ -8457,7 +8457,7 @@
       "label": "sanitizeHistoryForGemini()",
       "file_type": "code",
       "source_file": "frontend/src/lib/ai/rag.ts",
-      "source_location": "L84",
+      "source_location": "L87",
       "_origin": "ast",
       "id": "ai_rag_sanitizehistoryforgemini",
       "community": 54,
@@ -8467,7 +8467,7 @@
       "label": "callGemini()",
       "file_type": "code",
       "source_file": "frontend/src/lib/ai/rag.ts",
-      "source_location": "L117",
+      "source_location": "L120",
       "_origin": "ast",
       "id": "ai_rag_callgemini",
       "community": 54,
@@ -8484,10 +8484,20 @@
       "norm_label": "checksemanticmoderation()"
     },
     {
+      "label": "analyzeMessageForCustDev()",
+      "file_type": "code",
+      "source_file": "frontend/src/lib/ai/rag.ts",
+      "source_location": "L311",
+      "_origin": "ast",
+      "id": "ai_rag_analyzemessageforcustdev",
+      "community": 54,
+      "norm_label": "analyzemessageforcustdev()"
+    },
+    {
       "label": "queryRAG()",
       "file_type": "code",
       "source_file": "frontend/src/lib/ai/rag.ts",
-      "source_location": "L306",
+      "source_location": "L386",
       "_origin": "ast",
       "id": "ai_rag_queryrag",
       "community": 54,
@@ -8570,7 +8580,7 @@
       "source_location": "L70",
       "_origin": "ast",
       "id": "lib_db_botsettings",
-      "community": 54,
+      "community": 49,
       "norm_label": "botsettings"
     },
     {
@@ -8590,7 +8600,7 @@
       "source_location": "L110",
       "_origin": "ast",
       "id": "lib_db_module",
-      "community": 49,
+      "community": 0,
       "norm_label": "module"
     },
     {
@@ -8940,7 +8950,7 @@
       "source_location": "L11",
       "_origin": "ast",
       "id": "lib_telegrambotrunner_safeparse",
-      "community": 78,
+      "community": 0,
       "norm_label": "safeparse()"
     },
     {
@@ -9000,7 +9010,7 @@
       "source_location": "L76",
       "_origin": "ast",
       "id": "lib_telegrambotrunner_splittelegrammessage",
-      "community": 0,
+      "community": 81,
       "norm_label": "splittelegrammessage()"
     },
     {
@@ -9010,7 +9020,7 @@
       "source_location": "L100",
       "_origin": "ast",
       "id": "lib_telegrambotrunner_sendtelegrammessage",
-      "community": 0,
+      "community": 81,
       "norm_label": "sendtelegrammessage()"
     },
     {
@@ -9030,7 +9040,7 @@
       "source_location": "L180",
       "_origin": "ast",
       "id": "lib_telegrambotrunner_handletelegramupdate",
-      "community": 0,
+      "community": 81,
       "norm_label": "handletelegramupdate()"
     },
     {
@@ -9070,7 +9080,7 @@
       "source_location": "L1157",
       "_origin": "ast",
       "id": "lib_telegrambotrunner_starttelegrambots",
-      "community": 78,
+      "community": 0,
       "norm_label": "starttelegrambots()"
     },
     {
@@ -9450,7 +9460,7 @@
       "source_location": "L74",
       "_origin": "ast",
       "id": "lib_telegrambotrunner_getdbdatafromsupabase",
-      "community": 0,
+      "community": 81,
       "norm_label": "getdbdatafromsupabase"
     }
   ],
@@ -26007,6 +26017,16 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "frontend/src/lib/ai/rag.ts",
+      "source_location": "L311",
+      "weight": 1.0,
+      "source": "ai_rag",
+      "target": "ai_rag_analyzemessageforcustdev",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/src/lib/ai/rag.ts",
       "source_location": "L115",
       "weight": 1.0,
       "confidence_score": 1.0,
@@ -26161,6 +26181,17 @@
       "confidence_score": 1.0,
       "source": "ai_rag_queryrag",
       "target": "ai_rag_checksemanticmoderation"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/src/lib/ai/rag.ts",
+      "source_location": "L419",
+      "weight": 1.0,
+      "source": "ai_rag_queryrag",
+      "target": "ai_rag_analyzemessageforcustdev",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports",
@@ -27399,5 +27430,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "55afd94a5eba5f29e5dea3c7403582a29bf59017"
+  "built_at_commit": "5b2658e9b2b80b01f49e3a0c5cbf7a941623710c"
 }
