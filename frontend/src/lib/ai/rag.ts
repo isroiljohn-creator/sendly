@@ -459,6 +459,11 @@ Qoidalar:
 - Emojilar ishlatma.
 - Javob 1-2 gap bo'lsin.`;
 
+    let formattedHistory = sanitizeHistoryForGemini(history);
+    if (formattedHistory.length === 0) {
+      formattedHistory = [{ role: "user", parts: [{ text: question }] }];
+    }
+
     try {
       const res = await fetch(
         `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
@@ -467,7 +472,7 @@ Qoidalar:
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             system_instruction: { parts: [{ text: generalPrompt }] },
-            contents: [{ role: "user", parts: [{ text: question }] }],
+            contents: formattedHistory,
             generationConfig: { temperature: 0.7, maxOutputTokens: 8192 },
           }),
         }

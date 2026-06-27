@@ -1,16 +1,16 @@
 # Graph Report - Sendly  (2026-06-27)
 
 ## Corpus Check
-- 171 files · ~467,085 words
+- 171 files · ~467,134 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 946 nodes · 1704 edges · 85 communities (74 shown, 11 thin omitted)
+- 954 nodes · 1720 edges · 84 communities (73 shown, 11 thin omitted)
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS · INFERRED: 2 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `ff6c3f7e`
+- Built from commit: `e95c3496`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -83,7 +83,6 @@
 - [[_COMMUNITY_Community 78|Community 78]]
 - [[_COMMUNITY_Community 79|Community 79]]
 - [[_COMMUNITY_Community 80|Community 80]]
-- [[_COMMUNITY_Community 81|Community 81]]
 - [[_COMMUNITY_Community 82|Community 82]]
 - [[_COMMUNITY_Community 83|Community 83]]
 - [[_COMMUNITY_Community 84|Community 84]]
@@ -116,11 +115,11 @@
 - 2-file cycle: `backend/src/services/queue.ts -> backend/src/services/trigger.ts -> backend/src/services/queue.ts`
 - 3-file cycle: `backend/src/services/interpreter.ts -> backend/src/services/queue.ts -> backend/src/services/trigger.ts -> backend/src/services/interpreter.ts`
 
-## Communities (85 total, 11 thin omitted)
+## Communities (84 total, 11 thin omitted)
 
 ### Community 0 - "Community 0"
-Cohesion: 0.16
-Nodes (13): Module, ChatMessage, ChatThread, checkAndRunAutoOutreach(), getDbDataFromRailway(), lastOutreachChecks, runBotPollLoop(), safeParse() (+5 more)
+Cohesion: 0.13
+Nodes (16): ChatMessage, chatQueues, ChatThread, checkAndRunAutoOutreach(), getDbDataFromSupabase, getUserIdForChannel(), handleTelegramUpdate(), lastOutreachChecks (+8 more)
 
 ### Community 1 - "Community 1"
 Cohesion: 0.04
@@ -131,8 +130,8 @@ Cohesion: 0.07
 Nodes (49): calcGrowthPct(), checkIfUserIsAdmin(), GET(), POST(), readDb(), readRealAnalytics(), writeDb(), acquireFileLock() (+41 more)
 
 ### Community 3 - "Community 3"
-Cohesion: 0.06
-Nodes (18): AccordionContent, AccordionItem, AccordionTrigger, Avatar, AvatarFallback, AvatarImage, Checkbox, HoverCardContent (+10 more)
+Cohesion: 0.05
+Nodes (22): AccordionContent, AccordionItem, AccordionTrigger, Avatar, AvatarFallback, AvatarImage, Checkbox, HoverCardContent (+14 more)
 
 ### Community 4 - "Community 4"
 Cohesion: 0.14
@@ -143,16 +142,16 @@ Cohesion: 0.09
 Nodes (25): AdminPage(), LOCAL_TRANSLATIONS, AnalyticsPage(), ActivityCard(), ActivityCardProps, DEFAULT_VALUES, InstagramConnectCard(), DEFAULT_POINTS (+17 more)
 
 ### Community 6 - "Community 6"
-Cohesion: 0.11
-Nodes (25): POST(), readDb(), safeParse(), writeDb(), deleteValue(), getAll(), getAllLike(), getAllSettingsExcept() (+17 more)
+Cohesion: 0.15
+Nodes (19): POST(), readDb(), safeParse(), writeDb(), deleteValue(), getAll(), getAllLike(), getAllSettingsExcept() (+11 more)
 
 ### Community 7 - "Community 7"
 Cohesion: 0.26
 Nodes (12): getPool(), supabase, AuthenticatedRequest, authMiddleware(), router, router, router, router (+4 more)
 
 ### Community 8 - "Community 8"
-Cohesion: 0.16
-Nodes (16): cn(), Button, ButtonProps, buttonVariants, Pagination(), PaginationContent, PaginationEllipsis(), PaginationItem (+8 more)
+Cohesion: 0.11
+Nodes (24): cn(), AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter(), AlertDialogHeader(), AlertDialogOverlay (+16 more)
 
 ### Community 9 - "Community 9"
 Cohesion: 0.07
@@ -312,15 +311,15 @@ Nodes (4): Alert, AlertDescription, AlertTitle, alertVariants
 
 ### Community 49 - "Community 49"
 Cohesion: 0.12
-Nodes (9): AIAgentContent(), CustomDropdown(), CustomDropdownProps, FieldMapping, LoadingFallback(), MOCK_FB_FORMS, SimulatedMessage, BotSettings (+1 more)
+Nodes (10): AIAgentContent(), CustomDropdown(), CustomDropdownProps, FieldMapping, LoadingFallback(), MOCK_FB_FORMS, SimulatedMessage, BotSettings (+2 more)
 
 ### Community 50 - "Community 50"
 Cohesion: 0.50
 Nodes (3): Deploy on Vercel, Getting Started, Learn More
 
 ### Community 52 - "Community 52"
-Cohesion: 0.40
-Nodes (4): InputOTP, InputOTPGroup, InputOTPSeparator, InputOTPSlot
+Cohesion: 0.36
+Nodes (9): executeTool(), GET(), getOpenApiSpec(), handleRequest(), POST(), readDb(), safeParse(), tools (+1 more)
 
 ### Community 53 - "Community 53"
 Cohesion: 0.29
@@ -339,8 +338,8 @@ Cohesion: 0.47
 Nodes (5): detectLanguage(), matchTopicPrefix(), moderateMessage(), ModerationResult, OFFENSIVE_WORDS
 
 ### Community 78 - "Community 78"
-Cohesion: 0.22
-Nodes (8): AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter(), AlertDialogHeader(), AlertDialogOverlay, AlertDialogTitle
+Cohesion: 0.38
+Nodes (5): getDbDataFromRailway(), startTelegramBots(), TaskQueue, GET(), POST()
 
 ### Community 79 - "Community 79"
 Cohesion: 0.20
@@ -349,10 +348,6 @@ Nodes (9): name, private, scripts, backup, build, dev, lint, start (+1 more)
 ### Community 80 - "Community 80"
 Cohesion: 0.50
 Nodes (3): TabsContent, TabsList, TabsTrigger
-
-### Community 81 - "Community 81"
-Cohesion: 0.36
-Nodes (6): getDbDataFromSupabase, handleTelegramUpdate(), sendTelegramMessage(), splitTelegramMessage(), GET(), POST()
 
 ### Community 82 - "Community 82"
 Cohesion: 0.50
@@ -363,24 +358,24 @@ Cohesion: 0.67
 Nodes (3): Badge(), BadgeProps, badgeVariants
 
 ## Knowledge Gaps
-- **414 isolated node(s):** `name`, `version`, `description`, `main`, `dev` (+409 more)
+- **415 isolated node(s):** `name`, `version`, `description`, `main`, `dev` (+410 more)
   These have ≤1 connection - possible missing edges or undocumented components.
 - **11 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `cn()` connect `Community 8` to `Community 3`, `Community 4`, `Community 5`, `Community 16`, `Community 18`, `Community 19`, `Community 20`, `Community 22`, `Community 23`, `Community 24`, `Community 28`, `Community 29`, `Community 32`, `Community 35`, `Community 36`, `Community 37`, `Community 43`, `Community 44`, `Community 48`, `Community 52`, `Community 75`, `Community 78`, `Community 80`, `Community 83`, `Community 84`?**
+- **Why does `cn()` connect `Community 8` to `Community 3`, `Community 4`, `Community 5`, `Community 16`, `Community 18`, `Community 19`, `Community 20`, `Community 22`, `Community 23`, `Community 24`, `Community 28`, `Community 29`, `Community 32`, `Community 35`, `Community 36`, `Community 37`, `Community 43`, `Community 44`, `Community 48`, `Community 75`, `Community 80`, `Community 83`, `Community 84`?**
   _High betweenness centrality (0.150) - this node is a cross-community bridge._
 - **Why does `Channel` connect `Community 4` to `Community 0`, `Community 11`, `Community 12`, `Community 82`, `Community 22`?**
-  _High betweenness centrality (0.038) - this node is a cross-community bridge._
+  _High betweenness centrality (0.039) - this node is a cross-community bridge._
 - **Why does `useI18n()` connect `Community 11` to `Community 4`, `Community 5`, `Community 12`, `Community 16`, `Community 49`, `Community 82`, `Community 21`, `Community 22`?**
-  _High betweenness centrality (0.034) - this node is a cross-community bridge._
+  _High betweenness centrality (0.033) - this node is a cross-community bridge._
 - **What connects `name`, `version`, `description` to the rest of the system?**
-  _414 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _415 weakly-connected nodes found - possible documentation gaps or missing edges._
+- **Should `Community 0` be split into smaller, more focused modules?**
+  _Cohesion score 0.13405797101449277 - nodes in this community are weakly interconnected._
 - **Should `Community 1` be split into smaller, more focused modules?**
   _Cohesion score 0.03636363636363636 - nodes in this community are weakly interconnected._
 - **Should `Community 2` be split into smaller, more focused modules?**
   _Cohesion score 0.07481005260081823 - nodes in this community are weakly interconnected._
-- **Should `Community 3` be split into smaller, more focused modules?**
-  _Cohesion score 0.0625 - nodes in this community are weakly interconnected._
