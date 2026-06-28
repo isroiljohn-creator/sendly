@@ -245,8 +245,8 @@
     "semantic_hash": ""
   },
   "frontend/src/app/admin/page.tsx": {
-    "mtime": 1782475271.9179811,
-    "ast_hash": "951cc57dab5ea1b6ac58d5db3392b9cf",
+    "mtime": 1782641309.2294097,
+    "ast_hash": "925956f2373f6547559cef19dc7fb5bd",
     "semantic_hash": ""
   },
   "frontend/src/app/ai-agent/page.tsx": {

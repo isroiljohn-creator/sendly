@@ -1203,14 +1203,26 @@ export default function AdminPage() {
                           <div className="text-[10px] text-[#707070]">{u.email || ""}</div>
                         </td>
                         <td className="px-6 py-3.5">
-                          <span className={`inline-block text-[9px] font-extrabold px-2 py-0.5 rounded-full uppercase ${
-                            u.plan === "vip" ? "bg-black text-[#C7F33C] border border-[#C7F33C]" :
-                            u.plan === "premium" ? "bg-black text-white" :
-                            u.plan === "pro" ? "bg-blue-100 text-blue-800" :
-                            "bg-gray-100 text-gray-500"
-                          }`}>
-                            {u.plan || "free"}
-                          </span>
+                          <select
+                            value={u.plan || "free"}
+                            onChange={(e) => {
+                              const newPlan = e.target.value;
+                              if (confirm(`Foydalanuvchi (${u.fullName || u.email}) tarifini ${newPlan.toUpperCase()} ga o'zgartirmoqchimisiz?`)) {
+                                handleUpdatePlan(u.id, newPlan);
+                              }
+                            }}
+                            className={`text-[10px] font-extrabold px-2 py-0.5 rounded-full uppercase border focus:outline-none cursor-pointer transition-all ${
+                              (u.plan || "free") === "vip" ? "bg-black text-[#C7F33C] border-[#C7F33C]" :
+                              (u.plan || "free") === "premium" ? "bg-black text-white border-black" :
+                              (u.plan || "free") === "pro" ? "bg-blue-100 text-blue-800 border-blue-200" :
+                              "bg-gray-100 text-gray-500 border-gray-200"
+                            }`}
+                          >
+                            <option value="free" className="bg-white text-gray-700">FREE</option>
+                            <option value="pro" className="bg-white text-blue-800">PRO</option>
+                            <option value="premium" className="bg-white text-black font-bold">PREMIUM</option>
+                            <option value="vip" className="bg-white text-[#7CA607] font-bold">VIP</option>
+                          </select>
                         </td>
                         <td className="px-6 py-3.5">
                           {u.isCardLinked ? (
