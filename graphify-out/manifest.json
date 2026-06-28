@@ -240,8 +240,8 @@
     "semantic_hash": ""
   },
   "frontend/src/app/account/page.tsx": {
-    "mtime": 1782462535.3906353,
-    "ast_hash": "80aaf615ac8d606096da81a1a9799199",
+    "mtime": 1782666401.1863983,
+    "ast_hash": "4759d44aa6f30734ac7be9148fb34efe",
     "semantic_hash": ""
   },
   "frontend/src/app/admin/page.tsx": {
@@ -765,18 +765,18 @@
     "semantic_hash": ""
   },
   "frontend/src/i18n/locales/en.json": {
-    "mtime": 1782539856.1450944,
-    "ast_hash": "12d127be2275149803786d2bf426afef",
+    "mtime": 1782666366.4267054,
+    "ast_hash": "24343bced6cf0141879e8519d3c7aba7",
     "semantic_hash": ""
   },
   "frontend/src/i18n/locales/ru.json": {
-    "mtime": 1782539860.6943014,
-    "ast_hash": "0d86ec29d29da2e6f0ecc284bcbf501c",
+    "mtime": 1782666368.1613421,
+    "ast_hash": "4c61974db1fa2204d9b5646defb29d9b",
     "semantic_hash": ""
   },
   "frontend/src/i18n/locales/uz.json": {
-    "mtime": 1782542883.6274686,
-    "ast_hash": "8acfc782d0b33a8b0ff98874dc3cec7c",
+    "mtime": 1782666364.6671505,
+    "ast_hash": "dc1bb8c4cd6ead6843e9f22c12dc73b4",
     "semantic_hash": ""
   },
   "frontend/src/lib/ai/moderation.ts": {
@@ -805,8 +805,8 @@
     "semantic_hash": ""
   },
   "frontend/src/lib/pgdb.ts": {
-    "mtime": 1782547175.0009205,
-    "ast_hash": "d3fd7be4303114d752b5bc1d3564b1a5",
+    "mtime": 1782666263.2722101,
+    "ast_hash": "cbbe7fa2f922eba83e0496cab5e063a9",
     "semantic_hash": ""
   },
   "frontend/src/lib/telegramBotRunner.ts": {

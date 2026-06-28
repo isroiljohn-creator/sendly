@@ -142,7 +142,7 @@ export async function getUserIdByChannelId(channelId: string): Promise<string | 
     `SELECT key FROM kv_store 
      WHERE key LIKE 'global_settings_%' 
        AND value->>'replai_channels' LIKE $1`,
-    [`%"id":"${channelId}"%`]
+    [`%${channelId}%`]
   );
   if (rows.length > 0) {
     return rows[0].key.replace("global_settings_", "");

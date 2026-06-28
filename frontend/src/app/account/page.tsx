@@ -108,7 +108,7 @@ export default function AccountPage() {
       setCurrentUser(user);
       setName(user.fullName);
       setEmail(user.email);
-      setPassword(user.password || "123456");
+      setPassword("");
       
       // Load credits from server
       db.getAiCreditsFromServer(user.id || "guest").then((data) => {
@@ -126,7 +126,7 @@ export default function AccountPage() {
       setCurrentUser(mockUser);
       setName(mockUser.fullName);
       setEmail(mockUser.email);
-      setPassword("123456");
+      setPassword("");
     }
 
     // Read tab from query string
@@ -293,66 +293,24 @@ export default function AccountPage() {
     e.preventDefault();
     if (!currentUser) return;
 
-    // Check if email changed
-    if (email !== currentUser.email) {
-      const emailLower = email.trim().toLowerCase();
-      if (!emailLower.endsWith("@gmail.com") && !emailLower.endsWith("@icloud.com")) {
-        showAlert(
-          t("common.error"),
-          t("pages.login_page.error_invalid_email_domain") || "Faqat @gmail.com yoki @icloud.com elektron pochta manzillari qabul qilinadi.",
-          "error"
-        );
-        return;
-      }
-
-      setIsSendingEmailOtp(true);
-      const generatedCode = Math.floor(100000 + Math.random() * 900000).toString();
-      
-      try {
-        const mailRes = await fetch("/api/auth/send-otp", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email: email.trim(), otp: generatedCode }),
-        });
-        
-        const mailData = await mailRes.json();
-        
-        if (mailRes.ok && mailData.success) {
-          setEmailVerifyCodeState(generatedCode);
-          setPendingEmail(email);
-          setPendingName(name);
-          setPendingPassword(password);
-          setEmailOtpInput("");
-          setEmailOtpError("");
-          setIsEmailVerificationPending(true);
-          setEmailVerifyCountdown(120);
-          showAlert(t("common.success"), t("pages.account.general.sent_otp_success"), "success");
-        } else {
-          showAlert(t("common.error"), mailData.error || "Email yuborishda xatolik yuz berdi.", "error");
-        }
-      } catch (err: unknown) {
-        const errMsg = err instanceof Error ? err.message : String(err);
-        showAlert(t("common.error"), "Tarmoq ulanishida xatolik yuz berdi: " + errMsg, "error");
-      } finally {
-        setIsSendingEmailOtp(false);
-      }
-      return;
-    }
-
-    // Save updated name/password (no email change)
+    // Save updated name/password (no email change allowed)
     const users = db.getUsers();
     const idx = users.findIndex(u => u.email === currentUser.email);
-    const hashedPass = db.hashPassword(password);
+    
+    // Hash password ONLY if user typed a new one (not empty)
+    const isPasswordChanged = password.trim().length > 0;
+    const finalPassword = isPasswordChanged ? db.hashPassword(password) : currentUser.password;
+
     if (idx > -1) {
       users[idx].fullName = name;
-      users[idx].password = hashedPass;
+      users[idx].password = finalPassword;
       localStorage.setItem("replai_users", JSON.stringify(users));
     }
     
-    const updatedUser = { ...currentUser, fullName: name, password: hashedPass };
+    const updatedUser = { ...currentUser, fullName: name, password: finalPassword };
     localStorage.setItem("replai_current_user", JSON.stringify(updatedUser));
     setCurrentUser(updatedUser);
-    setPassword(hashedPass);
+    setPassword(""); // Clear password input field after saving
     
     // Persist changes to server
     await db.saveToServer();
@@ -560,87 +518,17 @@ export default function AccountPage() {
                 <div className="flex flex-col gap-1.5">
                   <label className="text-[11px] font-bold text-[#707070] uppercase tracking-wider">{t("pages.account.general.email")}</label>
                   
-                  {isEmailVerificationPending ? (
-                    <div className="flex flex-col gap-3 p-4 bg-[#F9F9F7] border border-[#E8E8E8] rounded-2xl">
-                      <div className="flex flex-col sm:flex-row gap-3">
-                        <div className="flex-1">
-                          <span className="text-[10px] font-bold text-[#707070] uppercase block mb-1">{t("pages.account.general.new_email")}</span>
-                          <input
-                            type="email"
-                            value={email}
-                            disabled
-                            className="w-full rounded-[10px] border border-[#D8D8D8] px-4 py-3 text-[13px] text-[#707070] bg-[#F5F5F5]"
-                          />
-                        </div>
-                        <div className="sm:w-[180px]">
-                          <span className="text-[10px] font-bold text-[#707070] uppercase block mb-1">{t("pages.account.general.verify_code")}</span>
-                          <input
-                            type="text"
-                            value={emailOtpInput}
-                            onChange={(e) => setEmailOtpInput(e.target.value.replace(/\D/g, "").substring(0, 6))}
-                            className="w-full rounded-[10px] border border-[#D8D8D8] px-4 py-3 text-[13px] text-black focus:outline-none focus:border-black text-center font-bold tracking-[2px]"
-                            placeholder="000000"
-                            required
-                          />
-                        </div>
-                      </div>
-
-                      {emailOtpError && (
-                        <p className="text-[11px] text-red-600 font-semibold">{emailOtpError}</p>
-                      )}
-
-                      <div className="flex flex-wrap items-center justify-between gap-3 mt-1 pt-2 border-t border-[#F0F0F0] text-[11px]">
-                        <div className="text-[#707070]">
-                          {emailVerifyCountdown > 0 ? (
-                            <span>{t("pages.account.general.resend_code").replace("{timer}", "")}<span className="font-mono text-black font-bold">{formatTimer(emailVerifyCountdown)}</span></span>
-                          ) : (
-                            <button
-                              type="button"
-                              onClick={handleResendEmailOtp}
-                              className="font-bold text-[#7CA607] hover:underline"
-                            >
-                              {t("pages.account.general.resend_btn")}
-                            </button>
-                          )}
-                        </div>
-                        <div className="flex items-center gap-3">
-                          <button
-                            type="button"
-                            onClick={handleCancelEmailChange}
-                            className="text-[#707070] hover:text-black font-semibold"
-                          >
-                            Bekor qilish
-                          </button>
-                          <button
-                            type="button"
-                            onClick={handleConfirmEmailOtpInline}
-                            disabled={emailOtpInput.length < 6 || isEmailOtpVerifying}
-                            className="px-4 py-2 bg-black hover:bg-neutral-800 text-white rounded-[10px] font-bold text-[12px] transition-all disabled:opacity-50 active:scale-95 flex items-center gap-1.5"
-                          >
-                            {isEmailOtpVerifying && <Loader2 size={12} className="animate-spin" />}
-                            <span>{t("pages.account.general.confirm_btn")}</span>
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="relative flex items-center">
-                      <input
-                        type="email"
-                        value={email}
-                        disabled={isSendingEmailOtp}
-                        onChange={(e) => setEmail(e.target.value)}
-                        className={`w-full rounded-[10px] border border-[#D8D8D8] px-4 py-3 text-[13px] text-black focus:outline-none focus:border-black ${isSendingEmailOtp ? "bg-[#F5F5F5] text-[#707070]" : ""}`}
-                        placeholder={t("pages.account.general.email_placeholder")}
-                        required
-                      />
-                      {isSendingEmailOtp && (
-                        <div className="absolute right-3">
-                          <Loader2 size={16} className="animate-spin text-gray-500" />
-                        </div>
-                      )}
-                    </div>
-                  )}
+                  <div className="relative flex items-center">
+                    <input
+                      type="email"
+                      value={email}
+                      disabled={true}
+                      className="w-full rounded-[10px] border border-[#D8D8D8] px-4 py-3 text-[13px] text-[#707070] bg-[#F5F5F5] cursor-not-allowed"
+                      placeholder={t("pages.account.general.email_placeholder")}
+                      required
+                    />
+                  </div>
+                  <p className="text-[10px] text-[#707070] mt-0.5">Elektron pochta manzilini o'zgartirib bo'lmaydi.</p>
                 </div>
 
                 <div className="flex flex-col gap-1.5">
@@ -648,16 +536,15 @@ export default function AccountPage() {
                   <input
                     type="password"
                     value={password}
-                    disabled={isEmailVerificationPending}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full rounded-[10px] border border-[#D8D8D8] px-4 py-3 text-[13px] text-black focus:outline-none focus:border-black bg-white disabled:bg-[#F5F5F5] disabled:text-[#707070]"
+                    className="w-full rounded-[10px] border border-[#D8D8D8] px-4 py-3 text-[13px] text-black focus:outline-none focus:border-black bg-white"
                     placeholder={t("pages.account.general.password_placeholder")}
                   />
                   <p className="text-[10px] text-[#707070] mt-0.5">{t("pages.account.general.password_desc")}</p>
                 </div>
 
                 <div className="mt-2 flex justify-start">
-                  <Button type="submit" variant="primary" disabled={isSendingEmailOtp || isEmailVerificationPending} className="gap-2 px-6 py-3 rounded-[10px] text-[13px]">
+                  <Button type="submit" variant="primary" disabled={isSendingEmailOtp} className="gap-2 px-6 py-3 rounded-[10px] text-[13px]">
                     {isSendingEmailOtp ? (
                       <Loader2 size={14} className="animate-spin" />
                     ) : (
@@ -674,7 +561,7 @@ export default function AccountPage() {
           {activeTab === "billing" && (() => {
             const connectedCount = channelsCount;
             const userPlan = currentUser?.plan || "free";
-            const basePrice = userPlan === "vip" ? 600000 : userPlan === "premium" ? 150000 : userPlan === "pro" ? 75000 : 0;
+            const basePrice = userPlan === "vip" ? 1200000 : userPlan === "premium" ? 300000 : userPlan === "pro" ? 150000 : 0;
             const includedChannels = userPlan === "vip" ? 10 : 1;
             const extraChannels = Math.max(0, connectedCount - includedChannels);
             const extraCost = extraChannels * 150000;
@@ -911,12 +798,14 @@ export default function AccountPage() {
                 </div>
 
                 {/* Info message */}
-                <div className="p-3.5 bg-amber-50/50 border border-amber-200/50 text-amber-800 rounded-2xl text-[11px] leading-relaxed flex items-start gap-2">
-                  <Info size={14} className="text-amber-600 shrink-0 mt-0.5" />
-                  <div>
-                    <strong>{t("pages.account.billing.credits_note_bold")}</strong> {t("pages.account.billing.credits_note_text")}
+                {(currentUser?.plan === "pro" || currentUser?.plan === "free" || !currentUser?.plan) && (
+                  <div className="p-3.5 bg-amber-50/50 border border-amber-200/50 text-amber-800 rounded-2xl text-[11px] leading-relaxed flex items-start gap-2">
+                    <Info size={14} className="text-amber-600 shrink-0 mt-0.5" />
+                    <div>
+                      <strong>{t("pages.account.billing.credits_note_bold")}</strong> {t("pages.account.billing.credits_note_text")}
+                    </div>
                   </div>
-                </div>
+                )}
 
                 <div>
                   <button
