@@ -65,10 +65,13 @@ export default function TermsOfService() {
             </p>
             <ul className="list-disc pl-6 space-y-2 mt-2">
               <li>
-                <strong>PRO tarifi:</strong> 75,000 so'm / oy (vaqtinchalik 50% chegirma bilan, odatda 150,000 so'm). Bitta Instagram professional akkaunti va cheksiz chatbot oqimlari.
+                <strong>PRO tarifi:</strong> 150,000 so'm / oy. Bitta Instagram professional akkaunti va 1,000 ta bepul AI tokenlari.
               </li>
               <li>
-                <strong>PREMIUM tarifi:</strong> 600,000 so'm / oy (vaqtinchalik 50% chegirma bilan, odatda 1,200,000 so'm). 10 tagacha Instagram akkaunti, Google Gemini / Sun'iy intellekt integratsiyasi va maxsus yordam.
+                <strong>PREMIUM tarifi:</strong> 300,000 so'm / oy. Bitta Instagram professional akkaunti va 30,000 ta bepul AI tokenlari.
+              </li>
+              <li>
+                <strong>VIP tarifi:</strong> 1,200,000 so'm / oy. 10 tagacha Instagram professional akkaunti va 150,000 ta bepul AI tokenlari.
               </li>
             </ul>
             <p className="mt-3">

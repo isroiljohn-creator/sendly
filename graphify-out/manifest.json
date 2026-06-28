@@ -320,8 +320,8 @@
     "semantic_hash": ""
   },
   "frontend/src/app/api/support/route.ts": {
-    "mtime": 1782544771.7291403,
-    "ast_hash": "8b2cc2295c1ba4294cb3e6006c8625f5",
+    "mtime": 1782640509.8686612,
+    "ast_hash": "7da04343a8eef3a41814d489e00dee30",
     "semantic_hash": ""
   },
   "frontend/src/app/api/telegram/send/route.ts": {
@@ -455,8 +455,8 @@
     "semantic_hash": ""
   },
   "frontend/src/app/terms/page.tsx": {
-    "mtime": 1780419381.0,
-    "ast_hash": "11fc4b68f7da41f1993ec9da82003afe",
+    "mtime": 1782640538.8658412,
+    "ast_hash": "53dfee8b16ba0a60081ba2b1cd8937bf",
     "semantic_hash": ""
   },
   "frontend/src/components/home/ActivityCard.tsx": {
@@ -490,8 +490,8 @@
     "semantic_hash": ""
   },
   "frontend/src/components/landing/LandingPageView.tsx": {
-    "mtime": 1782416588.5925477,
-    "ast_hash": "2293d6b7044f751bb8bbcd5e95b6221e",
+    "mtime": 1782640463.040432,
+    "ast_hash": "63b898e1c7d89d49cd14c6379d63265f",
     "semantic_hash": ""
   },
   "frontend/src/components/layout/AppLayout.tsx": {
@@ -810,8 +810,8 @@
     "semantic_hash": ""
   },
   "frontend/src/lib/telegramBotRunner.ts": {
-    "mtime": 1782638997.8746278,
-    "ast_hash": "df430c830be6f6fc721cbac348921af5",
+    "mtime": 1782640691.2224634,
+    "ast_hash": "2b5161bca494258dbc9aa8d071794b6d",
     "semantic_hash": ""
   },
   "frontend/src/lib/utils.ts": {

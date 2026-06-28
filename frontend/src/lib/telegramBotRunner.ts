@@ -560,10 +560,10 @@ export async function handleTelegramUpdate(channelId: string, token: string, upd
              } else if (matchedKeyword === "narxi" || matchedKeyword === "tarif" || matchedKeyword === "kurs") {
                botReplyText =
                  userLang === "en"
-                    ? "Our pricing (50% Discount!): \n• Pro: 75,000 UZS/month (usually 150,000 UZS) — 1 account\n• Premium: 600,000 UZS/month (usually 1,200,000 UZS) — 10 accounts\n\nOur operator will reply shortly with more details."
+                    ? "Our pricing: \n• Pro: 150,000 UZS/month — 1 account, 1,000 credits\n• Premium: 300,000 UZS/month — 1 account, 30,000 credits\n• VIP: 1,200,000 UZS/month — 10 accounts, 150,000 credits\n\nOur operator will reply shortly with more details."
                     : userLang === "ru"
-                    ? "Наши тарифы (Скидка 50%!): \n• Pro: 75,000 сум/мес (обычно 150,000) — 1 аккаунт\n• Premium: 600,000 сум/мес (обычно 1,200,000) — 10 аккаунтов\n\nНаш оператор скоро свяжется с вами."
-                   : "Bizning tariflarimiz (50% Chegirma!): \n• Pro: 75,000 so'm/oy (odatda 150,000) — 1ta akkaunt\n• Premium: 600,000 so'm/oy (odatda 1,200,000) — 10ta akkaunt\n\nBatafsil ma'lumot olish uchun operatorimiz tez orada javob yozadi.";
+                    ? "Наши тарифы: \n• Pro: 150,000 сум/мес — 1 аккаунт, 1,000 кредитов\n• Premium: 300,000 сум/мес — 1 аккаунт, 30,000 кредитов\n• VIP: 1,200,000 сум/мес — 10 аккаунтов, 150,000 кредитов\n\nНаш оператор скоро свяжется с вами."
+                    : "Bizning tariflarimiz: \n• Pro: 150,000 so'm/oy — 1ta akkaunt, 1,000 token\n• Premium: 300,000 so'm/oy — 1ta akkaunt, 30,000 token\n• VIP: 1,200,000 so'm/oy — 10ta akkaunt, 150,000 token\n\nBatafsil ma'lumot olish uchun operatorimiz tez orada javob yozadi.";
              } else {
                botReplyText = matchedKeyword;
              }

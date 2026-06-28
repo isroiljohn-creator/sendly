@@ -121,7 +121,7 @@ export function LandingPageView() {
       let reply = "";
       let next: string[] = [];
       if (btnText.includes("Narxi")) {
-        reply = "Sendly tariflari (50% Chegirma!):\n• PRO: 75,000 so'm/oy (odatda 150,000 UZS) — 1 akkaunt, 1,000 token\n• PREMIUM: 150,000 so'm/oy (odatda 300,000 UZS) — 1 akkaunt, 30,000 token\n• VIP: 600,000 so'm/oy (odatda 1,200,000 UZS) — 10 akkaunt, 150,000 token\n\n7 kun bepul sinab ko'ring! Sinash uchun karta bog'lash shart.";
+        reply = "Sendly tariflari:\n• PRO: 150,000 so'm/oy — 1 akkaunt, 1,000 token\n• PREMIUM: 300,000 so'm/oy — 1 akkaunt, 30,000 token\n• VIP: 1,200,000 so'm/oy — 10 akkaunt, 150,000 token\n\n7 kun bepul sinab ko'ring! Sinash uchun karta bog'lash shart.";
         next = ["Bepul boshlash", "Boshqa savol"];
       } else if (btnText.includes("ishlaydi")) {
         reply = "Juda oson:\n1. Ro'yxatdan o'ting\n2. Instagram professional akkauntingizni ulang\n3. Bot oqimlarini yarating\n\nBot 24/7 avtomatik javob beradi!";
@@ -485,13 +485,11 @@ export function LandingPageView() {
 
           {/* PRO */}
           <div className="relative rounded-[24px] border border-[#D8D8D8]/60 bg-white p-8 flex flex-col overflow-hidden shadow-sm">
-            <div className="absolute top-0 right-0 bg-red-500 text-white text-[10px] font-extrabold uppercase px-4 py-1.5 rounded-bl-[16px] tracking-wider">{"50% CHEGIRMA"}</div>
             <h3 className="text-[20px] font-extrabold text-black">{"PRO"}</h3>
             <p className="text-[12px] text-[#707075] mt-1">{"Kichik va o'rta bizneslar uchun"}</p>
             <div className="mt-5 flex flex-col gap-1">
-              <span className="text-[12px] text-red-500 font-semibold line-through">150,000 so'm</span>
               <div className="flex items-baseline gap-1.5">
-                <span className="text-[46px] font-[900] text-black tracking-tight leading-none">{"75,000"}</span>
+                <span className="text-[46px] font-[900] text-black tracking-tight leading-none">{"150,000"}</span>
                 <span className="text-[#515154] text-[13px] font-semibold">{"so'm / oy"}</span>
               </div>
             </div>
@@ -519,9 +517,8 @@ export function LandingPageView() {
             <h3 className="text-[20px] font-extrabold text-black">{"PREMIUM"}</h3>
             <p className="text-[12px] text-[#707075] mt-1">{"O'rta va tez o'suvchi bizneslar uchun"}</p>
             <div className="mt-5 flex flex-col gap-1">
-              <span className="text-[12px] text-red-500 font-semibold line-through">300,000 so'm</span>
               <div className="flex items-baseline gap-1.5">
-                <span className="text-[46px] font-[900] text-black tracking-tight leading-none">{"150,000"}</span>
+                <span className="text-[46px] font-[900] text-black tracking-tight leading-none">{"300,000"}</span>
                 <span className="text-[#515154] text-[13px] font-semibold">{"so'm / oy"}</span>
               </div>
             </div>
@@ -548,9 +545,8 @@ export function LandingPageView() {
             <h3 className="text-[20px] font-extrabold text-[#C7F33C]">{"VIP"}</h3>
             <p className="text-[12px] text-white/60 mt-1">{"Agentliklar va yirik loyihalar uchun"}</p>
             <div className="mt-5 flex flex-col gap-1">
-              <span className="text-[12px] text-red-500 font-semibold line-through">1,200,000 so'm</span>
               <div className="flex items-baseline gap-1.5">
-                <span className="text-[46px] font-[900] text-[#C7F33C] tracking-tight leading-none">{"600,000"}</span>
+                <span className="text-[46px] font-[900] text-[#C7F33C] tracking-tight leading-none">{"1,200,000"}</span>
                 <span className="text-white/60 text-[13px] font-semibold">{"so'm / oy"}</span>
               </div>
             </div>
