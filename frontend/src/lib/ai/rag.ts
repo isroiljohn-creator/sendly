@@ -31,25 +31,82 @@ export function retrieveContext(
     "biz", "siz", "ular", "shu", "o'sha", "bo'lib", "bo'lgan", "esa"
   ]);
 
-  const words = question
+  const rawWords = question
     .toLowerCase()
     .split(/\s+/)
     .map(w => w.replace(/[^a-z0-9'’‘`’]/g, "")) // Clean punctuation
-    .filter((w) => w.length > 2 && !stopWords.has(w));
+    .filter((w) => w.length > 1 && !stopWords.has(w));
+
+  // Synonym mapping for Uzbek/English and semantic variations
+  const synonymMap: Record<string, string[]> = {
+    "akkaunt": ["account", "profil", "profile", "kabinet", "pochta", "gmail", "google"],
+    "account": ["akkaunt", "profil", "profile", "kabinet", "pochta", "gmail", "google"],
+    "profil": ["akkaunt", "account", "profile"],
+    "ochish": ["och", "yaratish", "yarat", "sozlash", "kirish", "ocholmadim", "ochomadim", "ocholmayapman", "registratsiya"],
+    "ocholmadim": ["ochish", "yaratish", "ochishni", "ochishga", "ochmoqchi", "ocholmayapman", "yarat"],
+    "ochomadim": ["ochish", "yaratish", "ochishni", "ochishga", "ochmoqchi", "ocholmayapman", "yarat"],
+    "ocholmayapman": ["ochish", "yaratish", "ochishni", "ochishga", "ochmoqchi", "yarat"],
+    "yaratish": ["ochish", "yarat", "och", "sozlash", "yozilish", "registratsiya"],
+    "ulash": ["ulash", "bog'lash", "boglash", "integratsiya", "connect", "sozlash"],
+    "bog'lash": ["ulash", "boglash", "integratsiya", "connect"],
+    "boglanish": ["ulash", "bog'lash", "boglash", "operator", "kurator"],
+    "operator": ["boglanish", "bog'lash", "inson", "kurator", "yordam"],
+    "inson": ["boglanish", "operator", "kurator"],
+    "kurator": ["boglanish", "operator", "inson"],
+    "pul": ["to'lov", "tolov", "narx", "qiymat", "kredit", "credits", "balance", "balans", "tarif"],
+    "to'lov": ["pul", "tolov", "narx", "qiymat", "kredit", "credits", "balance", "balans", "tarif", "to'lash"],
+    "tolov": ["pul", "to'lov", "narx", "qiymat", "kredit", "credits", "balance", "balans", "tarif", "tolash"],
+    "narx": ["pul", "to'lov", "tolov", "qiymat", "qancha", "nechpul", "bahosi", "narxi"],
+    "qancha": ["narx", "qiymat", "nechpul", "bahosi"],
+  };
 
   const scored = lessons.map((lesson) => {
-    const content = ((lesson.transcript || "") + " " + lesson.title).toLowerCase();
+    const titleLower = (lesson.title || "").toLowerCase();
+    const contentLower = ((lesson.transcript || "") + " " + lesson.title).toLowerCase();
     let score = 0;
-    
-    if (words.length === 0) {
+
+    if (rawWords.length === 0) {
       return { lesson, score: 0 };
     }
 
-    for (const w of words) {
-      if (content.includes(w)) {
-        score += 2;
-      } else if (w.length >= 4 && content.includes(w.substring(0, 4))) {
-        score += 1;
+    for (const w of rawWords) {
+      // 1. Exact matches (highest priority)
+      if (contentLower.includes(w)) {
+        score += titleLower.includes(w) ? 6 : 4;
+      }
+
+      // 2. Synonym matching
+      const synonyms = synonymMap[w] || [];
+      for (const syn of synonyms) {
+        if (contentLower.includes(syn)) {
+          score += titleLower.includes(syn) ? 4 : 2;
+        }
+      }
+
+      // 3. Uzbek Root Stemming matches (for verbs and nouns with suffixes)
+      // Ochish / ocholmadim / ocholmayapman -> root is "och"
+      if (w.startsWith("och") && (contentLower.includes("ochish") || contentLower.includes("ochil") || contentLower.includes("ochishni"))) {
+        score += 3;
+      }
+      // Akkaunt / account -> root is "akk" or "acc"
+      if ((w.startsWith("akk") || w.startsWith("acc")) && (contentLower.includes("akkaunt") || contentLower.includes("account"))) {
+        score += 3;
+      }
+      // Ulay olmadim / ulash -> root is "ula"
+      if (w.startsWith("ula") && (contentLower.includes("ulash") || contentLower.includes("ulan") || contentLower.includes("ulashni"))) {
+        score += 3;
+      }
+      // To'lov / tolay olmadim -> root is "tol" or "to'l"
+      if ((w.startsWith("tol") || w.startsWith("to'l")) && (contentLower.includes("to'lov") || contentLower.includes("tolov") || contentLower.includes("to'lash") || contentLower.includes("tolash"))) {
+        score += 3;
+      }
+
+      // 4. Prefix fallback for longer words
+      if (w.length >= 4) {
+        const prefix = w.substring(0, 4);
+        if (contentLower.includes(prefix)) {
+          score += 1.5;
+        }
       }
     }
     return { lesson, score };

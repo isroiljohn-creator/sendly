@@ -4995,22 +4995,25 @@ function AIAgentContent() {
                   <div className="flex items-center gap-1">
                     <button
                       onClick={() => setShowAddModuleModal(true)}
-                      className="p-1.5 text-[#595959] hover:text-black hover:bg-[#F9F9F7] rounded-lg transition-all"
-                      title={t("pages.ai_agent.create_module_tooltip")}
+                      className="p-1.5 text-[#595959] hover:text-black hover:bg-[#F9F9F7] rounded-lg transition-all premium-tooltip"
+                      data-tooltip={t("pages.ai_agent.create_module_tooltip") || "Modul ochish"}
+                      title={t("pages.ai_agent.create_module_tooltip") || "Modul ochish"}
                     >
                       <FolderPlus size={15} />
                     </button>
                     <button
                       onClick={handleTriggerAddLesson}
-                      className="p-1.5 text-[#595959] hover:text-black hover:bg-[#F9F9F7] rounded-lg transition-all"
-                      title={t("pages.ai_agent.create_lesson_tooltip")}
+                      className="p-1.5 text-[#595959] hover:text-black hover:bg-[#F9F9F7] rounded-lg transition-all premium-tooltip"
+                      data-tooltip={t("pages.ai_agent.create_lesson_tooltip") || "Dars ochish"}
+                      title={t("pages.ai_agent.create_lesson_tooltip") || "Dars ochish"}
                     >
                       <FilePlus size={15} />
                     </button>
                     <button
                       onClick={() => fileInputRef.current?.click()}
-                      className="p-1.5 text-[#595959] hover:text-black hover:bg-[#F9F9F7] rounded-lg transition-all"
-                      title={t("pages.ai_agent.upload_document_tooltip") || "Hujjat yuklash (PDF, TXT, DOCX)"}
+                      className="p-1.5 text-[#595959] hover:text-black hover:bg-[#F9F9F7] rounded-lg transition-all premium-tooltip"
+                      data-tooltip={t("pages.ai_agent.upload_document_tooltip") || "Fayl yuklash (PDF, MP3, ...)"}
+                      title={t("pages.ai_agent.upload_document_tooltip") || "Fayl yuklash (PDF, MP3, ...)"}
                     >
                       <Upload size={15} />
                     </button>
@@ -5025,8 +5028,9 @@ function AIAgentContent() {
                         }
                         setShowAddLinkModal(true);
                       }}
-                      className="p-1.5 text-[#595959] hover:text-black hover:bg-[#F9F9F7] rounded-lg transition-all"
-                      title={t("pages.ai_agent.add_link_tooltip") || "Havola qo'shish (Veb-sahifa, YouTube, Vikipediya)"}
+                      className="p-1.5 text-[#595959] hover:text-black hover:bg-[#F9F9F7] rounded-lg transition-all premium-tooltip"
+                      data-tooltip={t("pages.ai_agent.add_link_tooltip") || "Havola qo'shish (Veb-sahifa, YouTube)"}
+                      title={t("pages.ai_agent.add_link_tooltip") || "Havola qo'shish (Veb-sahifa, YouTube)"}
                     >
                       <Link2 size={15} />
                     </button>

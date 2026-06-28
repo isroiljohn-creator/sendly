@@ -1,16 +1,16 @@
 # Graph Report - Sendly  (2026-06-28)
 
 ## Corpus Check
-- 171 files · ~467,508 words
+- 171 files · ~467,909 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 954 nodes · 1720 edges · 83 communities (73 shown, 10 thin omitted)
+- 954 nodes · 1722 edges · 83 communities (73 shown, 10 thin omitted)
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS · INFERRED: 2 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `26facb8b`
+- Built from commit: `0992ffbf`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -321,7 +321,7 @@ Cohesion: 0.36
 Nodes (9): executeTool(), GET(), getOpenApiSpec(), handleRequest(), POST(), readDb(), safeParse(), tools (+1 more)
 
 ### Community 53 - "Community 53"
-Cohesion: 0.29
+Cohesion: 0.30
 Nodes (13): acquireFileLock(), countActiveAutomations(), GET(), getInitialData(), LOCK_DIR, POST(), pruneOrphanSettings(), readDb() (+5 more)
 
 ### Community 54 - "Community 54"

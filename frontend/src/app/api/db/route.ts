@@ -609,17 +609,11 @@ export async function POST(request: Request) {
   }
 }
 
-async function runAutoLearningPipeline(userData: Record<string, any>) {
+async function runAutoLearningPipeline(userData: Record<string, any>, userId: string) {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) return;
 
   const botSettingsKeys = Object.keys(userData).filter(k => k.startsWith("replai_bot_settings_"));
-  let lessonsUpdated = false;
-
-  const rawLessons = userData["replai_lessons"];
-  const lessons: any[] = typeof rawLessons === "string" ? JSON.parse(rawLessons) : (rawLessons || []);
-  const rawModules = userData["replai_modules"];
-  const modules: any[] = typeof rawModules === "string" ? JSON.parse(rawModules) : (rawModules || []);
 
   for (const settingsKey of botSettingsKeys) {
     const botId = settingsKey.replace("replai_bot_settings_", "");
@@ -631,7 +625,16 @@ async function runAutoLearningPipeline(userData: Record<string, any>) {
       const rawChats = userData[chatsKey];
       const chatsList: any[] = typeof rawChats === "string" ? JSON.parse(rawChats) : (rawChats || []);
 
+      const lessonsKey = `replai_lessons_${botId}`;
+      const rawLessons = userData[lessonsKey];
+      const lessons: any[] = typeof rawLessons === "string" ? JSON.parse(rawLessons) : (rawLessons || []);
+
+      const modulesKey = `replai_modules_${botId}`;
+      const rawModules = userData[modulesKey];
+      const modules: any[] = typeof rawModules === "string" ? JSON.parse(rawModules) : (rawModules || []);
+
       let chatsUpdated = false;
+      let lessonsUpdated = false;
 
       for (const chat of chatsList) {
         if (chat.liveTakeover === false && !chat.autoLearned && chat.messages && chat.messages.length > 0) {
@@ -713,11 +716,21 @@ async function runAutoLearningPipeline(userData: Record<string, any>) {
       if (chatsUpdated) {
         userData[chatsKey] = JSON.stringify(chatsList);
       }
+      if (lessonsUpdated) {
+        userData[lessonsKey] = JSON.stringify(lessons);
+        userData[modulesKey] = JSON.stringify(modules);
+      }
     }
   }
 
-  if (lessonsUpdated) {
-    userData["replai_lessons"] = JSON.stringify(lessons);
-    userData["replai_modules"] = JSON.stringify(modules);
+  // Save the updated userData back to PostgreSQL/file system
+  if (pgdb.isConfigured()) {
+    await pgdb.setValue("global_settings_" + userId, userData);
+  } else {
+    const dbData = await readDb();
+    if (!dbData.userData) dbData.userData = {};
+    dbData.userData[userId] = userData;
+    await writeDb(dbData);
   }
+  console.log(`[AutoLearn] Finished background auto learning for user ${userId}.`);
 }
