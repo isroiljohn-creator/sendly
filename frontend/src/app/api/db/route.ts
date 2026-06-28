@@ -314,12 +314,34 @@ export async function POST(request: Request) {
       // 1. Channel duplication check
       if (payload.replai_channels) {
         try {
+          let existingChannels: any[] = [];
+          try {
+            const existingSettings = await pgdb.getValue("global_settings_" + userId) || {};
+            const existingChannelsRaw = existingSettings.replai_channels;
+            if (existingChannelsRaw) {
+              existingChannels = typeof existingChannelsRaw === "string"
+                ? JSON.parse(existingChannelsRaw)
+                : existingChannelsRaw;
+            }
+          } catch (e) {
+            console.error("Failed to load existing user channels:", e);
+          }
+
           const incomingChannels = JSON.parse(payload.replai_channels);
           if (Array.isArray(incomingChannels)) {
             for (const ch of incomingChannels) {
               if (!ch.username) continue;
               const channelUsernameNormalized = ch.username.toLowerCase().replace(/^@+/, "");
               
+              // Skip validation if the user already owned this channel previously
+              const isAlreadyOwned = Array.isArray(existingChannels) && existingChannels.some(
+                (oCh) =>
+                  oCh.type === ch.type &&
+                  oCh.username &&
+                  oCh.username.toLowerCase().replace(/^@+/, "") === channelUsernameNormalized
+              );
+              if (isAlreadyOwned) continue;
+
               // Query other users' settings
               const allSettings = await pgdb.getAllSettingsExcept(userId);
 
@@ -555,11 +577,33 @@ export async function POST(request: Request) {
 
     if (payload.replai_channels) {
       try {
+        let existingChannels: any[] = [];
+        try {
+          const existingChannelsRaw = dbData.userData[userId]?.replai_channels;
+          if (existingChannelsRaw) {
+            existingChannels = typeof existingChannelsRaw === "string"
+              ? JSON.parse(existingChannelsRaw)
+              : existingChannelsRaw;
+          }
+        } catch (e) {
+          console.error("Failed to load existing user channels:", e);
+        }
+
         const incomingChannels = JSON.parse(payload.replai_channels);
         if (Array.isArray(incomingChannels)) {
           for (const ch of incomingChannels) {
             if (!ch.username) continue;
             const channelUsernameNormalized = ch.username.toLowerCase().replace(/^@+/, "");
+
+            // Skip validation if the user already owned this channel previously
+            const isAlreadyOwned = Array.isArray(existingChannels) && existingChannels.some(
+              (oCh) =>
+                oCh.type === ch.type &&
+                oCh.username &&
+                oCh.username.toLowerCase().replace(/^@+/, "") === channelUsernameNormalized
+            );
+            if (isAlreadyOwned) continue;
+
             // Check other users' channels
             for (const [otherUserId, otherUserData] of Object.entries(dbData.userData || {})) {
               if (otherUserId === userId) continue;
