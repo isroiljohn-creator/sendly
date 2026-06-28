@@ -141,7 +141,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
       {impersonatorEmail && (
         <div className="w-full bg-neutral-900 border border-neutral-800 text-white px-4 md:px-6 py-2.5 md:py-3 rounded-[16px] flex justify-between items-center animate-in slide-in-from-top duration-300 shadow-sm relative overflow-hidden shrink-0 z-50">
           <div className="flex items-center gap-2.5 text-[11px] md:text-[12px] font-bold">
-            <span className="text-[#C7F33C]">👤</span>
+            <User size={16} className="text-[#C7F33C] shrink-0" />
             <span className="truncate max-w-[200px] sm:max-w-none">Siz hozirda &lt;{db.getCurrentUser()?.email}&gt; nomidan tizimdadasiz.</span>
           </div>
           <button 

@@ -122,7 +122,13 @@ export async function GET(request: Request) {
     }
     
     const payload = verifyJwt(token, jwtSecret);
-    if (!payload || payload.user_id !== userId) {
+    const isRequestingAdmin = payload && (
+      payload.role === "admin" ||
+      payload.email === "admin@sendly.uz" ||
+      payload.email === "isroiljohnabdullayev@gmail.com" ||
+      payload.email === "aisroil005@gmail.com"
+    );
+    if (!payload || (payload.user_id !== userId && !isRequestingAdmin)) {
       return NextResponse.json({ error: "Forbidden: Access denied" }, { status: 403 });
     }
   } else {
@@ -231,7 +237,13 @@ export async function POST(request: Request) {
   }
   
   const payloadJwt = verifyJwt(token, jwtSecret);
-  if (!payloadJwt || payloadJwt.user_id !== userId) {
+  const isRequestingAdmin = payloadJwt && (
+    payloadJwt.role === "admin" ||
+    payloadJwt.email === "admin@sendly.uz" ||
+    payloadJwt.email === "isroiljohnabdullayev@gmail.com" ||
+    payloadJwt.email === "aisroil005@gmail.com"
+  );
+  if (!payloadJwt || (payloadJwt.user_id !== userId && !isRequestingAdmin)) {
     return NextResponse.json({ error: "Forbidden: Access denied" }, { status: 403 });
   }
 

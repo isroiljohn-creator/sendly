@@ -343,11 +343,15 @@ if (isClient && window.localStorage) {
   }
 }
 
+let isSyncingSuspended = false;
+
 const notifyUpdate = () => {
   if (isClient) {
     window.dispatchEvent(new Event("replai-db-update"));
+    if (isSyncingSuspended) return;
     // Auto-save database state to the server asynchronously
     setTimeout(async () => {
+      if (isSyncingSuspended) return;
       if (typeof db !== "undefined" && db.saveToServer) {
         const res = await db.saveToServer();
         if (res && !res.success && res.error) {
@@ -1140,7 +1144,11 @@ export const db = {
     const data: Record<string, string> = {};
     for (let i = 0; i < localStorage.length; i++) {
       const key = localStorage.key(i);
-      if (key && key.startsWith("replai_")) {
+      if (key && key.startsWith("replai_") && 
+          key !== "replai_admin_impersonator" && 
+          key !== "replai_token" && 
+          key !== "replai_current_user" && 
+          key !== "replai_users") {
         data[key] = localStorage.getItem(key) || "";
       }
     }
@@ -1318,17 +1326,23 @@ export const db = {
   impersonateUser(email: string): { success: boolean; error?: string } {
     if (!isClient) return { success: false };
     const current = this.getCurrentUser();
+    
+    isSyncingSuspended = true; // Suspend saveToServer
+    
     if (current) {
       localStorage.setItem("replai_admin_impersonator", current.email);
     }
     const users = this.getUsers();
     const targetUser = users.find(u => u.email === email);
     if (!targetUser) {
+      isSyncingSuspended = false;
       return { success: false, error: "Foydalanuvchi topilmadi." };
     }
     localStorage.setItem("replai_current_user", JSON.stringify(targetUser));
     this._clearLocalBusinessData();
     notifyUpdate();
+    
+    isSyncingSuspended = false; // Resume
     return { success: true };
   },
 
@@ -1343,6 +1357,9 @@ export const db = {
     if (!adminUser) {
       return { success: false, error: "Admin foydalanuvchisi topilmadi." };
     }
+    
+    isSyncingSuspended = true; // Suspend saveToServer
+    
     const localStorageKeys = Object.keys(localStorage);
     localStorageKeys.forEach((key) => {
       if (key.startsWith("replai_automations_") || key.startsWith("replai_chats_") || key.startsWith("replai_bot_settings_")) {
@@ -1353,6 +1370,8 @@ export const db = {
     localStorage.removeItem("replai_admin_impersonator");
     this._clearLocalBusinessData();
     notifyUpdate();
+    
+    isSyncingSuspended = false; // Resume
     return { success: true };
   },
 

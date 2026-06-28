@@ -3977,7 +3977,7 @@
       "label": "countActiveAutomations()",
       "file_type": "code",
       "source_file": "frontend/src/app/api/db/route.ts",
-      "source_location": "L181",
+      "source_location": "L187",
       "_origin": "ast",
       "id": "db_route_countactiveautomations",
       "community": 53,
@@ -3987,7 +3987,7 @@
       "label": "pruneOrphanSettings()",
       "file_type": "code",
       "source_file": "frontend/src/app/api/db/route.ts",
-      "source_location": "L203",
+      "source_location": "L209",
       "_origin": "ast",
       "id": "db_route_pruneorphansettings",
       "community": 53,
@@ -3997,7 +3997,7 @@
       "label": "POST()",
       "file_type": "code",
       "source_file": "frontend/src/app/api/db/route.ts",
-      "source_location": "L216",
+      "source_location": "L222",
       "_origin": "ast",
       "id": "db_route_post",
       "community": 53,
@@ -4007,7 +4007,7 @@
       "label": "runAutoLearningPipeline()",
       "file_type": "code",
       "source_file": "frontend/src/app/api/db/route.ts",
-      "source_location": "L616",
+      "source_location": "L628",
       "_origin": "ast",
       "id": "db_route_runautolearningpipeline",
       "community": 53,
@@ -8707,7 +8707,7 @@
       "label": "notifyUpdate()",
       "file_type": "code",
       "source_file": "frontend/src/lib/db.ts",
-      "source_location": "L346",
+      "source_location": "L348",
       "_origin": "ast",
       "id": "lib_db_notifyupdate",
       "community": 22,
@@ -8717,7 +8717,7 @@
       "label": "safeParse()",
       "file_type": "code",
       "source_file": "frontend/src/lib/db.ts",
-      "source_location": "L362",
+      "source_location": "L366",
       "_origin": "ast",
       "id": "lib_db_safeparse",
       "community": 22,
@@ -8727,7 +8727,7 @@
       "label": "db",
       "file_type": "code",
       "source_file": "frontend/src/lib/db.ts",
-      "source_location": "L411",
+      "source_location": "L415",
       "_origin": "ast",
       "id": "lib_db_db",
       "community": 4,
@@ -14903,9 +14903,9 @@
       "source_file": "frontend/src/app/admin/page.tsx",
       "source_location": "L6",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "admin_page",
-      "target": "ui_primitives_confirmmodal",
-      "confidence_score": 1.0
+      "target": "ui_primitives_confirmmodal"
     },
     {
       "relation": "imports",
@@ -27224,9 +27224,9 @@
       "source_file": "frontend/src/lib/telegramBotRunner.ts",
       "source_location": "L100",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_telegrambotrunner",
-      "target": "lib_telegrambotrunner_getuserplan",
-      "confidence_score": 1.0
+      "target": "lib_telegrambotrunner_getuserplan"
     },
     {
       "relation": "contains",
@@ -27794,5 +27794,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "7602229b6657aa872efc7ad24f3ec9ee884ef10b"
+  "built_at_commit": "3ef35eb977bd9eaf7fc02f923b5954cb65dbeb05"
 }

@@ -75,7 +75,7 @@ const LOCAL_TRANSLATIONS: Record<string, Record<string, string>> = {
     cardStatus: "Karta holati",
     actions: "Amallar",
     manage: "Boshqarish",
-    impersonate: "Impersonate",
+    impersonate: "Nomidan kirish",
     searchPlaceholder: "Ism yoki email bo'yicha qidirish...",
     totalMembers: "Jami",
     createPromo: "Yangi promokod yaratish",
@@ -1301,7 +1301,7 @@ export default function AdminPage() {
                             title="Foydalanuvchi sifatida tizimga kirish"
                           >
                             <Eye size={12} />
-                            <span>Impersonate</span>
+                            <span>{tr("impersonate")}</span>
                           </button>
                         </td>
                       </tr>

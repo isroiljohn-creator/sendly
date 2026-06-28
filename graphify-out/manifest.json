@@ -245,8 +245,8 @@
     "semantic_hash": ""
   },
   "frontend/src/app/admin/page.tsx": {
-    "mtime": 1782662533.013818,
-    "ast_hash": "37e214990f71cf08fd0e4ba71fc33c57",
+    "mtime": 1782663589.2748196,
+    "ast_hash": "8cb30cdd3c938d99197b9b3fe47a8f5d",
     "semantic_hash": ""
   },
   "frontend/src/app/ai-agent/page.tsx": {
@@ -300,8 +300,8 @@
     "semantic_hash": ""
   },
   "frontend/src/app/api/db/route.ts": {
-    "mtime": 1782662749.8670483,
-    "ast_hash": "f28c2f191d98d827148c51e0b2905a2d",
+    "mtime": 1782663292.9001105,
+    "ast_hash": "fc7ec1572335accf8762990072353173",
     "semantic_hash": ""
   },
   "frontend/src/app/api/invite/route.ts": {
@@ -495,8 +495,8 @@
     "semantic_hash": ""
   },
   "frontend/src/components/layout/AppLayout.tsx": {
-    "mtime": 1782465184.4214401,
-    "ast_hash": "02fed2cf441ec02fd2cf396c641b7e73",
+    "mtime": 1782663601.3507428,
+    "ast_hash": "f630c5e4148c5c62be7e2210227a0efa",
     "semantic_hash": ""
   },
   "frontend/src/components/layout/ConnectChannelModal.tsx": {
@@ -790,8 +790,8 @@
     "semantic_hash": ""
   },
   "frontend/src/lib/db.ts": {
-    "mtime": 1782658613.8298168,
-    "ast_hash": "bb1d6a7853887ca76c357702a0103cbd",
+    "mtime": 1782663614.3711812,
+    "ast_hash": "33dcfd67aed53b6c591d633ae614ac95",
     "semantic_hash": ""
   },
   "frontend/src/lib/jwt.ts": {
