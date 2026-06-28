@@ -4007,7 +4007,7 @@
       "label": "runAutoLearningPipeline()",
       "file_type": "code",
       "source_file": "frontend/src/app/api/db/route.ts",
-      "source_location": "L628",
+      "source_location": "L672",
       "_origin": "ast",
       "id": "db_route_runautolearningpipeline",
       "community": 53,
@@ -27794,5 +27794,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "3ef35eb977bd9eaf7fc02f923b5954cb65dbeb05"
+  "built_at_commit": "3cefe2a4fbeea5a1aaaaa0ed19aa67f4539da438"
 }

@@ -272,9 +272,19 @@ router.get("/callback", async (req, res, next) => {
 
       // Subscribe page to webhook events
       const subUrl = `https://graph.facebook.com/v18.0/${page.id}/subscribed_apps?subscribed_fields=messages,messaging_postbacks,comments,mention,story_insights&access_token=${page.access_token}`;
-      const subRes = await fetch(subUrl, { method: "POST" });
-      if (!subRes.ok) {
-        console.error(`Failed to subscribe Page ${page.id} to webhooks:`, await subRes.text());
+      try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 6000);
+        const subRes = await fetch(subUrl, { 
+          method: "POST",
+          signal: controller.signal
+        });
+        clearTimeout(timeoutId);
+        if (!subRes.ok) {
+          console.error(`Failed to subscribe Page ${page.id} to webhooks:`, await subRes.text());
+        }
+      } catch (subErr: any) {
+        console.error(`Timeout or error subscribing Page ${page.id} to webhooks:`, subErr.message);
       }
 
       connectedAccounts.push({
@@ -381,7 +391,13 @@ router.post("/custom", authMiddleware, async (req: AuthenticatedRequest, res) =>
     // 1. Try to subscribe the page to the custom Meta App automatically
     try {
       const subUrl = `https://graph.facebook.com/v18.0/${instagramPageId}/subscribed_apps?subscribed_fields=messages,messaging_postbacks,comments,mention,story_insights&access_token=${customMetaAccessToken}`;
-      const subRes = await fetch(subUrl, { method: "POST" });
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 6000);
+      const subRes = await fetch(subUrl, { 
+        method: "POST",
+        signal: controller.signal
+      });
+      clearTimeout(timeoutId);
       if (subRes.ok) {
         console.log(`[Oauth Custom] Page ${instagramPageId} successfully subscribed to custom Meta App.`);
       } else {
