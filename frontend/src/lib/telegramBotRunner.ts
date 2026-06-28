@@ -743,25 +743,30 @@ export async function handleTelegramUpdate(channelId: string, token: string, upd
                   botReplyText = ragResult.text;
                 }
 
-                const cost = Math.min(100, 5 + Math.ceil(botReplyText.length / 10));
-                credits.balance = Math.max(0, credits.balance - cost);
-                credits.used = (credits.used || 0) + cost;
-                
-                const usageDesc =
-                  userLang === "en"
-                    ? `AI Curator response (${botReplyText.length} chars)`
-                    : userLang === "ru"
-                    ? `Ответ AI куратора (${botReplyText.length} симв.)`
-                    : `AI Curator javobi (${botReplyText.length} belgi)`;
+                // Determine if we should charge credits (Free for general talk, moderation warnings, and curator escalations)
+                const isFreeOfCharge = shouldEscalate || moderation.flagged || ragResult.isGeneralTalk === true || !botReplyText;
+                const cost = isFreeOfCharge ? 0 : Math.min(100, 5 + Math.ceil(botReplyText.length / 10));
 
-                credits.history.unshift({
-                  id: `tx-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
-                  type: "usage",
-                  amount: cost,
-                  description: usageDesc,
-                  date: new Date().toLocaleString("uz-UZ", { timeZone: "Asia/Tashkent" })
-                });
-                context["replai_ai_credits_data"] = JSON.stringify(credits);
+                if (cost > 0) {
+                  credits.balance = Math.max(0, credits.balance - cost);
+                  credits.used = (credits.used || 0) + cost;
+                  
+                  const usageDesc =
+                    userLang === "en"
+                      ? `AI Curator response (${botReplyText.length} chars)`
+                      : userLang === "ru"
+                      ? `Ответ AI куратора (${botReplyText.length} симв.)`
+                      : `AI Curator javobi (${botReplyText.length} belgi)`;
+
+                  credits.history.unshift({
+                    id: `tx-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+                    type: "usage",
+                    amount: cost,
+                    description: usageDesc,
+                    date: new Date().toLocaleString("uz-UZ", { timeZone: "Asia/Tashkent" })
+                  });
+                  context["replai_ai_credits_data"] = JSON.stringify(credits);
+                }
 
                 // 3.5. CustDev analysis for curator messages
                 try {
@@ -1047,17 +1052,21 @@ async function checkAndRunAutoOutreach(channelId: string, token: string) {
             chat.unread = true;
             chat.time = "Hozir";
 
-            // Deduct credits
-            const cost = Math.min(100, 5 + Math.ceil(outreachText.length / 10));
-            credits.balance = Math.max(0, credits.balance - cost);
-            credits.used = (credits.used || 0) + cost;
-            credits.history.unshift({
-              id: `tx-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
-              type: "usage",
-              amount: cost,
-              description: `AI Curator avtomatik eslatma (Follow-up)`,
-              date: new Date().toLocaleString("uz-UZ", { timeZone: "Asia/Tashkent" })
-            });
+            // Deduct credits (skip if it contains system / operator text)
+            const isFree = outreachText.includes("inson-kurator") || outreachText.includes("operator");
+            const cost = isFree ? 0 : Math.min(100, 5 + Math.ceil(outreachText.length / 10));
+            
+            if (cost > 0) {
+              credits.balance = Math.max(0, credits.balance - cost);
+              credits.used = (credits.used || 0) + cost;
+              credits.history.unshift({
+                id: `tx-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+                type: "usage",
+                amount: cost,
+                description: `AI Curator avtomatik eslatma (Follow-up)`,
+                date: new Date().toLocaleString("uz-UZ", { timeZone: "Asia/Tashkent" })
+              });
+            }
 
             hasUpdates = true;
           }

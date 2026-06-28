@@ -9,6 +9,7 @@ export type RAGResult = {
   intent?: string;
   sentiment?: string;
   painPoint?: string;
+  isGeneralTalk?: boolean;
 };
 
 /**
@@ -544,7 +545,8 @@ Qoidalar:
             sources: [],
             intent,
             sentiment,
-            painPoint
+            painPoint,
+            isGeneralTalk: true
           };
         }
       }
@@ -558,7 +560,8 @@ Qoidalar:
       sources: [],
       intent,
       sentiment,
-      painPoint
+      painPoint,
+      isGeneralTalk: true
     };
   }
 
