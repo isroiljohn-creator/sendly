@@ -83,10 +83,10 @@ export async function POST(request: Request) {
     // Decode base64 to Buffer
     const buffer = Buffer.from(base64Data, "base64");
     
-    // Create native File and FormData for fetch (ensures correct content-type header for audio format)
-    const filePart = new File([buffer], bodyFileName, { type: fileType || "audio/wav" });
+    // Create native Blob and FormData for fetch (ensures correct content-type header for audio format)
+    const audioBlob = new Blob([buffer], { type: fileType || "audio/wav" });
     const formData = new FormData();
-    formData.append("audio", filePart);
+    formData.append("audio", audioBlob, bodyFileName);
 
     console.log(`[Aisha STT] Sending audio file to Aisha STT API (${bodyFileName}, size: ${buffer.length} bytes)...`);
 
@@ -97,7 +97,7 @@ export async function POST(request: Request) {
     if (isV2) {
       console.log(`[Aisha STT] Audio duration is ${duration} mins (> 2 mins). Bypassing v1 and calling v2 directly...`);
       const v2FormData = new FormData();
-      v2FormData.append("audio", filePart);
+      v2FormData.append("audio", audioBlob, bodyFileName);
 
       response = await fetch("https://back.aisha.group/api/v2/stt/post/", {
         method: "POST",
@@ -135,7 +135,7 @@ export async function POST(request: Request) {
           isV2 = true;
 
           const v2FormData = new FormData();
-          v2FormData.append("audio", filePart);
+          v2FormData.append("audio", audioBlob, bodyFileName);
 
           const fallbackRes = await fetch("https://back.aisha.group/api/v2/stt/post/", {
             method: "POST",
