@@ -3257,7 +3257,7 @@
       "label": "LoadingFallback()",
       "file_type": "code",
       "source_file": "frontend/src/app/ai-agent/page.tsx",
-      "source_location": "L6303",
+      "source_location": "L6273",
       "_origin": "ast",
       "id": "ai_agent_page_loadingfallback",
       "community": 49,
@@ -3267,7 +3267,7 @@
       "label": "AIAgentPage()",
       "file_type": "code",
       "source_file": "frontend/src/app/ai-agent/page.tsx",
-      "source_location": "L6312",
+      "source_location": "L6282",
       "_origin": "ast",
       "id": "ai_agent_page_aiagentpage",
       "community": 49,
@@ -15640,9 +15640,9 @@
       "source_file": "frontend/src/app/api/ai/generate-prompt/route.ts",
       "source_location": "L4",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "generate_prompt_route",
-      "target": "generate_prompt_route_post",
-      "confidence_score": 1.0
+      "target": "generate_prompt_route_post"
     },
     {
       "relation": "imports_from",
@@ -15651,9 +15651,9 @@
       "source_file": "frontend/src/app/api/ai/generate-prompt/route.ts",
       "source_location": "L2",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "generate_prompt_route",
-      "target": "lib_jwt",
-      "confidence_score": 1.0
+      "target": "lib_jwt"
     },
     {
       "relation": "imports",
@@ -15662,9 +15662,9 @@
       "source_file": "frontend/src/app/api/ai/generate-prompt/route.ts",
       "source_location": "L2",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "generate_prompt_route",
-      "target": "lib_jwt_verifyjwt",
-      "confidence_score": 1.0
+      "target": "lib_jwt_verifyjwt"
     },
     {
       "relation": "calls",
@@ -27763,5 +27763,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "5fcf570c574c7e5a29894174281b28297142b4f5"
+  "built_at_commit": "02b992a5f07a6c67916e72ba4e7bb81adac1a5ea"
 }

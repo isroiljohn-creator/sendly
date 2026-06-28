@@ -4498,37 +4498,7 @@ function AIAgentContent() {
                     )}
                   </button>
 
-                  {/* Advanced Developer Mode - Collapsible Accordion */}
-                  <div className="mt-2 border-t border-[#F0F0F0] pt-4">
-                    <button
-                      type="button"
-                      onClick={() => setShowDeveloperPrompt(!showDeveloperPrompt)}
-                      className="flex items-center gap-1.5 text-[10px] text-[#A0A0A0] hover:text-black font-semibold uppercase tracking-wider focus:outline-none"
-                    >
-                      <span>{showDeveloperPrompt ? "▼" : "▶"}</span>
-                      <span>
-                        {lang === "uz" ? "Kengaytirilgan rejim (Texnik Prompt)" :
-                         lang === "ru" ? "Режим разработчика (Технический Промпт)" :
-                         "Developer Mode (Technical Prompt)"}
-                      </span>
-                    </button>
 
-                    {showDeveloperPrompt && (
-                      <div className="mt-3 animate-in fade-in duration-200 flex flex-col gap-2">
-                        <textarea
-                          value={settings.systemPrompt}
-                          onChange={(e) => handleUpdateSettings("systemPrompt", e.target.value)}
-                          className="w-full min-h-[180px] p-4 text-[11px] font-mono leading-relaxed bg-[#F9F9F7] border border-[#E8E8E8] rounded-[16px] focus:outline-none focus:border-black focus:ring-1 focus:ring-black resize-y text-black"
-                          placeholder={t("pages.ai_agent.system_instruction_placeholder")}
-                        />
-                        <p className="text-[10px] text-red-500 font-semibold mt-1">
-                          {lang === "uz" ? "⚠️ Diqqat: Tizimli promptni qo'lda o'zgartirish botning ishlashini buzishi mumkin!" :
-                           lang === "ru" ? "⚠️ Внимание: Изменение системного промпта вручную может нарушить работу бота!" :
-                           "⚠️ Caution: Manually changing the system prompt might disrupt the bot's functionality!"}
-                        </p>
-                      </div>
-                    )}
-                  </div>
                 </div>
               </div>
 
