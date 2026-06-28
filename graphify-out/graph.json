@@ -3347,7 +3347,7 @@
       "label": "readRealAnalytics()",
       "file_type": "code",
       "source_file": "frontend/src/app/api/admin/route.ts",
-      "source_location": "L50",
+      "source_location": "L51",
       "_origin": "ast",
       "id": "admin_route_readrealanalytics",
       "community": 2,
@@ -3357,7 +3357,7 @@
       "label": "calcGrowthPct()",
       "file_type": "code",
       "source_file": "frontend/src/app/api/admin/route.ts",
-      "source_location": "L100",
+      "source_location": "L101",
       "_origin": "ast",
       "id": "admin_route_calcgrowthpct",
       "community": 2,
@@ -3367,7 +3367,7 @@
       "label": "GET()",
       "file_type": "code",
       "source_file": "frontend/src/app/api/admin/route.ts",
-      "source_location": "L118",
+      "source_location": "L119",
       "_origin": "ast",
       "id": "admin_route_get",
       "community": 2,
@@ -3377,7 +3377,7 @@
       "label": "POST()",
       "file_type": "code",
       "source_file": "frontend/src/app/api/admin/route.ts",
-      "source_location": "L443",
+      "source_location": "L444",
       "_origin": "ast",
       "id": "admin_route_post",
       "community": 2,
@@ -27763,5 +27763,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "02b992a5f07a6c67916e72ba4e7bb81adac1a5ea"
+  "built_at_commit": "a25aa151183428338ce90caa0ac21340c5df8188"
 }

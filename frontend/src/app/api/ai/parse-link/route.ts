@@ -108,7 +108,7 @@ export async function POST(request: Request) {
     }
 
     userId = payload.user_id;
-    const isAdmin = payload.email === "admin@sendly.uz" || payload.email === "isroiljohnabdullayev@gmail.com" || payload.role === "admin";
+    const isAdmin = payload.email === "admin@sendly.uz" || payload.email === "isroiljohnabdullayev@gmail.com" || payload.email === "aisroil005@gmail.com" || payload.role === "admin";
 
     // Read user credits
     const creditsData = await readUserCredits(userId);

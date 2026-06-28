@@ -1761,7 +1761,7 @@ function AIAgentContent() {
     }
 
     const userId = db.getCurrentUser()?.id || "guest";
-    const isAdmin = db.getCurrentUser()?.email === "admin@sendly.uz" || db.getCurrentUser()?.email === "isroiljohnabdullayev@gmail.com" || db.getCurrentUser()?.role === "admin";
+    const isAdmin = db.getCurrentUser()?.email === "admin@sendly.uz" || db.getCurrentUser()?.email === "isroiljohnabdullayev@gmail.com" || db.getCurrentUser()?.email === "aisroil005@gmail.com" || db.getCurrentUser()?.role === "admin";
     if (userId !== "guest" && currentBalance < creditCost && !isAdmin) {
       showToast(
         (t("pages.ai_agent.toasts.insufficient_credits_doc") || "Balansingizda yetarli kreditlar mavjud emas. Havolani tahlil qilish uchun kamida {cost} ta kredit talab qilinadi. Sizda: {balance} ta kredit.")

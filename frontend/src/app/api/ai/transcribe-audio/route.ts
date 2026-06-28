@@ -50,7 +50,7 @@ export async function POST(request: Request) {
     }
 
     userId = payload.user_id;
-    const isAdmin = payload.email === "admin@sendly.uz" || payload.email === "isroiljohnabdullayev@gmail.com" || payload.role === "admin";
+    const isAdmin = payload.email === "admin@sendly.uz" || payload.email === "isroiljohnabdullayev@gmail.com" || payload.email === "aisroil005@gmail.com" || payload.role === "admin";
     const duration = durationInMinutes || 1;
     creditCost = Math.ceil(duration * 100); // 100 credits per minute (1,000 UZS)
 

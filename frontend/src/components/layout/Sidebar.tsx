@@ -140,7 +140,7 @@ export function Sidebar() {
           if (data) setCredits(data);
         });
       }
-      if (user && (user.email === "admin@sendly.uz" || user.email === "isroiljohnabdullayev@gmail.com" || (user as any).role === "admin")) {
+      if (user && (user.email === "admin@sendly.uz" || user.email === "isroiljohnabdullayev@gmail.com" || user.email === "aisroil005@gmail.com" || (user as any).role === "admin")) {
         setIsAdmin(true);
       } else {
         setIsAdmin(false);

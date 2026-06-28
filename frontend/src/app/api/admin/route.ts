@@ -43,7 +43,8 @@ async function checkIfUserIsAdmin(userId: string, email: string): Promise<boolea
   
   const user = usersList.find((u: any) => u.id === userId || (u.email && u.email.toLowerCase().trim() === email.toLowerCase().trim()));
   if (!user) return false;
-  return user.role === "admin" || user.email?.toLowerCase().trim() === "admin@sendly.uz";
+  const emailClean = user.email?.toLowerCase().trim() || "";
+  return user.role === "admin" || emailClean === "admin@sendly.uz" || emailClean === "isroiljohnabdullayev@gmail.com" || emailClean === "aisroil005@gmail.com";
 }
 
 // ─── Real analytics: read from Railway global_analytics_daily ───────────────

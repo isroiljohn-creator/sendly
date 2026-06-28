@@ -462,7 +462,7 @@ export default function AdminPage() {
 
   useEffect(() => {
     const user = db.getCurrentUser();
-    if (user && (user.email === "admin@sendly.uz" || user.email === "isroiljohnabdullayev@gmail.com" || (user as any).role === "admin")) {
+    if (user && (user.email === "admin@sendly.uz" || user.email === "isroiljohnabdullayev@gmail.com" || user.email === "aisroil005@gmail.com" || (user as any).role === "admin")) {
       setIsAdmin(true);
       loadAdminData();
     } else {

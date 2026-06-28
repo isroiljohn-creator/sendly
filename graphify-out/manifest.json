@@ -245,13 +245,13 @@
     "semantic_hash": ""
   },
   "frontend/src/app/admin/page.tsx": {
-    "mtime": 1782641309.2294097,
-    "ast_hash": "925956f2373f6547559cef19dc7fb5bd",
+    "mtime": 1782661223.0681272,
+    "ast_hash": "420d5cba27b40599d009078f9d515a64",
     "semantic_hash": ""
   },
   "frontend/src/app/ai-agent/page.tsx": {
-    "mtime": 1782660448.8813126,
-    "ast_hash": "aff68f76a18057709a65ea9bc8727905",
+    "mtime": 1782661265.929211,
+    "ast_hash": "b4cf9028aaaa7ee471fe2e9451bc3bb0",
     "semantic_hash": ""
   },
   "frontend/src/app/analytics/page.tsx": {
@@ -260,8 +260,8 @@
     "semantic_hash": ""
   },
   "frontend/src/app/api/admin/route.ts": {
-    "mtime": 1782549759.1287885,
-    "ast_hash": "825620e6a8ea127118c14dc616b8a538",
+    "mtime": 1782661589.3121789,
+    "ast_hash": "898ef947aeaa83a9fac87bc2e933c84c",
     "semantic_hash": ""
   },
   "frontend/src/app/api/ai/rag/route.ts": {
@@ -510,8 +510,8 @@
     "semantic_hash": ""
   },
   "frontend/src/components/layout/Sidebar.tsx": {
-    "mtime": 1782465193.0699573,
-    "ast_hash": "1908fbcffed36a637b39087daad064c6",
+    "mtime": 1782661724.329935,
+    "ast_hash": "19d96c9f6d87faba3ba13f5b10fab68d",
     "semantic_hash": ""
   },
   "frontend/src/components/layout/SupportWidget.tsx": {
@@ -985,13 +985,13 @@
     "semantic_hash": ""
   },
   "frontend/src/app/api/ai/transcribe-audio/route.ts": {
-    "mtime": 1782636613.1080701,
-    "ast_hash": "ca69ce86ed375cfe4c95b70a0305dc37",
+    "mtime": 1782661707.3545492,
+    "ast_hash": "29ab2e3012cc502731f69f4adbbbd221",
     "semantic_hash": ""
   },
   "frontend/src/app/api/ai/parse-link/route.ts": {
-    "mtime": 1782544023.0906632,
-    "ast_hash": "0880760fa38cb723b67e385775231bac",
+    "mtime": 1782661693.4517481,
+    "ast_hash": "3073b67f6d98c80e1593076776754422",
     "semantic_hash": ""
   },
   "frontend/src/app/api/ai/generate-prompt/route.ts": {
