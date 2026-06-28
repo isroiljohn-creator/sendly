@@ -73,6 +73,7 @@ export type BotSettings = {
   length: number;
   humor: number;
   systemPrompt: string;
+  customInstructions?: string;
   topics: string[];
   autoOutreach: boolean;
   outreachStart: string;
@@ -262,6 +263,7 @@ const DEFAULT_BOT_SETTINGS: BotSettings = {
   humor: 30,
   aiAgentType: "kurator",
   agentName: "Davron",
+  customInstructions: "",
   sheetsEnabled: false,
   sheetsWebhookUrl: "",
   bitrixEnabled: false,

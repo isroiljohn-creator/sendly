@@ -518,6 +518,8 @@ function AIAgentContent() {
   // Bot Settings UI States
   const [newTopic, setNewTopic] = useState("");
   const [newRule, setNewRule] = useState("");
+  const [isGeneratingPrompt, setIsGeneratingPrompt] = useState(false);
+  const [showDeveloperPrompt, setShowDeveloperPrompt] = useState(false);
 
   // Toast notification state
   const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
@@ -1296,6 +1298,51 @@ function AIAgentContent() {
       title: t("common.success") || "Muvaffaqiyatli",
       message: t("pages.ai_agent.toasts.tg_bot_linked_success").replace("{username}", formattedUsername),
     });
+  };
+
+  const handleGeneratePrompt = async () => {
+    if (!settings) return;
+    if (!settings.customInstructions || !settings.customInstructions.trim()) {
+      showToast("Iltimos, avval botingiz qanday xarakterga ega bo'lishi haqida ko'rsatma yozing.", "error");
+      return;
+    }
+    setIsGeneratingPrompt(true);
+    try {
+      const token = localStorage.getItem("replai_token");
+      const headers: Record<string, string> = { "Content-Type": "application/json" };
+      if (token) headers["Authorization"] = `Bearer ${token}`;
+
+      const res = await fetch("/api/ai/generate-prompt", {
+        method: "POST",
+        headers,
+        body: JSON.stringify({
+          userInstructions: settings.customInstructions,
+          agentType: settings.aiAgentType,
+          agentName: settings.agentName
+        })
+      });
+
+      if (!res.ok) {
+        const errData = await res.json();
+        throw new Error(errData.error || "API call failed");
+      }
+
+      const data = await res.json();
+      if (data.prompt) {
+        const updatedSettings = { ...settings, systemPrompt: data.prompt };
+        setSettings(updatedSettings);
+        db.saveBotSettings(updatedSettings, settings.telegramBotId);
+        await db.saveToServer();
+        showToast("AI Agent miyasi muvaffaqiyatli shakllantirildi!");
+      } else {
+        showToast("Miyani shakllantirishda xatolik yuz berdi.", "error");
+      }
+    } catch (err: any) {
+      console.error("Error generating prompt:", err);
+      showToast("Prompt yaratib bo'lmadi: " + (err.message || String(err)), "error");
+    } finally {
+      setIsGeneratingPrompt(false);
+    }
   };
 
   // Save changes to DB
@@ -4395,12 +4442,93 @@ function AIAgentContent() {
                     />
                   </div>
 
-                  <textarea
-                    value={settings.systemPrompt}
-                    onChange={(e) => handleUpdateSettings("systemPrompt", e.target.value)}
-                    className="w-full flex-1 min-h-[220px] p-4 text-[12px] font-mono leading-relaxed bg-[#F9F9F7] border border-[#E8E8E8] rounded-[16px] focus:outline-none focus:border-black focus:ring-1 focus:ring-black resize-y text-black"
-                    placeholder={t("pages.ai_agent.system_instruction_placeholder")}
-                  />
+                  {/* AI Assistant Character Instruction Textarea */}
+                  <div className="flex flex-col gap-1.5 mt-2">
+                    <label className="text-[11px] font-bold text-[#707070] uppercase tracking-wider">
+                      {lang === "uz" ? "AI Agent fe'l-atvori va xarakteri (Tabiiy tilda)" :
+                       lang === "ru" ? "Характер и поведение ИИ агента (На обычном языке)" :
+                       "AI Agent Character & Behavior (Natural language)"}
+                    </label>
+                    <span className="text-[10px] text-[#808080]">
+                      {lang === "uz" ? "Bot qanday so'zlar ishlatsin, o'zini qanday tutsin? Yozganingiz asosida AI uning tizimli ko'rsatmalarini avtomat shakllantiradi." :
+                       lang === "ru" ? "Как бот должен общаться, какие слова использовать? На основе этого ИИ автоматически настроит инструкции." :
+                       "How should the bot communicate? AI will automatically build the prompt instructions based on what you write."}
+                    </span>
+                    <textarea
+                      value={settings.customInstructions || ""}
+                      onChange={(e) => handleUpdateSettings("customInstructions", e.target.value)}
+                      className="w-full min-h-[120px] p-4 text-[12px] bg-[#F9F9F7] border border-[#E8E8E8] rounded-[16px] focus:outline-none focus:border-black focus:ring-1 focus:ring-black resize-y text-black leading-relaxed"
+                      placeholder={
+                        lang === "uz" ? "Masalan: Bot mijozlar bilan juda muloyim, hazillashib gaplashsin. Har bir gapida emojilardan foydalansin va mahsulotlarimizni tavsiya qilsin." :
+                        lang === "ru" ? "Например: Бот должен общаться очень вежливо и шутливо с клиентами. Использовать эмодзи в каждом предложении и рекомендовать наши продукты." :
+                        "For example: The bot should speak politely and jokingly with customers. Use emojis in every sentence and recommend our products."
+                      }
+                    />
+                  </div>
+
+                  {/* AI Configuration Action Button */}
+                  <button
+                    type="button"
+                    onClick={handleGeneratePrompt}
+                    disabled={isGeneratingPrompt}
+                    className={`w-full py-3.5 rounded-xl font-extrabold text-[12px] flex items-center justify-center gap-2 transition-all active:scale-[0.98] ${
+                      isGeneratingPrompt
+                        ? "bg-gray-100 text-gray-400 cursor-not-allowed border border-gray-200"
+                        : "bg-black text-[#C7F33C] hover:bg-black/90 shadow-[0_4px_15px_rgba(0,0,0,0.1)]"
+                    }`}
+                  >
+                    {isGeneratingPrompt ? (
+                      <>
+                        <div className="h-4 w-4 border-2 border-gray-400 border-t-transparent rounded-full animate-spin" />
+                        <span>
+                          {lang === "uz" ? "Miyani shakllantirish boshlandi..." :
+                           lang === "ru" ? "Формирование разума началось..." :
+                           "Brain configuration started..."}
+                        </span>
+                      </>
+                    ) : (
+                      <>
+                        <Brain size={14} className="animate-pulse text-[#C7F33C]" />
+                        <span>
+                          {lang === "uz" ? "Miyani shakllantirish (AI yordamida)" :
+                           lang === "ru" ? "Настроить разум (с помощью ИИ)" :
+                           "Configure Brain (Using AI)"}
+                        </span>
+                      </>
+                    )}
+                  </button>
+
+                  {/* Advanced Developer Mode - Collapsible Accordion */}
+                  <div className="mt-2 border-t border-[#F0F0F0] pt-4">
+                    <button
+                      type="button"
+                      onClick={() => setShowDeveloperPrompt(!showDeveloperPrompt)}
+                      className="flex items-center gap-1.5 text-[10px] text-[#A0A0A0] hover:text-black font-semibold uppercase tracking-wider focus:outline-none"
+                    >
+                      <span>{showDeveloperPrompt ? "▼" : "▶"}</span>
+                      <span>
+                        {lang === "uz" ? "Kengaytirilgan rejim (Texnik Prompt)" :
+                         lang === "ru" ? "Режим разработчика (Технический Промпт)" :
+                         "Developer Mode (Technical Prompt)"}
+                      </span>
+                    </button>
+
+                    {showDeveloperPrompt && (
+                      <div className="mt-3 animate-in fade-in duration-200 flex flex-col gap-2">
+                        <textarea
+                          value={settings.systemPrompt}
+                          onChange={(e) => handleUpdateSettings("systemPrompt", e.target.value)}
+                          className="w-full min-h-[180px] p-4 text-[11px] font-mono leading-relaxed bg-[#F9F9F7] border border-[#E8E8E8] rounded-[16px] focus:outline-none focus:border-black focus:ring-1 focus:ring-black resize-y text-black"
+                          placeholder={t("pages.ai_agent.system_instruction_placeholder")}
+                        />
+                        <p className="text-[10px] text-red-500 font-semibold mt-1">
+                          {lang === "uz" ? "⚠️ Diqqat: Tizimli promptni qo'lda o'zgartirish botning ishlashini buzishi mumkin!" :
+                           lang === "ru" ? "⚠️ Внимание: Изменение системного промпта вручную может нарушить работу бота!" :
+                           "⚠️ Caution: Manually changing the system prompt might disrupt the bot's functionality!"}
+                        </p>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
 
