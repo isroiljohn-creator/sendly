@@ -365,7 +365,9 @@ export async function POST(request: Request) {
             } else {
               newUser.plan = "free";
               newUser.role = "user";
-              newUser.trialExpiresAt = undefined;
+              const expiresAt = new Date();
+              expiresAt.setDate(expiresAt.getDate() + 7);
+              newUser.trialExpiresAt = expiresAt.toLocaleDateString("uz-UZ", { day: "numeric", month: "long", year: "numeric" });
             }
           }
           
@@ -373,7 +375,7 @@ export async function POST(request: Request) {
             const newPlan = newUser.plan || "free";
             const uData = await pgdb.getValue("global_settings_" + userId) || {};
 
-            let creditsData = { balance: 100, used: 0, history: [] as any[] };
+            let creditsData = { balance: 500, used: 0, history: [] as any[] };
             if (uData.replai_ai_credits_data) {
               try {
                 creditsData = typeof uData.replai_ai_credits_data === "string"
@@ -384,8 +386,8 @@ export async function POST(request: Request) {
               }
             }
 
-            let creditBalance = 100;
-            let description = "Hisob bepul tarifga o'tkazildi (Free reset)";
+            let creditBalance = 500;
+            let description = "Bepul tarif uchun 500 ta sinov krediti taqdim etildi";
             if (newPlan === "pro") {
               creditBalance = 1000;
               description = "PRO tarif obunasi uchun 1000 ta kredit taqdim etildi";
@@ -483,7 +485,9 @@ export async function POST(request: Request) {
           } else {
             newUser.plan = "free";
             newUser.role = "user";
-            newUser.trialExpiresAt = undefined;
+            const expiresAt = new Date();
+            expiresAt.setDate(expiresAt.getDate() + 7);
+            newUser.trialExpiresAt = expiresAt.toLocaleDateString("uz-UZ", { day: "numeric", month: "long", year: "numeric" });
           }
         }
         
@@ -491,7 +495,7 @@ export async function POST(request: Request) {
           const newPlan = newUser.plan || "free";
           if (!dbData.userData[userId]) dbData.userData[userId] = {};
           
-          let creditsData = { balance: 100, used: 0, history: [] as any[] };
+          let creditsData = { balance: 500, used: 0, history: [] as any[] };
           if (dbData.userData[userId]["replai_ai_credits_data"]) {
             try {
               const rawCreds = dbData.userData[userId]["replai_ai_credits_data"];
@@ -503,8 +507,8 @@ export async function POST(request: Request) {
             }
           }
 
-          let creditBalance = 100;
-          let description = "Hisob bepul tarifga o'tkazildi (Free reset)";
+          let creditBalance = 500;
+          let description = "Bepul tarif uchun 500 ta sinov krediti taqdim etildi";
           if (newPlan === "pro") {
             creditBalance = 1000;
             description = "PRO tarif obunasi uchun 1000 ta kredit taqdim etildi";

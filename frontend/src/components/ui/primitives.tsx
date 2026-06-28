@@ -383,7 +383,13 @@ export function ConfirmModal({
               onConfirm();
               onClose();
             }}
-            className="rounded-full bg-[#DC2626] px-4 py-2 font-medium text-white hover:bg-[#B91C1C] active:scale-95 transition-all"
+            className={`rounded-full px-4 py-2 font-medium active:scale-95 transition-all ${
+              resolvedConfirmText.toLowerCase().includes("o'chirish") ||
+              resolvedConfirmText.toLowerCase().includes("delete") ||
+              resolvedConfirmText.toLowerCase().includes("o'chirib")
+                ? "bg-[#DC2626] text-white hover:bg-[#B91C1C]"
+                : "bg-black text-[#C7F33C] hover:bg-black/90"
+            }`}
           >
             {resolvedConfirmText}
           </button>

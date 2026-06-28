@@ -499,7 +499,9 @@ export async function POST(request: Request) {
           if (plan === "free") {
             usersList[userIdx].isCardLinked = false;
             delete usersList[userIdx].cardNumber;
-            delete usersList[userIdx].trialExpiresAt;
+            const expiresAt = new Date();
+            expiresAt.setDate(expiresAt.getDate() + 7);
+            usersList[userIdx].trialExpiresAt = expiresAt.toLocaleDateString("uz-UZ", { day: "numeric", month: "long", year: "numeric" });
           } else {
             usersList[userIdx].isCardLinked = true;
             if (!usersList[userIdx].cardNumber) usersList[userIdx].cardNumber = "Visa, *8899";
@@ -512,11 +514,11 @@ export async function POST(request: Request) {
 
           try {
             const uData = await pgdb.getValue("global_settings_" + userId) || {};
-            let creditsData = { balance: 100, used: 0, history: [] as any[] };
+            let creditsData = { balance: 500, used: 0, history: [] as any[] };
             if (uData.replai_ai_credits_data) {
               try { creditsData = typeof uData.replai_ai_credits_data === "string" ? JSON.parse(uData.replai_ai_credits_data) : uData.replai_ai_credits_data; } catch {}
             }
-            let creditBalance = 100, description = "Hisob bepul tarifga o'tkazildi (Free reset)";
+            let creditBalance = 500, description = "Bepul tarif uchun 500 ta sinov krediti taqdim etildi";
             if (plan === "pro") { creditBalance = 1000; description = "PRO tarif obunasi uchun 1000 ta kredit taqdim etildi"; }
             else if (plan === "premium") { creditBalance = 30000; description = "PREMIUM tarif obunasi uchun 30 000 ta kredit taqdim etildi"; }
             else if (plan === "vip") { creditBalance = 150000; description = "VIP tarif obunasi uchun 150 000 ta kredit taqdim etildi"; }
@@ -585,14 +587,25 @@ export async function POST(request: Request) {
       if (userIdx === -1) return NextResponse.json({ error: "Foydalanuvchi topilmadi." }, { status: 400 });
       const prevPlan = dbData.users[userIdx].plan || "free";
       dbData.users[userIdx].plan = plan;
-      if (plan === "free") { dbData.users[userIdx].isCardLinked = false; delete dbData.users[userIdx].cardNumber; delete dbData.users[userIdx].trialExpiresAt; }
-      else { dbData.users[userIdx].isCardLinked = true; if (!dbData.users[userIdx].cardNumber) dbData.users[userIdx].cardNumber = "Visa, *8899"; const expiresAt = new Date(); expiresAt.setDate(expiresAt.getDate() + 30); dbData.users[userIdx].trialExpiresAt = expiresAt.toLocaleDateString("uz-UZ", { day: "numeric", month: "long", year: "numeric" }); }
+      if (plan === "free") {
+        dbData.users[userIdx].isCardLinked = false;
+        delete dbData.users[userIdx].cardNumber;
+        const expiresAt = new Date();
+        expiresAt.setDate(expiresAt.getDate() + 7);
+        dbData.users[userIdx].trialExpiresAt = expiresAt.toLocaleDateString("uz-UZ", { day: "numeric", month: "long", year: "numeric" });
+      } else {
+        dbData.users[userIdx].isCardLinked = true;
+        if (!dbData.users[userIdx].cardNumber) dbData.users[userIdx].cardNumber = "Visa, *8899";
+        const expiresAt = new Date();
+        expiresAt.setDate(expiresAt.getDate() + 30);
+        dbData.users[userIdx].trialExpiresAt = expiresAt.toLocaleDateString("uz-UZ", { day: "numeric", month: "long", year: "numeric" });
+      }
       if (!dbData.userData) dbData.userData = {};
       if (!dbData.userData[userId]) dbData.userData[userId] = {};
-      let creditsData = { balance: 100, used: 0, history: [] as any[] };
+      let creditsData = { balance: 500, used: 0, history: [] as any[] };
       const rawCreds = dbData.userData[userId]["replai_ai_credits_data"];
       if (rawCreds) { try { creditsData = typeof rawCreds === "string" ? JSON.parse(rawCreds) : rawCreds; } catch {} }
-      let creditBalance = 100, description = "Hisob bepul tarifga o'tkazildi (Free reset)";
+      let creditBalance = 500, description = "Bepul tarif uchun 500 ta sinov krediti taqdim etildi";
       if (plan === "pro") { creditBalance = 1000; description = "PRO tarif obunasi uchun 1000 ta kredit taqdim etildi"; }
       else if (plan === "premium") { creditBalance = 30000; description = "PREMIUM tarif obunasi uchun 30 000 ta kredit taqdim etildi"; }
       else if (plan === "vip") { creditBalance = 150000; description = "VIP tarif obunasi uchun 150 000 ta kredit taqdim etildi"; }

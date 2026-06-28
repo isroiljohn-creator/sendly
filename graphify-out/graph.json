@@ -2030,7 +2030,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "frontend_package",
-      "community": 79,
+      "community": 14,
       "norm_label": "package.json"
     },
     {
@@ -2040,7 +2040,7 @@
       "source_location": "L2",
       "_origin": "ast",
       "id": "frontend_package_name",
-      "community": 79,
+      "community": 14,
       "norm_label": "name"
     },
     {
@@ -2050,7 +2050,7 @@
       "source_location": "L3",
       "_origin": "ast",
       "id": "frontend_package_version",
-      "community": 79,
+      "community": 14,
       "norm_label": "version"
     },
     {
@@ -2060,7 +2060,7 @@
       "source_location": "L4",
       "_origin": "ast",
       "id": "frontend_package_private",
-      "community": 79,
+      "community": 14,
       "norm_label": "private"
     },
     {
@@ -2070,7 +2070,7 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "frontend_package_scripts",
-      "community": 79,
+      "community": 14,
       "norm_label": "scripts"
     },
     {
@@ -2080,7 +2080,7 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "frontend_package_scripts_dev",
-      "community": 79,
+      "community": 14,
       "norm_label": "dev"
     },
     {
@@ -2090,7 +2090,7 @@
       "source_location": "L7",
       "_origin": "ast",
       "id": "frontend_package_scripts_build",
-      "community": 79,
+      "community": 14,
       "norm_label": "build"
     },
     {
@@ -2100,7 +2100,7 @@
       "source_location": "L8",
       "_origin": "ast",
       "id": "frontend_package_scripts_start",
-      "community": 79,
+      "community": 14,
       "norm_label": "start"
     },
     {
@@ -2110,7 +2110,7 @@
       "source_location": "L9",
       "_origin": "ast",
       "id": "frontend_package_scripts_lint",
-      "community": 79,
+      "community": 14,
       "norm_label": "lint"
     },
     {
@@ -2120,7 +2120,7 @@
       "source_location": "L10",
       "_origin": "ast",
       "id": "frontend_package_scripts_backup",
-      "community": 79,
+      "community": 14,
       "norm_label": "backup"
     },
     {
@@ -3570,7 +3570,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "send_otp_route",
-      "community": 2,
+      "community": 15,
       "norm_label": "route.ts"
     },
     {
@@ -3580,7 +3580,7 @@
       "source_location": "L4",
       "_origin": "ast",
       "id": "send_otp_route_html_template",
-      "community": 2,
+      "community": 15,
       "norm_label": "html_template()"
     },
     {
@@ -3590,7 +3590,7 @@
       "source_location": "L35",
       "_origin": "ast",
       "id": "send_otp_route_post",
-      "community": 2,
+      "community": 15,
       "norm_label": "post()"
     },
     {
@@ -3630,7 +3630,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "verify_otp_route",
-      "community": 2,
+      "community": 15,
       "norm_label": "route.ts"
     },
     {
@@ -3640,7 +3640,7 @@
       "source_location": "L11",
       "_origin": "ast",
       "id": "verify_otp_route_readdb",
-      "community": 2,
+      "community": 15,
       "norm_label": "readdb()"
     },
     {
@@ -3650,7 +3650,7 @@
       "source_location": "L24",
       "_origin": "ast",
       "id": "verify_otp_route_finduserbyemail",
-      "community": 2,
+      "community": 15,
       "norm_label": "finduserbyemail()"
     },
     {
@@ -3660,7 +3660,7 @@
       "source_location": "L46",
       "_origin": "ast",
       "id": "verify_otp_route_post",
-      "community": 2,
+      "community": 15,
       "norm_label": "post()"
     },
     {
@@ -4007,7 +4007,7 @@
       "label": "runAutoLearningPipeline()",
       "file_type": "code",
       "source_file": "frontend/src/app/api/db/route.ts",
-      "source_location": "L612",
+      "source_location": "L616",
       "_origin": "ast",
       "id": "db_route_runautolearningpipeline",
       "community": 53,
@@ -4220,7 +4220,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "send_route",
-      "community": 15,
+      "community": 2,
       "norm_label": "route.ts"
     },
     {
@@ -4230,7 +4230,7 @@
       "source_location": "L9",
       "_origin": "ast",
       "id": "send_route_chatmessage",
-      "community": 15,
+      "community": 2,
       "norm_label": "chatmessage"
     },
     {
@@ -4240,7 +4240,7 @@
       "source_location": "L16",
       "_origin": "ast",
       "id": "send_route_chatthread",
-      "community": 15,
+      "community": 2,
       "norm_label": "chatthread"
     },
     {
@@ -4250,7 +4250,7 @@
       "source_location": "L29",
       "_origin": "ast",
       "id": "send_route_lock_dir",
-      "community": 15,
+      "community": 2,
       "norm_label": "lock_dir"
     },
     {
@@ -4260,7 +4260,7 @@
       "source_location": "L31",
       "_origin": "ast",
       "id": "send_route_acquirefilelock",
-      "community": 15,
+      "community": 2,
       "norm_label": "acquirefilelock()"
     },
     {
@@ -4270,7 +4270,7 @@
       "source_location": "L52",
       "_origin": "ast",
       "id": "send_route_releasefilelock",
-      "community": 15,
+      "community": 2,
       "norm_label": "releasefilelock()"
     },
     {
@@ -4280,7 +4280,7 @@
       "source_location": "L62",
       "_origin": "ast",
       "id": "send_route_readdbunlocked",
-      "community": 15,
+      "community": 2,
       "norm_label": "readdbunlocked()"
     },
     {
@@ -4290,7 +4290,7 @@
       "source_location": "L68",
       "_origin": "ast",
       "id": "send_route_writedbunlocked",
-      "community": 15,
+      "community": 2,
       "norm_label": "writedbunlocked()"
     },
     {
@@ -4300,7 +4300,7 @@
       "source_location": "L73",
       "_origin": "ast",
       "id": "send_route_readdb",
-      "community": 15,
+      "community": 2,
       "norm_label": "readdb()"
     },
     {
@@ -4310,7 +4310,7 @@
       "source_location": "L85",
       "_origin": "ast",
       "id": "send_route_writedb",
-      "community": 15,
+      "community": 2,
       "norm_label": "writedb()"
     },
     {
@@ -4320,7 +4320,7 @@
       "source_location": "L97",
       "_origin": "ast",
       "id": "send_route_splittelegrammessage",
-      "community": 15,
+      "community": 2,
       "norm_label": "splittelegrammessage()"
     },
     {
@@ -4330,7 +4330,7 @@
       "source_location": "L121",
       "_origin": "ast",
       "id": "send_route_post",
-      "community": 15,
+      "community": 2,
       "norm_label": "post()"
     },
     {
@@ -5690,7 +5690,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "ui_accordion",
-      "community": 3,
+      "community": 75,
       "norm_label": "accordion.tsx"
     },
     {
@@ -5700,7 +5700,7 @@
       "source_location": "L9",
       "_origin": "ast",
       "id": "ui_accordion_accordionitem",
-      "community": 3,
+      "community": 75,
       "norm_label": "accordionitem"
     },
     {
@@ -5710,7 +5710,7 @@
       "source_location": "L17",
       "_origin": "ast",
       "id": "ui_accordion_accordiontrigger",
-      "community": 3,
+      "community": 75,
       "norm_label": "accordiontrigger"
     },
     {
@@ -5720,7 +5720,7 @@
       "source_location": "L37",
       "_origin": "ast",
       "id": "ui_accordion_accordioncontent",
-      "community": 3,
+      "community": 75,
       "norm_label": "accordioncontent"
     },
     {
@@ -5730,7 +5730,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "ui_alert_dialog",
-      "community": 81,
+      "community": 8,
       "norm_label": "alert-dialog.tsx"
     },
     {
@@ -5740,7 +5740,7 @@
       "source_location": "L13",
       "_origin": "ast",
       "id": "ui_alert_dialog_alertdialogoverlay",
-      "community": 81,
+      "community": 8,
       "norm_label": "alertdialogoverlay"
     },
     {
@@ -5750,7 +5750,7 @@
       "source_location": "L28",
       "_origin": "ast",
       "id": "ui_alert_dialog_alertdialogcontent",
-      "community": 81,
+      "community": 8,
       "norm_label": "alertdialogcontent"
     },
     {
@@ -5760,7 +5760,7 @@
       "source_location": "L46",
       "_origin": "ast",
       "id": "ui_alert_dialog_alertdialogheader",
-      "community": 81,
+      "community": 8,
       "norm_label": "alertdialogheader()"
     },
     {
@@ -5770,7 +5770,7 @@
       "source_location": "L51",
       "_origin": "ast",
       "id": "ui_alert_dialog_alertdialogfooter",
-      "community": 81,
+      "community": 8,
       "norm_label": "alertdialogfooter()"
     },
     {
@@ -5780,7 +5780,7 @@
       "source_location": "L59",
       "_origin": "ast",
       "id": "ui_alert_dialog_alertdialogtitle",
-      "community": 81,
+      "community": 8,
       "norm_label": "alertdialogtitle"
     },
     {
@@ -5790,7 +5790,7 @@
       "source_location": "L71",
       "_origin": "ast",
       "id": "ui_alert_dialog_alertdialogdescription",
-      "community": 81,
+      "community": 8,
       "norm_label": "alertdialogdescription"
     },
     {
@@ -5800,7 +5800,7 @@
       "source_location": "L83",
       "_origin": "ast",
       "id": "ui_alert_dialog_alertdialogaction",
-      "community": 81,
+      "community": 8,
       "norm_label": "alertdialogaction"
     },
     {
@@ -5810,7 +5810,7 @@
       "source_location": "L91",
       "_origin": "ast",
       "id": "ui_alert_dialog_alertdialogcancel",
-      "community": 81,
+      "community": 8,
       "norm_label": "alertdialogcancel"
     },
     {
@@ -5880,7 +5880,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "ui_avatar",
-      "community": 85,
+      "community": 3,
       "norm_label": "avatar.tsx"
     },
     {
@@ -5890,7 +5890,7 @@
       "source_location": "L8",
       "_origin": "ast",
       "id": "ui_avatar_avatar",
-      "community": 85,
+      "community": 3,
       "norm_label": "avatar"
     },
     {
@@ -5900,7 +5900,7 @@
       "source_location": "L20",
       "_origin": "ast",
       "id": "ui_avatar_avatarimage",
-      "community": 85,
+      "community": 3,
       "norm_label": "avatarimage"
     },
     {
@@ -5910,7 +5910,7 @@
       "source_location": "L32",
       "_origin": "ast",
       "id": "ui_avatar_avatarfallback",
-      "community": 85,
+      "community": 3,
       "norm_label": "avatarfallback"
     },
     {
@@ -5960,7 +5960,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "ui_breadcrumb",
-      "community": 75,
+      "community": 18,
       "norm_label": "breadcrumb.tsx"
     },
     {
@@ -5970,7 +5970,7 @@
       "source_location": "L7",
       "_origin": "ast",
       "id": "ui_breadcrumb_breadcrumb",
-      "community": 75,
+      "community": 18,
       "norm_label": "breadcrumb"
     },
     {
@@ -5980,7 +5980,7 @@
       "source_location": "L15",
       "_origin": "ast",
       "id": "ui_breadcrumb_breadcrumblist",
-      "community": 75,
+      "community": 18,
       "norm_label": "breadcrumblist"
     },
     {
@@ -5990,7 +5990,7 @@
       "source_location": "L29",
       "_origin": "ast",
       "id": "ui_breadcrumb_breadcrumbitem",
-      "community": 75,
+      "community": 18,
       "norm_label": "breadcrumbitem"
     },
     {
@@ -6000,7 +6000,7 @@
       "source_location": "L36",
       "_origin": "ast",
       "id": "ui_breadcrumb_breadcrumblink",
-      "community": 75,
+      "community": 18,
       "norm_label": "breadcrumblink"
     },
     {
@@ -6010,7 +6010,7 @@
       "source_location": "L54",
       "_origin": "ast",
       "id": "ui_breadcrumb_breadcrumbpage",
-      "community": 75,
+      "community": 18,
       "norm_label": "breadcrumbpage"
     },
     {
@@ -6020,7 +6020,7 @@
       "source_location": "L68",
       "_origin": "ast",
       "id": "ui_breadcrumb_breadcrumbseparator",
-      "community": 75,
+      "community": 18,
       "norm_label": "breadcrumbseparator()"
     },
     {
@@ -6030,7 +6030,7 @@
       "source_location": "L80",
       "_origin": "ast",
       "id": "ui_breadcrumb_breadcrumbellipsis",
-      "community": 75,
+      "community": 18,
       "norm_label": "breadcrumbellipsis()"
     },
     {
@@ -6070,7 +6070,7 @@
       "source_location": "L39",
       "_origin": "ast",
       "id": "ui_button_button",
-      "community": 8,
+      "community": 23,
       "norm_label": "button"
     },
     {
@@ -7600,14 +7600,14 @@
       "source_location": "L348",
       "_origin": "ast",
       "id": "ui_primitives_confirmmodal",
-      "community": 16,
+      "community": 5,
       "norm_label": "confirmmodal()"
     },
     {
       "label": "AlertModalProps",
       "file_type": "code",
       "source_file": "frontend/src/components/ui/primitives.tsx",
-      "source_location": "L397",
+      "source_location": "L403",
       "_origin": "ast",
       "id": "ui_primitives_alertmodalprops",
       "community": 5,
@@ -7617,7 +7617,7 @@
       "label": "AlertModal()",
       "file_type": "code",
       "source_file": "frontend/src/components/ui/primitives.tsx",
-      "source_location": "L406",
+      "source_location": "L412",
       "_origin": "ast",
       "id": "ui_primitives_alertmodal",
       "community": 16,
@@ -8110,7 +8110,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "ui_tabs",
-      "community": 80,
+      "community": 3,
       "norm_label": "tabs.tsx"
     },
     {
@@ -8120,7 +8120,7 @@
       "source_location": "L8",
       "_origin": "ast",
       "id": "ui_tabs_tabslist",
-      "community": 80,
+      "community": 3,
       "norm_label": "tabslist"
     },
     {
@@ -8130,7 +8130,7 @@
       "source_location": "L23",
       "_origin": "ast",
       "id": "ui_tabs_tabstrigger",
-      "community": 80,
+      "community": 3,
       "norm_label": "tabstrigger"
     },
     {
@@ -8140,7 +8140,7 @@
       "source_location": "L38",
       "_origin": "ast",
       "id": "ui_tabs_tabscontent",
-      "community": 80,
+      "community": 3,
       "norm_label": "tabscontent"
     },
     {
@@ -8790,7 +8790,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "lib_otpstore",
-      "community": 2,
+      "community": 15,
       "norm_label": "otpstore.ts"
     },
     {
@@ -8800,7 +8800,7 @@
       "source_location": "L4",
       "_origin": "ast",
       "id": "lib_otpstore_otpentry",
-      "community": 2,
+      "community": 15,
       "norm_label": "otpentry"
     },
     {
@@ -8810,7 +8810,7 @@
       "source_location": "L10",
       "_origin": "ast",
       "id": "lib_otpstore_globalforotp",
-      "community": 2,
+      "community": 15,
       "norm_label": "globalforotp"
     },
     {
@@ -8820,7 +8820,7 @@
       "source_location": "L20",
       "_origin": "ast",
       "id": "lib_otpstore_generateandsaveotp",
-      "community": 2,
+      "community": 15,
       "norm_label": "generateandsaveotp()"
     },
     {
@@ -8830,7 +8830,7 @@
       "source_location": "L27",
       "_origin": "ast",
       "id": "lib_otpstore_verifyotpcode",
-      "community": 2,
+      "community": 15,
       "norm_label": "verifyotpcode()"
     },
     {
@@ -8840,7 +8840,7 @@
       "source_location": "L46",
       "_origin": "ast",
       "id": "lib_otpstore_ratelimitstore",
-      "community": 2,
+      "community": 15,
       "norm_label": "ratelimitstore"
     },
     {
@@ -8850,7 +8850,7 @@
       "source_location": "L48",
       "_origin": "ast",
       "id": "lib_otpstore_checkratelimit",
-      "community": 2,
+      "community": 15,
       "norm_label": "checkratelimit()"
     },
     {
@@ -9064,10 +9064,20 @@
       "norm_label": "splittelegrammessage()"
     },
     {
-      "label": "sendTelegramMessage()",
+      "label": "getUserPlan()",
       "file_type": "code",
       "source_file": "frontend/src/lib/telegramBotRunner.ts",
       "source_location": "L100",
+      "_origin": "ast",
+      "id": "lib_telegrambotrunner_getuserplan",
+      "community": 0,
+      "norm_label": "getuserplan()"
+    },
+    {
+      "label": "sendTelegramMessage()",
+      "file_type": "code",
+      "source_file": "frontend/src/lib/telegramBotRunner.ts",
+      "source_location": "L123",
       "_origin": "ast",
       "id": "lib_telegrambotrunner_sendtelegrammessage",
       "community": 0,
@@ -9077,7 +9087,7 @@
       "label": "TaskQueue",
       "file_type": "code",
       "source_file": "frontend/src/lib/telegramBotRunner.ts",
-      "source_location": "L131",
+      "source_location": "L154",
       "_origin": "ast",
       "id": "lib_telegrambotrunner_taskqueue",
       "community": 78,
@@ -9087,7 +9097,7 @@
       "label": ".add()",
       "file_type": "code",
       "source_file": "frontend/src/lib/telegramBotRunner.ts",
-      "source_location": "L134",
+      "source_location": "L157",
       "_origin": "ast",
       "id": "lib_telegrambotrunner_taskqueue_add",
       "community": 78,
@@ -9097,7 +9107,7 @@
       "label": "chatQueues",
       "file_type": "code",
       "source_file": "frontend/src/lib/telegramBotRunner.ts",
-      "source_location": "L146",
+      "source_location": "L169",
       "_origin": "ast",
       "id": "lib_telegrambotrunner_chatqueues",
       "community": 0,
@@ -9107,7 +9117,7 @@
       "label": "getChatQueue()",
       "file_type": "code",
       "source_file": "frontend/src/lib/telegramBotRunner.ts",
-      "source_location": "L148",
+      "source_location": "L171",
       "_origin": "ast",
       "id": "lib_telegrambotrunner_getchatqueue",
       "community": 0,
@@ -9117,7 +9127,7 @@
       "label": "getUserIdForChannel()",
       "file_type": "code",
       "source_file": "frontend/src/lib/telegramBotRunner.ts",
-      "source_location": "L157",
+      "source_location": "L180",
       "_origin": "ast",
       "id": "lib_telegrambotrunner_getuseridforchannel",
       "community": 0,
@@ -9127,7 +9137,7 @@
       "label": "updateUserDbFile()",
       "file_type": "code",
       "source_file": "frontend/src/lib/telegramBotRunner.ts",
-      "source_location": "L184",
+      "source_location": "L207",
       "_origin": "ast",
       "id": "lib_telegrambotrunner_updateuserdbfile",
       "community": 0,
@@ -9137,7 +9147,7 @@
       "label": "handleTelegramUpdate()",
       "file_type": "code",
       "source_file": "frontend/src/lib/telegramBotRunner.ts",
-      "source_location": "L220",
+      "source_location": "L243",
       "_origin": "ast",
       "id": "lib_telegrambotrunner_handletelegramupdate",
       "community": 0,
@@ -9147,7 +9157,7 @@
       "label": "lastOutreachChecks",
       "file_type": "code",
       "source_file": "frontend/src/lib/telegramBotRunner.ts",
-      "source_location": "L946",
+      "source_location": "L973",
       "_origin": "ast",
       "id": "lib_telegrambotrunner_lastoutreachchecks",
       "community": 0,
@@ -9157,7 +9167,7 @@
       "label": "checkAndRunAutoOutreach()",
       "file_type": "code",
       "source_file": "frontend/src/lib/telegramBotRunner.ts",
-      "source_location": "L948",
+      "source_location": "L975",
       "_origin": "ast",
       "id": "lib_telegrambotrunner_checkandrunautooutreach",
       "community": 0,
@@ -9167,7 +9177,7 @@
       "label": "runBotPollLoop()",
       "file_type": "code",
       "source_file": "frontend/src/lib/telegramBotRunner.ts",
-      "source_location": "L1088",
+      "source_location": "L1119",
       "_origin": "ast",
       "id": "lib_telegrambotrunner_runbotpollloop",
       "community": 0,
@@ -9177,7 +9187,7 @@
       "label": "startTelegramBots()",
       "file_type": "code",
       "source_file": "frontend/src/lib/telegramBotRunner.ts",
-      "source_location": "L1151",
+      "source_location": "L1182",
       "_origin": "ast",
       "id": "lib_telegrambotrunner_starttelegrambots",
       "community": 78,
@@ -9187,7 +9197,7 @@
       "label": "classifyIntentForCustDev()",
       "file_type": "code",
       "source_file": "frontend/src/lib/telegramBotRunner.ts",
-      "source_location": "L1291",
+      "source_location": "L1322",
       "_origin": "ast",
       "id": "lib_telegrambotrunner_classifyintentforcustdev",
       "community": 0,
@@ -9197,7 +9207,7 @@
       "label": "detectSentiment()",
       "file_type": "code",
       "source_file": "frontend/src/lib/telegramBotRunner.ts",
-      "source_location": "L1403",
+      "source_location": "L1434",
       "_origin": "ast",
       "id": "lib_telegrambotrunner_detectsentiment",
       "community": 0,
@@ -9207,7 +9217,7 @@
       "label": "extractPainPoint()",
       "file_type": "code",
       "source_file": "frontend/src/lib/telegramBotRunner.ts",
-      "source_location": "L1467",
+      "source_location": "L1498",
       "_origin": "ast",
       "id": "lib_telegrambotrunner_extractpainpoint",
       "community": 0,
@@ -14885,6 +14895,17 @@
       "confidence_score": 1.0,
       "source": "admin_page",
       "target": "ui_primitives_card"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/src/app/admin/page.tsx",
+      "source_location": "L6",
+      "weight": 1.0,
+      "source": "admin_page",
+      "target": "ui_primitives_confirmmodal",
+      "confidence_score": 1.0
     },
     {
       "relation": "imports",
@@ -27201,6 +27222,16 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "frontend/src/lib/telegramBotRunner.ts",
+      "source_location": "L100",
+      "weight": 1.0,
+      "source": "lib_telegrambotrunner",
+      "target": "lib_telegrambotrunner_getuserplan",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/src/lib/telegramBotRunner.ts",
       "source_location": "L168",
       "weight": 1.0,
       "confidence_score": 1.0,
@@ -27763,5 +27794,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "a25aa151183428338ce90caa0ac21340c5df8188"
+  "built_at_commit": "7602229b6657aa872efc7ad24f3ec9ee884ef10b"
 }

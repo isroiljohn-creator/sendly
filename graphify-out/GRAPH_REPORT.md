@@ -1,16 +1,16 @@
 # Graph Report - Sendly  (2026-06-28)
 
 ## Corpus Check
-- 172 files · ~469,002 words
+- 172 files · ~469,453 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 956 nodes · 1726 edges · 86 communities (76 shown, 10 thin omitted)
+- 957 nodes · 1728 edges · 82 communities (72 shown, 10 thin omitted)
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS · INFERRED: 2 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `a25aa151`
+- Built from commit: `7602229b`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -81,13 +81,9 @@
 - [[_COMMUNITY_Community 75|Community 75]]
 - [[_COMMUNITY_Community 77|Community 77]]
 - [[_COMMUNITY_Community 78|Community 78]]
-- [[_COMMUNITY_Community 79|Community 79]]
-- [[_COMMUNITY_Community 80|Community 80]]
-- [[_COMMUNITY_Community 81|Community 81]]
 - [[_COMMUNITY_Community 82|Community 82]]
 - [[_COMMUNITY_Community 83|Community 83]]
 - [[_COMMUNITY_Community 84|Community 84]]
-- [[_COMMUNITY_Community 85|Community 85]]
 
 ## God Nodes (most connected - your core abstractions)
 1. `useI18n()` - 73 edges
@@ -117,7 +113,7 @@
 - 2-file cycle: `backend/src/services/queue.ts -> backend/src/services/trigger.ts -> backend/src/services/queue.ts`
 - 3-file cycle: `backend/src/services/interpreter.ts -> backend/src/services/queue.ts -> backend/src/services/trigger.ts -> backend/src/services/interpreter.ts`
 
-## Communities (86 total, 10 thin omitted)
+## Communities (82 total, 10 thin omitted)
 
 ### Community 0 - "Community 0"
 Cohesion: 0.13
@@ -133,7 +129,7 @@ Nodes (50): calcGrowthPct(), checkIfUserIsAdmin(), GET(), POST(), readDb(), read
 
 ### Community 3 - "Community 3"
 Cohesion: 0.06
-Nodes (17): AccordionContent, AccordionItem, AccordionTrigger, Checkbox, HoverCardContent, Input, PopoverContent, Progress (+9 more)
+Nodes (20): Avatar, AvatarFallback, AvatarImage, Checkbox, HoverCardContent, Input, PopoverContent, Progress (+12 more)
 
 ### Community 4 - "Community 4"
 Cohesion: 0.14
@@ -141,7 +137,7 @@ Nodes (24): AutomationsPage(), Chat, ChatsPage(), INITIAL_CHATS, Message, AppLay
 
 ### Community 5 - "Community 5"
 Cohesion: 0.09
-Nodes (25): AdminPage(), LOCAL_TRANSLATIONS, AnalyticsPage(), ActivityCard(), ActivityCardProps, DEFAULT_VALUES, InstagramConnectCard(), DEFAULT_POINTS (+17 more)
+Nodes (26): AdminPage(), LOCAL_TRANSLATIONS, AnalyticsPage(), ActivityCard(), ActivityCardProps, DEFAULT_VALUES, InstagramConnectCard(), DEFAULT_POINTS (+18 more)
 
 ### Community 6 - "Community 6"
 Cohesion: 0.15
@@ -152,8 +148,8 @@ Cohesion: 0.26
 Nodes (12): getPool(), supabase, AuthenticatedRequest, authMiddleware(), router, router, router, router (+4 more)
 
 ### Community 8 - "Community 8"
-Cohesion: 0.16
-Nodes (16): cn(), Button, ButtonProps, buttonVariants, Pagination(), PaginationContent, PaginationEllipsis(), PaginationItem (+8 more)
+Cohesion: 0.11
+Nodes (23): cn(), AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter(), AlertDialogHeader(), AlertDialogOverlay (+15 more)
 
 ### Community 9 - "Community 9"
 Cohesion: 0.07
@@ -172,24 +168,24 @@ Cohesion: 0.13
 Nodes (14): formatShortDate(), getDynamicDateText(), Home(), MONTHS_SHORT, RANGE_PRESETS, RangeData, RangeKey, AutomationsCard() (+6 more)
 
 ### Community 14 - "Community 14"
-Cohesion: 0.18
-Nodes (11): devDependencies, eslint, eslint-config-next, postcss, tailwindcss, @types/node, @types/nodemailer, @types/pg (+3 more)
+Cohesion: 0.10
+Nodes (20): devDependencies, eslint, eslint-config-next, postcss, tailwindcss, @types/node, @types/nodemailer, @types/pg (+12 more)
 
 ### Community 15 - "Community 15"
-Cohesion: 0.30
-Nodes (11): acquireFileLock(), ChatMessage, ChatThread, LOCK_DIR, POST(), readDb(), readDbUnlocked(), releaseFileLock() (+3 more)
+Cohesion: 0.26
+Nodes (11): checkRateLimit(), generateAndSaveOtp(), globalForOtp, OtpEntry, rateLimitStore, verifyOtpCode(), HTML_TEMPLATE(), POST() (+3 more)
 
 ### Community 16 - "Community 16"
-Cohesion: 0.13
-Nodes (14): AccountPage(), FAQItem, GuideStep, HelpPage(), LOCAL_TRANSLATIONS, PageHeader(), PageHeaderProps, Lesson (+6 more)
+Cohesion: 0.14
+Nodes (13): AccountPage(), FAQItem, GuideStep, HelpPage(), LOCAL_TRANSLATIONS, PageHeader(), PageHeaderProps, Lesson (+5 more)
 
 ### Community 17 - "Community 17"
 Cohesion: 0.11
 Nodes (18): compilerOptions, allowJs, esModuleInterop, incremental, isolatedModules, jsx, lib, module (+10 more)
 
 ### Community 18 - "Community 18"
-Cohesion: 0.22
-Nodes (8): SheetContent, SheetContentProps, SheetDescription, SheetFooter(), SheetHeader(), SheetOverlay, SheetTitle, sheetVariants
+Cohesion: 0.11
+Nodes (15): Breadcrumb, BreadcrumbEllipsis(), BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator(), SheetContent (+7 more)
 
 ### Community 19 - "Community 19"
 Cohesion: 0.12
@@ -208,8 +204,8 @@ Cohesion: 0.14
 Nodes (9): BroadcastPage(), Broadcast, DEFAULT_BOT_SETTINGS, INITIAL_BROADCASTS, INITIAL_CHANNELS, INITIAL_CONTACTS, INITIAL_LESSONS, INITIAL_MODULES (+1 more)
 
 ### Community 23 - "Community 23"
-Cohesion: 0.14
-Nodes (12): Carousel, CarouselApi, CarouselContent, CarouselContext, CarouselContextProps, CarouselItem, CarouselNext, CarouselOptions (+4 more)
+Cohesion: 0.13
+Nodes (13): Button, Carousel, CarouselApi, CarouselContent, CarouselContext, CarouselContextProps, CarouselItem, CarouselNext (+5 more)
 
 ### Community 24 - "Community 24"
 Cohesion: 0.14
@@ -332,8 +328,8 @@ Cohesion: 0.36
 Nodes (8): analyzeMessageForCustDev(), callGemini(), checkSemanticModeration(), queryRAG(), RAGResult, retrieveContext(), sanitizeHistoryForGemini(), POST()
 
 ### Community 75 - "Community 75"
-Cohesion: 0.25
-Nodes (7): Breadcrumb, BreadcrumbEllipsis(), BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator()
+Cohesion: 0.50
+Nodes (3): AccordionContent, AccordionItem, AccordionTrigger
 
 ### Community 77 - "Community 77"
 Cohesion: 0.47
@@ -342,18 +338,6 @@ Nodes (5): detectLanguage(), matchTopicPrefix(), moderateMessage(), ModerationRe
 ### Community 78 - "Community 78"
 Cohesion: 0.38
 Nodes (5): getDbDataFromRailway(), startTelegramBots(), TaskQueue, GET(), POST()
-
-### Community 79 - "Community 79"
-Cohesion: 0.20
-Nodes (9): name, private, scripts, backup, build, dev, lint, start (+1 more)
-
-### Community 80 - "Community 80"
-Cohesion: 0.50
-Nodes (3): TabsContent, TabsList, TabsTrigger
-
-### Community 81 - "Community 81"
-Cohesion: 0.22
-Nodes (8): AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter(), AlertDialogHeader(), AlertDialogOverlay, AlertDialogTitle
 
 ### Community 82 - "Community 82"
 Cohesion: 0.50
@@ -367,10 +351,6 @@ Nodes (3): Badge(), BadgeProps, badgeVariants
 Cohesion: 0.40
 Nodes (4): InputOTP, InputOTPGroup, InputOTPSeparator, InputOTPSlot
 
-### Community 85 - "Community 85"
-Cohesion: 0.50
-Nodes (3): Avatar, AvatarFallback, AvatarImage
-
 ## Knowledge Gaps
 - **415 isolated node(s):** `name`, `version`, `description`, `main`, `dev` (+410 more)
   These have ≤1 connection - possible missing edges or undocumented components.
@@ -379,7 +359,7 @@ Nodes (3): Avatar, AvatarFallback, AvatarImage
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `cn()` connect `Community 8` to `Community 3`, `Community 4`, `Community 5`, `Community 16`, `Community 18`, `Community 19`, `Community 20`, `Community 22`, `Community 23`, `Community 24`, `Community 28`, `Community 29`, `Community 32`, `Community 35`, `Community 36`, `Community 37`, `Community 43`, `Community 44`, `Community 48`, `Community 75`, `Community 80`, `Community 81`, `Community 83`, `Community 84`, `Community 85`?**
+- **Why does `cn()` connect `Community 8` to `Community 3`, `Community 4`, `Community 5`, `Community 16`, `Community 18`, `Community 19`, `Community 20`, `Community 22`, `Community 23`, `Community 24`, `Community 28`, `Community 29`, `Community 32`, `Community 35`, `Community 36`, `Community 37`, `Community 43`, `Community 44`, `Community 48`, `Community 75`, `Community 83`, `Community 84`?**
   _High betweenness centrality (0.150) - this node is a cross-community bridge._
 - **Why does `Channel` connect `Community 4` to `Community 0`, `Community 11`, `Community 12`, `Community 82`, `Community 22`?**
   _High betweenness centrality (0.040) - this node is a cross-community bridge._
@@ -388,8 +368,8 @@ _Questions this graph is uniquely positioned to answer:_
 - **What connects `name`, `version`, `description` to the rest of the system?**
   _415 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `Community 0` be split into smaller, more focused modules?**
-  _Cohesion score 0.13405797101449277 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.12666666666666668 - nodes in this community are weakly interconnected._
 - **Should `Community 1` be split into smaller, more focused modules?**
   _Cohesion score 0.03636363636363636 - nodes in this community are weakly interconnected._
 - **Should `Community 2` be split into smaller, more focused modules?**
-  _Cohesion score 0.06963645673323093 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.07213114754098361 - nodes in this community are weakly interconnected._

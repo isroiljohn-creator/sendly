@@ -97,6 +97,29 @@ function splitTelegramMessage(text: string, maxLength = 4000): string[] {
   return chunks;
 }
 
+async function getUserPlan(userId: string): Promise<string> {
+  if (pgdb.isConfigured()) {
+    try {
+      const globalUsers = await pgdb.getValue("global_users");
+      if (Array.isArray(globalUsers)) {
+        const u = globalUsers.find((x: any) => x.id === userId);
+        if (u) return u.plan || "free";
+      }
+    } catch (e) {
+      console.error("Failed to get user plan from PostgreSQL:", e);
+    }
+  } else {
+    try {
+      const dbData = readDb();
+      const u = dbData.users?.find((x: any) => x.id === userId);
+      if (u) return u.plan || "free";
+    } catch (e) {
+      console.error("Failed to get user plan from JSON:", e);
+    }
+  }
+  return "free";
+}
+
 async function sendTelegramMessage(token: string, chatId: number | string, text: string, parseMode?: string, replyMarkup?: any) {
   try {
     const chunks = splitTelegramMessage(text);
@@ -820,6 +843,10 @@ export async function handleTelegramUpdate(channelId: string, token: string, upd
         }
         
         if (botReplyText) {
+          const userPlan = await getUserPlan(userId);
+          if (userPlan === "free") {
+            botReplyText = botReplyText + "\n\nPowered by sendly.uz";
+          }
           await sendTelegramMessage(token, chatId, botReplyText);
           
           const botMsg: ChatMessage = {
@@ -1035,7 +1062,11 @@ async function checkAndRunAutoOutreach(channelId: string, token: string) {
           );
 
           if (ragResult && ragResult.text) {
-            const outreachText = ragResult.text;
+            let outreachText = ragResult.text;
+            const userPlan = await getUserPlan(userId);
+            if (userPlan === "free") {
+              outreachText = outreachText + "\n\nPowered by sendly.uz";
+            }
             
             // Send the message on Telegram
             await sendTelegramMessage(token, chat.id, outreachText);

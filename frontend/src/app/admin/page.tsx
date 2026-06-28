@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { PageHeader } from "@/components/layout/PageHeader";
-import { Card, Button, AlertModal, BarChart, AreaChart, MetricCard } from "@/components/ui/primitives";
+import { Card, Button, AlertModal, ConfirmModal, BarChart, AreaChart, MetricCard } from "@/components/ui/primitives";
 import { 
   Users, 
   Ticket, 
@@ -388,6 +388,19 @@ export default function AdminPage() {
   const [alertOpen, setAlertOpen] = useState(false);
   const [alertTitle, setAlertTitle] = useState("");
   const [alertMessage, setAlertMessage] = useState("");
+
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [confirmTitle, setConfirmTitle] = useState("");
+  const [confirmMessage, setConfirmMessage] = useState("");
+  const [confirmCallback, setConfirmCallback] = useState<(() => void) | null>(null);
+  const [openPlanMenuUserId, setOpenPlanMenuUserId] = useState<string | null>(null);
+
+  const showConfirm = (title: string, msg: string, callback: () => void) => {
+    setConfirmTitle(title);
+    setConfirmMessage(msg);
+    setConfirmCallback(() => callback);
+    setConfirmOpen(true);
+  };
 
   const showAlert = (title: string, msg: string) => {
     setAlertTitle(title);
@@ -1202,27 +1215,65 @@ export default function AdminPage() {
                           <div className="font-bold text-black">{u.fullName || "Foydalanuvchi"}</div>
                           <div className="text-[10px] text-[#707070]">{u.email || ""}</div>
                         </td>
-                        <td className="px-6 py-3.5">
-                          <select
-                            value={u.plan || "free"}
-                            onChange={(e) => {
-                              const newPlan = e.target.value;
-                              if (confirm(`Foydalanuvchi (${u.fullName || u.email}) tarifini ${newPlan.toUpperCase()} ga o'zgartirmoqchimisiz?`)) {
-                                handleUpdatePlan(u.id, newPlan);
-                              }
+                        <td className="px-6 py-3.5 relative">
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setOpenPlanMenuUserId(openPlanMenuUserId === u.id ? null : u.id);
                             }}
-                            className={`text-[10px] font-extrabold px-2 py-0.5 rounded-full uppercase border focus:outline-none cursor-pointer transition-all ${
+                            className={`text-[10px] font-extrabold px-2.5 py-1 rounded-full uppercase border focus:outline-none cursor-pointer transition-all flex items-center gap-1 ${
                               (u.plan || "free") === "vip" ? "bg-black text-[#C7F33C] border-[#C7F33C]" :
                               (u.plan || "free") === "premium" ? "bg-black text-white border-black" :
                               (u.plan || "free") === "pro" ? "bg-blue-100 text-blue-800 border-blue-200" :
                               "bg-gray-100 text-gray-500 border-gray-200"
                             }`}
                           >
-                            <option value="free" className="bg-white text-gray-700">FREE</option>
-                            <option value="pro" className="bg-white text-blue-800">PRO</option>
-                            <option value="premium" className="bg-white text-black font-bold">PREMIUM</option>
-                            <option value="vip" className="bg-white text-[#7CA607] font-bold">VIP</option>
-                          </select>
+                            <span>{u.plan || "free"}</span>
+                            <span className="text-[7px] opacity-70">▼</span>
+                          </button>
+
+                          {openPlanMenuUserId === u.id && (
+                            <>
+                              {/* Backdrop to close menu on click outside */}
+                              <div 
+                                className="fixed inset-0 z-45" 
+                                onClick={() => setOpenPlanMenuUserId(null)}
+                              />
+                              
+                              {/* Custom Dropdown Content */}
+                              <div className="absolute left-6 mt-1 w-28 rounded-2xl bg-white border border-[#E8E8E8] shadow-[0_10px_30px_rgba(0,0,0,0.08)] py-1.5 z-50 animate-in fade-in slide-in-from-top-1 duration-150 flex flex-col text-left">
+                                {["free", "pro", "premium", "vip"].map((pOption) => (
+                                  <button
+                                    key={pOption}
+                                    type="button"
+                                    onClick={() => {
+                                      setOpenPlanMenuUserId(null);
+                                      if ((u.plan || "free") !== pOption) {
+                                        showConfirm(
+                                          lang === "uz" ? "Tarifni o'zgartirish" : lang === "ru" ? "Изменение тарифа" : "Change Tariff",
+                                          lang === "uz" 
+                                            ? `Foydalanuvchi (${u.fullName || u.email}) tarifini ${pOption.toUpperCase()} ga o'zgartirmoqchimisiz?`
+                                            : lang === "ru"
+                                            ? `Вы действительно хотите изменить тариф пользователя (${u.fullName || u.email}) на ${pOption.toUpperCase()}?`
+                                            : `Are you sure you want to change the tariff of (${u.fullName || u.email}) to ${pOption.toUpperCase()}?`,
+                                          () => handleUpdatePlan(u.id, pOption)
+                                        );
+                                      }
+                                    }}
+                                    className={`px-4 py-2 text-[11px] font-bold uppercase transition-colors flex items-center justify-between ${
+                                      (u.plan || "free") === pOption
+                                        ? "text-[#7CA607] bg-[#C7F33C]/10"
+                                        : "text-[#515154] hover:bg-[#F9F9F7] hover:text-black"
+                                    }`}
+                                  >
+                                    <span>{pOption}</span>
+                                    {(u.plan || "free") === pOption && <span className="text-[10px]">✓</span>}
+                                  </button>
+                                ))}
+                              </div>
+                            </>
+                          )}
                         </td>
                         <td className="px-6 py-3.5">
                           {u.isCardLinked ? (
@@ -1825,6 +1876,18 @@ export default function AdminPage() {
         onClose={() => setAlertOpen(false)}
         title={alertTitle}
         message={alertMessage}
+      />
+
+      <ConfirmModal
+        isOpen={confirmOpen}
+        onClose={() => setConfirmOpen(false)}
+        onConfirm={() => {
+          if (confirmCallback) confirmCallback();
+        }}
+        title={confirmTitle}
+        message={confirmMessage}
+        confirmText="OK"
+        cancelText={lang === "uz" ? "Bekor qilish" : lang === "ru" ? "Отменить" : "Cancel"}
       />
     </AppLayout>
   );
