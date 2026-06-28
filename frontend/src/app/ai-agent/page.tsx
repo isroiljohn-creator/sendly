@@ -1081,12 +1081,12 @@ function AIAgentContent() {
     const channels = db.getChannels();
 
     const tgChannels = channels.filter(
-      (c) => c.type === "telegram" && c.isConnected && c.telegramToken
+      (c) => (c.type === "telegram" && c.isConnected && c.telegramToken) || (c.type === "instagram" && c.isConnected)
     );
 
     const activeCh = db.getActiveChannel();
     let initialBotId = "";
-    if (activeCh && activeCh.type === "telegram" && activeCh.isConnected && activeCh.telegramToken) {
+    if (activeCh && ((activeCh.type === "telegram" && activeCh.isConnected && activeCh.telegramToken) || (activeCh.type === "instagram" && activeCh.isConnected))) {
       initialBotId = activeCh.id;
     } else if (tgChannels.length > 0) {
       initialBotId = tgChannels[0].id;
@@ -4367,53 +4367,67 @@ function AIAgentContent() {
                       <div className="w-11 h-6 bg-[#E8E8E8] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-[#D8D8D8] after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-black"></div>
                     </label>
                   </div>
-                  <div className="flex flex-col gap-1.5 mt-2 pt-2 border-t border-[#F0F0F0]">
-                    <label className="text-[10px] font-extrabold text-[#707070] uppercase tracking-wider">{t("pages.ai_agent.labels.tg_bot_for_bot").replace("{agentName}", getAgentName())}</label>
-                    {(() => {
-                      const tgChannels = db.getChannels().filter(c => c.type === "telegram" && c.isConnected && c.telegramToken);
-                      if (tgChannels.length > 0) {
-                        const botOptions = tgChannels.map(c => ({
-                          value: c.id,
-                          label: `${c.name} (@${c.username.replace(/^@+/, "")})`
-                        }));
-                        const selectedBotId = settings.telegramBotId || tgChannels[0].id;
-                        return (
+                  {(() => {
+                    const allChs = db.getChannels().filter(c => (c.type === "telegram" && c.isConnected && c.telegramToken) || (c.type === "instagram" && c.isConnected));
+                    const selectedBotId = settings.telegramBotId || (allChs.length > 0 ? allChs[0].id : "");
+                    const selectedCh = allChs.find(c => c.id === selectedBotId);
+                    const isInstagram = selectedCh?.type === "instagram";
+                    const labelText = isInstagram 
+                      ? `AI ${getAgentName()} UCHUN INSTAGRAM SAHIFASI` 
+                      : `AI ${getAgentName()} UCHUN TELEGRAM BOT`;
+                    const willAnswerText = isInstagram
+                      ? `AI ${getAgentName()} ushbu tanlangan Instagram sahifasi orqali mijozlarga avtomatik javob beradi.`
+                      : t("pages.ai_agent.labels.tg_bot_will_answer").replace("{agentName}", getAgentName());
+
+                    if (allChs.length > 0) {
+                      const botOptions = allChs.map(c => ({
+                        value: c.id,
+                        label: c.type === "instagram" 
+                          ? `${c.name} (@${c.username.replace(/^@+/, "")}) [Instagram]` 
+                          : `${c.name} (@${c.username.replace(/^@+/, "")}) [Telegram]`
+                      }));
+                      return (
+                        <div className="flex flex-col gap-1.5 mt-2 pt-2 border-t border-[#F0F0F0]">
+                          <label className="text-[10px] font-extrabold text-[#707070] uppercase tracking-wider">{labelText}</label>
                           <div className="flex flex-col gap-2 mt-1">
                             <CustomDropdown
                               value={selectedBotId}
                               onChange={handleBotChange}
                               options={botOptions}
-                              placeholder={t("pages.ai_agent.placeholders.select_tg_bot")}
+                              placeholder="Kanalni tanlang..."
                               className="w-full"
                             />
                             <div className="flex items-center gap-1.5 text-[10px] text-green-700 mt-1 bg-green-50/50 p-2.5 rounded-xl border border-green-100">
                               <CheckCircle size={12} className="text-green-500 shrink-0" />
-                              <span>{t("pages.ai_agent.labels.tg_bot_will_answer").replace("{agentName}", getAgentName())}</span>
+                              <span>{willAnswerText}</span>
                             </div>
                           </div>
-                        );
-                      } else {
-                        return (
+                        </div>
+                      );
+                    } else {
+                      return (
+                        <div className="flex flex-col gap-1.5 mt-2 pt-2 border-t border-[#F0F0F0]">
+                          <label className="text-[10px] font-extrabold text-[#707070] uppercase tracking-wider">AI KANALI</label>
                           <div className="flex flex-col gap-2.5 p-4 bg-amber-50/50 border border-amber-200/50 rounded-2xl text-[11px] text-amber-800 mt-1">
                             <div className="flex items-center gap-2">
                               <Info size={14} className="shrink-0 text-amber-500" />
-                              <span className="font-bold">{t("pages.ai_agent.labels.tg_bot_not_found")}</span>
+                              <span className="font-bold">Kanallar topilmadi</span>
                             </div>
                             <p className="text-[10px] text-amber-600 leading-relaxed">
-                              {t("pages.ai_agent.labels.tg_bot_required").replace("{agentName}", getAgentName())}
+                              AI {getAgentName()} ishlashi uchun kamida 1 ta Telegram bot yoki Instagram sahifasi sozlamalarda ulangan bo'lishi kerak.
                             </p>
                             <button
                               type="button"
                               onClick={() => setShowTgConnectModal(true)}
                               className="mt-2 inline-block w-fit px-5 py-2 bg-black text-[#C7F33C] rounded-full hover:bg-black/90 font-bold text-[10px] shadow-sm transition-all text-center"
                             >
-                              {t("pages.ai_agent.labels.link_bot_btn")}
+                              Kanal ulash
                             </button>
                           </div>
-                        );
-                      }
-                    })()}
-                  </div>
+                        </div>
+                      );
+                    }
+                  })()}
                 </div>
 
                 {/* System Prompt Settings */}
