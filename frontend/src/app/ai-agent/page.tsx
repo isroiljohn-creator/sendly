@@ -4445,14 +4445,14 @@ function AIAgentContent() {
                   {/* AI Assistant Character Instruction Textarea */}
                   <div className="flex flex-col gap-1.5 mt-2">
                     <label className="text-[11px] font-bold text-[#707070] uppercase tracking-wider">
-                      {lang === "uz" ? "AI Agent fe'l-atvori va xarakteri (Tabiiy tilda)" :
-                       lang === "ru" ? "Характер и поведение ИИ агента (На обычном языке)" :
-                       "AI Agent Character & Behavior (Natural language)"}
+                      {lang === "uz" ? "AI Agent uchun maxsus yo'riqnoma (Erkin tilda)" :
+                       lang === "ru" ? "Особые инструкции для ИИ Агента (В свободной форме)" :
+                       "Custom Instructions for AI Agent (Free-form)"}
                     </label>
                     <span className="text-[10px] text-[#808080]">
-                      {lang === "uz" ? "Bot qanday so'zlar ishlatsin, o'zini qanday tutsin? Yozganingiz asosida AI uning tizimli ko'rsatmalarini avtomat shakllantiradi." :
-                       lang === "ru" ? "Как бот должен общаться, какие слова использовать? На основе этого ИИ автоматически настроит инструкции." :
-                       "How should the bot communicate? AI will automatically build the prompt instructions based on what you write."}
+                      {lang === "uz" ? "Bot qanday so'zlar ishlatsin, o'zini qanday tutsin? Ushbu ko'rsatmalar asosida AI agent tizimli promptini shakllantiradi." :
+                       lang === "ru" ? "Как бот должен общаться, какие слова использовать? На основе этого ИИ настроит системные инструкции." :
+                       "How should the bot communicate? AI will build the system instructions based on these custom rules."}
                     </span>
                     <textarea
                       value={settings.customInstructions || ""}
