@@ -3257,7 +3257,7 @@
       "label": "LoadingFallback()",
       "file_type": "code",
       "source_file": "frontend/src/app/ai-agent/page.tsx",
-      "source_location": "L6099",
+      "source_location": "L6105",
       "_origin": "ast",
       "id": "ai_agent_page_loadingfallback",
       "community": 49,
@@ -3267,7 +3267,7 @@
       "label": "AIAgentPage()",
       "file_type": "code",
       "source_file": "frontend/src/app/ai-agent/page.tsx",
-      "source_location": "L6108",
+      "source_location": "L6114",
       "_origin": "ast",
       "id": "ai_agent_page_aiagentpage",
       "community": 49,
@@ -7630,7 +7630,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "ui_radio_group",
-      "community": 3,
+      "community": 81,
       "norm_label": "radio-group.tsx"
     },
     {
@@ -7640,7 +7640,7 @@
       "source_location": "L7",
       "_origin": "ast",
       "id": "ui_radio_group_radiogroup",
-      "community": 3,
+      "community": 81,
       "norm_label": "radiogroup"
     },
     {
@@ -7650,7 +7650,7 @@
       "source_location": "L15",
       "_origin": "ast",
       "id": "ui_radio_group_radiogroupitem",
-      "community": 3,
+      "community": 81,
       "norm_label": "radiogroupitem"
     },
     {
@@ -27678,5 +27678,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "16f4afc9da58da4324df325798c79bce83deee40"
+  "built_at_commit": "75bc4ef86af702aaa8297c4ffea316702c4bdd87"
 }

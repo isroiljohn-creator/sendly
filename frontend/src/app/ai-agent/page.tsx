@@ -5238,30 +5238,36 @@ function AIAgentContent() {
 
                   {/* Statistics Grid */}
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                    <div className="bg-[#F9F9F7] border border-[#E8E8E8] rounded-2xl p-4 flex flex-col gap-1 relative overflow-hidden">
-                      <FolderPlus size={16} className="text-[#707070] absolute right-4 top-4 opacity-40" />
-                      <span className="text-[9px] font-extrabold text-[#707070] uppercase tracking-wider">
-                        {`Jami ${getModuleLabel().toLowerCase()}lar`}
-                      </span>
-                      <span className="text-[20px] font-extrabold text-black">{modules.length}</span>
+                    <div className="bg-[#F9F9F7] border border-[#E8E8E8] rounded-2xl p-4 flex items-center justify-between overflow-hidden">
+                      <div className="flex flex-col gap-1">
+                        <span className="text-[9px] font-extrabold text-[#707070] uppercase tracking-wider">
+                          {`Jami ${getModuleLabel().toLowerCase()}lar`}
+                        </span>
+                        <span className="text-[20px] font-extrabold text-black">{modules.length}</span>
+                      </div>
+                      <Folder size={18} className="text-[#707070] opacity-40 shrink-0" />
                     </div>
 
-                    <div className="bg-[#F9F9F7] border border-[#E8E8E8] rounded-2xl p-4 flex flex-col gap-1 relative overflow-hidden">
-                      <BookOpen size={16} className="text-[#707070] absolute right-4 top-4 opacity-40" />
-                      <span className="text-[9px] font-extrabold text-[#707070] uppercase tracking-wider">
-                        {`Jami ${getLessonLabel().toLowerCase()}lar`}
-                      </span>
-                      <span className="text-[20px] font-extrabold text-black">{lessons.length}</span>
+                    <div className="bg-[#F9F9F7] border border-[#E8E8E8] rounded-2xl p-4 flex items-center justify-between overflow-hidden">
+                      <div className="flex flex-col gap-1">
+                        <span className="text-[9px] font-extrabold text-[#707070] uppercase tracking-wider">
+                          {`Jami ${getLessonLabel().toLowerCase()}lar`}
+                        </span>
+                        <span className="text-[20px] font-extrabold text-black">{lessons.length}</span>
+                      </div>
+                      <BookOpen size={18} className="text-[#707070] opacity-40 shrink-0" />
                     </div>
 
-                    <div className="bg-[#F9F9F7] border border-[#E8E8E8] rounded-2xl p-4 flex flex-col gap-1 relative overflow-hidden">
-                      <FileText size={16} className="text-[#707070] absolute right-4 top-4 opacity-40" />
-                      <span className="text-[9px] font-extrabold text-[#707070] uppercase tracking-wider">
-                        {t("pages.ai_agent.stats_chars") || "Jami belgilar"}
-                      </span>
-                      <span className="text-[20px] font-extrabold text-black">
-                        {lessons.reduce((acc, curr) => acc + (curr.transcript?.length || 0), 0).toLocaleString()}
-                      </span>
+                    <div className="bg-[#F9F9F7] border border-[#E8E8E8] rounded-2xl p-4 flex items-center justify-between overflow-hidden">
+                      <div className="flex flex-col gap-1">
+                        <span className="text-[9px] font-extrabold text-[#707070] uppercase tracking-wider">
+                          {t("pages.ai_agent.stats_chars") || "Jami belgilar"}
+                        </span>
+                        <span className="text-[20px] font-extrabold text-black">
+                          {lessons.reduce((acc, curr) => acc + (curr.transcript?.length || 0), 0).toLocaleString()}
+                        </span>
+                      </div>
+                      <FileText size={18} className="text-[#707070] opacity-40 shrink-0" />
                     </div>
                   </div>
 
@@ -5282,24 +5288,24 @@ function AIAgentContent() {
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-2 pt-4 border-t border-[#F0F0F0]">
                     <button
                       onClick={() => setShowAddModuleModal(true)}
-                      className="flex items-center justify-center gap-2 py-3 rounded-xl border border-[#D8D8D8] text-[11px] font-bold text-[#595959] hover:bg-[#F9F9F7] active:scale-95 transition-all shadow-xs"
+                      className="flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 px-1 py-3 rounded-xl border border-[#D8D8D8] text-[10px] sm:text-[11px] font-bold text-[#595959] hover:bg-[#F9F9F7] active:scale-95 transition-all shadow-xs"
                     >
-                      <Folder size={14} />
-                      <span>{`${getModuleLabel().split(" / ")[0]}`}</span>
+                      <Folder size={14} className="shrink-0" />
+                      <span className="text-center sm:text-left">{`${getModuleLabel().split(" / ")[0]}`}</span>
                     </button>
                     <button
                       onClick={handleTriggerAddLesson}
-                      className="flex items-center justify-center gap-2 py-3 rounded-xl bg-black text-[#C7F33C] text-[11px] font-bold hover:bg-black/90 active:scale-95 transition-all shadow-sm"
+                      className="flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 px-1 py-3 rounded-xl bg-black text-[#C7F33C] text-[10px] sm:text-[11px] font-bold hover:bg-black/90 active:scale-95 transition-all shadow-sm"
                     >
-                      <FileText size={14} />
-                      <span>{`${getLessonLabel().split(" / ")[0]}`}</span>
+                      <FileText size={14} className="shrink-0" />
+                      <span className="text-center sm:text-left">{`${getLessonLabel().split(" / ")[0]}`}</span>
                     </button>
                     <button
                       onClick={() => fileInputRef.current?.click()}
-                      className="flex items-center justify-center gap-2 py-3 rounded-xl border border-[#D8D8D8] text-[11px] font-bold text-[#595959] hover:bg-[#F9F9F7] active:scale-95 transition-all shadow-xs"
+                      className="flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 px-1 py-3 rounded-xl border border-[#D8D8D8] text-[10px] sm:text-[11px] font-bold text-[#595959] hover:bg-[#F9F9F7] active:scale-95 transition-all shadow-xs"
                     >
-                      <Upload size={14} />
-                      <span>{t("pages.ai_agent.upload_file") || "Fayl yuklash"}</span>
+                      <Upload size={14} className="shrink-0" />
+                      <span className="text-center sm:text-left">{t("pages.ai_agent.upload_file") || "Fayl yuklash"}</span>
                     </button>
                     <button
                       onClick={() => {
@@ -5308,10 +5314,10 @@ function AIAgentContent() {
                         }
                         setShowAddLinkModal(true);
                       }}
-                      className="flex items-center justify-center gap-2 py-3 rounded-xl border border-[#D8D8D8] text-[11px] font-bold text-[#595959] hover:bg-[#F9F9F7] active:scale-95 transition-all shadow-xs"
+                      className="flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 px-1 py-3 rounded-xl border border-[#D8D8D8] text-[10px] sm:text-[11px] font-bold text-[#595959] hover:bg-[#F9F9F7] active:scale-95 transition-all shadow-xs"
                     >
-                      <Link2 size={14} />
-                      <span>{t("pages.ai_agent.add_link") || "Havola qo'shish"}</span>
+                      <Link2 size={14} className="shrink-0" />
+                      <span className="text-center sm:text-left">{t("pages.ai_agent.add_link") || "Havola qo'shish"}</span>
                     </button>
                   </div>
                 </div>
