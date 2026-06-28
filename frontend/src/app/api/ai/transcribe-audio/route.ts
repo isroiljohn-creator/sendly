@@ -83,58 +83,83 @@ export async function POST(request: Request) {
     // Decode base64 to Buffer
     const buffer = Buffer.from(base64Data, "base64");
     
-    // Create native Blob and FormData for fetch
-    const blob = new Blob([buffer], { type: fileType || "audio/wav" });
+    // Create native File and FormData for fetch (ensures correct content-type header for audio format)
+    const filePart = new File([buffer], bodyFileName, { type: fileType || "audio/wav" });
     const formData = new FormData();
-    formData.append("audio", blob, bodyFileName);
+    formData.append("audio", filePart);
 
     console.log(`[Aisha STT] Sending audio file to Aisha STT API (${bodyFileName}, size: ${buffer.length} bytes)...`);
 
-    let response = await fetch("https://back.aisha.group/api/v1/stt/post/", {
-      method: "POST",
-      headers: {
-        "X-Api-Key": apiKey.trim()
-      },
-      body: formData
-    });
-
+    let response;
     let data;
-    let isV2 = false;
+    let isV2 = duration > 2;
 
-    if (!response.ok) {
-      const errText = await response.text();
-      console.error("[Aisha STT API Error]:", response.status, errText);
+    if (isV2) {
+      console.log(`[Aisha STT] Audio duration is ${duration} mins (> 2 mins). Bypassing v1 and calling v2 directly...`);
+      const v2FormData = new FormData();
+      v2FormData.append("audio", filePart);
 
-      // Check if it's a 403 error due to audio duration limit (needs v2)
-      if (response.status === 403 && (errText.includes("audio_duration_use_v2") || errText.includes("2 daqiqadan"))) {
-        console.log("[Aisha STT] Audio too long for v1, falling back to v2...");
-        isV2 = true;
+      response = await fetch("https://back.aisha.group/api/v2/stt/post/", {
+        method: "POST",
+        headers: {
+          "X-Api-Key": apiKey.trim()
+        },
+        body: v2FormData
+      });
 
-        const v2FormData = new FormData();
-        v2FormData.append("audio", blob, bodyFileName);
-
-        response = await fetch("https://back.aisha.group/api/v2/stt/post/", {
-          method: "POST",
-          headers: {
-            "X-Api-Key": apiKey.trim()
-          },
-          body: v2FormData
-        });
-
-        if (!response.ok) {
-          const v2ErrText = await response.text();
-          console.error("[Aisha STT v2 API Error]:", response.status, v2ErrText);
-          throw new Error(`Aisha API nutqni matnga o'girishda xatoga yo'l qo'ydi (v2 Status: ${response.status}).`);
-        }
-
-        data = await response.json();
-        console.log("[Aisha STT v2 Async Response]:", JSON.stringify(data));
-      } else {
-        throw new Error(`Aisha API nutqni matnga o'girishda xatoga yo'l qo'ydi (Status: ${response.status}).`);
+      if (!response.ok) {
+        const v2ErrText = await response.text();
+        console.error("[Aisha STT v2 API Error]:", response.status, v2ErrText);
+        throw new Error(`Aisha API nutqni matnga o'girishda xatoga yo'l qo'ydi (v2 Status: ${response.status}).`);
       }
-    } else {
+
       data = await response.json();
-      console.log("[Aisha STT Success Response]:", JSON.stringify(data));
+      console.log("[Aisha STT v2 Async Response]:", JSON.stringify(data));
+    } else {
+      console.log(`[Aisha STT] Audio duration is ${duration} mins (<= 2 mins). Calling v1...`);
+      response = await fetch("https://back.aisha.group/api/v1/stt/post/", {
+        method: "POST",
+        headers: {
+          "X-Api-Key": apiKey.trim()
+        },
+        body: formData
+      });
+
+      if (!response.ok) {
+        const errText = await response.text();
+        console.error("[Aisha STT API Error]:", response.status, errText);
+
+        // Check if it's a 403 error due to audio duration limit (needs v2)
+        if (response.status === 403 && (errText.includes("audio_duration_use_v2") || errText.includes("2 daqiqadan"))) {
+          console.log("[Aisha STT] Audio too long for v1, falling back to v2...");
+          isV2 = true;
+
+          const v2FormData = new FormData();
+          v2FormData.append("audio", filePart);
+
+          const fallbackRes = await fetch("https://back.aisha.group/api/v2/stt/post/", {
+            method: "POST",
+            headers: {
+              "X-Api-Key": apiKey.trim()
+            },
+            body: v2FormData
+          });
+
+          if (!fallbackRes.ok) {
+            const v2ErrText = await fallbackRes.text();
+            console.error("[Aisha STT v2 API Error]:", fallbackRes.status, v2ErrText);
+            throw new Error(`Aisha API nutqni matnga o'girishda xatoga yo'l qo'ydi (v2 Status: ${fallbackRes.status}).`);
+          }
+
+          data = await fallbackRes.json();
+          console.log("[Aisha STT v2 Async Response]:", JSON.stringify(data));
+        } else {
+          throw new Error(`Aisha API nutqni matnga o'girishda xatoga yo'l qo'ydi (Status: ${response.status}).`);
+        }
+      } else {
+        data = await response.json();
+        console.log("[Aisha STT Success Response]:", JSON.stringify(data));
+      }
     }
 
     let resultText = "";

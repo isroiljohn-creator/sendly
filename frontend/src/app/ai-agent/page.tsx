@@ -499,6 +499,9 @@ function AIAgentContent() {
   // Knowledge Base UI States
   const [expandedModules, setExpandedModules] = useState<Record<string, boolean>>({ "mod-1": true });
   const [selectedLesson, setSelectedLesson] = useState<Lesson | null>(null);
+  const [activeModuleId, setActiveModuleId] = useState<string | null>(null);
+  const [fileUploadProgress, setFileUploadProgress] = useState<number | null>(null);
+  const [uploadProgressText, setUploadProgressText] = useState<string>("");
   
   // Input fields for adding items
   const [newModuleName, setNewModuleName] = useState("");
@@ -1121,6 +1124,9 @@ function AIAgentContent() {
 
     if (loadedLessons.length > 0 && !selectedLesson) {
       setSelectedLesson(loadedLessons[0]);
+      setActiveModuleId(loadedLessons[0].moduleId);
+    } else if (loadedModules.length > 0) {
+      setActiveModuleId(loadedModules[0].id);
     }
 
     if (typeof window !== "undefined") {
@@ -1385,6 +1391,7 @@ function AIAgentContent() {
       ...prev,
       [moduleId]: !prev[moduleId]
     }));
+    setActiveModuleId(moduleId);
   };
 
   // Add new module
@@ -1394,6 +1401,7 @@ function AIAgentContent() {
     setModules(db.getModules());
     setNewModuleName("");
     setShowAddModuleModal(false);
+    setActiveModuleId(newMod.id);
     showToast(t("pages.ai_agent.toasts.module_created").replace("{title}", newMod.title));
   };
 
@@ -1426,9 +1434,12 @@ function AIAgentContent() {
       const newMod = db.addModule(defaultModuleName);
       setModules(db.getModules());
       targetModuleId = newMod.id;
+      setActiveModuleId(newMod.id);
       showToast(t("pages.ai_agent.toasts.default_module_created") || "Hujjatlar uchun standart modul yaratildi");
     } else {
-      targetModuleId = modules[0].id;
+      targetModuleId = activeModuleId && modules.some(m => m.id === activeModuleId) 
+        ? activeModuleId 
+        : modules[0].id;
     }
     setNewLessonModuleId(targetModuleId);
     setShowAddLessonModal(true);
@@ -1516,6 +1527,24 @@ function AIAgentContent() {
     // Determine target API endpoint
     const endpoint = isAudio ? "/api/ai/transcribe-audio" : "/api/ai/parse-document";
 
+    // Set initial progress state
+    setFileUploadProgress(0);
+    setUploadProgressText(
+      isAudio
+        ? (t("pages.ai_agent.toasts.transcribing_audio") || "Audio transkripsiya qilinmoqda...")
+        : (t("pages.ai_agent.toasts.parsing_document") || "Hujjat tahlil qilinmoqda...")
+    );
+
+    const estSeconds = isAudio ? Math.max(12, durationInMinutes * 7.5) : 10;
+    let progressVal = 0;
+    const progressInterval = setInterval(() => {
+      progressVal += 100 / (estSeconds * 3.33); // 300ms intervals (3.33 ticks per second)
+      if (progressVal >= 95) {
+        progressVal = 95;
+      }
+      setFileUploadProgress(Math.floor(progressVal));
+    }, 300);
+
     setIsFileUploading(true);
     showToast(
       isAudio 
@@ -1594,8 +1623,11 @@ function AIAgentContent() {
         const newMod = db.addModule(defaultModuleName);
         setModules(db.getModules());
         targetModuleId = newMod.id;
+        setActiveModuleId(newMod.id);
       } else {
-        targetModuleId = modules[0].id;
+        targetModuleId = activeModuleId && modules.some(m => m.id === activeModuleId) 
+          ? activeModuleId 
+          : modules[0].id;
       }
 
       // 4. Add new lesson/document
@@ -1632,6 +1664,9 @@ function AIAgentContent() {
         await db.getAiCreditsFromServer(currentUserId);
       }
     } finally {
+      clearInterval(progressInterval);
+      setFileUploadProgress(null);
+      setUploadProgressText("");
       setIsFileUploading(false);
       if (fileInputRef.current) fileInputRef.current.value = "";
     }
@@ -4982,7 +5017,11 @@ function AIAgentContent() {
                     <button
                       onClick={() => {
                         if (modules.length > 0) {
-                          setNewLinkModuleId(modules[0].id);
+                          setNewLinkModuleId(
+                            activeModuleId && modules.some(m => m.id === activeModuleId)
+                              ? activeModuleId
+                              : modules[0].id
+                          );
                         }
                         setShowAddLinkModal(true);
                       }}
@@ -5025,7 +5064,11 @@ function AIAgentContent() {
                         {/* Module header */}
                         <div
                           onClick={() => toggleModule(mod.id)}
-                          className="flex items-center justify-between p-2 hover:bg-[#F9F9F7] rounded-xl cursor-pointer group transition-colors"
+                          className={`flex items-center justify-between p-2 rounded-xl cursor-pointer group transition-all ${
+                            activeModuleId === mod.id
+                              ? "bg-[#C7F33C]/10 border border-[#C7F33C]/30"
+                              : "hover:bg-[#F9F9F7]"
+                          }`}
                         >
                           <div className="flex items-center gap-2 min-w-0">
                             <span className="shrink-0">{isExpanded ? <ChevronDown size={14} className="text-[#707070]" /> : <ChevronRight size={14} className="text-[#707070]" />}</span>
@@ -5067,7 +5110,10 @@ function AIAgentContent() {
                               return (
                                 <div
                                   key={les.id}
-                                  onClick={() => setSelectedLesson(les)}
+                                  onClick={() => {
+                                    setSelectedLesson(les);
+                                    setActiveModuleId(les.moduleId);
+                                  }}
                                   className={`flex items-center justify-between p-2 rounded-xl cursor-pointer group transition-all ${
                                     isSelected
                                       ? "bg-black text-[#C7F33C]"
@@ -5310,7 +5356,11 @@ function AIAgentContent() {
                     <button
                       onClick={() => {
                         if (modules.length > 0) {
-                          setNewLinkModuleId(modules[0].id);
+                          setNewLinkModuleId(
+                            activeModuleId && modules.some(m => m.id === activeModuleId)
+                              ? activeModuleId
+                              : modules[0].id
+                          );
                         }
                         setShowAddLinkModal(true);
                       }}
@@ -5891,15 +5941,31 @@ function AIAgentContent() {
                 <div className="w-12 h-12 rounded-full border-4 border-[#C7F33C]/20 border-t-[#8CB807] animate-spin" />
                 <Brain size={20} className="absolute text-[#8CB807] animate-pulse" />
               </div>
-              <div className="flex flex-col gap-1">
+              <div className="flex flex-col gap-1 w-full">
                 <h4 className="text-[13px] font-bold text-black">
                   {isLinkParsing ? (t("pages.ai_agent.toasts.parsing_link") || "Havola tahlil qilinmoqda...") : "AI tahlil jarayoni..."}
                 </h4>
-                <p className="text-[11px] text-[#707070] leading-relaxed">
+                <p className="text-[11px] text-[#707070] leading-relaxed mb-1">
                   {isLinkParsing 
                     ? "Veb-sahifa yoki YouTube videosi matni sun'iy intellekt tomonidan o'rganilmoqda. Iltimos, kuting..."
                     : "Hujjat yoki audio faylingiz sun'iy intellekt tomonidan o'rganilmoqda. Iltimos, kuting..."}
                 </p>
+
+                {/* Simulated Progress Bar */}
+                {fileUploadProgress !== null && (
+                  <div className="w-full flex flex-col gap-1.5 mt-2">
+                    <div className="w-full h-1.5 bg-[#E8E8E8] rounded-full overflow-hidden">
+                      <div 
+                        className="h-full bg-[#8CB807] transition-all duration-300 rounded-full" 
+                        style={{ width: `${fileUploadProgress}%` }}
+                      />
+                    </div>
+                    <div className="flex justify-between text-[9px] font-bold text-[#707070]">
+                      <span>{uploadProgressText}</span>
+                      <span>{fileUploadProgress}%</span>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           </div>
