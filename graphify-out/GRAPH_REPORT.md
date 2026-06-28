@@ -1,16 +1,16 @@
-# Graph Report - Sendly  (2026-06-27)
+# Graph Report - Sendly  (2026-06-28)
 
 ## Corpus Check
-- 171 files · ~467,134 words
+- 171 files · ~467,157 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 954 nodes · 1720 edges · 84 communities (73 shown, 11 thin omitted)
+- 954 nodes · 1720 edges · 83 communities (73 shown, 10 thin omitted)
 - Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS · INFERRED: 2 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `e95c3496`
+- Built from commit: `16f4afc9`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -85,7 +85,6 @@
 - [[_COMMUNITY_Community 80|Community 80]]
 - [[_COMMUNITY_Community 82|Community 82]]
 - [[_COMMUNITY_Community 83|Community 83]]
-- [[_COMMUNITY_Community 84|Community 84]]
 
 ## God Nodes (most connected - your core abstractions)
 1. `useI18n()` - 73 edges
@@ -115,7 +114,7 @@
 - 2-file cycle: `backend/src/services/queue.ts -> backend/src/services/trigger.ts -> backend/src/services/queue.ts`
 - 3-file cycle: `backend/src/services/interpreter.ts -> backend/src/services/queue.ts -> backend/src/services/trigger.ts -> backend/src/services/interpreter.ts`
 
-## Communities (84 total, 11 thin omitted)
+## Communities (83 total, 10 thin omitted)
 
 ### Community 0 - "Community 0"
 Cohesion: 0.13
@@ -131,7 +130,7 @@ Nodes (49): calcGrowthPct(), checkIfUserIsAdmin(), GET(), POST(), readDb(), read
 
 ### Community 3 - "Community 3"
 Cohesion: 0.05
-Nodes (22): AccordionContent, AccordionItem, AccordionTrigger, Avatar, AvatarFallback, AvatarImage, Checkbox, HoverCardContent (+14 more)
+Nodes (24): AccordionContent, AccordionItem, AccordionTrigger, Avatar, AvatarFallback, AvatarImage, Checkbox, HoverCardContent (+16 more)
 
 ### Community 4 - "Community 4"
 Cohesion: 0.14
@@ -360,12 +359,12 @@ Nodes (3): Badge(), BadgeProps, badgeVariants
 ## Knowledge Gaps
 - **415 isolated node(s):** `name`, `version`, `description`, `main`, `dev` (+410 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **11 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **10 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `cn()` connect `Community 8` to `Community 3`, `Community 4`, `Community 5`, `Community 16`, `Community 18`, `Community 19`, `Community 20`, `Community 22`, `Community 23`, `Community 24`, `Community 28`, `Community 29`, `Community 32`, `Community 35`, `Community 36`, `Community 37`, `Community 43`, `Community 44`, `Community 48`, `Community 75`, `Community 80`, `Community 83`, `Community 84`?**
+- **Why does `cn()` connect `Community 8` to `Community 3`, `Community 4`, `Community 5`, `Community 16`, `Community 18`, `Community 19`, `Community 20`, `Community 22`, `Community 23`, `Community 24`, `Community 28`, `Community 29`, `Community 32`, `Community 35`, `Community 36`, `Community 37`, `Community 43`, `Community 44`, `Community 48`, `Community 75`, `Community 80`, `Community 83`?**
   _High betweenness centrality (0.150) - this node is a cross-community bridge._
 - **Why does `Channel` connect `Community 4` to `Community 0`, `Community 11`, `Community 12`, `Community 82`, `Community 22`?**
   _High betweenness centrality (0.039) - this node is a cross-community bridge._

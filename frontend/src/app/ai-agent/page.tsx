@@ -23,6 +23,7 @@ import {
   ShieldAlert,
   ArrowRight,
   FolderPlus,
+  Folder,
   FilePlus,
   CheckCircle,
   History,
@@ -5283,15 +5284,15 @@ function AIAgentContent() {
                       onClick={() => setShowAddModuleModal(true)}
                       className="flex items-center justify-center gap-2 py-3 rounded-xl border border-[#D8D8D8] text-[11px] font-bold text-[#595959] hover:bg-[#F9F9F7] active:scale-95 transition-all shadow-xs"
                     >
-                      <FolderPlus size={14} />
-                      <span>{`+ ${getModuleLabel().split(" / ")[0]}`}</span>
+                      <Folder size={14} />
+                      <span>{`${getModuleLabel().split(" / ")[0]}`}</span>
                     </button>
                     <button
                       onClick={handleTriggerAddLesson}
                       className="flex items-center justify-center gap-2 py-3 rounded-xl bg-black text-[#C7F33C] text-[11px] font-bold hover:bg-black/90 active:scale-95 transition-all shadow-sm"
                     >
-                      <FilePlus size={14} />
-                      <span>{`+ ${getLessonLabel().split(" / ")[0]}`}</span>
+                      <FileText size={14} />
+                      <span>{`${getLessonLabel().split(" / ")[0]}`}</span>
                     </button>
                     <button
                       onClick={() => fileInputRef.current?.click()}

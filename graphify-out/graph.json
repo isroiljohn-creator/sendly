@@ -3147,7 +3147,7 @@
       "label": "Facebook()",
       "file_type": "code",
       "source_file": "frontend/src/app/ai-agent/page.tsx",
-      "source_location": "L47",
+      "source_location": "L48",
       "_origin": "ast",
       "id": "ai_agent_page_facebook",
       "community": 49,
@@ -3157,7 +3157,7 @@
       "label": "CopyIcon()",
       "file_type": "code",
       "source_file": "frontend/src/app/ai-agent/page.tsx",
-      "source_location": "L64",
+      "source_location": "L65",
       "_origin": "ast",
       "id": "ai_agent_page_copyicon",
       "community": 49,
@@ -3167,7 +3167,7 @@
       "label": "PlayIcon()",
       "file_type": "code",
       "source_file": "frontend/src/app/ai-agent/page.tsx",
-      "source_location": "L82",
+      "source_location": "L83",
       "_origin": "ast",
       "id": "ai_agent_page_playicon",
       "community": 49,
@@ -3177,7 +3177,7 @@
       "label": "FieldMapping",
       "file_type": "code",
       "source_file": "frontend/src/app/ai-agent/page.tsx",
-      "source_location": "L99",
+      "source_location": "L100",
       "_origin": "ast",
       "id": "ai_agent_page_fieldmapping",
       "community": 49,
@@ -3187,7 +3187,7 @@
       "label": "generateJsonPayload()",
       "file_type": "code",
       "source_file": "frontend/src/app/ai-agent/page.tsx",
-      "source_location": "L106",
+      "source_location": "L107",
       "_origin": "ast",
       "id": "ai_agent_page_generatejsonpayload",
       "community": 49,
@@ -3197,7 +3197,7 @@
       "label": "parseJsonPayload()",
       "file_type": "code",
       "source_file": "frontend/src/app/ai-agent/page.tsx",
-      "source_location": "L142",
+      "source_location": "L143",
       "_origin": "ast",
       "id": "ai_agent_page_parsejsonpayload",
       "community": 49,
@@ -3207,7 +3207,7 @@
       "label": "CustomDropdownProps",
       "file_type": "code",
       "source_file": "frontend/src/app/ai-agent/page.tsx",
-      "source_location": "L178",
+      "source_location": "L179",
       "_origin": "ast",
       "id": "ai_agent_page_customdropdownprops",
       "community": 49,
@@ -3217,7 +3217,7 @@
       "label": "CustomDropdown()",
       "file_type": "code",
       "source_file": "frontend/src/app/ai-agent/page.tsx",
-      "source_location": "L186",
+      "source_location": "L187",
       "_origin": "ast",
       "id": "ai_agent_page_customdropdown",
       "community": 49,
@@ -3227,7 +3227,7 @@
       "label": "SimulatedMessage",
       "file_type": "code",
       "source_file": "frontend/src/app/ai-agent/page.tsx",
-      "source_location": "L238",
+      "source_location": "L239",
       "_origin": "ast",
       "id": "ai_agent_page_simulatedmessage",
       "community": 49,
@@ -3237,7 +3237,7 @@
       "label": "MOCK_FB_FORMS",
       "file_type": "code",
       "source_file": "frontend/src/app/ai-agent/page.tsx",
-      "source_location": "L247",
+      "source_location": "L248",
       "_origin": "ast",
       "id": "ai_agent_page_mock_fb_forms",
       "community": 49,
@@ -3247,7 +3247,7 @@
       "label": "AIAgentContent()",
       "file_type": "code",
       "source_file": "frontend/src/app/ai-agent/page.tsx",
-      "source_location": "L253",
+      "source_location": "L254",
       "_origin": "ast",
       "id": "ai_agent_page_aiagentcontent",
       "community": 49,
@@ -3257,7 +3257,7 @@
       "label": "LoadingFallback()",
       "file_type": "code",
       "source_file": "frontend/src/app/ai-agent/page.tsx",
-      "source_location": "L6098",
+      "source_location": "L6099",
       "_origin": "ast",
       "id": "ai_agent_page_loadingfallback",
       "community": 49,
@@ -3267,7 +3267,7 @@
       "label": "AIAgentPage()",
       "file_type": "code",
       "source_file": "frontend/src/app/ai-agent/page.tsx",
-      "source_location": "L6107",
+      "source_location": "L6108",
       "_origin": "ast",
       "id": "ai_agent_page_aiagentpage",
       "community": 49,
@@ -7630,7 +7630,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "ui_radio_group",
-      "community": 84,
+      "community": 3,
       "norm_label": "radio-group.tsx"
     },
     {
@@ -7640,7 +7640,7 @@
       "source_location": "L7",
       "_origin": "ast",
       "id": "ui_radio_group_radiogroup",
-      "community": 84,
+      "community": 3,
       "norm_label": "radiogroup"
     },
     {
@@ -7650,7 +7650,7 @@
       "source_location": "L15",
       "_origin": "ast",
       "id": "ui_radio_group_radiogroupitem",
-      "community": 84,
+      "community": 3,
       "norm_label": "radiogroupitem"
     },
     {
@@ -8357,7 +8357,7 @@
       "label": "useI18n()",
       "file_type": "code",
       "source_file": "frontend/src/i18n/I18nProvider.tsx",
-      "source_location": "L95",
+      "source_location": "L102",
       "_origin": "ast",
       "id": "i18n_i18nprovider_usei18n",
       "community": 11,
@@ -26729,9 +26729,9 @@
       "source_file": "frontend/src/lib/pgdb.ts",
       "source_location": "L111",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_pgdb",
-      "target": "lib_pgdb_getbottoken",
-      "confidence_score": 1.0
+      "target": "lib_pgdb_getbottoken"
     },
     {
       "relation": "contains",
@@ -26749,9 +26749,9 @@
       "source_file": "frontend/src/lib/pgdb.ts",
       "source_location": "L139",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_pgdb",
-      "target": "lib_pgdb_getuseridbychannelid",
-      "confidence_score": 1.0
+      "target": "lib_pgdb_getuseridbychannelid"
     },
     {
       "relation": "contains",
@@ -26759,9 +26759,9 @@
       "source_file": "frontend/src/lib/pgdb.ts",
       "source_location": "L154",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_pgdb",
-      "target": "lib_pgdb_getusersettings",
-      "confidence_score": 1.0
+      "target": "lib_pgdb_getusersettings"
     },
     {
       "relation": "contains",
@@ -26865,9 +26865,9 @@
       "source_file": "frontend/src/lib/pgdb.ts",
       "source_location": "L113",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_pgdb_getbottoken",
-      "target": "lib_pgdb_getpool",
-      "confidence_score": 1.0
+      "target": "lib_pgdb_getpool"
     },
     {
       "relation": "calls",
@@ -26876,9 +26876,9 @@
       "source_file": "frontend/src/lib/pgdb.ts",
       "source_location": "L141",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_pgdb_getuseridbychannelid",
-      "target": "lib_pgdb_getpool",
-      "confidence_score": 1.0
+      "target": "lib_pgdb_getpool"
     },
     {
       "relation": "calls",
@@ -26964,9 +26964,9 @@
       "source_file": "frontend/src/lib/pgdb.ts",
       "source_location": "L112",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_pgdb_getbottoken",
-      "target": "lib_pgdb_initdb",
-      "confidence_score": 1.0
+      "target": "lib_pgdb_initdb"
     },
     {
       "relation": "calls",
@@ -26975,9 +26975,9 @@
       "source_file": "frontend/src/lib/pgdb.ts",
       "source_location": "L140",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_pgdb_getuseridbychannelid",
-      "target": "lib_pgdb_initdb",
-      "confidence_score": 1.0
+      "target": "lib_pgdb_initdb"
     },
     {
       "relation": "calls",
@@ -27008,9 +27008,9 @@
       "source_file": "frontend/src/lib/pgdb.ts",
       "source_location": "L155",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_pgdb_getusersettings",
-      "target": "lib_pgdb_getvalue",
-      "confidence_score": 1.0
+      "target": "lib_pgdb_getvalue"
     },
     {
       "relation": "contains",
@@ -27028,9 +27028,9 @@
       "source_file": "frontend/src/lib/telegramBotRunner.ts",
       "source_location": "L146",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_telegrambotrunner",
-      "target": "lib_telegrambotrunner_chatqueues",
-      "confidence_score": 1.0
+      "target": "lib_telegrambotrunner_chatqueues"
     },
     {
       "relation": "contains",
@@ -27088,9 +27088,9 @@
       "source_file": "frontend/src/lib/telegramBotRunner.ts",
       "source_location": "L148",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_telegrambotrunner",
-      "target": "lib_telegrambotrunner_getchatqueue",
-      "confidence_score": 1.0
+      "target": "lib_telegrambotrunner_getchatqueue"
     },
     {
       "relation": "contains",
@@ -27108,9 +27108,9 @@
       "source_file": "frontend/src/lib/telegramBotRunner.ts",
       "source_location": "L157",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_telegrambotrunner",
-      "target": "lib_telegrambotrunner_getuseridforchannel",
-      "confidence_score": 1.0
+      "target": "lib_telegrambotrunner_getuseridforchannel"
     },
     {
       "relation": "contains",
@@ -27198,9 +27198,9 @@
       "source_file": "frontend/src/lib/telegramBotRunner.ts",
       "source_location": "L131",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_telegrambotrunner",
-      "target": "lib_telegrambotrunner_taskqueue",
-      "confidence_score": 1.0
+      "target": "lib_telegrambotrunner_taskqueue"
     },
     {
       "relation": "contains",
@@ -27218,9 +27218,9 @@
       "source_file": "frontend/src/lib/telegramBotRunner.ts",
       "source_location": "L184",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_telegrambotrunner",
-      "target": "lib_telegrambotrunner_updateuserdbfile",
-      "confidence_score": 1.0
+      "target": "lib_telegrambotrunner_updateuserdbfile"
     },
     {
       "relation": "calls",
@@ -27229,9 +27229,9 @@
       "source_file": "frontend/src/lib/telegramBotRunner.ts",
       "source_location": "L170",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_telegrambotrunner_getuseridforchannel",
-      "target": "lib_telegrambotrunner_safeparse",
-      "confidence_score": 1.0
+      "target": "lib_telegrambotrunner_safeparse"
     },
     {
       "relation": "calls",
@@ -27283,9 +27283,9 @@
       "source_file": "frontend/src/lib/telegramBotRunner.ts",
       "source_location": "L134",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_telegrambotrunner_taskqueue",
-      "target": "lib_telegrambotrunner_taskqueue_add",
-      "confidence_score": 1.0
+      "target": "lib_telegrambotrunner_taskqueue_add"
     },
     {
       "relation": "calls",
@@ -27294,9 +27294,9 @@
       "source_file": "frontend/src/lib/telegramBotRunner.ts",
       "source_location": "L1206",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_telegrambotrunner_starttelegrambots",
-      "target": "lib_telegrambotrunner_taskqueue_add",
-      "confidence_score": 1.0
+      "target": "lib_telegrambotrunner_taskqueue_add"
     },
     {
       "relation": "calls",
@@ -27305,9 +27305,9 @@
       "source_file": "frontend/src/lib/telegramBotRunner.ts",
       "source_location": "L945",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_telegrambotrunner_checkandrunautooutreach",
-      "target": "lib_telegrambotrunner_getuseridforchannel",
-      "confidence_score": 1.0
+      "target": "lib_telegrambotrunner_getuseridforchannel"
     },
     {
       "relation": "calls",
@@ -27316,9 +27316,9 @@
       "source_file": "frontend/src/lib/telegramBotRunner.ts",
       "source_location": "L265",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_telegrambotrunner_handletelegramupdate",
-      "target": "lib_telegrambotrunner_getuseridforchannel",
-      "confidence_score": 1.0
+      "target": "lib_telegrambotrunner_getuseridforchannel"
     },
     {
       "relation": "calls",
@@ -27327,9 +27327,9 @@
       "source_file": "frontend/src/lib/telegramBotRunner.ts",
       "source_location": "L947",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_telegrambotrunner_checkandrunautooutreach",
-      "target": "lib_telegrambotrunner_updateuserdbfile",
-      "confidence_score": 1.0
+      "target": "lib_telegrambotrunner_updateuserdbfile"
     },
     {
       "relation": "calls",
@@ -27338,9 +27338,9 @@
       "source_file": "frontend/src/lib/telegramBotRunner.ts",
       "source_location": "L266",
       "weight": 1.0,
+      "confidence_score": 1.0,
       "source": "lib_telegrambotrunner_handletelegramupdate",
-      "target": "lib_telegrambotrunner_updateuserdbfile",
-      "confidence_score": 1.0
+      "target": "lib_telegrambotrunner_updateuserdbfile"
     },
     {
       "relation": "calls",
@@ -27678,5 +27678,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "e95c34960193b50192430d621db7d58c4886a7ed"
+  "built_at_commit": "16f4afc9da58da4324df325798c79bce83deee40"
 }

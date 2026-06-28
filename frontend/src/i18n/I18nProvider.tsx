@@ -38,7 +38,7 @@ const DAYS: Record<Lang, string[]> = {
 type Ctx = {
   lang: Lang;
   setLang: (l: Lang) => void;
-  t: (key: string) => string;
+  t: (key: string, params?: Record<string, string | number>) => string;
   days: string[];
 };
 
@@ -60,7 +60,7 @@ export function I18nProvider({ children }: { children: ReactNode }) {
     localStorage.setItem("replai-lang", l);
   };
 
-  const t = (key: string): string => {
+  const t = (key: string, params?: Record<string, string | number>): string => {
     const dict = translations[lang] || translations.uz;
     const parts = key.split(".");
     let current: unknown = dict;
@@ -77,10 +77,17 @@ export function I18nProvider({ children }: { children: ReactNode }) {
             return key;
           }
         }
-        return typeof fallback === "string" ? fallback : key;
+        current = fallback;
+        break;
       }
     }
-    return typeof current === "string" ? current : key;
+    let val = typeof current === "string" ? current : key;
+    if (params) {
+      Object.entries(params).forEach(([k, v]) => {
+        val = val.replace(new RegExp(`\\{${k}\\}`, "g"), String(v));
+      });
+    }
+    return val;
   };
 
   const days = DAYS[lang];
