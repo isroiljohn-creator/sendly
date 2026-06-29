@@ -271,7 +271,7 @@ router.get("/callback", async (req, res, next) => {
       }
 
       // Subscribe page to webhook events
-      const subUrl = `https://graph.facebook.com/v18.0/${page.id}/subscribed_apps?subscribed_fields=messages,messaging_postbacks,comments,mention,story_insights&access_token=${page.access_token}`;
+      const subUrl = `https://graph.facebook.com/v18.0/${page.id}/subscribed_apps?subscribed_fields=messages,messaging_postbacks,mention&access_token=${page.access_token}`;
       try {
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 6000);
@@ -407,7 +407,7 @@ router.post("/custom", authMiddleware, async (req: AuthenticatedRequest, res) =>
         console.error("[Oauth Custom] Error resolving Page ID via /me:", meErr.message);
       }
 
-      const subUrl = `https://graph.facebook.com/v18.0/${targetId}/subscribed_apps?subscribed_fields=messages,messaging_postbacks,comments,mention,story_insights&access_token=${customMetaAccessToken}`;
+      const subUrl = `https://graph.facebook.com/v18.0/${targetId}/subscribed_apps?subscribed_fields=messages,messaging_postbacks,mention&access_token=${customMetaAccessToken}`;
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 6000);
       const subRes = await fetch(subUrl, { 
