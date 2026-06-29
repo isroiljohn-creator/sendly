@@ -260,7 +260,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
                   </div>
                   <div className="min-w-0">
                     <p className="text-[11.5px] font-bold text-black truncate">{activeChannel.name}</p>
-                    <p className="text-[9.5px] text-[#707070] truncate">{activeChannel.username}</p>
+                    <p className="text-[9.5px] text-[#707070] truncate">{activeChannel.username.startsWith("@") ? activeChannel.username : `@${activeChannel.username}`}</p>
                   </div>
                 </div>
                 <span className="text-[8.5px] font-black bg-[#C7F33C]/25 text-[#7CA607] px-2 py-0.5 rounded-full">
@@ -301,7 +301,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
                       }`}>
                         {ch.type === "instagram" ? <Instagram size={10} className="text-white" /> : <Bot size={10} className="text-white" />}
                       </div>
-                      <span className="text-[11px] font-bold text-neutral-700 truncate">{ch.username}</span>
+                      <span className="text-[11px] font-bold text-neutral-700 truncate">{ch.username.startsWith("@") ? ch.username : `@${ch.username}`}</span>
                     </div>
                     <span className="text-[9px] text-neutral-400 font-semibold">O&apos;tish ▾</span>
                   </button>

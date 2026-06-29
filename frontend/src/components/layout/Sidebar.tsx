@@ -219,7 +219,7 @@ export function Sidebar() {
       <div className="mt-4 relative" ref={dropdownRef}>
         <button
           onClick={() => setDropdownOpen((p) => !p)}
-          title={activeChannel?.username ?? t("nav.select_channel")}
+          title={activeChannel ? (activeChannel.username.startsWith("@") ? activeChannel.username : `@${activeChannel.username}`) : t("nav.select_channel")}
           className="relative flex flex-col items-center group"
         >
           {activeChannel ? (
@@ -260,7 +260,7 @@ export function Sidebar() {
                   <ChannelAvatar channel={ch} size={28} />
                   <div className="min-w-0 flex-1">
                     <p className="text-[12px] font-semibold text-black truncate">{ch.name}</p>
-                    <p className="text-[10px] text-[#707070] truncate">{ch.username}</p>
+                    <p className="text-[10px] text-[#707070] truncate">{ch.username.startsWith("@") ? ch.username : `@${ch.username}`}</p>
                   </div>
                   {isAct && (
                     <div className="w-2 h-2 rounded-full bg-[#16A34A] shrink-0" />

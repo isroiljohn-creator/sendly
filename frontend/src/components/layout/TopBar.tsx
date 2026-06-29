@@ -157,7 +157,7 @@ export function TopBar() {
       <div className={`grid h-6 w-6 place-items-center rounded-full shrink-0 ${activeChannel.type === "instagram" ? "bg-gradient-to-br from-[#f09433] via-[#e6683c] to-[#bc1888]" : "bg-[#229ED9]"}`}>
         {activeChannel.type === "instagram" ? <Instagram size={11} className="text-white" /> : <Bot size={11} className="text-white" />}
       </div>
-      <span className="text-[12px] font-bold text-black">{activeChannel.username}</span>
+      <span className="text-[12px] font-bold text-black">{activeChannel.username.startsWith("@") ? activeChannel.username : `@${activeChannel.username}`}</span>
       <span className="text-[11px] text-[#707070] font-medium">ulangan</span>
       <span className="text-[10px] text-[#A0A0A0] font-bold ml-1">O&apos;zgartirish ▾</span>
     </div>
