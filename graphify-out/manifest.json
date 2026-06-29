@@ -495,8 +495,8 @@
     "semantic_hash": ""
   },
   "frontend/src/components/layout/AppLayout.tsx": {
-    "mtime": 1782663601.3507428,
-    "ast_hash": "f630c5e4148c5c62be7e2210227a0efa",
+    "mtime": 1782757559.281693,
+    "ast_hash": "98fc8681e621993e8bef3311c50656f2",
     "semantic_hash": ""
   },
   "frontend/src/components/layout/ConnectChannelModal.tsx": {
@@ -510,8 +510,8 @@
     "semantic_hash": ""
   },
   "frontend/src/components/layout/Sidebar.tsx": {
-    "mtime": 1782661724.329935,
-    "ast_hash": "19d96c9f6d87faba3ba13f5b10fab68d",
+    "mtime": 1782757530.8976057,
+    "ast_hash": "11b58cfb3ebd76276656e3d0f833b4bf",
     "semantic_hash": ""
   },
   "frontend/src/components/layout/SupportWidget.tsx": {
@@ -520,8 +520,8 @@
     "semantic_hash": ""
   },
   "frontend/src/components/layout/TopBar.tsx": {
-    "mtime": 1782475778.4238276,
-    "ast_hash": "71e18f37cb46e9ca5ac92dda713bfbc3",
+    "mtime": 1782757561.1905577,
+    "ast_hash": "beebc038f78e6733d9960f417a41174a",
     "semantic_hash": ""
   },
   "frontend/src/components/ui/BrandLoader.tsx": {
