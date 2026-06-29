@@ -390,7 +390,24 @@ router.post("/custom", authMiddleware, async (req: AuthenticatedRequest, res) =>
 
     // 1. Try to subscribe the page to the custom Meta App automatically
     try {
-      const subUrl = `https://graph.facebook.com/v18.0/${instagramPageId}/subscribed_apps?subscribed_fields=messages,messaging_postbacks,comments,mention,story_insights&access_token=${customMetaAccessToken}`;
+      let targetId = instagramPageId;
+      try {
+        const meUrl = `https://graph.facebook.com/v18.0/me?access_token=${customMetaAccessToken}`;
+        const meRes = await fetch(meUrl);
+        if (meRes.ok) {
+          const meData = await meRes.json();
+          if (meData && meData.id) {
+            targetId = meData.id;
+            console.log(`[Oauth Custom] Resolved Facebook Page ID: ${targetId} from access token`);
+          }
+        } else {
+          console.warn("[Oauth Custom] Failed to call /me endpoint, falling back to instagramPageId:", await meRes.text());
+        }
+      } catch (meErr: any) {
+        console.error("[Oauth Custom] Error resolving Page ID via /me:", meErr.message);
+      }
+
+      const subUrl = `https://graph.facebook.com/v18.0/${targetId}/subscribed_apps?subscribed_fields=messages,messaging_postbacks,comments,mention,story_insights&access_token=${customMetaAccessToken}`;
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 6000);
       const subRes = await fetch(subUrl, { 
@@ -399,10 +416,10 @@ router.post("/custom", authMiddleware, async (req: AuthenticatedRequest, res) =>
       });
       clearTimeout(timeoutId);
       if (subRes.ok) {
-        console.log(`[Oauth Custom] Page ${instagramPageId} successfully subscribed to custom Meta App.`);
+        console.log(`[Oauth Custom] Page ${targetId} successfully subscribed to custom Meta App.`);
       } else {
         const errText = await subRes.text();
-        console.warn(`[Oauth Custom] Webhook subscription warning for Page ${instagramPageId}:`, errText);
+        console.warn(`[Oauth Custom] Webhook subscription warning for Page ${targetId}:`, errText);
       }
     } catch (subErr: any) {
       console.error("[Oauth Custom] Webhook subscription API call failed:", subErr.message);
