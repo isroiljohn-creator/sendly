@@ -4,8 +4,14 @@ import path from "path";
 import { startTelegramBots, getDefaultSystemPrompt } from "@/lib/telegramBotRunner";
 import * as pgdb from "@/lib/pgdb";
 import { verifyJwt } from "@/lib/jwt";
+import { cookies } from "next/headers";
 
 const DB_FILE = process.env.DB_FILE_PATH || path.join(process.cwd(), "db.json");
+
+const ADMIN_EMAILS = (process.env.ADMIN_EMAILS || 'admin@sendly.uz,isroiljohnabdullayev@gmail.com,aisroil005@gmail.com')
+  .split(',')
+  .map((e) => e.trim())
+  .filter(Boolean);
 
 const LOCK_DIR = path.join(process.cwd(), "db.lock");
 
@@ -114,8 +120,8 @@ export async function GET(request: Request) {
 
   // Check auth for non-guest userIds
   if (userId !== "guest") {
-    const authHeader = request.headers.get("Authorization");
-    const token = authHeader?.startsWith("Bearer ") ? authHeader.substring(7) : null;
+    const cookieStore = await cookies();
+    const token = cookieStore.get('replai_token')?.value || request.headers.get('Authorization')?.split(' ')[1] || '';
     const jwtSecret = process.env.JWT_SECRET;
     const jwtPattern = /^[a-zA-Z0-9-_]+\.[a-zA-Z0-9-_]+\.[a-zA-Z0-9-_]+$/;
     
@@ -126,9 +132,7 @@ export async function GET(request: Request) {
     const payload = verifyJwt(token, jwtSecret);
     const isRequestingAdmin = payload && (
       payload.role === "admin" ||
-      payload.email === "admin@sendly.uz" ||
-      payload.email === "isroiljohnabdullayev@gmail.com" ||
-      payload.email === "aisroil005@gmail.com"
+      (payload.email && ADMIN_EMAILS.includes(payload.email.toLowerCase().trim()))
     );
     if (!payload || (payload.user_id !== userId && !isRequestingAdmin)) {
       return NextResponse.json({ error: "Forbidden: Access denied" }, { status: 403 });
@@ -229,8 +233,8 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Forbidden: Guests cannot write to database" }, { status: 403 });
   }
 
-  const authHeader = request.headers.get("Authorization");
-  const token = authHeader?.startsWith("Bearer ") ? authHeader.substring(7) : null;
+  const cookieStore = await cookies();
+  const token = cookieStore.get('replai_token')?.value || request.headers.get('Authorization')?.split(' ')[1] || '';
   const jwtSecret = process.env.JWT_SECRET;
   const jwtPattern = /^[a-zA-Z0-9-_]+\.[a-zA-Z0-9-_]+\.[a-zA-Z0-9-_]+$/;
   
@@ -241,9 +245,7 @@ export async function POST(request: Request) {
   const payloadJwt = verifyJwt(token, jwtSecret);
   const isRequestingAdmin = payloadJwt && (
     payloadJwt.role === "admin" ||
-    payloadJwt.email === "admin@sendly.uz" ||
-    payloadJwt.email === "isroiljohnabdullayev@gmail.com" ||
-    payloadJwt.email === "aisroil005@gmail.com"
+    (payloadJwt.email && ADMIN_EMAILS.includes(payloadJwt.email.toLowerCase().trim()))
   );
   if (!payloadJwt || (payloadJwt.user_id !== userId && !isRequestingAdmin)) {
     return NextResponse.json({ error: "Forbidden: Access denied" }, { status: 403 });
@@ -709,6 +711,8 @@ async function runAutoLearningPipeline(userData: Record<string, any>, userId: st
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) return;
 
+  const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-2.5-flash';
+
   const botSettingsKeys = Object.keys(userData).filter(k => k.startsWith("replai_bot_settings_"));
 
   for (const settingsKey of botSettingsKeys) {
@@ -734,13 +738,13 @@ async function runAutoLearningPipeline(userData: Record<string, any>, userId: st
         let lessonsUpdated = false;
 
         for (const chat of chatsList) {
-          if (chat.liveTakeover === false && !chat.autoLearned && chat.messages && chat.messages.length > 0) {
-            const msgs = chat.messages.filter((m: any) => m.text);
-            if (msgs.length < 2) continue;
+          try {
+            if (chat.liveTakeover === false && !chat.autoLearned && chat.messages && chat.messages.length > 0) {
+              const msgs = chat.messages.filter((m: any) => m.text);
+              if (msgs.length < 2) continue;
 
-            const conversationText = msgs.map((m: any) => `${m.sender === "user" ? "Mijoz" : "Operator"}: ${m.text}`).join("\n");
+              const conversationText = msgs.map((m: any) => `${m.sender === "user" ? "Mijoz" : "Operator"}: ${m.text}`).join("\n");
 
-            try {
               const systemPrompt = `Siz professional marketing darsliklari va savol-javob (Q&A) qo'llanmalari tuzuvchisiz.\n` +
                 `Sizga operator va mijoz o'rtasidagi chat yozishmalari taqdim etiladi. Yozishmalardan foydali savol va unga berilgan aniq javobni (fakt, ma'lumot yoki qoida) topib, foydali marketing darsligi shakllantiring.\n` +
                 `Agar suhbatda hech qanday foydali darslik darajasidagi ma'lumot (masalan, narxlar, kurs tafsilotlari, qoidalar) bo'lmasa, bo'sh JSON {} qaytaring.\n` +
@@ -751,7 +755,7 @@ async function runAutoLearningPipeline(userData: Record<string, any>, userId: st
                 `}`;
 
               const res = await fetch(
-                `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
+                `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${apiKey}`,
                 {
                   method: "POST",
                   headers: { "Content-Type": "application/json" },
@@ -801,12 +805,13 @@ async function runAutoLearningPipeline(userData: Record<string, any>, userId: st
                   }
                 }
               }
-            } catch (err) {
-              console.error("[AutoLearn] Error running AI summarization:", err);
-            }
 
-            chat.autoLearned = true;
-            chatsUpdated = true;
+              chat.autoLearned = true;
+              chatsUpdated = true;
+            }
+          } catch (chatErr) {
+            console.error(`[AutoLearn] Error processing chat (id: ${chat.id ?? 'unknown'}):`, chatErr);
+            // Continue to the next chat — do not let one failure break the whole pipeline
           }
         }
 

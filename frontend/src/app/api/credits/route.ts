@@ -3,6 +3,7 @@ import fs from "fs";
 import path from "path";
 import { verifyJwt } from "@/lib/jwt";
 import * as pgdb from "@/lib/pgdb";
+import { cookies } from "next/headers";
 
 const DB_FILE = process.env.DB_FILE_PATH || path.join(process.cwd(), "db.json");
 
@@ -300,8 +301,8 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: "Unauthorized: Guests have no credits data" }, { status: 401 });
   }
 
-  const authHeader = request.headers.get("Authorization");
-  const token = authHeader?.startsWith("Bearer ") ? authHeader.substring(7) : null;
+  const cookieStore = await cookies();
+  const token = cookieStore.get('replai_token')?.value || request.headers.get('Authorization')?.split(' ')[1] || '';
   const jwtSecret = process.env.JWT_SECRET;
   const jwtPattern = /^[a-zA-Z0-9-_]+\.[a-zA-Z0-9-_]+\.[a-zA-Z0-9-_]+$/;
   
@@ -327,8 +328,8 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Unauthorized: Guests have no credits data" }, { status: 401 });
     }
 
-    const authHeader = request.headers.get("Authorization");
-    const token = authHeader?.startsWith("Bearer ") ? authHeader.substring(7) : null;
+    const cookieStore = await cookies();
+    const token = cookieStore.get('replai_token')?.value || request.headers.get('Authorization')?.split(' ')[1] || '';
     const jwtSecret = process.env.JWT_SECRET;
     const jwtPattern = /^[a-zA-Z0-9-_]+\.[a-zA-Z0-9-_]+\.[a-zA-Z0-9-_]+$/;
     

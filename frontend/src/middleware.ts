@@ -2,12 +2,14 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
 // Rate limiting in-memory store
+// NOTE: This is an in-memory store and will reset on each serverless function cold start.
+// For production multi-instance deployments, consider using Redis or a persistent store.
 const apiRateLimitStore = new Map<string, { count: number; resetTime: number }>();
 
 function checkApiRateLimit(ip: string): boolean {
   const now = Date.now();
-  const limitWindow = 60 * 1000; // 1 minute
-  const maxRequests = 60;
+  const limitWindow = 2 * 60 * 1000; // 2 minutes window for better traffic burst handling
+  const maxRequests = 120; // 120 requests per 2 minutes
   
   const record = apiRateLimitStore.get(ip);
   if (!record || now > record.resetTime) {
@@ -123,7 +125,7 @@ export function middleware(request: NextRequest) {
   const response = NextResponse.next();
 
   // Add standard security headers (Issue 392 - Security Audit Compliance)
-  response.headers.set("X-Frame-Options", "SAMEORIGIN");
+  response.headers.set("X-Frame-Options", "DENY");
   response.headers.set("X-Content-Type-Options", "nosniff");
   response.headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
   response.headers.set(
@@ -136,9 +138,10 @@ export function middleware(request: NextRequest) {
   );
   
   // Content Security Policy (CSP) - allows self, fonts, scripts, and google/facebook OAuth integration
+  // 'unsafe-eval' removed from script-src (not needed in Next.js production builds)
   response.headers.set(
     "Content-Security-Policy",
-    "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://apis.google.com https://accounts.google.com https://connect.facebook.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: https: blob:; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' https: wss:; frame-src 'self' https://*.facebook.com https://*.google.com https://accounts.google.com; object-src 'none';"
+    "default-src 'self'; script-src 'self' 'unsafe-inline' https://apis.google.com https://accounts.google.com https://connect.facebook.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: https: blob:; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' https: wss:; frame-src 'self' https://*.facebook.com https://*.google.com https://accounts.google.com; object-src 'none';"
   );
 
   return response;

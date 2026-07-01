@@ -1,8 +1,21 @@
 import { NextResponse } from "next/server";
 import { queryRAG } from "@/lib/ai/rag";
+import { cookies } from "next/headers";
+import { verifyJwt } from "@/lib/jwt";
 
 export async function POST(request: Request) {
   try {
+    const cookieStore = await cookies();
+    const token = cookieStore.get('replai_token')?.value || request.headers.get('Authorization')?.split(' ')[1] || '';
+    const jwtSecret = process.env.JWT_SECRET;
+
+    if (!token || !jwtSecret || !verifyJwt(token, jwtSecret)) {
+      return NextResponse.json(
+        { error: "Unauthorized: Access denied" },
+        { status: 401 }
+      );
+    }
+
     const body = await request.json();
     const { question, studentName, lessons, modules, settings, history } = body;
 

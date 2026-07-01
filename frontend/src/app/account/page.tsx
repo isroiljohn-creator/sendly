@@ -11,7 +11,12 @@ import {
   X,
   Plus,
   Info,
-  Loader2
+  Loader2,
+  Lock,
+  Key,
+  Eye,
+  EyeOff,
+  Check
 } from "lucide-react";
 import { db, type User } from "@/lib/db";
 import { useI18n } from "@/i18n/I18nProvider";
@@ -82,6 +87,27 @@ export default function AccountPage() {
   const [emailOtpError, setEmailOtpError] = useState("");
   const [emailVerifyCountdown, setEmailVerifyCountdown] = useState(120);
 
+  // New Password Change states
+  const [oldPassword, setOldPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [passwordError, setPasswordError] = useState("");
+  const [passwordSuccess, setPasswordSuccess] = useState("");
+  const [passwordLoading, setPasswordLoading] = useState(false);
+
+  // Forgot Password modal flow states
+  const [isForgotModalOpen, setIsForgotModalOpen] = useState(false);
+  const [forgotEmail, setForgotEmail] = useState("");
+  const [forgotStep, setForgotStep] = useState<"email" | "otp" | "new_password">("email");
+  const [forgotOtpCode, setForgotOtpCode] = useState("");
+  const [forgotSentOtpCode, setForgotSentOtpCode] = useState("");
+  const [forgotNewPassword, setForgotNewPassword] = useState("");
+  const [forgotConfirmPassword, setForgotConfirmPassword] = useState("");
+  const [forgotOtpTimer, setForgotOtpTimer] = useState(120);
+  const [forgotError, setForgotError] = useState("");
+  const [forgotSuccess, setForgotSuccess] = useState("");
+  const [forgotLoading, setForgotLoading] = useState(false);
+
   useEffect(() => {
     let interval: NodeJS.Timeout;
     if (cardStep === "otp" && otpTimer > 0) {
@@ -101,6 +127,16 @@ export default function AccountPage() {
     }
     return () => clearInterval(interval);
   }, [isEmailVerificationPending, emailVerifyCountdown]);
+
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    if (isForgotModalOpen && forgotStep === "otp" && forgotOtpTimer > 0) {
+      interval = setInterval(() => {
+        setForgotOtpTimer((prev) => prev - 1);
+      }, 1000);
+    }
+    return () => clearInterval(interval);
+  }, [isForgotModalOpen, forgotStep, forgotOtpTimer]);
 
   useEffect(() => {
     const user = db.getCurrentUser();
@@ -293,29 +329,200 @@ export default function AccountPage() {
     e.preventDefault();
     if (!currentUser) return;
 
-    // Save updated name/password (no email change allowed)
+    // Save updated name (no email or password change allowed here)
     const users = db.getUsers();
     const idx = users.findIndex(u => u.email === currentUser.email);
-    
-    // Hash password ONLY if user typed a new one (not empty)
-    const isPasswordChanged = password.trim().length > 0;
-    const finalPassword = isPasswordChanged ? db.hashPassword(password) : currentUser.password;
 
     if (idx > -1) {
       users[idx].fullName = name;
-      users[idx].password = finalPassword;
       localStorage.setItem("replai_users", JSON.stringify(users));
     }
     
-    const updatedUser = { ...currentUser, fullName: name, password: finalPassword };
+    const updatedUser = { ...currentUser, fullName: name };
     localStorage.setItem("replai_current_user", JSON.stringify(updatedUser));
     setCurrentUser(updatedUser);
-    setPassword(""); // Clear password input field after saving
     
     // Persist changes to server
     await db.saveToServer();
     
     showAlert(t("common.success"), t("pages.account.general.success_message") || "Profil ma'lumotlari muvaffaqiyatli saqlandi!", "success");
+  };
+
+  const validatePasswordStrength = (pass: string) => {
+    if (pass.length < 8) return "Parol kamida 8 ta belgidan iborat bo'lishi kerak.";
+    if (!/[A-Z]/.test(pass)) return "Parolda kamida bitta bosh harf (A-Z) bo'lishi kerak.";
+    if (!/[a-z]/.test(pass)) return "Parolda kamida bitta kichik harf (a-z) bo'lishi kerak.";
+    if (!/[0-9]/.test(pass)) return "Parolda kamida bitta raqam (0-9) bo'lishi kerak.";
+    if (!/[!@#$%^&*(),.?":{}|<>]/.test(pass)) return "Parolda kamida bitta maxsus belgi (!@#$%^&*...) bo'lishi kerak.";
+    return null;
+  };
+
+  const handlePasswordChange = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setPasswordError("");
+    setPasswordSuccess("");
+
+    if (!currentUser) return;
+
+    // Verify current password
+    const hashedOld = db.hashPassword(oldPassword);
+    if (currentUser.password && hashedOld !== currentUser.password) {
+      setPasswordError("Hozirgi parol noto'g'ri kiritildi.");
+      return;
+    }
+
+    if (newPassword !== confirmPassword) {
+      setPasswordError("Yangi parollar mos kelmadi.");
+      return;
+    }
+
+    if (oldPassword === newPassword) {
+      setPasswordError("Yangi parol eski parol bilan bir xil bo'lmasligi kerak.");
+      return;
+    }
+
+    const strengthError = validatePasswordStrength(newPassword);
+    if (strengthError) {
+      setPasswordError(strengthError);
+      return;
+    }
+
+    setPasswordLoading(true);
+    try {
+      // Update in local DB
+      const users = db.getUsers();
+      const idx = users.findIndex(u => u.email === currentUser.email);
+      const hashedNew = db.hashPassword(newPassword);
+      if (idx > -1) {
+        users[idx].password = hashedNew;
+        localStorage.setItem("replai_users", JSON.stringify(users));
+      }
+
+      const updatedUser = { ...currentUser, password: hashedNew };
+      localStorage.setItem("replai_current_user", JSON.stringify(updatedUser));
+      setCurrentUser(updatedUser);
+
+      setPasswordSuccess("Parol muvaffaqiyatli yangilandi!");
+      setOldPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
+      await db.saveToServer();
+    } catch (err: unknown) {
+      setPasswordError("Xatolik yuz berdi. Iltimos qaytadan urinib ko'ring.");
+    } finally {
+      setPasswordLoading(false);
+    }
+  };
+
+  const handleForgotSendOtp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setForgotError("");
+    setForgotSuccess("");
+
+    if (!forgotEmail.trim()) {
+      setForgotError("Iltimos, elektron pochtangizni kiriting.");
+      return;
+    }
+
+    // Verify email exists in DB
+    const users = db.getUsers();
+    const userExists = users.some(u => u.email.toLowerCase() === forgotEmail.trim().toLowerCase());
+    if (!userExists) {
+      setForgotError("Ushbu elektron pochta manzili tizimda ro'yxatdan o'tmagan.");
+      return;
+    }
+
+    setForgotLoading(true);
+    const code = Math.floor(100000 + Math.random() * 900000).toString();
+    try {
+      const res = await fetch("/api/auth/send-otp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: forgotEmail.trim(), otp: code }),
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setForgotSentOtpCode(code);
+        setForgotStep("otp");
+        setForgotOtpTimer(120);
+        setForgotSuccess("Tasdiqlash kodi elektron pochtangizga yuborildi.");
+      } else {
+        setForgotError(data.error || "Kodni yuborishda xatolik yuz berdi.");
+      }
+    } catch (err) {
+      setForgotError("Tarmoq xatoligi yuz berdi.");
+    } finally {
+      setForgotLoading(false);
+    }
+  };
+
+  const handleForgotVerifyOtp = (e: React.FormEvent) => {
+    e.preventDefault();
+    setForgotError("");
+    setForgotSuccess("");
+
+    if (forgotOtpTimer <= 0) {
+      setForgotError("Kodni kiritish vaqti tugadi. Qaytadan kod yuboring.");
+      return;
+    }
+
+    if (forgotOtpCode !== forgotSentOtpCode) {
+      setForgotError("Tasdiqlash kodi noto'g'ri.");
+      return;
+    }
+
+    setForgotStep("new_password");
+  };
+
+  const handleForgotResetPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setForgotError("");
+    setForgotSuccess("");
+
+    if (forgotNewPassword !== forgotConfirmPassword) {
+      setForgotError("Parollar mos kelmadi.");
+      return;
+    }
+
+    const strengthError = validatePasswordStrength(forgotNewPassword);
+    if (strengthError) {
+      setForgotError(strengthError);
+      return;
+    }
+
+    setForgotLoading(true);
+    try {
+      const users = db.getUsers();
+      const idx = users.findIndex(u => u.email.toLowerCase() === forgotEmail.trim().toLowerCase());
+      const hashed = db.hashPassword(forgotNewPassword);
+      if (idx > -1) {
+        users[idx].password = hashed;
+        localStorage.setItem("replai_users", JSON.stringify(users));
+
+        // If the reset user is the current logged-in user, update session as well
+        if (currentUser && currentUser.email.toLowerCase() === forgotEmail.trim().toLowerCase()) {
+          const updatedUser = { ...currentUser, password: hashed };
+          localStorage.setItem("replai_current_user", JSON.stringify(updatedUser));
+          setCurrentUser(updatedUser);
+        }
+      }
+
+      await db.saveToServer();
+      showAlert("Muvaffaqiyatli", "Parolingiz muvaffaqiyatli yangilandi!", "success");
+      setIsForgotModalOpen(false);
+      
+      // Clear states
+      setForgotEmail("");
+      setForgotOtpCode("");
+      setForgotSentOtpCode("");
+      setForgotNewPassword("");
+      setForgotConfirmPassword("");
+      setForgotStep("email");
+    } catch (err) {
+      setForgotError("Parolni yangilashda xatolik yuz berdi.");
+    } finally {
+      setForgotLoading(false);
+    }
   };
 
   const handleGetOtp = (e: React.FormEvent) => {
@@ -531,18 +738,6 @@ export default function AccountPage() {
                   <p className="text-[10px] text-[#707070] mt-0.5">Elektron pochta manzilini o'zgartirib bo'lmaydi.</p>
                 </div>
 
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-[11px] font-bold text-[#707070] uppercase tracking-wider">{t("pages.account.general.password")}</label>
-                  <input
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="w-full rounded-[10px] border border-[#D8D8D8] px-4 py-3 text-[13px] text-black focus:outline-none focus:border-black bg-white"
-                    placeholder={t("pages.account.general.password_placeholder")}
-                  />
-                  <p className="text-[10px] text-[#707070] mt-0.5">{t("pages.account.general.password_desc")}</p>
-                </div>
-
                 <div className="mt-2 flex justify-start">
                   <Button type="submit" variant="primary" disabled={isSendingEmailOtp} className="gap-2 px-6 py-3 rounded-[10px] text-[13px]">
                     {isSendingEmailOtp ? (
@@ -554,6 +749,96 @@ export default function AccountPage() {
                   </Button>
                 </div>
               </form>
+
+              {/* Change Password Card */}
+              <Card className="border border-[#D8D8D8] bg-white mt-6">
+                <div className="flex flex-col gap-6">
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <Lock size={16} className="text-black" />
+                      <h3 className="text-[15px] font-medium text-black">
+                        Parolni o'zgartirish
+                      </h3>
+                    </div>
+                    <p className="text-[12px] text-[#707070] mt-1.5 leading-relaxed">
+                      Profilingiz xavfsizligini ta'minlash uchun parolni yangilab turing.
+                    </p>
+                  </div>
+
+                  <form onSubmit={handlePasswordChange} className="flex flex-col gap-4">
+                    {passwordError && (
+                      <div className="p-3 bg-red-50 border border-red-200 text-red-600 rounded-[10px] text-[12px] font-semibold">
+                        {passwordError}
+                      </div>
+                    )}
+                    {passwordSuccess && (
+                      <div className="p-3 bg-green-50 border border-green-200 text-green-600 rounded-[10px] text-[12px] font-semibold">
+                        {passwordSuccess}
+                      </div>
+                    )}
+
+                    <div className="flex flex-col gap-1.5">
+                      <label className="text-[10px] font-bold text-[#707070] uppercase tracking-wide">Hozirgi parol</label>
+                      <input
+                        type="password"
+                        value={oldPassword}
+                        onChange={(e) => setOldPassword(e.target.value)}
+                        placeholder="Hozirgi parolingizni kiriting"
+                        required
+                        className="w-full rounded-[10px] border border-[#D8D8D8] px-3.5 py-2.5 text-[12px] focus:outline-none focus:border-black font-semibold text-black bg-white"
+                      />
+                    </div>
+
+                    <div className="flex flex-col gap-1.5">
+                      <label className="text-[10px] font-bold text-[#707070] uppercase tracking-wide">Yangi parol</label>
+                      <input
+                        type="password"
+                        value={newPassword}
+                        onChange={(e) => setNewPassword(e.target.value)}
+                        placeholder="Yangi parol (kamida 8 ta belgi, bosh/kichik harf, raqam va maxsus belgi)"
+                        required
+                        className="w-full rounded-[10px] border border-[#D8D8D8] px-3.5 py-2.5 text-[12px] focus:outline-none focus:border-black font-semibold text-black bg-white"
+                      />
+                    </div>
+
+                    <div className="flex flex-col gap-1.5">
+                      <label className="text-[10px] font-bold text-[#707070] uppercase tracking-wide">Yangi parolni tasdiqlash</label>
+                      <input
+                        type="password"
+                        value={confirmPassword}
+                        onChange={(e) => setConfirmPassword(e.target.value)}
+                        placeholder="Yangi parolni qayta kiriting"
+                        required
+                        className="w-full rounded-[10px] border border-[#D8D8D8] px-3.5 py-2.5 text-[12px] focus:outline-none focus:border-black font-semibold text-black bg-white"
+                      />
+                    </div>
+
+                    <div className="flex items-center justify-between mt-2">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setForgotEmail(currentUser?.email || "");
+                          setForgotStep("email");
+                          setForgotError("");
+                          setForgotSuccess("");
+                          setIsForgotModalOpen(true);
+                        }}
+                        className="text-[12px] font-bold text-black hover:underline cursor-pointer bg-transparent border-none"
+                      >
+                        Parolni unutdim
+                      </button>
+
+                      <button
+                        type="submit"
+                        disabled={passwordLoading}
+                        className="px-6 py-2.5 text-[12px] font-bold rounded-full bg-black text-[#C7F33C] hover:bg-black/90 transition-all active:scale-95 disabled:opacity-50 border-none cursor-pointer"
+                      >
+                        {passwordLoading ? "Yangilanmoqda..." : "Parolni yangilash"}
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              </Card>
             </div>
           )}
 
@@ -1369,6 +1654,132 @@ export default function AccountPage() {
                 </div>
               );
             })()}
+          </div>
+        </div>
+      )}
+
+      {/* Forgot Password Modal */}
+      {isForgotModalOpen && (
+        <div className="fixed inset-0 z-[150] flex items-center justify-center bg-black/40 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+          <div className="w-full max-w-[400px] rounded-[24px] bg-white p-7 border border-[#D8D8D8] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200">
+            <div className="flex items-center justify-between pb-3 border-b border-[#F0F0F0] mb-5">
+              <h3 className="text-[16px] font-bold text-black">Parolni tiklash</h3>
+              <button 
+                onClick={() => setIsForgotModalOpen(false)} 
+                className="grid h-8 w-8 place-items-center rounded-full hover:bg-[#F0F0F0] text-[#707070] transition-colors"
+              >
+                <X size={16} />
+              </button>
+            </div>
+
+            {forgotError && (
+              <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-600 rounded-[10px] text-[12px] font-semibold">
+                {forgotError}
+              </div>
+            )}
+            {forgotSuccess && (
+              <div className="mb-4 p-3 bg-green-50 border border-green-200 text-green-600 rounded-[10px] text-[12px] font-semibold">
+                {forgotSuccess}
+              </div>
+            )}
+
+            {forgotStep === "email" && (
+              <form onSubmit={handleForgotSendOtp} className="flex flex-col gap-4">
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-[11px] font-bold text-[#707070] uppercase">Elektron pochta</label>
+                  <input
+                    type="email"
+                    value={forgotEmail}
+                    onChange={(e) => setForgotEmail(e.target.value)}
+                    placeholder="example@gmail.com"
+                    required
+                    className="w-full rounded-[10px] border border-[#D8D8D8] px-3.5 py-2.5 text-[12px] text-black focus:outline-none focus:border-black bg-white"
+                  />
+                </div>
+                <Button type="submit" disabled={forgotLoading} className="w-full py-3 text-[12px] font-bold rounded-[10px] bg-black text-white hover:bg-black/90">
+                  {forgotLoading ? "Kodni yuborish..." : "Tasdiqlash kodini yuborish"}
+                </Button>
+              </form>
+            )}
+
+            {forgotStep === "otp" && (
+              <form onSubmit={handleForgotVerifyOtp} className="flex flex-col gap-4">
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-[11px] font-bold text-[#707070] uppercase">Tasdiqlash kodi</label>
+                  <input
+                    type="text"
+                    value={forgotOtpCode}
+                    onChange={(e) => setForgotOtpCode(e.target.value)}
+                    placeholder="6 xonali kod"
+                    maxLength={6}
+                    required
+                    className="w-full rounded-[10px] border border-[#D8D8D8] px-3.5 py-2.5 text-[12px] text-black font-semibold text-center tracking-widest focus:outline-none focus:border-black bg-white"
+                  />
+                  <div className="flex items-center justify-between text-[11px] text-[#707070] mt-1 px-1">
+                    <span>Kod yaroqlilik muddati:</span>
+                    <span className={`font-bold ${forgotOtpTimer < 30 ? "text-red-500" : "text-black"}`}>
+                      {Math.floor(forgotOtpTimer / 60)}:{(forgotOtpTimer % 60).toString().padStart(2, "0")}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setForgotStep("email")}
+                    className="flex-1 py-3 text-[12px] font-bold rounded-[10px] bg-[#F0F0F0] text-black hover:bg-[#E8E8E8] transition-colors"
+                  >
+                    Orqaga
+                  </button>
+                  <Button type="submit" className="flex-1 py-3 text-[12px] font-bold rounded-[10px] bg-black text-white hover:bg-black/90">
+                    Tasdiqlash
+                  </Button>
+                </div>
+
+                <div className="text-center mt-2">
+                  <button
+                    type="button"
+                    disabled={forgotOtpTimer > 0 || forgotLoading}
+                    onClick={handleForgotSendOtp}
+                    className="text-[11px] font-bold text-[#707070] hover:text-black hover:underline disabled:opacity-40"
+                  >
+                    Kodni qayta yuborish
+                  </button>
+                </div>
+              </form>
+            )}
+
+            {forgotStep === "new_password" && (
+              <form onSubmit={handleForgotResetPassword} className="flex flex-col gap-4">
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-[11px] font-bold text-[#707070] uppercase">Yangi parol</label>
+                  <input
+                    type="password"
+                    value={forgotNewPassword}
+                    onChange={(e) => setForgotNewPassword(e.target.value)}
+                    placeholder="Kamida 8 ta belgi"
+                    required
+                    className="w-full rounded-[10px] border border-[#D8D8D8] px-3.5 py-2.5 text-[12px] text-black focus:outline-none focus:border-black bg-white"
+                  />
+                </div>
+
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-[11px] font-bold text-[#707070] uppercase">Yangi parolni tasdiqlash</label>
+                  <input
+                    type="password"
+                    value={forgotConfirmPassword}
+                    onChange={(e) => setForgotConfirmPassword(e.target.value)}
+                    placeholder="Qayta kiriting"
+                    required
+                    className="w-full rounded-[10px] border border-[#D8D8D8] px-3.5 py-2.5 text-[12px] text-black focus:outline-none focus:border-black bg-white"
+                  />
+                </div>
+
+                <Button type="submit" disabled={forgotLoading} className="w-full py-3 text-[12px] font-bold rounded-[10px] bg-black text-white hover:bg-black/90">
+                  {forgotLoading ? "Saqlanmoqda..." : "Parolni saqlash"}
+                </Button>
+              </form>
+            )}
           </div>
         </div>
       )}

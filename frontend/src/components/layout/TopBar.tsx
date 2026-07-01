@@ -18,14 +18,21 @@ import {
   HelpCircle,
   Menu,
   Zap,
-  Coins
+  Coins,
+  Plus,
+  Search,
+  SlidersHorizontal,
+  Calendar,
+  Home
 } from "lucide-react";
 import { Instagram } from "@/components/ui/icons";
+import { CustomDropdown } from "@/components/ui/CustomDropdown";
 import { useI18n } from "@/i18n/I18nProvider";
 import type { Lang } from "@/i18n/I18nProvider";
 import { db } from "@/lib/db";
 import type { Channel, User as DBUser } from "@/lib/db";
-import { CustomDropdown } from "@/components/ui/CustomDropdown";
+
+type RangeKey = "today" | "7days" | "30days" | "all" | "custom";
 
 const LANG_NAMES: Record<Lang, string> = {
   uz: "O'zbekcha",
@@ -38,6 +45,26 @@ const LANG_FLAGS: Record<Lang, string> = { uz: "UZ", ru: "RU", en: "EN" };
 export function TopBar() {
   const { t, lang, setLang } = useI18n();
   const pathname = usePathname();
+
+  const [activePartnerTab, setActivePartnerTab] = useState<"home" | "referrals">("home");
+
+  useEffect(() => {
+    const handleTabChange = (e: Event) => {
+      const customEvent = e as CustomEvent<"home" | "referrals">;
+      if (customEvent.detail) {
+        setActivePartnerTab(customEvent.detail);
+      }
+    };
+    window.addEventListener("sendly-partner-tab-change", handleTabChange as EventListener);
+    return () => {
+      window.removeEventListener("sendly-partner-tab-change", handleTabChange as EventListener);
+    };
+  }, []);
+
+  const handlePartnerTabClick = (tab: "home" | "referrals") => {
+    setActivePartnerTab(tab);
+    window.dispatchEvent(new CustomEvent("sendly-partner-tab-change", { detail: tab }));
+  };
 
   // Dropdown states
   const [isLangOpen, setIsLangOpen] = useState(false);
@@ -54,6 +81,133 @@ export function TopBar() {
   const [channels, setChannels] = useState<Channel[]>([]);
   const [activeChannelId, setActiveChannelId] = useState<string>("");
   const [activeChannel, setActiveChannel] = useState<Channel | null>(null);
+
+  // Date picker state for home page
+  const [selectedRangeKey, setSelectedRangeKey] = useState<RangeKey>(() => {
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("sendly_selected_range") as RangeKey;
+      if (saved && ["today", "7days", "30days", "all"].includes(saved)) {
+        return saved;
+      }
+    }
+    return "7days";
+  });
+  const [isDateOpen, setIsDateOpen] = useState(false);
+  const dateRef = useRef<HTMLDivElement>(null);
+
+  const [automationsSearch, setAutomationsSearch] = useState("");
+  const [automationsSort, setAutomationsSort] = useState("recent");
+
+  // Custom calendar picker states
+  const [showCalendarView, setShowCalendarView] = useState(false);
+  const [calendarMonth, setCalendarMonth] = useState(() => new Date());
+  const [customStart, setCustomStart] = useState<Date | null>(null);
+  const [customEnd, setCustomEnd] = useState<Date | null>(null);
+
+  const getDaysInMonth = (year: number, month: number) => {
+    return new Date(year, month + 1, 0).getDate();
+  };
+
+  const getFirstDayOfMonth = (year: number, month: number) => {
+    const day = new Date(year, month, 1).getDay();
+    return day === 0 ? 6 : day - 1;
+  };
+
+  const handleDayClick = (dayNum: number) => {
+    const clickedDate = new Date(calendarMonth.getFullYear(), calendarMonth.getMonth(), dayNum);
+    if (!customStart || (customStart && customEnd)) {
+      setCustomStart(clickedDate);
+      setCustomEnd(null);
+    } else if (customStart && !customEnd) {
+      if (clickedDate < customStart) {
+        setCustomStart(clickedDate);
+      } else {
+        setCustomEnd(clickedDate);
+      }
+    }
+  };
+
+  const handleApplyCustomRange = () => {
+    if (customStart && customEnd) {
+      const MONTHS_SHORT = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+      const startText = `${customStart.getDate()} ${MONTHS_SHORT[customStart.getMonth()]}`;
+      const endText = `${customEnd.getDate()} ${MONTHS_SHORT[customEnd.getMonth()]}`;
+      const formatted = `${startText} — ${endText}`;
+      
+      localStorage.setItem("sendly_selected_range", "custom");
+      localStorage.setItem("sendly_custom_range_start", customStart.toISOString());
+      localStorage.setItem("sendly_custom_range_end", customEnd.toISOString());
+      localStorage.setItem("sendly_custom_range_text", formatted);
+      
+      setSelectedRangeKey("custom");
+      window.dispatchEvent(new CustomEvent("sendly-range-changed", { detail: "custom" }));
+      setIsDateOpen(false);
+      setShowCalendarView(false);
+    }
+  };
+
+  // Click outside listener for date picker
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dateRef.current && !dateRef.current.contains(event.target as Node)) {
+        setIsDateOpen(false);
+        setShowCalendarView(false);
+      }
+    };
+    const handleRangeChangeSync = (e: Event) => {
+      const customEvent = e as CustomEvent<RangeKey>;
+      if (customEvent.detail) {
+        setSelectedRangeKey(customEvent.detail);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    window.addEventListener("sendly-range-changed", handleRangeChangeSync as EventListener);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      window.removeEventListener("sendly-range-changed", handleRangeChangeSync as EventListener);
+    };
+  }, []);
+
+  const getDynamicDateText = (rangeKey: RangeKey): string => {
+    const now = new Date();
+    const MONTHS_SHORT = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    const formatShortDate = (date: Date) => `${date.getDate()} ${MONTHS_SHORT[date.getMonth()]}`;
+    
+    if (rangeKey === "custom") {
+      if (typeof window !== "undefined") {
+        const saved = localStorage.getItem("sendly_custom_range_text");
+        if (saved) return saved;
+      }
+      return "Sanani tanlash...";
+    }
+    if (rangeKey === "today") {
+      return `${formatShortDate(now)}, ${now.getFullYear()}`;
+    }
+    if (rangeKey === "7days") {
+      const start = new Date(now);
+      start.setDate(now.getDate() - 6);
+      return `${formatShortDate(start)} — ${formatShortDate(now)}`;
+    }
+    if (rangeKey === "30days") {
+      const start = new Date(now);
+      start.setDate(now.getDate() - 29);
+      return `${formatShortDate(start)} — ${formatShortDate(now)}`;
+    }
+    return "Barcha davr";
+  };
+
+  const handleRangeChange = (key: RangeKey) => {
+    setSelectedRangeKey(key);
+    localStorage.setItem("sendly_selected_range", key);
+    window.dispatchEvent(new CustomEvent("sendly-range-changed", { detail: key }));
+    setIsDateOpen(false);
+  };
+
+  const handleCreateBotClick = () => {
+    window.dispatchEvent(new Event("replai-open-create-bot-modal"));
+  };
 
   useEffect(() => {
     const loadData = () => {
@@ -153,16 +307,24 @@ export function TopBar() {
   const total = activeCredits.balance + activeCredits.used;
   const percent = total > 0 ? Math.round((activeCredits.balance / total) * 100) : 100;
 
-  const customTrigger = activeChannel ? (
-    <div className="flex items-center gap-2.5 px-3.5 py-2 rounded-[14px] bg-white border border-[#E8E8E8] w-fit shrink-0 hover:border-black transition-all select-none shadow-sm hover:shadow-md duration-150 cursor-pointer">
-      <div className={`grid h-6 w-6 place-items-center rounded-full shrink-0 ${activeChannel.type === "instagram" ? "bg-gradient-to-br from-[#f09433] via-[#e6683c] to-[#bc1888]" : "bg-[#229ED9]"}`}>
-        {activeChannel.type === "instagram" ? <Instagram size={11} className="text-white" /> : <Bot size={11} className="text-white" />}
-      </div>
-      <span className="text-[12px] font-bold text-black">{activeChannel.username.startsWith("@") ? activeChannel.username : `@${activeChannel.username}`}</span>
-      <span className="text-[11px] text-[#707070] font-medium">{t("nav.connected")}</span>
-      <span className="text-[10px] text-[#A0A0A0] font-bold ml-1">{t("nav.change")} ▾</span>
-    </div>
-  ) : null;
+      {/* Account Selector is completely removed from top bar */}
+      <div className="hidden md:flex items-center gap-2" />
+
+  const getPageTitle = (): string => {
+    if (pathname === "/") return t("pages.home.title");
+    if (pathname.startsWith("/partner")) return t("partner.title") || "Hamkor kabineti";
+    if (pathname.startsWith("/ai-agent")) return t("nav.ai-agent") || "Sun'iy intellekt";
+    if (pathname.startsWith("/automations")) return t("nav.automations") || "Avtomatlashtirish";
+    if (pathname.startsWith("/chats")) return t("nav.chats") || "Chatlar";
+    if (pathname.startsWith("/contacts")) return t("nav.contacts") || "Mijozlar";
+    if (pathname.startsWith("/broadcast")) return t("nav.broadcast") || "Ommaviy xabarnoma";
+    if (pathname.startsWith("/analytics")) return t("nav.analytics") || "Analitika";
+    if (pathname.startsWith("/lessons")) return t("nav.lessons") || "Mini-kurs";
+    if (pathname.startsWith("/settings")) return t("nav.settings") || "Sozlamalar";
+    if (pathname.startsWith("/help")) return t("nav.help") || "Yordam";
+    if (pathname.startsWith("/admin")) return t("nav.admin") || "Administrator paneli";
+    return "";
+  };
 
   return (
     <div className="flex h-[42px] items-center justify-between gap-4 w-full">
@@ -181,37 +343,249 @@ export function TopBar() {
         <span className="font-black text-[14px] text-black tracking-tight">Sendly</span>
       </div>
 
-      {/* Account Selector */}
-      {!isLessonsPage && (
-        <div className="hidden md:flex items-center gap-2">
-          {channels.length > 0 ? (
-            <CustomDropdown
-              value={activeChannelId}
-              onChange={handleChannelChange}
-              options={channelOptions}
-              placeholder={t("nav.select_account")}
-              className="w-56"
-              footerLabel={t("nav.add_account")}
-              onFooterClick={() => window.dispatchEvent(new Event("replai-open-connect-modal"))}
-              trigger={customTrigger}
-            />
-          ) : (
-            <button
-              onClick={() => window.dispatchEvent(new Event("replai-open-connect-modal"))}
-              className="flex items-center gap-2.5 px-3.5 py-2 rounded-[14px] bg-red-50 border border-red-200/50 text-red-700 w-fit shrink-0 hover:bg-red-100/50 hover:border-red-300 transition-all select-none shadow-sm hover:shadow-md duration-150 cursor-pointer"
-            >
-              <div className="grid h-5 w-5 place-items-center rounded-full bg-red-100 text-red-600 shrink-0">
-                <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
-              </div>
-              <span className="text-[12px] font-bold">{t("pages.settings_page.no_channel") || "Ulanmagan"}</span>
-              <span className="text-[10px] text-red-500 font-bold ml-1">{t("common.connect") || "Ulash"} ▾</span>
-            </button>
-          )}
-        </div>
-      )}
+      {/* Page Title on the left of TopBar (Desktop) */}
+      <div className="hidden md:block">
+        <h1 className="text-[28px] font-black text-black tracking-tight leading-none">
+          {getPageTitle()}
+        </h1>
+      </div>
 
       {/* Action buttons */}
       <div className="flex items-center gap-3">
+        {/* Partner Page tab buttons next to AI Balans shape */}
+        {pathname.startsWith("/partner") && (
+          <div className="flex items-center gap-1.5 sm:gap-2">
+            <button
+              onClick={() => handlePartnerTabClick("home")}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] sm:text-[12px] font-bold h-[32px] sm:h-[38px] transition-all select-none border cursor-pointer ${
+                activePartnerTab === "home"
+                  ? "bg-black text-[#C7F33C] border-black shadow-xs font-black"
+                  : "bg-white hover:bg-[#F9F9F7] text-[#595959] hover:text-black border-[#E8E8E8]"
+              }`}
+            >
+              <Home size={13} />
+              <span>{t("partner.home_tab")}</span>
+            </button>
+            <button
+              onClick={() => handlePartnerTabClick("referrals")}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] sm:text-[12px] font-bold h-[32px] sm:h-[38px] transition-all select-none border cursor-pointer ${
+                activePartnerTab === "referrals"
+                  ? "bg-black text-[#C7F33C] border-black shadow-xs font-black"
+                  : "bg-white hover:bg-[#F9F9F7] text-[#595959] hover:text-black border-[#E8E8E8]"
+              }`}
+            >
+              <Users size={13} />
+              <span>{t("partner.referrals_tab")}</span>
+            </button>
+          </div>
+        )}
+        {/* Date picker (Homepage & Analytics) */}
+        {(pathname === "/" || pathname.startsWith("/analytics")) && (
+          <div className="hidden sm:block relative mr-1" ref={dateRef}>
+            <button
+              onClick={() => setIsDateOpen(!isDateOpen)}
+              className="flex items-center gap-2 rounded-full bg-white px-3.5 py-2 text-[12px] font-bold text-black border border-[#E8E8E8] hover:bg-[#F9F9F7] hover:border-[#D8D8D8] transition-all shadow-xs h-[38px] select-none cursor-pointer"
+            >
+              <span>{getDynamicDateText(selectedRangeKey)}</span>
+              <ChevronDown size={12} className={`transition-transform duration-200 ${isDateOpen ? "rotate-180" : ""}`} />
+            </button>
+
+            {isDateOpen && (
+              <div className={["absolute right-0 mt-2 rounded-[20px] bg-white p-3.5 border border-[#E8E8E8] shadow-[0_8px_30px_rgba(0,0,0,0.08)] z-[90] animate-in fade-in slide-in-from-top-2 duration-150 text-left select-none text-black", showCalendarView ? "w-[280px]" : "w-[160px]"].join(" ")}>
+                {!showCalendarView ? (
+                  <div className="flex flex-col gap-1 text-[12px] font-medium">
+                    {(["today", "7days", "30days", "all"] as RangeKey[]).map((key) => (
+                      <button
+                        key={key}
+                        onClick={() => {
+                          handleRangeChange(key);
+                        }}
+                        className={[
+                          "w-full px-3 py-1.5 rounded-[12px] text-left transition-colors font-semibold cursor-pointer",
+                          selectedRangeKey === key ? "bg-[#C7F33C]/20 text-[#1A2906]" : "hover:bg-[#F9F9F7]"
+                        ].join(" ")}
+                      >
+                        {key === "today" ? "Bugun" : key === "7days" ? "Oxirgi 7 kun" : key === "30days" ? "Oxirgi 30 kun" : "Barcha davr"}
+                      </button>
+                    ))}
+                    <button
+                      onClick={() => setShowCalendarView(true)}
+                      className="w-full px-3 py-1.5 rounded-[12px] text-left hover:bg-[#F9F9F7] text-black font-semibold border-t border-[#F0F0F0]/70 mt-1.5 pt-2 flex items-center justify-between cursor-pointer border-0"
+                    >
+                      <span>Sanani tanlash...</span>
+                      <Calendar size={13} className="text-[#707070]" />
+                    </button>
+                  </div>
+                ) : (
+                  <div className="flex flex-col gap-3">
+                    {/* Calendar Month Header */}
+                    <div className="flex items-center justify-between border-b border-[#F0F0F0] pb-2">
+                      <button
+                        onClick={() => {
+                          const prev = new Date(calendarMonth);
+                          prev.setMonth(prev.getMonth() - 1);
+                          setCalendarMonth(prev);
+                        }}
+                        className="p-1 hover:bg-[#F5F5F5] rounded-full cursor-pointer font-bold text-[13px] text-[#707070] hover:text-black"
+                      >
+                        &larr;
+                      </button>
+                      <span className="text-[12px] font-bold text-black uppercase tracking-wider">
+                        {calendarMonth.toLocaleDateString("uz-UZ", { month: "long", year: "numeric" })}
+                      </span>
+                      <button
+                        onClick={() => {
+                          const next = new Date(calendarMonth);
+                          next.setMonth(next.getMonth() + 1);
+                          setCalendarMonth(next);
+                        }}
+                        className="p-1 hover:bg-[#F5F5F5] rounded-full cursor-pointer font-bold text-[13px] text-[#707070] hover:text-black"
+                      >
+                        &rarr;
+                      </button>
+                    </div>
+
+                    {/* Weekday Labels */}
+                    <div className="grid grid-cols-7 gap-1 text-[10px] font-bold text-[#A0A0A0] text-center">
+                      {["Du", "Se", "Ch", "Pa", "Ju", "Sh", "Ya"].map((d) => (
+                        <div key={d}>{d}</div>
+                      ))}
+                    </div>
+
+                    {/* Days Grid */}
+                    <div className="grid grid-cols-7 gap-1">
+                      {Array.from({ length: getFirstDayOfMonth(calendarMonth.getFullYear(), calendarMonth.getMonth()) }).map((_, i) => (
+                        <div key={`blank-${i}`} />
+                      ))}
+                      {Array.from({ length: getDaysInMonth(calendarMonth.getFullYear(), calendarMonth.getMonth()) }).map((_, i) => {
+                        const dayNum = i + 1;
+                        const date = new Date(calendarMonth.getFullYear(), calendarMonth.getMonth(), dayNum);
+                        
+                        const isStart = customStart && date.toDateString() === customStart.toDateString();
+                        const isEnd = customEnd && date.toDateString() === customEnd.toDateString();
+                        const isInRange = customStart && customEnd && date > customStart && date < customEnd;
+
+                        return (
+                          <button
+                            key={`day-${dayNum}`}
+                            onClick={() => handleDayClick(dayNum)}
+                            className={[
+                              "h-6 text-[10px] font-bold rounded-md flex items-center justify-center transition-all cursor-pointer",
+                              isStart || isEnd
+                                ? "bg-[#C7F33C] text-black font-extrabold shadow-sm scale-105"
+                                : isInRange
+                                ? "bg-[#C7F33C]/20 text-[#1A2906]"
+                                : "text-black hover:bg-[#F5F5F5]"
+                            ].join(" ")}
+                          >
+                            {dayNum}
+                          </button>
+                        );
+                      })}
+                    </div>
+
+                    {/* Action buttons */}
+                    <div className="flex items-center justify-between border-t border-[#F0F0F0] pt-2 mt-1">
+                      <button
+                        onClick={() => {
+                          setShowCalendarView(false);
+                          setCustomStart(null);
+                          setCustomEnd(null);
+                        }}
+                        className="text-[10px] font-bold text-[#707070] hover:text-black px-2 py-1 rounded cursor-pointer"
+                      >
+                        Orqaga
+                      </button>
+                      <button
+                        onClick={handleApplyCustomRange}
+                        disabled={!customStart || !customEnd}
+                        className={[
+                          "text-[10px] font-bold px-3 py-1 rounded-full cursor-pointer transition-all",
+                          customStart && customEnd
+                            ? "bg-[#C7F33C] text-black font-black hover:bg-[#b0df2c]"
+                            : "bg-[#F5F5F5] text-[#A0A0A0] cursor-not-allowed"
+                        ].join(" ")}
+                      >
+                        Tasdiqlash
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Create Bot Button (Homepage) */}
+        {pathname === "/" && (
+          <button
+            onClick={handleCreateBotClick}
+            className="hidden sm:flex items-center px-4 py-2 rounded-full bg-[#C7F33C] text-black text-[12px] font-bold shadow-xs select-none hover:bg-[#b0df2c] active:scale-95 transition-all cursor-pointer h-[38px] mr-1"
+          >
+            <span>{t("common.create_bot") || "+ Bot yaratish"}</span>
+          </button>
+        )}
+
+        {/* New Broadcast Button (Broadcast page) */}
+        {pathname.startsWith("/broadcast") && (
+          <button
+            onClick={() => window.dispatchEvent(new Event("sendly-open-new-broadcast-modal"))}
+            className="hidden sm:flex items-center px-4 py-2 rounded-full bg-[#C7F33C] text-black text-[12px] font-bold shadow-xs select-none hover:bg-[#b0df2c] active:scale-95 transition-all cursor-pointer h-[38px] mr-1"
+          >
+            <span>+ {t("pages.broadcast.create_new") || "Yangi xabar"}</span>
+          </button>
+        )}
+
+        {/* Automations Search & Sort Controls (Automations page) */}
+        {pathname.startsWith("/automations") && !pathname.includes("/builder") && (
+          <div className="hidden sm:flex items-center gap-2 mr-1">
+            {/* Search bar */}
+            <div className="relative">
+              <input
+                type="text"
+                placeholder={t("pages.automations_page.search_placeholder") || "Qidiruv..."}
+                value={automationsSearch}
+                onChange={(e) => {
+                  setAutomationsSearch(e.target.value);
+                  window.dispatchEvent(new CustomEvent("sendly-automations-search", { detail: e.target.value }));
+                }}
+                className="w-[130px] lg:w-[170px] pl-8 pr-3 py-1.5 text-[11px] bg-white border border-[#E8E8E8] rounded-full focus:outline-none focus:border-black focus:ring-1 focus:ring-black transition-all font-semibold h-[38px] text-black"
+              />
+              <Search size={11} className="absolute left-3 top-3 text-[#A0A0A0]" />
+              {automationsSearch && (
+                <button 
+                  onClick={() => {
+                    setAutomationsSearch("");
+                    window.dispatchEvent(new CustomEvent("sendly-automations-search", { detail: "" }));
+                  }} 
+                  className="absolute right-3 top-0.5 text-[#707070] hover:text-black font-bold text-[12px] h-[34px] flex items-center"
+                >
+                  ✕
+                </button>
+              )}
+            </div>
+
+            {/* Sort Selector */}
+            <div className="flex items-center gap-1 bg-white border border-[#E8E8E8] rounded-full px-2 py-0.5 min-w-[100px] h-[38px] select-none text-black">
+              <SlidersHorizontal size={11} className="text-[#707070] shrink-0 ml-1.5" />
+              <CustomDropdown
+                value={automationsSort}
+                onChange={(val) => {
+                  setAutomationsSort(val);
+                  window.dispatchEvent(new CustomEvent("sendly-automations-sort", { detail: val }));
+                }}
+                options={[
+                  { value: "recent", label: t("pages.automations_page.sort_recent") || "Yangi" },
+                  { value: "oldest", label: t("pages.automations_page.sort_oldest") || "Eski" },
+                  { value: "runs", label: t("pages.automations_page.sort_runs") || "Ishlar" },
+                ]}
+                className="border-0 bg-transparent p-0 text-[11px] font-bold text-[#505050] focus:border-0 focus:shadow-none hover:bg-transparent rounded-none h-auto w-auto flex-1 select-none pr-1 cursor-pointer"
+                dropdownClassName="min-w-[110px] right-0 left-auto mt-2"
+              />
+            </div>
+          </div>
+        )}
+
         {/* Desktop AI Limits TopBar Pill with Tooltip */}
         {currentUser && (
           <div className="group relative hidden lg:flex items-center gap-2 px-3.5 py-2 rounded-full bg-white border border-[#E8E8E8]/60 text-black text-[12px] font-bold shadow-xs select-none hover:bg-[#F9F9F7] hover:border-[#D8D8D8] transition-all cursor-pointer h-[38px]">

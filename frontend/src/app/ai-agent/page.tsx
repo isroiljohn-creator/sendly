@@ -2702,7 +2702,7 @@ function AIAgentContent() {
   if (selectedAgentType === null) {
     return (
       <AppLayout>
-        <div className="flex flex-col gap-5 relative pb-6 justify-start max-w-6xl mx-auto py-2 w-full">
+        <div className="flex flex-col gap-[20px]">
           {/* Toast Alert */}
           {toast && (
             <div className="fixed top-6 right-6 z-[999] flex items-center gap-3 px-5 py-3.5 rounded-xl border bg-white shadow-lg animate-in fade-in slide-in-from-top-3 duration-250">
@@ -3507,7 +3507,7 @@ function AIAgentContent() {
 
     return (
       <AppLayout>
-        <div className="flex flex-col gap-6 relative min-h-screen pb-12">
+        <div className="flex flex-col gap-[20px] relative pb-12">
           {/* Style override for dots flow animation */}
           <style dangerouslySetInnerHTML={{ __html: `
             @keyframes flowRight {
@@ -4465,7 +4465,7 @@ function AIAgentContent() {
 
   return (
     <AppLayout>
-      <div className="flex flex-col gap-6 relative min-h-screen pb-12">
+      <div className="flex flex-col gap-[20px] relative pb-12">
         {/* Toast Alert */}
         {toast && (
           <div className="fixed top-6 right-6 z-[999] flex items-center gap-3 px-5 py-3.5 rounded-xl border bg-white shadow-lg animate-in fade-in slide-in-from-top-3 duration-250">

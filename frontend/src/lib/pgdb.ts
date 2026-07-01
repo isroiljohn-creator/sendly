@@ -47,22 +47,38 @@ let _initialized = false;
 export async function initDb(): Promise<void> {
   if (_initialized) return;
   const pool = getPool();
+
+  // Listen for pool errors so they don't crash the process
+  pool.on('error', (err) => {
+    console.error('[pgdb] Unexpected idle client error:', err.message);
+  });
+
   await pool.query(`
     CREATE TABLE IF NOT EXISTS kv_store (
-      key   VARCHAR(500) PRIMARY KEY,
-      value JSONB        NOT NULL DEFAULT '{}'
+      key        VARCHAR(500) PRIMARY KEY,
+      value      JSONB        NOT NULL DEFAULT '{}',
+      updated_at TIMESTAMPTZ  NOT NULL DEFAULT NOW()
     );
+
+    ALTER TABLE kv_store ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW();
+
+    -- GIN index for full JSONB scan
     CREATE INDEX IF NOT EXISTS idx_kv_store_value_gin ON kv_store USING gin (value);
+
+    -- B-Tree indexes for common top-level JSONB text fields
+    CREATE INDEX IF NOT EXISTS idx_kv_email ON kv_store ((value->>'replai_current_user_email'));
+    CREATE INDEX IF NOT EXISTS idx_kv_updated ON kv_store (updated_at DESC);
 
     CREATE TABLE IF NOT EXISTS credit_ledger (
       id          SERIAL PRIMARY KEY,
       user_id     VARCHAR(255) NOT NULL,
-      action_type VARCHAR(50) NOT NULL,
-      amount      INTEGER NOT NULL,
+      action_type VARCHAR(50)  NOT NULL,
+      amount      INTEGER      NOT NULL,
       description TEXT,
-      created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      created_at  TIMESTAMPTZ DEFAULT NOW()
     );
     CREATE INDEX IF NOT EXISTS idx_credit_ledger_user ON credit_ledger(user_id);
+    CREATE INDEX IF NOT EXISTS idx_credit_ledger_created ON credit_ledger(created_at DESC);
   `);
   _initialized = true;
 }
@@ -100,9 +116,11 @@ export async function setValue(key: string, value: unknown, client?: any): Promi
   await initDb();
   const runner = client || getPool();
   await runner.query(
-    `INSERT INTO kv_store (key, value)
-     VALUES ($1, $2::jsonb)
-     ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value`,
+    `INSERT INTO kv_store (key, value, updated_at)
+     VALUES ($1, $2::jsonb, NOW())
+     ON CONFLICT (key) DO UPDATE
+       SET value      = EXCLUDED.value,
+           updated_at = NOW()`,
     [key, JSON.stringify(value)]
   );
 }
@@ -202,4 +220,25 @@ export async function getUserIdByChannelId(channelId: string): Promise<string | 
 /** Get only a single user settings row. */
 export async function getUserSettings(userId: string): Promise<any | null> {
   return getValue("global_settings_" + userId);
+}
+
+/**
+ * Patch (merge-update) only specific top-level keys inside a user's settings JSONB.
+ * Much cheaper than reading and re-writing the entire blob.
+ */
+export async function patchUserSettings(
+  userId: string,
+  patch: Record<string, unknown>
+): Promise<void> {
+  await initDb();
+  const key = `global_settings_${userId}`;
+  // jsonb_strip_nulls removes null-valued keys so callers can delete fields
+  await getPool().query(
+    `INSERT INTO kv_store (key, value, updated_at)
+     VALUES ($1, $2::jsonb, NOW())
+     ON CONFLICT (key) DO UPDATE
+       SET value      = kv_store.value || EXCLUDED.value,
+           updated_at = NOW()`,
+    [key, JSON.stringify(patch)]
+  );
 }

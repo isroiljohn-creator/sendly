@@ -1,16 +1,16 @@
-# Graph Report - Sendly  (2026-07-01)
+# Graph Report - Sendly  (2026-07-02)
 
 ## Corpus Check
-- 180 files · ~480,345 words
+- 183 files · ~486,051 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 1018 nodes · 1837 edges · 86 communities (78 shown, 8 thin omitted)
-- Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS · INFERRED: 2 edges (avg confidence: 0.8)
+- 1042 nodes · 1876 edges · 89 communities (78 shown, 11 thin omitted)
+- Extraction: 100% EXTRACTED · 0% INFERRED · 0% AMBIGUOUS · INFERRED: 3 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `82be9aaa`
+- Built from commit: `7304253f`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -84,25 +84,25 @@
 - [[_COMMUNITY_Community 79|Community 79]]
 - [[_COMMUNITY_Community 81|Community 81]]
 - [[_COMMUNITY_Community 82|Community 82]]
-- [[_COMMUNITY_Community 83|Community 83]]
 - [[_COMMUNITY_Community 84|Community 84]]
 - [[_COMMUNITY_Community 85|Community 85]]
+- [[_COMMUNITY_Community 86|Community 86]]
+- [[_COMMUNITY_Community 87|Community 87]]
+- [[_COMMUNITY_Community 88|Community 88]]
 
 ## God Nodes (most connected - your core abstractions)
-1. `useI18n()` - 75 edges
+1. `useI18n()` - 73 edges
 2. `cn()` - 72 edges
-3. `verifyJwt()` - 25 edges
+3. `verifyJwt()` - 27 edges
 4. `db` - 23 edges
 5. `QueryBuilder` - 21 edges
-6. `Card` - 20 edges
+6. `Card` - 21 edges
 7. `supabase` - 18 edges
-8. `compilerOptions` - 17 edges
-9. `AppLayout()` - 16 edges
-10. `Button` - 16 edges
+8. `Button` - 17 edges
+9. `compilerOptions` - 17 edges
+10. `AppLayout()` - 16 edges
 
 ## Surprising Connections (you probably didn't know these)
-- `AccountPage()` --calls--> `useI18n()`  [EXTRACTED]
-  frontend/src/app/account/page.tsx → frontend/src/i18n/I18nProvider.tsx
 - `AdminPage()` --calls--> `useI18n()`  [EXTRACTED]
   frontend/src/app/admin/page.tsx → frontend/src/i18n/I18nProvider.tsx
 - `CustomDropdown()` --calls--> `useI18n()`  [EXTRACTED]
@@ -111,12 +111,14 @@
   frontend/src/app/ai-agent/page.tsx → frontend/src/i18n/I18nProvider.tsx
 - `LoadingFallback()` --calls--> `useI18n()`  [EXTRACTED]
   frontend/src/app/ai-agent/page.tsx → frontend/src/i18n/I18nProvider.tsx
+- `AutomationsPage()` --calls--> `useI18n()`  [EXTRACTED]
+  frontend/src/app/automations/page.tsx → frontend/src/i18n/I18nProvider.tsx
 
 ## Import Cycles
 - 2-file cycle: `backend/src/services/queue.ts -> backend/src/services/trigger.ts -> backend/src/services/queue.ts`
 - 3-file cycle: `backend/src/services/interpreter.ts -> backend/src/services/queue.ts -> backend/src/services/trigger.ts -> backend/src/services/interpreter.ts`
 
-## Communities (86 total, 8 thin omitted)
+## Communities (89 total, 11 thin omitted)
 
 ### Community 0 - "Community 0"
 Cohesion: 0.09
@@ -127,32 +129,32 @@ Cohesion: 0.04
 Nodes (56): dependencies, bcryptjs, class-variance-authority, clsx, cmdk, @danielxceron/youtube-transcript, date-fns, embla-carousel-react (+48 more)
 
 ### Community 2 - "Community 2"
-Cohesion: 0.08
-Nodes (45): calcGrowthPct(), checkIfUserIsAdmin(), GET(), POST(), readDb(), readRealAnalytics(), writeDb(), POST() (+37 more)
+Cohesion: 0.07
+Nodes (51): calcGrowthPct(), checkIfUserIsAdmin(), GET(), POST(), readDb(), readRealAnalytics(), writeDb(), POST() (+43 more)
 
 ### Community 3 - "Community 3"
-Cohesion: 0.06
-Nodes (17): AccordionContent, AccordionItem, AccordionTrigger, Checkbox, HoverCardContent, Input, PopoverContent, Progress (+9 more)
+Cohesion: 0.07
+Nodes (16): AccordionContent, AccordionItem, AccordionTrigger, Checkbox, HoverCardContent, Input, PopoverContent, Progress (+8 more)
 
 ### Community 4 - "Community 4"
-Cohesion: 0.15
-Nodes (16): Lang, MOBILE_TABS, ConnectChannelModal(), BOTTOM_ITEMS, NavButton(), NavItem, TOP_ITEMS, LANG_FLAGS (+8 more)
+Cohesion: 0.10
+Nodes (16): Chat, ChatFolder, ChatsPage(), DEFAULT_FOLDERS, Message, Broadcast, Contact, DEFAULT_BOT_SETTINGS (+8 more)
 
 ### Community 5 - "Community 5"
-Cohesion: 0.08
-Nodes (31): AccountPage(), AdminPage(), LOCAL_TRANSLATIONS, ActivityCard(), ActivityCardProps, DEFAULT_VALUES, InstagramConnectCard(), DEFAULT_POINTS (+23 more)
+Cohesion: 0.09
+Nodes (19): ActivityCard(), ActivityCardProps, DEFAULT_VALUES, DEFAULT_POINTS, RevenueCard(), RevenueCardProps, AlertModalProps, AreaChart() (+11 more)
 
 ### Community 6 - "Community 6"
-Cohesion: 0.11
-Nodes (28): POST(), readDb(), safeParse(), writeDb(), POST(), readDb(), userExists(), deleteValue() (+20 more)
+Cohesion: 0.10
+Nodes (29): POST(), readDb(), safeParse(), writeDb(), POST(), readDb(), userExists(), deleteValue() (+21 more)
 
 ### Community 7 - "Community 7"
 Cohesion: 0.26
 Nodes (12): getPool(), supabase, AuthenticatedRequest, authMiddleware(), router, router, router, router (+4 more)
 
 ### Community 8 - "Community 8"
-Cohesion: 0.11
-Nodes (24): cn(), AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter(), AlertDialogHeader(), AlertDialogOverlay (+16 more)
+Cohesion: 0.09
+Nodes (27): cn(), AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter(), AlertDialogHeader(), AlertDialogOverlay (+19 more)
 
 ### Community 9 - "Community 9"
 Cohesion: 0.07
@@ -163,32 +165,32 @@ Cohesion: 0.19
 Nodes (22): executeSessionStep(), interpolateVariables(), updateSession(), activeTimeouts, addBroadcastToQueue(), addWebhookToQueue(), cancelSessionDelay(), processBroadcastJob() (+14 more)
 
 ### Community 11 - "Community 11"
-Cohesion: 0.18
-Nodes (14): ActionNode(), BuilderPage(), ButtonEdge(), ButtonItem, ConditionNode(), MessageNode(), NodeData, NodeType (+6 more)
+Cohesion: 0.19
+Nodes (10): MOBILE_TABS, ConnectChannelModal(), BOTTOM_ITEMS, NavButton(), NavItem, TOP_ITEMS, Message, SupportWidget() (+2 more)
 
 ### Community 12 - "Community 12"
-Cohesion: 0.14
-Nodes (13): formatShortDate(), getDynamicDateText(), Home(), MONTHS_SHORT, RANGE_PRESETS, RangeData, RangeKey, AutomationsCard() (+5 more)
+Cohesion: 0.13
+Nodes (14): formatShortDate(), getDynamicDateText(), Home(), MONTHS_SHORT, RANGE_PRESETS, RangeData, RangeKey, AutomationsCard() (+6 more)
 
 ### Community 14 - "Community 14"
-Cohesion: 0.17
-Nodes (12): devDependencies, eslint, eslint-config-next, postcss, tailwindcss, @types/bcryptjs, @types/node, @types/nodemailer (+4 more)
+Cohesion: 0.09
+Nodes (21): devDependencies, eslint, eslint-config-next, postcss, tailwindcss, @types/bcryptjs, @types/node, @types/nodemailer (+13 more)
 
 ### Community 15 - "Community 15"
-Cohesion: 0.27
-Nodes (12): checkOtpIpLimit(), checkRateLimit(), generateAndSaveOtp(), globalForOtp, OtpEntry, rateLimitStore, verifyOtpCode(), HTML_TEMPLATE() (+4 more)
+Cohesion: 0.15
+Nodes (20): findUserByEmail(), POST(), readDb(), base64url(), signJwt(), checkOtpIpLimit(), checkRateLimit(), generateAndSaveOtp() (+12 more)
 
 ### Community 16 - "Community 16"
-Cohesion: 0.11
-Nodes (18): AnalyticsPage(), Chat, ChatsPage(), INITIAL_CHATS, Message, ContactsPage(), FAQItem, GuideStep (+10 more)
+Cohesion: 0.13
+Nodes (20): AdminPage(), LOCAL_TRANSLATIONS, RangeKey, AutomationsPage(), FAQItem, GuideStep, HelpPage(), LOCAL_TRANSLATIONS (+12 more)
 
 ### Community 17 - "Community 17"
 Cohesion: 0.10
 Nodes (20): compilerOptions, allowJs, esModuleInterop, incremental, isolatedModules, jsx, lib, module (+12 more)
 
 ### Community 18 - "Community 18"
-Cohesion: 0.15
-Nodes (11): Badge(), BadgeProps, badgeVariants, SheetContent, SheetContentProps, SheetDescription, SheetFooter(), SheetHeader() (+3 more)
+Cohesion: 0.22
+Nodes (8): SheetContent, SheetContentProps, SheetDescription, SheetFooter(), SheetHeader(), SheetOverlay, SheetTitle, sheetVariants
 
 ### Community 19 - "Community 19"
 Cohesion: 0.12
@@ -199,12 +201,12 @@ Cohesion: 0.12
 Nodes (11): Menubar, MenubarCheckboxItem, MenubarContent, MenubarItem, MenubarLabel, MenubarRadioItem, MenubarSeparator, MenubarShortcut() (+3 more)
 
 ### Community 21 - "Community 21"
-Cohesion: 0.20
-Nodes (9): Ctx, DAYS, I18nContext, Join, Paths, Prev, TKey, TranslationData (+1 more)
+Cohesion: 0.14
+Nodes (15): Ctx, DAYS, I18nContext, Join, Lang, Paths, Prev, TKey (+7 more)
 
 ### Community 22 - "Community 22"
-Cohesion: 0.09
-Nodes (21): AutomationsPage(), BroadcastPage(), Broadcast, Channel, DEFAULT_BOT_SETTINGS, Group, INITIAL_BROADCASTS, INITIAL_CHANNELS (+13 more)
+Cohesion: 0.17
+Nodes (12): Channel, DEFAULT_TEMPLATES, LOCAL_TRANSLATIONS, QuickBotWizardPage(), LOCAL_TRANSLATIONS, ModalType, SettingsPage(), TemplateItem (+4 more)
 
 ### Community 23 - "Community 23"
 Cohesion: 0.14
@@ -303,8 +305,8 @@ Cohesion: 0.40
 Nodes (5): fs, path, run(), migrateFromLocal(), { Pool }
 
 ### Community 47 - "Community 47"
-Cohesion: 0.18
-Nodes (6): inter, translations, I18nProvider(), ErrorTrackerInitializer(), Toaster(), ToasterProps
+Cohesion: 0.16
+Nodes (7): inter, translations, I18nProvider(), CookieConsent(), ErrorTrackerInitializer(), Toaster(), ToasterProps
 
 ### Community 48 - "Community 48"
 Cohesion: 0.40
@@ -319,20 +321,20 @@ Cohesion: 0.50
 Nodes (3): Deploy on Vercel, Getting Started, Learn More
 
 ### Community 52 - "Community 52"
-Cohesion: 0.27
-Nodes (10): addTelegramChannelToList(), checkAndRunAutoOutreach(), getBotUsername(), getDbDataFromSupabase, getUserIdForChannel(), handleBlockedUser(), handleTelegramUpdate(), updateUserDbFile() (+2 more)
+Cohesion: 0.16
+Nodes (16): AccountPage(), AnalyticsPage(), ActionNode(), BuilderPage(), ButtonEdge(), ButtonItem, ConditionNode(), MessageNode() (+8 more)
 
 ### Community 53 - "Community 53"
-Cohesion: 0.36
-Nodes (9): executeTool(), GET(), getOpenApiSpec(), handleRequest(), POST(), readDb(), safeParse(), tools (+1 more)
+Cohesion: 0.50
+Nodes (3): Avatar, AvatarFallback, AvatarImage
 
 ### Community 54 - "Community 54"
-Cohesion: 0.30
-Nodes (13): acquireFileLock(), countActiveAutomations(), GET(), getInitialData(), LOCK_DIR, POST(), pruneOrphanSettings(), readDb() (+5 more)
+Cohesion: 0.28
+Nodes (14): acquireFileLock(), ADMIN_EMAILS, countActiveAutomations(), GET(), getInitialData(), LOCK_DIR, POST(), pruneOrphanSettings() (+6 more)
 
 ### Community 58 - "Community 58"
-Cohesion: 0.36
-Nodes (8): analyzeMessageForCustDev(), callGemini(), checkSemanticModeration(), queryRAG(), RAGResult, retrieveContext(), sanitizeHistoryForGemini(), POST()
+Cohesion: 0.30
+Nodes (12): addTelegramChannelToList(), checkAndRunAutoOutreach(), getBotUsername(), getChannelIdByToken(), getDbDataFromRailway(), getUserIdForChannel(), handleBlockedUser(), handleTelegramUpdate() (+4 more)
 
 ### Community 64 - "Community 64"
 Cohesion: 0.22
@@ -340,15 +342,15 @@ Nodes (8): extends, rules, @next/next/no-img-element, prefer-const, react-hooks/
 
 ### Community 75 - "Community 75"
 Cohesion: 0.36
-Nodes (8): getChannelIdByToken(), getDbDataFromRailway(), isUserBlocked(), runBotPollLoop(), safeParse(), startTelegramBots(), GET(), POST()
+Nodes (8): analyzeMessageForCustDev(), callGemini(), checkSemanticModeration(), queryRAG(), RAGResult, retrieveContext(), sanitizeHistoryForGemini(), POST()
 
 ### Community 77 - "Community 77"
-Cohesion: 0.47
-Nodes (5): detectLanguage(), matchTopicPrefix(), moderateMessage(), ModerationResult, OFFENSIVE_WORDS
+Cohesion: 0.36
+Nodes (9): executeTool(), GET(), getOpenApiSpec(), handleRequest(), POST(), readDb(), safeParse(), tools (+1 more)
 
 ### Community 78 - "Community 78"
-Cohesion: 0.30
-Nodes (11): acquireFileLock(), ChatMessage, ChatThread, LOCK_DIR, POST(), readDb(), readDbUnlocked(), releaseFileLock() (+3 more)
+Cohesion: 0.47
+Nodes (5): detectLanguage(), matchTopicPrefix(), moderateMessage(), ModerationResult, OFFENSIVE_WORDS
 
 ### Community 79 - "Community 79"
 Cohesion: 0.47
@@ -359,40 +361,36 @@ Cohesion: 0.25
 Nodes (7): Breadcrumb, BreadcrumbEllipsis(), BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator()
 
 ### Community 82 - "Community 82"
-Cohesion: 0.50
-Nodes (3): Avatar, AvatarFallback, AvatarImage
-
-### Community 83 - "Community 83"
-Cohesion: 0.20
-Nodes (9): name, private, scripts, backup, build, dev, lint, start (+1 more)
+Cohesion: 0.83
+Nodes (3): startTelegramBots(), GET(), POST()
 
 ### Community 84 - "Community 84"
 Cohesion: 0.40
 Nodes (4): InputOTP, InputOTPGroup, InputOTPSeparator, InputOTPSlot
 
 ### Community 85 - "Community 85"
-Cohesion: 0.50
-Nodes (3): TabsContent, TabsList, TabsTrigger
+Cohesion: 0.32
+Nodes (6): fs, getTelegramAvatarBase64(), path, { Pool }, run(), safeParse()
 
 ## Knowledge Gaps
-- **428 isolated node(s):** `name`, `version`, `description`, `main`, `dev` (+423 more)
+- **436 isolated node(s):** `name`, `version`, `description`, `main`, `dev` (+431 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **8 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **11 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `cn()` connect `Community 8` to `Community 3`, `Community 5`, `Community 16`, `Community 18`, `Community 19`, `Community 20`, `Community 22`, `Community 23`, `Community 24`, `Community 28`, `Community 29`, `Community 32`, `Community 35`, `Community 36`, `Community 37`, `Community 43`, `Community 44`, `Community 48`, `Community 81`, `Community 82`, `Community 84`, `Community 85`?**
+- **Why does `cn()` connect `Community 8` to `Community 3`, `Community 4`, `Community 5`, `Community 16`, `Community 18`, `Community 19`, `Community 20`, `Community 22`, `Community 23`, `Community 24`, `Community 28`, `Community 29`, `Community 32`, `Community 35`, `Community 36`, `Community 37`, `Community 43`, `Community 44`, `Community 48`, `Community 53`, `Community 81`, `Community 84`, `Community 86`, `Community 88`?**
   _High betweenness centrality (0.134) - this node is a cross-community bridge._
-- **Why does `Channel` connect `Community 22` to `Community 16`, `Community 0`, `Community 12`, `Community 4`?**
-  _High betweenness centrality (0.039) - this node is a cross-community bridge._
-- **Why does `useI18n()` connect `Community 11` to `Community 4`, `Community 5`, `Community 12`, `Community 16`, `Community 49`, `Community 21`, `Community 22`?**
-  _High betweenness centrality (0.023) - this node is a cross-community bridge._
+- **Why does `Channel` connect `Community 22` to `Community 0`, `Community 4`, `Community 11`, `Community 12`, `Community 16`, `Community 21`?**
+  _High betweenness centrality (0.040) - this node is a cross-community bridge._
+- **Why does `verifyJwt()` connect `Community 2` to `Community 75`, `Community 54`?**
+  _High betweenness centrality (0.018) - this node is a cross-community bridge._
 - **What connects `name`, `version`, `description` to the rest of the system?**
-  _428 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _436 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `Community 0` be split into smaller, more focused modules?**
-  _Cohesion score 0.09333333333333334 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.08547008547008547 - nodes in this community are weakly interconnected._
 - **Should `Community 1` be split into smaller, more focused modules?**
   _Cohesion score 0.03571428571428571 - nodes in this community are weakly interconnected._
 - **Should `Community 2` be split into smaller, more focused modules?**
-  _Cohesion score 0.07832080200501253 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.0701484895033282 - nodes in this community are weakly interconnected._

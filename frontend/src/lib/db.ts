@@ -1193,7 +1193,10 @@ export const db = {
       if (token) {
         headers["Authorization"] = `Bearer ${token}`;
       }
-      const res = await fetch(`/api/db?userId=${userId}`, { headers });
+      const res = await fetch(`/api/db?userId=${userId}`, {
+        headers,
+        credentials: 'include'  // Bu cookie'ni avtomatik yuboradi
+      });
       if (res.status === 401 || res.status === 403) {
         localStorage.removeItem("replai_token");
         localStorage.removeItem("replai_current_user");
@@ -1233,6 +1236,7 @@ export const db = {
         method: "POST",
         headers,
         body: JSON.stringify(data),
+        credentials: 'include'  // Bu cookie'ni avtomatik yuboradi
       });
       if (res.status === 401 || res.status === 403) {
         localStorage.removeItem("replai_token");
@@ -1261,7 +1265,10 @@ export const db = {
       if (token) {
         headers["Authorization"] = `Bearer ${token}`;
       }
-      const res = await fetch(`/api/credits?userId=${userId}`, { headers });
+      const res = await fetch(`/api/credits?userId=${userId}`, {
+        headers,
+        credentials: 'include'  // Bu cookie'ni avtomatik yuboradi
+      });
       if (res.ok) {
         const data = await res.json();
         localStorage.setItem("replai_ai_credits_data", JSON.stringify(data));
@@ -1293,7 +1300,8 @@ export const db = {
       const res = await fetch(`/api/credits?userId=${userId}`, {
         method: "POST",
         headers,
-        body: JSON.stringify({ action: "buy", amount, description })
+        body: JSON.stringify({ action: "buy", amount, description }),
+        credentials: 'include'  // Bu cookie'ni avtomatik yuboradi
       });
       if (res.ok) {
         const data = await res.json();

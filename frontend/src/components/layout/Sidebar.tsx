@@ -47,8 +47,6 @@ const TOP_ITEMS: NavItem[] = [
   { to: "/automations", Icon: Zap, labelKey: "nav.automations" },
   { to: "/ai-agent", Icon: Brain, labelKey: "nav.ai-agent" },
   { to: "/chats", Icon: MessageSquare, labelKey: "nav.chats" },
-  { to: "/contacts", Icon: Users, labelKey: "nav.contacts" },
-  { to: "/broadcast", Icon: Send, labelKey: "nav.broadcast" },
   { to: "/analytics", Icon: BarChart3, labelKey: "nav.analytics" },
   { to: "/settings", Icon: Settings, labelKey: "nav.settings" },
 ];

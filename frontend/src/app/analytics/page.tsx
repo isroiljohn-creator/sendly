@@ -7,26 +7,41 @@ import { Card, MetricCard, BarChart, AreaChart } from "@/components/ui/primitive
 import { useI18n } from "@/i18n/I18nProvider";
 import { db } from "@/lib/db";
 
+type RangeKey = "today" | "7days" | "30days" | "all";
+
 export default function AnalyticsPage() {
   const { t, days } = useI18n();
 
-  const [stats, setStats] = useState({
-    optInRate: "0.0%",
-    avgCompletion: "0.0%",
-    messagesSent: "0",
-    messagesVolume: [0, 0, 0, 0, 0, 0, 0],
-    leadConversions: [0, 0, 0, 0, 0, 0, 0],
-    revenueVal: "0 UZS"
+  const [selectedRangeKey, setSelectedRangeKey] = useState<RangeKey>(() => {
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("sendly_selected_range") as RangeKey;
+      if (saved && ["today", "7days", "30days", "all"].includes(saved)) {
+        return saved;
+      }
+    }
+    return "7days";
   });
 
-  useEffect(() => {
-    setStats(db.getRealAnalytics());
+  const [stats, setStats] = useState(() => db.getRealAnalytics());
 
+  useEffect(() => {
     const handleDbUpdate = () => {
       setStats(db.getRealAnalytics());
     };
+    const handleRangeChange = (e: Event) => {
+      const customEvent = e as CustomEvent<RangeKey>;
+      if (customEvent.detail) {
+        setSelectedRangeKey(customEvent.detail);
+      }
+    };
+
     window.addEventListener("replai-db-update", handleDbUpdate);
-    return () => window.removeEventListener("replai-db-update", handleDbUpdate);
+    window.addEventListener("sendly-range-changed", handleRangeChange as EventListener);
+
+    return () => {
+      window.removeEventListener("replai-db-update", handleDbUpdate);
+      window.removeEventListener("sendly-range-changed", handleRangeChange as EventListener);
+    };
   }, []);
 
   const lastVol = stats.messagesVolume[6] || 0;
@@ -37,11 +52,6 @@ export default function AnalyticsPage() {
         <PageHeader
           title={t("pages.analytics.title")}
           breadcrumbs={t("pages.analytics.breadcrumb")}
-          filters={
-            <button className="rounded-full bg-white px-4 py-2.5 text-[13px] font-medium text-black hover:bg-white/95 active:scale-95 transition-all">
-              {t("common.date_range")}
-            </button>
-          }
         />
 
         {/* Analytics Metric Cards Grid */}

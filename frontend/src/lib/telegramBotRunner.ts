@@ -459,8 +459,24 @@ async function sendTelegramMessage(token: string, chatId: number | string, text:
         });
 
         if (res.status === 403) {
-          console.warn(`[sendTelegramMessage] Received 403 Forbidden. Contact ${chatId} blocked the bot.`);
+          console.warn(`[sendTelegramMessage] Bot foydalanuvchi tomonidan bloklangan: chatId=${chatId}`);
           await handleBlockedUser(token, chatId);
+          return;
+        }
+
+        if (res.status === 429) {
+          console.warn(`[sendTelegramMessage] 429 Too Many Requests for chatId=${chatId}. Retrying after 1s...`);
+          await new Promise(r => setTimeout(r, 1000));
+          const retryRes = await fetch(url, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
+            cache: "no-store"
+          });
+          if (!retryRes.ok) {
+            const errText = await retryRes.text();
+            console.error(`[sendTelegramMessage] Retry failed for chunk ${i+1}/${chunks.length} to ${chatId}: ${retryRes.status} - ${errText}`);
+          }
           return;
         }
 
@@ -564,6 +580,10 @@ async function updateUserDbFile(
   } catch (e) {
     console.error("Failed to write db.json in fallback updater", e);
   }
+}
+
+export function escapeMarkdownV2(text: string): string {
+  return text.replace(/[_*[\]()~`>#+=|{}.!\\-]/g, '\\$&');
 }
 
 export async function handleTelegramUpdate(channelId: string, token: string, update: any) {
@@ -744,7 +764,8 @@ export async function handleTelegramUpdate(channelId: string, token: string, upd
           ? `Здравствуйте! Добро пожаловать в бот Sendly.\n\nВаш код подтверждения: <code>${verifyCode}</code>\n\nВведите этот код в окно подключения администратора на платформе Sendly (код активен в течение 1 минуты).`
           : `Assalomu alaykum! Sendly botiga xush kelibsiz.\n\nSizning tasdiqlash kodingiz: <code>${verifyCode}</code>\n\nUshbu kodni Sendly platformasidagi adminni ulash oynasiga kiriting (kod 1 daqiqa davomida faol bo'ladi).`;
       
-      const copyBtnText = userLang === "en" ? "📋 Copy Code" : userLang === "ru" ? "📋 Копировать код" : "📋 Kodni nusxalash";
+      const copyBtnTextRaw = userLang === "en" ? "📋 Copy Code" : userLang === "ru" ? "📋 Копировать код" : "📋 Kodni nusxalash";
+      const copyBtnText = copyBtnTextRaw.substring(0, 64);
       const replyMarkup = {
         inline_keyboard: [[
           { text: copyBtnText, callback_data: "copy_code" }
@@ -1295,11 +1316,13 @@ export async function handleTelegramUpdate(channelId: string, token: string, upd
 
       const cleanName = chatName;
 
+      const cleanUsername = (username || '').replace(/^@+/, '') || (isGroup ? `group_${chatId}` : `tg_${chatId}`);
+
       if (!contactObj) {
         contactObj = {
           id: String(chatId),
           name: cleanName,
-          username: username || (isGroup ? `group_${chatId}` : `tg_${chatId}`),
+          username: cleanUsername,
           status: true,
           messagesCount: 1,
           tags: isGroup ? ["Telegram", "Group"] : ["Telegram"],
@@ -1312,7 +1335,7 @@ export async function handleTelegramUpdate(channelId: string, token: string, upd
         contactsList.unshift(contactObj);
       } else {
         contactObj.name = cleanName;
-        if (username) contactObj.username = username;
+        if (username) contactObj.username = cleanUsername;
         contactObj.messagesCount = (contactObj.messagesCount || 0) + 1;
         contactObj.lastActive = new Date().toLocaleTimeString("uz-UZ", { hour: "2-digit", minute: "2-digit" });
         contactObj.lastMessage = text;

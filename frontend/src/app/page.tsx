@@ -16,7 +16,7 @@ import type { Channel, Contact, Automation, User } from "@/lib/db";
 import { LandingPageView } from "@/components/landing/LandingPageView";
 import { BrandLoader } from "@/components/ui/BrandLoader";
 
-type RangeKey = "today" | "7days" | "30days" | "all";
+type RangeKey = "today" | "7days" | "30days" | "all" | "custom";
 
 type RangeData = {
   label: string;
@@ -104,6 +104,18 @@ const RANGE_PRESETS: Record<RangeKey, RangeData> = {
     revenueTag: "+24%",
     proVal: "235,900",
   },
+  custom: {
+    label: "Taqvim",
+    dateText: "Boshqa...",
+    activityVal: "12,486",
+    activitySub: "Tanlangan davrdagi faol suhbatlar",
+    activityPoints: [40, 55, 32, 70, 48, 90, 38],
+    revenueVal: "29,48 mln",
+    revenueSub: "Tanlangan davrdagi jami savdo hajmi",
+    revenuePoints: [30, 45, 38, 55, 48, 70, 62, 80, 72, 88],
+    revenueTag: "+9%",
+    proVal: "12,233",
+  },
 };
 
 export default function Home() {
@@ -114,12 +126,41 @@ export default function Home() {
   const [isAuthLoaded, setIsAuthLoaded] = useState(false);
 
   // Dashboard States
-  const [selectedRangeKey, setSelectedRangeKey] = useState<RangeKey>("7days");
+  const [selectedRangeKey, setSelectedRangeKey] = useState<RangeKey>(() => {
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("sendly_selected_range") as RangeKey;
+      if (saved && ["today", "7days", "30days", "all"].includes(saved)) {
+        return saved;
+      }
+    }
+    return "7days";
+  });
   const [isDateOpen, setIsDateOpen] = useState(false);
   
   const [isCreateBotOpen, setIsCreateBotOpen] = useState(false);
   const [newBotName, setNewBotName] = useState("");
   const [newBotTrigger, setNewBotTrigger] = useState<"keyword" | "story">("keyword");
+
+  useEffect(() => {
+    const handleRangeChange = (e: Event) => {
+      const customEvent = e as CustomEvent<RangeKey>;
+      if (customEvent.detail) {
+        setSelectedRangeKey(customEvent.detail);
+      }
+    };
+    const handleCreateBot = () => {
+      setNewBotName("");
+      setIsCreateBotOpen(true);
+    };
+
+    window.addEventListener("sendly-range-changed", handleRangeChange as EventListener);
+    window.addEventListener("replai-open-create-bot-modal", handleCreateBot);
+
+    return () => {
+      window.removeEventListener("sendly-range-changed", handleRangeChange as EventListener);
+      window.removeEventListener("replai-open-create-bot-modal", handleCreateBot);
+    };
+  }, []);
 
   const [activeChannel, setActiveChannel] = useState<Channel | null>(null);
   const [channels, setChannels] = useState<Channel[]>([]);
@@ -188,11 +229,13 @@ export default function Home() {
   }, []);
 
   const getDynamicStats = (rangeKey: RangeKey): RangeData => {
-    const preset = RANGE_PRESETS[rangeKey];
-    const localizedLabel = t(`pages.home.ranges.${rangeKey}` as string);
-    const dynamicDateText = getDynamicDateText(rangeKey);
-    const localizedActivitySub = t(`pages.home.ranges.${rangeKey}_sub` as string);
-    const localizedRevenueSub = t(`pages.home.ranges.${rangeKey}_rev` as string);
+    const preset = RANGE_PRESETS[rangeKey as keyof typeof RANGE_PRESETS] || RANGE_PRESETS["7days"];
+    const localizedLabel = rangeKey === "custom" ? "Sanani tanlash" : t(`pages.home.ranges.${rangeKey}` as string);
+    const dynamicDateText = rangeKey === "custom"
+      ? (typeof window !== "undefined" ? localStorage.getItem("sendly_custom_range_text") || "Boshqa..." : "Boshqa...")
+      : getDynamicDateText(rangeKey);
+    const localizedActivitySub = rangeKey === "custom" ? "Tanlangan davrdagi faol suhbatlar" : t(`pages.home.ranges.${rangeKey}_sub` as string);
+    const localizedRevenueSub = rangeKey === "custom" ? "Tanlangan davrdagi jami savdo" : t(`pages.home.ranges.${rangeKey}_rev` as string);
     
     if (!isLoaded) {
       return {
@@ -310,53 +353,10 @@ export default function Home() {
 
   return (
     <AppLayout>
-      <div className="flex flex-col gap-[28px]">
+      <div className="flex flex-col gap-[20px]">
         <PageHeader
           title={t("pages.home.title")}
           breadcrumbs={t("pages.home.breadcrumb")}
-          filters={
-            <div className="relative" ref={dateRef}>
-              <button
-                onClick={() => setIsDateOpen(!isDateOpen)}
-                className="flex items-center gap-2 rounded-full bg-white px-4 py-2.5 text-[13px] font-medium text-black border border-[#D8D8D8]/60 transition-all hover:bg-white/95 active:scale-95 shadow-sm"
-              >
-                <span>{activeRange.dateText}</span>
-                <ChevronDown size={14} className={`transition-transform duration-200 ${isDateOpen ? "rotate-180" : ""}`} />
-              </button>
-
-              {isDateOpen && (
-                <div className="absolute left-0 sm:right-0 sm:left-auto mt-2 w-[180px] rounded-[20px] bg-white p-2 border border-[#D8D8D8] shadow-lg z-[90] animate-in fade-in slide-in-from-top-2 duration-150">
-                  <div className="flex flex-col gap-1 text-[12px]">
-                    {(Object.keys(RANGE_PRESETS) as RangeKey[]).map((key) => {
-                      return (
-                        <button
-                          key={key}
-                          onClick={() => {
-                            setSelectedRangeKey(key);
-                            setIsDateOpen(false);
-                          }}
-                          className={[
-                            "w-full px-3 py-2 rounded-[12px] text-left transition-colors text-black font-medium",
-                            selectedRangeKey === key ? "bg-[#C7F33C]/20 text-[#1A2906]" : "hover:bg-[#F9F9F7]",
-                          ].join(" ")}
-                        >
-                          {t(`pages.home.ranges.${key}` as string)}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-              )}
-            </div>
-          }
-          actions={
-            <Button variant="accent" onClick={() => {
-              setNewBotName("");
-              setIsCreateBotOpen(true);
-            }}>
-              {t("common.create_bot")}
-            </Button>
-          }
         />
 
         {/* Row 1 — 3 columns */}

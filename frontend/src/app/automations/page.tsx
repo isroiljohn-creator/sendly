@@ -23,6 +23,7 @@ import {
 } from "lucide-react";
 import { Instagram } from "@/components/ui/icons";
 import { AppLayout } from "@/components/layout/AppLayout";
+import { PageHeader } from "@/components/layout/PageHeader";
 import { Card, Button, ConfirmModal, AlertModal } from "@/components/ui/primitives";
 import { CustomDropdown } from "@/components/ui/CustomDropdown";
 import { useI18n } from "@/i18n/I18nProvider";
@@ -82,6 +83,23 @@ export default function AutomationsPage() {
 
   useEffect(() => {
     loadAllData();
+
+    const handleSearch = (e: Event) => {
+      const customEvent = e as CustomEvent<string>;
+      setSearchQuery(customEvent.detail || "");
+    };
+    const handleSort = (e: Event) => {
+      const customEvent = e as CustomEvent<string>;
+      setSortBy(customEvent.detail || "recent");
+    };
+
+    window.addEventListener("sendly-automations-search", handleSearch as EventListener);
+    window.addEventListener("sendly-automations-sort", handleSort as EventListener);
+
+    return () => {
+      window.removeEventListener("sendly-automations-search", handleSearch as EventListener);
+      window.removeEventListener("sendly-automations-sort", handleSort as EventListener);
+    };
   }, []);
 
   // Handle active state toggle
@@ -254,22 +272,18 @@ export default function AutomationsPage() {
 
   return (
     <AppLayout>
-      <div className="flex flex-col lg:flex-row gap-6 items-start w-full">
+      <div className="flex flex-col gap-[20px]">
+        <PageHeader
+          title={t("nav.automations")}
+          breadcrumbs={t("pages.automations.breadcrumb")}
+        />
+        
+        <div className="flex flex-col lg:flex-row gap-6 items-start w-full">
         
         {/* ================= LEFT SUB-SIDEBAR ================= */}
         <div className="w-full lg:w-[280px] shrink-0 flex flex-col gap-4 bg-white border border-[#E8E8E8] rounded-[24px] p-5 shadow-sm">
-          {/* Header */}
-          <div className="flex items-center justify-between pb-2 border-b border-[#F0F0F0] cursor-pointer lg:cursor-default" onClick={() => setIsFiltersOpenMobile(p => !p)}>
-            <h2 className="text-[16px] font-extrabold text-black tracking-tight flex items-center gap-2">
-              <span>{t("pages.automations.title")}</span>
-              <span className="lg:hidden text-[10px] bg-neutral-100 text-neutral-600 px-2 py-0.5 rounded border font-bold">
-                {isFiltersOpenMobile ? "Yopish ▲" : "Filtrlar ▼"}
-              </span>
-            </h2>
-          </div>
-
-          {/* Collapsible container on mobile */}
-          <div className={`flex-col gap-4 mt-2 lg:mt-0 ${isFiltersOpenMobile ? "flex animate-in fade-in duration-200" : "hidden lg:flex"}`}>
+          {/* Collapsible container */}
+          <div className="flex flex-col gap-4">
             {/* Action buttons */}
             <div className="flex flex-col gap-2">
             <button 
@@ -418,67 +432,6 @@ export default function AutomationsPage() {
 
         {/* ================= RIGHT CONTENT PANEL ================= */}
         <div className="flex-1 min-w-0 w-full flex flex-col gap-6">
-
-          {/* Breadcrumbs and Page title */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white border border-[#E8E8E8] rounded-[24px] p-5 shadow-sm">
-            <div>
-              <div className="text-[10px] text-[#A0A0A0] uppercase font-bold tracking-wider mb-1">
-                {t("pages.automations.breadcrumb")}
-              </div>
-              <h1 className="text-[20px] font-extrabold text-black flex items-center gap-2 tracking-tight">
-                {selectedGroupId === "all" ? (
-                  t("pages.automations_page.all_flows")
-                ) : selectedGroupId === "none" ? (
-                  t("pages.automations_page.uncategorized")
-                ) : (
-                  <span>{t("pages.automations_page.groups")}: {getGroupNameById(selectedGroupId)}</span>
-                )}
-                {selectedChannelId !== "all" && (
-                  <span className="text-[11px] font-normal bg-black text-[#C7F33C] px-2 py-0.5 rounded-full">
-                    @{channels.find((c) => c.id === selectedChannelId)?.username}
-                  </span>
-                )}
-                <span className="text-[11px] font-bold text-[#707070] bg-[#F5F5F5] border border-[#E8E8E8] px-2.5 py-0.5 rounded-full">
-                  {t("pages.automations_page.flows_count").replace("{count}", String(filteredAutomations.length))}
-                </span>
-              </h1>
-            </div>
-
-            <div className="flex flex-wrap items-center gap-2">
-              {/* Search bar */}
-              <div className="relative">
-                <input
-                  type="text"
-                  placeholder={t("pages.automations_page.search_placeholder")}
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-[180px] sm:w-[220px] pl-8 pr-3 py-1.5 text-[11px] bg-white border border-[#E8E8E8] rounded-full focus:outline-none focus:border-black focus:ring-1 focus:ring-black transition-all font-medium"
-                />
-                <Search size={12} className="absolute left-3 top-2.5 text-[#A0A0A0]" />
-                {searchQuery && (
-                  <button onClick={() => setSearchQuery("")} className="absolute right-3 top-2 text-[#707070] hover:text-black">
-                    ✕
-                  </button>
-                )}
-              </div>
-
-              {/* Sort selector */}
-              <div className="flex items-center gap-1 bg-white border border-[#E8E8E8] rounded-full px-2 py-0.5 min-w-[130px]">
-                <SlidersHorizontal size={11} className="text-[#707070] shrink-0 ml-1.5" />
-                <CustomDropdown
-                  value={sortBy}
-                  onChange={setSortBy}
-                  options={[
-                    { value: "recent", label: t("pages.automations_page.sort_recent") },
-                    { value: "oldest", label: t("pages.automations_page.sort_oldest") },
-                    { value: "runs", label: t("pages.automations_page.sort_runs") },
-                  ]}
-                  className="border-0 bg-transparent p-0 text-[11px] font-bold text-[#505050] focus:border-0 focus:shadow-none hover:bg-transparent rounded-none h-auto w-auto flex-1 select-none pr-1"
-                  dropdownClassName="min-w-[120px] right-0 left-auto mt-2"
-                />
-              </div>
-            </div>
-          </div>
 
           {/* No Channel Warn Badge */}
           {channels.length === 0 && (
@@ -964,6 +917,7 @@ export default function AutomationsPage() {
         title={alertConfig?.title || ""}
         message={alertConfig?.message || ""}
       />
+      </div>
     </AppLayout>
   );
 }

@@ -100,13 +100,7 @@ export default function SettingsPage() {
   // Channels state
   const [channels, setChannels] = useState<Channel[]>([]);
   
-  // Password change states
-  const [oldPassword, setOldPassword] = useState("");
-  const [newPassword, setNewPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [passwordError, setPasswordError] = useState("");
-  const [passwordSuccess, setPasswordSuccess] = useState("");
-  const [passwordLoading, setPasswordLoading] = useState(false);
+  const [activeIntegrationTab, setActiveIntegrationTab] = useState<"crm" | "apikeys" | "mcp">("crm");
   const [modal, setModal] = useState<ModalType>(null);
   const [saving, setSaving] = useState(false);
   const [channelToDelete, setChannelToDelete] = useState<Channel | null>(null);
@@ -413,6 +407,9 @@ export default function SettingsPage() {
     if (tabParam) {
       if (tabParam === "subscription" || tabParam === "billing") {
         window.location.href = "/account?tab=billing";
+      } else if (tabParam === "apikeys" || tabParam === "mcp") {
+        setActiveSection("integrations");
+        setActiveIntegrationTab(tabParam);
       } else {
         setActiveSection(tabParam === "profile" ? "general" : tabParam);
       }
@@ -561,65 +558,7 @@ export default function SettingsPage() {
     showAlert(t("common.success"), t("pages.settings_page.delete_success"));
   };
 
-  const handlePasswordChange = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setPasswordError("");
-    setPasswordSuccess("");
 
-    if (newPassword !== confirmPassword) {
-      setPasswordError("Yangi parollar mos kelmadi.");
-      return;
-    }
-
-    if (newPassword.length < 6) {
-      setPasswordError("Yangi parol kamida 6 ta belgidan iborat bo'lishi shart.");
-      return;
-    }
-
-    setPasswordLoading(true);
-    try {
-      const token = localStorage.getItem("replai_token");
-      const headers: Record<string, string> = { "Content-Type": "application/json" };
-      if (token) {
-        headers["Authorization"] = `Bearer ${token}`;
-      }
-
-      const res = await fetch("/api/auth/change-password", {
-        method: "POST",
-        headers,
-        body: JSON.stringify({ oldPassword, newPassword }),
-      });
-      const data = await res.json();
-
-      if (!res.ok) {
-        setPasswordError(data.error || "Parolni o'zgartirishda xatolik.");
-      } else {
-        setPasswordSuccess("Parol muvaffaqiyatli o'zgartirildi!");
-        setOldPassword("");
-        setNewPassword("");
-        setConfirmPassword("");
-        
-        // Update password locally as well
-        const users = db.getUsers();
-        if (currentUser) {
-          const idx = users.findIndex(u => u.id === currentUser.id);
-          if (idx > -1) {
-            const hashed = db.hashPassword(newPassword);
-            users[idx].password = hashed;
-            localStorage.setItem("replai_users", JSON.stringify(users));
-            const updatedUser = { ...currentUser, password: hashed };
-            localStorage.setItem("replai_current_user", JSON.stringify(updatedUser));
-            setCurrentUser(updatedUser);
-          }
-        }
-      }
-    } catch (err: unknown) {
-      const errMsg = err instanceof Error ? err.message : String(err);
-      setPasswordError("Tarmoq xatoligi: " + errMsg);
-    } finally {
-      setPasswordLoading(false);
-    }
-  };
 
   const handleExportDatabase = () => {
     try {
@@ -670,7 +609,7 @@ export default function SettingsPage() {
 
   return (
     <AppLayout>
-      <div className="flex flex-col gap-6">
+      <div className="flex flex-col gap-[20px]">
         <PageHeader
           title={t("pages.settings.title")}
           breadcrumbs={t("pages.settings.breadcrumb")}
@@ -708,14 +647,6 @@ export default function SettingsPage() {
                   {t("pages.settings_page.general")}
                 </button>
                 <button
-                  onClick={() => {
-                    window.location.href = "/contacts";
-                  }}
-                  className="flex items-center w-full px-3 py-2 text-[12px] font-semibold rounded-[10px] transition-colors text-[#707070] hover:bg-[#F9F9F7] hover:text-black text-left"
-                >
-                  {t("pages.settings_page.contacts")}
-                </button>
-                <button
                   onClick={() => setActiveSection("integrations")}
                   className={`flex items-center w-full px-3 py-2 text-[12px] font-semibold rounded-[10px] transition-colors text-left ${
                     activeSection === "integrations"
@@ -734,26 +665,6 @@ export default function SettingsPage() {
                   }`}
                 >
                   {t("pages.settings_page.team")}
-                </button>
-                <button
-                  onClick={() => setActiveSection("apikeys")}
-                  className={`flex items-center w-full px-3 py-2 text-[12px] font-semibold rounded-[10px] transition-colors text-left ${
-                    activeSection === "apikeys"
-                    ? "bg-[#C7F33C]/20 text-black font-bold"
-                    : "text-[#707070] hover:bg-[#F9F9F7] hover:text-black"
-                  }`}
-                >
-                  {t("pages.settings_page.apikeys")}
-                </button>
-                <button
-                  onClick={() => setActiveSection("mcp")}
-                  className={`flex items-center w-full px-3 py-2 text-[12px] font-semibold rounded-[10px] transition-colors text-left ${
-                    activeSection === "mcp"
-                    ? "bg-[#C7F33C]/20 text-black font-bold"
-                    : "text-[#707070] hover:bg-[#F9F9F7] hover:text-black"
-                  }`}
-                >
-                  {t("pages.settings_page.tab_mcp")}
                 </button>
               </div>
 
@@ -891,85 +802,6 @@ export default function SettingsPage() {
                     </div>
                   </div>
                 </Card>
-
-                {/* Change Password Card */}
-                <Card className="border border-[#D8D8D8] bg-white">
-                  <div className="flex flex-col gap-6">
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <Lock size={16} className="text-black" />
-                        <h3 className="text-[15px] font-medium text-black">
-                          Parolni o'zgartirish
-                        </h3>
-                      </div>
-                      <p className="text-[12px] text-[#707070] mt-1.5 leading-relaxed">
-                        Profilingiz xavfsizligini ta'minlash uchun parolni yangilab turing.
-                      </p>
-                    </div>
-
-                    <form onSubmit={handlePasswordChange} className="flex flex-col gap-4">
-                      {passwordError && (
-                        <div className="p-3 bg-red-50 border border-red-200 text-red-600 rounded-[10px] text-[12px] font-semibold">
-                          {passwordError}
-                        </div>
-                      )}
-                      {passwordSuccess && (
-                        <div className="p-3 bg-green-50 border border-green-200 text-green-600 rounded-[10px] text-[12px] font-semibold">
-                          {passwordSuccess}
-                        </div>
-                      )}
-
-                      {/* Only show old password field if they have a password set */}
-                      {currentUser && (currentUser as any).password && (
-                        <div className="flex flex-col gap-1">
-                          <label className="text-[10px] font-bold text-[#707070] uppercase tracking-wide">Eski parol</label>
-                          <input
-                            type="password"
-                            value={oldPassword}
-                            onChange={(e) => setOldPassword(e.target.value)}
-                            placeholder="Eski parolingizni kiriting"
-                            required
-                            className="w-full rounded-[10px] border border-[#D8D8D8] px-3.5 py-2 text-[12px] focus:outline-none focus:border-black font-semibold text-black bg-white"
-                          />
-                        </div>
-                      )}
-
-                      <div className="flex flex-col gap-1">
-                        <label className="text-[10px] font-bold text-[#707070] uppercase tracking-wide">Yangi parol</label>
-                        <input
-                          type="password"
-                          value={newPassword}
-                          onChange={(e) => setNewPassword(e.target.value)}
-                          placeholder="Yangi parol (kamida 6 ta belgi)"
-                          required
-                          className="w-full rounded-[10px] border border-[#D8D8D8] px-3.5 py-2 text-[12px] focus:outline-none focus:border-black font-semibold text-black bg-white"
-                        />
-                      </div>
-
-                      <div className="flex flex-col gap-1">
-                        <label className="text-[10px] font-bold text-[#707070] uppercase tracking-wide">Yangi parolni tasdiqlash</label>
-                        <input
-                          type="password"
-                          value={confirmPassword}
-                          onChange={(e) => setConfirmPassword(e.target.value)}
-                          placeholder="Yangi parolni qayta kiriting"
-                          required
-                          className="w-full rounded-[10px] border border-[#D8D8D8] px-3.5 py-2 text-[12px] focus:outline-none focus:border-black font-semibold text-black bg-white"
-                        />
-                      </div>
-
-                      <div className="flex justify-end mt-2">
-                        <button
-                          type="submit"
-                          disabled={passwordLoading}
-                          className="flex items-center gap-1.5 rounded-full bg-black text-white hover:bg-black/90 px-5 py-2.5 text-[12px] font-bold transition-all active:scale-95 disabled:opacity-50"
-                        >
-                          {passwordLoading ? "Yangilanmoqda..." : "Parolni yangilash"}
-                        </button>
-                      </div>
-                    </form>
-                  </div>
-                </Card>
               </div>
             )}
             {/* Team Members Tab */}
@@ -1042,456 +874,520 @@ export default function SettingsPage() {
 
             {/* Integrations Tab */}
             {activeSection === "integrations" && (
-              <div className="flex flex-col gap-6 max-w-[650px]">
-                {/* Bot selection dropdown if multiple channels exist */}
-                {channels.length > 0 ? (
-                  <Card className="border border-[#D8D8D8] bg-[#F9F9F7] p-5">
-                    <div className="flex flex-col gap-2">
-                      <label className="text-[12px] font-bold text-black uppercase tracking-wider">
-                        {t("pages.settings_page.integrations_select_bot") || "Kanal/Botni tanlang"}
-                      </label>
-                      <CustomDropdown
-                        value={selectedBotId}
-                        onChange={(val) => setSelectedBotId(val)}
-                        options={channels.map((ch) => ({
-                          value: ch.id,
-                          label: `${ch.type === "telegram" ? "Telegram" : "Instagram"}: ${ch.username}`
-                        }))}
-                      />
-                    </div>
-                  </Card>
-                ) : (
-                  <div className="p-4 rounded-xl bg-amber-50 text-amber-700 border border-amber-200 text-[12px] text-center">
-                    Integratsiyalarni sozlash uchun avval hisobingizga bitta kanal/bot ulanishi kerak.
+              <div className="flex flex-col gap-6 max-w-[680px] w-full animate-in fade-in duration-200">
+                {/* Integration Sub-tabs */}
+                <div className="flex gap-2.5 pb-2.5 w-full mt-1 overflow-x-auto scrollbar-none select-none border-b border-[#E8E8E8]/50">
+                  <button
+                    onClick={() => setActiveIntegrationTab("crm")}
+                    className={`px-4 py-2 rounded-full text-[12px] font-bold transition-all cursor-pointer border-none ${
+                      activeIntegrationTab === "crm"
+                        ? "bg-black text-[#C7F33C] shadow-sm font-black"
+                        : "bg-[#F5F5F5] hover:bg-neutral-200 text-[#707070] hover:text-black"
+                    }`}
+                  >
+                    Integratsiyalar
+                  </button>
+                  <button
+                    onClick={() => setActiveIntegrationTab("apikeys")}
+                    className={`px-4 py-2 rounded-full text-[12px] font-bold transition-all cursor-pointer border-none ${
+                      activeIntegrationTab === "apikeys"
+                        ? "bg-black text-[#C7F33C] shadow-sm font-black"
+                        : "bg-[#F5F5F5] hover:bg-neutral-200 text-[#707070] hover:text-black"
+                    }`}
+                  >
+                    API kalitlari
+                  </button>
+                  <button
+                    onClick={() => setActiveIntegrationTab("mcp")}
+                    className={`px-4 py-2 rounded-full text-[12px] font-bold transition-all cursor-pointer border-none ${
+                      activeIntegrationTab === "mcp"
+                        ? "bg-black text-[#C7F33C] shadow-sm font-black"
+                        : "bg-[#F5F5F5] hover:bg-neutral-200 text-[#707070] hover:text-black"
+                    }`}
+                  >
+                    Model Context Protocol (MCP)
+                  </button>
+                </div>
+
+                {/* CRM Tab Content */}
+                {activeIntegrationTab === "crm" && (
+                  <div className="flex flex-col gap-6 max-w-[650px] w-full">
+                    {/* Bot selection dropdown if multiple channels exist */}
+                    {channels.length > 0 ? (
+                      <Card className="border border-[#D8D8D8] bg-[#F9F9F7] p-5">
+                        <div className="flex flex-col gap-2">
+                          <label className="text-[12px] font-bold text-black uppercase tracking-wider">
+                            {t("pages.settings_page.integrations_select_bot") || "Kanal/Botni tanlang"}
+                          </label>
+                          <CustomDropdown
+                            value={selectedBotId}
+                            onChange={(val) => setSelectedBotId(val)}
+                            options={channels.map((ch) => ({
+                              value: ch.id,
+                              label: `${ch.type === "telegram" ? "Telegram" : "Instagram"}: ${ch.username}`
+                            }))}
+                          />
+                        </div>
+                      </Card>
+                    ) : (
+                      <div className="p-4 rounded-xl bg-amber-50 text-amber-700 border border-amber-200 text-[12px] text-center">
+                        Integratsiyalarni sozlash uchun avval hisobingizga bitta kanal/bot ulanishi kerak.
+                      </div>
+                    )}
+
+                    {/* Google Sheets Card */}
+                    <Card className="border border-[#D8D8D8]">
+                      <div className="flex flex-col gap-5">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-start gap-4">
+                            <div className="grid h-12 w-12 place-items-center rounded-[16px] bg-green-500/10 text-green-600 shrink-0">
+                              <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" strokeWidth="1.75" fill="none" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                                <polyline points="14 2 14 8 20 8" />
+                                <line x1="16" y1="13" x2="8" y2="13" />
+                                <line x1="16" y1="17" x2="8" y2="17" />
+                                <polyline points="10 9 9 9 8 9" />
+                              </svg>
+                            </div>
+                            <div>
+                              <h3 className="text-[16px] font-medium text-black">{t("pages.settings_page.sheets_title") || "Google Sheets Integratsiyasi"}</h3>
+                              <p className="mt-1 text-[12px] text-[#707070]">
+                                {t("pages.settings_page.sheets_desc") || "Lid ma'lumotlarini avtomatik Google jadvalingizga yuboring"}
+                              </p>
+                            </div>
+                          </div>
+
+                          <label className="relative inline-flex items-center cursor-pointer select-none shrink-0">
+                            <input
+                              type="checkbox"
+                              checked={sheetsEnabled}
+                              onChange={(e) => setSheetsEnabled(e.target.checked)}
+                              className="sr-only peer"
+                            />
+                            <div className="w-11 h-6 bg-[#E8E8E8] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-[#D8D8D8] after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-black"></div>
+                          </label>
+                        </div>
+
+                        {sheetsEnabled && (
+                          <div className="flex flex-col gap-4 border-t border-[#F0F0F0] pt-4">
+                            <div className="flex flex-col gap-1.5">
+                              <label className="text-[11px] font-medium text-[#707070] px-1">
+                                {t("pages.settings_page.webhook_url_label") || "Webhook URL manzili"}
+                              </label>
+                              <input
+                                type="url"
+                                value={sheetsUrl}
+                                onChange={(e) => setSheetsUrl(e.target.value)}
+                                placeholder="https://oapi.make.com/... yoki https://script.google.com/..."
+                                className="w-full rounded-[14px] bg-[#F0F0F0] px-4 py-3 text-[13px] text-black outline-none placeholder:text-[#a0a0a0] transition-colors focus:bg-[#e8e8e8]"
+                              />
+                            </div>
+
+                            <Button
+                              onClick={() => handleSaveIntegration("sheets")}
+                              variant="accent"
+                              className="flex items-center justify-center gap-1.5 py-3 self-start text-[12px]"
+                            >
+                              <Save size={14} />
+                              <span>{t("common.save") || "Saqlash"}</span>
+                            </Button>
+                          </div>
+                        )}
+                      </div>
+                    </Card>
+
+                    {/* Bitrix24 Card */}
+                    <Card className="border border-[#D8D8D8]">
+                      <div className="flex flex-col gap-5">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-start gap-4">
+                            <div className="grid h-12 w-12 place-items-center rounded-[16px] bg-blue-500/10 text-blue-600 shrink-0">
+                              <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" strokeWidth="1.75" fill="none" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                                <polyline points="22 4 12 14.01 9 11.01" />
+                              </svg>
+                            </div>
+                            <div>
+                              <h3 className="text-[16px] font-medium text-black">{t("pages.settings_page.bitrix_title") || "Bitrix24 Integratsiyasi"}</h3>
+                              <p className="mt-1 text-[12px] text-[#707070]">
+                                {t("pages.settings_page.bitrix_desc") || "Kontaktlarni Bitrix24 CRM tizimiga inbound webhook orqali yuboring"}
+                              </p>
+                            </div>
+                          </div>
+
+                          <label className="relative inline-flex items-center cursor-pointer select-none shrink-0">
+                            <input
+                              type="checkbox"
+                              checked={bitrixEnabled}
+                              onChange={(e) => setBitrixEnabled(e.target.checked)}
+                              className="sr-only peer"
+                            />
+                            <div className="w-11 h-6 bg-[#E8E8E8] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-[#D8D8D8] after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-black"></div>
+                          </label>
+                        </div>
+
+                        {bitrixEnabled && (
+                          <div className="flex flex-col gap-4 border-t border-[#F0F0F0] pt-4">
+                            <div className="flex flex-col gap-1.5">
+                              <label className="text-[11px] font-medium text-[#707070] px-1">
+                                {t("pages.settings_page.webhook_url_label") || "Webhook URL manzili"}
+                              </label>
+                              <input
+                                type="url"
+                                value={bitrixUrl}
+                                onChange={(e) => setBitrixUrl(e.target.value)}
+                                placeholder="https://b24-xxxxxx.bitrix24.ru/rest/1/xxxxxxxx/crm.lead.add.json"
+                                className="w-full rounded-[14px] bg-[#F0F0F0] px-4 py-3 text-[13px] text-black outline-none placeholder:text-[#a0a0a0] transition-colors focus:bg-[#e8e8e8]"
+                              />
+                            </div>
+
+                            <Button
+                              onClick={() => handleSaveIntegration("bitrix")}
+                              variant="accent"
+                              className="flex items-center justify-center gap-1.5 py-3 self-start text-[12px]"
+                            >
+                              <Save size={14} />
+                              <span>{t("common.save") || "Saqlash"}</span>
+                            </Button>
+                          </div>
+                        )}
+                      </div>
+                    </Card>
+
+                    {/* AmoCRM Card */}
+                    <Card className="border border-[#D8D8D8]">
+                      <div className="flex flex-col gap-5">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-start gap-4">
+                            <div className="grid h-12 w-12 place-items-center rounded-[16px] bg-indigo-500/10 text-indigo-600 shrink-0">
+                              <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" strokeWidth="1.75" fill="none" strokeLinecap="round" strokeLinejoin="round">
+                                <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                                <line x1="9" y1="9" x2="15" y2="15" />
+                                <line x1="15" y1="9" x2="9" y2="15" />
+                              </svg>
+                            </div>
+                            <div>
+                              <h3 className="text-[16px] font-medium text-black">{t("pages.settings_page.amo_title") || "AmoCRM Integratsiyasi"}</h3>
+                              <p className="mt-1 text-[12px] text-[#707070]">
+                                {t("pages.settings_page.amo_desc") || "Kontaktlarni AmoCRM tizimiga webhook orqali yo'naltiring"}
+                              </p>
+                            </div>
+                          </div>
+
+                          <label className="relative inline-flex items-center cursor-pointer select-none shrink-0">
+                            <input
+                              type="checkbox"
+                              checked={amoEnabled}
+                              onChange={(e) => setAmoEnabled(e.target.checked)}
+                              className="sr-only peer"
+                            />
+                            <div className="w-11 h-6 bg-[#E8E8E8] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-[#D8D8D8] after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-black"></div>
+                          </label>
+                        </div>
+
+                        {amoEnabled && (
+                          <div className="flex flex-col gap-4 border-t border-[#F0F0F0] pt-4">
+                            <div className="flex flex-col gap-1.5">
+                              <label className="text-[11px] font-medium text-[#707070] px-1">
+                                {t("pages.settings_page.webhook_url_label") || "Webhook URL manzili"}
+                              </label>
+                              <input
+                                type="url"
+                                value={amoUrl}
+                                onChange={(e) => setAmoUrl(e.target.value)}
+                                placeholder="https://xxxxxx.amocrm.ru/api/v4/leads"
+                                className="w-full rounded-[14px] bg-[#F0F0F0] px-4 py-3 text-[13px] text-black outline-none placeholder:text-[#a0a0a0] transition-colors focus:bg-[#e8e8e8]"
+                              />
+                            </div>
+
+                            <Button
+                              onClick={() => handleSaveIntegration("amo")}
+                              variant="accent"
+                              className="flex items-center justify-center gap-1.5 py-3 self-start text-[12px]"
+                            >
+                              <Save size={14} />
+                              <span>{t("common.save") || "Saqlash"}</span>
+                            </Button>
+                          </div>
+                        )}
+                      </div>
+                    </Card>
                   </div>
                 )}
 
-                {/* Google Sheets Card */}
-                <Card className="border border-[#D8D8D8]">
-                  <div className="flex flex-col gap-5">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-start gap-4">
-                        <div className="grid h-12 w-12 place-items-center rounded-[16px] bg-green-500/10 text-green-600 shrink-0">
-                          <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" strokeWidth="1.75" fill="none" strokeLinecap="round" strokeLinejoin="round">
-                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-                            <polyline points="14 2 14 8 20 8" />
-                            <line x1="16" y1="13" x2="8" y2="13" />
-                            <line x1="16" y1="17" x2="8" y2="17" />
-                            <polyline points="10 9 9 9 8 9" />
-                          </svg>
-                        </div>
-                        <div>
-                          <h3 className="text-[16px] font-medium text-black">{t("pages.settings_page.sheets_title") || "Google Sheets Integratsiyasi"}</h3>
-                          <p className="mt-1 text-[12px] text-[#707070]">
-                            {t("pages.settings_page.sheets_desc") || "Lid ma'lumotlarini avtomatik Google jadvalingizga yuboring"}
-                          </p>
-                        </div>
-                      </div>
-
-                      <label className="relative inline-flex items-center cursor-pointer select-none shrink-0">
-                        <input
-                          type="checkbox"
-                          checked={sheetsEnabled}
-                          onChange={(e) => setSheetsEnabled(e.target.checked)}
-                          className="sr-only peer"
-                        />
-                        <div className="w-11 h-6 bg-[#E8E8E8] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-[#D8D8D8] after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-black"></div>
-                      </label>
+                {/* API Keys Tab Content */}
+                {activeIntegrationTab === "apikeys" && (
+                  <div className="max-w-[640px] w-full flex flex-col gap-6 animate-in fade-in duration-200">
+                    <div>
+                      <h3 className="text-[28px] font-bold text-black">{tr("api_keys")}</h3>
+                      <p className="text-[13px] text-[#707070] mt-1.5">{t("pages.settings_page.api_keys_desc")}</p>
                     </div>
 
-                    {sheetsEnabled && (
-                      <div className="flex flex-col gap-4 border-t border-[#F0F0F0] pt-4">
-                        <div className="flex flex-col gap-1.5">
-                          <label className="text-[11px] font-medium text-[#707070] px-1">
-                            {t("pages.settings_page.webhook_url_label") || "Webhook URL manzili"}
-                          </label>
+                    <div className="p-5 rounded-[14px] bg-[#F9F9F7] border border-[#F0F0F0] mt-2 flex flex-col gap-3">
+                      <div className="flex items-center justify-between">
+                        <span className="text-[12px] font-bold text-black uppercase tracking-wider">{t("pages.settings_page.api_key_label")}</span>
+                        <span className="bg-[#C7F33C]/20 text-[#5A7C1E] text-[10px] font-bold px-2 py-0.5 rounded-full">{t("common.active")}</span>
+                      </div>
+                      <div className="flex gap-2 items-center">
+                        <div className="relative flex-1">
                           <input
-                            type="url"
-                            value={sheetsUrl}
-                            onChange={(e) => setSheetsUrl(e.target.value)}
-                            placeholder="https://oapi.make.com/... yoki https://script.google.com/..."
-                            className="w-full rounded-[14px] bg-[#F0F0F0] px-4 py-3 text-[13px] text-black outline-none placeholder:text-[#a0a0a0] transition-colors focus:bg-[#e8e8e8]"
+                            type={showKey ? "text" : "password"}
+                            readOnly
+                            value={apiKey}
+                            className="w-full rounded-[10px] border border-[#D8D8D8] pl-4 pr-10 py-2.5 text-[13px] text-black bg-white focus:outline-none font-mono focus:border-black"
                           />
+                          <button
+                            type="button"
+                            onClick={() => setShowKey(!showKey)}
+                            className="absolute right-3 top-1/2 -translate-y-1/2 text-[#707070] hover:text-black transition-colors"
+                          >
+                            {showKey ? <EyeOff size={16} /> : <Eye size={16} />}
+                          </button>
                         </div>
-
-                        <Button
-                          onClick={() => handleSaveIntegration("sheets")}
-                          variant="accent"
-                          className="flex items-center justify-center gap-1.5 py-3 self-start text-[12px]"
+                        <button
+                          onClick={handleCopyKey}
+                          className="h-[38px] bg-black hover:bg-black/80 text-white font-semibold text-[12px] px-4 rounded-[10px] transition-all flex items-center gap-1.5 active:scale-95 shrink-0 animate-in zoom-in-95"
                         >
-                          <Save size={14} />
-                          <span>{t("common.save") || "Saqlash"}</span>
-                        </Button>
+                          {copiedKey ? <Check size={14} /> : <Copy size={14} />}
+                          <span>{t("common.copy")}</span>
+                        </button>
                       </div>
-                    )}
+                      
+                      <div className="flex justify-end mt-1">
+                        <button
+                          onClick={handleRegenerateKey}
+                          className="text-[11px] font-bold text-red-600 hover:text-red-700 hover:underline flex items-center gap-1 transition-colors"
+                        >
+                          <RefreshCw size={12} />
+                          <span>{tr("regenerate_btn")}</span>
+                        </button>
+                      </div>
+                    </div>
                   </div>
-                </Card>
+                )}
 
-                {/* Bitrix24 Card */}
-                <Card className="border border-[#D8D8D8]">
-                  <div className="flex flex-col gap-5">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-start gap-4">
-                        <div className="grid h-12 w-12 place-items-center rounded-[16px] bg-blue-500/10 text-blue-600 shrink-0">
-                          <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" strokeWidth="1.75" fill="none" strokeLinecap="round" strokeLinejoin="round">
-                            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
-                            <polyline points="22 4 12 14.01 9 11.01" />
-                          </svg>
-                        </div>
-                        <div>
-                          <h3 className="text-[16px] font-medium text-black">{t("pages.settings_page.bitrix_title") || "Bitrix24 Integratsiyasi"}</h3>
-                          <p className="mt-1 text-[12px] text-[#707070]">
-                            {t("pages.settings_page.bitrix_desc") || "Kontaktlarni Bitrix24 CRM tizimiga inbound webhook orqali yuboring"}
-                          </p>
-                        </div>
-                      </div>
-
-                      <label className="relative inline-flex items-center cursor-pointer select-none shrink-0">
-                        <input
-                          type="checkbox"
-                          checked={bitrixEnabled}
-                          onChange={(e) => setBitrixEnabled(e.target.checked)}
-                          className="sr-only peer"
-                        />
-                        <div className="w-11 h-6 bg-[#E8E8E8] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-[#D8D8D8] after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-black"></div>
-                      </label>
+                {/* MCP Tab Content */}
+                {activeIntegrationTab === "mcp" && (
+                  <div className="max-w-[680px] w-full flex flex-col gap-6 animate-in fade-in duration-200">
+                    <div>
+                      <h3 className="text-[28px] font-bold text-black">{t("pages.settings_page.mcp_title")}</h3>
+                      <p className="text-[13px] text-[#707070] mt-1.5 leading-relaxed">{t("pages.settings_page.mcp_desc")}</p>
                     </div>
 
-                    {bitrixEnabled && (
-                      <div className="flex flex-col gap-4 border-t border-[#F0F0F0] pt-4">
-                        <div className="flex flex-col gap-1.5">
-                          <label className="text-[11px] font-medium text-[#707070] px-1">
-                            {t("pages.settings_page.webhook_url_label") || "Webhook URL manzili"}
-                          </label>
-                          <input
-                            type="url"
-                            value={bitrixUrl}
-                            onChange={(e) => setBitrixUrl(e.target.value)}
-                            placeholder="https://b24-xxxxxx.bitrix24.ru/rest/1/xxxxxxxx/crm.lead.add.json"
-                            className="w-full rounded-[14px] bg-[#F0F0F0] px-4 py-3 text-[13px] text-black outline-none placeholder:text-[#a0a0a0] transition-colors focus:bg-[#e8e8e8]"
-                          />
-                        </div>
-
-                        <Button
-                          onClick={() => handleSaveIntegration("bitrix")}
-                          variant="accent"
-                          className="flex items-center justify-center gap-1.5 py-3 self-start text-[12px]"
-                        >
-                          <Save size={14} />
-                          <span>{t("common.save") || "Saqlash"}</span>
-                        </Button>
+                    {/* API Key warning/info box */}
+                    <div className="p-4 rounded-[14px] bg-[#C7F33C]/10 border border-[#C7F33C]/20 flex items-center justify-between gap-3 text-[12px] text-black">
+                      <div className="flex items-center gap-2">
+                        <Database size={16} className="text-black shrink-0" />
+                        <span>
+                          <strong>{t("pages.settings_page.mcp_api_key_info")}</strong>{" "}
+                          <code className="bg-white/60 px-2 py-0.5 rounded font-mono text-[11px]">
+                            {apiKey ? `${apiKey.substring(0, 12)}...${apiKey.substring(apiKey.length - 4)}` : "Generate a key first"}
+                          </code>
+                        </span>
                       </div>
-                    )}
-                  </div>
-                </Card>
-
-                {/* AmoCRM Card */}
-                <Card className="border border-[#D8D8D8]">
-                  <div className="flex flex-col gap-5">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-start gap-4">
-                        <div className="grid h-12 w-12 place-items-center rounded-[16px] bg-indigo-500/10 text-indigo-600 shrink-0">
-                          <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" strokeWidth="1.75" fill="none" strokeLinecap="round" strokeLinejoin="round">
-                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
-                            <line x1="9" y1="9" x2="15" y2="15" />
-                            <line x1="15" y1="9" x2="9" y2="15" />
-                          </svg>
-                        </div>
-                        <div>
-                          <h3 className="text-[16px] font-medium text-black">{t("pages.settings_page.amo_title") || "AmoCRM Integratsiyasi"}</h3>
-                          <p className="mt-1 text-[12px] text-[#707070]">
-                            {t("pages.settings_page.amo_desc") || "Kontaktlarni AmoCRM tizimiga webhook orqali yo'naltiring"}
-                          </p>
-                        </div>
-                      </div>
-
-                      <label className="relative inline-flex items-center cursor-pointer select-none shrink-0">
-                        <input
-                          type="checkbox"
-                          checked={amoEnabled}
-                          onChange={(e) => setAmoEnabled(e.target.checked)}
-                          className="sr-only peer"
-                        />
-                        <div className="w-11 h-6 bg-[#E8E8E8] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-[#D8D8D8] after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-black"></div>
-                      </label>
-                    </div>
-
-                    {amoEnabled && (
-                      <div className="flex flex-col gap-4 border-t border-[#F0F0F0] pt-4">
-                        <div className="flex flex-col gap-1.5">
-                          <label className="text-[11px] font-medium text-[#707070] px-1">
-                            {t("pages.settings_page.webhook_url_label") || "Webhook URL manzili"}
-                          </label>
-                          <input
-                            type="url"
-                            value={amoUrl}
-                            onChange={(e) => setAmoUrl(e.target.value)}
-                            placeholder="https://xxxxxx.amocrm.ru/api/v4/leads"
-                            className="w-full rounded-[14px] bg-[#F0F0F0] px-4 py-3 text-[13px] text-black outline-none placeholder:text-[#a0a0a0] transition-colors focus:bg-[#e8e8e8]"
-                          />
-                        </div>
-
-                        <Button
-                          onClick={() => handleSaveIntegration("amo")}
-                          variant="accent"
-                          className="flex items-center justify-center gap-1.5 py-3 self-start text-[12px]"
-                        >
-                          <Save size={14} />
-                          <span>{t("common.save") || "Saqlash"}</span>
-                        </Button>
-                      </div>
-                    )}
-                  </div>
-                </Card>
-              </div>
-            )}
-
-            {/* API Keys Tab */}
-            {activeSection === "apikeys" && (
-              <div className="max-w-[640px] flex flex-col gap-6 animate-in fade-in duration-200">
-                <div>
-                  <h3 className="text-[28px] font-bold text-black">{tr("api_keys")}</h3>
-                  <p className="text-[13px] text-[#707070] mt-1.5">{t("pages.settings_page.api_keys_desc")}</p>
-                </div>
-
-                <div className="p-5 rounded-[14px] bg-[#F9F9F7] border border-[#F0F0F0] mt-2 flex flex-col gap-3">
-                  <div className="flex items-center justify-between">
-                    <span className="text-[12px] font-bold text-black uppercase tracking-wider">{t("pages.settings_page.api_key_label")}</span>
-                    <span className="bg-[#C7F33C]/20 text-[#5A7C1E] text-[10px] font-bold px-2 py-0.5 rounded-full">{t("common.active")}</span>
-                  </div>
-                  <div className="flex gap-2 items-center">
-                    <div className="relative flex-1">
-                      <input
-                        type={showKey ? "text" : "password"}
-                        readOnly
-                        value={apiKey}
-                        className="w-full rounded-[10px] border border-[#D8D8D8] pl-4 pr-10 py-2.5 text-[13px] text-black bg-white focus:outline-none font-mono focus:border-black"
-                      />
                       <button
-                        type="button"
-                        onClick={() => setShowKey(!showKey)}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-[#707070] hover:text-black transition-colors"
+                        onClick={() => {
+                          navigator.clipboard.writeText(apiKey);
+                          showAlert(t("common.success"), t("pages.settings_page.copied_title") || "Nusxalandi");
+                        }}
+                        className="flex items-center gap-1 text-[11px] font-bold hover:underline cursor-pointer"
                       >
-                        {showKey ? <EyeOff size={16} /> : <Eye size={16} />}
+                        <Copy size={12} />
+                        <span>{t("common.copy")}</span>
                       </button>
                     </div>
-                    <button
-                      onClick={handleCopyKey}
-                      className="h-[38px] bg-black hover:bg-black/80 text-white font-semibold text-[12px] px-4 rounded-[10px] transition-all flex items-center gap-1.5 active:scale-95 shrink-0"
-                    >
-                      {copiedKey ? <Check size={14} /> : <Copy size={14} />}
-                      <span>{t("common.copy")}</span>
-                    </button>
-                  </div>
-                  
-                  <div className="flex justify-end mt-1">
-                    <button
-                      onClick={handleRegenerateKey}
-                      className="text-[11px] font-bold text-red-600 hover:text-red-700 hover:underline flex items-center gap-1 transition-colors"
-                    >
-                      <RefreshCw size={12} />
-                      <span>{tr("regenerate_btn")}</span>
-                    </button>
-                  </div>
-                </div>
-              </div>
-            )}
 
-            {/* MCP Tab */}
-            {activeSection === "mcp" && (
-              <div className="max-w-[680px] flex flex-col gap-6 animate-in fade-in duration-200">
-                <div>
-                  <h3 className="text-[28px] font-bold text-black">{t("pages.settings_page.mcp_title")}</h3>
-                  <p className="text-[13px] text-[#707070] mt-1.5 leading-relaxed">{t("pages.settings_page.mcp_desc")}</p>
-                </div>
+                    {/* Navigation inside MCP: Tabs switcher */}
+                    <div className="flex border-b border-[#E8E8E8] gap-6 text-[13px] font-semibold text-[#707070]">
+                      <button
+                        type="button"
+                        onClick={() => setMcpTab("local")}
+                        className={`pb-3 relative transition-colors ${
+                          mcpTab === "local" ? "text-black border-b-2 border-black" : "hover:text-black"
+                        }`}
+                      >
+                        {t("pages.settings_page.mcp_local_tab")}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setMcpTab("cloud")}
+                        className={`pb-3 relative transition-colors ${
+                          mcpTab === "cloud" ? "text-black border-b-2 border-black" : "hover:text-black"
+                        }`}
+                      >
+                        {t("pages.settings_page.mcp_cloud_tab")}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setMcpTab("sse")}
+                        className={`pb-3 relative transition-colors ${
+                          mcpTab === "sse" ? "text-black border-b-2 border-black" : "hover:text-black"
+                        }`}
+                      >
+                        {t("pages.settings_page.mcp_sse_tab")}
+                      </button>
+                    </div>
 
-                {/* API Key warning/info box */}
-                <div className="p-4 rounded-[14px] bg-[#C7F33C]/10 border border-[#C7F33C]/20 flex items-center justify-between gap-3 text-[12px] text-black">
-                  <div className="flex items-center gap-2">
-                    <Database size={16} className="text-black shrink-0" />
-                    <span>
-                      <strong>{t("pages.settings_page.mcp_api_key_info")}</strong>{" "}
-                      <code className="bg-white/60 px-2 py-0.5 rounded font-mono text-[11px]">
-                        {apiKey ? `${apiKey.substring(0, 12)}...${apiKey.substring(apiKey.length - 4)}` : "Generate a key first"}
-                      </code>
-                    </span>
-                  </div>
-                  <button
-                    onClick={() => {
-                      navigator.clipboard.writeText(apiKey);
-                      showAlert(t("common.success"), t("pages.settings_page.copied_title") || "Nusxalandi");
-                    }}
-                    className="flex items-center gap-1 text-[11px] font-bold hover:underline cursor-pointer"
-                  >
-                    <Copy size={12} />
-                    <span>{t("common.copy")}</span>
-                  </button>
-                </div>
+                    {/* Tab content */}
+                    <div className="mt-2">
+                      {mcpTab === "local" && (
+                        <div className="flex flex-col gap-4 animate-in fade-in duration-150">
+                          <p className="text-[13px] text-[#707070] leading-relaxed">
+                            {t("pages.settings_page.mcp_local_desc")}
+                          </p>
+                          
+                          <div className="flex flex-col gap-3.5 bg-[#F9F9F7] border border-[#E8E8E8] p-5 rounded-[16px] text-[12px] text-[#505050]">
+                            <p>{t("pages.settings_page.mcp_local_step_1")}</p>
+                            <p>{t("pages.settings_page.mcp_local_step_2")}</p>
+                            <p>{t("pages.settings_page.mcp_local_step_3")}</p>
 
-                {/* Navigation inside MCP: Tabs switcher */}
-                <div className="flex border-b border-[#E8E8E8] gap-6 text-[13px] font-semibold text-[#707070]">
-                  <button
-                    type="button"
-                    onClick={() => setMcpTab("local")}
-                    className={`pb-3 relative transition-colors ${
-                      mcpTab === "local" ? "text-black border-b-2 border-black" : "hover:text-black"
-                    }`}
-                  >
-                    {t("pages.settings_page.mcp_local_tab")}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setMcpTab("cloud")}
-                    className={`pb-3 relative transition-colors ${
-                      mcpTab === "cloud" ? "text-black border-b-2 border-black" : "hover:text-black"
-                    }`}
-                  >
-                    {t("pages.settings_page.mcp_cloud_tab")}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setMcpTab("sse")}
-                    className={`pb-3 relative transition-colors ${
-                      mcpTab === "sse" ? "text-black border-b-2 border-black" : "hover:text-black"
-                    }`}
-                  >
-                    {t("pages.settings_page.mcp_sse_tab")}
-                  </button>
-                </div>
-
-                {/* Tab content */}
-                <div className="mt-2">
-                  {mcpTab === "local" && (
-                    <div className="flex flex-col gap-4 animate-in fade-in duration-150">
-                      <p className="text-[13px] text-[#707070] leading-relaxed">
-                        {t("pages.settings_page.mcp_local_desc")}
-                      </p>
-                      
-                      <div className="flex flex-col gap-3.5 bg-[#F9F9F7] border border-[#E8E8E8] p-5 rounded-[16px] text-[12px] text-[#505050]">
-                        <p>{t("pages.settings_page.mcp_local_step_1")}</p>
-                        <p>{t("pages.settings_page.mcp_local_step_2")}</p>
-                        <p>{t("pages.settings_page.mcp_local_step_3")}</p>
-
-                        <div className="relative mt-2 rounded-[12px] bg-black text-white p-4 font-mono text-[11px] overflow-x-auto">
-                          <button
-                            type="button"
-                            onClick={() => {
-                              const configText = JSON.stringify({
-                                "mcpServers": {
-                                  "sendly-workspace": {
-                                    "command": "node",
-                                    "args": [
-                                      "/absolute/path/to/sendly-mcp.js"
-                                    ],
-                                    "env": {
-                                      "SENDLY_API_URL": typeof window !== "undefined" ? window.location.origin : "http://localhost:3000",
-                                      "SENDLY_API_KEY": apiKey,
-                                      "SENDLY_USER_ID": apiKey
+                            <div className="relative mt-2 rounded-[12px] bg-black text-white p-4 font-mono text-[11px] overflow-x-auto">
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  const configText = JSON.stringify({
+                                    "mcpServers": {
+                                      "sendly-workspace": {
+                                        "command": "node",
+                                        "args": [
+                                          "/absolute/path/to/sendly-mcp.js"
+                                        ],
+                                        "env": {
+                                          "SENDLY_API_URL": typeof window !== "undefined" ? window.location.origin : "http://localhost:3000",
+                                          "SENDLY_API_KEY": apiKey,
+                                          "SENDLY_USER_ID": apiKey
+                                        }
+                                      }
+                                    }
+                                  }, null, 2);
+                                  navigator.clipboard.writeText(configText);
+                                  showAlert(t("common.success"), t("pages.settings_page.copied_title") || "Nusxalandi");
+                                }}
+                                className="absolute top-3 right-3 text-white/60 hover:text-white p-1 hover:bg-white/10 rounded transition-all"
+                                title="Copy config"
+                              >
+                                <Copy size={14} />
+                              </button>
+                              <pre className="text-white font-mono text-[10px] lg:text-[11px] select-all leading-normal">
+                                {JSON.stringify({
+                                  "mcpServers": {
+                                    "sendly-workspace": {
+                                      "command": "node",
+                                      "args": [
+                                        "/absolute/path/to/sendly-mcp.js"
+                                      ],
+                                      "env": {
+                                        "SENDLY_API_URL": typeof window !== "undefined" ? window.location.origin : "http://localhost:3000",
+                                        "SENDLY_API_KEY": apiKey,
+                                        "SENDLY_USER_ID": apiKey
+                                      }
                                     }
                                   }
-                                }
-                              }, null, 2);
-                              navigator.clipboard.writeText(configText);
-                              showAlert(t("common.success"), t("pages.settings_page.copied_title") || "Nusxalandi");
-                            }}
-                            className="absolute top-3 right-3 text-white/60 hover:text-white p-1 hover:bg-white/10 rounded transition-all"
-                            title="Copy config"
-                          >
-                            <Copy size={14} />
-                          </button>
-                          <pre>{JSON.stringify({
-                            "mcpServers": {
-                              "sendly-workspace": {
-                                "command": "node",
-                                "args": [
-                                  "/absolute/path/to/sendly-mcp.js"
-                                ],
-                                "env": {
-                                  "SENDLY_API_URL": typeof window !== "undefined" ? window.location.origin : "http://localhost:3000",
-                                  "SENDLY_API_KEY": apiKey,
-                                  "SENDLY_USER_ID": apiKey
-                                }
-                              }
-                            }
-                          }, null, 2)}</pre>
+                                }, null, 2)}
+                              </pre>
+                            </div>
+                          </div>
                         </div>
-                      </div>
+                      )}
+
+                      {mcpTab === "cloud" && (
+                        <div className="flex flex-col gap-4 animate-in fade-in duration-150">
+                          <p className="text-[13px] text-[#707070] leading-relaxed">
+                            {t("pages.settings_page.mcp_cloud_desc")}
+                          </p>
+
+                          <div className="flex flex-col gap-3.5 bg-[#F9F9F7] border border-[#E8E8E8] p-5 rounded-[16px] text-[12px] text-[#505050]">
+                            <p>{t("pages.settings_page.mcp_cloud_step_1")}</p>
+                            <p>{t("pages.settings_page.mcp_cloud_step_2")}</p>
+                            
+                            <div className="relative mt-2 rounded-[12px] bg-black text-white p-4 font-mono text-[11px] overflow-x-auto">
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  const configText = JSON.stringify({
+                                    "mcpServers": {
+                                      "sendly-cloud": {
+                                        "command": "npx",
+                                        "args": [
+                                          "-y",
+                                          "@isroiljohn-creator/sendly-mcp"
+                                        ],
+                                        "env": {
+                                          "SENDLY_API_KEY": apiKey
+                                        }
+                                      }
+                                    }
+                                  }, null, 2);
+                                  navigator.clipboard.writeText(configText);
+                                  showAlert(t("common.success"), t("pages.settings_page.copied_title") || "Nusxalandi");
+                                }}
+                                className="absolute top-3 right-3 text-white/60 hover:text-white p-1 hover:bg-white/10 rounded transition-all"
+                                title="Copy config"
+                              >
+                                <Copy size={14} />
+                              </button>
+                              <pre className="text-white font-mono text-[10px] lg:text-[11px] select-all leading-normal">
+                                {JSON.stringify({
+                                  "mcpServers": {
+                                    "sendly-cloud": {
+                                      "command": "npx",
+                                      "args": [
+                                        "-y",
+                                        "@isroiljohn-creator/sendly-mcp"
+                                      ],
+                                      "env": {
+                                        "SENDLY_API_KEY": apiKey
+                                      }
+                                    }
+                                  }
+                                }, null, 2)}
+                              </pre>
+                            </div>
+
+                            <p>{t("pages.settings_page.mcp_cloud_step_3")}</p>
+                          </div>
+                        </div>
+                      )}
+
+                      {mcpTab === "sse" && (
+                        <div className="flex flex-col gap-4 animate-in fade-in duration-150">
+                          <p className="text-[13px] text-[#707070] leading-relaxed">
+                            {t("pages.settings_page.mcp_sse_desc")}
+                          </p>
+
+                          <div className="flex flex-col gap-3.5 bg-[#F9F9F7] border border-[#E8E8E8] p-5 rounded-[16px] text-[12px] text-[#505050]">
+                            <p className="font-bold text-black">{t("pages.settings_page.mcp_sse_url_label")}</p>
+                            
+                            <div className="flex items-center gap-2">
+                              <input
+                                type="text"
+                                readOnly
+                                value={typeof window !== "undefined" ? `${window.location.origin}/api/mcp/sse?apiKey=${apiKey}` : `/api/mcp/sse?apiKey=${apiKey}`}
+                                className="flex-1 bg-white border border-[#D8D8D8] rounded-[8px] px-3 py-1.5 text-[11px] font-mono text-black focus:outline-none"
+                              />
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  const sseUrl = typeof window !== "undefined" ? `${window.location.origin}/api/mcp/sse?apiKey=${apiKey}` : `/api/mcp/sse?apiKey=${apiKey}`;
+                                  navigator.clipboard.writeText(sseUrl);
+                                  showAlert(t("common.success"), t("pages.settings_page.copied_title") || "Nusxalandi");
+                                }}
+                                className="bg-black hover:bg-black/90 text-white font-semibold text-[11px] px-3.5 py-1.5 rounded-[8px] transition-all flex items-center gap-1 active:scale-95 shrink-0"
+                              >
+                                <Copy size={12} />
+                                <span>{t("common.copy")}</span>
+                              </button>
+                            </div>
+
+                            <div className="p-3 rounded-lg bg-black/5 text-[#707070] text-[11px] leading-relaxed italic text-center">
+                              {t("pages.settings_page.mcp_sse_desc_note")}
+                            </div>
+                          </div>
+                        </div>
+                      )}
                     </div>
-                  )}
-
-                  {mcpTab === "cloud" && (
-                    <div className="flex flex-col gap-4 animate-in fade-in duration-150">
-                      <p className="text-[13px] text-[#707070] leading-relaxed">
-                        {t("pages.settings_page.mcp_cloud_desc")}
-                      </p>
-
-                      <div className="flex flex-col gap-3.5 bg-[#F9F9F7] border border-[#E8E8E8] p-5 rounded-[16px] text-[12px] text-[#505050]">
-                        <p>{t("pages.settings_page.mcp_cloud_step_1")}</p>
-                        <p>{t("pages.settings_page.mcp_cloud_step_2")}</p>
-                        
-                        <div className="flex items-center gap-2 pl-4">
-                          <input
-                            type="text"
-                            readOnly
-                            value={typeof window !== "undefined" ? `${window.location.origin}/api/mcp/openapi.json` : "/api/mcp/openapi.json"}
-                            className="flex-1 bg-white border border-[#D8D8D8] rounded-[8px] px-3 py-1.5 text-[11px] font-mono text-black focus:outline-none"
-                          />
-                          <button
-                            type="button"
-                            onClick={() => {
-                              const specUrl = typeof window !== "undefined" ? `${window.location.origin}/api/mcp/openapi.json` : "/api/mcp/openapi.json";
-                              navigator.clipboard.writeText(specUrl);
-                              showAlert(t("common.success"), t("pages.settings_page.copied_title") || "Nusxalandi");
-                            }}
-                            className="bg-black hover:bg-black/90 text-white font-semibold text-[11px] px-3.5 py-1.5 rounded-[8px] transition-all flex items-center gap-1 active:scale-95 shrink-0"
-                          >
-                            <Copy size={12} />
-                            <span>{t("common.copy")}</span>
-                          </button>
-                        </div>
-
-                        <p>{t("pages.settings_page.mcp_cloud_step_3")}</p>
-                      </div>
-                    </div>
-                  )}
-
-                  {mcpTab === "sse" && (
-                    <div className="flex flex-col gap-4 animate-in fade-in duration-150">
-                      <p className="text-[13px] text-[#707070] leading-relaxed">
-                        {t("pages.settings_page.mcp_sse_desc")}
-                      </p>
-
-                      <div className="flex flex-col gap-3.5 bg-[#F9F9F7] border border-[#E8E8E8] p-5 rounded-[16px] text-[12px] text-[#505050]">
-                        <p className="font-bold text-black">{t("pages.settings_page.mcp_sse_url_label")}</p>
-                        
-                        <div className="flex items-center gap-2">
-                          <input
-                            type="text"
-                            readOnly
-                            value={typeof window !== "undefined" ? `${window.location.origin}/api/mcp/sse?apiKey=${apiKey}` : `/api/mcp/sse?apiKey=${apiKey}`}
-                            className="flex-1 bg-white border border-[#D8D8D8] rounded-[8px] px-3 py-1.5 text-[11px] font-mono text-black focus:outline-none"
-                          />
-                          <button
-                            type="button"
-                            onClick={() => {
-                              const sseUrl = typeof window !== "undefined" ? `${window.location.origin}/api/mcp/sse?apiKey=${apiKey}` : `/api/mcp/sse?apiKey=${apiKey}`;
-                              navigator.clipboard.writeText(sseUrl);
-                              showAlert(t("common.success"), t("pages.settings_page.copied_title") || "Nusxalandi");
-                            }}
-                            className="bg-black hover:bg-black/90 text-white font-semibold text-[11px] px-3.5 py-1.5 rounded-[8px] transition-all flex items-center gap-1 active:scale-95 shrink-0"
-                          >
-                            <Copy size={12} />
-                            <span>{t("common.copy")}</span>
-                          </button>
-                        </div>
-
-                        <div className="p-3 rounded-lg bg-black/5 text-[#707070] text-[11px] leading-relaxed italic text-center">
-                          {t("pages.settings_page.mcp_sse_desc_note")}
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                </div>
+                  </div>
+                )}
               </div>
             )}
 

@@ -69,15 +69,27 @@ export async function POST(request: Request) {
 
     const apiKey = process.env.RESEND_API_KEY;
     if (!apiKey) {
-      console.log(`\n==================================================\n[OTP DEBUG FOR LOCAL TESTING]\nEmail: ${email}\nOTP: ${otp}\n==================================================\n`);
-      return NextResponse.json(
-        {
-          success: false,
-          error: "Email yuborish xizmati sozlanmagan. Railway da RESEND_API_KEY o'zgaruvchisini kiriting.",
-          otp: otp // Keep exposing in fallback mode for easy simulator testing
-        },
-        { status: 501 }
-      );
+      if (process.env.NODE_ENV === 'development') {
+        console.log(`\n==================================================\n[OTP DEBUG FOR LOCAL TESTING]\nEmail: ${email}\nOTP: ${otp}\n==================================================\n`);
+        return NextResponse.json(
+          {
+            success: true,
+            message: 'OTP konsolga chiqarildi (dev mode)',
+            otp,
+          },
+          { status: 200 }
+        );
+      } else {
+        // Production: never expose OTP in the response body
+        console.log(`[send-otp][prod-fallback] OTP for ${email}: ${otp}`);
+        return NextResponse.json(
+          {
+            success: false,
+            error: "Email yuborish xizmati sozlanmagan. Railway da RESEND_API_KEY o'zgaruvchisini kiriting.",
+          },
+          { status: 501 }
+        );
+      }
     }
 
     const resend = new Resend(apiKey);

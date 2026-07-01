@@ -4,6 +4,7 @@ import fs from "fs";
 import path from "path";
 import crypto from "crypto";
 import * as pgdb from "@/lib/pgdb";
+import { signJwt } from "@/lib/jwt";
 
 const DB_FILE = process.env.DB_FILE_PATH || path.join(process.cwd(), "db.json");
 
@@ -111,7 +112,13 @@ export async function POST(request: Request) {
       );
     }
 
-    return NextResponse.json({
+    const jwtSecret = process.env.JWT_SECRET || 'sendly-secret-key-2024';
+    const token = signJwt(
+      { user_id: user.id, email: user.email, role: user.role || 'user' },
+      jwtSecret
+    );
+
+    const response = NextResponse.json({
       success: true,
       user: {
         id: user.id,
@@ -121,6 +128,16 @@ export async function POST(request: Request) {
         role: user.role || "user"
       }
     });
+
+    response.cookies.set('replai_token', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 60 * 60 * 24 * 7, // 7 days
+      path: '/'
+    });
+
+    return response;
   } catch (err: unknown) {
     console.error("[login-auth] Unexpected error:", err);
     const errMsg = err instanceof Error ? err.message : "Tizimga kirishda xatolik yuz berdi.";

@@ -9,16 +9,16 @@ interface PageHeaderProps {
 
 export function PageHeader({ title, breadcrumbs, actions, filters }: PageHeaderProps) {
   return (
-    <header className="flex flex-wrap items-end justify-between gap-4 py-1">
-      <div>
-        <div className="text-[12px] text-[#707070] font-normal tracking-wide">
+    <header className="flex flex-wrap items-center justify-between gap-4 py-1">
+      <div className="md:hidden">
+        <div className="text-[11px] text-[#707070] font-bold uppercase tracking-wider">
           {breadcrumbs}
         </div>
-        <h1 className="bf-tight mt-1 text-[42px] font-medium leading-[1.05] text-black">
+        <h1 className="text-[28px] font-black text-black leading-tight mt-0.5">
           {title}
         </h1>
       </div>
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2 ml-auto">
         {filters}
         {actions}
       </div>

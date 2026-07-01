@@ -112,13 +112,23 @@ export async function POST(request: Request) {
 
     const token = signJwt(tokenPayload, jwtSecret);
 
-    return NextResponse.json({
+    const otpResponse = NextResponse.json({
       success: true,
       token,
       userId,
       isRegistered: !!user,
       user: user || null
     });
+
+    otpResponse.cookies.set('replai_token', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 60 * 60 * 24 * 30, // 30 days
+      path: '/'
+    });
+
+    return otpResponse;
   } catch (err: unknown) {
     console.error("[verify-otp] Unexpected error:", err);
     const errMsg = err instanceof Error ? err.message : "OTP tasdiqlashda xatolik yuz berdi.";

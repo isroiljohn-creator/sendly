@@ -1,5 +1,8 @@
 import { BotSettings, Lesson, Module } from "../db";
 
+// Centralised model constant — override via GEMINI_MODEL env variable
+const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-2.5-flash';
+
 export type RAGResult = {
   text: string;
   confidence: number;
@@ -239,7 +242,7 @@ O'quvchilarning savollariga faqat dars materiallari (KURS MATERIALLARI) asosida 
     for (let i = 0; i < maxRetries; i++) {
       try {
         response = await fetch(
-          `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
+          `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${apiKey}`,
           {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -273,7 +276,7 @@ O'quvchilarning savollariga faqat dars materiallari (KURS MATERIALLARI) asosida 
 
     if (!response || response.status === 429) {
       response = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
+        `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${apiKey}`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -291,7 +294,31 @@ O'quvchilarning savollariga faqat dars materiallari (KURS MATERIALLARI) asosida 
       );
     }
 
-    if (!response.ok) {
+    if (!response || !response.ok) {
+      console.warn('[RAG] Flash failed, trying Gemini Pro fallback...');
+      const PRO_MODEL = process.env.GEMINI_PRO_MODEL || 'gemini-1.5-pro';
+      try {
+        response = await fetch(
+          `https://generativelanguage.googleapis.com/v1beta/models/${PRO_MODEL}:generateContent?key=${apiKey}`,
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              system_instruction: { parts: [{ text: systemPrompt }] },
+              contents,
+              generationConfig: {
+                temperature: Math.min(0.95, 0.5 + (settings.humor || 30) / 200),
+                maxOutputTokens: 8192,
+              },
+            }),
+          }
+        );
+      } catch (proErr) {
+        console.error('[RAG] Gemini Pro fallback fetch error:', proErr);
+      }
+    }
+
+    if (!response || !response.ok) {
       console.error("Gemini API error:", response.status, await response.text());
       return null;
     }
@@ -331,7 +358,7 @@ Faqat toza JSON qaytaring, boshqa yozuv qo'shmang.`;
 
   try {
     const res = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${apiKey}`,
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -401,7 +428,7 @@ Faqat toza JSON qaytaring.`;
 
   try {
     const res = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${apiKey}`,
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -451,35 +478,36 @@ export async function queryRAG(
 ): Promise<RAGResult> {
   const apiKey = process.env.GEMINI_API_KEY || "";
 
-  // 1. Semantic moderation & General talk check
+  // 1. Semantic moderation & General talk check + CustDev analysis (parallel)
   let flagged = false;
   let isGeneralTalk = false;
   let matchedTopic = "";
-  
-  if (apiKey) {
-    try {
-      const moderation = await checkSemanticModeration(question, settings.topics || [], apiKey);
-      flagged = moderation.flagged;
-      matchedTopic = moderation.matchedTopic || "";
-      isGeneralTalk = moderation.isGeneralTalk === true;
-    } catch (e) {
-      console.error("Semantic check failed:", e);
-    }
-  }
-
-  // AI CustDev Analysis (run concurrently or fast)
   let intent = "general";
   let sentiment: "positive" | "neutral" | "negative" = "neutral";
-  let painPoint = settings.aiAgentType === "sales" ? "Mahsulot haqida qo'shimcha umumiy ma'lumot olish istagi" : "Kurs yoki darslar haqida qo'shimcha umumiy ma'lumot olish istagi";
-  
+  let painPoint = settings.aiAgentType === "sales"
+    ? "Mahsulot haqida qo'shimcha umumiy ma'lumot olish istagi"
+    : "Kurs yoki darslar haqida qo'shimcha umumiy ma'lumot olish istagi";
+
   if (apiKey) {
-    try {
-      const analysis = await analyzeMessageForCustDev(question, settings.aiAgentType || "kurator", apiKey);
-      intent = analysis.intent;
-      sentiment = analysis.sentiment;
-      painPoint = analysis.painPoint;
-    } catch (e) {
-      console.error("CustDev analysis failed:", e);
+    const [moderationResult, analysisResult] = await Promise.allSettled([
+      checkSemanticModeration(question, settings.topics || [], apiKey),
+      analyzeMessageForCustDev(question, settings.aiAgentType || "kurator", apiKey),
+    ]);
+
+    if (moderationResult.status === "fulfilled") {
+      flagged = moderationResult.value.flagged;
+      matchedTopic = moderationResult.value.matchedTopic || "";
+      isGeneralTalk = moderationResult.value.isGeneralTalk === true;
+    } else {
+      console.error("Semantic check failed:", moderationResult.reason);
+    }
+
+    if (analysisResult.status === "fulfilled") {
+      intent = analysisResult.value.intent;
+      sentiment = analysisResult.value.sentiment;
+      painPoint = analysisResult.value.painPoint;
+    } else {
+      console.error("CustDev analysis failed:", analysisResult.reason);
     }
   }
 
@@ -524,7 +552,7 @@ Qoidalar:
 
     try {
       const res = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
+        `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${apiKey}`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },

@@ -50,6 +50,22 @@ export default function RootLayout({
   return (
     <html lang={lang}>
       <body className={`${inter.variable} font-sans antialiased`}>
+        <Script id="error-tracking" strategy="afterInteractive">{`
+  window.addEventListener('error', function(e) {
+    fetch('/api/track', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+      body: JSON.stringify({ type: 'js_error', message: e.message, filename: e.filename, lineno: e.lineno })
+    }).catch(function() {});
+  });
+  window.addEventListener('unhandledrejection', function(e) {
+    fetch('/api/track', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+      body: JSON.stringify({ type: 'promise_rejection', message: e.reason?.message || String(e.reason) })
+    }).catch(function() {});
+  });
+`}</Script>
         <ErrorTrackerInitializer />
         <I18nProvider>
           {children}
