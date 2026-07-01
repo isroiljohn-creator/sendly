@@ -1103,7 +1103,7 @@ export default function ChatsPage() {
                     {displayedContacts.map((c) => (
                       <tr key={c.id} className="hover:bg-[#F9F9F7]/50 transition-colors">
                         <td className="px-6 py-3 flex items-center gap-3">
-                          <Avatar size={32} />
+                          <Avatar src={c.avatar} size={32} />
                           <span className="font-extrabold text-black">{c.name}</span>
                         </td>
                         <td className="px-6 py-3 text-[#707070]">{c.username.startsWith("@") ? c.username : `@${c.username}`}</td>

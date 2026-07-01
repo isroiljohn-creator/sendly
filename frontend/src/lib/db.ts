@@ -40,6 +40,7 @@ export type Contact = {
   messagesCount: number;
   tags: string[];
   lastActive: string;
+  avatar?: string;
 };
 
 export type Broadcast = {

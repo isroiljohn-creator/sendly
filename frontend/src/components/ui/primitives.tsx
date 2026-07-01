@@ -122,9 +122,11 @@ interface AvatarProps {
 }
 
 export function Avatar({ src, alt, size = 38, className, fallbackColor, style }: AvatarProps) {
+  const [hasError, setHasError] = React.useState(false);
+
   return (
     <div
-      className={cn("relative overflow-hidden rounded-full ring-2 ring-[#E8E8E8] shrink-0", className)}
+      className={cn("relative overflow-hidden rounded-full ring-2 ring-[#E8E8E8] shrink-0 flex items-center justify-center", className)}
       style={{
         width: size,
         height: size,
@@ -132,13 +134,20 @@ export function Avatar({ src, alt, size = 38, className, fallbackColor, style }:
         ...style,
       }}
     >
-      {src && (
+      {src && !hasError ? (
         // eslint-disable-next-line @next/next/no-img-element
         <img
           src={src}
           alt={alt || "Avatar"}
           className="h-full w-full object-cover"
+          onError={() => setHasError(true)}
         />
+      ) : (
+        <div className="text-[#1A2906]/60 flex items-center justify-center w-full h-full">
+          <svg viewBox="0 0 24 24" width="60%" height="60%" fill="currentColor">
+            <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
+          </svg>
+        </div>
       )}
     </div>
   );

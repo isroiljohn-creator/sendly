@@ -1330,7 +1330,8 @@ export async function handleTelegramUpdate(channelId: string, token: string, upd
           phone: extractedPhone,
           email: extractedEmail,
           companyName: extractedCompany,
-          lastMessage: text
+          lastMessage: text,
+          avatar: chat.avatar
         };
         contactsList.unshift(contactObj);
       } else {
@@ -1339,6 +1340,7 @@ export async function handleTelegramUpdate(channelId: string, token: string, upd
         contactObj.messagesCount = (contactObj.messagesCount || 0) + 1;
         contactObj.lastActive = new Date().toLocaleTimeString("uz-UZ", { hour: "2-digit", minute: "2-digit" });
         contactObj.lastMessage = text;
+        contactObj.avatar = chat.avatar;
         if (extractedPhone) contactObj.phone = extractedPhone;
         if (extractedEmail) contactObj.email = extractedEmail;
         if (extractedCompany) contactObj.companyName = extractedCompany;
