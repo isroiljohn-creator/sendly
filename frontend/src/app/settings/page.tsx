@@ -359,9 +359,11 @@ export default function SettingsPage() {
 
   // Profile management functions
   const validatePasswordStrength = (pass: string): string => {
-    if (pass.length < 6) {
-      return "Parol kamida 6 ta belgidan iborat bo'lishi kerak.";
-    }
+    if (pass.length < 8) return "Parol kamida 8 ta belgidan iborat bo'lishi kerak.";
+    if (!/[A-Z]/.test(pass)) return "Parolda kamida bitta bosh harf (A-Z) bo'lishi kerak.";
+    if (!/[a-z]/.test(pass)) return "Parolda kamida bitta kichik harf (a-z) bo'lishi kerak.";
+    if (!/[0-9]/.test(pass)) return "Parolda kamida bitta raqam (0-9) bo'lishi kerak.";
+    if (!/[!@#$%^&*(),.?":{}|<>]/.test(pass)) return "Parolda kamida bitta maxsus belgi (!@#$%^&*...) bo'lishi kerak.";
     return "";
   };
 
@@ -1195,15 +1197,31 @@ export default function SettingsPage() {
                   </div>
                 </div>
 
-                <Button 
-                  type="submit" 
-                  disabled={passwordLoading} 
-                  variant="primary" 
-                  className="py-3 px-6 text-[12px] font-bold self-start rounded-xl flex items-center gap-2"
-                >
-                  {passwordLoading && <Loader2 size={13} className="animate-spin" />}
-                  {t("pages.account.general.password") || "Parolni o'zgartirish"}
-                </Button>
+                <div className="flex items-center justify-between mt-2 w-full">
+                  <Button 
+                    type="submit" 
+                    disabled={passwordLoading} 
+                    variant="primary" 
+                    className="py-3 px-6 text-[12px] font-bold rounded-xl flex items-center gap-2"
+                  >
+                    {passwordLoading && <Loader2 size={13} className="animate-spin" />}
+                    {t("pages.account.general.password") || "Parolni o'zgartirish"}
+                  </Button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setForgotEmail(currentUser?.email || "");
+                      setForgotStep("email");
+                      setForgotError("");
+                      setForgotSuccess("");
+                      setIsForgotModalOpen(true);
+                    }}
+                    className="text-[12px] font-bold text-black hover:underline cursor-pointer bg-transparent border-none"
+                  >
+                    Parolni unutdim
+                  </button>
+                </div>
               </form>
             </div>
           )}
@@ -2750,6 +2768,131 @@ export default function SettingsPage() {
                 </Button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Forgot Password Modal */}
+      {isForgotModalOpen && (
+        <div className="fixed inset-0 z-[150] flex items-center justify-center bg-black/40 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+          <div className="w-full max-w-[400px] rounded-[24px] bg-white p-7 border border-[#D8D8D8] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200">
+            <div className="flex items-center justify-between pb-3 border-b border-[#F0F0F0] mb-5">
+              <h3 className="text-[16px] font-bold text-black">Parolni tiklash</h3>
+              <button 
+                onClick={() => setIsForgotModalOpen(false)} 
+                className="grid h-8 w-8 place-items-center rounded-full hover:bg-[#F0F0F0] text-[#707070] transition-colors"
+              >
+                <X size={16} />
+              </button>
+            </div>
+
+            {forgotError && (
+              <div className="p-3 bg-red-50 border border-red-200 text-red-600 rounded-[10px] text-[12px] font-semibold mb-4">
+                {forgotError}
+              </div>
+            )}
+            {forgotSuccess && (
+              <div className="p-3 bg-green-50 border border-green-200 text-green-600 rounded-[10px] text-[12px] font-semibold mb-4">
+                {forgotSuccess}
+              </div>
+            )}
+
+            {forgotStep === "email" && (
+              <form onSubmit={handleForgotSendOtp} className="flex flex-col gap-4">
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-[11px] font-bold text-[#707070] uppercase">Elektron pochta</label>
+                  <input
+                    type="email"
+                    value={forgotEmail}
+                    onChange={(e) => setForgotEmail(e.target.value)}
+                    placeholder="example@gmail.com"
+                    required
+                    className="w-full rounded-[10px] border border-[#D8D8D8] px-3.5 py-2.5 text-[12px] text-black focus:outline-none focus:border-black bg-white"
+                  />
+                </div>
+                <Button type="submit" disabled={forgotLoading} variant="primary" className="w-full py-3 text-[12px] font-bold rounded-[10px] flex items-center justify-center gap-2">
+                  {forgotLoading && <Loader2 size={13} className="animate-spin" />}
+                  Kod yuborish
+                </Button>
+              </form>
+            )}
+
+            {forgotStep === "otp" && (
+              <form onSubmit={handleForgotVerifyOtp} className="flex flex-col gap-4">
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-[11px] font-bold text-[#707070] uppercase">Tasdiqlash kodi</label>
+                  <input
+                    type="text"
+                    value={forgotOtpCode}
+                    onChange={(e) => setForgotOtpCode(e.target.value)}
+                    placeholder="6 xonali kod"
+                    maxLength={6}
+                    required
+                    className="w-full rounded-[10px] border border-[#D8D8D8] px-3.5 py-2.5 text-[12px] text-black font-semibold text-center tracking-widest focus:outline-none focus:border-black bg-white"
+                  />
+                  <p className="text-[11px] text-[#707070] text-center">
+                    {forgotOtpTimer > 0 ? `Kod ${forgotOtpTimer} soniyada yaroqsiz bo'ladi` : "Kod muddati tugadi"}
+                  </p>
+                </div>
+
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setForgotStep("email")}
+                    className="flex-1 py-3 text-[12px] font-bold rounded-[10px] bg-[#F0F0F0] text-black hover:bg-[#E8E8E8] transition-colors"
+                  >
+                    Orqaga
+                  </button>
+                  <Button type="submit" className="flex-1 py-3 text-[12px] font-bold rounded-[10px] bg-black text-white hover:bg-black/90">
+                    Tasdiqlash
+                  </Button>
+                </div>
+
+                <div className="text-center mt-2">
+                  <button
+                    type="button"
+                    disabled={forgotOtpTimer > 0 || forgotLoading}
+                    onClick={handleForgotSendOtp}
+                    className="text-[11px] font-bold text-[#707070] hover:text-black hover:underline disabled:opacity-40"
+                  >
+                    Kodni qayta yuborish
+                  </button>
+                </div>
+              </form>
+            )}
+
+            {forgotStep === "new_password" && (
+              <form onSubmit={handleForgotResetPassword} className="flex flex-col gap-4">
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-[11px] font-bold text-[#707070] uppercase">Yangi parol</label>
+                  <input
+                    type="password"
+                    value={forgotNewPassword}
+                    onChange={(e) => setForgotNewPassword(e.target.value)}
+                    placeholder="Kamida 8 ta belgi"
+                    required
+                    className="w-full rounded-[10px] border border-[#D8D8D8] px-3.5 py-2.5 text-[12px] text-black focus:outline-none focus:border-black bg-white"
+                  />
+                </div>
+
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-[11px] font-bold text-[#707070] uppercase">Yangi parolni tasdiqlash</label>
+                  <input
+                    type="password"
+                    value={forgotConfirmPassword}
+                    onChange={(e) => setForgotConfirmPassword(e.target.value)}
+                    placeholder="Qayta kiriting"
+                    required
+                    className="w-full rounded-[10px] border border-[#D8D8D8] px-3.5 py-2.5 text-[12px] text-black focus:outline-none focus:border-black bg-white"
+                  />
+                </div>
+
+                <Button type="submit" disabled={forgotLoading} variant="primary" className="w-full py-3 text-[12px] font-bold rounded-[10px] flex items-center justify-center gap-2">
+                  {forgotLoading && <Loader2 size={13} className="animate-spin" />}
+                  Parolni yangilash
+                </Button>
+              </form>
+            )}
           </div>
         </div>
       )}
