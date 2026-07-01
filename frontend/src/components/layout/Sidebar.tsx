@@ -362,21 +362,12 @@ export function Sidebar() {
               {/* Menu items */}
               <div className="flex flex-col gap-0.5 px-2">
                 <Link
-                  href="/account?tab=general"
+                  href="/settings?section=profile"
                   onClick={() => setProfileMenuOpen(false)}
                   className="flex items-center gap-3 px-3 py-2 rounded-[12px] hover:bg-[#F9F9F7] text-left transition-colors text-black font-semibold text-[13px]"
                 >
-                  <User size={16} className="text-[#595959]" />
-                  <span>{t("nav.my_account")}</span>
-                </Link>
-
-                <Link
-                  href="/account?tab=billing"
-                  onClick={() => setProfileMenuOpen(false)}
-                  className="flex items-center gap-3 px-3 py-2 rounded-[12px] hover:bg-[#F9F9F7] text-left transition-colors text-black font-semibold text-[13px]"
-                >
-                  <CreditCard size={16} className="text-[#595959]" />
-                  <span>{t("nav.billing_plans")}</span>
+                  <Settings size={16} className="text-[#595959]" />
+                  <span>{t("nav.settings") || "Sozlamalar"}</span>
                 </Link>
 
                 <Link

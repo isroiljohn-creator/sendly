@@ -353,12 +353,11 @@ export function AppLayout({ children }: { children: ReactNode }) {
           {/* Account Section */}
           <div className="mt-6">
             <p className="text-[9px] font-extrabold text-[#a0a0a0] uppercase tracking-wider mb-2">
-              {t("nav.my_account") || "Profil sozlamalari"}
+              {t("nav.settings") || "Sozlamalar"}
             </p>
             <div className="flex flex-col gap-1">
               {[
-                { to: "/account?tab=general", Icon: User, label: t("nav.my_account") },
-                { to: "/account?tab=billing", Icon: CreditCard, label: t("nav.billing_plans") },
+                { to: "/settings?section=profile", Icon: Settings, label: t("nav.settings") || "Sozlamalar" },
                 { to: "/partner", Icon: Users, label: t("nav.partner_dashboard") },
                 { to: "/help", Icon: HelpCircle, label: t("nav.help") }
               ].map((item) => (

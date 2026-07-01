@@ -12,7 +12,8 @@ import {
   HelpCircle, 
   ArrowUpRight, 
   DollarSign, 
-  Wallet
+  Wallet,
+  ArrowLeft
 } from "lucide-react";
 import { useI18n } from "@/i18n/I18nProvider";
 import { db } from "@/lib/db";
@@ -76,17 +77,38 @@ export default function PartnerPage() {
     });
     setReferrals(mapped);
 
-    const handleTabChange = (e: Event) => {
-      const customEvent = e as CustomEvent<"home" | "referrals">;
-      if (customEvent.detail) {
-        setActiveTab(customEvent.detail);
+    // 3. Sync active tab from query param
+    const searchParams = new URLSearchParams(window.location.search);
+    const tab = searchParams.get("tab");
+    if (tab === "referrals") {
+      setActiveTab("referrals");
+    } else {
+      setActiveTab("home");
+    }
+
+    // 4. Handle popstate event (browser navigation)
+    const handlePopState = () => {
+      const params = new URLSearchParams(window.location.search);
+      const tabParam = params.get("tab");
+      if (tabParam === "referrals") {
+        setActiveTab("referrals");
+      } else {
+        setActiveTab("home");
       }
     };
-    window.addEventListener("sendly-partner-tab-change", handleTabChange as EventListener);
+
+    window.addEventListener("popstate", handlePopState);
     return () => {
-      window.removeEventListener("sendly-partner-tab-change", handleTabChange as EventListener);
+      window.removeEventListener("popstate", handlePopState);
     };
   }, []);
+
+  const changeTab = (tab: "home" | "referrals") => {
+    setActiveTab(tab);
+    const url = new URL(window.location.href);
+    url.searchParams.set("tab", tab);
+    window.history.pushState({}, "", url.toString());
+  };
 
   const referralsCount = referrals.length;
   const totalEarnedFloat = referrals.reduce((acc, r) => {
@@ -122,7 +144,7 @@ export default function PartnerPage() {
                 {/* Joriy balans */}
                 <Card className="flex flex-col justify-between min-h-[120px] p-6 relative">
                   <div className="flex items-start justify-between">
-                    <span className="text-[13px] text-[#707070] font-medium">{t("pages.partner.balance")}</span>
+                    <span className="text-[13px] text-[#707070] font-medium">{t("partner.balance")}</span>
                     <div className="h-8 w-8 rounded-full bg-[#F0F0F0] flex items-center justify-center text-black">
                       <Wallet size={14} />
                     </div>
@@ -130,7 +152,7 @@ export default function PartnerPage() {
                   <div className="mt-3">
                     <div className="text-[28px] font-semibold text-black leading-none">{balance}</div>
                     <div className="mt-1.5 text-[10px] text-[#707070] font-semibold flex items-center gap-1">
-                      <span>{t("pages.partner.payout_available")}</span>
+                      <span>{t("partner.payout_available")}</span>
                     </div>
                   </div>
                 </Card>
@@ -138,28 +160,28 @@ export default function PartnerPage() {
                 {/* Jami daromad */}
                 <Card className="flex flex-col justify-between min-h-[120px] p-6 relative">
                   <div className="flex items-start justify-between">
-                    <span className="text-[13px] text-[#707070] font-medium">{t("pages.partner.total_earned")}</span>
+                    <span className="text-[13px] text-[#707070] font-medium">{t("partner.total_earned")}</span>
                     <div className="h-8 w-8 rounded-full bg-[#F0F0F0] flex items-center justify-center text-black">
                       <DollarSign size={14} />
                     </div>
                   </div>
                   <div className="mt-3">
                     <div className="text-[28px] font-semibold text-black leading-none">{totalEarned}</div>
-                    <div className="mt-1.5 text-[10px] text-[#707070]">{t("pages.partner.total_earned_desc")}</div>
+                    <div className="mt-1.5 text-[10px] text-[#707070]">{t("partner.total_earned_desc")}</div>
                   </div>
                 </Card>
 
                 {/* Taklif etilgan mijozlar */}
-                <Card className="flex flex-col justify-between min-h-[120px] p-6 relative cursor-pointer group" onClick={() => setActiveTab("referrals")}>
+                <Card className="flex flex-col justify-between min-h-[120px] p-6 relative cursor-pointer group" onClick={() => changeTab("referrals")}>
                   <div className="flex items-start justify-between">
-                    <span className="text-[13px] text-[#707070] font-medium">{t("pages.partner.referrals_count")}</span>
+                    <span className="text-[13px] text-[#707070] font-medium">{t("partner.referrals_count")}</span>
                     <div className="h-8 w-8 rounded-full bg-[#F0F0F0] group-hover:bg-[#C7F33C] flex items-center justify-center text-black transition-colors">
                       <ArrowUpRight size={14} />
                     </div>
                   </div>
                   <div className="mt-3">
                     <div className="text-[28px] font-semibold text-black leading-none">{referralsCount}</div>
-                    <div className="mt-1.5 text-[10px] text-[#707070]">{t("pages.partner.referrals_count_desc")}</div>
+                    <div className="mt-1.5 text-[10px] text-[#707070]">{t("partner.referrals_count_desc")}</div>
                   </div>
                 </Card>
               </div>
@@ -170,37 +192,37 @@ export default function PartnerPage() {
                   <div className="flex items-center gap-3">
                     <div className="bg-[#3B82F6] text-white flex items-center gap-1 text-[10px] font-bold px-2.5 py-1 rounded-full uppercase shadow-sm">
                       <Check size={11} strokeWidth={3} />
-                      <span>{t("pages.partner.status_pro")}</span>
+                      <span>{t("partner.status_pro")}</span>
                     </div>
                     
                     <div className="flex items-center gap-1.5">
-                      <span className="text-[13px] font-semibold text-black">{t("pages.partner.status_label")}</span>
-                      <span className="text-[13px] font-bold text-[#10B981]">{t("pages.partner.status_active")}</span>
-                      <button onClick={() => setIsAlertOpen(true)} className="text-[#A0A0A0] hover:text-black">
+                      <span className="text-[13px] font-semibold text-black">{t("partner.status_label")}</span>
+                      <span className="text-[13px] font-bold text-[#10B981]">{t("partner.status_active")}</span>
+                      <button onClick={() => setIsAlertOpen(true)} className="text-[#A0A0A0] hover:text-black bg-transparent border-none cursor-pointer">
                         <HelpCircle size={14} />
                       </button>
                     </div>
                   </div>
 
                   <div className="text-[11px] text-[#707070]">
-                    {t("pages.partner.monthly_payout_info")}
+                    {t("partner.monthly_payout_info")}
                   </div>
                 </div>
 
                 <div className="pt-6">
                   <div className="flex items-center gap-2">
-                    <span className="text-[22px] font-bold text-black leading-none">{t("pages.partner.commission_rate")}</span>
-                    <span className="text-[13px] font-semibold text-black">{t("pages.partner.commission_duration")}</span>
+                    <span className="text-[22px] font-bold text-black leading-none">{t("partner.commission_rate")}</span>
+                    <span className="text-[13px] font-semibold text-black">{t("partner.commission_duration")}</span>
                   </div>
                   <p className="text-[12px] text-[#707070] mt-2 leading-relaxed max-w-[580px]">
-                    {t("pages.partner.commission_desc")}
+                    {t("partner.commission_desc")}
                   </p>
                 </div>
               </Card>
 
               {/* Referral Link copy block */}
               <Card className="p-6">
-                <h4 className="text-[11px] font-bold text-[#707070] uppercase tracking-wider mb-2.5">{t("pages.partner.your_ref_link")}</h4>
+                <h4 className="text-[11px] font-bold text-[#707070] uppercase tracking-wider mb-2.5">{t("partner.your_ref_link")}</h4>
                 
                 <div className="flex items-center gap-2 w-full">
                   <div className="flex-1 bg-[#F5F5F5] rounded-[18px] border border-[#E5E5E5] px-4 py-3 text-[12px] text-black font-medium select-all truncate">
@@ -214,19 +236,19 @@ export default function PartnerPage() {
                     {copied ? (
                       <>
                         <Check size={14} />
-                        <span className="hidden sm:inline">{t("pages.partner.copied_btn")}</span>
+                        <span className="hidden sm:inline">{t("partner.copied_btn")}</span>
                       </>
                     ) : (
                       <>
                         <Copy size={14} />
-                        <span className="hidden sm:inline">{t("pages.partner.copy_btn")}</span>
+                        <span className="hidden sm:inline">{t("partner.copy_btn")}</span>
                       </>
                     )}
                   </Button>
                 </div>
 
                 <p className="text-[11px] text-[#707070] mt-3.5 leading-relaxed">
-                  {t("pages.partner.ref_link_desc")}
+                  {t("partner.ref_link_desc")}
                 </p>
               </Card>
             </div>
@@ -234,20 +256,30 @@ export default function PartnerPage() {
 
           {activeTab === "referrals" && (
             <Card className="overflow-hidden p-0">
-              <div className="p-6 border-b border-[#F0F0F0]">
-                <h3 className="text-[16px] font-semibold text-black">{t("pages.partner.history_title")}</h3>
-                <p className="text-[11px] text-[#707070] mt-1">{t("pages.partner.history_desc")}</p>
+              <div className="p-6 border-b border-[#F0F0F0] flex items-center justify-between gap-4">
+                <div>
+                  <h3 className="text-[16px] font-semibold text-black">{t("partner.history_title")}</h3>
+                  <p className="text-[11px] text-[#707070] mt-1">{t("partner.history_desc")}</p>
+                </div>
+                <Button 
+                  onClick={() => changeTab("home")} 
+                  variant="secondary"
+                  className="flex items-center gap-1.5 px-4 py-2 rounded-full text-[11px] font-bold"
+                >
+                  <ArrowLeft size={13} />
+                  <span>{t("common.back") || "Orqaga"}</span>
+                </Button>
               </div>
 
               <div className="overflow-x-auto">
                 <table className="w-full text-left border-collapse">
                   <thead>
                     <tr className="border-b border-[#F0F0F0] text-[10px] font-bold text-[#707070] uppercase tracking-wider bg-[#F9F9F7]">
-                      <th className="py-3 px-6">{t("pages.partner.table_client")}</th>
-                      <th className="py-3 px-6">{t("pages.partner.table_date")}</th>
-                      <th className="py-3 px-6">{t("pages.partner.table_plan")}</th>
-                      <th className="py-3 px-6">{t("pages.partner.table_commission")}</th>
-                      <th className="py-3 px-6 text-right">{t("pages.partner.table_status")}</th>
+                      <th className="py-3 px-6">{t("partner.table_client")}</th>
+                      <th className="py-3 px-6">{t("partner.table_date")}</th>
+                      <th className="py-3 px-6">{t("partner.table_plan")}</th>
+                      <th className="py-3 px-6">{t("partner.table_commission")}</th>
+                      <th className="py-3 px-6 text-right">{t("partner.table_status")}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -256,8 +288,8 @@ export default function PartnerPage() {
                         <td colSpan={5} className="py-16 text-center">
                           <div className="flex flex-col items-center gap-2">
                             <Users size={32} strokeWidth={1.5} className="text-[#D8D8D8]" />
-                            <p className="text-[13px] text-[#707070]">{t("pages.partner.no_referrals")}</p>
-                            <p className="text-[11px] text-[#A0A0A0]">{t("pages.partner.no_referrals_sub")}</p>
+                            <p className="text-[13px] text-[#707070]">{t("partner.no_referrals")}</p>
+                            <p className="text-[11px] text-[#A0A0A0]">{t("partner.no_referrals_sub")}</p>
                           </div>
                         </td>
                       </tr>
@@ -284,7 +316,7 @@ export default function PartnerPage() {
                             ref.status === "Faol" ? "bg-[#10B981]" : "bg-yellow-400"
                           }`} />
                           <span className="text-[11px] font-medium">
-                            {ref.status === "Faol" ? t("pages.partner.status_active") : t("pages.partner.status_pending")}
+                            {ref.status === "Faol" ? t("partner.status_active") : t("partner.status_pending")}
                           </span>
                         </td>
                       </tr>
@@ -300,8 +332,8 @@ export default function PartnerPage() {
       <AlertModal
         isOpen={isAlertOpen}
         onClose={() => setIsAlertOpen(false)}
-        title={t("pages.partner.modal_title")}
-        message={t("pages.partner.modal_message")}
+        title={t("partner.modal_title")}
+        message={t("partner.modal_message")}
       />
     </AppLayout>
   );

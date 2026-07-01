@@ -46,25 +46,7 @@ export function TopBar() {
   const { t, lang, setLang } = useI18n();
   const pathname = usePathname();
 
-  const [activePartnerTab, setActivePartnerTab] = useState<"home" | "referrals">("home");
 
-  useEffect(() => {
-    const handleTabChange = (e: Event) => {
-      const customEvent = e as CustomEvent<"home" | "referrals">;
-      if (customEvent.detail) {
-        setActivePartnerTab(customEvent.detail);
-      }
-    };
-    window.addEventListener("sendly-partner-tab-change", handleTabChange as EventListener);
-    return () => {
-      window.removeEventListener("sendly-partner-tab-change", handleTabChange as EventListener);
-    };
-  }, []);
-
-  const handlePartnerTabClick = (tab: "home" | "referrals") => {
-    setActivePartnerTab(tab);
-    window.dispatchEvent(new CustomEvent("sendly-partner-tab-change", { detail: tab }));
-  };
 
   // Dropdown states
   const [isLangOpen, setIsLangOpen] = useState(false);
@@ -352,33 +334,7 @@ export function TopBar() {
 
       {/* Action buttons */}
       <div className="flex items-center gap-3">
-        {/* Partner Page tab buttons next to AI Balans shape */}
-        {pathname.startsWith("/partner") && (
-          <div className="flex items-center gap-1.5 sm:gap-2">
-            <button
-              onClick={() => handlePartnerTabClick("home")}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] sm:text-[12px] font-bold h-[32px] sm:h-[38px] transition-all select-none border cursor-pointer ${
-                activePartnerTab === "home"
-                  ? "bg-black text-[#C7F33C] border-black shadow-xs font-black"
-                  : "bg-white hover:bg-[#F9F9F7] text-[#595959] hover:text-black border-[#E8E8E8]"
-              }`}
-            >
-              <Home size={13} />
-              <span>{t("partner.home_tab")}</span>
-            </button>
-            <button
-              onClick={() => handlePartnerTabClick("referrals")}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] sm:text-[12px] font-bold h-[32px] sm:h-[38px] transition-all select-none border cursor-pointer ${
-                activePartnerTab === "referrals"
-                  ? "bg-black text-[#C7F33C] border-black shadow-xs font-black"
-                  : "bg-white hover:bg-[#F9F9F7] text-[#595959] hover:text-black border-[#E8E8E8]"
-              }`}
-            >
-              <Users size={13} />
-              <span>{t("partner.referrals_tab")}</span>
-            </button>
-          </div>
-        )}
+
         {/* Date picker (Homepage & Analytics) */}
         {(pathname === "/" || pathname.startsWith("/analytics")) && (
           <div className="hidden sm:block relative mr-1" ref={dateRef}>
