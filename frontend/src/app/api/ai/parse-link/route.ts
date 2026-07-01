@@ -73,7 +73,7 @@ function cleanYouTubeTranscript(rawText: string): string {
 }
 
 export async function POST(request: Request) {
-  let userId: string | null = null;
+  let userId: string = "";
   const creditCost = 50; // flat cost of 50 credits
   let didDeduct = false;
   let targetUrl = "";

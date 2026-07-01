@@ -26,6 +26,63 @@ export function ConnectChannelModal() {
   const [tgName, setTgName] = useState("");
   const [tgUsername, setTgUsername] = useState("");
 
+  // Input validation states
+  const [tgTokenError, setTgTokenError] = useState("");
+  const [customMetaPageIdError, setCustomMetaPageIdError] = useState("");
+  const [customMetaAppIdError, setCustomMetaAppIdError] = useState("");
+  const [customMetaUsernameError, setCustomMetaUsernameError] = useState("");
+
+  const validateTgToken = (val: string) => {
+    if (!val) {
+      setTgTokenError("");
+      return;
+    }
+    const tokenRegex = /^[0-9]+:[a-zA-Z0-9_-]+$/;
+    if (!tokenRegex.test(val)) {
+      setTgTokenError("Token formati noto'g'ri (masalan: 123456789:ABC-def123)");
+    } else {
+      setTgTokenError("");
+    }
+  };
+
+  const validateCustomMetaPageId = (val: string) => {
+    if (!val) {
+      setCustomMetaPageIdError("");
+      return;
+    }
+    if (!/^[0-9]+$/.test(val)) {
+      setCustomMetaPageIdError("ID faqat raqamlardan iborat bo'lishi kerak!");
+    } else {
+      setCustomMetaPageIdError("");
+    }
+  };
+
+  const validateCustomMetaAppId = (val: string) => {
+    if (!val) {
+      setCustomMetaAppIdError("");
+      return;
+    }
+    if (!/^[0-9]+$/.test(val)) {
+      setCustomMetaAppIdError("Ilova ID faqat raqamlardan iborat bo'lishi kerak!");
+    } else {
+      setCustomMetaAppIdError("");
+    }
+  };
+
+  const validateCustomMetaUsername = (val: string) => {
+    if (!val) {
+      setCustomMetaUsernameError("");
+      return;
+    }
+    if (!val.startsWith("@")) {
+      setCustomMetaUsernameError("Foydalanuvchi nomi @ bilan boshlanishi kerak!");
+    } else if (val.length < 3) {
+      setCustomMetaUsernameError("Foydalanuvchi nomi juda qisqa!");
+    } else {
+      setCustomMetaUsernameError("");
+    }
+  };
+
   // Alert modal state
   const [alertOpen, setAlertOpen] = useState(false);
   const [alertTitle, setAlertTitle] = useState("");
@@ -99,6 +156,22 @@ export function ConnectChannelModal() {
       setOAuthWaiting(false);
     }
   }, [modal]);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        if (alertOpen) {
+          setAlertOpen(false);
+        } else if (modal !== null) {
+          setModal(null);
+        }
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [modal, alertOpen]);
 
   const handleInstagramLogin = async () => {
     const currentUser = db.getCurrentUser();
@@ -391,33 +464,54 @@ export function ConnectChannelModal() {
                 <input
                   type="text"
                   value={customMetaPageId}
-                  onChange={(e) => setCustomMetaPageId(e.target.value)}
+                  onChange={(e) => {
+                    setCustomMetaPageId(e.target.value);
+                    validateCustomMetaPageId(e.target.value);
+                  }}
+                  onBlur={(e) => validateCustomMetaPageId(e.target.value)}
                   placeholder="Masalan: 17841401234567890"
                   required
-                  className="w-full rounded-[10px] border border-[#D8D8D8] px-3.5 py-2 text-[12px] focus:outline-none focus:border-black font-semibold text-black bg-white"
+                  className={`w-full rounded-[10px] border px-3.5 py-2 text-[12px] focus:outline-none transition-all font-semibold text-black bg-white ${customMetaPageIdError ? "border-red-500 focus:border-red-500" : "border-[#D8D8D8] focus:border-black"}`}
                 />
+                {customMetaPageIdError && (
+                  <span className="text-[10px] text-red-500 font-semibold">{customMetaPageIdError}</span>
+                )}
               </div>
               <div className="flex flex-col gap-1">
                 <label className="text-[10px] font-bold text-[#707070] uppercase tracking-wide">Instagram foydalanuvchi nomi</label>
                 <input
                   type="text"
                   value={customMetaUsername}
-                  onChange={(e) => setCustomMetaUsername(e.target.value)}
+                  onChange={(e) => {
+                    setCustomMetaUsername(e.target.value);
+                    validateCustomMetaUsername(e.target.value);
+                  }}
+                  onBlur={(e) => validateCustomMetaUsername(e.target.value)}
                   placeholder="Masalan: @my_business_page"
                   required
-                  className="w-full rounded-[10px] border border-[#D8D8D8] px-3.5 py-2 text-[12px] focus:outline-none focus:border-black font-semibold text-black bg-white"
+                  className={`w-full rounded-[10px] border px-3.5 py-2 text-[12px] focus:outline-none transition-all font-semibold text-black bg-white ${customMetaUsernameError ? "border-red-500 focus:border-red-500" : "border-[#D8D8D8] focus:border-black"}`}
                 />
+                {customMetaUsernameError && (
+                  <span className="text-[10px] text-red-500 font-semibold">{customMetaUsernameError}</span>
+                )}
               </div>
               <div className="flex flex-col gap-1">
                 <label className="text-[10px] font-bold text-[#707070] uppercase tracking-wide">Meta ilova ID (ID)</label>
                 <input
                   type="text"
                   value={customMetaAppId}
-                  onChange={(e) => setCustomMetaAppId(e.target.value)}
+                  onChange={(e) => {
+                    setCustomMetaAppId(e.target.value);
+                    validateCustomMetaAppId(e.target.value);
+                  }}
+                  onBlur={(e) => validateCustomMetaAppId(e.target.value)}
                   placeholder="Masalan: 485912345678901"
                   required
-                  className="w-full rounded-[10px] border border-[#D8D8D8] px-3.5 py-2 text-[12px] focus:outline-none focus:border-black font-semibold text-black bg-white"
+                  className={`w-full rounded-[10px] border px-3.5 py-2 text-[12px] focus:outline-none transition-all font-semibold text-black bg-white ${customMetaAppIdError ? "border-red-500 focus:border-red-500" : "border-[#D8D8D8] focus:border-black"}`}
                 />
+                {customMetaAppIdError && (
+                  <span className="text-[10px] text-red-500 font-semibold">{customMetaAppIdError}</span>
+                )}
               </div>
               <div className="flex flex-col gap-1">
                 <label className="text-[10px] font-bold text-[#707070] uppercase tracking-wide">Meta ilova maxfiy kaliti (Secret)</label>
@@ -562,12 +656,19 @@ export function ConnectChannelModal() {
             <div className="px-6 py-5 flex flex-col gap-4">
               <div className="flex flex-col gap-1.5">
                 <label className="text-[10px] font-bold text-[#707070] uppercase tracking-widest">{t("pages.settings_page.bot_token_label")}</label>
-                <input
+                 <input
                   value={tgToken}
-                  onChange={(e) => setTgToken(e.target.value)}
+                  onChange={(e) => {
+                    setTgToken(e.target.value);
+                    validateTgToken(e.target.value);
+                  }}
+                  onBlur={(e) => validateTgToken(e.target.value)}
                   placeholder="1234567890:ABCdefGhIJKlmNoPQRsTUVwxyZ"
-                  className="w-full rounded-[12px] bg-[#F0F0F0] px-4 py-3 text-[12px] text-black outline-none focus:bg-[#e8e8e8] transition-colors font-mono"
+                  className={`w-full rounded-[12px] px-4 py-3 text-[12px] text-black outline-none transition-all font-mono border bg-[#F0F0F0] ${tgTokenError ? "border-red-500 focus:bg-red-50/10" : "border-transparent focus:bg-[#e8e8e8]"}`}
                 />
+                {tgTokenError && (
+                  <span className="text-[10px] text-red-500 font-semibold mt-1">{tgTokenError}</span>
+                )}
               </div>
 
               <div className="p-3 rounded-[12px] bg-[#F9F9F7] border border-[#E8E8E8] flex flex-col gap-2">

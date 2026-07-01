@@ -63,3 +63,7 @@ export function checkRateLimit(identifier: string, windowMs: number, max: number
   entry.count++;
   return { allowed: true, retryAfter: 0 };
 }
+
+export function checkOtpIpLimit(ip: string): { allowed: boolean; retryAfter: number } {
+  return checkRateLimit(`otp_ip_limit_${ip}`, 5 * 60 * 1000, 5);
+}

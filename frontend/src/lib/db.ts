@@ -160,8 +160,8 @@ export function sha256Sync(str: string): string {
       w[j] = words[i + j];
     }
     for (j = 16; j < 64; j++) {
-      const s0 = rightRotate(w[j - 15], 7) ^ rightRotate(w[j - 15], 18) ^ (w[j - 15] >>> 3);
-      const s1 = rightRotate(w[j - 2], 17) ^ rightRotate(w[j - 2], 19) ^ (w[j - 2] >>> 10);
+      const s0: number = rightRotate(w[j - 15], 7) ^ rightRotate(w[j - 15], 18) ^ (w[j - 15] >>> 3);
+      const s1: number = rightRotate(w[j - 2], 17) ^ rightRotate(w[j - 2], 19) ^ (w[j - 2] >>> 10);
       w[j] = (w[j - 16] + s0 + w[j - 7] + s1) | 0;
     }
 
@@ -344,13 +344,20 @@ if (isClient && window.localStorage) {
 }
 
 let isSyncingSuspended = false;
+let syncTimeoutId: any = null;
 
 const notifyUpdate = () => {
   if (isClient) {
     window.dispatchEvent(new Event("replai-db-update"));
     if (isSyncingSuspended) return;
-    // Auto-save database state to the server asynchronously
-    setTimeout(async () => {
+    
+    // Debounce database state saves to the server (Issue 1)
+    if (syncTimeoutId) {
+      clearTimeout(syncTimeoutId);
+    }
+    
+    syncTimeoutId = setTimeout(async () => {
+      syncTimeoutId = null;
       if (isSyncingSuspended) return;
       if (typeof db !== "undefined" && db.saveToServer) {
         const res = await db.saveToServer();
@@ -358,7 +365,7 @@ const notifyUpdate = () => {
           window.dispatchEvent(new CustomEvent("replai-db-error", { detail: res.error }));
         }
       }
-    }, 50);
+    }, 1000); // 1-second debounce (prevents API hammering)
   }
 };
 
@@ -368,17 +375,6 @@ function safeParse<T>(jsonString: string | null, fallback: T): T {
   try {
     const parsed = JSON.parse(jsonString);
     if (parsed === null || parsed === undefined) return fallback;
-    if (Array.isArray(fallback)) {
-      if (!Array.isArray(parsed)) {
-        return fallback;
-      }
-      return parsed.filter((item: unknown) => item !== null && item !== undefined) as unknown as T;
-    }
-    if (fallback !== null && typeof fallback === "object") {
-      if (typeof parsed !== "object" || Array.isArray(parsed)) {
-        return fallback;
-      }
-    }
     return parsed as T;
   } catch (e) {
     console.error("Failed to parse JSON", jsonString, e);
@@ -386,8 +382,8 @@ function safeParse<T>(jsonString: string | null, fallback: T): T {
   }
 }
 
-// DB version — bump this to force-clear old localStorage data
-const DB_VERSION = "v11"; // Bump to clear potentially corrupted states
+// DB version — bump this to force-clear old localStorage data (Issue 13)
+const DB_VERSION = "v12"; // Bump to clear potentially corrupted states
 if (isClient && localStorage.getItem("replai_db_version") !== DB_VERSION) {
   localStorage.removeItem("replai_automations");
   localStorage.removeItem("replai_contacts");

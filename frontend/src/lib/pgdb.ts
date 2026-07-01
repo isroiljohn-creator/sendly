@@ -23,6 +23,24 @@ function getPool(): Pool {
   return _pool;
 }
 
+export async function executeTransaction<T>(
+  callback: (client: any) => Promise<T>
+): Promise<T> {
+  const pool = getPool();
+  const client = await pool.connect();
+  try {
+    await client.query("BEGIN");
+    const result = await callback(client);
+    await client.query("COMMIT");
+    return result;
+  } catch (e) {
+    await client.query("ROLLBACK");
+    throw e;
+  } finally {
+    client.release();
+  }
+}
+
 // ─── Table Init ──────────────────────────────────────────────────────────────
 let _initialized = false;
 
@@ -34,16 +52,43 @@ export async function initDb(): Promise<void> {
       key   VARCHAR(500) PRIMARY KEY,
       value JSONB        NOT NULL DEFAULT '{}'
     );
+    CREATE INDEX IF NOT EXISTS idx_kv_store_value_gin ON kv_store USING gin (value);
+
+    CREATE TABLE IF NOT EXISTS credit_ledger (
+      id          SERIAL PRIMARY KEY,
+      user_id     VARCHAR(255) NOT NULL,
+      action_type VARCHAR(50) NOT NULL,
+      amount      INTEGER NOT NULL,
+      description TEXT,
+      created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
+    CREATE INDEX IF NOT EXISTS idx_credit_ledger_user ON credit_ledger(user_id);
   `);
   _initialized = true;
+}
+
+export async function logCreditTransaction(
+  userId: string,
+  actionType: string,
+  amount: number,
+  description: string
+): Promise<void> {
+  if (!isConfigured()) return;
+  await initDb();
+  await getPool().query(
+    `INSERT INTO credit_ledger (user_id, action_type, amount, description)
+     VALUES ($1, $2, $3, $4)`,
+    [userId, actionType, amount, description]
+  );
 }
 
 // ─── Core CRUD ───────────────────────────────────────────────────────────────
 
 /** Read a single value by key. Returns null if not found. */
-export async function getValue(key: string): Promise<any | null> {
+export async function getValue(key: string, client?: any): Promise<any | null> {
   await initDb();
-  const { rows } = await getPool().query(
+  const runner = client || getPool();
+  const { rows } = await runner.query(
     "SELECT value FROM kv_store WHERE key = $1",
     [key]
   );
@@ -51,9 +96,10 @@ export async function getValue(key: string): Promise<any | null> {
 }
 
 /** Write (upsert) a value. value should be a plain JS object/array. */
-export async function setValue(key: string, value: unknown): Promise<void> {
+export async function setValue(key: string, value: unknown, client?: any): Promise<void> {
   await initDb();
-  await getPool().query(
+  const runner = client || getPool();
+  await runner.query(
     `INSERT INTO kv_store (key, value)
      VALUES ($1, $2::jsonb)
      ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value`,
@@ -62,9 +108,10 @@ export async function setValue(key: string, value: unknown): Promise<void> {
 }
 
 /** Delete a key. */
-export async function deleteValue(key: string): Promise<void> {
+export async function deleteValue(key: string, client?: any): Promise<void> {
   await initDb();
-  await getPool().query("DELETE FROM kv_store WHERE key = $1", [key]);
+  const runner = client || getPool();
+  await runner.query("DELETE FROM kv_store WHERE key = $1", [key]);
 }
 
 /** Get all rows (used by admin). */
@@ -90,10 +137,12 @@ export async function getAllLike(
 
 /** Get all rows where key does NOT match a pattern and key LIKE another pattern */
 export async function getAllSettingsExcept(
-  excludeUserId: string
+  excludeUserId: string,
+  client?: any
 ): Promise<Array<{ key: string; value: any }>> {
   await initDb();
-  const { rows } = await getPool().query(
+  const runner = client || getPool();
+  const { rows } = await runner.query(
     `SELECT key, value FROM kv_store
      WHERE key LIKE 'global_settings_%'
        AND key != $1`,

@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
+import { toast } from "sonner";
 import { usePathname } from "next/navigation";
 import {
   Bell,
@@ -72,7 +73,7 @@ export function TopBar() {
             } catch {}
           }
         }
-        db.getAiCreditsFromServer(user.id).then((data) => {
+        db.getAiCreditsFromServer(user.id || "").then((data) => {
           if (data) setCredits(data);
         });
       }
@@ -136,7 +137,7 @@ export function TopBar() {
     if (code === "uz" || code === "ru" || code === "en") {
       setLang(code as Lang);
     } else {
-      alert(t("nav.lang_soon"));
+      toast.info(t("nav.lang_soon"));
     }
     setIsLangSubOpen(false);
   };
@@ -158,8 +159,8 @@ export function TopBar() {
         {activeChannel.type === "instagram" ? <Instagram size={11} className="text-white" /> : <Bot size={11} className="text-white" />}
       </div>
       <span className="text-[12px] font-bold text-black">{activeChannel.username.startsWith("@") ? activeChannel.username : `@${activeChannel.username}`}</span>
-      <span className="text-[11px] text-[#707070] font-medium">ulangan</span>
-      <span className="text-[10px] text-[#A0A0A0] font-bold ml-1">O&apos;zgartirish ▾</span>
+      <span className="text-[11px] text-[#707070] font-medium">{t("nav.connected")}</span>
+      <span className="text-[10px] text-[#A0A0A0] font-bold ml-1">{t("nav.change")} ▾</span>
     </div>
   ) : null;
 
@@ -170,7 +171,7 @@ export function TopBar() {
         <button 
           onClick={() => window.dispatchEvent(new Event("replai-toggle-mobile-menu"))}
           className="p-1.5 -ml-1 text-black hover:bg-neutral-100 rounded-full active:scale-95 transition-all shrink-0"
-          title="Menyu"
+          title={t("nav.menu")}
         >
           <Menu size={20} />
         </button>
@@ -188,9 +189,9 @@ export function TopBar() {
               value={activeChannelId}
               onChange={handleChannelChange}
               options={channelOptions}
-              placeholder="Akkaunt tanlang..."
+              placeholder={t("nav.select_account")}
               className="w-56"
-              footerLabel="Akkaunt qo'shish"
+              footerLabel={t("nav.add_account")}
               onFooterClick={() => window.dispatchEvent(new Event("replai-open-connect-modal"))}
               trigger={customTrigger}
             />

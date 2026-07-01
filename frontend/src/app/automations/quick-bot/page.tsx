@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
+import { toast } from "sonner";
 import { 
   ArrowLeft, 
   Plus, 
@@ -427,7 +428,7 @@ export default function QuickBotWizardPage() {
 
   const handleRefreshTgChannels = async () => {
     if (!selectedChannel || selectedChannel.type !== "telegram" || !selectedChannel.telegramToken) {
-      alert("Iltimos, avval bot tokeni mavjud bo'lgan Telegram akkauntini tanlang.");
+      toast.error("Iltimos, avval bot tokeni mavjud bo'lgan Telegram akkauntini tanlang.");
       return;
     }
     setRefreshingTg(true);
@@ -472,19 +473,19 @@ export default function QuickBotWizardPage() {
             const updatedChannels = channels.map(c => c.id === selectedChannel.id ? selectedChannel : c);
             db.saveChannels(updatedChannels);
             setChannels(updatedChannels);
-            alert("Yangi Telegram kanallari muvaffaqiyatli yuklandi! 🎉");
+            toast.success("Yangi Telegram kanallari muvaffaqiyatli yuklandi! 🎉");
           } else {
-            alert("Yangi kanallar topilmadi. Bot ushbu kanalga administrator sifatida qo'shilganiga va unda yangi harakat bo'lganiga ishonch hosil qiling.");
+            toast.error("Yangi kanallar topilmadi. Bot ushbu kanalga administrator sifatida qo'shilganiga va unda yangi harakat bo'lganiga ishonch hosil qiling.");
           }
         } else {
-          alert("Telegram getUpdates so'rovidan noto'g'ri javob olindi.");
+          toast.error("Telegram getUpdates so'rovidan noto'g'ri javob olindi.");
         }
       } else {
-        alert("Telegram API bilan bog'lanishda xatolik yuz berdi. Bot tokeni to'g'riligini tekshiring.");
+        toast.error("Telegram API bilan bog'lanishda xatolik yuz berdi. Bot tokeni to'g'riligini tekshiring.");
       }
     } catch (err) {
       console.error("Failed to refresh tg channels:", err);
-      alert("Xatolik yuz berdi: " + (err instanceof Error ? err.message : String(err)));
+      toast.error("Xatolik yuz berdi: " + (err instanceof Error ? err.message : String(err)));
     } finally {
       setRefreshingTg(false);
     }
@@ -548,7 +549,7 @@ export default function QuickBotWizardPage() {
 
   const handleCreateBot = () => {
     if (!selectedChannel) {
-      alert("Iltimos, avval akkauntni tanlang.");
+      toast.error("Iltimos, avval akkauntni tanlang.");
       return;
     }
     

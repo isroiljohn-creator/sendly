@@ -30,7 +30,7 @@ const HTML_TEMPLATE = (otp: string) => `
   </div>
 `;
 
-import { generateAndSaveOtp, checkRateLimit } from "@/lib/otpStore";
+import { generateAndSaveOtp, checkRateLimit, checkOtpIpLimit } from "@/lib/otpStore";
 
 export async function POST(request: Request) {
   try {
@@ -52,11 +52,11 @@ export async function POST(request: Request) {
       );
     }
 
-    // Rate Limiting per IP: Max 10 requests per 10 minutes (using secure IP extraction)
+    // Rate Limiting per IP: Max 5 requests per 5 minutes (using checkOtpIpLimit)
     const rawIp = request.headers.get("x-real-ip") || request.headers.get("x-forwarded-for") || "unknown";
     const ip = rawIp.split(",")[0].trim();
     
-    const ipLimit = checkRateLimit(`ip_${ip}`, 10 * 60 * 1000, 10);
+    const ipLimit = checkOtpIpLimit(ip);
     if (!ipLimit.allowed) {
       return NextResponse.json(
         { success: false, error: `Ko'p so'rov yuborildi. Iltimos ${ipLimit.retryAfter} soniyadan so'ng qayta urinib ko'ring.` },

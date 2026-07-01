@@ -1954,6 +1954,76 @@
       "norm_label": "extends"
     },
     {
+      "label": "rules",
+      "file_type": "code",
+      "source_file": "frontend/.eslintrc.json",
+      "source_location": "L3",
+      "_origin": "ast",
+      "id": "frontend_eslintrc_rules",
+      "community": 64,
+      "norm_label": "rules"
+    },
+    {
+      "label": "@typescript-eslint/no-unused-vars",
+      "file_type": "code",
+      "source_file": "frontend/.eslintrc.json",
+      "source_location": "L4",
+      "_origin": "ast",
+      "id": "frontend_eslintrc_rules_typescript_eslint_no_unused_vars",
+      "community": 64,
+      "norm_label": "@typescript-eslint/no-unused-vars"
+    },
+    {
+      "label": "@typescript-eslint/no-explicit-any",
+      "file_type": "code",
+      "source_file": "frontend/.eslintrc.json",
+      "source_location": "L5",
+      "_origin": "ast",
+      "id": "frontend_eslintrc_rules_typescript_eslint_no_explicit_any",
+      "community": 64,
+      "norm_label": "@typescript-eslint/no-explicit-any"
+    },
+    {
+      "label": "react/no-unescaped-entities",
+      "file_type": "code",
+      "source_file": "frontend/.eslintrc.json",
+      "source_location": "L6",
+      "_origin": "ast",
+      "id": "frontend_eslintrc_rules_react_no_unescaped_entities",
+      "community": 64,
+      "norm_label": "react/no-unescaped-entities"
+    },
+    {
+      "label": "prefer-const",
+      "file_type": "code",
+      "source_file": "frontend/.eslintrc.json",
+      "source_location": "L7",
+      "_origin": "ast",
+      "id": "frontend_eslintrc_rules_prefer_const",
+      "community": 64,
+      "norm_label": "prefer-const"
+    },
+    {
+      "label": "react-hooks/exhaustive-deps",
+      "file_type": "code",
+      "source_file": "frontend/.eslintrc.json",
+      "source_location": "L8",
+      "_origin": "ast",
+      "id": "frontend_eslintrc_rules_react_hooks_exhaustive_deps",
+      "community": 64,
+      "norm_label": "react-hooks/exhaustive-deps"
+    },
+    {
+      "label": "@next/next/no-img-element",
+      "file_type": "code",
+      "source_file": "frontend/.eslintrc.json",
+      "source_location": "L9",
+      "_origin": "ast",
+      "id": "frontend_eslintrc_rules_next_next_no_img_element",
+      "community": 64,
+      "norm_label": "@next/next/no-img-element"
+    },
+    {
       "label": "check-db.js",
       "file_type": "code",
       "source_file": "frontend/check-db.js",
@@ -2030,7 +2100,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "frontend_package",
-      "community": 14,
+      "community": 83,
       "norm_label": "package.json"
     },
     {
@@ -2040,7 +2110,7 @@
       "source_location": "L2",
       "_origin": "ast",
       "id": "frontend_package_name",
-      "community": 14,
+      "community": 83,
       "norm_label": "name"
     },
     {
@@ -2050,7 +2120,7 @@
       "source_location": "L3",
       "_origin": "ast",
       "id": "frontend_package_version",
-      "community": 14,
+      "community": 83,
       "norm_label": "version"
     },
     {
@@ -2060,7 +2130,7 @@
       "source_location": "L4",
       "_origin": "ast",
       "id": "frontend_package_private",
-      "community": 14,
+      "community": 83,
       "norm_label": "private"
     },
     {
@@ -2070,7 +2140,7 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "frontend_package_scripts",
-      "community": 14,
+      "community": 83,
       "norm_label": "scripts"
     },
     {
@@ -2080,7 +2150,7 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "frontend_package_scripts_dev",
-      "community": 14,
+      "community": 83,
       "norm_label": "dev"
     },
     {
@@ -2090,7 +2160,7 @@
       "source_location": "L7",
       "_origin": "ast",
       "id": "frontend_package_scripts_build",
-      "community": 14,
+      "community": 83,
       "norm_label": "build"
     },
     {
@@ -2100,7 +2170,7 @@
       "source_location": "L8",
       "_origin": "ast",
       "id": "frontend_package_scripts_start",
-      "community": 14,
+      "community": 83,
       "norm_label": "start"
     },
     {
@@ -2110,7 +2180,7 @@
       "source_location": "L9",
       "_origin": "ast",
       "id": "frontend_package_scripts_lint",
-      "community": 14,
+      "community": 83,
       "norm_label": "lint"
     },
     {
@@ -2120,7 +2190,7 @@
       "source_location": "L10",
       "_origin": "ast",
       "id": "frontend_package_scripts_backup",
-      "community": 14,
+      "community": 83,
       "norm_label": "backup"
     },
     {
@@ -2414,10 +2484,20 @@
       "norm_label": "@radix-ui/react-tooltip"
     },
     {
-      "label": "class-variance-authority",
+      "label": "bcryptjs",
       "file_type": "code",
       "source_file": "frontend/package.json",
       "source_location": "L41",
+      "_origin": "ast",
+      "id": "frontend_package_dependencies_bcryptjs",
+      "community": 1,
+      "norm_label": "bcryptjs"
+    },
+    {
+      "label": "class-variance-authority",
+      "file_type": "code",
+      "source_file": "frontend/package.json",
+      "source_location": "L42",
       "_origin": "ast",
       "id": "frontend_package_dependencies_class_variance_authority",
       "community": 1,
@@ -2427,7 +2507,7 @@
       "label": "clsx",
       "file_type": "code",
       "source_file": "frontend/package.json",
-      "source_location": "L42",
+      "source_location": "L43",
       "_origin": "ast",
       "id": "frontend_package_dependencies_clsx",
       "community": 1,
@@ -2437,7 +2517,7 @@
       "label": "cmdk",
       "file_type": "code",
       "source_file": "frontend/package.json",
-      "source_location": "L43",
+      "source_location": "L44",
       "_origin": "ast",
       "id": "frontend_package_dependencies_cmdk",
       "community": 1,
@@ -2447,7 +2527,7 @@
       "label": "date-fns",
       "file_type": "code",
       "source_file": "frontend/package.json",
-      "source_location": "L44",
+      "source_location": "L45",
       "_origin": "ast",
       "id": "frontend_package_dependencies_date_fns",
       "community": 1,
@@ -2457,7 +2537,7 @@
       "label": "embla-carousel-react",
       "file_type": "code",
       "source_file": "frontend/package.json",
-      "source_location": "L45",
+      "source_location": "L46",
       "_origin": "ast",
       "id": "frontend_package_dependencies_embla_carousel_react",
       "community": 1,
@@ -2467,7 +2547,7 @@
       "label": "framer-motion",
       "file_type": "code",
       "source_file": "frontend/package.json",
-      "source_location": "L46",
+      "source_location": "L47",
       "_origin": "ast",
       "id": "frontend_package_dependencies_framer_motion",
       "community": 1,
@@ -2477,7 +2557,7 @@
       "label": "i18next",
       "file_type": "code",
       "source_file": "frontend/package.json",
-      "source_location": "L47",
+      "source_location": "L48",
       "_origin": "ast",
       "id": "frontend_package_dependencies_i18next",
       "community": 1,
@@ -2487,7 +2567,7 @@
       "label": "input-otp",
       "file_type": "code",
       "source_file": "frontend/package.json",
-      "source_location": "L48",
+      "source_location": "L49",
       "_origin": "ast",
       "id": "frontend_package_dependencies_input_otp",
       "community": 1,
@@ -2497,7 +2577,7 @@
       "label": "lucide-react",
       "file_type": "code",
       "source_file": "frontend/package.json",
-      "source_location": "L49",
+      "source_location": "L50",
       "_origin": "ast",
       "id": "frontend_package_dependencies_lucide_react",
       "community": 1,
@@ -2507,7 +2587,7 @@
       "label": "next",
       "file_type": "code",
       "source_file": "frontend/package.json",
-      "source_location": "L50",
+      "source_location": "L51",
       "_origin": "ast",
       "id": "frontend_package_dependencies_next",
       "community": 1,
@@ -2517,7 +2597,7 @@
       "label": "nodemailer",
       "file_type": "code",
       "source_file": "frontend/package.json",
-      "source_location": "L51",
+      "source_location": "L52",
       "_origin": "ast",
       "id": "frontend_package_dependencies_nodemailer",
       "community": 1,
@@ -2527,7 +2607,7 @@
       "label": "pg",
       "file_type": "code",
       "source_file": "frontend/package.json",
-      "source_location": "L52",
+      "source_location": "L53",
       "_origin": "ast",
       "id": "frontend_package_dependencies_pg",
       "community": 1,
@@ -2537,7 +2617,7 @@
       "label": "puppeteer",
       "file_type": "code",
       "source_file": "frontend/package.json",
-      "source_location": "L53",
+      "source_location": "L54",
       "_origin": "ast",
       "id": "frontend_package_dependencies_puppeteer",
       "community": 1,
@@ -2547,7 +2627,7 @@
       "label": "react",
       "file_type": "code",
       "source_file": "frontend/package.json",
-      "source_location": "L54",
+      "source_location": "L55",
       "_origin": "ast",
       "id": "frontend_package_dependencies_react",
       "community": 1,
@@ -2557,7 +2637,7 @@
       "label": "react-day-picker",
       "file_type": "code",
       "source_file": "frontend/package.json",
-      "source_location": "L55",
+      "source_location": "L56",
       "_origin": "ast",
       "id": "frontend_package_dependencies_react_day_picker",
       "community": 1,
@@ -2567,7 +2647,7 @@
       "label": "react-dom",
       "file_type": "code",
       "source_file": "frontend/package.json",
-      "source_location": "L56",
+      "source_location": "L57",
       "_origin": "ast",
       "id": "frontend_package_dependencies_react_dom",
       "community": 1,
@@ -2577,7 +2657,7 @@
       "label": "react-hook-form",
       "file_type": "code",
       "source_file": "frontend/package.json",
-      "source_location": "L57",
+      "source_location": "L58",
       "_origin": "ast",
       "id": "frontend_package_dependencies_react_hook_form",
       "community": 1,
@@ -2587,7 +2667,7 @@
       "label": "react-i18next",
       "file_type": "code",
       "source_file": "frontend/package.json",
-      "source_location": "L58",
+      "source_location": "L59",
       "_origin": "ast",
       "id": "frontend_package_dependencies_react_i18next",
       "community": 1,
@@ -2597,7 +2677,7 @@
       "label": "react-resizable-panels",
       "file_type": "code",
       "source_file": "frontend/package.json",
-      "source_location": "L59",
+      "source_location": "L60",
       "_origin": "ast",
       "id": "frontend_package_dependencies_react_resizable_panels",
       "community": 1,
@@ -2607,7 +2687,7 @@
       "label": "reactflow",
       "file_type": "code",
       "source_file": "frontend/package.json",
-      "source_location": "L60",
+      "source_location": "L61",
       "_origin": "ast",
       "id": "frontend_package_dependencies_reactflow",
       "community": 1,
@@ -2617,7 +2697,7 @@
       "label": "recharts",
       "file_type": "code",
       "source_file": "frontend/package.json",
-      "source_location": "L61",
+      "source_location": "L62",
       "_origin": "ast",
       "id": "frontend_package_dependencies_recharts",
       "community": 1,
@@ -2627,7 +2707,7 @@
       "label": "resend",
       "file_type": "code",
       "source_file": "frontend/package.json",
-      "source_location": "L62",
+      "source_location": "L63",
       "_origin": "ast",
       "id": "frontend_package_dependencies_resend",
       "community": 1,
@@ -2637,7 +2717,7 @@
       "label": "sonner",
       "file_type": "code",
       "source_file": "frontend/package.json",
-      "source_location": "L63",
+      "source_location": "L64",
       "_origin": "ast",
       "id": "frontend_package_dependencies_sonner",
       "community": 1,
@@ -2647,7 +2727,7 @@
       "label": "tailwind-merge",
       "file_type": "code",
       "source_file": "frontend/package.json",
-      "source_location": "L64",
+      "source_location": "L65",
       "_origin": "ast",
       "id": "frontend_package_dependencies_tailwind_merge",
       "community": 1,
@@ -2657,7 +2737,7 @@
       "label": "vaul",
       "file_type": "code",
       "source_file": "frontend/package.json",
-      "source_location": "L65",
+      "source_location": "L66",
       "_origin": "ast",
       "id": "frontend_package_dependencies_vaul",
       "community": 1,
@@ -2667,7 +2747,7 @@
       "label": "zod",
       "file_type": "code",
       "source_file": "frontend/package.json",
-      "source_location": "L66",
+      "source_location": "L67",
       "_origin": "ast",
       "id": "frontend_package_dependencies_zod",
       "community": 1,
@@ -2677,17 +2757,27 @@
       "label": "devDependencies",
       "file_type": "code",
       "source_file": "frontend/package.json",
-      "source_location": "L68",
+      "source_location": "L69",
       "_origin": "ast",
       "id": "frontend_package_devdependencies",
       "community": 14,
       "norm_label": "devdependencies"
     },
     {
+      "label": "@types/bcryptjs",
+      "file_type": "code",
+      "source_file": "frontend/package.json",
+      "source_location": "L70",
+      "_origin": "ast",
+      "id": "frontend_package_devdependencies_types_bcryptjs",
+      "community": 14,
+      "norm_label": "@types/bcryptjs"
+    },
+    {
       "label": "@types/node",
       "file_type": "code",
       "source_file": "frontend/package.json",
-      "source_location": "L69",
+      "source_location": "L71",
       "_origin": "ast",
       "id": "frontend_package_devdependencies_types_node",
       "community": 14,
@@ -2697,7 +2787,7 @@
       "label": "@types/nodemailer",
       "file_type": "code",
       "source_file": "frontend/package.json",
-      "source_location": "L70",
+      "source_location": "L72",
       "_origin": "ast",
       "id": "frontend_package_devdependencies_types_nodemailer",
       "community": 14,
@@ -2707,7 +2797,7 @@
       "label": "@types/pg",
       "file_type": "code",
       "source_file": "frontend/package.json",
-      "source_location": "L71",
+      "source_location": "L73",
       "_origin": "ast",
       "id": "frontend_package_devdependencies_types_pg",
       "community": 14,
@@ -2717,7 +2807,7 @@
       "label": "@types/react",
       "file_type": "code",
       "source_file": "frontend/package.json",
-      "source_location": "L72",
+      "source_location": "L74",
       "_origin": "ast",
       "id": "frontend_package_devdependencies_types_react",
       "community": 14,
@@ -2727,7 +2817,7 @@
       "label": "@types/react-dom",
       "file_type": "code",
       "source_file": "frontend/package.json",
-      "source_location": "L73",
+      "source_location": "L75",
       "_origin": "ast",
       "id": "frontend_package_devdependencies_types_react_dom",
       "community": 14,
@@ -2737,7 +2827,7 @@
       "label": "eslint",
       "file_type": "code",
       "source_file": "frontend/package.json",
-      "source_location": "L74",
+      "source_location": "L76",
       "_origin": "ast",
       "id": "frontend_package_devdependencies_eslint",
       "community": 14,
@@ -2747,7 +2837,7 @@
       "label": "eslint-config-next",
       "file_type": "code",
       "source_file": "frontend/package.json",
-      "source_location": "L75",
+      "source_location": "L77",
       "_origin": "ast",
       "id": "frontend_package_devdependencies_eslint_config_next",
       "community": 14,
@@ -2757,7 +2847,7 @@
       "label": "postcss",
       "file_type": "code",
       "source_file": "frontend/package.json",
-      "source_location": "L76",
+      "source_location": "L78",
       "_origin": "ast",
       "id": "frontend_package_devdependencies_postcss",
       "community": 14,
@@ -2767,7 +2857,7 @@
       "label": "tailwindcss",
       "file_type": "code",
       "source_file": "frontend/package.json",
-      "source_location": "L77",
+      "source_location": "L79",
       "_origin": "ast",
       "id": "frontend_package_devdependencies_tailwindcss",
       "community": 14,
@@ -2777,7 +2867,7 @@
       "label": "typescript",
       "file_type": "code",
       "source_file": "frontend/package.json",
-      "source_location": "L78",
+      "source_location": "L80",
       "_origin": "ast",
       "id": "frontend_package_devdependencies_typescript",
       "community": 14,
@@ -3090,7 +3180,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "account_page",
-      "community": 16,
+      "community": 5,
       "norm_label": "page.tsx"
     },
     {
@@ -3100,7 +3190,7 @@
       "source_location": "L19",
       "_origin": "ast",
       "id": "account_page_accountpage",
-      "community": 16,
+      "community": 5,
       "norm_label": "accountpage()"
     },
     {
@@ -3257,7 +3347,7 @@
       "label": "LoadingFallback()",
       "file_type": "code",
       "source_file": "frontend/src/app/ai-agent/page.tsx",
-      "source_location": "L6287",
+      "source_location": "L6923",
       "_origin": "ast",
       "id": "ai_agent_page_loadingfallback",
       "community": 49,
@@ -3267,7 +3357,7 @@
       "label": "AIAgentPage()",
       "file_type": "code",
       "source_file": "frontend/src/app/ai-agent/page.tsx",
-      "source_location": "L6296",
+      "source_location": "L6932",
       "_origin": "ast",
       "id": "ai_agent_page_aiagentpage",
       "community": 49,
@@ -3280,7 +3370,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "analytics_page",
-      "community": 5,
+      "community": 16,
       "norm_label": "page.tsx"
     },
     {
@@ -3290,7 +3380,7 @@
       "source_location": "L10",
       "_origin": "ast",
       "id": "analytics_page_analyticspage",
-      "community": 5,
+      "community": 16,
       "norm_label": "analyticspage()"
     },
     {
@@ -3466,11 +3556,31 @@
     {
       "label": "route.ts",
       "file_type": "code",
+      "source_file": "frontend/src/app/api/ai/parse-students/route.ts",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "parse_students_route",
+      "community": 80,
+      "norm_label": "route.ts"
+    },
+    {
+      "label": "POST()",
+      "file_type": "code",
+      "source_file": "frontend/src/app/api/ai/parse-students/route.ts",
+      "source_location": "L3",
+      "_origin": "ast",
+      "id": "parse_students_route_post",
+      "community": 80,
+      "norm_label": "post()"
+    },
+    {
+      "label": "route.ts",
+      "file_type": "code",
       "source_file": "frontend/src/app/api/ai/rag/route.ts",
       "source_location": "L1",
       "_origin": "ast",
       "id": "rag_route",
-      "community": 54,
+      "community": 58,
       "norm_label": "route.ts"
     },
     {
@@ -3480,7 +3590,7 @@
       "source_location": "L4",
       "_origin": "ast",
       "id": "rag_route_post",
-      "community": 54,
+      "community": 58,
       "norm_label": "post()"
     },
     {
@@ -3526,6 +3636,86 @@
     {
       "label": "route.ts",
       "file_type": "code",
+      "source_file": "frontend/src/app/api/auth/change-password/route.ts",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "change_password_route",
+      "community": 2,
+      "norm_label": "route.ts"
+    },
+    {
+      "label": "readDb()",
+      "file_type": "code",
+      "source_file": "frontend/src/app/api/auth/change-password/route.ts",
+      "source_location": "L11",
+      "_origin": "ast",
+      "id": "change_password_route_readdb",
+      "community": 2,
+      "norm_label": "readdb()"
+    },
+    {
+      "label": "writeDb()",
+      "file_type": "code",
+      "source_file": "frontend/src/app/api/auth/change-password/route.ts",
+      "source_location": "L24",
+      "_origin": "ast",
+      "id": "change_password_route_writedb",
+      "community": 2,
+      "norm_label": "writedb()"
+    },
+    {
+      "label": "POST()",
+      "file_type": "code",
+      "source_file": "frontend/src/app/api/auth/change-password/route.ts",
+      "source_location": "L34",
+      "_origin": "ast",
+      "id": "change_password_route_post",
+      "community": 2,
+      "norm_label": "post()"
+    },
+    {
+      "label": "route.ts",
+      "file_type": "code",
+      "source_file": "frontend/src/app/api/auth/check-email/route.ts",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "check_email_route",
+      "community": 6,
+      "norm_label": "route.ts"
+    },
+    {
+      "label": "readDb()",
+      "file_type": "code",
+      "source_file": "frontend/src/app/api/auth/check-email/route.ts",
+      "source_location": "L8",
+      "_origin": "ast",
+      "id": "check_email_route_readdb",
+      "community": 6,
+      "norm_label": "readdb()"
+    },
+    {
+      "label": "userExists()",
+      "file_type": "code",
+      "source_file": "frontend/src/app/api/auth/check-email/route.ts",
+      "source_location": "L21",
+      "_origin": "ast",
+      "id": "check_email_route_userexists",
+      "community": 6,
+      "norm_label": "userexists()"
+    },
+    {
+      "label": "POST()",
+      "file_type": "code",
+      "source_file": "frontend/src/app/api/auth/check-email/route.ts",
+      "source_location": "L40",
+      "_origin": "ast",
+      "id": "check_email_route_post",
+      "community": 6,
+      "norm_label": "post()"
+    },
+    {
+      "label": "route.ts",
+      "file_type": "code",
       "source_file": "frontend/src/app/api/auth/google/route.ts",
       "source_location": "L1",
       "_origin": "ast",
@@ -3560,6 +3750,86 @@
       "source_location": "L45",
       "_origin": "ast",
       "id": "google_route_post",
+      "community": 2,
+      "norm_label": "post()"
+    },
+    {
+      "label": "route.ts",
+      "file_type": "code",
+      "source_file": "frontend/src/app/api/auth/login/route.ts",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "login_route",
+      "community": 6,
+      "norm_label": "route.ts"
+    },
+    {
+      "label": "readDb()",
+      "file_type": "code",
+      "source_file": "frontend/src/app/api/auth/login/route.ts",
+      "source_location": "L10",
+      "_origin": "ast",
+      "id": "login_route_readdb",
+      "community": 6,
+      "norm_label": "readdb()"
+    },
+    {
+      "label": "findUserByEmail()",
+      "file_type": "code",
+      "source_file": "frontend/src/app/api/auth/login/route.ts",
+      "source_location": "L23",
+      "_origin": "ast",
+      "id": "login_route_finduserbyemail",
+      "community": 6,
+      "norm_label": "finduserbyemail()"
+    },
+    {
+      "label": "POST()",
+      "file_type": "code",
+      "source_file": "frontend/src/app/api/auth/login/route.ts",
+      "source_location": "L43",
+      "_origin": "ast",
+      "id": "login_route_post",
+      "community": 6,
+      "norm_label": "post()"
+    },
+    {
+      "label": "route.ts",
+      "file_type": "code",
+      "source_file": "frontend/src/app/api/auth/reset-password/route.ts",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "reset_password_route",
+      "community": 2,
+      "norm_label": "route.ts"
+    },
+    {
+      "label": "readDb()",
+      "file_type": "code",
+      "source_file": "frontend/src/app/api/auth/reset-password/route.ts",
+      "source_location": "L11",
+      "_origin": "ast",
+      "id": "reset_password_route_readdb",
+      "community": 2,
+      "norm_label": "readdb()"
+    },
+    {
+      "label": "writeDb()",
+      "file_type": "code",
+      "source_file": "frontend/src/app/api/auth/reset-password/route.ts",
+      "source_location": "L24",
+      "_origin": "ast",
+      "id": "reset_password_route_writedb",
+      "community": 2,
+      "norm_label": "writedb()"
+    },
+    {
+      "label": "POST()",
+      "file_type": "code",
+      "source_file": "frontend/src/app/api/auth/reset-password/route.ts",
+      "source_location": "L34",
+      "_origin": "ast",
+      "id": "reset_password_route_post",
       "community": 2,
       "norm_label": "post()"
     },
@@ -3737,7 +4007,7 @@
       "label": "releaseFileLock()",
       "file_type": "code",
       "source_file": "frontend/src/app/api/credits/route.ts",
-      "source_location": "L58",
+      "source_location": "L55",
       "_origin": "ast",
       "id": "credits_route_releasefilelock",
       "community": 2,
@@ -3747,7 +4017,7 @@
       "label": "CreditTransaction",
       "file_type": "code",
       "source_file": "frontend/src/app/api/credits/route.ts",
-      "source_location": "L68",
+      "source_location": "L65",
       "_origin": "ast",
       "id": "credits_route_credittransaction",
       "community": 2,
@@ -3757,7 +4027,7 @@
       "label": "CreditsData",
       "file_type": "code",
       "source_file": "frontend/src/app/api/credits/route.ts",
-      "source_location": "L76",
+      "source_location": "L73",
       "_origin": "ast",
       "id": "credits_route_creditsdata",
       "community": 2,
@@ -3767,7 +4037,7 @@
       "label": "getInitialCredits()",
       "file_type": "code",
       "source_file": "frontend/src/app/api/credits/route.ts",
-      "source_location": "L83",
+      "source_location": "L80",
       "_origin": "ast",
       "id": "credits_route_getinitialcredits",
       "community": 2,
@@ -3777,7 +4047,7 @@
       "label": "readDbUnlocked()",
       "file_type": "code",
       "source_file": "frontend/src/app/api/credits/route.ts",
-      "source_location": "L100",
+      "source_location": "L97",
       "_origin": "ast",
       "id": "credits_route_readdbunlocked",
       "community": 2,
@@ -3787,7 +4057,7 @@
       "label": "writeDbUnlocked()",
       "file_type": "code",
       "source_file": "frontend/src/app/api/credits/route.ts",
-      "source_location": "L108",
+      "source_location": "L107",
       "_origin": "ast",
       "id": "credits_route_writedbunlocked",
       "community": 2,
@@ -3797,7 +4067,7 @@
       "label": "readDb()",
       "file_type": "code",
       "source_file": "frontend/src/app/api/credits/route.ts",
-      "source_location": "L113",
+      "source_location": "L112",
       "_origin": "ast",
       "id": "credits_route_readdb",
       "community": 2,
@@ -3807,7 +4077,7 @@
       "label": "writeDb()",
       "file_type": "code",
       "source_file": "frontend/src/app/api/credits/route.ts",
-      "source_location": "L125",
+      "source_location": "L124",
       "_origin": "ast",
       "id": "credits_route_writedb",
       "community": 2,
@@ -3817,7 +4087,7 @@
       "label": "readUserCredits()",
       "file_type": "code",
       "source_file": "frontend/src/app/api/credits/route.ts",
-      "source_location": "L137",
+      "source_location": "L136",
       "_origin": "ast",
       "id": "credits_route_readusercredits",
       "community": 2,
@@ -3827,7 +4097,7 @@
       "label": "writeUserCredits()",
       "file_type": "code",
       "source_file": "frontend/src/app/api/credits/route.ts",
-      "source_location": "L176",
+      "source_location": "L175",
       "_origin": "ast",
       "id": "credits_route_writeusercredits",
       "community": 2,
@@ -3837,7 +4107,7 @@
       "label": "redeemVoucher()",
       "file_type": "code",
       "source_file": "frontend/src/app/api/credits/route.ts",
-      "source_location": "L201",
+      "source_location": "L200",
       "_origin": "ast",
       "id": "credits_route_redeemvoucher",
       "community": 2,
@@ -3847,7 +4117,7 @@
       "label": "GET()",
       "file_type": "code",
       "source_file": "frontend/src/app/api/credits/route.ts",
-      "source_location": "L289",
+      "source_location": "L295",
       "_origin": "ast",
       "id": "credits_route_get",
       "community": 2,
@@ -3857,7 +4127,7 @@
       "label": "POST()",
       "file_type": "code",
       "source_file": "frontend/src/app/api/credits/route.ts",
-      "source_location": "L315",
+      "source_location": "L321",
       "_origin": "ast",
       "id": "credits_route_post",
       "community": 2,
@@ -3870,7 +4140,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "db_route",
-      "community": 53,
+      "community": 54,
       "norm_label": "route.ts"
     },
     {
@@ -3880,7 +4150,7 @@
       "source_location": "L10",
       "_origin": "ast",
       "id": "db_route_lock_dir",
-      "community": 53,
+      "community": 54,
       "norm_label": "lock_dir"
     },
     {
@@ -3890,7 +4160,7 @@
       "source_location": "L22",
       "_origin": "ast",
       "id": "db_route_acquirefilelock",
-      "community": 53,
+      "community": 54,
       "norm_label": "acquirefilelock()"
     },
     {
@@ -3900,7 +4170,7 @@
       "source_location": "L40",
       "_origin": "ast",
       "id": "db_route_releasefilelock",
-      "community": 53,
+      "community": 54,
       "norm_label": "releasefilelock()"
     },
     {
@@ -3910,7 +4180,7 @@
       "source_location": "L50",
       "_origin": "ast",
       "id": "db_route_getinitialdata",
-      "community": 53,
+      "community": 54,
       "norm_label": "getinitialdata()"
     },
     {
@@ -3920,97 +4190,97 @@
       "source_location": "L54",
       "_origin": "ast",
       "id": "db_route_readdbunlocked",
-      "community": 53,
+      "community": 54,
       "norm_label": "readdbunlocked()"
     },
     {
       "label": "writeDbUnlocked()",
       "file_type": "code",
       "source_file": "frontend/src/app/api/db/route.ts",
-      "source_location": "L64",
+      "source_location": "L66",
       "_origin": "ast",
       "id": "db_route_writedbunlocked",
-      "community": 53,
+      "community": 54,
       "norm_label": "writedbunlocked()"
     },
     {
       "label": "readDb()",
       "file_type": "code",
       "source_file": "frontend/src/app/api/db/route.ts",
-      "source_location": "L69",
+      "source_location": "L71",
       "_origin": "ast",
       "id": "db_route_readdb",
-      "community": 53,
+      "community": 54,
       "norm_label": "readdb()"
     },
     {
       "label": "writeDb()",
       "file_type": "code",
       "source_file": "frontend/src/app/api/db/route.ts",
-      "source_location": "L92",
+      "source_location": "L94",
       "_origin": "ast",
       "id": "db_route_writedb",
-      "community": 53,
+      "community": 54,
       "norm_label": "writedb()"
     },
     {
       "label": "isValidUuid()",
       "file_type": "code",
       "source_file": "frontend/src/app/api/db/route.ts",
-      "source_location": "L104",
+      "source_location": "L106",
       "_origin": "ast",
       "id": "db_route_isvaliduuid",
-      "community": 53,
+      "community": 54,
       "norm_label": "isvaliduuid()"
     },
     {
       "label": "GET()",
       "file_type": "code",
       "source_file": "frontend/src/app/api/db/route.ts",
-      "source_location": "L109",
+      "source_location": "L111",
       "_origin": "ast",
       "id": "db_route_get",
-      "community": 53,
+      "community": 54,
       "norm_label": "get()"
     },
     {
       "label": "countActiveAutomations()",
       "file_type": "code",
       "source_file": "frontend/src/app/api/db/route.ts",
-      "source_location": "L187",
+      "source_location": "L189",
       "_origin": "ast",
       "id": "db_route_countactiveautomations",
-      "community": 53,
+      "community": 54,
       "norm_label": "countactiveautomations()"
     },
     {
       "label": "pruneOrphanSettings()",
       "file_type": "code",
       "source_file": "frontend/src/app/api/db/route.ts",
-      "source_location": "L209",
+      "source_location": "L211",
       "_origin": "ast",
       "id": "db_route_pruneorphansettings",
-      "community": 53,
+      "community": 54,
       "norm_label": "pruneorphansettings()"
     },
     {
       "label": "POST()",
       "file_type": "code",
       "source_file": "frontend/src/app/api/db/route.ts",
-      "source_location": "L222",
+      "source_location": "L224",
       "_origin": "ast",
       "id": "db_route_post",
-      "community": 53,
+      "community": 54,
       "norm_label": "post()"
     },
     {
       "label": "runAutoLearningPipeline()",
       "file_type": "code",
       "source_file": "frontend/src/app/api/db/route.ts",
-      "source_location": "L672",
+      "source_location": "L708",
       "_origin": "ast",
       "id": "db_route_runautolearningpipeline",
-      "community": 53,
+      "community": 54,
       "norm_label": "runautolearningpipeline()"
     },
     {
@@ -4050,7 +4320,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "path_route",
-      "community": 52,
+      "community": 53,
       "norm_label": "route.ts"
     },
     {
@@ -4060,7 +4330,7 @@
       "source_location": "L8",
       "_origin": "ast",
       "id": "path_route_readdb",
-      "community": 52,
+      "community": 53,
       "norm_label": "readdb()"
     },
     {
@@ -4070,7 +4340,7 @@
       "source_location": "L18",
       "_origin": "ast",
       "id": "path_route_writedb",
-      "community": 52,
+      "community": 53,
       "norm_label": "writedb()"
     },
     {
@@ -4080,7 +4350,7 @@
       "source_location": "L28",
       "_origin": "ast",
       "id": "path_route_safeparse",
-      "community": 52,
+      "community": 53,
       "norm_label": "safeparse()"
     },
     {
@@ -4090,7 +4360,7 @@
       "source_location": "L40",
       "_origin": "ast",
       "id": "path_route_tools",
-      "community": 52,
+      "community": 53,
       "norm_label": "tools"
     },
     {
@@ -4100,7 +4370,7 @@
       "source_location": "L120",
       "_origin": "ast",
       "id": "path_route_executetool",
-      "community": 52,
+      "community": 53,
       "norm_label": "executetool()"
     },
     {
@@ -4110,7 +4380,7 @@
       "source_location": "L324",
       "_origin": "ast",
       "id": "path_route_getopenapispec",
-      "community": 52,
+      "community": 53,
       "norm_label": "getopenapispec()"
     },
     {
@@ -4120,7 +4390,7 @@
       "source_location": "L464",
       "_origin": "ast",
       "id": "path_route_get",
-      "community": 52,
+      "community": 53,
       "norm_label": "get()"
     },
     {
@@ -4130,7 +4400,7 @@
       "source_location": "L468",
       "_origin": "ast",
       "id": "path_route_post",
-      "community": 52,
+      "community": 53,
       "norm_label": "post()"
     },
     {
@@ -4140,7 +4410,7 @@
       "source_location": "L472",
       "_origin": "ast",
       "id": "path_route_handlerequest",
-      "community": 52,
+      "community": 53,
       "norm_label": "handlerequest()"
     },
     {
@@ -4220,7 +4490,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "send_route",
-      "community": 2,
+      "community": 78,
       "norm_label": "route.ts"
     },
     {
@@ -4230,7 +4500,7 @@
       "source_location": "L9",
       "_origin": "ast",
       "id": "send_route_chatmessage",
-      "community": 2,
+      "community": 78,
       "norm_label": "chatmessage"
     },
     {
@@ -4240,7 +4510,7 @@
       "source_location": "L16",
       "_origin": "ast",
       "id": "send_route_chatthread",
-      "community": 2,
+      "community": 78,
       "norm_label": "chatthread"
     },
     {
@@ -4250,7 +4520,7 @@
       "source_location": "L29",
       "_origin": "ast",
       "id": "send_route_lock_dir",
-      "community": 2,
+      "community": 78,
       "norm_label": "lock_dir"
     },
     {
@@ -4260,7 +4530,7 @@
       "source_location": "L31",
       "_origin": "ast",
       "id": "send_route_acquirefilelock",
-      "community": 2,
+      "community": 78,
       "norm_label": "acquirefilelock()"
     },
     {
@@ -4270,7 +4540,7 @@
       "source_location": "L52",
       "_origin": "ast",
       "id": "send_route_releasefilelock",
-      "community": 2,
+      "community": 78,
       "norm_label": "releasefilelock()"
     },
     {
@@ -4280,7 +4550,7 @@
       "source_location": "L62",
       "_origin": "ast",
       "id": "send_route_readdbunlocked",
-      "community": 2,
+      "community": 78,
       "norm_label": "readdbunlocked()"
     },
     {
@@ -4290,7 +4560,7 @@
       "source_location": "L68",
       "_origin": "ast",
       "id": "send_route_writedbunlocked",
-      "community": 2,
+      "community": 78,
       "norm_label": "writedbunlocked()"
     },
     {
@@ -4300,7 +4570,7 @@
       "source_location": "L73",
       "_origin": "ast",
       "id": "send_route_readdb",
-      "community": 2,
+      "community": 78,
       "norm_label": "readdb()"
     },
     {
@@ -4310,7 +4580,7 @@
       "source_location": "L85",
       "_origin": "ast",
       "id": "send_route_writedb",
-      "community": 2,
+      "community": 78,
       "norm_label": "writedb()"
     },
     {
@@ -4320,7 +4590,7 @@
       "source_location": "L97",
       "_origin": "ast",
       "id": "send_route_splittelegrammessage",
-      "community": 2,
+      "community": 78,
       "norm_label": "splittelegrammessage()"
     },
     {
@@ -4330,7 +4600,7 @@
       "source_location": "L121",
       "_origin": "ast",
       "id": "send_route_post",
-      "community": 2,
+      "community": 78,
       "norm_label": "post()"
     },
     {
@@ -4340,7 +4610,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "start_route",
-      "community": 78,
+      "community": 75,
       "norm_label": "route.ts"
     },
     {
@@ -4350,7 +4620,7 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "start_route_get",
-      "community": 78,
+      "community": 75,
       "norm_label": "get()"
     },
     {
@@ -4360,7 +4630,7 @@
       "source_location": "L11",
       "_origin": "ast",
       "id": "start_route_post",
-      "community": 78,
+      "community": 75,
       "norm_label": "post()"
     },
     {
@@ -4430,7 +4700,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "webhook_info_route",
-      "community": 0,
+      "community": 52,
       "norm_label": "route.ts"
     },
     {
@@ -4440,7 +4710,7 @@
       "source_location": "L11",
       "_origin": "ast",
       "id": "webhook_info_route_get",
-      "community": 0,
+      "community": 52,
       "norm_label": "get()"
     },
     {
@@ -4450,7 +4720,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "webhook_route",
-      "community": 0,
+      "community": 52,
       "norm_label": "route.ts"
     },
     {
@@ -4460,7 +4730,7 @@
       "source_location": "L10",
       "_origin": "ast",
       "id": "webhook_route_post",
-      "community": 0,
+      "community": 52,
       "norm_label": "post()"
     },
     {
@@ -4590,7 +4860,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "automations_page",
-      "community": 4,
+      "community": 22,
       "norm_label": "page.tsx"
     },
     {
@@ -4600,7 +4870,7 @@
       "source_location": "L32",
       "_origin": "ast",
       "id": "automations_page_automationspage",
-      "community": 4,
+      "community": 22,
       "norm_label": "automationspage()"
     },
     {
@@ -4610,37 +4880,37 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "quick_bot_page",
-      "community": 82,
+      "community": 22,
       "norm_label": "page.tsx"
     },
     {
       "label": "LOCAL_TRANSLATIONS",
       "file_type": "code",
       "source_file": "frontend/src/app/automations/quick-bot/page.tsx",
-      "source_location": "L24",
+      "source_location": "L25",
       "_origin": "ast",
       "id": "quick_bot_page_local_translations",
-      "community": 82,
+      "community": 22,
       "norm_label": "local_translations"
     },
     {
       "label": "DEFAULT_TEMPLATES",
       "file_type": "code",
       "source_file": "frontend/src/app/automations/quick-bot/page.tsx",
-      "source_location": "L264",
+      "source_location": "L265",
       "_origin": "ast",
       "id": "quick_bot_page_default_templates",
-      "community": 82,
+      "community": 22,
       "norm_label": "default_templates"
     },
     {
       "label": "QuickBotWizardPage()",
       "file_type": "code",
       "source_file": "frontend/src/app/automations/quick-bot/page.tsx",
-      "source_location": "L315",
+      "source_location": "L316",
       "_origin": "ast",
       "id": "quick_bot_page_quickbotwizardpage",
-      "community": 82,
+      "community": 22,
       "norm_label": "quickbotwizardpage()"
     },
     {
@@ -4670,7 +4940,7 @@
       "source_location": "L37",
       "_origin": "ast",
       "id": "templates_page_templatespage",
-      "community": 11,
+      "community": 4,
       "norm_label": "templatespage()"
     },
     {
@@ -4720,7 +4990,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "chats_page",
-      "community": 4,
+      "community": 16,
       "norm_label": "page.tsx"
     },
     {
@@ -4730,7 +5000,7 @@
       "source_location": "L14",
       "_origin": "ast",
       "id": "chats_page_message",
-      "community": 4,
+      "community": 16,
       "norm_label": "message"
     },
     {
@@ -4740,7 +5010,7 @@
       "source_location": "L21",
       "_origin": "ast",
       "id": "chats_page_chat",
-      "community": 4,
+      "community": 16,
       "norm_label": "chat"
     },
     {
@@ -4750,7 +5020,7 @@
       "source_location": "L34",
       "_origin": "ast",
       "id": "chats_page_initial_chats",
-      "community": 4,
+      "community": 16,
       "norm_label": "initial_chats"
     },
     {
@@ -4760,7 +5030,7 @@
       "source_location": "L36",
       "_origin": "ast",
       "id": "chats_page_chatspage",
-      "community": 4,
+      "community": 16,
       "norm_label": "chatspage()"
     },
     {
@@ -4770,7 +5040,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "contacts_page",
-      "community": 4,
+      "community": 16,
       "norm_label": "page.tsx"
     },
     {
@@ -4780,7 +5050,7 @@
       "source_location": "L14",
       "_origin": "ast",
       "id": "contacts_page_contactspage",
-      "community": 11,
+      "community": 16,
       "norm_label": "contactspage()"
     },
     {
@@ -4834,10 +5104,30 @@
       "norm_label": "page.tsx"
     },
     {
+      "label": "Facebook()",
+      "file_type": "code",
+      "source_file": "frontend/src/app/help/page.tsx",
+      "source_location": "L24",
+      "_origin": "ast",
+      "id": "help_page_facebook",
+      "community": 16,
+      "norm_label": "facebook()"
+    },
+    {
+      "label": "Instagram()",
+      "file_type": "code",
+      "source_file": "frontend/src/app/help/page.tsx",
+      "source_location": "L41",
+      "_origin": "ast",
+      "id": "help_page_instagram",
+      "community": 16,
+      "norm_label": "instagram()"
+    },
+    {
       "label": "FAQItem",
       "file_type": "code",
       "source_file": "frontend/src/app/help/page.tsx",
-      "source_location": "L26",
+      "source_location": "L60",
       "_origin": "ast",
       "id": "help_page_faqitem",
       "community": 16,
@@ -4847,7 +5137,7 @@
       "label": "GuideStep",
       "file_type": "code",
       "source_file": "frontend/src/app/help/page.tsx",
-      "source_location": "L31",
+      "source_location": "L65",
       "_origin": "ast",
       "id": "help_page_guidestep",
       "community": 16,
@@ -4857,7 +5147,7 @@
       "label": "LOCAL_TRANSLATIONS",
       "file_type": "code",
       "source_file": "frontend/src/app/help/page.tsx",
-      "source_location": "L39",
+      "source_location": "L73",
       "_origin": "ast",
       "id": "help_page_local_translations",
       "community": 16,
@@ -4867,7 +5157,7 @@
       "label": "HelpPage()",
       "file_type": "code",
       "source_file": "frontend/src/app/help/page.tsx",
-      "source_location": "L297",
+      "source_location": "L331",
       "_origin": "ast",
       "id": "help_page_helppage",
       "community": 16,
@@ -4887,27 +5177,37 @@
       "label": "inter",
       "file_type": "code",
       "source_file": "frontend/src/app/layout.tsx",
-      "source_location": "L7",
+      "source_location": "L11",
       "_origin": "ast",
       "id": "app_layout_inter",
       "community": 47,
       "norm_label": "inter"
     },
     {
-      "label": "metadata",
+      "label": "translations",
       "file_type": "code",
       "source_file": "frontend/src/app/layout.tsx",
-      "source_location": "L13",
+      "source_location": "L17",
       "_origin": "ast",
-      "id": "app_layout_metadata",
+      "id": "app_layout_translations",
       "community": 47,
-      "norm_label": "metadata"
+      "norm_label": "translations"
+    },
+    {
+      "label": "generateMetadata()",
+      "file_type": "code",
+      "source_file": "frontend/src/app/layout.tsx",
+      "source_location": "L32",
+      "_origin": "ast",
+      "id": "app_layout_generatemetadata",
+      "community": 47,
+      "norm_label": "generatemetadata()"
     },
     {
       "label": "RootLayout()",
       "file_type": "code",
       "source_file": "frontend/src/app/layout.tsx",
-      "source_location": "L18",
+      "source_location": "L42",
       "_origin": "ast",
       "id": "app_layout_rootlayout",
       "community": 47,
@@ -4950,7 +5250,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "login_page",
-      "community": 21,
+      "community": 4,
       "norm_label": "page.tsx"
     },
     {
@@ -4960,7 +5260,7 @@
       "source_location": "L11",
       "_origin": "ast",
       "id": "login_page_loginpage",
-      "community": 21,
+      "community": 4,
       "norm_label": "loginpage()"
     },
     {
@@ -5070,7 +5370,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "partner_page",
-      "community": 16,
+      "community": 5,
       "norm_label": "page.tsx"
     },
     {
@@ -5080,7 +5380,7 @@
       "source_location": "L20",
       "_origin": "ast",
       "id": "partner_page_referreduser",
-      "community": 16,
+      "community": 5,
       "norm_label": "referreduser"
     },
     {
@@ -5090,7 +5390,7 @@
       "source_location": "L30",
       "_origin": "ast",
       "id": "partner_page_partnerpage",
-      "community": 16,
+      "community": 5,
       "norm_label": "partnerpage()"
     },
     {
@@ -5120,7 +5420,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "register_page",
-      "community": 21,
+      "community": 5,
       "norm_label": "page.tsx"
     },
     {
@@ -5130,7 +5430,7 @@
       "source_location": "L11",
       "_origin": "ast",
       "id": "register_page_registerpage",
-      "community": 21,
+      "community": 5,
       "norm_label": "registerpage()"
     },
     {
@@ -5140,7 +5440,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "settings_page",
-      "community": 4,
+      "community": 22,
       "norm_label": "page.tsx"
     },
     {
@@ -5150,7 +5450,7 @@
       "source_location": "L14",
       "_origin": "ast",
       "id": "settings_page_modaltype",
-      "community": 4,
+      "community": 22,
       "norm_label": "modaltype"
     },
     {
@@ -5160,7 +5460,7 @@
       "source_location": "L16",
       "_origin": "ast",
       "id": "settings_page_local_translations",
-      "community": 4,
+      "community": 22,
       "norm_label": "local_translations"
     },
     {
@@ -5170,7 +5470,7 @@
       "source_location": "L49",
       "_origin": "ast",
       "id": "settings_page_settingspage",
-      "community": 4,
+      "community": 22,
       "norm_label": "settingspage()"
     },
     {
@@ -5420,7 +5720,7 @@
       "source_location": "L44",
       "_origin": "ast",
       "id": "layout_applayout_applayout",
-      "community": 4,
+      "community": 16,
       "norm_label": "applayout()"
     },
     {
@@ -5442,6 +5742,26 @@
       "id": "layout_connectchannelmodal_connectchannelmodal",
       "community": 4,
       "norm_label": "connectchannelmodal()"
+    },
+    {
+      "label": "CookieConsent.tsx",
+      "file_type": "code",
+      "source_file": "frontend/src/components/layout/CookieConsent.tsx",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "layout_cookieconsent",
+      "community": 11,
+      "norm_label": "cookieconsent.tsx"
+    },
+    {
+      "label": "CookieConsent()",
+      "file_type": "code",
+      "source_file": "frontend/src/components/layout/CookieConsent.tsx",
+      "source_location": "L7",
+      "_origin": "ast",
+      "id": "layout_cookieconsent_cookieconsent",
+      "community": 11,
+      "norm_label": "cookieconsent()"
     },
     {
       "label": "PageHeader.tsx",
@@ -5480,64 +5800,64 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "layout_sidebar",
-      "community": 11,
+      "community": 4,
       "norm_label": "sidebar.tsx"
     },
     {
       "label": "NavItem",
       "file_type": "code",
       "source_file": "frontend/src/components/layout/Sidebar.tsx",
-      "source_location": "L37",
+      "source_location": "L38",
       "_origin": "ast",
       "id": "layout_sidebar_navitem",
-      "community": 11,
+      "community": 4,
       "norm_label": "navitem"
     },
     {
       "label": "TOP_ITEMS",
       "file_type": "code",
       "source_file": "frontend/src/components/layout/Sidebar.tsx",
-      "source_location": "L44",
+      "source_location": "L45",
       "_origin": "ast",
       "id": "layout_sidebar_top_items",
-      "community": 11,
+      "community": 4,
       "norm_label": "top_items"
     },
     {
       "label": "BOTTOM_ITEMS",
       "file_type": "code",
       "source_file": "frontend/src/components/layout/Sidebar.tsx",
-      "source_location": "L55",
+      "source_location": "L56",
       "_origin": "ast",
       "id": "layout_sidebar_bottom_items",
-      "community": 11,
+      "community": 4,
       "norm_label": "bottom_items"
     },
     {
       "label": "NavButton()",
       "file_type": "code",
       "source_file": "frontend/src/components/layout/Sidebar.tsx",
-      "source_location": "L57",
+      "source_location": "L58",
       "_origin": "ast",
       "id": "layout_sidebar_navbutton",
-      "community": 11,
+      "community": 4,
       "norm_label": "navbutton()"
     },
     {
       "label": "ChannelAvatar()",
       "file_type": "code",
       "source_file": "frontend/src/components/layout/Sidebar.tsx",
-      "source_location": "L85",
+      "source_location": "L86",
       "_origin": "ast",
       "id": "layout_sidebar_channelavatar",
-      "community": 11,
+      "community": 4,
       "norm_label": "channelavatar()"
     },
     {
       "label": "Sidebar()",
       "file_type": "code",
       "source_file": "frontend/src/components/layout/Sidebar.tsx",
-      "source_location": "L105",
+      "source_location": "L106",
       "_origin": "ast",
       "id": "layout_sidebar_sidebar",
       "community": 11,
@@ -5587,7 +5907,7 @@
       "label": "LANG_NAMES",
       "file_type": "code",
       "source_file": "frontend/src/components/layout/TopBar.tsx",
-      "source_location": "L29",
+      "source_location": "L30",
       "_origin": "ast",
       "id": "layout_topbar_lang_names",
       "community": 4,
@@ -5597,7 +5917,7 @@
       "label": "LANG_FLAGS",
       "file_type": "code",
       "source_file": "frontend/src/components/layout/TopBar.tsx",
-      "source_location": "L35",
+      "source_location": "L36",
       "_origin": "ast",
       "id": "layout_topbar_lang_flags",
       "community": 4,
@@ -5607,7 +5927,7 @@
       "label": "TopBar()",
       "file_type": "code",
       "source_file": "frontend/src/components/layout/TopBar.tsx",
-      "source_location": "L37",
+      "source_location": "L38",
       "_origin": "ast",
       "id": "layout_topbar_topbar",
       "community": 4,
@@ -5650,7 +5970,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "ui_customdropdown",
-      "community": 4,
+      "community": 22,
       "norm_label": "customdropdown.tsx"
     },
     {
@@ -5660,7 +5980,7 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "ui_customdropdown_dropdownoption",
-      "community": 4,
+      "community": 22,
       "norm_label": "dropdownoption"
     },
     {
@@ -5670,7 +5990,7 @@
       "source_location": "L11",
       "_origin": "ast",
       "id": "ui_customdropdown_customdropdownprops",
-      "community": 4,
+      "community": 22,
       "norm_label": "customdropdownprops"
     },
     {
@@ -5680,7 +6000,7 @@
       "source_location": "L25",
       "_origin": "ast",
       "id": "ui_customdropdown_customdropdown",
-      "community": 4,
+      "community": 22,
       "norm_label": "customdropdown()"
     },
     {
@@ -5690,7 +6010,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "ui_accordion",
-      "community": 75,
+      "community": 3,
       "norm_label": "accordion.tsx"
     },
     {
@@ -5700,7 +6020,7 @@
       "source_location": "L9",
       "_origin": "ast",
       "id": "ui_accordion_accordionitem",
-      "community": 75,
+      "community": 3,
       "norm_label": "accordionitem"
     },
     {
@@ -5710,7 +6030,7 @@
       "source_location": "L17",
       "_origin": "ast",
       "id": "ui_accordion_accordiontrigger",
-      "community": 75,
+      "community": 3,
       "norm_label": "accordiontrigger"
     },
     {
@@ -5720,7 +6040,7 @@
       "source_location": "L37",
       "_origin": "ast",
       "id": "ui_accordion_accordioncontent",
-      "community": 75,
+      "community": 3,
       "norm_label": "accordioncontent"
     },
     {
@@ -5880,7 +6200,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "ui_avatar",
-      "community": 3,
+      "community": 82,
       "norm_label": "avatar.tsx"
     },
     {
@@ -5890,7 +6210,7 @@
       "source_location": "L8",
       "_origin": "ast",
       "id": "ui_avatar_avatar",
-      "community": 3,
+      "community": 82,
       "norm_label": "avatar"
     },
     {
@@ -5900,7 +6220,7 @@
       "source_location": "L20",
       "_origin": "ast",
       "id": "ui_avatar_avatarimage",
-      "community": 3,
+      "community": 82,
       "norm_label": "avatarimage"
     },
     {
@@ -5910,7 +6230,7 @@
       "source_location": "L32",
       "_origin": "ast",
       "id": "ui_avatar_avatarfallback",
-      "community": 3,
+      "community": 82,
       "norm_label": "avatarfallback"
     },
     {
@@ -5920,7 +6240,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "ui_badge",
-      "community": 83,
+      "community": 18,
       "norm_label": "badge.tsx"
     },
     {
@@ -5930,7 +6250,7 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "ui_badge_badgevariants",
-      "community": 83,
+      "community": 18,
       "norm_label": "badgevariants"
     },
     {
@@ -5940,7 +6260,7 @@
       "source_location": "L25",
       "_origin": "ast",
       "id": "ui_badge_badgeprops",
-      "community": 83,
+      "community": 18,
       "norm_label": "badgeprops"
     },
     {
@@ -5950,7 +6270,7 @@
       "source_location": "L28",
       "_origin": "ast",
       "id": "ui_badge_badge",
-      "community": 83,
+      "community": 18,
       "norm_label": "badge()"
     },
     {
@@ -5960,7 +6280,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "ui_breadcrumb",
-      "community": 18,
+      "community": 81,
       "norm_label": "breadcrumb.tsx"
     },
     {
@@ -5970,7 +6290,7 @@
       "source_location": "L7",
       "_origin": "ast",
       "id": "ui_breadcrumb_breadcrumb",
-      "community": 18,
+      "community": 81,
       "norm_label": "breadcrumb"
     },
     {
@@ -5980,7 +6300,7 @@
       "source_location": "L15",
       "_origin": "ast",
       "id": "ui_breadcrumb_breadcrumblist",
-      "community": 18,
+      "community": 81,
       "norm_label": "breadcrumblist"
     },
     {
@@ -5990,7 +6310,7 @@
       "source_location": "L29",
       "_origin": "ast",
       "id": "ui_breadcrumb_breadcrumbitem",
-      "community": 18,
+      "community": 81,
       "norm_label": "breadcrumbitem"
     },
     {
@@ -6000,7 +6320,7 @@
       "source_location": "L36",
       "_origin": "ast",
       "id": "ui_breadcrumb_breadcrumblink",
-      "community": 18,
+      "community": 81,
       "norm_label": "breadcrumblink"
     },
     {
@@ -6010,7 +6330,7 @@
       "source_location": "L54",
       "_origin": "ast",
       "id": "ui_breadcrumb_breadcrumbpage",
-      "community": 18,
+      "community": 81,
       "norm_label": "breadcrumbpage"
     },
     {
@@ -6020,7 +6340,7 @@
       "source_location": "L68",
       "_origin": "ast",
       "id": "ui_breadcrumb_breadcrumbseparator",
-      "community": 18,
+      "community": 81,
       "norm_label": "breadcrumbseparator()"
     },
     {
@@ -6030,7 +6350,7 @@
       "source_location": "L80",
       "_origin": "ast",
       "id": "ui_breadcrumb_breadcrumbellipsis",
-      "community": 18,
+      "community": 81,
       "norm_label": "breadcrumbellipsis()"
     },
     {
@@ -6070,7 +6390,7 @@
       "source_location": "L39",
       "_origin": "ast",
       "id": "ui_button_button",
-      "community": 23,
+      "community": 8,
       "norm_label": "button"
     },
     {
@@ -7430,7 +7750,7 @@
       "source_location": "L36",
       "_origin": "ast",
       "id": "ui_primitives_button",
-      "community": 21,
+      "community": 5,
       "norm_label": "button"
     },
     {
@@ -7500,7 +7820,7 @@
       "source_location": "L124",
       "_origin": "ast",
       "id": "ui_primitives_avatar",
-      "community": 4,
+      "community": 16,
       "norm_label": "avatar()"
     },
     {
@@ -7620,7 +7940,7 @@
       "source_location": "L412",
       "_origin": "ast",
       "id": "ui_primitives_alertmodal",
-      "community": 16,
+      "community": 5,
       "norm_label": "alertmodal()"
     },
     {
@@ -7970,27 +8290,27 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "ui_sonner",
-      "community": 58,
+      "community": 47,
       "norm_label": "sonner.tsx"
     },
     {
       "label": "ToasterProps",
       "file_type": "code",
       "source_file": "frontend/src/components/ui/sonner.tsx",
-      "source_location": "L3",
+      "source_location": "L5",
       "_origin": "ast",
       "id": "ui_sonner_toasterprops",
-      "community": 58,
+      "community": 47,
       "norm_label": "toasterprops"
     },
     {
       "label": "Toaster()",
       "file_type": "code",
       "source_file": "frontend/src/components/ui/sonner.tsx",
-      "source_location": "L5",
+      "source_location": "L7",
       "_origin": "ast",
       "id": "ui_sonner_toaster",
-      "community": 58,
+      "community": 47,
       "norm_label": "toaster()"
     },
     {
@@ -8110,7 +8430,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "ui_tabs",
-      "community": 3,
+      "community": 85,
       "norm_label": "tabs.tsx"
     },
     {
@@ -8120,7 +8440,7 @@
       "source_location": "L8",
       "_origin": "ast",
       "id": "ui_tabs_tabslist",
-      "community": 3,
+      "community": 85,
       "norm_label": "tabslist"
     },
     {
@@ -8130,7 +8450,7 @@
       "source_location": "L23",
       "_origin": "ast",
       "id": "ui_tabs_tabstrigger",
-      "community": 3,
+      "community": 85,
       "norm_label": "tabstrigger"
     },
     {
@@ -8140,7 +8460,7 @@
       "source_location": "L38",
       "_origin": "ast",
       "id": "ui_tabs_tabscontent",
-      "community": 3,
+      "community": 85,
       "norm_label": "tabscontent"
     },
     {
@@ -8270,7 +8590,7 @@
       "source_location": "L9",
       "_origin": "ast",
       "id": "i18n_i18nprovider_lang",
-      "community": 21,
+      "community": 4,
       "norm_label": "lang"
     },
     {
@@ -8377,7 +8697,7 @@
       "label": "useI18n()",
       "file_type": "code",
       "source_file": "frontend/src/i18n/I18nProvider.tsx",
-      "source_location": "L102",
+      "source_location": "L121",
       "_origin": "ast",
       "id": "i18n_i18nprovider_usei18n",
       "community": 11,
@@ -8450,7 +8770,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "ai_rag",
-      "community": 54,
+      "community": 58,
       "norm_label": "rag.ts"
     },
     {
@@ -8460,7 +8780,7 @@
       "source_location": "L3",
       "_origin": "ast",
       "id": "ai_rag_ragresult",
-      "community": 54,
+      "community": 58,
       "norm_label": "ragresult"
     },
     {
@@ -8470,7 +8790,7 @@
       "source_location": "L19",
       "_origin": "ast",
       "id": "ai_rag_retrievecontext",
-      "community": 54,
+      "community": 58,
       "norm_label": "retrievecontext()"
     },
     {
@@ -8480,7 +8800,7 @@
       "source_location": "L145",
       "_origin": "ast",
       "id": "ai_rag_sanitizehistoryforgemini",
-      "community": 54,
+      "community": 58,
       "norm_label": "sanitizehistoryforgemini()"
     },
     {
@@ -8490,7 +8810,7 @@
       "source_location": "L178",
       "_origin": "ast",
       "id": "ai_rag_callgemini",
-      "community": 54,
+      "community": 58,
       "norm_label": "callgemini()"
     },
     {
@@ -8500,7 +8820,7 @@
       "source_location": "L308",
       "_origin": "ast",
       "id": "ai_rag_checksemanticmoderation",
-      "community": 54,
+      "community": 58,
       "norm_label": "checksemanticmoderation()"
     },
     {
@@ -8510,7 +8830,7 @@
       "source_location": "L369",
       "_origin": "ast",
       "id": "ai_rag_analyzemessageforcustdev",
-      "community": 54,
+      "community": 58,
       "norm_label": "analyzemessageforcustdev()"
     },
     {
@@ -8520,7 +8840,7 @@
       "source_location": "L444",
       "_origin": "ast",
       "id": "ai_rag_queryrag",
-      "community": 54,
+      "community": 58,
       "norm_label": "queryrag()"
     },
     {
@@ -8560,7 +8880,7 @@
       "source_location": "L30",
       "_origin": "ast",
       "id": "lib_db_group",
-      "community": 4,
+      "community": 22,
       "norm_label": "group"
     },
     {
@@ -8570,7 +8890,7 @@
       "source_location": "L35",
       "_origin": "ast",
       "id": "lib_db_contact",
-      "community": 12,
+      "community": 16,
       "norm_label": "contact"
     },
     {
@@ -8590,7 +8910,7 @@
       "source_location": "L54",
       "_origin": "ast",
       "id": "lib_db_channel",
-      "community": 4,
+      "community": 22,
       "norm_label": "channel"
     },
     {
@@ -8707,7 +9027,7 @@
       "label": "notifyUpdate()",
       "file_type": "code",
       "source_file": "frontend/src/lib/db.ts",
-      "source_location": "L348",
+      "source_location": "L349",
       "_origin": "ast",
       "id": "lib_db_notifyupdate",
       "community": 22,
@@ -8717,7 +9037,7 @@
       "label": "safeParse()",
       "file_type": "code",
       "source_file": "frontend/src/lib/db.ts",
-      "source_location": "L366",
+      "source_location": "L373",
       "_origin": "ast",
       "id": "lib_db_safeparse",
       "community": 22,
@@ -8727,11 +9047,51 @@
       "label": "db",
       "file_type": "code",
       "source_file": "frontend/src/lib/db.ts",
-      "source_location": "L415",
+      "source_location": "L411",
       "_origin": "ast",
       "id": "lib_db_db",
       "community": 4,
       "norm_label": "db"
+    },
+    {
+      "label": "errorTracker.ts",
+      "file_type": "code",
+      "source_file": "frontend/src/lib/errorTracker.ts",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "lib_errortracker",
+      "community": 47,
+      "norm_label": "errortracker.ts"
+    },
+    {
+      "label": "isTrackingAllowed()",
+      "file_type": "code",
+      "source_file": "frontend/src/lib/errorTracker.ts",
+      "source_location": "L5",
+      "_origin": "ast",
+      "id": "lib_errortracker_istrackingallowed",
+      "community": 47,
+      "norm_label": "istrackingallowed()"
+    },
+    {
+      "label": "initErrorTracking()",
+      "file_type": "code",
+      "source_file": "frontend/src/lib/errorTracker.ts",
+      "source_location": "L17",
+      "_origin": "ast",
+      "id": "lib_errortracker_initerrortracking",
+      "community": 47,
+      "norm_label": "initerrortracking()"
+    },
+    {
+      "label": "ErrorTrackerInitializer()",
+      "file_type": "code",
+      "source_file": "frontend/src/lib/errorTracker.ts",
+      "source_location": "L73",
+      "_origin": "ast",
+      "id": "lib_errortracker_errortrackerinitializer",
+      "community": 47,
+      "norm_label": "errortrackerinitializer()"
     },
     {
       "label": "jwt.ts",
@@ -8777,7 +9137,7 @@
       "label": "verifyJwt()",
       "file_type": "code",
       "source_file": "frontend/src/lib/jwt.ts",
-      "source_location": "L33",
+      "source_location": "L36",
       "_origin": "ast",
       "id": "lib_jwt_verifyjwt",
       "community": 2,
@@ -8854,6 +9214,16 @@
       "norm_label": "checkratelimit()"
     },
     {
+      "label": "checkOtpIpLimit()",
+      "file_type": "code",
+      "source_file": "frontend/src/lib/otpStore.ts",
+      "source_location": "L67",
+      "_origin": "ast",
+      "id": "lib_otpstore_checkotpiplimit",
+      "community": 15,
+      "norm_label": "checkotpiplimit()"
+    },
+    {
       "label": "pgdb.ts",
       "file_type": "code",
       "source_file": "frontend/src/lib/pgdb.ts",
@@ -8874,20 +9244,40 @@
       "norm_label": "getpool()"
     },
     {
+      "label": "executeTransaction()",
+      "file_type": "code",
+      "source_file": "frontend/src/lib/pgdb.ts",
+      "source_location": "L26",
+      "_origin": "ast",
+      "id": "lib_pgdb_executetransaction",
+      "community": 6,
+      "norm_label": "executetransaction()"
+    },
+    {
       "label": "initDb()",
       "file_type": "code",
       "source_file": "frontend/src/lib/pgdb.ts",
-      "source_location": "L29",
+      "source_location": "L47",
       "_origin": "ast",
       "id": "lib_pgdb_initdb",
       "community": 6,
       "norm_label": "initdb()"
     },
     {
+      "label": "logCreditTransaction()",
+      "file_type": "code",
+      "source_file": "frontend/src/lib/pgdb.ts",
+      "source_location": "L70",
+      "_origin": "ast",
+      "id": "lib_pgdb_logcredittransaction",
+      "community": 6,
+      "norm_label": "logcredittransaction()"
+    },
+    {
       "label": "getValue()",
       "file_type": "code",
       "source_file": "frontend/src/lib/pgdb.ts",
-      "source_location": "L44",
+      "source_location": "L88",
       "_origin": "ast",
       "id": "lib_pgdb_getvalue",
       "community": 6,
@@ -8897,7 +9287,7 @@
       "label": "setValue()",
       "file_type": "code",
       "source_file": "frontend/src/lib/pgdb.ts",
-      "source_location": "L54",
+      "source_location": "L99",
       "_origin": "ast",
       "id": "lib_pgdb_setvalue",
       "community": 6,
@@ -8907,7 +9297,7 @@
       "label": "deleteValue()",
       "file_type": "code",
       "source_file": "frontend/src/lib/pgdb.ts",
-      "source_location": "L65",
+      "source_location": "L111",
       "_origin": "ast",
       "id": "lib_pgdb_deletevalue",
       "community": 6,
@@ -8917,7 +9307,7 @@
       "label": "getAll()",
       "file_type": "code",
       "source_file": "frontend/src/lib/pgdb.ts",
-      "source_location": "L71",
+      "source_location": "L118",
       "_origin": "ast",
       "id": "lib_pgdb_getall",
       "community": 6,
@@ -8927,7 +9317,7 @@
       "label": "getAllLike()",
       "file_type": "code",
       "source_file": "frontend/src/lib/pgdb.ts",
-      "source_location": "L80",
+      "source_location": "L127",
       "_origin": "ast",
       "id": "lib_pgdb_getalllike",
       "community": 6,
@@ -8937,7 +9327,7 @@
       "label": "getAllSettingsExcept()",
       "file_type": "code",
       "source_file": "frontend/src/lib/pgdb.ts",
-      "source_location": "L92",
+      "source_location": "L139",
       "_origin": "ast",
       "id": "lib_pgdb_getallsettingsexcept",
       "community": 6,
@@ -8947,7 +9337,7 @@
       "label": "isConfigured()",
       "file_type": "code",
       "source_file": "frontend/src/lib/pgdb.ts",
-      "source_location": "L106",
+      "source_location": "L155",
       "_origin": "ast",
       "id": "lib_pgdb_isconfigured",
       "community": 6,
@@ -8957,7 +9347,7 @@
       "label": "getBotToken()",
       "file_type": "code",
       "source_file": "frontend/src/lib/pgdb.ts",
-      "source_location": "L111",
+      "source_location": "L160",
       "_origin": "ast",
       "id": "lib_pgdb_getbottoken",
       "community": 6,
@@ -8967,7 +9357,7 @@
       "label": "getUserIdByChannelId()",
       "file_type": "code",
       "source_file": "frontend/src/lib/pgdb.ts",
-      "source_location": "L139",
+      "source_location": "L188",
       "_origin": "ast",
       "id": "lib_pgdb_getuseridbychannelid",
       "community": 6,
@@ -8977,7 +9367,7 @@
       "label": "getUserSettings()",
       "file_type": "code",
       "source_file": "frontend/src/lib/pgdb.ts",
-      "source_location": "L154",
+      "source_location": "L203",
       "_origin": "ast",
       "id": "lib_pgdb_getusersettings",
       "community": 6,
@@ -8994,20 +9384,70 @@
       "norm_label": "telegrambotrunner.ts"
     },
     {
-      "label": "safeParse()",
+      "label": "readDb()",
       "file_type": "code",
       "source_file": "frontend/src/lib/telegramBotRunner.ts",
       "source_location": "L11",
       "_origin": "ast",
-      "id": "lib_telegrambotrunner_safeparse",
+      "id": "lib_telegrambotrunner_readdb",
       "community": 0,
+      "norm_label": "readdb()"
+    },
+    {
+      "label": "safeParse()",
+      "file_type": "code",
+      "source_file": "frontend/src/lib/telegramBotRunner.ts",
+      "source_location": "L22",
+      "_origin": "ast",
+      "id": "lib_telegrambotrunner_safeparse",
+      "community": 75,
       "norm_label": "safeparse()"
+    },
+    {
+      "label": "getDefaultSystemPrompt()",
+      "file_type": "code",
+      "source_file": "frontend/src/lib/telegramBotRunner.ts",
+      "source_location": "L34",
+      "_origin": "ast",
+      "id": "lib_telegrambotrunner_getdefaultsystemprompt",
+      "community": 0,
+      "norm_label": "getdefaultsystemprompt()"
+    },
+    {
+      "label": "sanitizeMessage()",
+      "file_type": "code",
+      "source_file": "frontend/src/lib/telegramBotRunner.ts",
+      "source_location": "L55",
+      "_origin": "ast",
+      "id": "lib_telegrambotrunner_sanitizemessage",
+      "community": 0,
+      "norm_label": "sanitizemessage()"
+    },
+    {
+      "label": "injectStyleInstructions()",
+      "file_type": "code",
+      "source_file": "frontend/src/lib/telegramBotRunner.ts",
+      "source_location": "L74",
+      "_origin": "ast",
+      "id": "lib_telegrambotrunner_injectstyleinstructions",
+      "community": 0,
+      "norm_label": "injectstyleinstructions()"
+    },
+    {
+      "label": "injectForbiddenTopics()",
+      "file_type": "code",
+      "source_file": "frontend/src/lib/telegramBotRunner.ts",
+      "source_location": "L105",
+      "_origin": "ast",
+      "id": "lib_telegrambotrunner_injectforbiddentopics",
+      "community": 0,
+      "norm_label": "injectforbiddentopics()"
     },
     {
       "label": "ChatMessage",
       "file_type": "code",
       "source_file": "frontend/src/lib/telegramBotRunner.ts",
-      "source_location": "L23",
+      "source_location": "L117",
       "_origin": "ast",
       "id": "lib_telegrambotrunner_chatmessage",
       "community": 0,
@@ -9017,7 +9457,7 @@
       "label": "ChatThread",
       "file_type": "code",
       "source_file": "frontend/src/lib/telegramBotRunner.ts",
-      "source_location": "L30",
+      "source_location": "L124",
       "_origin": "ast",
       "id": "lib_telegrambotrunner_chatthread",
       "community": 0,
@@ -9027,7 +9467,7 @@
       "label": "TelegramBotState",
       "file_type": "code",
       "source_file": "frontend/src/lib/telegramBotRunner.ts",
-      "source_location": "L43",
+      "source_location": "L137",
       "_origin": "ast",
       "id": "lib_telegrambotrunner_telegrambotstate",
       "community": 0,
@@ -9037,7 +9477,7 @@
       "label": "isValidUuid()",
       "file_type": "code",
       "source_file": "frontend/src/lib/telegramBotRunner.ts",
-      "source_location": "L50",
+      "source_location": "L144",
       "_origin": "ast",
       "id": "lib_telegrambotrunner_isvaliduuid",
       "community": 0,
@@ -9047,17 +9487,17 @@
       "label": "getDbDataFromRailway()",
       "file_type": "code",
       "source_file": "frontend/src/lib/telegramBotRunner.ts",
-      "source_location": "L55",
+      "source_location": "L149",
       "_origin": "ast",
       "id": "lib_telegrambotrunner_getdbdatafromrailway",
-      "community": 78,
+      "community": 75,
       "norm_label": "getdbdatafromrailway()"
     },
     {
       "label": "splitTelegramMessage()",
       "file_type": "code",
       "source_file": "frontend/src/lib/telegramBotRunner.ts",
-      "source_location": "L76",
+      "source_location": "L170",
       "_origin": "ast",
       "id": "lib_telegrambotrunner_splittelegrammessage",
       "community": 0,
@@ -9067,17 +9507,107 @@
       "label": "getUserPlan()",
       "file_type": "code",
       "source_file": "frontend/src/lib/telegramBotRunner.ts",
-      "source_location": "L100",
+      "source_location": "L194",
       "_origin": "ast",
       "id": "lib_telegrambotrunner_getuserplan",
       "community": 0,
       "norm_label": "getuserplan()"
     },
     {
+      "label": "MessageQueue",
+      "file_type": "code",
+      "source_file": "frontend/src/lib/telegramBotRunner.ts",
+      "source_location": "L217",
+      "_origin": "ast",
+      "id": "lib_telegrambotrunner_messagequeue",
+      "community": 0,
+      "norm_label": "messagequeue"
+    },
+    {
+      "label": ".add()",
+      "file_type": "code",
+      "source_file": "frontend/src/lib/telegramBotRunner.ts",
+      "source_location": "L221",
+      "_origin": "ast",
+      "id": "lib_telegrambotrunner_messagequeue_add",
+      "community": 0,
+      "norm_label": ".add()"
+    },
+    {
+      "label": "tokenQueues",
+      "file_type": "code",
+      "source_file": "frontend/src/lib/telegramBotRunner.ts",
+      "source_location": "L241",
+      "_origin": "ast",
+      "id": "lib_telegrambotrunner_tokenqueues",
+      "community": 0,
+      "norm_label": "tokenqueues"
+    },
+    {
+      "label": "getTokenQueue()",
+      "file_type": "code",
+      "source_file": "frontend/src/lib/telegramBotRunner.ts",
+      "source_location": "L243",
+      "_origin": "ast",
+      "id": "lib_telegrambotrunner_gettokenqueue",
+      "community": 0,
+      "norm_label": "gettokenqueue()"
+    },
+    {
+      "label": "getChannelIdByToken()",
+      "file_type": "code",
+      "source_file": "frontend/src/lib/telegramBotRunner.ts",
+      "source_location": "L252",
+      "_origin": "ast",
+      "id": "lib_telegrambotrunner_getchannelidbytoken",
+      "community": 75,
+      "norm_label": "getchannelidbytoken()"
+    },
+    {
+      "label": "handleBlockedUser()",
+      "file_type": "code",
+      "source_file": "frontend/src/lib/telegramBotRunner.ts",
+      "source_location": "L288",
+      "_origin": "ast",
+      "id": "lib_telegrambotrunner_handleblockeduser",
+      "community": 52,
+      "norm_label": "handleblockeduser()"
+    },
+    {
+      "label": "isUserBlocked()",
+      "file_type": "code",
+      "source_file": "frontend/src/lib/telegramBotRunner.ts",
+      "source_location": "L307",
+      "_origin": "ast",
+      "id": "lib_telegrambotrunner_isuserblocked",
+      "community": 75,
+      "norm_label": "isuserblocked()"
+    },
+    {
+      "label": "getBotUsername()",
+      "file_type": "code",
+      "source_file": "frontend/src/lib/telegramBotRunner.ts",
+      "source_location": "L338",
+      "_origin": "ast",
+      "id": "lib_telegrambotrunner_getbotusername",
+      "community": 52,
+      "norm_label": "getbotusername()"
+    },
+    {
+      "label": "addTelegramChannelToList()",
+      "file_type": "code",
+      "source_file": "frontend/src/lib/telegramBotRunner.ts",
+      "source_location": "L363",
+      "_origin": "ast",
+      "id": "lib_telegrambotrunner_addtelegramchanneltolist",
+      "community": 52,
+      "norm_label": "addtelegramchanneltolist()"
+    },
+    {
       "label": "sendTelegramMessage()",
       "file_type": "code",
       "source_file": "frontend/src/lib/telegramBotRunner.ts",
-      "source_location": "L123",
+      "source_location": "L382",
       "_origin": "ast",
       "id": "lib_telegrambotrunner_sendtelegrammessage",
       "community": 0,
@@ -9087,27 +9617,27 @@
       "label": "TaskQueue",
       "file_type": "code",
       "source_file": "frontend/src/lib/telegramBotRunner.ts",
-      "source_location": "L154",
+      "source_location": "L430",
       "_origin": "ast",
       "id": "lib_telegrambotrunner_taskqueue",
-      "community": 78,
+      "community": 0,
       "norm_label": "taskqueue"
     },
     {
       "label": ".add()",
       "file_type": "code",
       "source_file": "frontend/src/lib/telegramBotRunner.ts",
-      "source_location": "L157",
+      "source_location": "L433",
       "_origin": "ast",
       "id": "lib_telegrambotrunner_taskqueue_add",
-      "community": 78,
+      "community": 0,
       "norm_label": ".add()"
     },
     {
       "label": "chatQueues",
       "file_type": "code",
       "source_file": "frontend/src/lib/telegramBotRunner.ts",
-      "source_location": "L169",
+      "source_location": "L445",
       "_origin": "ast",
       "id": "lib_telegrambotrunner_chatqueues",
       "community": 0,
@@ -9117,7 +9647,7 @@
       "label": "getChatQueue()",
       "file_type": "code",
       "source_file": "frontend/src/lib/telegramBotRunner.ts",
-      "source_location": "L171",
+      "source_location": "L447",
       "_origin": "ast",
       "id": "lib_telegrambotrunner_getchatqueue",
       "community": 0,
@@ -9127,37 +9657,37 @@
       "label": "getUserIdForChannel()",
       "file_type": "code",
       "source_file": "frontend/src/lib/telegramBotRunner.ts",
-      "source_location": "L180",
+      "source_location": "L456",
       "_origin": "ast",
       "id": "lib_telegrambotrunner_getuseridforchannel",
-      "community": 0,
+      "community": 52,
       "norm_label": "getuseridforchannel()"
     },
     {
       "label": "updateUserDbFile()",
       "file_type": "code",
       "source_file": "frontend/src/lib/telegramBotRunner.ts",
-      "source_location": "L207",
+      "source_location": "L483",
       "_origin": "ast",
       "id": "lib_telegrambotrunner_updateuserdbfile",
-      "community": 0,
+      "community": 52,
       "norm_label": "updateuserdbfile()"
     },
     {
       "label": "handleTelegramUpdate()",
       "file_type": "code",
       "source_file": "frontend/src/lib/telegramBotRunner.ts",
-      "source_location": "L243",
+      "source_location": "L521",
       "_origin": "ast",
       "id": "lib_telegrambotrunner_handletelegramupdate",
-      "community": 0,
+      "community": 52,
       "norm_label": "handletelegramupdate()"
     },
     {
       "label": "lastOutreachChecks",
       "file_type": "code",
       "source_file": "frontend/src/lib/telegramBotRunner.ts",
-      "source_location": "L973",
+      "source_location": "L1276",
       "_origin": "ast",
       "id": "lib_telegrambotrunner_lastoutreachchecks",
       "community": 0,
@@ -9167,37 +9697,37 @@
       "label": "checkAndRunAutoOutreach()",
       "file_type": "code",
       "source_file": "frontend/src/lib/telegramBotRunner.ts",
-      "source_location": "L975",
+      "source_location": "L1278",
       "_origin": "ast",
       "id": "lib_telegrambotrunner_checkandrunautooutreach",
-      "community": 0,
+      "community": 52,
       "norm_label": "checkandrunautooutreach()"
     },
     {
       "label": "runBotPollLoop()",
       "file_type": "code",
       "source_file": "frontend/src/lib/telegramBotRunner.ts",
-      "source_location": "L1119",
+      "source_location": "L1422",
       "_origin": "ast",
       "id": "lib_telegrambotrunner_runbotpollloop",
-      "community": 0,
+      "community": 75,
       "norm_label": "runbotpollloop()"
     },
     {
       "label": "startTelegramBots()",
       "file_type": "code",
       "source_file": "frontend/src/lib/telegramBotRunner.ts",
-      "source_location": "L1182",
+      "source_location": "L1485",
       "_origin": "ast",
       "id": "lib_telegrambotrunner_starttelegrambots",
-      "community": 78,
+      "community": 75,
       "norm_label": "starttelegrambots()"
     },
     {
       "label": "classifyIntentForCustDev()",
       "file_type": "code",
       "source_file": "frontend/src/lib/telegramBotRunner.ts",
-      "source_location": "L1322",
+      "source_location": "L1697",
       "_origin": "ast",
       "id": "lib_telegrambotrunner_classifyintentforcustdev",
       "community": 0,
@@ -9207,7 +9737,7 @@
       "label": "detectSentiment()",
       "file_type": "code",
       "source_file": "frontend/src/lib/telegramBotRunner.ts",
-      "source_location": "L1434",
+      "source_location": "L1809",
       "_origin": "ast",
       "id": "lib_telegrambotrunner_detectsentiment",
       "community": 0,
@@ -9217,7 +9747,7 @@
       "label": "extractPainPoint()",
       "file_type": "code",
       "source_file": "frontend/src/lib/telegramBotRunner.ts",
-      "source_location": "L1498",
+      "source_location": "L1873",
       "_origin": "ast",
       "id": "lib_telegrambotrunner_extractpainpoint",
       "community": 0,
@@ -9242,6 +9772,66 @@
       "id": "lib_utils_cn",
       "community": 8,
       "norm_label": "cn()"
+    },
+    {
+      "label": "middleware.ts",
+      "file_type": "code",
+      "source_file": "frontend/src/middleware.ts",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "src_middleware",
+      "community": 79,
+      "norm_label": "middleware.ts"
+    },
+    {
+      "label": "apiRateLimitStore",
+      "file_type": "code",
+      "source_file": "frontend/src/middleware.ts",
+      "source_location": "L5",
+      "_origin": "ast",
+      "id": "src_middleware_apiratelimitstore",
+      "community": 79,
+      "norm_label": "apiratelimitstore"
+    },
+    {
+      "label": "checkApiRateLimit()",
+      "file_type": "code",
+      "source_file": "frontend/src/middleware.ts",
+      "source_location": "L7",
+      "_origin": "ast",
+      "id": "src_middleware_checkapiratelimit",
+      "community": 79,
+      "norm_label": "checkapiratelimit()"
+    },
+    {
+      "label": "isOriginAllowed()",
+      "file_type": "code",
+      "source_file": "frontend/src/middleware.ts",
+      "source_location": "L26",
+      "_origin": "ast",
+      "id": "src_middleware_isoriginallowed",
+      "community": 79,
+      "norm_label": "isoriginallowed()"
+    },
+    {
+      "label": "middleware()",
+      "file_type": "code",
+      "source_file": "frontend/src/middleware.ts",
+      "source_location": "L43",
+      "_origin": "ast",
+      "id": "src_middleware_middleware",
+      "community": 79,
+      "norm_label": "middleware()"
+    },
+    {
+      "label": "config",
+      "file_type": "code",
+      "source_file": "frontend/src/middleware.ts",
+      "source_location": "L147",
+      "_origin": "ast",
+      "id": "src_middleware_config",
+      "community": 79,
+      "norm_label": "config"
     },
     {
       "label": "tailwind.config.ts",
@@ -9324,10 +9914,30 @@
       "norm_label": "strict"
     },
     {
-      "label": "noEmit",
+      "label": "noImplicitAny",
       "file_type": "code",
       "source_file": "frontend/tsconfig.json",
       "source_location": "L7",
+      "_origin": "ast",
+      "id": "frontend_tsconfig_compileroptions_noimplicitany",
+      "community": 17,
+      "norm_label": "noimplicitany"
+    },
+    {
+      "label": "strictNullChecks",
+      "file_type": "code",
+      "source_file": "frontend/tsconfig.json",
+      "source_location": "L8",
+      "_origin": "ast",
+      "id": "frontend_tsconfig_compileroptions_strictnullchecks",
+      "community": 17,
+      "norm_label": "strictnullchecks"
+    },
+    {
+      "label": "noEmit",
+      "file_type": "code",
+      "source_file": "frontend/tsconfig.json",
+      "source_location": "L9",
       "_origin": "ast",
       "id": "frontend_tsconfig_compileroptions_noemit",
       "community": 17,
@@ -9337,7 +9947,7 @@
       "label": "esModuleInterop",
       "file_type": "code",
       "source_file": "frontend/tsconfig.json",
-      "source_location": "L8",
+      "source_location": "L10",
       "_origin": "ast",
       "id": "frontend_tsconfig_compileroptions_esmoduleinterop",
       "community": 17,
@@ -9347,7 +9957,7 @@
       "label": "module",
       "file_type": "code",
       "source_file": "frontend/tsconfig.json",
-      "source_location": "L9",
+      "source_location": "L11",
       "_origin": "ast",
       "id": "frontend_tsconfig_compileroptions_module",
       "community": 17,
@@ -9357,7 +9967,7 @@
       "label": "moduleResolution",
       "file_type": "code",
       "source_file": "frontend/tsconfig.json",
-      "source_location": "L10",
+      "source_location": "L12",
       "_origin": "ast",
       "id": "frontend_tsconfig_compileroptions_moduleresolution",
       "community": 17,
@@ -9367,7 +9977,7 @@
       "label": "resolveJsonModule",
       "file_type": "code",
       "source_file": "frontend/tsconfig.json",
-      "source_location": "L11",
+      "source_location": "L13",
       "_origin": "ast",
       "id": "frontend_tsconfig_compileroptions_resolvejsonmodule",
       "community": 17,
@@ -9377,7 +9987,7 @@
       "label": "isolatedModules",
       "file_type": "code",
       "source_file": "frontend/tsconfig.json",
-      "source_location": "L12",
+      "source_location": "L14",
       "_origin": "ast",
       "id": "frontend_tsconfig_compileroptions_isolatedmodules",
       "community": 17,
@@ -9387,7 +9997,7 @@
       "label": "jsx",
       "file_type": "code",
       "source_file": "frontend/tsconfig.json",
-      "source_location": "L13",
+      "source_location": "L15",
       "_origin": "ast",
       "id": "frontend_tsconfig_compileroptions_jsx",
       "community": 17,
@@ -9397,7 +10007,7 @@
       "label": "incremental",
       "file_type": "code",
       "source_file": "frontend/tsconfig.json",
-      "source_location": "L14",
+      "source_location": "L16",
       "_origin": "ast",
       "id": "frontend_tsconfig_compileroptions_incremental",
       "community": 17,
@@ -9407,7 +10017,7 @@
       "label": "plugins",
       "file_type": "code",
       "source_file": "frontend/tsconfig.json",
-      "source_location": "L15",
+      "source_location": "L17",
       "_origin": "ast",
       "id": "frontend_tsconfig_compileroptions_plugins",
       "community": 17,
@@ -9417,7 +10027,7 @@
       "label": "paths",
       "file_type": "code",
       "source_file": "frontend/tsconfig.json",
-      "source_location": "L20",
+      "source_location": "L22",
       "_origin": "ast",
       "id": "frontend_tsconfig_compileroptions_paths",
       "community": 17,
@@ -9427,7 +10037,7 @@
       "label": "@/*",
       "file_type": "code",
       "source_file": "frontend/tsconfig.json",
-      "source_location": "L21",
+      "source_location": "L23",
       "_origin": "ast",
       "id": "frontend_tsconfig_paths",
       "community": 17,
@@ -9437,7 +10047,7 @@
       "label": "include",
       "file_type": "code",
       "source_file": "frontend/tsconfig.json",
-      "source_location": "L24",
+      "source_location": "L26",
       "_origin": "ast",
       "id": "frontend_tsconfig_include",
       "community": 17,
@@ -9447,7 +10057,7 @@
       "label": "exclude",
       "file_type": "code",
       "source_file": "frontend/tsconfig.json",
-      "source_location": "L25",
+      "source_location": "L27",
       "_origin": "ast",
       "id": "frontend_tsconfig_exclude",
       "community": 17,
@@ -9567,10 +10177,10 @@
       "label": "getDbDataFromSupabase",
       "file_type": "code",
       "source_file": "frontend/src/lib/telegramBotRunner.ts",
-      "source_location": "L74",
+      "source_location": "L168",
       "_origin": "ast",
       "id": "lib_telegrambotrunner_getdbdatafromsupabase",
-      "community": 0,
+      "community": 52,
       "norm_label": "getdbdatafromsupabase"
     }
   ],
@@ -13487,6 +14097,76 @@
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
+      "source_file": "frontend/.eslintrc.json",
+      "source_location": "L3",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "frontend_eslintrc",
+      "target": "frontend_eslintrc_rules"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/.eslintrc.json",
+      "source_location": "L9",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "frontend_eslintrc_rules",
+      "target": "frontend_eslintrc_rules_next_next_no_img_element"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/.eslintrc.json",
+      "source_location": "L7",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "frontend_eslintrc_rules",
+      "target": "frontend_eslintrc_rules_prefer_const"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/.eslintrc.json",
+      "source_location": "L8",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "frontend_eslintrc_rules",
+      "target": "frontend_eslintrc_rules_react_hooks_exhaustive_deps"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/.eslintrc.json",
+      "source_location": "L6",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "frontend_eslintrc_rules",
+      "target": "frontend_eslintrc_rules_react_no_unescaped_entities"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/.eslintrc.json",
+      "source_location": "L5",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "frontend_eslintrc_rules",
+      "target": "frontend_eslintrc_rules_typescript_eslint_no_explicit_any"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/.eslintrc.json",
+      "source_location": "L4",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "frontend_eslintrc_rules",
+      "target": "frontend_eslintrc_rules_typescript_eslint_no_unused_vars"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
       "source_file": "frontend/check-db.js",
       "source_location": "L1",
       "weight": 1.0,
@@ -13623,6 +14303,16 @@
       "confidence_score": 1.0,
       "source": "frontend_package_scripts",
       "target": "frontend_package_scripts_start"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/package.json",
+      "source_location": "L41",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "frontend_package_dependencies",
+      "target": "frontend_package_dependencies_bcryptjs"
     },
     {
       "relation": "contains",
@@ -14203,6 +14893,16 @@
       "confidence_score": 1.0,
       "source": "frontend_package_devdependencies",
       "target": "frontend_package_devdependencies_tailwindcss"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/package.json",
+      "source_location": "L70",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "frontend_package_devdependencies",
+      "target": "frontend_package_devdependencies_types_bcryptjs"
     },
     {
       "relation": "contains",
@@ -15178,6 +15878,17 @@
       "weight": 1.0,
       "confidence_score": 1.0,
       "source": "ai_agent_page",
+      "target": "lib_db_contact"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/src/app/ai-agent/page.tsx",
+      "source_location": "L10",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "ai_agent_page",
       "target": "lib_db_db"
     },
     {
@@ -15849,6 +16560,16 @@
       "target": "lib_jwt_verifyjwt"
     },
     {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/src/app/api/ai/parse-students/route.ts",
+      "source_location": "L3",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "parse_students_route",
+      "target": "parse_students_route_post"
+    },
+    {
       "relation": "imports_from",
       "context": "import",
       "confidence": "EXTRACTED",
@@ -16002,6 +16723,165 @@
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
+      "source_file": "frontend/src/app/api/auth/change-password/route.ts",
+      "source_location": "L33",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "change_password_route",
+      "target": "change_password_route_post"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/src/app/api/auth/change-password/route.ts",
+      "source_location": "L10",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "change_password_route",
+      "target": "change_password_route_readdb"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/src/app/api/auth/change-password/route.ts",
+      "source_location": "L23",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "change_password_route",
+      "target": "change_password_route_writedb"
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/src/app/api/auth/change-password/route.ts",
+      "source_location": "L6",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "change_password_route",
+      "target": "lib_jwt"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/src/app/api/auth/change-password/route.ts",
+      "source_location": "L6",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "change_password_route",
+      "target": "lib_jwt_verifyjwt"
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/src/app/api/auth/change-password/route.ts",
+      "source_location": "L5",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "change_password_route",
+      "target": "lib_pgdb"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/src/app/api/auth/change-password/route.ts",
+      "source_location": "L88",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "change_password_route_post",
+      "target": "change_password_route_readdb"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/src/app/api/auth/change-password/route.ts",
+      "source_location": "L106",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "change_password_route_post",
+      "target": "change_password_route_writedb"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "frontend/src/app/api/auth/change-password/route.ts",
+      "source_location": "L43",
+      "weight": 1.0,
+      "source": "change_password_route_post",
+      "target": "lib_jwt_verifyjwt"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/src/app/api/auth/check-email/route.ts",
+      "source_location": "L40",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "check_email_route",
+      "target": "check_email_route_post"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/src/app/api/auth/check-email/route.ts",
+      "source_location": "L8",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "check_email_route",
+      "target": "check_email_route_readdb"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/src/app/api/auth/check-email/route.ts",
+      "source_location": "L21",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "check_email_route",
+      "target": "check_email_route_userexists"
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/src/app/api/auth/check-email/route.ts",
+      "source_location": "L4",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "check_email_route",
+      "target": "lib_pgdb"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/src/app/api/auth/check-email/route.ts",
+      "source_location": "L35",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "check_email_route_userexists",
+      "target": "check_email_route_readdb"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/src/app/api/auth/check-email/route.ts",
+      "source_location": "L51",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "check_email_route_post",
+      "target": "check_email_route_userexists"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
       "source_file": "frontend/src/app/api/auth/google/route.ts",
       "source_location": "L23",
       "weight": 1.0,
@@ -16099,12 +16979,193 @@
       "relation": "imports_from",
       "context": "import",
       "confidence": "EXTRACTED",
+      "source_file": "frontend/src/app/api/auth/login/route.ts",
+      "source_location": "L5",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "login_route",
+      "target": "lib_pgdb"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/src/app/api/auth/login/route.ts",
+      "source_location": "L22",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "login_route",
+      "target": "login_route_finduserbyemail"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/src/app/api/auth/login/route.ts",
+      "source_location": "L42",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "login_route",
+      "target": "login_route_post"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/src/app/api/auth/login/route.ts",
+      "source_location": "L9",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "login_route",
+      "target": "login_route_readdb"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/src/app/api/auth/login/route.ts",
+      "source_location": "L37",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "login_route_finduserbyemail",
+      "target": "login_route_readdb"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/src/app/api/auth/login/route.ts",
+      "source_location": "L94",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "login_route_post",
+      "target": "login_route_readdb"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/src/app/api/auth/login/route.ts",
+      "source_location": "L53",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "login_route_post",
+      "target": "login_route_finduserbyemail"
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/src/app/api/auth/reset-password/route.ts",
+      "source_location": "L6",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "reset_password_route",
+      "target": "lib_jwt"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/src/app/api/auth/reset-password/route.ts",
+      "source_location": "L6",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "reset_password_route",
+      "target": "lib_jwt_verifyjwt"
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/src/app/api/auth/reset-password/route.ts",
+      "source_location": "L5",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "reset_password_route",
+      "target": "lib_pgdb"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/src/app/api/auth/reset-password/route.ts",
+      "source_location": "L33",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "reset_password_route",
+      "target": "reset_password_route_post"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/src/app/api/auth/reset-password/route.ts",
+      "source_location": "L10",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "reset_password_route",
+      "target": "reset_password_route_readdb"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/src/app/api/auth/reset-password/route.ts",
+      "source_location": "L23",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "reset_password_route",
+      "target": "reset_password_route_writedb"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/src/app/api/auth/reset-password/route.ts",
+      "source_location": "L75",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "reset_password_route_post",
+      "target": "reset_password_route_readdb"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/src/app/api/auth/reset-password/route.ts",
+      "source_location": "L81",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "reset_password_route_post",
+      "target": "reset_password_route_writedb"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "frontend/src/app/api/auth/reset-password/route.ts",
+      "source_location": "L43",
+      "weight": 1.0,
+      "source": "reset_password_route_post",
+      "target": "lib_jwt_verifyjwt"
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
       "source_file": "frontend/src/app/api/auth/send-otp/route.ts",
       "source_location": "L33",
       "weight": 1.0,
       "confidence_score": 1.0,
       "source": "send_otp_route",
       "target": "lib_otpstore"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/src/app/api/auth/send-otp/route.ts",
+      "source_location": "L33",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "send_otp_route",
+      "target": "lib_otpstore_checkotpiplimit"
     },
     {
       "relation": "imports",
@@ -16158,6 +17219,17 @@
       "confidence_score": 1.0,
       "source": "send_otp_route_post",
       "target": "send_otp_route_html_template"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "frontend/src/app/api/auth/send-otp/route.ts",
+      "source_location": "L59",
+      "weight": 1.0,
+      "source": "send_otp_route_post",
+      "target": "lib_otpstore_checkotpiplimit"
     },
     {
       "relation": "calls",
@@ -16989,6 +18061,17 @@
       "confidence_score": 1.0,
       "source": "db_route",
       "target": "lib_telegrambotrunner"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/src/app/api/db/route.ts",
+      "source_location": "L4",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "db_route",
+      "target": "lib_telegrambotrunner_getdefaultsystemprompt"
     },
     {
       "relation": "imports",
@@ -19639,6 +20722,16 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "frontend/src/app/help/page.tsx",
+      "source_location": "L24",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "help_page",
+      "target": "help_page_facebook"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/src/app/help/page.tsx",
       "source_location": "L26",
       "weight": 1.0,
       "confidence_score": 1.0,
@@ -19664,6 +20757,16 @@
       "confidence_score": 1.0,
       "source": "help_page",
       "target": "help_page_helppage"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/src/app/help/page.tsx",
+      "source_location": "L41",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "help_page",
+      "target": "help_page_instagram"
     },
     {
       "relation": "contains",
@@ -19789,6 +20892,16 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "frontend/src/app/layout.tsx",
+      "source_location": "L29",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "app_layout",
+      "target": "app_layout_generatemetadata"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/src/app/layout.tsx",
       "source_location": "L7",
       "weight": 1.0,
       "confidence_score": 1.0,
@@ -19799,21 +20912,21 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "frontend/src/app/layout.tsx",
-      "source_location": "L13",
-      "weight": 1.0,
-      "confidence_score": 1.0,
-      "source": "app_layout",
-      "target": "app_layout_metadata"
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
-      "source_file": "frontend/src/app/layout.tsx",
       "source_location": "L18",
       "weight": 1.0,
       "confidence_score": 1.0,
       "source": "app_layout",
       "target": "app_layout_rootlayout"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/src/app/layout.tsx",
+      "source_location": "L14",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "app_layout",
+      "target": "app_layout_translations"
     },
     {
       "relation": "imports_from",
@@ -19836,6 +20949,72 @@
       "confidence_score": 1.0,
       "source": "app_layout",
       "target": "i18n_i18nprovider_i18nprovider"
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/src/app/layout.tsx",
+      "source_location": "L9",
+      "weight": 1.0,
+      "source": "app_layout",
+      "target": "layout_cookieconsent",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/src/app/layout.tsx",
+      "source_location": "L9",
+      "weight": 1.0,
+      "source": "app_layout",
+      "target": "layout_cookieconsent_cookieconsent",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/src/app/layout.tsx",
+      "source_location": "L8",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "app_layout",
+      "target": "lib_errortracker"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/src/app/layout.tsx",
+      "source_location": "L8",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "app_layout",
+      "target": "lib_errortracker_errortrackerinitializer"
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/src/app/layout.tsx",
+      "source_location": "L7",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "app_layout",
+      "target": "ui_sonner"
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/src/app/layout.tsx",
+      "source_location": "L7",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "app_layout",
+      "target": "ui_sonner_toaster"
     },
     {
       "relation": "imports_from",
@@ -21890,6 +23069,49 @@
       "source_location": "L11",
       "weight": 1.0,
       "source": "layout_connectchannelmodal_connectchannelmodal",
+      "target": "i18n_i18nprovider_usei18n"
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/src/components/layout/CookieConsent.tsx",
+      "source_location": "L4",
+      "weight": 1.0,
+      "source": "layout_cookieconsent",
+      "target": "i18n_i18nprovider",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/src/components/layout/CookieConsent.tsx",
+      "source_location": "L4",
+      "weight": 1.0,
+      "source": "layout_cookieconsent",
+      "target": "i18n_i18nprovider_usei18n",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/src/components/layout/CookieConsent.tsx",
+      "source_location": "L7",
+      "weight": 1.0,
+      "source": "layout_cookieconsent",
+      "target": "layout_cookieconsent_cookieconsent",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "frontend/src/components/layout/CookieConsent.tsx",
+      "source_location": "L8",
+      "weight": 1.0,
+      "source": "layout_cookieconsent_cookieconsent",
       "target": "i18n_i18nprovider_usei18n"
     },
     {
@@ -26670,6 +27892,36 @@
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
+      "source_file": "frontend/src/lib/errorTracker.ts",
+      "source_location": "L59",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "lib_errortracker",
+      "target": "lib_errortracker_errortrackerinitializer"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/src/lib/errorTracker.ts",
+      "source_location": "L5",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "lib_errortracker",
+      "target": "lib_errortracker_initerrortracking"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/src/lib/errorTracker.ts",
+      "source_location": "L5",
+      "weight": 1.0,
+      "source": "lib_errortracker",
+      "target": "lib_errortracker_istrackingallowed",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
       "source_file": "frontend/src/lib/jwt.ts",
       "source_location": "L3",
       "weight": 1.0,
@@ -26733,6 +27985,16 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "frontend/src/lib/otpStore.ts",
+      "source_location": "L67",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "lib_otpstore",
+      "target": "lib_otpstore_checkotpiplimit"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/src/lib/otpStore.ts",
       "source_location": "L48",
       "weight": 1.0,
       "confidence_score": 1.0,
@@ -26790,6 +28052,17 @@
       "target": "lib_otpstore_verifyotpcode"
     },
     {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/src/lib/otpStore.ts",
+      "source_location": "L68",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "lib_otpstore_checkotpiplimit",
+      "target": "lib_otpstore_checkratelimit"
+    },
+    {
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "frontend/src/lib/pgdb.ts",
@@ -26798,6 +28071,16 @@
       "confidence_score": 1.0,
       "source": "lib_pgdb",
       "target": "lib_pgdb_deletevalue"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/src/lib/pgdb.ts",
+      "source_location": "L26",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "lib_pgdb",
+      "target": "lib_pgdb_executetransaction"
     },
     {
       "relation": "contains",
@@ -26903,6 +28186,16 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "frontend/src/lib/pgdb.ts",
+      "source_location": "L70",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "lib_pgdb",
+      "target": "lib_pgdb_logcredittransaction"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/src/lib/pgdb.ts",
       "source_location": "L54",
       "weight": 1.0,
       "confidence_score": 1.0,
@@ -26929,6 +28222,17 @@
       "weight": 1.0,
       "confidence_score": 1.0,
       "source": "lib_pgdb_deletevalue",
+      "target": "lib_pgdb_getpool"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/src/lib/pgdb.ts",
+      "source_location": "L29",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "lib_pgdb_executetransaction",
       "target": "lib_pgdb_getpool"
     },
     {
@@ -27006,6 +28310,17 @@
       "weight": 1.0,
       "confidence_score": 1.0,
       "source": "lib_pgdb_initdb",
+      "target": "lib_pgdb_getpool"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/src/lib/pgdb.ts",
+      "source_location": "L78",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "lib_pgdb_logcredittransaction",
       "target": "lib_pgdb_getpool"
     },
     {
@@ -27101,6 +28416,17 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "frontend/src/lib/pgdb.ts",
+      "source_location": "L77",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "lib_pgdb_logcredittransaction",
+      "target": "lib_pgdb_initdb"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/src/lib/pgdb.ts",
       "source_location": "L55",
       "weight": 1.0,
       "confidence_score": 1.0,
@@ -27112,11 +28438,32 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "frontend/src/lib/pgdb.ts",
+      "source_location": "L76",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "lib_pgdb_logcredittransaction",
+      "target": "lib_pgdb_isconfigured"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/src/lib/pgdb.ts",
       "source_location": "L155",
       "weight": 1.0,
       "confidence_score": 1.0,
       "source": "lib_pgdb_getusersettings",
       "target": "lib_pgdb_getvalue"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/src/lib/telegramBotRunner.ts",
+      "source_location": "L363",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "lib_telegrambotrunner",
+      "target": "lib_telegrambotrunner_addtelegramchanneltolist"
     },
     {
       "relation": "contains",
@@ -27192,6 +28539,26 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "frontend/src/lib/telegramBotRunner.ts",
+      "source_location": "L338",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "lib_telegrambotrunner",
+      "target": "lib_telegrambotrunner_getbotusername"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/src/lib/telegramBotRunner.ts",
+      "source_location": "L252",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "lib_telegrambotrunner",
+      "target": "lib_telegrambotrunner_getchannelidbytoken"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/src/lib/telegramBotRunner.ts",
       "source_location": "L148",
       "weight": 1.0,
       "confidence_score": 1.0,
@@ -27207,6 +28574,26 @@
       "confidence_score": 1.0,
       "source": "lib_telegrambotrunner",
       "target": "lib_telegrambotrunner_getdbdatafromrailway"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/src/lib/telegramBotRunner.ts",
+      "source_location": "L34",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "lib_telegrambotrunner",
+      "target": "lib_telegrambotrunner_getdefaultsystemprompt"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/src/lib/telegramBotRunner.ts",
+      "source_location": "L243",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "lib_telegrambotrunner",
+      "target": "lib_telegrambotrunner_gettokenqueue"
     },
     {
       "relation": "contains",
@@ -27232,11 +28619,51 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "frontend/src/lib/telegramBotRunner.ts",
+      "source_location": "L288",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "lib_telegrambotrunner",
+      "target": "lib_telegrambotrunner_handleblockeduser"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/src/lib/telegramBotRunner.ts",
       "source_location": "L168",
       "weight": 1.0,
       "confidence_score": 1.0,
       "source": "lib_telegrambotrunner",
       "target": "lib_telegrambotrunner_handletelegramupdate"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/src/lib/telegramBotRunner.ts",
+      "source_location": "L105",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "lib_telegrambotrunner",
+      "target": "lib_telegrambotrunner_injectforbiddentopics"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/src/lib/telegramBotRunner.ts",
+      "source_location": "L74",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "lib_telegrambotrunner",
+      "target": "lib_telegrambotrunner_injectstyleinstructions"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/src/lib/telegramBotRunner.ts",
+      "source_location": "L307",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "lib_telegrambotrunner",
+      "target": "lib_telegrambotrunner_isuserblocked"
     },
     {
       "relation": "contains",
@@ -27262,6 +28689,26 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "frontend/src/lib/telegramBotRunner.ts",
+      "source_location": "L217",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "lib_telegrambotrunner",
+      "target": "lib_telegrambotrunner_messagequeue"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/src/lib/telegramBotRunner.ts",
+      "source_location": "L11",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "lib_telegrambotrunner",
+      "target": "lib_telegrambotrunner_readdb"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/src/lib/telegramBotRunner.ts",
       "source_location": "L997",
       "weight": 1.0,
       "confidence_score": 1.0,
@@ -27277,6 +28724,16 @@
       "confidence_score": 1.0,
       "source": "lib_telegrambotrunner",
       "target": "lib_telegrambotrunner_safeparse"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/src/lib/telegramBotRunner.ts",
+      "source_location": "L55",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "lib_telegrambotrunner",
+      "target": "lib_telegrambotrunner_sanitizemessage"
     },
     {
       "relation": "contains",
@@ -27332,11 +28789,43 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "frontend/src/lib/telegramBotRunner.ts",
+      "source_location": "L241",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "lib_telegrambotrunner",
+      "target": "lib_telegrambotrunner_tokenqueues"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/src/lib/telegramBotRunner.ts",
       "source_location": "L184",
       "weight": 1.0,
       "confidence_score": 1.0,
       "source": "lib_telegrambotrunner",
       "target": "lib_telegrambotrunner_updateuserdbfile"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/src/lib/telegramBotRunner.ts",
+      "source_location": "L207",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "lib_telegrambotrunner_getuserplan",
+      "target": "lib_telegrambotrunner_readdb"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/src/lib/telegramBotRunner.ts",
+      "source_location": "L265",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "lib_telegrambotrunner_getchannelidbytoken",
+      "target": "lib_telegrambotrunner_safeparse"
     },
     {
       "relation": "calls",
@@ -27354,11 +28843,44 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "frontend/src/lib/telegramBotRunner.ts",
+      "source_location": "L332",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "lib_telegrambotrunner_isuserblocked",
+      "target": "lib_telegrambotrunner_safeparse"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/src/lib/telegramBotRunner.ts",
       "source_location": "L1129",
       "weight": 1.0,
       "confidence_score": 1.0,
       "source": "lib_telegrambotrunner_starttelegrambots",
       "target": "lib_telegrambotrunner_safeparse"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/src/lib/telegramBotRunner.ts",
+      "source_location": "L255",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "lib_telegrambotrunner_getchannelidbytoken",
+      "target": "lib_telegrambotrunner_getdbdatafromrailway"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/src/lib/telegramBotRunner.ts",
+      "source_location": "L315",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "lib_telegrambotrunner_isuserblocked",
+      "target": "lib_telegrambotrunner_getdbdatafromrailway"
     },
     {
       "relation": "calls",
@@ -27383,6 +28905,137 @@
       "target": "lib_telegrambotrunner_splittelegrammessage"
     },
     {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/src/lib/telegramBotRunner.ts",
+      "source_location": "L221",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "lib_telegrambotrunner_messagequeue",
+      "target": "lib_telegrambotrunner_messagequeue_add"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/src/lib/telegramBotRunner.ts",
+      "source_location": "L390",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "lib_telegrambotrunner_sendtelegrammessage",
+      "target": "lib_telegrambotrunner_gettokenqueue"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/src/lib/telegramBotRunner.ts",
+      "source_location": "L289",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "lib_telegrambotrunner_handleblockeduser",
+      "target": "lib_telegrambotrunner_getchannelidbytoken"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/src/lib/telegramBotRunner.ts",
+      "source_location": "L308",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "lib_telegrambotrunner_isuserblocked",
+      "target": "lib_telegrambotrunner_getchannelidbytoken"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/src/lib/telegramBotRunner.ts",
+      "source_location": "L291",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "lib_telegrambotrunner_handleblockeduser",
+      "target": "lib_telegrambotrunner_getuseridforchannel"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/src/lib/telegramBotRunner.ts",
+      "source_location": "L293",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "lib_telegrambotrunner_handleblockeduser",
+      "target": "lib_telegrambotrunner_updateuserdbfile"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/src/lib/telegramBotRunner.ts",
+      "source_location": "L310",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "lib_telegrambotrunner_isuserblocked",
+      "target": "lib_telegrambotrunner_getuseridforchannel"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/src/lib/telegramBotRunner.ts",
+      "source_location": "L383",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "lib_telegrambotrunner_sendtelegrammessage",
+      "target": "lib_telegrambotrunner_isuserblocked"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/src/lib/telegramBotRunner.ts",
+      "source_location": "L632",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "lib_telegrambotrunner_handletelegramupdate",
+      "target": "lib_telegrambotrunner_getbotusername"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/src/lib/telegramBotRunner.ts",
+      "source_location": "L364",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "lib_telegrambotrunner_addtelegramchanneltolist",
+      "target": "lib_telegrambotrunner_getuseridforchannel"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/src/lib/telegramBotRunner.ts",
+      "source_location": "L366",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "lib_telegrambotrunner_addtelegramchanneltolist",
+      "target": "lib_telegrambotrunner_updateuserdbfile"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/src/lib/telegramBotRunner.ts",
+      "source_location": "L566",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "lib_telegrambotrunner_handletelegramupdate",
+      "target": "lib_telegrambotrunner_addtelegramchanneltolist"
+    },
+    {
       "relation": "calls",
       "context": "call",
       "confidence": "EXTRACTED",
@@ -27392,6 +29045,17 @@
       "confidence_score": 1.0,
       "source": "lib_telegrambotrunner_handletelegramupdate",
       "target": "lib_telegrambotrunner_sendtelegrammessage"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/src/lib/telegramBotRunner.ts",
+      "source_location": "L405",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "lib_telegrambotrunner_sendtelegrammessage",
+      "target": "lib_telegrambotrunner_taskqueue_add"
     },
     {
       "relation": "method",
@@ -27500,6 +29164,78 @@
       "confidence_score": 1.0,
       "source": "lib_utils",
       "target": "lib_utils_cn"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/src/middleware.ts",
+      "source_location": "L5",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "src_middleware",
+      "target": "src_middleware_apiratelimitstore"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/src/middleware.ts",
+      "source_location": "L7",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "src_middleware",
+      "target": "src_middleware_checkapiratelimit"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/src/middleware.ts",
+      "source_location": "L29",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "src_middleware",
+      "target": "src_middleware_config"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/src/middleware.ts",
+      "source_location": "L26",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "src_middleware",
+      "target": "src_middleware_isoriginallowed"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/src/middleware.ts",
+      "source_location": "L4",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "src_middleware",
+      "target": "src_middleware_middleware"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/src/middleware.ts",
+      "source_location": "L73",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "src_middleware_middleware",
+      "target": "src_middleware_checkapiratelimit"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/src/middleware.ts",
+      "source_location": "L51",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "src_middleware_middleware",
+      "target": "src_middleware_isoriginallowed"
     },
     {
       "relation": "contains",
@@ -27635,6 +29371,16 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "frontend/tsconfig.json",
+      "source_location": "L7",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "frontend_tsconfig_compileroptions",
+      "target": "frontend_tsconfig_compileroptions_noimplicitany"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/tsconfig.json",
       "source_location": "L20",
       "weight": 1.0,
       "confidence_score": 1.0,
@@ -27680,6 +29426,16 @@
       "confidence_score": 1.0,
       "source": "frontend_tsconfig_compileroptions",
       "target": "frontend_tsconfig_compileroptions_strict"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "frontend/tsconfig.json",
+      "source_location": "L8",
+      "weight": 1.0,
+      "confidence_score": 1.0,
+      "source": "frontend_tsconfig_compileroptions",
+      "target": "frontend_tsconfig_compileroptions_strictnullchecks"
     },
     {
       "relation": "contains",
@@ -27794,5 +29550,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "cc826623ebd6a8d506265bcc778d2909e5774abd"
+  "built_at_commit": "82be9aaa984a2ce115d539dbc5ac8afe4f92319a"
 }

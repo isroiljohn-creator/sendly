@@ -7,7 +7,7 @@ import { AppLayout } from "@/components/layout/AppLayout";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { useI18n } from "@/i18n/I18nProvider";
 import { BrandLoader } from "@/components/ui/BrandLoader";
-import { db, BotSettings, Lesson, Module } from "@/lib/db";
+import { db, BotSettings, Lesson, Module, Contact } from "@/lib/db";
 import { moderateMessage } from "@/lib/ai/moderation";
 import {
   Brain,
@@ -41,8 +41,8 @@ import {
   Key,
   LifeBuoy,
   HelpCircle,
-  GraduationCap,
-  Link2
+  Link2,
+  Users
 } from "lucide-react";
 
 const Facebook = ({ size = 24, className, ...props }: React.SVGProps<SVGSVGElement> & { size?: number }) => (
@@ -104,13 +104,13 @@ interface FieldMapping {
   description: string;
 }
 
-const generateJsonPayload = (name: string, phone: string, message: string, mappings: FieldMapping[]) => {
+const generateJsonPayload = (name: string, phone: string, message: string, mappings: FieldMapping[], lang?: string) => {
   const fieldData = mappings.map((m) => {
     let value = "";
     if (m.sendlyField === "name") value = name;
     else if (m.sendlyField === "phone") value = phone;
     else if (m.sendlyField === "message" || m.sendlyField === "email") value = message;
-    else value = "Mock qiymat";
+    else value = lang === "en" ? "Mock value" : lang === "ru" ? "Макетное значение" : "Mock qiymat";
     return {
       name: m.metaField,
       values: [value]
@@ -226,7 +226,7 @@ function CustomDropdown({ value, onChange, options, placeholder, className = "" 
             ))}
             {options.length === 0 && (
               <div className="px-4 py-2 text-[11px] text-[#A0A0A0] italic text-center">
-                Ma&apos;lumot mavjud emas
+                {t("pages.ai_agent.kb_search_no_results") || "Ma'lumot mavjud emas"}
               </div>
             )}
           </div>
@@ -502,6 +502,22 @@ function AIAgentContent() {
   const [activeModuleId, setActiveModuleId] = useState<string | null>(null);
   const [fileUploadProgress, setFileUploadProgress] = useState<number | null>(null);
   const [uploadProgressText, setUploadProgressText] = useState<string>("");
+
+  // Custom sub-tab for Knowledge Base
+  const [kbSubTab, setKbSubTab] = useState<"lessons" | "students">("lessons");
+  const [kbContacts, setKbContacts] = useState<Contact[]>([]);
+  const [selectedStudent, setSelectedStudent] = useState<Contact | null>(null);
+  const [studentSearchQuery, setStudentSearchQuery] = useState("");
+  const [showAddStudentModal, setShowAddStudentModal] = useState(false);
+  const [isStudentUploading, setIsStudentUploading] = useState(false);
+  const studentFileInputRef = useRef<HTMLInputElement>(null);
+
+  // Student form editing states
+  const [studentFormName, setStudentFormName] = useState("");
+  const [studentFormUsername, setStudentFormUsername] = useState("");
+  const [studentFormGroup, setStudentFormGroup] = useState("sales");
+  const [studentFormTags, setStudentFormTags] = useState<string[]>([]);
+  const [studentFormStatus, setStudentFormStatus] = useState(true);
   
   // Input fields for adding items
   const [newModuleName, setNewModuleName] = useState("");
@@ -520,6 +536,50 @@ function AIAgentContent() {
   const [newRule, setNewRule] = useState("");
   const [isGeneratingPrompt, setIsGeneratingPrompt] = useState(false);
   const [showDeveloperPrompt, setShowDeveloperPrompt] = useState(false);
+
+  // Input validation states
+  const [tgTokenError, setTgTokenError] = useState("");
+  const [studentFormNameError, setStudentFormNameError] = useState("");
+  const [studentFormUsernameError, setStudentFormUsernameError] = useState("");
+
+  const validateTgToken = (val: string) => {
+    if (!val) {
+      setTgTokenError("");
+      return;
+    }
+    const tokenPattern = /^[0-9]+:[a-zA-Z0-9_-]+$/;
+    if (!tokenPattern.test(val)) {
+      setTgTokenError("Token formati noto'g'ri (Masalan: 123456789:ABC-def123)!");
+    } else {
+      setTgTokenError("");
+    }
+  };
+
+  const validateStudentName = (val: string) => {
+    if (!val.trim()) {
+      setStudentFormNameError("Ism-Familiya bo'sh bo'lmasligi kerak!");
+    } else if (val.trim().length < 2) {
+      setStudentFormNameError("Ism-Familiya kamida 2 ta belgidan iborat bo'lishi kerak!");
+    } else {
+      setStudentFormNameError("");
+    }
+  };
+
+  const validateStudentUsername = (val: string) => {
+    const clean = val.trim();
+    if (!clean) {
+      setStudentFormUsernameError("Telefon yoki username bo'sh bo'lmasligi kerak!");
+    } else if (clean.startsWith("@") && clean.length < 5) {
+      setStudentFormUsernameError("Username kamida 5 ta belgidan iborat bo'lishi kerak!");
+    } else if (!clean.startsWith("@") && !/^\+?[0-9\s-]{9,20}$/.test(clean) && !/^[a-zA-Z0-9_]{5,32}$/.test(clean)) {
+      setStudentFormUsernameError("Noto'g'ri format. Telefon raqam yoki telegram username kiriting!");
+    } else {
+      setStudentFormUsernameError("");
+    }
+  };
+
+  // Unsaved changes state (isDirty)
+  const [isDirty, setIsDirty] = useState(false);
 
   // Toast notification state
   const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
@@ -696,10 +756,10 @@ function AIAgentContent() {
   // Keep JSON payload updated when simple inputs change
   useEffect(() => {
     if (!isSimulatorJsonMode) {
-      setSimJsonPayload(generateJsonPayload(simLeadName, simLeadPhone, simLeadMessage, fieldMappings));
+      setSimJsonPayload(generateJsonPayload(simLeadName, simLeadPhone, simLeadMessage, fieldMappings, lang));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [simLeadName, simLeadPhone, simLeadMessage, fieldMappings, isSimulatorJsonMode]);
+  }, [simLeadName, simLeadPhone, simLeadMessage, fieldMappings, isSimulatorJsonMode, lang]);
 
   // Set default message/email value based on selectedAgentType
   useEffect(() => {
@@ -727,6 +787,70 @@ function AIAgentContent() {
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Escape key event listener to close modals
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        if (alertModal.isOpen) {
+          setAlertModal(prev => ({ ...prev, isOpen: false }));
+        } else if (confirmModal.isOpen) {
+          setConfirmModal(prev => ({ ...prev, isOpen: false }));
+        } else if (showTgConnectModal) {
+          setShowTgConnectModal(false);
+          setTgToken("");
+          setTgTokenError("");
+        } else if (showAddStudentModal) {
+          setShowAddStudentModal(false);
+        } else if (showAddModuleModal) {
+          setShowAddModuleModal(false);
+        } else if (showAddLessonModal) {
+          setShowAddLessonModal(false);
+        } else if (showAddLinkModal) {
+          setShowAddLinkModal(false);
+        } else if (selectedStudent) {
+          setSelectedStudent(null);
+        }
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [
+    alertModal.isOpen,
+    confirmModal.isOpen,
+    showTgConnectModal,
+    showAddStudentModal,
+    showAddModuleModal,
+    showAddLessonModal,
+    showAddLinkModal,
+    selectedStudent,
+  ]);
+
+  // Alert before unloading if settings are dirty
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (isDirty) {
+        e.preventDefault();
+        e.returnValue = "";
+        return "";
+      }
+    };
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+    };
+  }, [isDirty]);
+
+  // Reset student validation errors when selectedStudent changes
+  useEffect(() => {
+    if (selectedStudent) {
+      setStudentFormNameError("");
+      setStudentFormUsernameError("");
+    }
+  }, [selectedStudent]);
+
 
   // Initialize analyzed messages
   useEffect(() => {
@@ -915,6 +1039,7 @@ function AIAgentContent() {
         topics: defaultTopics,
         escalationRules: defaultRules
       } : null);
+      setIsDirty(true);
     }
   }, [selectedAgentType, settings, t]);
 
@@ -1080,16 +1205,12 @@ function AIAgentContent() {
 
     const channels = db.getChannels();
 
-    const tgChannels = channels.filter(
-      (c) => (c.type === "telegram" && c.isConnected && c.telegramToken) || (c.type === "instagram" && c.isConnected)
-    );
-
     const activeCh = db.getActiveChannel();
     let initialBotId = "";
-    if (activeCh && ((activeCh.type === "telegram" && activeCh.isConnected && activeCh.telegramToken) || (activeCh.type === "instagram" && activeCh.isConnected))) {
+    if (activeCh) {
       initialBotId = activeCh.id;
-    } else if (tgChannels.length > 0) {
-      initialBotId = tgChannels[0].id;
+    } else if (channels.length > 0) {
+      initialBotId = channels[0].id;
     }
 
     const loadedSettings = db.getBotSettings(initialBotId);
@@ -1103,12 +1224,13 @@ function AIAgentContent() {
     setSettings(loadedSettings);
     setModules(loadedModules);
     setLessons(loadedLessons);
+    setKbContacts(db.getContacts());
 
     const selectedBotId = loadedSettings.telegramBotId || initialBotId;
-    const telegramChannel = tgChannels.find(c => c.id === selectedBotId);
+    const telegramChannel = channels.find(c => c.id === selectedBotId);
 
     if (telegramChannel) {
-      setIsTelegramLinked(true);
+      setIsTelegramLinked(telegramChannel.type === "telegram" ? telegramChannel.isConnected : false);
       setTelegramBotUsername(telegramChannel.username);
       if (!loadedSettings.telegramBotId) {
         loadedSettings.telegramBotId = telegramChannel.id;
@@ -1146,6 +1268,7 @@ function AIAgentContent() {
         setAnalyzedMessages([]);
       }
     }
+    setIsDirty(false);
   };
 
   const showToast = (message: string, type: "success" | "error" = "success") => {
@@ -1225,6 +1348,7 @@ function AIAgentContent() {
       setTelegramBotUsername("");
     }
     showToast(t("pages.ai_agent.toasts.tg_bot_linked"));
+    setIsDirty(false);
   };
 
   const handleAddTelegram = async () => {
@@ -1264,7 +1388,7 @@ function AIAgentContent() {
       }
     } catch (err) {
       console.error("Failed to fetch bot info from Telegram:", err);
-      showToast("Telegram serveriga ulanishda xatolik yuz berdi. Tarmoqni tekshiring.", "error");
+      showToast(t("pages.ai_agent.tg_error"), "error");
       setIsTgSaving(false);
       return;
     }
@@ -1303,7 +1427,7 @@ function AIAgentContent() {
   const handleGeneratePrompt = async () => {
     if (!settings) return;
     if (!settings.customInstructions || !settings.customInstructions.trim()) {
-      showToast("Iltimos, avval botingiz qanday xarakterga ega bo'lishi haqida ko'rsatma yozing.", "error");
+      showToast(t("pages.ai_agent.character_instruction_required"), "error");
       return;
     }
     setIsGeneratingPrompt(true);
@@ -1333,9 +1457,10 @@ function AIAgentContent() {
         setSettings(updatedSettings);
         db.saveBotSettings(updatedSettings, settings.telegramBotId);
         await db.saveToServer();
-        showToast("AI Agent miyasi muvaffaqiyatli shakllantirildi!");
+        showToast(t("pages.ai_agent.brain_success"));
+        setIsDirty(false);
       } else {
-        showToast("Miyani shakllantirishda xatolik yuz berdi.", "error");
+        showToast(t("pages.ai_agent.brain_error"), "error");
       }
     } catch (err: any) {
       console.error("Error generating prompt:", err);
@@ -1362,6 +1487,7 @@ function AIAgentContent() {
       await db.saveToServer();
       showToast(t("pages.ai_agent.toasts.save_success"));
       setSelectedLesson(null);
+      setIsDirty(false);
     } catch (err) {
       console.error(err);
       showToast(t("pages.ai_agent.toasts.error_occurred"), "error");
@@ -1582,16 +1708,6 @@ function AIAgentContent() {
         : (t("pages.ai_agent.toasts.parsing_document") || "Hujjat tahlil qilinmoqda...")
     );
 
-    const estSeconds = isAudio ? Math.max(12, durationInMinutes * 7.5) : 10;
-    let progressVal = 0;
-    const progressInterval = setInterval(() => {
-      progressVal += 100 / (estSeconds * 3.33); // 300ms intervals (3.33 ticks per second)
-      if (progressVal >= 95) {
-        progressVal = 95;
-      }
-      setFileUploadProgress(Math.floor(progressVal));
-    }, 300);
-
     setIsFileUploading(true);
     showToast(
       isAudio 
@@ -1620,24 +1736,60 @@ function AIAgentContent() {
         headers["Authorization"] = `Bearer ${token}`;
       }
 
-      // 2. Call API
-      const res = await fetch(endpoint, {
-        method: "POST",
-        headers,
-        body: JSON.stringify({
+      // 2. Call API via XMLHttpRequest to track actual upload progress
+      const data = await new Promise<any>((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        xhr.open("POST", endpoint);
+        
+        // Set headers
+        for (const [key, value] of Object.entries(headers)) {
+          xhr.setRequestHeader(key, value);
+        }
+
+        // Track progress
+        xhr.upload.onprogress = (event) => {
+          if (event.lengthComputable) {
+            const percentComplete = Math.round((event.loaded / event.total) * 100);
+            setFileUploadProgress(percentComplete);
+            if (percentComplete === 100) {
+              setUploadProgressText(
+                isAudio
+                  ? "Audio serverda transkripsiya qilinmoqda..."
+                  : "Hujjat serverda tahlil qilinmoqda..."
+              );
+            }
+          }
+        };
+
+        xhr.onload = () => {
+          if (xhr.status >= 200 && xhr.status < 300) {
+            try {
+              const resJson = JSON.parse(xhr.responseText);
+              resolve(resJson);
+            } catch (err) {
+              reject(new Error("Response parsing error"));
+            }
+          } else {
+            try {
+              const resJson = JSON.parse(xhr.responseText);
+              reject(new Error(resJson.error || t("pages.ai_agent.file_upload_error")));
+            } catch {
+              reject(new Error(t("pages.ai_agent.file_upload_error")));
+            }
+          }
+        };
+
+        xhr.onerror = () => {
+          reject(new Error("Network error"));
+        };
+
+        xhr.send(JSON.stringify({
           fileName,
           fileType: file.type,
           base64Data,
           durationInMinutes
-        })
+        }));
       });
-
-      if (!res.ok) {
-        const errData = await res.json();
-        throw new Error(errData.error || t("pages.ai_agent.toasts.upload_error") || "Faylni yuklash/tahlil qilishda xatolik yuz berdi.");
-      }
-
-      const data = await res.json();
       const extractedText = data.text;
 
       // 3. Deduct credits for files (Documents are deducted on client side, audio on server side)
@@ -1711,11 +1863,94 @@ function AIAgentContent() {
         await db.getAiCreditsFromServer(currentUserId);
       }
     } finally {
-      clearInterval(progressInterval);
       setFileUploadProgress(null);
       setUploadProgressText("");
       setIsFileUploading(false);
       if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  };
+
+  const handleStudentFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const fileName = file.name;
+    const ext = fileName.split('.').pop()?.toLowerCase();
+    const validExtensions = ["xlsx", "xls", "csv", "txt"];
+    if (!validExtensions.includes(ext || "")) {
+      showToast("Faqat Excel (.xlsx, .xls) yoki CSV/TXT fayllarni yuklashingiz mumkin.", "error");
+      return;
+    }
+
+    setIsStudentUploading(true);
+    showToast("Fayl tahlil qilinmoqda, iltimos kuting...", "success");
+
+    try {
+      const base64Data = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+          const dataUrl = reader.result as string;
+          const base64 = dataUrl.split(",")[1];
+          resolve(base64);
+        };
+        reader.onerror = (err) => reject(err);
+        reader.readAsDataURL(file);
+      });
+
+      const token = localStorage.getItem("replai_token");
+      const headers: Record<string, string> = { "Content-Type": "application/json" };
+      if (token) {
+        headers["Authorization"] = `Bearer ${token}`;
+      }
+
+      const res = await fetch("/api/ai/parse-students", {
+        method: "POST",
+        headers,
+        body: JSON.stringify({
+          fileName,
+          fileType: file.type,
+          base64Data
+        })
+      });
+
+      if (!res.ok) {
+        const errData = await res.json();
+        throw new Error(errData.error || t("pages.ai_agent.file_parse_error"));
+      }
+
+      const { students } = await res.json();
+      if (!students || students.length === 0) {
+        showToast(t("pages.ai_agent.students.file_empty_error"), "error");
+        return;
+      }
+
+      // Ask for confirmation
+      const confirmMsg = t("pages.ai_agent.students.file_confirm_import", { count: students.length });
+      if (confirm(confirmMsg)) {
+        const allContacts = db.getContacts();
+        
+        // Add parsed students to contacts list
+        const newContacts = students.map((st: any, idx: number) => ({
+          id: `student-${Date.now()}-${idx}`,
+          name: st.name,
+          username: st.username,
+          status: true,
+          messagesCount: 0,
+          tags: Array.isArray(st.tags) ? st.tags : ["O'quvchi"],
+          lastActive: new Date().toLocaleTimeString("uz-UZ", { hour: "2-digit", minute: "2-digit" })
+        }));
+
+        const updated = [...newContacts, ...allContacts];
+        db.saveContacts(updated);
+        setKbContacts(updated);
+        showToast(t("pages.ai_agent.students.file_imported_success", { count: newContacts.length }), "success");
+      }
+    } catch (err: any) {
+      console.error(err);
+      showToast(err.message || t("pages.ai_agent.file_upload_error"), "error");
+    } finally {
+      setIsStudentUploading(false);
+      if (studentFileInputRef.current) studentFileInputRef.current.value = "";
     }
   };
 
@@ -1761,7 +1996,7 @@ function AIAgentContent() {
     }
 
     const userId = db.getCurrentUser()?.id || "guest";
-    const isAdmin = db.getCurrentUser()?.email === "admin@sendly.uz" || db.getCurrentUser()?.email === "isroiljohnabdullayev@gmail.com" || db.getCurrentUser()?.email === "aisroil005@gmail.com" || db.getCurrentUser()?.role === "admin";
+    const isAdmin = db.getCurrentUser()?.email === "admin@sendly.uz" || db.getCurrentUser()?.email === "isroiljohnabdullayev@gmail.com" || db.getCurrentUser()?.email === "aisroil005@gmail.com" || (db.getCurrentUser() as any)?.role === "admin";
     if (userId !== "guest" && currentBalance < creditCost && !isAdmin) {
       showToast(
         (t("pages.ai_agent.toasts.insufficient_credits_doc") || "Balansingizda yetarli kreditlar mavjud emas. Havolani tahlil qilish uchun kamida {cost} ta kredit talab qilinadi. Sizda: {balance} ta kredit.")
@@ -1790,7 +2025,7 @@ function AIAgentContent() {
 
       if (!res.ok) {
         const errData = await res.json();
-        throw new Error(errData.error || t("pages.ai_agent.toasts.upload_error") || "Havolani tahlil qilishda xatolik yuz berdi.");
+        throw new Error(errData.error || t("pages.ai_agent.link_parse_error"));
       }
 
       const data = await res.json();
@@ -1861,6 +2096,7 @@ function AIAgentContent() {
     };
     setSettings(updated);
     setNewTopic("");
+    setIsDirty(true);
   };
 
   // Settings: Remove dynamic forbidden topic badge
@@ -1871,6 +2107,7 @@ function AIAgentContent() {
       topics: settings.topics.filter(t => t !== topic)
     };
     setSettings(updated);
+    setIsDirty(true);
   };
 
   // Settings: Add custom escalation rule
@@ -1886,6 +2123,7 @@ function AIAgentContent() {
     };
     setSettings(updated);
     setNewRule("");
+    setIsDirty(true);
   };
 
   // Settings: Toggle rule enabled/disabled
@@ -1896,6 +2134,7 @@ function AIAgentContent() {
       escalationRules: settings.escalationRules.map(r => r.id === ruleId ? { ...r, enabled: !r.enabled } : r)
     };
     setSettings(updated);
+    setIsDirty(true);
   };
 
   // Settings: Delete escalation rule
@@ -1906,6 +2145,7 @@ function AIAgentContent() {
       escalationRules: settings.escalationRules.filter(r => r.id !== ruleId)
     };
     setSettings(updated);
+    setIsDirty(true);
   };
 
   // Settings: Update slider/prompt properties
@@ -1915,6 +2155,7 @@ function AIAgentContent() {
       ...settings,
       [field]: value
     });
+    setIsDirty(true);
   };
 
   const handleSliderChange = (type: "tone" | "length" | "humor", value: number) => {
@@ -3656,12 +3897,12 @@ function AIAgentContent() {
                       <input
                         type="text"
                         readOnly
-                        value={`https://api.sendly.uz/webhooks/fb-leads/${settings.fbFormId || "form-1"}`}
+                        value={`${process.env.NEXT_PUBLIC_BACKEND_URL || "https://api.sendly.uz"}/webhooks/fb-leads/${settings.fbFormId || "form-1"}`}
                         className="flex-1 px-3 py-2.5 text-[11px] font-mono bg-[#F9F9F7] border border-[#E8E8E8] rounded-xl focus:outline-none text-[#595959] select-all"
                       />
                       <button
                         onClick={() => {
-                          navigator.clipboard.writeText(`https://api.sendly.uz/webhooks/fb-leads/${settings.fbFormId || "form-1"}`);
+                          navigator.clipboard.writeText(`${process.env.NEXT_PUBLIC_BACKEND_URL || "https://api.sendly.uz"}/webhooks/fb-leads/${settings.fbFormId || "form-1"}`);
                           showToast(t("common.copied"));
                         }}
                         className="px-3.5 py-2.5 bg-black hover:bg-black/90 text-white rounded-xl flex items-center justify-center gap-1.5 transition-all text-[11px] font-bold shrink-0"
@@ -4368,10 +4609,11 @@ function AIAgentContent() {
                     </label>
                   </div>
                   {(() => {
-                    const allChs = db.getChannels().filter(c => (c.type === "telegram" && c.isConnected && c.telegramToken) || (c.type === "instagram" && c.isConnected));
+                    const allChs = db.getChannels();
                     const selectedBotId = settings.telegramBotId || (allChs.length > 0 ? allChs[0].id : "");
                     const selectedCh = allChs.find(c => c.id === selectedBotId);
                     const isInstagram = selectedCh?.type === "instagram";
+                    const isConnected = selectedCh?.isConnected;
                     const labelText = isInstagram 
                       ? `AI ${getAgentName()} UCHUN INSTAGRAM SAHIFASI` 
                       : `AI ${getAgentName()} UCHUN TELEGRAM BOT`;
@@ -4397,10 +4639,17 @@ function AIAgentContent() {
                               placeholder="Kanalni tanlang..."
                               className="w-full"
                             />
-                            <div className="flex items-center gap-1.5 text-[10px] text-green-700 mt-1 bg-green-50/50 p-2.5 rounded-xl border border-green-100">
-                              <CheckCircle size={12} className="text-green-500 shrink-0" />
-                              <span>{willAnswerText}</span>
-                            </div>
+                            {isConnected ? (
+                              <div className="flex items-center gap-1.5 text-[10px] text-green-700 mt-1 bg-green-50/50 p-2.5 rounded-xl border border-green-100">
+                                <CheckCircle size={12} className="text-green-500 shrink-0" />
+                                <span>{willAnswerText}</span>
+                              </div>
+                            ) : (
+                              <div className="flex items-center gap-1.5 text-[10px] text-amber-700 mt-1 bg-amber-50/50 p-2.5 rounded-xl border border-amber-100">
+                                <Info size={12} className="text-amber-500 shrink-0" />
+                                <span>Ushbu kanal hali to'liq ulanmagan. Iltimos, sozlamalardan uni ulang.</span>
+                              </div>
+                            )}
                           </div>
                         </div>
                       );
@@ -5098,9 +5347,394 @@ function AIAgentContent() {
 
         {/* Bilim Bazasi Workspace */}
         {activeTab === "knowledge" && (
-          <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-stretch">
-            {/* Left Side: Tree navigation of modules/lessons */}
-            <div className="md:col-span-5 bg-white border border-[#E8E8E8] rounded-[24px] p-6 shadow-sm flex flex-col justify-between min-h-[500px]">
+          <div className="flex flex-col gap-6 w-full animate-in fade-in duration-200">
+            {/* Sub-tab navigation */}
+            <div className="flex border-b border-[#E8E8E8] gap-6">
+              <button
+                type="button"
+                onClick={() => setKbSubTab("lessons")}
+                className={`pb-3.5 text-[13px] font-bold relative transition-colors ${
+                  kbSubTab === "lessons" ? "text-black font-extrabold" : "text-[#707070] hover:text-black"
+                }`}
+              >
+                <span>{t("pages.ai_agent.students.tab_lessons")}</span>
+                {kbSubTab === "lessons" && <span className="absolute bottom-0 left-0 right-0 h-[2px] bg-black" />}
+              </button>
+              <button
+                type="button"
+                onClick={() => setKbSubTab("students")}
+                className={`pb-3.5 text-[13px] font-bold relative transition-colors ${
+                  kbSubTab === "students" ? "text-black font-extrabold" : "text-[#707070] hover:text-black"
+                }`}
+              >
+                <span>{t("pages.ai_agent.students.tab_students")}</span>
+                {kbSubTab === "students" && <span className="absolute bottom-0 left-0 right-0 h-[2px] bg-black" />}
+              </button>
+            </div>
+
+            {kbSubTab === "students" ? (
+              <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-stretch">
+                {/* Left Side: Students List */}
+                <div className="md:col-span-5 bg-white border border-[#E8E8E8] rounded-[24px] p-6 shadow-sm flex flex-col justify-between min-h-[500px]">
+                  <div className="flex flex-col gap-4 flex-1">
+                    <div className="flex items-center justify-between pb-2 border-b border-[#F0F0F0]">
+                      <h3 className="text-[13px] font-extrabold text-black uppercase tracking-wider">{t("pages.ai_agent.students.list_title")}</h3>
+                      <div className="flex items-center gap-1.5">
+                        <input
+                          type="file"
+                          ref={studentFileInputRef}
+                          className="hidden"
+                          accept=".xlsx,.xls,.csv,.txt"
+                          onChange={handleStudentFileUpload}
+                        />
+                        <button
+                          type="button"
+                          disabled={isStudentUploading}
+                          onClick={() => studentFileInputRef.current?.click()}
+                          className="flex items-center gap-1.5 px-3 py-1.5 border border-[#D8D8D8] text-[11px] font-bold rounded-xl hover:bg-[#F9F9F7] active:scale-95 transition-all shadow-xs disabled:opacity-50"
+                        >
+                          {isStudentUploading ? (
+                            <Loader2 size={13} className="animate-spin" />
+                          ) : (
+                            <Upload size={13} />
+                          )}
+                          <span>{t("pages.ai_agent.students.upload_excel")}</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setSelectedStudent({ id: "new", name: "", username: "", status: true, tags: ["O'quvchi"], messagesCount: 0, lastActive: "" });
+                            setStudentFormName("");
+                            setStudentFormUsername("");
+                            setStudentFormTags(["O'quvchi"]);
+                            setStudentFormStatus(true);
+                          }}
+                          className="flex items-center gap-1.5 px-3 py-1.5 bg-black text-[#C7F33C] text-[11px] font-bold rounded-xl hover:bg-black/90 active:scale-95 transition-all shadow-sm"
+                        >
+                          <FolderPlus size={13} />
+                          <span>{t("pages.ai_agent.students.add_btn")}</span>
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Search Bar */}
+                    <div className="relative">
+                      <Search size={13} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#707070]" />
+                      <input
+                        type="text"
+                        placeholder="Ism, telefon yoki guruh bo'yicha qidirish..."
+                        value={studentSearchQuery}
+                        onChange={(e) => setStudentSearchQuery(e.target.value)}
+                        className="w-full pl-9 pr-8 py-2.5 text-[11px] bg-[#F9F9F7] border border-[#E8E8E8] rounded-xl focus:outline-none focus:border-black/35 transition-all text-black placeholder:text-[#A0A0A0] font-semibold"
+                      />
+                      {studentSearchQuery && (
+                        <button
+                          type="button"
+                          onClick={() => setStudentSearchQuery("")}
+                          className="absolute right-3 top-1/2 -translate-y-1/2 text-[#707070] hover:text-black transition-colors"
+                        >
+                          <X size={12} />
+                        </button>
+                      )}
+                    </div>
+
+                    {/* Students scrollable list */}
+                    <div className="flex flex-col gap-2 max-h-[420px] overflow-y-auto pr-1">
+                      {kbContacts
+                        .filter((st) => {
+                          const q = studentSearchQuery.toLowerCase();
+                          return (
+                            (st.name || "").toLowerCase().includes(q) ||
+                            (st.username || "").toLowerCase().includes(q) ||
+                            (st.tags || []).some((t) => t.toLowerCase().includes(q))
+                          );
+                        })
+                        .map((st) => {
+                          const isSelected = selectedStudent?.id === st.id;
+                          return (
+                            <div
+                              key={st.id}
+                              onClick={() => {
+                                setSelectedStudent(st);
+                                setStudentFormName(st.name || "");
+                                setStudentFormUsername(st.username || "");
+                                setStudentFormTags(st.tags || []);
+                                setStudentFormStatus(st.status !== false);
+                              }}
+                              className={`flex items-center justify-between p-3 rounded-xl cursor-pointer border transition-all ${
+                                isSelected
+                                  ? "bg-black border-black text-[#C7F33C]"
+                                  : "bg-white border-[#E8E8E8] hover:bg-[#F9F9F7]"
+                              }`}
+                            >
+                              <div className="flex items-center gap-3 min-w-0">
+                                <span className={`w-8 h-8 rounded-full flex items-center justify-center text-[12px] font-bold shrink-0 ${isSelected ? "bg-[#C7F33C] text-black" : "bg-[#F0F0F0] text-black"}`}>
+                                  {(st.name || "U").substring(0, 2).toUpperCase()}
+                                </span>
+                                <div className="flex flex-col min-w-0">
+                                  <span className={`text-[12px] font-bold truncate ${isSelected ? "text-white" : "text-black"}`}>{st.name}</span>
+                                  <span className={`text-[10px] truncate ${isSelected ? "text-[#C7F33C]/75" : "text-[#707070]"}`}>{st.username}</span>
+                                </div>
+                              </div>
+                              <div className="flex flex-col items-end gap-1.5 shrink-0">
+                                <span className={`text-[9px] px-1.5 py-0.5 rounded-full font-bold uppercase ${
+                                  st.status !== false
+                                    ? (isSelected ? "bg-[#C7F33C]/20 text-[#C7F33C]" : "bg-green-50 text-green-700")
+                                    : "bg-red-50 text-red-700"
+                                }`}>
+                                  {st.status !== false ? t("common.active") : t("common.inactive")}
+                                </span>
+                                <div className="flex gap-1">
+                                  {st.tags?.slice(0, 2).map((t, idx) => (
+                                    <span key={idx} className="text-[8px] bg-[#F0F0F0]/65 text-black px-1.5 py-0.5 rounded-full font-semibold max-w-[60px] truncate">
+                                      {t}
+                                    </span>
+                                  ))}
+                                </div>
+                              </div>
+                            </div>
+                          );
+                        })}
+
+                      {kbContacts.filter((st) => {
+                        const q = studentSearchQuery.toLowerCase();
+                        return (
+                          (st.name || "").toLowerCase().includes(q) ||
+                          (st.username || "").toLowerCase().includes(q) ||
+                          (st.tags || []).some((t) => t.toLowerCase().includes(q))
+                        );
+                      }).length === 0 && (
+                        <div className="text-center py-12 text-[#707070]">
+                          <p className="text-[11px] italic">{t("pages.ai_agent.students.no_students_found")}</p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Right Side: Student Editor */}
+                <div className="md:col-span-7 bg-white border border-[#E8E8E8] rounded-[24px] p-6 shadow-sm min-h-[500px] flex flex-col justify-between">
+                  {selectedStudent ? (
+                    <div className="flex flex-col gap-5 flex-1 justify-between">
+                      <div>
+                        <div className="flex items-center justify-between pb-3 border-b border-[#F0F0F0] mb-4">
+                          <h4 className="text-[14px] font-extrabold text-black">
+                            {selectedStudent.id === "new" ? t("pages.ai_agent.students.add_new_title") : t("pages.ai_agent.students.edit_title")}
+                          </h4>
+                          <button
+                            type="button"
+                            onClick={() => setSelectedStudent(null)}
+                            className="text-[#707070] hover:text-black transition-colors"
+                          >
+                            <X size={16} />
+                          </button>
+                        </div>
+
+                        <div className="flex flex-col gap-4 mt-4">
+                          {/* Name Input */}
+                          <div className="flex flex-col gap-1.5">
+                            <label className="text-[11px] font-extrabold text-black uppercase tracking-wider">{t("pages.ai_agent.students.name_label")}</label>
+                            <input
+                              type="text"
+                              value={studentFormName}
+                              onChange={(e) => {
+                                setStudentFormName(e.target.value);
+                                validateStudentName(e.target.value);
+                              }}
+                              onBlur={(e) => validateStudentName(e.target.value)}
+                              placeholder={t("pages.ai_agent.students.name_placeholder")}
+                              className={`w-full px-4 py-2.5 text-[12px] bg-[#F9F9F7] border rounded-xl focus:outline-none transition-all text-black font-semibold shadow-xs ${studentFormNameError ? "border-red-500 focus:border-red-500" : "border-[#E8E8E8] focus:border-black/35"}`}
+                            />
+                            {studentFormNameError && (
+                              <span className="text-[10px] text-red-500 font-semibold">{studentFormNameError}</span>
+                            )}
+                          </div>
+
+                          {/* Phone / Username Input */}
+                          <div className="flex flex-col gap-1.5">
+                            <label className="text-[11px] font-extrabold text-black uppercase tracking-wider">{t("pages.ai_agent.students.phone_user_label")}</label>
+                            <input
+                              type="text"
+                              value={studentFormUsername}
+                              onChange={(e) => {
+                                setStudentFormUsername(e.target.value);
+                                validateStudentUsername(e.target.value);
+                              }}
+                              onBlur={(e) => validateStudentUsername(e.target.value)}
+                              placeholder={t("pages.ai_agent.students.phone_user_placeholder")}
+                              className={`w-full px-4 py-2.5 text-[12px] bg-[#F9F9F7] border rounded-xl focus:outline-none transition-all text-black font-semibold shadow-xs ${studentFormUsernameError ? "border-red-500 focus:border-red-500" : "border-[#E8E8E8] focus:border-black/35"}`}
+                            />
+                            {studentFormUsernameError && (
+                              <span className="text-[10px] text-red-500 font-semibold">{studentFormUsernameError}</span>
+                            )}
+                          </div>
+
+                          {/* Group dropdown */}
+                          <div className="flex flex-col gap-1.5">
+                            <label className="text-[11px] font-extrabold text-black uppercase tracking-wider">{t("pages.ai_agent.students.tags_label")}</label>
+                            <div className="flex flex-wrap gap-1.5 mb-2">
+                              {studentFormTags.map((t, idx) => (
+                                <span key={idx} className="flex items-center gap-1 text-[10px] bg-[#C7F33C]/20 border border-[#C7F33C]/40 text-[#7CA607] px-2.5 py-1 rounded-full font-bold">
+                                  <span>{t}</span>
+                                  <button
+                                    type="button"
+                                    onClick={() => setStudentFormTags(studentFormTags.filter((_, i) => i !== idx))}
+                                    className="hover:text-red-600 transition-colors"
+                                  >
+                                    <X size={10} />
+                                  </button>
+                                </span>
+                              ))}
+                            </div>
+                            <div className="flex gap-2">
+                              <input
+                                type="text"
+                                id="newStudentTagInput"
+                                placeholder={t("pages.ai_agent.students.tags_label")}
+                                onKeyDown={(e) => {
+                                  if (e.key === "Enter") {
+                                    e.preventDefault();
+                                    const target = e.currentTarget;
+                                    const val = target.value.trim();
+                                    if (val && !studentFormTags.includes(val)) {
+                                      setStudentFormTags([...studentFormTags, val]);
+                                      target.value = "";
+                                    }
+                                  }
+                                }}
+                                className="flex-1 px-4 py-2.5 text-[11px] bg-[#F9F9F7] border border-[#E8E8E8] rounded-xl focus:outline-none focus:border-black/35 transition-all text-black font-semibold"
+                              />
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  const input = document.getElementById("newStudentTagInput") as HTMLInputElement;
+                                  const val = input?.value.trim();
+                                  if (val && !studentFormTags.includes(val)) {
+                                    setStudentFormTags([...studentFormTags, val]);
+                                    input.value = "";
+                                  }
+                                }}
+                                className="px-4 py-2.5 bg-[#F0F0F0] text-black hover:bg-[#E8E8E8] text-[11px] font-extrabold rounded-xl transition-all"
+                              >
+                                {t("pages.ai_agent.students.add_btn")}
+                              </button>
+                            </div>
+                          </div>
+
+                          {/* Status Toggle */}
+                          <div className="flex items-center justify-between p-4 bg-[#F9F9F7] border border-[#E8E8E8] rounded-2xl mt-2">
+                            <div className="flex flex-col gap-0.5">
+                              <span className="text-[12px] font-bold text-black">{t("pages.ai_agent.students.status_label")}</span>
+                              <span className="text-[10px] text-[#707070]">{t("pages.ai_agent.students.status_desc")}</span>
+                            </div>
+                            <input
+                              type="checkbox"
+                              checked={studentFormStatus}
+                              onChange={(e) => setStudentFormStatus(e.target.checked)}
+                              className="w-4 h-4 accent-black cursor-pointer rounded"
+                            />
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Editor Actions */}
+                      <div className="flex items-center justify-between border-t border-[#F0F0F0] pt-4 mt-6 gap-3">
+                        {selectedStudent.id !== "new" && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              if (confirm(t("pages.ai_agent.students.confirm_delete"))) {
+                                const updated = kbContacts.filter(c => c.id !== selectedStudent.id);
+                                db.saveContacts(updated);
+                                setKbContacts(updated);
+                                setSelectedStudent(null);
+                                showToast(t("pages.ai_agent.students.deleted_toast"));
+                              }
+                            }}
+                            className="px-4 py-2.5 text-[11px] font-bold text-red-600 border border-red-200 hover:bg-red-50 rounded-xl transition-all"
+                          >
+                            {t("pages.ai_agent.students.delete_btn")}
+                          </button>
+                        )}
+                        <div className="flex items-center gap-2 ml-auto">
+                          <button
+                            type="button"
+                            onClick={() => setSelectedStudent(null)}
+                            className="px-4 py-2.5 text-[11px] font-bold text-[#595959] hover:bg-[#F9F9F7] border border-[#E8E8E8] rounded-xl transition-all"
+                          >
+                            {t("pages.ai_agent.students.cancel_btn")}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              if (!studentFormName.trim()) {
+                                showToast(t("pages.ai_agent.students.name_required_alert"), "error");
+                                return;
+                              }
+                              if (!studentFormUsername.trim()) {
+                                showToast(t("pages.ai_agent.students.username_required_alert"), "error");
+                                return;
+                              }
+
+                              if (selectedStudent.id === "new") {
+                                const newStudent = {
+                                  id: `student-${Date.now()}`,
+                                  name: studentFormName,
+                                  username: studentFormUsername,
+                                  status: studentFormStatus,
+                                  messagesCount: 0,
+                                  tags: studentFormTags.filter(Boolean),
+                                  lastActive: new Date().toLocaleTimeString("uz-UZ", { hour: "2-digit", minute: "2-digit" }),
+                                };
+                                const updated = [newStudent, ...kbContacts];
+                                db.saveContacts(updated);
+                                setKbContacts(updated);
+                                setSelectedStudent(newStudent);
+                                showToast(t("pages.ai_agent.students.added_toast"));
+                              } else {
+                                const updated = kbContacts.map(c => {
+                                  if (c.id === selectedStudent.id) {
+                                    return {
+                                      ...c,
+                                      name: studentFormName,
+                                      username: studentFormUsername,
+                                      status: studentFormStatus,
+                                      tags: studentFormTags.filter(Boolean),
+                                    };
+                                  }
+                                  return c;
+                                });
+                                db.saveContacts(updated);
+                                setKbContacts(updated);
+                                setSelectedStudent(updated.find(c => c.id === selectedStudent.id) || null);
+                                showToast(t("pages.ai_agent.students.saved_toast"));
+                              }
+                            }}
+                            className="px-5 py-2.5 text-[11px] font-extrabold bg-black text-[#C7F33C] hover:bg-black/95 rounded-xl transition-all shadow-sm flex items-center gap-1.5"
+                          >
+                            <Save size={13} />
+                            <span>{t("pages.ai_agent.students.save_btn")}</span>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="flex-1 flex flex-col items-center justify-center text-center p-12 animate-in fade-in duration-200">
+                      <div className="w-16 h-16 rounded-full bg-[#C7F33C]/10 flex items-center justify-center mb-4">
+                        <Users size={24} className="text-[#7CA607]" />
+                      </div>
+                      <h4 className="text-[13px] font-extrabold text-black">{t("pages.ai_agent.students.not_selected_title")}</h4>
+                      <p className="text-[11px] text-[#707070] mt-1 max-w-[280px] leading-relaxed">
+                        {t("pages.ai_agent.students.not_selected_desc")}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-stretch">
+                {/* Left Side: Tree navigation of modules/lessons */}
+                <div className="md:col-span-5 bg-white border border-[#E8E8E8] rounded-[24px] p-6 shadow-sm flex flex-col justify-between min-h-[500px]">
               <div className="flex flex-col gap-4 flex-1">
                 <div className="flex items-center justify-between pb-2 border-b border-[#F0F0F0]">
                   <h3 className="text-[13px] font-extrabold text-black uppercase tracking-wider">{getKnowledgeSectionTitle()}</h3>
@@ -5489,6 +6123,8 @@ function AIAgentContent() {
                 </div>
               )}
             </div>
+          </div>
+            )}
           </div>
         )}
 

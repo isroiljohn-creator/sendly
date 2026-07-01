@@ -1,4 +1,8 @@
 {
+  "metadata": {
+    "title": "Sendly — Instagram chatbot va avtomatlashtirish",
+    "description": "O'zbekiston bozori uchun Instagram chatbot va savdoni avtomatlashtirish platformasi."
+  },
   "common": {
     "create": "Yaratish",
     "select": "Tanlang...",
@@ -52,7 +56,16 @@
     "select_channel": "Kanal tanlash",
     "channels_header": "Kanallar",
     "no_channels": "Hali kanal yo'q",
-    "lang_soon": "Ushbu til tez orada qo'shiladi!"
+    "lang_soon": "Ushbu til tez orada qo'shiladi!",
+    "connected": "ulangan",
+    "change": "O'zgartirish",
+    "menu": "Menyu",
+    "select_account": "Akkaunt tanlang...",
+    "add_account": "Akkaunt qo'shish",
+    "impersonation_notice": "Siz hozirda {email} nomidan tizimdadasiz.",
+    "back_to_admin": "Admin hisobiga qaytish",
+    "switch_channel_mobile": "O'tish",
+    "system_language": "Tizim tili"
   },
   "pages": {
     "home": {
@@ -909,6 +922,43 @@
       "support_tooltip": "Qo'llab-quvvatlash"
     },
     "ai_agent": {
+      "students": {
+        "tab_lessons": "Darsliklar & Materiallar",
+        "tab_students": "O'quvchilar ro'yxati",
+        "list_title": "O'quvchilar Ro'yxati",
+        "upload_excel": "Excel/CSV yuklash",
+        "add_btn": "Qo'shish",
+        "no_students_found": "O'quvchilar ro'yxati bo'sh yoki qidiruv bo'yicha natija topilmadi.",
+        "not_selected_title": "O'quvchi tanlanmagan",
+        "not_selected_desc": "Ro'yxatdan biror o'quvchini tanlang yoki yangi o'quvchi kiritish uchun \"O'quvchi qo'shish\" tugmasini bosing.",
+        "status_label": "Faollik holati",
+        "status_desc": "O'quvchiga AI javob berishi uchun faol holatda bo'lishi kerak.",
+        "delete_btn": "O'chirib yuborish",
+        "cancel_btn": "Bekor qilish",
+        "save_btn": "Saqlash",
+        "name_required_alert": "Iltimos, ism-familiyani kiriting.",
+        "username_required_alert": "Iltimos, telefon yoki username kiriting.",
+        "add_new_title": "Yangi O'quvchi Qo'shish",
+        "edit_title": "O'quvchi Ma'lumotlarini Tahrirlash",
+        "confirm_delete": "Ushbu o'quvchini ro'yxatdan o'chirishni tasdiqlaysizmi?",
+        "deleted_toast": "O'quvchi ro'yxatdan o'chirildi!",
+        "added_toast": "Yangi o'quvchi muvaffaqiyatli qo'shildi!",
+        "saved_toast": "O'quvchi ma'lumotlari saqlandi!",
+        "file_empty_error": "Fayldan hech qanday o'quvchi ma'lumoti topilmadi.",
+        "file_confirm_import": "Fayldan {count} ta o'quvchi aniqlandi. Ularni ro'yxatga qo'shishni tasdiqlaysizmi?",
+        "file_imported_success": "{count} ta o'quvchi muvaffaqiyatli qo'shildi!",
+        "name_label": "Ism-Familiya",
+        "name_placeholder": "Masalan: Sardor Salimov",
+        "phone_user_label": "Telefon raqam yoki Username",
+        "phone_user_placeholder": "Masalan: +998901234567 yoki telegram_user",
+        "tags_label": "Teglar (Guruh yoki maxsus teglar)"
+      },
+      "brain_success": "AI Agent miyasi muvaffaqiyatli shakllantirildi!",
+      "tg_error": "Telegram serveriga ulanishda xatolik yuz berdi. Tarmoqni tekshiring.",
+      "brain_error": "Miyani shakllantirishda xatolik yuz berdi.",
+      "file_upload_error": "Faylni yuklash/tahlil qilishda xatolik yuz berdi.",
+      "file_parse_error": "Faylni tahlil qilishda xatolik yuz berdi.",
+      "link_parse_error": "Havolani tahlil qilishda xatolik yuz berdi.",
       "prefix_channel": "Kanal",
       "prefix_group": "Guruh",
       "search_placeholder": "Qidirish (modul yoki darslar)...",
@@ -1861,5 +1911,22 @@
   "toast": {
     "success": "Muvaffaqiyatli",
     "error": "Xatolik yuz berdi"
+  },
+  "cookie_consent": {
+    "banner_title": "Biz cookie-fayllardan foydalanamiz",
+    "banner_text": "Saytimiz ishlashini yaxshilash, foydalanish tajribangizni shaxsiylashtirish va tahliliy ma'tlimotlarni yig'ish maqsadida cookie-fayllardan foydalanamiz. Ruxsat berishni yoki afzalliklarni sozlashni xohlaysizmi?",
+    "accept_all": "Barchasiga ruxsat berish",
+    "reject_all": "Rad etish",
+    "settings": "Sozlash",
+    "modal_title": "Maxfiylik sozlamalari",
+    "modal_desc": "Saytimizda qaysi turdagi cookie-fayllardan foydalanishga ruxsat berishingizni tanlang. Ruxsat bermaslik ba'zi xizmatlar sifatiga ta'sir qilishi mumkin.",
+    "necessary_title": "Zaruriy kuki-fayllar",
+    "necessary_desc": "Ushbu fayllar saytning asosiy ishlashini (masalan, til tanlovi, kirish sessiyasi va navigatsiya) ta'minlaydi va ularni o'chirib bo'lmaydi.",
+    "analytical_title": "Tahliliy kuki-fayllar",
+    "analytical_desc": "Ushbu fayllar bizga saytimizdagi sahifalar qanday ishlayotganligini (xatoliklar, sahifalar yuklanishi) tahlil qilishimizga yordam beradi.",
+    "marketing_title": "Marketing kuki-fayllari",
+    "marketing_desc": "Ushbu fayllar tashqi xizmatlar integratsiyasi (ijtimoiy tarmoqlar, maqsadli reklamalar) uchun ishlatiladi.",
+    "save_settings": "Sozlamalarni saqlash",
+    "always_active": "Doim faol"
   }
 }

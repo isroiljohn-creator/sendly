@@ -51,6 +51,9 @@ export function I18nProvider({ children }: { children: ReactNode }) {
     const saved = localStorage.getItem("replai-lang") as Lang | null;
     if (saved && (saved === "uz" || saved === "ru" || saved === "en")) {
       setLangState(saved);
+      document.cookie = `replai-lang=${saved}; path=/; max-age=31536000; SameSite=Lax`;
+    } else {
+      document.cookie = `replai-lang=uz; path=/; max-age=31536000; SameSite=Lax`;
     }
     db.fetchFromServer();
   }, []);
@@ -58,6 +61,7 @@ export function I18nProvider({ children }: { children: ReactNode }) {
   const setLang = (l: Lang) => {
     setLangState(l);
     localStorage.setItem("replai-lang", l);
+    document.cookie = `replai-lang=${l}; path=/; max-age=31536000; SameSite=Lax`;
   };
 
   const t = (key: string, params?: Record<string, string | number>): string => {
@@ -91,6 +95,21 @@ export function I18nProvider({ children }: { children: ReactNode }) {
   };
 
   const days = DAYS[lang];
+
+  useEffect(() => {
+    document.documentElement.lang = lang;
+    const title = t("metadata.title");
+    const description = t("metadata.description");
+    if (title && title !== "metadata.title") {
+      document.title = title;
+    }
+    if (description && description !== "metadata.description") {
+      const metaDesc = document.querySelector('meta[name="description"]');
+      if (metaDesc) {
+        metaDesc.setAttribute("content", description);
+      }
+    }
+  }, [lang]);
 
   return (
     <I18nContext.Provider value={{ lang, setLang, t, days }}>

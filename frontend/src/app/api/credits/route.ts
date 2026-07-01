@@ -34,7 +34,7 @@ function getVoucherMutex(code: string): Mutex {
 
 const LOCK_DIR = path.join(process.cwd(), "db.lock");
 
-function acquireFileLock(): boolean {
+async function acquireFileLock(): Promise<boolean> {
   const maxRetries = 15;
   const retryDelay = 50; // ms
   for (let i = 0; i < maxRetries; i++) {
@@ -43,10 +43,7 @@ function acquireFileLock(): boolean {
       return true;
     } catch (err: any) {
       if (err.code === "EEXIST") {
-        const start = Date.now();
-        while (Date.now() - start < retryDelay) {
-          // block
-        }
+        await new Promise((resolve) => setTimeout(resolve, retryDelay));
       } else {
         return false;
       }
@@ -97,23 +94,25 @@ function getInitialCredits(): CreditsData {
   };
 }
 
-function readDbUnlocked() {
-  if (!fs.existsSync(DB_FILE)) {
+async function readDbUnlocked() {
+  try {
+    await fs.promises.access(DB_FILE);
+  } catch {
     return {};
   }
-  const data = fs.readFileSync(DB_FILE, "utf8");
+  const data = await fs.promises.readFile(DB_FILE, "utf8");
   return JSON.parse(data);
 }
 
-function writeDbUnlocked(data: unknown) {
-  fs.writeFileSync(DB_FILE, JSON.stringify(data, null, 2), "utf8");
+async function writeDbUnlocked(data: unknown) {
+  await fs.promises.writeFile(DB_FILE, JSON.stringify(data, null, 2), "utf8");
   return true;
 }
 
-function readDb() {
-  const hasLock = acquireFileLock();
+async function readDb() {
+  const hasLock = await acquireFileLock();
   try {
-    return readDbUnlocked();
+    return await readDbUnlocked();
   } catch (err) {
     console.error("Error reading database file in credits API", err);
     return {};
@@ -122,10 +121,10 @@ function readDb() {
   }
 }
 
-function writeDb(data: unknown) {
-  const hasLock = acquireFileLock();
+async function writeDb(data: unknown) {
+  const hasLock = await acquireFileLock();
   try {
-    return writeDbUnlocked(data);
+    return await writeDbUnlocked(data);
   } catch (err) {
     console.error("Error writing to database file in credits API", err);
     return false;
@@ -153,7 +152,7 @@ export async function readUserCredits(userId: string): Promise<CreditsData> {
   }
 
   // Fallback to local db.json
-  const dbData = readDb();
+  const dbData = await readDb();
   const userData = dbData.userData?.[userId] || {};
   let creditsData: CreditsData;
   if (!userData["replai_ai_credits_data"]) {
@@ -187,11 +186,11 @@ export async function writeUserCredits(userId: string, creditsData: CreditsData)
 
   // Fallback to local db.json
   try {
-    const dbData = readDb();
+    const dbData = await readDb();
     if (!dbData.userData) dbData.userData = {};
     if (!dbData.userData[userId]) dbData.userData[userId] = {};
     dbData.userData[userId]["replai_ai_credits_data"] = JSON.stringify(creditsData);
-    return writeDb(dbData);
+    return await writeDb(dbData);
   } catch (e) {
     console.error("Failed to write user credits to local db", e);
     return false;
@@ -212,7 +211,7 @@ async function redeemVoucher(userId: string, normalizedCode: string, creditsData
       console.error("Failed to read voucher data from pgdb", e);
     }
   } else {
-    const dbData = readDb();
+    const dbData = await readDb();
     usersList = dbData.users || [];
     promoCodes = dbData.promoCodes || [];
   }
@@ -269,6 +268,13 @@ async function redeemVoucher(userId: string, normalizedCode: string, creditsData
     date: timestamp
   });
 
+  // Log to PostgreSQL credit_ledger
+  try {
+    await pgdb.logCreditTransaction(userId, "purchase", voucherInfo.amount, `Promokod faollashtirildi: ${normalizedCode}`);
+  } catch (err) {
+    console.error("Failed to log voucher redemption to credit ledger:", err);
+  }
+
   // Save promo code status back
   if (pgdb.isConfigured()) {
     try {
@@ -278,9 +284,9 @@ async function redeemVoucher(userId: string, normalizedCode: string, creditsData
       console.error("Failed to save updated vouchers to pgdb", e);
     }
   } else {
-    const dbData = readDb();
+    const dbData = await readDb();
     dbData.promoCodes = promoCodes;
-    writeDb(dbData);
+    await writeDb(dbData);
   }
 
   return {};
@@ -344,26 +350,38 @@ export async function POST(request: Request) {
     if (action === "buy") {
       // Allow simulated credit purchase for all users in prototype/demo mode
       creditsData.balance = (creditsData.balance || 0) + amount;
+      const desc = description || `${amount} AI kredit paketi sotib olindi`;
       creditsData.history.unshift({
         id: `tx-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
         type: "purchase",
         amount,
-        description: description || `${amount} AI kredit paketi sotib olindi`,
+        description: desc,
         date: timestamp
       });
+      try {
+        await pgdb.logCreditTransaction(userId, "purchase", amount, desc);
+      } catch (err) {
+        console.error("Failed to log purchase to credit ledger:", err);
+      }
     } else if (action === "deduct") {
       if (creditsData.balance < amount) {
         return NextResponse.json({ error: "Insufficient credits" }, { status: 400 });
       }
       creditsData.balance = Math.max(0, creditsData.balance - amount);
       creditsData.used = (creditsData.used || 0) + amount;
+      const desc = description || "AI yordamchi javobi";
       creditsData.history.unshift({
         id: `tx-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
         type: "usage",
         amount,
-        description: description || "AI yordamchi javobi",
+        description: desc,
         date: timestamp
       });
+      try {
+        await pgdb.logCreditTransaction(userId, "usage", -amount, desc);
+      } catch (err) {
+        console.error("Failed to log usage to credit ledger:", err);
+      }
     } else if (action === "redeem_voucher") {
       const code = body.code;
       if (!code) {

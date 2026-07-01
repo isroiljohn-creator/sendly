@@ -17,6 +17,9 @@ function base64urlDecode(str: string): string {
 }
 
 export function signJwt(payload: object, secret: string): string {
+  if (!secret || secret.length < 32) {
+    console.warn("Warning: JWT secret is less than 32 characters long!");
+  }
   const header = { alg: "HS256", typ: "JWT" };
   const encodedHeader = base64url(JSON.stringify(header));
   const encodedPayload = base64url(JSON.stringify(payload));

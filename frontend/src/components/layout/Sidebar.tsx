@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { toast } from "sonner";
 import { useState, useEffect, useRef } from "react";
 import {
   Home,
@@ -136,7 +137,7 @@ export function Sidebar() {
             } catch {}
           }
         }
-        db.getAiCreditsFromServer(user.id).then((data) => {
+        db.getAiCreditsFromServer(user.id || "").then((data) => {
           if (data) setCredits(data);
         });
       }
@@ -183,7 +184,7 @@ export function Sidebar() {
     if (code === "uz" || code === "ru" || code === "en") {
       setLang(code);
     } else {
-      alert(t("nav.lang_soon"));
+      toast.info(t("nav.lang_soon"));
     }
     setLangMenuOpen(false);
   };

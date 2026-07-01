@@ -5,7 +5,7 @@ import { AppLayout } from "@/components/layout/AppLayout";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Card, Button, StatusPill, ConfirmModal, AlertModal } from "@/components/ui/primitives";
 import { useI18n } from "@/i18n/I18nProvider";
-import { Save, Database, Trash2, Plus, Bot, X, CheckCircle, ChevronDown, Download, Upload, Eye, EyeOff, Copy, RefreshCw, Check } from "lucide-react";
+import { Save, Database, Trash2, Plus, Bot, X, CheckCircle, ChevronDown, Download, Upload, Eye, EyeOff, Copy, RefreshCw, Check, Lock } from "lucide-react";
 import { Instagram } from "@/components/ui/icons";
 import { db } from "@/lib/db";
 import type { User, Channel } from "@/lib/db";
@@ -82,7 +82,10 @@ export default function SettingsPage() {
   // Form states
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
-  const [webhookUrl, setWebhookUrl] = useState("https://api.sendly.uz/webhooks/instagram");
+  const [webhookUrl, setWebhookUrl] = useState(() => {
+    const base = process.env.NEXT_PUBLIC_BACKEND_URL || "https://api.sendly.uz";
+    return `${base}/webhooks/instagram`;
+  });
   const [isIgConnected] = useState(true);
 
   // CRM/Sheets states
@@ -96,6 +99,14 @@ export default function SettingsPage() {
 
   // Channels state
   const [channels, setChannels] = useState<Channel[]>([]);
+  
+  // Password change states
+  const [oldPassword, setOldPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [passwordError, setPasswordError] = useState("");
+  const [passwordSuccess, setPasswordSuccess] = useState("");
+  const [passwordLoading, setPasswordLoading] = useState(false);
   const [modal, setModal] = useState<ModalType>(null);
   const [saving, setSaving] = useState(false);
   const [channelToDelete, setChannelToDelete] = useState<Channel | null>(null);
@@ -550,6 +561,66 @@ export default function SettingsPage() {
     showAlert(t("common.success"), t("pages.settings_page.delete_success"));
   };
 
+  const handlePasswordChange = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setPasswordError("");
+    setPasswordSuccess("");
+
+    if (newPassword !== confirmPassword) {
+      setPasswordError("Yangi parollar mos kelmadi.");
+      return;
+    }
+
+    if (newPassword.length < 6) {
+      setPasswordError("Yangi parol kamida 6 ta belgidan iborat bo'lishi shart.");
+      return;
+    }
+
+    setPasswordLoading(true);
+    try {
+      const token = localStorage.getItem("replai_token");
+      const headers: Record<string, string> = { "Content-Type": "application/json" };
+      if (token) {
+        headers["Authorization"] = `Bearer ${token}`;
+      }
+
+      const res = await fetch("/api/auth/change-password", {
+        method: "POST",
+        headers,
+        body: JSON.stringify({ oldPassword, newPassword }),
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        setPasswordError(data.error || "Parolni o'zgartirishda xatolik.");
+      } else {
+        setPasswordSuccess("Parol muvaffaqiyatli o'zgartirildi!");
+        setOldPassword("");
+        setNewPassword("");
+        setConfirmPassword("");
+        
+        // Update password locally as well
+        const users = db.getUsers();
+        if (currentUser) {
+          const idx = users.findIndex(u => u.id === currentUser.id);
+          if (idx > -1) {
+            const hashed = db.hashPassword(newPassword);
+            users[idx].password = hashed;
+            localStorage.setItem("replai_users", JSON.stringify(users));
+            const updatedUser = { ...currentUser, password: hashed };
+            localStorage.setItem("replai_current_user", JSON.stringify(updatedUser));
+            setCurrentUser(updatedUser);
+          }
+        }
+      }
+    } catch (err: unknown) {
+      const errMsg = err instanceof Error ? err.message : String(err);
+      setPasswordError("Tarmoq xatoligi: " + errMsg);
+    } finally {
+      setPasswordLoading(false);
+    }
+  };
+
   const handleExportDatabase = () => {
     try {
       const data = db.exportData();
@@ -818,6 +889,85 @@ export default function SettingsPage() {
                         </button>
                       </div>
                     </div>
+                  </div>
+                </Card>
+
+                {/* Change Password Card */}
+                <Card className="border border-[#D8D8D8] bg-white">
+                  <div className="flex flex-col gap-6">
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <Lock size={16} className="text-black" />
+                        <h3 className="text-[15px] font-medium text-black">
+                          Parolni o'zgartirish
+                        </h3>
+                      </div>
+                      <p className="text-[12px] text-[#707070] mt-1.5 leading-relaxed">
+                        Profilingiz xavfsizligini ta'minlash uchun parolni yangilab turing.
+                      </p>
+                    </div>
+
+                    <form onSubmit={handlePasswordChange} className="flex flex-col gap-4">
+                      {passwordError && (
+                        <div className="p-3 bg-red-50 border border-red-200 text-red-600 rounded-[10px] text-[12px] font-semibold">
+                          {passwordError}
+                        </div>
+                      )}
+                      {passwordSuccess && (
+                        <div className="p-3 bg-green-50 border border-green-200 text-green-600 rounded-[10px] text-[12px] font-semibold">
+                          {passwordSuccess}
+                        </div>
+                      )}
+
+                      {/* Only show old password field if they have a password set */}
+                      {currentUser && (currentUser as any).password && (
+                        <div className="flex flex-col gap-1">
+                          <label className="text-[10px] font-bold text-[#707070] uppercase tracking-wide">Eski parol</label>
+                          <input
+                            type="password"
+                            value={oldPassword}
+                            onChange={(e) => setOldPassword(e.target.value)}
+                            placeholder="Eski parolingizni kiriting"
+                            required
+                            className="w-full rounded-[10px] border border-[#D8D8D8] px-3.5 py-2 text-[12px] focus:outline-none focus:border-black font-semibold text-black bg-white"
+                          />
+                        </div>
+                      )}
+
+                      <div className="flex flex-col gap-1">
+                        <label className="text-[10px] font-bold text-[#707070] uppercase tracking-wide">Yangi parol</label>
+                        <input
+                          type="password"
+                          value={newPassword}
+                          onChange={(e) => setNewPassword(e.target.value)}
+                          placeholder="Yangi parol (kamida 6 ta belgi)"
+                          required
+                          className="w-full rounded-[10px] border border-[#D8D8D8] px-3.5 py-2 text-[12px] focus:outline-none focus:border-black font-semibold text-black bg-white"
+                        />
+                      </div>
+
+                      <div className="flex flex-col gap-1">
+                        <label className="text-[10px] font-bold text-[#707070] uppercase tracking-wide">Yangi parolni tasdiqlash</label>
+                        <input
+                          type="password"
+                          value={confirmPassword}
+                          onChange={(e) => setConfirmPassword(e.target.value)}
+                          placeholder="Yangi parolni qayta kiriting"
+                          required
+                          className="w-full rounded-[10px] border border-[#D8D8D8] px-3.5 py-2 text-[12px] focus:outline-none focus:border-black font-semibold text-black bg-white"
+                        />
+                      </div>
+
+                      <div className="flex justify-end mt-2">
+                        <button
+                          type="submit"
+                          disabled={passwordLoading}
+                          className="flex items-center gap-1.5 rounded-full bg-black text-white hover:bg-black/90 px-5 py-2.5 text-[12px] font-bold transition-all active:scale-95 disabled:opacity-50"
+                        >
+                          {passwordLoading ? "Yangilanmoqda..." : "Parolni yangilash"}
+                        </button>
+                      </div>
+                    </form>
                   </div>
                 </Card>
               </div>

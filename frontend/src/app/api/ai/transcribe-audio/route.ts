@@ -3,7 +3,7 @@ import { verifyJwt } from "@/lib/jwt";
 import { readUserCredits, writeUserCredits } from "../../credits/route";
 
 export async function POST(request: Request) {
-  let userId: string | null = null;
+  let userId: string = "";
   let creditCost = 0;
   let didDeduct = false;
   let bodyFileName = "audio.wav";

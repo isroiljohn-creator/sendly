@@ -156,46 +156,52 @@ export default function LoginPage() {
     setError("");
     setIsFallbackMode(false);
     
-    // Check password correctness
-    const checkRes = db.signIn(email, password);
-    if (checkRes.success) {
+    try {
+      const loginRes = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+      const loginData = await loginRes.json();
+      
+      if (!loginRes.ok) {
+        setError(loginData.error || t("pages.login_page.error_invalid_credentials"));
+        return;
+      }
+
       // Request real SMTP sending and server-side OTP generation
-      try {
-        const mailRes = await fetch("/api/auth/send-otp", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email }),
-        });
-        
-        const mailData = await mailRes.json();
-        
-        if (mailRes.ok && mailData.success) {
+      const mailRes = await fetch("/api/auth/send-otp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      });
+      
+      const mailData = await mailRes.json();
+      
+      if (mailRes.ok && mailData.success) {
+        setIsVerifyingEmail(true);
+        setCountdown(120);
+        setEnteredOtp(["", "", "", ""]);
+        setShowNotification(false);
+      } else {
+        // If SMTP variables are missing, fallback to simulator with warning
+        if (mailRes.status === 501) {
+          if (mailData.otp) {
+            setOtpCode(mailData.otp);
+          }
+          setIsFallbackMode(true);
           setIsVerifyingEmail(true);
           setCountdown(120);
           setEnteredOtp(["", "", "", ""]);
-          setShowNotification(false);
+          setShowNotification(true);
+          setTimeout(() => setShowNotification(false), 15000);
         } else {
-          // If SMTP variables are missing, fallback to simulator with warning
-          if (mailRes.status === 501) {
-            if (mailData.otp) {
-              setOtpCode(mailData.otp);
-            }
-            setIsFallbackMode(true);
-            setIsVerifyingEmail(true);
-            setCountdown(120);
-            setEnteredOtp(["", "", "", ""]);
-            setShowNotification(true);
-            setTimeout(() => setShowNotification(false), 15000);
-          } else {
-            setError(mailData.error || t("pages.login_page.error_send_otp"));
-          }
+          setError(mailData.error || t("pages.login_page.error_send_otp"));
         }
-      } catch (err: unknown) {
-        const errMsg = err instanceof Error ? err.message : String(err);
-        setError(t("pages.login_page.error_connection") + errMsg);
       }
-    } else {
-      setError(checkRes.error || t("pages.login_page.error_invalid_credentials"));
+    } catch (err: unknown) {
+      const errMsg = err instanceof Error ? err.message : String(err);
+      setError(t("pages.login_page.error_connection") + errMsg);
     }
   };
 
@@ -272,15 +278,20 @@ export default function LoginPage() {
     setSuccessMessage("");
     setIsFallbackMode(false);
 
-    const users = db.getUsers();
-    const userExists = users.some(u => u.email.toLowerCase() === recoveryEmail.toLowerCase());
-
-    if (!userExists) {
-      setError(t("pages.login_page.error_email_not_found"));
-      return;
-    }
-
     try {
+      // Check user existence on the server
+      const checkRes = await fetch("/api/auth/check-email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: recoveryEmail }),
+      });
+      const checkData = await checkRes.json();
+      
+      if (!checkRes.ok || !checkData.exists) {
+        setError(t("pages.login_page.error_email_not_found"));
+        return;
+      }
+
       const mailRes = await fetch("/api/auth/send-otp", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -388,16 +399,31 @@ export default function LoginPage() {
       return;
     }
 
-    const users = db.getUsers();
-    const idx = users.findIndex((u) => u.email.toLowerCase() === recoveryEmail.toLowerCase());
-    if (idx > -1) {
-      users[idx].password = db.hashPassword(newPassword);
-      localStorage.setItem("replai_users", JSON.stringify(users));
+    try {
+      const token = localStorage.getItem("replai_token");
+      const headers: Record<string, string> = { "Content-Type": "application/json" };
+      if (token) {
+        headers["Authorization"] = `Bearer ${token}`;
+      }
 
-      const saveRes = await db.saveToServer();
-      if (saveRes && !saveRes.success && saveRes.error) {
-        setError(saveRes.error);
+      const resetRes = await fetch("/api/auth/reset-password", {
+        method: "POST",
+        headers,
+        body: JSON.stringify({ password: newPassword }),
+      });
+      const resetData = await resetRes.json();
+
+      if (!resetRes.ok) {
+        setError(resetData.error || "Parolni tiklashda xatolik.");
         return;
+      }
+
+      // Also update locally to keep state consistent if the users list is locally stored
+      const users = db.getUsers();
+      const idx = users.findIndex((u) => u.email.toLowerCase() === recoveryEmail.toLowerCase());
+      if (idx > -1) {
+        users[idx].password = db.hashPassword(newPassword);
+        localStorage.setItem("replai_users", JSON.stringify(users));
       }
 
       setSuccessMessage(t("pages.login_page.recovery_success"));
@@ -405,8 +431,9 @@ export default function LoginPage() {
       setRecoveryStep(1);
       setEmail(recoveryEmail);
       setPassword("");
-    } else {
-      setError(t("pages.login_page.error_email_not_found"));
+    } catch (err: unknown) {
+      const errMsg = err instanceof Error ? err.message : String(err);
+      setError(t("pages.login_page.error_connection") + errMsg);
     }
   };
 

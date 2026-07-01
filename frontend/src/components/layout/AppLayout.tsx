@@ -108,7 +108,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
             } catch {}
           }
         }
-        db.getAiCreditsFromServer(user.id).then((data) => {
+        db.getAiCreditsFromServer(user.id || "").then((data) => {
           if (data) setCredits(data);
         });
       }
@@ -137,12 +137,14 @@ export function AppLayout({ children }: { children: ReactNode }) {
   const activeCredits = credits || { balance: 0, used: 0 };
 
   return (
-    <div className="h-[100dvh] md:h-screen w-full bg-[#E8E8E8] p-3 md:px-6 md:py-4 flex flex-col gap-3 md:gap-4 overflow-hidden relative">
+    <div className="flex flex-col h-[100dvh] md:h-screen w-full bg-[#E8E8E8] overflow-hidden">
       {impersonatorEmail && (
-        <div className="w-full bg-neutral-900 border border-neutral-800 text-white px-4 md:px-6 py-2.5 md:py-3 rounded-[16px] flex justify-between items-center animate-in slide-in-from-top duration-300 shadow-sm relative overflow-hidden shrink-0 z-50">
+        <div className="w-full bg-[#DC2626] text-white px-4 md:px-6 py-2.5 md:py-3 flex justify-between items-center animate-in slide-in-from-top duration-300 shadow-md relative overflow-hidden shrink-0 z-50">
           <div className="flex items-center gap-2.5 text-[11px] md:text-[12px] font-bold">
-            <User size={16} className="text-[#C7F33C] shrink-0" />
-            <span className="truncate max-w-[200px] sm:max-w-none">Siz hozirda &lt;{db.getCurrentUser()?.email}&gt; nomidan tizimdadasiz.</span>
+            <span className="text-[14px]">⚠️</span>
+            <span className="truncate max-w-[200px] sm:max-w-none">
+              Tizimga boshqa foydalanuvchi nomidan kirgansiz: <strong>{db.getCurrentUser()?.email}</strong>
+            </span>
           </div>
           <button 
             onClick={() => {
@@ -151,12 +153,14 @@ export function AppLayout({ children }: { children: ReactNode }) {
                 window.location.href = "/admin";
               }
             }}
-            className="bg-[#C7F33C] text-black font-extrabold text-[10px] md:text-[11px] px-3.5 py-1.5 rounded-full hover:bg-[#b0d82d] transition-colors shrink-0"
+            className="bg-white text-[#DC2626] hover:bg-neutral-100 font-extrabold text-[10px] md:text-[11px] px-3.5 py-1.5 rounded-xl transition-colors shrink-0"
           >
             Admin hisobiga qaytish
           </button>
         </div>
       )}
+
+      <div className="flex-1 p-3 md:px-6 md:py-4 flex flex-col gap-3 md:gap-4 overflow-hidden relative min-h-0">
 
       {announcement && !dismissed && (
         <div className="w-full bg-[#C7F33C] text-[#1A2906] px-4 md:px-6 py-3 rounded-[16px] border border-[#1A2906]/10 flex justify-between items-center animate-in slide-in-from-top duration-300 shadow-sm relative overflow-hidden shrink-0 z-50">
@@ -303,7 +307,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
                       </div>
                       <span className="text-[11px] font-bold text-neutral-700 truncate">{ch.username.startsWith("@") ? ch.username : `@${ch.username}`}</span>
                     </div>
-                    <span className="text-[9px] text-neutral-400 font-semibold">O&apos;tish ▾</span>
+                    <span className="text-[9px] text-neutral-400 font-semibold">{t("nav.switch_channel_mobile")} ▾</span>
                   </button>
                 ))}
               </div>
@@ -374,7 +378,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
           {/* Language Selector */}
           <div className="mt-6">
             <p className="text-[9px] font-extrabold text-[#a0a0a0] uppercase tracking-wider mb-2">
-              Tizim tili
+              {t("nav.system_language")}
             </p>
             <div className="flex flex-col gap-1.5">
               {[
@@ -447,6 +451,8 @@ export function AppLayout({ children }: { children: ReactNode }) {
             </button>
           </div>
         </div>
+      </div>
+
       </div>
 
       <ConnectChannelModal />

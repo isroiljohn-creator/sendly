@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import fs from "fs";
 import path from "path";
-import { startTelegramBots } from "@/lib/telegramBotRunner";
+import { startTelegramBots, getDefaultSystemPrompt } from "@/lib/telegramBotRunner";
 import * as pgdb from "@/lib/pgdb";
 import { verifyJwt } from "@/lib/jwt";
 
@@ -51,32 +51,34 @@ function getInitialData() {
   return {};
 }
 
-function readDbUnlocked() {
-  if (!fs.existsSync(DB_FILE)) {
+async function readDbUnlocked() {
+  try {
+    await fs.promises.access(DB_FILE);
+  } catch {
     const initial = getInitialData();
-    fs.writeFileSync(DB_FILE, JSON.stringify(initial, null, 2), "utf8");
+    await fs.promises.writeFile(DB_FILE, JSON.stringify(initial, null, 2), "utf8");
     return initial;
   }
-  const data = fs.readFileSync(DB_FILE, "utf8");
+  const data = await fs.promises.readFile(DB_FILE, "utf8");
   return JSON.parse(data);
 }
 
-function writeDbUnlocked(data: unknown) {
-  fs.writeFileSync(DB_FILE, JSON.stringify(data, null, 2), "utf8");
+async function writeDbUnlocked(data: unknown) {
+  await fs.promises.writeFile(DB_FILE, JSON.stringify(data, null, 2), "utf8");
   return true;
 }
 
 async function readDb() {
   const hasLock = await acquireFileLock();
   try {
-    let dbData = readDbUnlocked();
+    let dbData = await readDbUnlocked();
     if (dbData && !dbData.userData && !dbData.users) {
       const users = dbData.replai_users ? JSON.parse(dbData.replai_users) : [];
       dbData = {
         users: users,
         userData: {}
       };
-      writeDbUnlocked(dbData);
+      await writeDbUnlocked(dbData);
     }
     if (!dbData.users) dbData.users = [];
     if (!dbData.userData) dbData.userData = {};
@@ -92,7 +94,7 @@ async function readDb() {
 async function writeDb(data: unknown) {
   const hasLock = await acquireFileLock();
   try {
-    return writeDbUnlocked(data);
+    return await writeDbUnlocked(data);
   } catch (err) {
     console.error("Error writing to database file", err);
     return false;
@@ -266,7 +268,7 @@ export async function POST(request: Request) {
     }
   } else {
     try {
-      const dbData = readDbUnlocked();
+      const dbData = await readDbUnlocked();
       const userObj = dbData.users?.find((u: any) => u.id === userId);
       plan = userObj?.plan || "free";
     } catch (e) {
@@ -311,172 +313,190 @@ export async function POST(request: Request) {
   try {
     // Use Railway PostgreSQL if configured
     if (pgdb.isConfigured()) {
-      // 1. Channel duplication check
-      if (payload.replai_channels) {
-        try {
-          let existingChannels: any[] = [];
+      return await pgdb.executeTransaction(async (client) => {
+        // 1. Channel duplication check
+        if (payload.replai_channels) {
           try {
-            const existingSettings = await pgdb.getValue("global_settings_" + userId) || {};
-            const existingChannelsRaw = existingSettings.replai_channels;
-            if (existingChannelsRaw) {
-              existingChannels = typeof existingChannelsRaw === "string"
-                ? JSON.parse(existingChannelsRaw)
-                : existingChannelsRaw;
+            let existingChannels: any[] = [];
+            try {
+              const existingSettings = await pgdb.getValue("global_settings_" + userId, client) || {};
+              const existingChannelsRaw = existingSettings.replai_channels;
+              if (existingChannelsRaw) {
+                existingChannels = typeof existingChannelsRaw === "string"
+                  ? JSON.parse(existingChannelsRaw)
+                  : existingChannelsRaw;
+              }
+            } catch (e) {
+              console.error("Failed to load existing user channels:", e);
             }
-          } catch (e) {
-            console.error("Failed to load existing user channels:", e);
-          }
 
-          const incomingChannels = JSON.parse(payload.replai_channels);
-          if (Array.isArray(incomingChannels)) {
-            for (const ch of incomingChannels) {
-              if (!ch.username) continue;
-              const channelUsernameNormalized = ch.username.toLowerCase().replace(/^@+/, "");
-              
-              // Skip validation if the user already owned this channel previously
-              const isAlreadyOwned = Array.isArray(existingChannels) && existingChannels.some(
-                (oCh) =>
-                  oCh.type === ch.type &&
-                  oCh.username &&
-                  oCh.username.toLowerCase().replace(/^@+/, "") === channelUsernameNormalized
-              );
-              if (isAlreadyOwned) continue;
+            const incomingChannels = JSON.parse(payload.replai_channels);
+            if (Array.isArray(incomingChannels)) {
+              for (const ch of incomingChannels) {
+                if (!ch.username) continue;
+                const channelUsernameNormalized = ch.username.toLowerCase().replace(/^@+/, "");
+                
+                // Skip validation if the user already owned this channel previously
+                const isAlreadyOwned = Array.isArray(existingChannels) && existingChannels.some(
+                  (oCh) =>
+                    oCh.type === ch.type &&
+                    oCh.username &&
+                    oCh.username.toLowerCase().replace(/^@+/, "") === channelUsernameNormalized
+                );
+                if (isAlreadyOwned) continue;
 
-              // Query other users' settings
-              const allSettings = await pgdb.getAllSettingsExcept(userId);
+                // Query other users' settings
+                const allSettings = await pgdb.getAllSettingsExcept(userId, client);
 
-              for (const row of allSettings) {
-                const otherUserChannelsRaw = row.value?.replai_channels;
-                if (otherUserChannelsRaw) {
-                  const otherUserChannels = typeof otherUserChannelsRaw === "string"
-                    ? JSON.parse(otherUserChannelsRaw)
-                    : otherUserChannelsRaw;
-                  if (Array.isArray(otherUserChannels)) {
-                    const duplicate = otherUserChannels.find(
-                      (oCh) =>
-                        oCh.type === ch.type &&
-                        oCh.username.toLowerCase().replace(/^@+/, "") === channelUsernameNormalized
-                    );
-                    if (duplicate) {
-                      return NextResponse.json(
-                        {
-                          success: false,
-                          error: `Ushbu ${ch.type === "telegram" ? "Telegram bot" : "Instagram sahifa"} (@${ch.username.replace(/^@+/, "")}) allaqachon boshqa foydalanuvchiga ulangan!`,
-                        },
-                        { status: 400 }
+                for (const row of allSettings) {
+                  const otherUserChannelsRaw = row.value?.replai_channels;
+                  if (otherUserChannelsRaw) {
+                    const otherUserChannels = typeof otherUserChannelsRaw === "string"
+                      ? JSON.parse(otherUserChannelsRaw)
+                      : otherUserChannelsRaw;
+                    if (Array.isArray(otherUserChannels)) {
+                      const duplicate = otherUserChannels.find(
+                        (oCh) =>
+                          oCh.type === ch.type &&
+                          oCh.username.toLowerCase().replace(/^@+/, "") === channelUsernameNormalized
                       );
+                      if (duplicate) {
+                        return NextResponse.json(
+                          {
+                            success: false,
+                            error: `Ushbu ${ch.type === "telegram" ? "Telegram bot" : "Instagram sahifa"} (@${ch.username.replace(/^@+/, "")}) allaqachon boshqa foydalanuvchiga ulangan!`,
+                          },
+                          { status: 400 }
+                        );
+                      }
                     }
                   }
                 }
               }
             }
+          } catch (e) {
+            console.error("Failed to validate channels during Railway POST:", e);
           }
-        } catch (e) {
-          console.error("Failed to validate channels during Railway POST:", e);
-        }
-      }
-
-      // 2. Save shared users list
-      if (payload.replai_users) {
-        let usersList = [];
-        try {
-          usersList = JSON.parse(payload.replai_users);
-        } catch (e) {
-          console.error("Failed to parse replai_users payload:", e);
         }
 
-        try {
-          const prevUsersList = await pgdb.getValue("global_users") || [];
-          
-          const prevUser = prevUsersList.find((u: any) => u.id === userId || (u.email && u.email === usersList.find((x: any) => x.id === userId)?.email));
-          const newUser = usersList.find((u: any) => u.id === userId);
-          
-          if (newUser) {
-            if (prevUser) {
-              newUser.plan = prevUser.plan || "free";
-              newUser.trialExpiresAt = prevUser.trialExpiresAt;
-              newUser.role = prevUser.role || "user";
-            } else {
-              newUser.plan = "free";
-              newUser.role = "user";
-              const expiresAt = new Date();
-              expiresAt.setDate(expiresAt.getDate() + 7);
-              newUser.trialExpiresAt = expiresAt.toLocaleDateString("uz-UZ", { day: "numeric", month: "long", year: "numeric" });
-            }
+        // 2. Save shared users list
+        if (payload.replai_users) {
+          let usersList = [];
+          try {
+            usersList = JSON.parse(payload.replai_users);
+          } catch (e) {
+            console.error("Failed to parse replai_users payload:", e);
           }
-          
-          if (newUser && prevUser && prevUser.plan !== newUser.plan) {
-            const newPlan = newUser.plan || "free";
-            const uData = await pgdb.getValue("global_settings_" + userId) || {};
 
-            let creditsData = { balance: 500, used: 0, history: [] as any[] };
-            if (uData.replai_ai_credits_data) {
-              try {
-                creditsData = typeof uData.replai_ai_credits_data === "string"
-                  ? JSON.parse(uData.replai_ai_credits_data)
-                  : uData.replai_ai_credits_data;
-              } catch {
-                // ignore
+          try {
+            const prevUsersList = await pgdb.getValue("global_users", client) || [];
+            
+            const prevUser = prevUsersList.find((u: any) => u.id === userId || (u.email && u.email === usersList.find((x: any) => x.id === userId)?.email));
+            const newUser = usersList.find((u: any) => u.id === userId);
+            
+            if (newUser) {
+              if (prevUser) {
+                newUser.plan = prevUser.plan || "free";
+                newUser.trialExpiresAt = prevUser.trialExpiresAt;
+                newUser.role = prevUser.role || "user";
+              } else {
+                newUser.plan = "free";
+                newUser.role = "user";
+                const expiresAt = new Date();
+                expiresAt.setDate(expiresAt.getDate() + 7);
+                newUser.trialExpiresAt = expiresAt.toLocaleDateString("uz-UZ", { day: "numeric", month: "long", year: "numeric" });
               }
             }
+            
+            if (newUser && prevUser && prevUser.plan !== newUser.plan) {
+              const newPlan = newUser.plan || "free";
+              const uData = await pgdb.getValue("global_settings_" + userId, client) || {};
 
-            let creditBalance = 500;
-            let description = "Bepul tarif uchun 500 ta sinov krediti taqdim etildi";
-            if (newPlan === "pro") {
-              creditBalance = 1000;
-              description = "PRO tarif obunasi uchun 1000 ta kredit taqdim etildi";
-            } else if (newPlan === "premium") {
-              creditBalance = 30000;
-              description = "PREMIUM tarif obunasi uchun 30 000 ta kredit taqdim etildi";
-            } else if (newPlan === "vip") {
-              creditBalance = 150000;
-              description = "VIP tarif obunasi uchun 150 000 ta kredit taqdim etildi";
+              let creditsData = { balance: 500, used: 0, history: [] as any[] };
+              if (uData.replai_ai_credits_data) {
+                try {
+                  creditsData = typeof uData.replai_ai_credits_data === "string"
+                    ? JSON.parse(uData.replai_ai_credits_data)
+                    : uData.replai_ai_credits_data;
+                } catch {
+                  // ignore
+                }
+              }
+
+              let creditBalance = 500;
+              let description = "Bepul tarif uchun 500 ta sinov krediti taqdim etildi";
+              if (newPlan === "pro") {
+                creditBalance = 1000;
+                description = "PRO tarif obunasi uchun 1000 ta kredit taqdim etildi";
+              } else if (newPlan === "premium") {
+                creditBalance = 30000;
+                description = "PREMIUM tarif obunasi uchun 30 000 ta kredit taqdim etildi";
+              } else if (newPlan === "vip") {
+                creditBalance = 150000;
+                description = "VIP tarif obunasi uchun 150 000 ta kredit taqdim etildi";
+              }
+
+              creditsData.balance = creditBalance;
+              creditsData.history.unshift({
+                id: `tx-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+                type: "purchase",
+                amount: creditBalance,
+                description,
+                date: new Date().toLocaleString("uz-UZ", { timeZone: "Asia/Tashkent" })
+              });
+
+              uData.replai_ai_credits_data = creditsData;
+              await pgdb.setValue("global_settings_" + userId, uData, client);
             }
-
-            creditsData.balance = creditBalance;
-            creditsData.history.unshift({
-              id: `tx-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
-              type: "purchase",
-              amount: creditBalance,
-              description,
-              date: new Date().toLocaleString("uz-UZ", { timeZone: "Asia/Tashkent" })
-            });
-
-            uData.replai_ai_credits_data = creditsData;
-            await pgdb.setValue("global_settings_" + userId, uData);
+          } catch (planChangeErr) {
+            console.error("Failed to sync credits on plan change detection (Railway API):", planChangeErr);
           }
-        } catch (planChangeErr) {
-          console.error("Failed to sync credits on plan change detection (Railway API):", planChangeErr);
+
+          await pgdb.setValue("global_users", usersList, client);
         }
 
-        await pgdb.setValue("global_users", usersList);
-      }
+        // 3. Extract and save user specific fields
+        const userSpecificData = await pgdb.getValue("global_settings_" + userId, client) || {};
+        Object.entries(payload).forEach(([key, val]) => {
+          if (
+            key.startsWith("replai_") &&
+            key !== "replai_users" &&
+            key !== "replai_current_user" &&
+            key !== "replai_ai_credits_data"
+          ) {
+            if (key.startsWith("replai_bot_settings_")) {
+              try {
+                let parsedSettings: any = null;
+                if (typeof val === "string") {
+                  parsedSettings = JSON.parse(val);
+                } else if (val && typeof val === "object") {
+                  parsedSettings = val;
+                }
+                if (parsedSettings && (!parsedSettings.systemPrompt || parsedSettings.systemPrompt.trim() === "")) {
+                  parsedSettings.systemPrompt = getDefaultSystemPrompt(parsedSettings.aiAgentType || "kurator");
+                  val = typeof val === "string" ? JSON.stringify(parsedSettings) : parsedSettings;
+                }
+              } catch (e) {
+                console.error("Error setting default system prompt in route POST:", e);
+              }
+            }
+            userSpecificData[key] = val;
+          }
+        });
 
-      // 3. Extract and save user specific fields
-      const userSpecificData = await pgdb.getValue("global_settings_" + userId) || {};
-      Object.entries(payload).forEach(([key, val]) => {
-        if (
-          key.startsWith("replai_") &&
-          key !== "replai_users" &&
-          key !== "replai_current_user" &&
-          key !== "replai_ai_credits_data"
-        ) {
-          userSpecificData[key] = val;
+        if (payload.replai_channels && activeChannelIds.length > 0) {
+          pruneOrphanSettings(userSpecificData, activeChannelIds);
         }
+        await runAutoLearningPipeline(userSpecificData, userId);
+        await pgdb.setValue("global_settings_" + userId, userSpecificData, client);
+
+        try {
+          startTelegramBots();
+        } catch (err) {
+          console.error("Failed to auto-start telegram bots on db POST (Railway):", err);
+        }
+        return NextResponse.json({ success: true });
       });
-
-      if (payload.replai_channels && activeChannelIds.length > 0) {
-        pruneOrphanSettings(userSpecificData, activeChannelIds);
-      }
-      await runAutoLearningPipeline(userSpecificData);
-      await pgdb.setValue("global_settings_" + userId, userSpecificData);
-
-      try {
-        startTelegramBots();
-      } catch (err) {
-        console.error("Failed to auto-start telegram bots on db POST (Railway):", err);
-      }
-      return NextResponse.json({ success: true });
     }
   } catch (supabaseErr: any) {
     console.error("Supabase POST error, falling back to local file", supabaseErr);
@@ -647,11 +667,27 @@ export async function POST(request: Request) {
         key !== "replai_current_user" &&
         key !== "replai_ai_credits_data"
       ) {
+        if (key.startsWith("replai_bot_settings_")) {
+          try {
+            let parsedSettings: any = null;
+            if (typeof val === "string") {
+              parsedSettings = JSON.parse(val);
+            } else if (val && typeof val === "object") {
+              parsedSettings = val;
+            }
+            if (parsedSettings && (!parsedSettings.systemPrompt || parsedSettings.systemPrompt.trim() === "")) {
+              parsedSettings.systemPrompt = getDefaultSystemPrompt(parsedSettings.aiAgentType || "kurator");
+              val = typeof val === "string" ? JSON.stringify(parsedSettings) : parsedSettings;
+            }
+          } catch (e) {
+            console.error("Error setting default system prompt in local fallback POST:", e);
+          }
+        }
         dbData.userData[userId][key] = val;
       }
     });
 
-    await runAutoLearningPipeline(dbData.userData[userId]);
+    await runAutoLearningPipeline(dbData.userData[userId], userId);
 
     const success = await writeDb(dbData);
     
@@ -676,110 +712,114 @@ async function runAutoLearningPipeline(userData: Record<string, any>, userId: st
   const botSettingsKeys = Object.keys(userData).filter(k => k.startsWith("replai_bot_settings_"));
 
   for (const settingsKey of botSettingsKeys) {
-    const botId = settingsKey.replace("replai_bot_settings_", "");
-    const rawSettings = userData[settingsKey];
-    const settings = typeof rawSettings === "string" ? JSON.parse(rawSettings) : rawSettings;
+    try {
+      const botId = settingsKey.replace("replai_bot_settings_", "");
+      const rawSettings = userData[settingsKey];
+      const settings = typeof rawSettings === "string" ? JSON.parse(rawSettings) : rawSettings;
 
-    if (settings && settings.autoLearnEnabled === true) {
-      const chatsKey = `replai_chats_${botId}`;
-      const rawChats = userData[chatsKey];
-      const chatsList: any[] = typeof rawChats === "string" ? JSON.parse(rawChats) : (rawChats || []);
+      if (settings && settings.autoLearnEnabled === true) {
+        const chatsKey = `replai_chats_${botId}`;
+        const rawChats = userData[chatsKey];
+        const chatsList: any[] = typeof rawChats === "string" ? JSON.parse(rawChats) : (rawChats || []);
 
-      const lessonsKey = `replai_lessons_${botId}`;
-      const rawLessons = userData[lessonsKey];
-      const lessons: any[] = typeof rawLessons === "string" ? JSON.parse(rawLessons) : (rawLessons || []);
+        const lessonsKey = `replai_lessons_${botId}`;
+        const rawLessons = userData[lessonsKey];
+        const lessons: any[] = typeof rawLessons === "string" ? JSON.parse(rawLessons) : (rawLessons || []);
 
-      const modulesKey = `replai_modules_${botId}`;
-      const rawModules = userData[modulesKey];
-      const modules: any[] = typeof rawModules === "string" ? JSON.parse(rawModules) : (rawModules || []);
+        const modulesKey = `replai_modules_${botId}`;
+        const rawModules = userData[modulesKey];
+        const modules: any[] = typeof rawModules === "string" ? JSON.parse(rawModules) : (rawModules || []);
 
-      let chatsUpdated = false;
-      let lessonsUpdated = false;
+        let chatsUpdated = false;
+        let lessonsUpdated = false;
 
-      for (const chat of chatsList) {
-        if (chat.liveTakeover === false && !chat.autoLearned && chat.messages && chat.messages.length > 0) {
-          const msgs = chat.messages.filter((m: any) => m.text);
-          if (msgs.length < 2) continue;
+        for (const chat of chatsList) {
+          if (chat.liveTakeover === false && !chat.autoLearned && chat.messages && chat.messages.length > 0) {
+            const msgs = chat.messages.filter((m: any) => m.text);
+            if (msgs.length < 2) continue;
 
-          const conversationText = msgs.map((m: any) => `${m.sender === "user" ? "Mijoz" : "Operator"}: ${m.text}`).join("\n");
+            const conversationText = msgs.map((m: any) => `${m.sender === "user" ? "Mijoz" : "Operator"}: ${m.text}`).join("\n");
 
-          try {
-            const systemPrompt = `Siz professional marketing darsliklari va savol-javob (Q&A) qo'llanmalari tuzuvchisiz.\n` +
-              `Sizga operator va mijoz o'rtasidagi chat yozishmalari taqdim etiladi. Yozishmalardan foydali savol va unga berilgan aniq javobni (fakt, ma'lumot yoki qoida) topib, foydali marketing darsligi shakllantiring.\n` +
-              `Agar suhbatda hech qanday foydali darslik darajasidagi ma'lumot (masalan, narxlar, kurs tafsilotlari, qoidalar) bo'lmasa, bo'sh JSON {} qaytaring.\n` +
-              `Javobni FAQAT quyidagi JSON formatida qaytaring, boshqa hech qanday matn qo'shmang:\n` +
-              `{\n` +
-              `  "title": "Mavzu nomi (masalan: Kurs narxi va to'lov turlari)",\n` +
-              `  "transcript": "Darslik/tushuntirish matni (mijoz so'ragan masalaga to'liq javob, batafsil yoritilgan)"\n` +
-              `}`;
+            try {
+              const systemPrompt = `Siz professional marketing darsliklari va savol-javob (Q&A) qo'llanmalari tuzuvchisiz.\n` +
+                `Sizga operator va mijoz o'rtasidagi chat yozishmalari taqdim etiladi. Yozishmalardan foydali savol va unga berilgan aniq javobni (fakt, ma'lumot yoki qoida) topib, foydali marketing darsligi shakllantiring.\n` +
+                `Agar suhbatda hech qanday foydali darslik darajasidagi ma'lumot (masalan, narxlar, kurs tafsilotlari, qoidalar) bo'lmasa, bo'sh JSON {} qaytaring.\n` +
+                `Javobni FAQAT quyidagi JSON formatida qaytaring, boshqa hech qanday matn qo'shmang:\n` +
+                `{\n` +
+                `  "title": "Mavzu nomi (masalan: Kurs narxi va to'lov turlari)",\n` +
+                `  "transcript": "Darslik/tushuntirish matni (mijoz so'ragan masalaga to'liq javob, batafsil yoritilgan)"\n` +
+                `}`;
 
-            const res = await fetch(
-              `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
-              {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                  system_instruction: {
-                    parts: [{ text: systemPrompt }],
-                  },
-                  contents: [
-                    {
-                      role: "user",
-                      parts: [{ text: `SUHBAT:\n${conversationText}` }],
+              const res = await fetch(
+                `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
+                {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({
+                    system_instruction: {
+                      parts: [{ text: systemPrompt }],
+                    },
+                    contents: [
+                      {
+                        role: "user",
+                        parts: [{ text: `SUHBAT:\n${conversationText}` }],
+                      }
+                    ],
+                    generationConfig: {
+                      temperature: 0.1,
+                      responseMimeType: "application/json",
+                    },
+                  }),
+                }
+              );
+
+              if (res.ok) {
+                const data = await res.json();
+                const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+                if (text) {
+                  const parsed = JSON.parse(text);
+                  if (parsed.title && parsed.transcript) {
+                    let autoModule = modules.find(m => m.title === "Avtomatik o'rganilgan bilimlar");
+                    if (!autoModule) {
+                      autoModule = {
+                        id: "mod-auto-" + Date.now(),
+                        title: "Avtomatik o'rganilgan bilimlar",
+                        description: "Mijozlar bilan suhbatlar asosida avtomatik shakllantirilgan bilimlar bazasi."
+                      };
+                      modules.push(autoModule);
                     }
-                  ],
-                  generationConfig: {
-                    temperature: 0.1,
-                    responseMimeType: "application/json",
-                  },
-                }),
-              }
-            );
 
-            if (res.ok) {
-              const data = await res.json();
-              const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
-              if (text) {
-                const parsed = JSON.parse(text);
-                if (parsed.title && parsed.transcript) {
-                  let autoModule = modules.find(m => m.title === "Avtomatik o'rganilgan bilimlar");
-                  if (!autoModule) {
-                    autoModule = {
-                      id: "mod-auto-" + Date.now(),
-                      title: "Avtomatik o'rganilgan bilimlar",
-                      description: "Mijozlar bilan suhbatlar asosida avtomatik shakllantirilgan bilimlar bazasi."
+                    const newLesson = {
+                      id: "les-auto-" + Date.now() + "-" + Math.floor(Math.random() * 1000),
+                      moduleId: autoModule.id,
+                      title: parsed.title,
+                      transcript: parsed.transcript
                     };
-                    modules.push(autoModule);
+
+                    lessons.push(newLesson);
+                    lessonsUpdated = true;
                   }
-
-                  const newLesson = {
-                    id: "les-auto-" + Date.now() + "-" + Math.floor(Math.random() * 1000),
-                    moduleId: autoModule.id,
-                    title: parsed.title,
-                    transcript: parsed.transcript
-                  };
-
-                  lessons.push(newLesson);
-                  lessonsUpdated = true;
                 }
               }
+            } catch (err) {
+              console.error("[AutoLearn] Error running AI summarization:", err);
             }
-          } catch (err) {
-            console.error("[AutoLearn] Error running AI summarization:", err);
-          }
 
-          chat.autoLearned = true;
-          chatsUpdated = true;
+            chat.autoLearned = true;
+            chatsUpdated = true;
+          }
+        }
+
+        if (chatsUpdated) {
+          userData[chatsKey] = JSON.stringify(chatsList);
+        }
+        if (lessonsUpdated) {
+          userData[lessonsKey] = JSON.stringify(lessons);
+          userData[modulesKey] = JSON.stringify(modules);
         }
       }
-
-      if (chatsUpdated) {
-        userData[chatsKey] = JSON.stringify(chatsList);
-      }
-      if (lessonsUpdated) {
-        userData[lessonsKey] = JSON.stringify(lessons);
-        userData[modulesKey] = JSON.stringify(modules);
-      }
+    } catch (botErr) {
+      console.error(`[AutoLearn] Error processing bot settings for ${settingsKey}:`, botErr);
     }
   }
 

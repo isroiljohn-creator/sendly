@@ -1,4 +1,8 @@
 {
+  "metadata": {
+    "title": "Sendly — Instagram chatbot and automation",
+    "description": "Instagram chatbot and sales automation platform for the Uzbekistan market."
+  },
   "common": {
     "create": "Create",
     "select": "Select...",
@@ -52,7 +56,16 @@
     "select_channel": "Select Channel",
     "channels_header": "Channels",
     "no_channels": "No channels yet",
-    "lang_soon": "This language will be added soon!"
+    "lang_soon": "This language will be added soon!",
+    "connected": "connected",
+    "change": "Change",
+    "menu": "Menu",
+    "select_account": "Select account...",
+    "add_account": "Add account",
+    "impersonation_notice": "You are currently logged in as {email}.",
+    "back_to_admin": "Return to Admin",
+    "switch_channel_mobile": "Switch",
+    "system_language": "System language"
   },
   "pages": {
     "home": {
@@ -909,6 +922,43 @@
       "support_tooltip": "Support"
     },
     "ai_agent": {
+      "students": {
+        "tab_lessons": "Lessons & Materials",
+        "tab_students": "Student List",
+        "list_title": "Student List",
+        "upload_excel": "Upload Excel/CSV",
+        "add_btn": "Add",
+        "no_students_found": "Student list is empty or no search results found.",
+        "not_selected_title": "Student not selected",
+        "not_selected_desc": "Select a student from the list or click the \"Add student\" button to enter a new student.",
+        "status_label": "Activity Status",
+        "status_desc": "The student must be in active status for the AI to respond.",
+        "delete_btn": "Delete",
+        "cancel_btn": "Cancel",
+        "save_btn": "Save",
+        "name_required_alert": "Please enter first and last name.",
+        "username_required_alert": "Please enter phone or username.",
+        "add_new_title": "Add New Student",
+        "edit_title": "Edit Student Details",
+        "confirm_delete": "Are you sure you want to delete this student from the list?",
+        "deleted_toast": "Student deleted from the list!",
+        "added_toast": "New student successfully added!",
+        "saved_toast": "Student details saved!",
+        "file_empty_error": "No student data found in the file.",
+        "file_confirm_import": "{count} students found in the file. Do you confirm adding them to the list?",
+        "file_imported_success": "{count} students successfully added!",
+        "name_label": "First and Last Name",
+        "name_placeholder": "e.g. Sardor Salimov",
+        "phone_user_label": "Phone number or Username",
+        "phone_user_placeholder": "e.g. +998901234567 or telegram_user",
+        "tags_label": "Tags (Group or special tags)"
+      },
+      "brain_success": "AI Agent brain successfully formed!",
+      "tg_error": "An error occurred connecting to Telegram server. Check your network.",
+      "brain_error": "An error occurred forming the brain.",
+      "file_upload_error": "An error occurred uploading/parsing the file.",
+      "file_parse_error": "An error occurred parsing the file.",
+      "link_parse_error": "An error occurred parsing the link.",
       "prefix_channel": "Channel",
       "prefix_group": "Group",
       "search_placeholder": "Search (modules or lessons)...",
@@ -1861,5 +1911,22 @@
   "toast": {
     "success": "Success",
     "error": "An error occurred"
+  },
+  "cookie_consent": {
+    "banner_title": "We use cookies",
+    "banner_text": "We use cookies to improve your experience on our website, personalize content, and collect analytical data. Would you like to accept all or customize your preferences?",
+    "accept_all": "Accept all",
+    "reject_all": "Reject all",
+    "settings": "Customize",
+    "modal_title": "Privacy Settings",
+    "modal_desc": "Choose which types of cookies you want to allow. Disabling some cookies may affect your experience on our website.",
+    "necessary_title": "Necessary Cookies",
+    "necessary_desc": "These cookies are required for basic website functionality (e.g. language preferences, sessions, navigation) and cannot be disabled.",
+    "analytical_title": "Analytical Cookies",
+    "analytical_desc": "These cookies help us analyze website performance (errors, page load times) and monitor site usage.",
+    "marketing_title": "Marketing Cookies",
+    "marketing_desc": "These cookies are used for third-party integrations (social media embeds, targeted advertising).",
+    "save_settings": "Save Settings",
+    "always_active": "Always Active"
   }
 }
