@@ -966,25 +966,20 @@ export default function SettingsPage() {
             </div>
 
             <div className="flex md:flex-col gap-2 md:gap-1 overflow-x-auto [&::-webkit-scrollbar]:hidden [scrollbar-width:none] pb-2 md:pb-0 w-full">
-              {/* Account Settings Sub-group */}
-              <span className="hidden md:block text-[9px] font-bold text-[#909090] uppercase tracking-wider px-2 mt-2 select-none">
-                {t("pages.settings_page.user_details") || "Foydalanuvchi"}
-              </span>
-
               <button
                 onClick={() => setActiveSection("profile")}
-                className={`flex items-center shrink-0 whitespace-nowrap px-3 py-2 text-[12px] font-semibold rounded-[10px] transition-colors text-left ${
+                className={`flex items-center shrink-0 whitespace-nowrap px-3 py-2.5 text-[12px] font-semibold rounded-[10px] transition-colors text-left ${
                   activeSection === "profile"
                     ? "bg-[#C7F33C]/20 text-black font-bold"
                     : "text-[#707070] hover:bg-[#F9F9F7] hover:text-black"
                 }`}
               >
-                {t("pages.account.tabs.general") || "Umumiy sozlamalar"}
+                {t("nav.my_account") || "Mening akkauntim"}
               </button>
 
               <button
                 onClick={() => setActiveSection("billing")}
-                className={`flex items-center shrink-0 whitespace-nowrap px-3 py-2 text-[12px] font-semibold rounded-[10px] transition-colors text-left ${
+                className={`flex items-center shrink-0 whitespace-nowrap px-3 py-2.5 text-[12px] font-semibold rounded-[10px] transition-colors text-left ${
                   activeSection === "billing"
                     ? "bg-[#C7F33C]/20 text-black font-bold"
                     : "text-[#707070] hover:bg-[#F9F9F7] hover:text-black"
@@ -995,7 +990,7 @@ export default function SettingsPage() {
 
               <button
                 onClick={() => setActiveSection("limits")}
-                className={`flex items-center shrink-0 whitespace-nowrap px-3 py-2 text-[12px] font-semibold rounded-[10px] transition-colors text-left ${
+                className={`flex items-center shrink-0 whitespace-nowrap px-3 py-2.5 text-[12px] font-semibold rounded-[10px] transition-colors text-left ${
                   activeSection === "limits"
                     ? "bg-[#C7F33C]/20 text-black font-bold"
                     : "text-[#707070] hover:bg-[#F9F9F7] hover:text-black"
@@ -1006,7 +1001,7 @@ export default function SettingsPage() {
 
               <button
                 onClick={() => setActiveSection("bonuses")}
-                className={`flex items-center shrink-0 whitespace-nowrap px-3 py-2 text-[12px] font-semibold rounded-[10px] transition-colors text-left ${
+                className={`flex items-center shrink-0 whitespace-nowrap px-3 py-2.5 text-[12px] font-semibold rounded-[10px] transition-colors text-left ${
                   activeSection === "bonuses"
                     ? "bg-[#C7F33C]/20 text-black font-bold"
                     : "text-[#707070] hover:bg-[#F9F9F7] hover:text-black"
@@ -1015,14 +1010,9 @@ export default function SettingsPage() {
                 {t("pages.account.tabs.bonuses") || "Bonuslar"}
               </button>
 
-              {/* System Settings Sub-group */}
-              <span className="hidden md:block text-[9px] font-bold text-[#909090] uppercase tracking-wider px-2 mt-4 select-none">
-                {t("pages.settings_page.workspace_section") || "Loyiha"}
-              </span>
-
               <button
                 onClick={() => setActiveSection("integrations")}
-                className={`flex items-center shrink-0 whitespace-nowrap px-3 py-2 text-[12px] font-semibold rounded-[10px] transition-colors text-left ${
+                className={`flex items-center shrink-0 whitespace-nowrap px-3 py-2.5 text-[12px] font-semibold rounded-[10px] transition-colors text-left ${
                   activeSection === "integrations"
                     ? "bg-[#C7F33C]/20 text-black font-bold"
                     : "text-[#707070] hover:bg-[#F9F9F7] hover:text-black"
@@ -1033,7 +1023,7 @@ export default function SettingsPage() {
 
               <button
                 onClick={() => setActiveSection("team")}
-                className={`flex items-center shrink-0 whitespace-nowrap px-3 py-2 text-[12px] font-semibold rounded-[10px] transition-colors text-left ${
+                className={`flex items-center shrink-0 whitespace-nowrap px-3 py-2.5 text-[12px] font-semibold rounded-[10px] transition-colors text-left ${
                   activeSection === "team"
                     ? "bg-[#C7F33C]/20 text-black font-bold"
                     : "text-[#707070] hover:bg-[#F9F9F7] hover:text-black"
@@ -1044,7 +1034,7 @@ export default function SettingsPage() {
 
               <button
                 onClick={() => setActiveSection("system")}
-                className={`flex items-center shrink-0 whitespace-nowrap px-3 py-2 text-[12px] font-semibold rounded-[10px] transition-colors text-left ${
+                className={`flex items-center shrink-0 whitespace-nowrap px-3 py-2.5 text-[12px] font-semibold rounded-[10px] transition-colors text-left ${
                   activeSection === "system"
                     ? "bg-[#C7F33C]/20 text-black font-bold"
                     : "text-[#707070] hover:bg-[#F9F9F7] hover:text-black"
