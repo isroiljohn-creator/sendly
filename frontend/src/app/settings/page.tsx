@@ -979,7 +979,7 @@ export default function SettingsPage() {
                     : "text-[#707070] hover:bg-[#F9F9F7] hover:text-black"
                 }`}
               >
-                {t("account.tabs.general") || "Umumiy sozlamalar"}
+                {t("pages.account.tabs.general") || "Umumiy sozlamalar"}
               </button>
 
               <button
@@ -990,7 +990,7 @@ export default function SettingsPage() {
                     : "text-[#707070] hover:bg-[#F9F9F7] hover:text-black"
                 }`}
               >
-                {t("account.tabs.billing") || "To'lov va tariflar"}
+                {t("pages.account.tabs.billing") || "To'lov va tariflar"}
               </button>
 
               <button
@@ -1001,7 +1001,7 @@ export default function SettingsPage() {
                     : "text-[#707070] hover:bg-[#F9F9F7] hover:text-black"
                 }`}
               >
-                {t("account.tabs.limits") || "Limitlar"}
+                {t("pages.account.tabs.limits") || "Limitlar"}
               </button>
 
               <button
@@ -1012,7 +1012,7 @@ export default function SettingsPage() {
                     : "text-[#707070] hover:bg-[#F9F9F7] hover:text-black"
                 }`}
               >
-                {t("account.tabs.bonuses") || "Bonuslar"}
+                {t("pages.account.tabs.bonuses") || "Bonuslar"}
               </button>
 
               {/* System Settings Sub-group */}
@@ -1522,7 +1522,7 @@ export default function SettingsPage() {
           {activeSection === "bonuses" && (
             <div className="max-w-[650px] flex flex-col gap-8 animate-in fade-in duration-200">
               <div>
-                <h3 className="text-[28px] font-bold text-black">{t("account.tabs.bonuses") || "Bonuslar va Promokodlar"}</h3>
+                <h3 className="text-[28px] font-bold text-black">{t("pages.account.tabs.bonuses") || "Bonuslar va Promokodlar"}</h3>
                 <p className="text-[13px] text-[#707070] mt-1.5">Maxsus kodlarni faollashtiring yoki bepul AI kreditlarni oling</p>
               </div>
 
