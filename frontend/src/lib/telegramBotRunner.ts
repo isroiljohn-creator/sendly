@@ -249,6 +249,54 @@ function getTokenQueue(token: string): MessageQueue {
   return q;
 }
 
+async function getTelegramAvatarBase64(token: string, chatId: number | string, isGroup: boolean): Promise<string | null> {
+  try {
+    if (isGroup) {
+      const chatRes = await fetch(`https://api.telegram.org/bot${token}/getChat?chat_id=${chatId}`, { cache: "no-store" });
+      if (!chatRes.ok) return null;
+      const chatData = await chatRes.json();
+      if (!chatData.ok || !chatData.result || !chatData.result.photo) return null;
+      
+      const fileId = chatData.result.photo.small_file_id;
+      const fileRes = await fetch(`https://api.telegram.org/bot${token}/getFile?file_id=${fileId}`, { cache: "no-store" });
+      if (!fileRes.ok) return null;
+      const fileData = await fileRes.json();
+      if (!fileData.ok || !fileData.result || !fileData.result.file_path) return null;
+      
+      const filePath = fileData.result.file_path;
+      const imgRes = await fetch(`https://api.telegram.org/file/bot${token}/${filePath}`, { cache: "no-store" });
+      if (!imgRes.ok) return null;
+      
+      const buffer = await imgRes.arrayBuffer();
+      return `data:image/jpeg;base64,${Buffer.from(buffer).toString("base64")}`;
+    } else {
+      const photosRes = await fetch(`https://api.telegram.org/bot${token}/getUserProfilePhotos?user_id=${chatId}&limit=1`, { cache: "no-store" });
+      if (!photosRes.ok) return null;
+      const photosData = await photosRes.json();
+      if (!photosData.ok || !photosData.result || photosData.result.total_count === 0) return null;
+      
+      const photos = photosData.result.photos;
+      if (!photos || photos.length === 0 || photos[0].length === 0) return null;
+      
+      const fileId = photos[0][0].file_id;
+      const fileRes = await fetch(`https://api.telegram.org/bot${token}/getFile?file_id=${fileId}`, { cache: "no-store" });
+      if (!fileRes.ok) return null;
+      const fileData = await fileRes.json();
+      if (!fileData.ok || !fileData.result || !fileData.result.file_path) return null;
+      
+      const filePath = fileData.result.file_path;
+      const imgRes = await fetch(`https://api.telegram.org/file/bot${token}/${filePath}`, { cache: "no-store" });
+      if (!imgRes.ok) return null;
+      
+      const buffer = await imgRes.arrayBuffer();
+      return `data:image/jpeg;base64,${Buffer.from(buffer).toString("base64")}`;
+    }
+  } catch (e) {
+    console.error("Failed to fetch Telegram avatar:", e);
+    return null;
+  }
+}
+
 async function getChannelIdByToken(token: string): Promise<string | null> {
   let dbData: any = {};
   if (pgdb.isConfigured()) {
@@ -769,13 +817,24 @@ export async function handleTelegramUpdate(channelId: string, token: string, upd
       // 2. Find or create chat
       let chat = chatsList.find((c: ChatThread) => c.id === String(chatId));
       if (!chat) {
+        let avatarUrl = isGroup
+          ? `https://images.unsplash.com/photo-1582213782179-e0d53f98f2ca?w=100&auto=format&fit=crop`
+          : `https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&auto=format&fit=crop`;
+        
+        try {
+          const fetchedAvatar = await getTelegramAvatarBase64(token, chatId, isGroup);
+          if (fetchedAvatar) {
+            avatarUrl = fetchedAvatar;
+          }
+        } catch (e) {
+          console.error("Failed fetching telegram user avatar:", e);
+        }
+
         chat = {
           id: String(chatId),
           name: chatName,
           username: username || (isGroup ? `group_${chatId}` : `tg_${chatId}`),
-          avatar: isGroup
-            ? `https://images.unsplash.com/photo-1582213782179-e0d53f98f2ca?w=100&auto=format&fit=crop`
-            : `https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&auto=format&fit=crop`,
+          avatar: avatarUrl,
           lastMessage: "",
           time: "",
           unread: true,
@@ -784,6 +843,15 @@ export async function handleTelegramUpdate(channelId: string, token: string, upd
           liveTakeover: false,
         };
         chatsList.push(chat);
+      } else if (!chat.avatar || chat.avatar.startsWith("https://images.unsplash.com")) {
+        try {
+          const fetchedAvatar = await getTelegramAvatarBase64(token, chatId, isGroup);
+          if (fetchedAvatar) {
+            chat.avatar = fetchedAvatar;
+          }
+        } catch (e) {
+          console.error("Failed updating telegram user avatar:", e);
+        }
       }
 
       // Reset liveTakeover if user restarts the bot with /start or boshlash
