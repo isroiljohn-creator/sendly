@@ -495,6 +495,7 @@ function AIAgentContent() {
   const [settings, setSettings] = useState<BotSettings | null>(null);
   const [modules, setModules] = useState<Module[]>([]);
   const [lessons, setLessons] = useState<Lesson[]>([]);
+  const [noAvailableBots, setNoAvailableBots] = useState(false);
   
   // Knowledge Base UI States
   const [expandedModules, setExpandedModules] = useState<Record<string, boolean>>({ "mod-1": true });
@@ -786,7 +787,7 @@ function AIAgentContent() {
       }
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [typeParam]);
 
   // Escape key event listener to close modals
   useEffect(() => {
@@ -1017,31 +1018,7 @@ function AIAgentContent() {
     if (selectedAgentType === "fb-leads-direct" && activeTab === "knowledge") {
       setActiveTab("settings");
     }
-    
-    const isSpecialType = ["kurator", "sales", "booker", "recruiter", "clinic", "realtor", "helpdesk"].includes(selectedAgentType);
-    if (isSpecialType && settings.aiAgentType !== selectedAgentType) {
-      const defaultPrompt = t(`pages.ai_agent.defaults.${selectedAgentType}.prompt`);
-      const defaultTopics = [
-        t(`pages.ai_agent.defaults.${selectedAgentType}.topics.0`),
-        t(`pages.ai_agent.defaults.${selectedAgentType}.topics.1`),
-        t(`pages.ai_agent.defaults.${selectedAgentType}.topics.2`)
-      ];
-      const defaultRules = [
-        { id: "esc-1", text: t(`pages.ai_agent.defaults.${selectedAgentType}.rules.esc_1`), enabled: true },
-        { id: "esc-2", text: t(`pages.ai_agent.defaults.${selectedAgentType}.rules.esc_2`), enabled: true },
-        { id: "esc-3", text: t(`pages.ai_agent.defaults.${selectedAgentType}.rules.esc_3`), enabled: true }
-      ];
-      
-      setSettings(prev => prev ? {
-        ...prev,
-        aiAgentType: selectedAgentType,
-        systemPrompt: defaultPrompt,
-        topics: defaultTopics,
-        escalationRules: defaultRules
-      } : null);
-      setIsDirty(true);
-    }
-  }, [selectedAgentType, settings, t]);
+  }, [selectedAgentType, settings]);
 
   // Sync simulator welcome messages when selected agent changes
   useEffect(() => {
@@ -1204,13 +1181,79 @@ function AIAgentContent() {
     }
 
     const channels = db.getChannels();
-
-    const activeCh = db.getActiveChannel();
+    const tgChannels = channels.filter(c => c.type === "telegram" && c.isConnected);
     let initialBotId = "";
-    if (activeCh) {
-      initialBotId = activeCh.id;
-    } else if (channels.length > 0) {
-      initialBotId = channels[0].id;
+    let resolvedNoAvailableBots = false;
+
+    if (typeParam) {
+      // Find bot configured for this agent type
+      const matchingBot = tgChannels.find(c => db.getBotSettings(c.id).aiAgentType === typeParam);
+      if (matchingBot) {
+        initialBotId = matchingBot.id;
+        if (db.getActiveChannel()?.id !== matchingBot.id) {
+          localStorage.setItem("replai_active_channel", matchingBot.id);
+        }
+      } else {
+        // We need to assign a new bot to this agent type
+        // A bot is unused if it has aiCuratorEnabled === false, or if settings.aiAgentType is not in the other special types
+        const availableBot = tgChannels.find(c => {
+          const s = db.getBotSettings(c.id);
+          return !s.aiCuratorEnabled || !s.aiAgentType || !["kurator", "sales", "booker", "recruiter", "clinic", "realtor", "helpdesk"].includes(s.aiAgentType);
+        });
+
+        if (availableBot) {
+          initialBotId = availableBot.id;
+          if (db.getActiveChannel()?.id !== availableBot.id) {
+            localStorage.setItem("replai_active_channel", availableBot.id);
+          }
+          // Initialize settings for this bot
+          const defaultPrompt = t(`pages.ai_agent.defaults.${typeParam}.prompt`) || "";
+          const defaultTopics = [
+            t(`pages.ai_agent.defaults.${typeParam}.topics.0`) || "",
+            t(`pages.ai_agent.defaults.${typeParam}.topics.1`) || "",
+            t(`pages.ai_agent.defaults.${typeParam}.topics.2`) || ""
+          ];
+          const defaultRules = [
+            { id: "esc-1", text: t(`pages.ai_agent.defaults.${typeParam}.rules.esc_1`) || "", enabled: true },
+            { id: "esc-2", text: t(`pages.ai_agent.defaults.${typeParam}.rules.esc_2`) || "", enabled: true },
+            { id: "esc-3", text: t(`pages.ai_agent.defaults.${typeParam}.rules.esc_3`) || "", enabled: true }
+          ];
+
+          const defaultSettings = db.getBotSettings(availableBot.id);
+          const newSettings = {
+            ...defaultSettings,
+            aiAgentType: typeParam as any,
+            aiCuratorEnabled: true,
+            systemPrompt: defaultPrompt,
+            topics: defaultTopics,
+            escalationRules: defaultRules
+          };
+
+          db.saveBotSettings(newSettings, availableBot.id);
+          // Clear modules/lessons for fresh startup ("0dan bo'lishi kerak")
+          db.saveModules([], availableBot.id);
+          db.saveLessons([], availableBot.id);
+        } else {
+          resolvedNoAvailableBots = true;
+        }
+      }
+    } else {
+      const activeCh = db.getActiveChannel();
+      if (activeCh) {
+        initialBotId = activeCh.id;
+      } else if (channels.length > 0) {
+        initialBotId = channels[0].id;
+      }
+    }
+
+    setNoAvailableBots(resolvedNoAvailableBots);
+
+    if (resolvedNoAvailableBots) {
+      setSettings(null);
+      setModules([]);
+      setLessons([]);
+      setKbContacts([]);
+      return;
     }
 
     const loadedSettings = db.getBotSettings(initialBotId);
@@ -1246,12 +1289,19 @@ function AIAgentContent() {
       }
     }
 
-    if (loadedLessons.length > 0 && !selectedLesson) {
+    if (loadedLessons.length > 0) {
       setSelectedLesson(loadedLessons[0]);
       setActiveModuleId(loadedLessons[0].moduleId);
-    } else if (loadedModules.length > 0) {
-      setActiveModuleId(loadedModules[0].id);
+    } else {
+      setSelectedLesson(null);
+      if (loadedModules.length > 0) {
+        setActiveModuleId(loadedModules[0].id);
+      } else {
+        setActiveModuleId(null);
+      }
     }
+    setSelectedStudent(null);
+    setExpandedModules(loadedModules.reduce((acc, m) => ({ ...acc, [m.id]: true }), {}));
 
     if (typeof window !== "undefined") {
       const stored = localStorage.getItem("replai_curator_analyzed_messages");
@@ -2699,6 +2749,45 @@ function AIAgentContent() {
     }, 800);
   };
 
+  if (selectedAgentType !== null && noAvailableBots) {
+    return (
+      <AppLayout>
+        <div className="flex flex-col gap-[20px]">
+          <PageHeader
+            title={getAgentName()}
+            breadcrumbs={`${t("pages.ai_agent.breadcrumbs.default")} / ${getAgentName()}`}
+          />
+          <div className="bg-white border border-[#E8E8E8] p-8 max-w-[600px] mx-auto text-center flex flex-col items-center justify-center gap-5 rounded-[24px] shadow-sm mt-8 animate-in fade-in duration-200">
+            <div className="w-16 h-16 rounded-full bg-amber-50 text-amber-500 flex items-center justify-center border border-amber-100">
+              <Info size={28} />
+            </div>
+            <div className="flex flex-col gap-2">
+              <h3 className="text-[18px] font-black text-black">Barcha Telegram botlaringiz band!</h3>
+              <p className="text-[13px] text-[#707070] leading-relaxed max-w-[460px]">
+                Hozirda barcha ulangan Telegram botlaringiz boshqa AI agentlarga biriktirilgan. 
+                Yangi <strong>{getAgentName()}</strong> agentini sozlash uchun avval sozlamalardan yangi Telegram bot ulang yoki faol botlardan birining AI agentini o'chiring.
+              </p>
+            </div>
+            <div className="flex gap-3">
+              <button
+                onClick={() => useRouterObj.push("/ai-agent")}
+                className="px-5 py-2.5 rounded-full border border-[#D8D8D8] text-[12px] font-bold text-[#595959] bg-transparent hover:bg-neutral-50 hover:text-black transition-all cursor-pointer"
+              >
+                Orqaga qaytish
+              </button>
+              <button
+                onClick={() => useRouterObj.push("/settings?section=channels")}
+                className="px-5 py-2.5 rounded-full bg-black text-[#C7F33C] text-[12px] font-bold shadow-sm hover:bg-black/90 active:scale-95 transition-all cursor-pointer border-none"
+              >
+                Yangi bot ulash
+              </button>
+            </div>
+          </div>
+        </div>
+      </AppLayout>
+    );
+  }
+
   if (selectedAgentType === null) {
     return (
       <AppLayout>
@@ -3700,7 +3789,11 @@ function AIAgentContent() {
                     {selectedAgentType === "fb-leads-direct" ? t("pages.ai_agent.labels.tg_bot_for_leads") : t("pages.ai_agent.labels.tg_bot")}
                   </label>
                   {(() => {
-                    const tgChannels = db.getChannels().filter(c => c.type === "telegram" && c.isConnected && c.telegramToken);
+                    const tgChannels = db.getChannels().filter(c => {
+                      if (c.type !== "telegram" || !c.isConnected || !c.telegramToken) return false;
+                      const s = db.getBotSettings(c.id);
+                      return s.aiAgentType === selectedAgentType || !s.aiCuratorEnabled || !s.aiAgentType || !["kurator", "sales", "booker", "recruiter", "clinic", "realtor", "helpdesk"].includes(s.aiAgentType);
+                    });
                     if (tgChannels.length > 0) {
                       const botOptions = tgChannels.map(c => ({
                         value: c.id,
@@ -4609,7 +4702,10 @@ function AIAgentContent() {
                     </label>
                   </div>
                   {(() => {
-                    const allChs = db.getChannels();
+                    const allChs = db.getChannels().filter(c => {
+                      const s = db.getBotSettings(c.id);
+                      return s.aiAgentType === selectedAgentType || !s.aiCuratorEnabled || !s.aiAgentType || !["kurator", "sales", "booker", "recruiter", "clinic", "realtor", "helpdesk"].includes(s.aiAgentType);
+                    });
                     const selectedBotId = settings.telegramBotId || (allChs.length > 0 ? allChs[0].id : "");
                     const selectedCh = allChs.find(c => c.id === selectedBotId);
                     const isInstagram = selectedCh?.type === "instagram";
