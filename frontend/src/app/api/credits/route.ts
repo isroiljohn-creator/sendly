@@ -348,10 +348,10 @@ export async function POST(request: Request) {
     const creditsData = await readUserCredits(userId);
     const timestamp = new Date().toLocaleString("uz-UZ", { timeZone: "Asia/Tashkent" });
 
-    if (action === "buy") {
+    if (action === "buy" || action === "buy_credits") {
       // Allow simulated credit purchase for all users in prototype/demo mode
       creditsData.balance = (creditsData.balance || 0) + amount;
-      const desc = description || `${amount} AI kredit paketi sotib olindi`;
+      const desc = description || (body.packageName ? `${body.packageName} sotib olindi` : `${amount.toLocaleString()} AI kredit paketi sotib olindi`);
       creditsData.history.unshift({
         id: `tx-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
         type: "purchase",

@@ -41,9 +41,9 @@ export async function seedBillingConfigs(): Promise<void> {
 
   // 2. Seed credit_packages (ON CONFLICT DO UPDATE)
   const packages = [
-    { name: "Starter", cr: 10000, price: 100000 },
-    { name: "Standart", cr: 50000, price: 400000 },
-    { name: "Biznes", cr: 150000, price: 1050000 }
+    { name: "Starter", cr: 3000, price: 100000 },
+    { name: "Standart", cr: 15000, price: 400000 },
+    { name: "Biznes", cr: 45000, price: 1050000 }
   ];
   for (const p of packages) {
     await pool.query(

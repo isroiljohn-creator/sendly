@@ -2516,12 +2516,12 @@ export default function SettingsPage() {
               {/* Package 1 */}
               <div 
                 className="border border-[#E8E8E8] hover:border-black rounded-[20px] p-5 flex items-center justify-between transition-all bg-[#F9F9F7] hover:shadow-md cursor-pointer group"
-                onClick={() => handleBuyCredits(10000, 100000, "Starter paket")}
+                onClick={() => handleBuyCredits(3000, 100000, "Starter paket")}
               >
                 <div>
                   <h4 className="text-[15px] font-bold text-black group-hover:text-[#7CA607] transition-colors">Starter paket</h4>
                   <p className="text-[11px] text-[#707070] mt-1">Kichik botlar va test qilish uchun mo'ljallangan.</p>
-                  <span className="text-[20px] font-black text-black mt-2 block">10 000 <span className="text-[11px] font-bold text-[#707070]">kredit</span></span>
+                  <span className="text-[20px] font-black text-black mt-2 block">3 000 <span className="text-[11px] font-bold text-[#707070]">kredit</span></span>
                 </div>
                 <div className="text-right">
                   <span className="bg-black text-[#C7F33C] text-[12px] font-bold px-4 py-2 rounded-full whitespace-nowrap shadow-sm group-hover:scale-105 transition-all">
@@ -2533,19 +2533,19 @@ export default function SettingsPage() {
               {/* Package 2 */}
               <div 
                 className="border border-black bg-black text-white rounded-[20px] p-5 flex items-center justify-between transition-all hover:shadow-md cursor-pointer relative overflow-hidden group"
-                onClick={() => handleBuyCredits(50000, 350000, "Standart paket")}
+                onClick={() => handleBuyCredits(15000, 400000, "Standart paket")}
               >
                 <div className="absolute top-0 right-0 bg-[#C7F33C] text-black text-[8px] font-extrabold uppercase px-2.5 py-0.5 rounded-bl-[10px]">
-                  30% chegirma
+                  20% chegirma
                 </div>
                 <div>
                   <h4 className="text-[15px] font-bold text-[#C7F33C]">Standart paket</h4>
                   <p className="text-[11px] text-white/60 mt-1">O'rtacha yuklamaga ega chatbotlar uchun optimal.</p>
-                  <span className="text-[20px] font-black text-white mt-2 block">50 000 <span className="text-[11px] font-bold text-white/60">kredit</span></span>
+                  <span className="text-[20px] font-black text-white mt-2 block">15 000 <span className="text-[11px] font-bold text-white/60">kredit</span></span>
                 </div>
                 <div className="text-right">
                   <span className="bg-[#C7F33C] text-black text-[12px] font-bold px-4 py-2 rounded-full whitespace-nowrap shadow-sm group-hover:scale-105 transition-all">
-                    350 000 UZS
+                    400 000 UZS
                   </span>
                 </div>
               </div>
@@ -2553,19 +2553,19 @@ export default function SettingsPage() {
               {/* Package 3 */}
               <div 
                 className="border border-[#E8E8E8] hover:border-black rounded-[20px] p-5 flex items-center justify-between transition-all bg-[#F9F9F7] hover:shadow-md cursor-pointer group relative"
-                onClick={() => handleBuyCredits(150000, 700000, "Biznes paket")}
+                onClick={() => handleBuyCredits(45000, 1050000, "Biznes paket")}
               >
                 <div className="absolute top-0 right-0 bg-[#C7F33C] text-black text-[8px] font-extrabold uppercase px-2.5 py-0.5 rounded-bl-[10px]">
-                  53% chegirma
+                  30% chegirma
                 </div>
                 <div>
                   <h4 className="text-[15px] font-bold text-black group-hover:text-[#7CA607] transition-colors">Biznes paket</h4>
                   <p className="text-[11px] text-[#707070] mt-1">Faol va katta hajmdagi suhbatlar uchun eng yaxshi narx.</p>
-                  <span className="text-[20px] font-black text-black mt-2 block">150 000 <span className="text-[11px] font-bold text-[#707070]">kredit</span></span>
+                  <span className="text-[20px] font-black text-black mt-2 block">45 000 <span className="text-[11px] font-bold text-[#707070]">kredit</span></span>
                 </div>
                 <div className="text-right">
                   <span className="bg-black text-[#C7F33C] text-[12px] font-bold px-4 py-2 rounded-full whitespace-nowrap shadow-sm group-hover:scale-105 transition-all">
-                    700 000 UZS
+                    1 050 000 UZS
                   </span>
                 </div>
               </div>

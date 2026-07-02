@@ -85,9 +85,9 @@ async function runPricingDbTests() {
   const pkgMap = new Map(pkgRes.rows.map(p => [p.name, p]));
   
   const expectedPackages = [
-    { name: "Starter", cr: 10000, price: 100000 },
-    { name: "Standart", cr: 50000, price: 400000 },
-    { name: "Biznes", cr: 150000, price: 1050000 }
+    { name: "Starter", cr: 3000, price: 100000 },
+    { name: "Standart", cr: 15000, price: 400000 },
+    { name: "Biznes", cr: 45000, price: 1050000 }
   ];
 
   for (const exp of expectedPackages) {
