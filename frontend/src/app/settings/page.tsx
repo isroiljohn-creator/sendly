@@ -2552,7 +2552,7 @@ export default function SettingsPage() {
 
               {/* Package 3 */}
               <div 
-                className="border border-[#E8E8E8] hover:border-black rounded-[20px] p-5 flex items-center justify-between transition-all bg-[#F9F9F7] hover:shadow-md cursor-pointer group"
+                className="border border-[#E8E8E8] hover:border-black rounded-[20px] p-5 flex items-center justify-between transition-all bg-[#F9F9F7] hover:shadow-md cursor-pointer group relative"
                 onClick={() => handleBuyCredits(150000, 700000, "Biznes paket")}
               >
                 <div className="absolute top-0 right-0 bg-[#C7F33C] text-black text-[8px] font-extrabold uppercase px-2.5 py-0.5 rounded-bl-[10px]">
