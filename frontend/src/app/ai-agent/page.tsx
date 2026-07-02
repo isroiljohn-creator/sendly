@@ -902,13 +902,26 @@ function AIAgentContent() {
   }, [chatMessages]);
 
   const getAgentName = () => {
-    if (!selectedAgentType) return t("pages.ai_agent.names.default");
-    return t(`pages.ai_agent.names.${selectedAgentType}`);
+    if (!selectedAgentType) return t("pages.ai_agent.select_template_title") || "AI Agent andozasini tanlang";
+    const typeKey = selectedAgentType.replace(/-/g, "_");
+    const nameVal = t(`pages.ai_agent.templates.${typeKey}.name`);
+    if (nameVal && !nameVal.startsWith("pages.")) {
+      return nameVal;
+    }
+    if (selectedAgentType === "fb-leads") return "Meta Leads + AI orqali saralash";
+    if (selectedAgentType === "fb-leads-direct") return "Lidlarni Telegramga yo'naltirish (AIsiz)";
+    return selectedAgentType;
   };
 
   const getAgentBreadcrumb = () => {
-    if (!selectedAgentType) return t("pages.ai_agent.breadcrumbs.default");
-    return t(`pages.ai_agent.breadcrumbs.${selectedAgentType}`);
+    if (!selectedAgentType) return t("pages.ai_agent.breadcrumbs.default") || "Bosh sahifa / AI Agent";
+    const val = t(`pages.ai_agent.breadcrumbs.${selectedAgentType}`);
+    if (val && !val.startsWith("pages.")) {
+      return val;
+    }
+    if (selectedAgentType === "fb-leads") return "Bosh sahifa / AI Agent / Meta Leads + AI";
+    if (selectedAgentType === "fb-leads-direct") return "Bosh sahifa / AI Agent / Lidlar yo'naltiruvchisi";
+    return `Bosh sahifa / AI Agent / ${getAgentName()}`;
   };
 
   const getKnowledgeTabName = () => {
@@ -2765,7 +2778,7 @@ function AIAgentContent() {
               <h3 className="text-[18px] font-black text-black">Barcha Telegram botlaringiz band!</h3>
               <p className="text-[13px] text-[#707070] leading-relaxed max-w-[460px]">
                 Hozirda barcha ulangan Telegram botlaringiz boshqa AI agentlarga biriktirilgan. 
-                Yangi <strong>{getAgentName()}</strong> agentini sozlash uchun avval sozlamalardan yangi Telegram bot ulang yoki faol botlardan birining AI agentini o'chiring.
+                Yangi <strong>{getAgentName()}</strong> agentini sozlash uchun avval yangi Telegram bot ulang yoki faol botlardan birining AI agentini o'chiring.
               </p>
             </div>
             <div className="flex gap-3">
@@ -2776,7 +2789,7 @@ function AIAgentContent() {
                 Orqaga qaytish
               </button>
               <button
-                onClick={() => useRouterObj.push("/settings?section=channels")}
+                onClick={() => setShowTgConnectModal(true)}
                 className="px-5 py-2.5 rounded-full bg-black text-[#C7F33C] text-[12px] font-bold shadow-sm hover:bg-black/90 active:scale-95 transition-all cursor-pointer border-none"
               >
                 Yangi bot ulash
@@ -2784,6 +2797,57 @@ function AIAgentContent() {
             </div>
           </div>
         </div>
+
+        {/* Modal: Connect Telegram Bot */}
+        {showTgConnectModal && (
+          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[999] flex items-center justify-center p-4">
+            <div className="bg-white border border-[#E8E8E8] rounded-[24px] max-w-[420px] w-full p-6 shadow-2xl flex flex-col gap-4 animate-in zoom-in-95 duration-150 text-black">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
+                  <Send size={18} />
+                </div>
+                <h3 className="text-[15px] font-bold text-black">{t("pages.ai_agent.labels.link_tg_bot_title")}</h3>
+              </div>
+              
+              <div className="flex flex-col gap-3">
+                <div className="flex flex-col gap-1">
+                  <span className="text-[10px] font-bold text-black">{t("pages.ai_agent.labels.bot_token")}</span>
+                  <input
+                    type="text"
+                    value={tgToken}
+                    onChange={(e) => setTgToken(e.target.value)}
+                    placeholder={t("pages.ai_agent.placeholders.token_example")}
+                    className="w-full px-4 py-2.5 text-[12px] bg-[#F9F9F7] border border-[#E8E8E8] rounded-xl focus:outline-none focus:border-black text-black"
+                  />
+                  <span className="text-[9px] text-[#707070]">
+                    {t("pages.ai_agent.labels.get_token_desc")}
+                  </span>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-end gap-3 mt-2">
+                <button
+                  onClick={() => {
+                    setShowTgConnectModal(false);
+                    setTgToken("");
+                  }}
+                  className="px-4 py-2 rounded-xl border border-[#D8D8D8] text-[12px] font-bold text-[#595959] hover:bg-[#F9F9F7] transition-all"
+                  disabled={isTgSaving}
+                >
+                  Bekor qilish
+                </button>
+                <button
+                  onClick={handleAddTelegram}
+                  disabled={!tgToken.trim() || isTgSaving}
+                  className="px-4 py-2 rounded-xl bg-black text-[#C7F33C] text-[12px] font-bold hover:bg-black/90 disabled:opacity-50 transition-all flex items-center gap-1.5"
+                >
+                  {isTgSaving && <Loader2 size={13} className="animate-spin" />}
+                  <span>{isTgSaving ? t("pages.ai_agent.labels.connecting") : t("pages.ai_agent.labels.link")}</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </AppLayout>
     );
   }
