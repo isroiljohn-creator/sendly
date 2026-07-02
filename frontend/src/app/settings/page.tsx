@@ -538,10 +538,16 @@ export default function SettingsPage() {
     setProcessingPurchase(true);
     setIsBuyCreditsModalOpen(false);
 
+    const token = typeof window !== "undefined" ? localStorage.getItem("replai_token") : "";
+    const headers: Record<string, string> = { "Content-Type": "application/json" };
+    if (token) {
+      headers["Authorization"] = `Bearer ${token}`;
+    }
+
     try {
       const res = await fetch(`/api/credits?userId=${currentUser?.id || "guest"}`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers,
         body: JSON.stringify({ action: "buy_credits", amount, price, packageName: name })
       });
       const data = await res.json();
@@ -566,10 +572,16 @@ export default function SettingsPage() {
     const code = voucherCode.trim();
     if (!code) return;
 
+    const token = typeof window !== "undefined" ? localStorage.getItem("replai_token") : "";
+    const headers: Record<string, string> = { "Content-Type": "application/json" };
+    if (token) {
+      headers["Authorization"] = `Bearer ${token}`;
+    }
+
     try {
       const res = await fetch(`/api/credits?userId=${currentUser?.id || "guest"}`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers,
         body: JSON.stringify({ action: "redeem_voucher", code })
       });
       const data = await res.json();

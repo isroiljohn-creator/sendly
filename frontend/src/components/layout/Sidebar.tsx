@@ -371,6 +371,15 @@ export function Sidebar() {
                 </Link>
 
                 <Link
+                  href="/settings?section=billing"
+                  onClick={() => setProfileMenuOpen(false)}
+                  className="flex items-center gap-3 px-3 py-2 rounded-[12px] hover:bg-[#F9F9F7] text-left transition-colors text-black font-semibold text-[13px]"
+                >
+                  <CreditCard size={16} className="text-[#595959]" />
+                  <span>{t("nav.billing_plans") || "To'lov va tariflar"}</span>
+                </Link>
+
+                <Link
                   href="/partner"
                   onClick={() => setProfileMenuOpen(false)}
                   className="flex items-center gap-3 px-3 py-2 rounded-[12px] hover:bg-[#F9F9F7] text-left transition-colors text-black font-semibold text-[13px]"
