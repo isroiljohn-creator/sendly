@@ -2258,7 +2258,7 @@ export default function SettingsPage() {
       {/* Pricing Upgrade Modal */}
       {isPricingOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 overflow-y-auto">
-          <div className="bg-white rounded-[32px] w-full max-w-[900px] shadow-2xl p-6 md:p-8 border border-[#D8D8D8] animate-in fade-in zoom-in-95 duration-200 relative max-h-[90vh] overflow-y-auto">
+          <div className="bg-white rounded-[32px] w-full max-w-[1200px] shadow-2xl p-6 md:p-8 border border-[#D8D8D8] animate-in fade-in zoom-in-95 duration-200 relative max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between pb-4 border-b border-[#F0F0F0] mb-6">
               <div>
                 <h3 className="text-[20px] font-black text-black">Sendly Premium tariflari</h3>
@@ -2302,7 +2302,7 @@ export default function SettingsPage() {
                 <div>
                   <h4 className="text-[17px] font-extrabold text-black">PRO</h4>
                   <p className="text-[11px] text-[#707070] mt-1.5">Yangi boshlovchilar va kichik bizneslar uchun.</p>
-                  <div className="mt-4 flex items-baseline gap-1">
+                  <div className="mt-4 flex items-baseline gap-1 whitespace-nowrap">
                     <span className="text-[28px] font-black text-black">
                       {billingCycle === "monthly" ? "147 000" : "117 600"}
                     </span>
@@ -2333,7 +2333,7 @@ export default function SettingsPage() {
                 <div>
                   <h4 className="text-[17px] font-extrabold text-[#C7F33C]">Premium</h4>
                   <p className="text-[11px] text-white/60 mt-1.5">Tez o'sayotgan bizneslar va faol sotuvchilar uchun.</p>
-                  <div className="mt-4 flex items-baseline gap-1">
+                  <div className="mt-4 flex items-baseline gap-1 whitespace-nowrap">
                     <span className="text-[28px] font-black text-white">
                       {billingCycle === "monthly" ? "497 000" : "397 600"}
                     </span>
@@ -2362,7 +2362,7 @@ export default function SettingsPage() {
                 <div>
                   <h4 className="text-[17px] font-extrabold text-black">Business</h4>
                   <p className="text-[11px] text-[#707070] mt-1.5">Kengayotgan bizneslar va bir nechta filiallar uchun.</p>
-                  <div className="mt-4 flex items-baseline gap-1">
+                  <div className="mt-4 flex items-baseline gap-1 whitespace-nowrap">
                     <span className="text-[28px] font-black text-black">
                       {billingCycle === "monthly" ? "1 197 000" : "957 600"}
                     </span>
@@ -2391,7 +2391,7 @@ export default function SettingsPage() {
                 <div>
                   <h4 className="text-[17px] font-extrabold text-black">VIP</h4>
                   <p className="text-[11px] text-[#707070] mt-1.5">Yirik agentliklar va keng qamrovli korxonalar uchun.</p>
-                  <div className="mt-4 flex items-baseline gap-1">
+                  <div className="mt-4 flex items-baseline gap-1 whitespace-nowrap">
                     <span className="text-[28px] font-black text-black">
                       {billingCycle === "monthly" ? "2 497 000" : "1 997 600"}
                     </span>
