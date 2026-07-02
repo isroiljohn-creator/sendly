@@ -2292,18 +2292,18 @@ export default function SettingsPage() {
               {/* Pro Plan */}
               <div className="border border-[#E8E8E8] rounded-[24px] p-6 bg-[#F9F9F7] flex flex-col justify-between h-full hover:shadow-lg transition-all group">
                 <div>
-                  <h4 className="text-[17px] font-extrabold text-black">Pro (Trial)</h4>
+                  <h4 className="text-[17px] font-extrabold text-black">PRO</h4>
                   <p className="text-[11px] text-[#707070] mt-1.5">Yangi boshlovchilar va kichik bizneslar uchun.</p>
                   <div className="mt-4 flex items-baseline gap-1">
                     <span className="text-[28px] font-black text-black">
-                      {billingCycle === "monthly" ? "150 000" : "120 000"}
+                      {billingCycle === "monthly" ? "147 000" : "117 600"}
                     </span>
                     <span className="text-[11px] font-bold text-[#707070]">UZS / oy</span>
                   </div>
                   <ul className="mt-6 flex flex-col gap-3 text-[11.5px] text-[#505050] font-bold list-none p-0">
                     <li className="flex items-center gap-2">✓ 1 ta faol kanal / bot</li>
                     <li className="flex items-center gap-2">✓ 5 ta bot ssenariylari</li>
-                    <li className="flex items-center gap-2">✓ 5,000 AI krediti / oy</li>
+                    <li className="flex items-center gap-2">✓ 1 000 AI krediti / oy</li>
                     <li className="flex items-center gap-2">✓ CRM integratsiyalari</li>
                   </ul>
                 </div>
@@ -2327,14 +2327,14 @@ export default function SettingsPage() {
                   <p className="text-[11px] text-white/60 mt-1.5">Tez o'sayotgan bizneslar va faol sotuvchilar uchun.</p>
                   <div className="mt-4 flex items-baseline gap-1">
                     <span className="text-[28px] font-black text-white">
-                      {billingCycle === "monthly" ? "300 000" : "240 000"}
+                      {billingCycle === "monthly" ? "497 000" : "397 600"}
                     </span>
                     <span className="text-[11px] font-bold text-white/60">UZS / oy</span>
                   </div>
                   <ul className="mt-6 flex flex-col gap-3 text-[11.5px] text-white/80 font-bold list-none p-0">
                     <li className="flex items-center gap-2">✓ 3 ta faol kanal / bot</li>
                     <li className="flex items-center gap-2">✓ 20 ta bot ssenariylari</li>
-                    <li className="flex items-center gap-2">✓ 15,000 AI krediti / oy</li>
+                    <li className="flex items-center gap-2">✓ 30 000 AI krediti / oy</li>
                     <li className="flex items-center gap-2">✓ Google Sheets va CRM</li>
                     <li className="flex items-center gap-2">✓ Maxsus Meta API qo'llab-quvvatlash</li>
                   </ul>
@@ -2352,18 +2352,18 @@ export default function SettingsPage() {
               {/* VIP Plan */}
               <div className="border border-[#E8E8E8] rounded-[24px] p-6 bg-[#F9F9F7] flex flex-col justify-between h-full hover:shadow-lg transition-all group">
                 <div>
-                  <h4 className="text-[17px] font-extrabold text-black">VIP (Cheksiz)</h4>
+                  <h4 className="text-[17px] font-extrabold text-black">VIP</h4>
                   <p className="text-[11px] text-[#707070] mt-1.5">Yirik agentliklar va keng qamrovli korxonalar uchun.</p>
                   <div className="mt-4 flex items-baseline gap-1">
                     <span className="text-[28px] font-black text-black">
-                      {billingCycle === "monthly" ? "600 000" : "480 000"}
+                      {billingCycle === "monthly" ? "2 497 000" : "1 997 600"}
                     </span>
                     <span className="text-[11px] font-bold text-[#707070]">UZS / oy</span>
                   </div>
                   <ul className="mt-6 flex flex-col gap-3 text-[11.5px] text-[#505050] font-bold list-none p-0">
                     <li className="flex items-center gap-2">✓ 10 ta faol kanal / bot</li>
                     <li className="flex items-center gap-2">✓ 50 ta bot ssenariylari</li>
-                    <li className="flex items-center gap-2">✓ 50,000 AI krediti / oy</li>
+                    <li className="flex items-center gap-2">✓ 150 000 AI krediti / oy</li>
                     <li className="flex items-center gap-2">✓ Cheksiz CRM integratsiyalari</li>
                     <li className="flex items-center gap-2">✓ 24/7 shaxsiy menejer</li>
                   </ul>
