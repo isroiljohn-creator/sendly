@@ -5,6 +5,8 @@ import { Channel, Automation, BotSettings, Lesson, Module } from "./db";
 import { moderateMessage } from "./ai/moderation";
 import { queryRAG } from "./ai/rag";
 import * as pgdb from "./pgdb";
+import { deductCredits } from "./billing";
+import { checkRateLimit } from "./rateLimiter";
 
 const DB_FILE = process.env.DB_FILE_PATH || path.join(process.cwd(), "db.json");
 
@@ -703,6 +705,22 @@ export async function handleTelegramUpdate(channelId: string, token: string, upd
     const isCommand = text.startsWith("/");
     const shouldReply = !isGroup || isMentioned || isReplyToBot || isCommand;
 
+    // Rate Limiter Guardrail (5 messages per minute per customer)
+    if (shouldReply && channelId !== "system_bot") {
+      const rateLimitKey = `rate_limit:${channelId}:${chatId}`;
+      const isAllowed = checkRateLimit(rateLimitKey, 5, 60000);
+      if (!isAllowed.allowed) {
+        const rateLimitWarning =
+          userLang === "en"
+            ? "Please slow down. You are sending messages too quickly."
+            : userLang === "ru"
+            ? "Пожалуйста, пишите медленнее. Вы отправляете сообщения слишком часто."
+            : "Iltimos, biroz sekinroq yozing. Xabarlar juda tez-tez yuborilmoqda.";
+        await sendTelegramMessage(token, chatId, rateLimitWarning);
+        return;
+      }
+    }
+
     const chatName = isGroup 
       ? (title || `Guruh ${chatId}`) 
       : `${firstName || ""} ${lastName || ""}`.trim() || username || `Telegram User ${chatId}`;
@@ -988,17 +1006,15 @@ export async function handleTelegramUpdate(channelId: string, token: string, upd
                   ? "Здравствуйте! Добро пожаловать в сервис чат-ботов Sendly. Наша система успешно подключена."
                   : "Assalomu alaykum! Sendly chatbot xizmatiga xush kelibsiz. Tizimimiz muvaffaqiyatli ulangan.";
             } else if (settings.aiCuratorEnabled && settings.telegramBotId === channelId) {
-               const rawLessons = context[`replai_lessons_${channelId}`];
-               const lessons: Lesson[] = safeParse(rawLessons, []);
-               const rawModules = context[`replai_modules_${channelId}`];
-               const modules: Module[] = safeParse(rawModules, []);
+               // Resolve active credits in PostgreSQL database
+              const pool = pgdb.getPool();
+              const balRes = await pool.query(
+                "SELECT COALESCE(plan_credits, 0) + COALESCE(purchased_credits, 0) as balance FROM credit_balances WHERE user_id = $1",
+                [userId]
+              );
+              const realBalance = balRes.rows.length > 0 ? parseInt(balRes.rows[0].balance) : 0;
 
-              let credits = { balance: 100, used: 0, history: [] as any[] };
-              if (context["replai_ai_credits_data"]) {
-                credits = safeParse(context["replai_ai_credits_data"], { balance: 100, used: 0, history: [] });
-              }
-
-              if ((credits.balance || 0) < 5) {
+              if (realBalance < 10) {
                 const errMsg =
                   userLang === "en"
                     ? "You do not have enough AI credits on your account. Please top up your AI credits balance in your replai.uz panel."
@@ -1041,6 +1057,11 @@ export async function handleTelegramUpdate(channelId: string, token: string, upd
 
                 botReplyText = "";
               } else {
+               const rawLessons = context[`replai_lessons_${channelId}`];
+               const lessons: Lesson[] = safeParse(rawLessons, []);
+               const rawModules = context[`replai_modules_${channelId}`];
+               const modules: Module[] = safeParse(rawModules, []);
+
                 const studentName = chat.name || "Talaba";
                 const chatHistory = chat.messages
                   .filter(m => m.text)
@@ -1056,12 +1077,11 @@ export async function handleTelegramUpdate(channelId: string, token: string, upd
                     lessons,
                     modules,
                     settings,
-                    chatHistory
+                    chatHistory,
+                    userId
                   );
 
-                  // Check escalation rules
                   let shouldEscalate = false;
-                  
                   const explicitHumanRequest = ["operator", "inson", "admin", "aloqa", "bog'lanish", "boglanish", "odam"].some(kw => 
                     text.toLowerCase().includes(kw)
                   );
@@ -1157,27 +1177,39 @@ export async function handleTelegramUpdate(channelId: string, token: string, upd
 
                   // Determine if we should charge credits (Free for general talk, moderation warnings, and curator escalations)
                   const isFreeOfCharge = shouldEscalate || moderation.flagged || ragResult.isGeneralTalk === true || !botReplyText;
-                  const cost = isFreeOfCharge ? 0 : Math.min(100, 5 + Math.ceil(botReplyText.length / 10));
 
-                  if (cost > 0) {
-                    credits.balance = Math.max(0, credits.balance - cost);
-                    credits.used = (credits.used || 0) + cost;
-                    
-                    const usageDesc =
-                      userLang === "en"
-                        ? `AI Curator response (${botReplyText.length} chars)`
-                        : userLang === "ru"
-                        ? `Ответ AI куратора (${botReplyText.length} симв.)`
-                        : `AI Curator javobi (${botReplyText.length} belgi)`;
+                  if (!isFreeOfCharge) {
+                    try {
+                      const idempotencyKey = `bot-reply:${channelId}:${chatId}:${message.message_id}`;
+                      const usageDesc = `AI Curator javobi (${botReplyText.length} belgi)`;
+                      await deductCredits(userId, "chat_reply", {
+                        idempotencyKey,
+                        description: usageDesc
+                      });
+                    } catch (err: any) {
+                      console.error("[Bot Runner] Credit deduction failed:", err.message);
 
-                    credits.history.unshift({
-                      id: `tx-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
-                      type: "usage",
-                      amount: cost,
-                      description: usageDesc,
-                      date: new Date().toLocaleString("uz-UZ", { timeZone: "Asia/Tashkent" })
-                    });
-                    context["replai_ai_credits_data"] = JSON.stringify(credits);
+                      // Auto-pause bot
+                      settings.aiCuratorEnabled = false;
+                      context[`replai_bot_settings_${channelId}`] = JSON.stringify(settings);
+
+                      // Notify owner
+                      if (settings.adminTelegramChatId) {
+                        const sysToken = process.env.SYSTEM_BOT_TOKEN || process.env.TELEGRAM_BOT_TOKEN;
+                        const notifyToken = sysToken || token;
+
+                        let warnMsg = "";
+                        if (err.message === "DAILY_LIMIT_EXCEEDED") {
+                          warnMsg = "🚨 [Kunlik limit oshdi] Sizning kunlik AI sarf limiti oshib ketdi. Bot vaqtincha to'xtatildi.";
+                        } else {
+                          warnMsg = "🚨 [Balans tugadi] Balansingizda kredit yetarli emasligi sababli bot vaqtincha to'xtatildi. Iltimos, hisobni to'ldiring.";
+                        }
+                        await sendTelegramMessage(notifyToken, settings.adminTelegramChatId, warnMsg);
+                      }
+
+                      // Nullify reply so customer is never shown the error
+                      botReplyText = "";
+                    }
                   }
 
                   // 3.5. CustDev analysis for curator messages
@@ -1448,13 +1480,16 @@ async function checkAndRunAutoOutreach(channelId: string, token: string) {
         try {
           const followUpPrompt = "Mijoz suhbatni to'xtatdi. Dars materiallariga asoslanib, uning savoli yoki qiziqishi qolgan-qolmaganini so'rab muloyim va juda qisqa eslatma yozing (1-2 gap).";
           
+
+
           const ragResult = await queryRAG(
             followUpPrompt,
             chat.name || "Talaba",
             lessons,
             modules,
             settings,
-            chatHistory
+            chatHistory,
+            userId
           );
 
           if (ragResult && ragResult.text) {

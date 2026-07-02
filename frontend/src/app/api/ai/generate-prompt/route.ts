@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { verifyJwt } from "@/lib/jwt";
+import { executeGeminiCall } from "@/lib/ai/modelRouter";
 
 export async function POST(request: Request) {
   try {
@@ -48,40 +49,28 @@ Siz yaratadigan tizimli prompt quyidagi qoidalarga to'liq va qat'iy rioya qilish
 
 Javobda faqat va faqat promptning o'zini qaytaring. Hech qanday "Mana siz so'ragan prompt" kabi kirish yoki tushuntirish so'zlarini, markdown bloklarini (\`\`\` kabi) aralashtirmang. Faqat sof matn bo'lsin.`;
 
-    const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          system_instruction: {
-            parts: [{ text: systemPrompt }],
-          },
-          contents: [
-            {
-              role: "user",
-              parts: [{ text: `Quyidagi foydalanuvchi istaklari asosida tizimli prompt yarating:\n\n${userInstructions}` }]
-            }
-          ],
-          generationConfig: {
-            temperature: 0.3,
-            maxOutputTokens: 2048,
-          },
-        }),
-      }
-    );
+    const result = await executeGeminiCall({
+      operationType: "chat_reply",
+      contents: [
+        {
+          role: "user",
+          parts: [{ text: `Quyidagi foydalanuvchi istaklari asosida tizimli prompt yarating:\n\n${userInstructions}` }]
+        }
+      ],
+      systemInstruction: systemPrompt,
+      apiKey,
+      userId: payload.user_id
+    });
 
-    if (!response.ok) {
-      const errText = await response.text();
-      console.error("[Gemini Prompt Gen Error]:", response.status, errText);
+    if (result.status === "error" || !result.text) {
+      console.error("[Gemini Prompt Gen Error]:", result.error);
       return NextResponse.json(
-        { error: "Gemini API prompt yaratishda xatoga yo'l qo'ydi." },
+        { error: "Gemini API prompt yaratishda xatoga yo'l qo'ydi: " + (result.error || "") },
         { status: 500 }
       );
     }
 
-    const data = await response.json();
-    let resultText = data?.candidates?.[0]?.content?.parts?.[0]?.text || "";
+    let resultText = result.text;
     
     // Clean up any potential markdown wrap code blocks
     resultText = resultText

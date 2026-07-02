@@ -1,5 +1,7 @@
 "use client";
 
+import modelPricing from "../config/model_pricing.json";
+
 // Types
 export type User = {
   id?: string;
@@ -9,7 +11,7 @@ export type User = {
   isCardLinked?: boolean;
   cardNumber?: string;
   trialExpiresAt?: string;
-  plan?: "free" | "pro" | "premium" | "vip";
+  plan?: "free" | "pro" | "premium" | "business" | "vip";
   createdAt?: string;
   hasUsedTrial?: boolean;
 };
@@ -740,7 +742,7 @@ export const db = {
     notifyUpdate();
   },
 
-  updatePlan(planName: "free" | "pro" | "premium" | "vip"): { success: boolean; error?: string } {
+  updatePlan(planName: "free" | "pro" | "premium" | "business" | "vip"): { success: boolean; error?: string } {
     if (!isClient) return { success: false, error: "Client not available" };
     const currentUser = this.getCurrentUser();
     if (!currentUser) return { success: false, error: "User not found" };
@@ -770,20 +772,16 @@ export const db = {
     return { success: true };
   },
 
-  updateCreditsOnPlanChange(planName: "free" | "pro" | "premium" | "vip"): void {
+  updateCreditsOnPlanChange(planName: "free" | "pro" | "premium" | "business" | "vip"): void {
     if (!isClient) return;
     let creditBalance = 100;
-    let description = "Hisob bepul tarifga o'tkazildi (Free reset)";
-    if (planName === "pro") {
-      creditBalance = 1000;
-      description = "PRO tarif obunasi uchun 1000 ta kredit taqdim etildi";
-    } else if (planName === "premium") {
-      creditBalance = 30000;
-      description = "PREMIUM tarif obunasi uchun 30 000 ta kredit taqdim etildi";
-    } else if (planName === "vip") {
-      creditBalance = 150000;
-      description = "VIP tarif obunasi uchun 150 000 ta kredit taqdim etildi";
+    const planKey = planName.toLowerCase();
+    if (planKey in modelPricing.plans) {
+      creditBalance = (modelPricing.plans as Record<string, number>)[planKey];
     }
+    const description = planName === "free"
+      ? "Hisob bepul tarifga o'tkazildi (Free reset)"
+      : `${planName.toUpperCase()} tarif obunasi uchun ${creditBalance.toLocaleString("uz-UZ")} ta kredit taqdim etildi`;
 
     const local = localStorage.getItem("replai_ai_credits_data");
     let creditsData = { balance: creditBalance, used: 0, history: [] as any[], usedVouchers: [] as string[] };

@@ -1,0 +1,34 @@
+{
+  "exchange_rate_uzs_per_usd": 12000,
+  "models": {
+    "gemini-3.1-flash-lite": {
+      "input_usd_per_m": 0.25,
+      "output_usd_per_m": 1.50,
+      "cached_input_usd_per_m": 0.025
+    },
+    "gemini-3.5-flash": {
+      "input_usd_per_m": 1.50,
+      "output_usd_per_m": 9.00,
+      "cached_input_usd_per_m": 0.15
+    }
+  },
+  "external": {
+    "aisha_stt": {
+      "uzs_per_minute": 120
+    }
+  },
+  "planned_costs": {
+    "chat_reply": 22.00,
+    "lead_qualification": 16.00,
+    "link_analysis": 90.00,
+    "pdf_analysis": 140.00,
+    "audio_transcription": 240.00,
+    "image_analysis": 40.00
+  },
+  "plans": {
+    "pro": 5000,
+    "premium": 30000,
+    "business": 75000,
+    "vip": 150000
+  }
+}

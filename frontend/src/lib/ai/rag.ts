@@ -1,7 +1,6 @@
 import { BotSettings, Lesson, Module } from "../db";
-
-// Centralised model constant — override via GEMINI_MODEL env variable
-const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-2.5-flash';
+import { executeGeminiCall } from "./modelRouter";
+import { calculateKbHash, getOrBuildContextCache } from "./contextCache";
 
 export type RAGResult = {
   text: string;
@@ -182,10 +181,19 @@ async function callGemini(
   contents: { role: "user" | "model"; parts: { text: string }[] }[],
   context: string,
   studentName: string,
-  settings: BotSettings
+  settings: BotSettings,
+  userId: string,
+  lessons?: Lesson[],
+  modules?: Module[]
 ): Promise<string | null> {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) return null;
+
+  let cachedContentName: string | null = null;
+  if (lessons && modules) {
+    const kbHash = calculateKbHash(lessons, modules);
+    cachedContentName = await getOrBuildContextCache(kbHash, context, apiKey);
+  }
 
   let promptTemplate = settings.systemPrompt;
   if (!promptTemplate) {
@@ -221,10 +229,16 @@ O'quvchilarning savollariga faqat dars materiallari (KURS MATERIALLARI) asosida 
   const agentName = settings.agentName || "Sendly";
   systemPrompt = systemPrompt.replace(/\{\{agentName\}\}/g, agentName);
 
-  if (systemPrompt.includes("{{context}}")) {
-    systemPrompt = systemPrompt.replace("{{context}}", context);
+  if (cachedContentName) {
+    if (systemPrompt.includes("{{context}}")) {
+      systemPrompt = systemPrompt.replace("{{context}}", "[Darslik materiallari keshda saqlangan.]");
+    }
   } else {
-    systemPrompt = systemPrompt + "\n\nKURS MATERIALLARI:\n" + context;
+    if (systemPrompt.includes("{{context}}")) {
+      systemPrompt = systemPrompt.replace("{{context}}", context);
+    } else {
+      systemPrompt = systemPrompt + "\n\nKURS MATERIALLARI:\n" + context;
+    }
   }
 
   let conversationGreetingRule = "";
@@ -234,108 +248,23 @@ O'quvchilarning savollariga faqat dars materiallari (KURS MATERIALLARI) asosida 
 
   systemPrompt = `O'quvchining ismi: ${studentName}\n` + characterInstructions + conversationGreetingRule + "\n\n" + systemPrompt;
 
-  try {
-    let response: Response | null = null;
-    let delay = 1000;
-    const maxRetries = 3;
+  const result = await executeGeminiCall({
+    operationType: "chat_reply",
+    contents,
+    systemInstruction: systemPrompt,
+    cachedContentName: cachedContentName || undefined,
+    apiKey,
+    userId
+  });
 
-    for (let i = 0; i < maxRetries; i++) {
-      try {
-        response = await fetch(
-          `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${apiKey}`,
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              system_instruction: {
-                parts: [{ text: systemPrompt }],
-              },
-              contents: contents,
-              generationConfig: {
-                temperature: Math.min(0.95, 0.5 + (settings.humor || 30) / 200),
-                maxOutputTokens: 8192,
-              },
-            }),
-          }
-        );
-
-        if (response.status === 429) {
-          console.warn(`[Gemini] RAG API rate limited (429). Retrying in ${delay}ms... (Attempt ${i + 1}/${maxRetries})`);
-          await new Promise((resolve) => setTimeout(resolve, delay));
-          delay *= 2;
-          continue;
-        }
-        break;
-      } catch (err) {
-        console.error(`[Gemini] RAG fetch error during attempt ${i + 1}:`, err);
-        if (i === maxRetries - 1) throw err;
-        await new Promise((resolve) => setTimeout(resolve, delay));
-        delay *= 2;
-      }
-    }
-
-    if (!response || response.status === 429) {
-      response = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${apiKey}`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            system_instruction: {
-              parts: [{ text: systemPrompt }],
-            },
-            contents: contents,
-            generationConfig: {
-              temperature: Math.min(0.95, 0.5 + (settings.humor || 30) / 200),
-              maxOutputTokens: 8192,
-            },
-          }),
-        }
-      );
-    }
-
-    if (!response || !response.ok) {
-      console.warn('[RAG] Flash failed, trying Gemini Pro fallback...');
-      const PRO_MODEL = process.env.GEMINI_PRO_MODEL || 'gemini-1.5-pro';
-      try {
-        response = await fetch(
-          `https://generativelanguage.googleapis.com/v1beta/models/${PRO_MODEL}:generateContent?key=${apiKey}`,
-          {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              system_instruction: { parts: [{ text: systemPrompt }] },
-              contents,
-              generationConfig: {
-                temperature: Math.min(0.95, 0.5 + (settings.humor || 30) / 200),
-                maxOutputTokens: 8192,
-              },
-            }),
-          }
-        );
-      } catch (proErr) {
-        console.error('[RAG] Gemini Pro fallback fetch error:', proErr);
-      }
-    }
-
-    if (!response || !response.ok) {
-      console.error("Gemini API error:", response.status, await response.text());
-      return null;
-    }
-
-    const data = await response.json();
-    const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
-    return text || null;
-  } catch (err) {
-    console.error("Gemini fetch error:", err);
-    return null;
-  }
+  return result.text || null;
 }
 
 async function checkSemanticModeration(
   question: string,
   restrictedTopics: string[],
-  apiKey: string
+  apiKey: string,
+  userId: string
 ): Promise<{ flagged: boolean; matchedTopic?: string; isGeneralTalk?: boolean }> {
   if (!apiKey) {
     return { flagged: false, isGeneralTalk: false };
@@ -357,35 +286,21 @@ Qoidalar:
 Faqat toza JSON qaytaring, boshqa yozuv qo'shmang.`;
 
   try {
-    const res = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${apiKey}`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          system_instruction: {
-            parts: [{ text: systemPrompt }],
-          },
-          contents: [{ role: "user", parts: [{ text: question }] }],
-          generationConfig: {
-            temperature: 0.1,
-            responseMimeType: "application/json",
-            maxOutputTokens: 1000,
-          },
-        }),
-      }
-    );
-    if (res.ok) {
-      const data = await res.json();
-      const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
-      if (text) {
-        const parsed = JSON.parse(text);
-        return {
-          flagged: parsed.flagged === true,
-          matchedTopic: parsed.topic,
-          isGeneralTalk: parsed.isGeneralTalk === true
-        };
-      }
+    const result = await executeGeminiCall({
+      operationType: "chat_reply",
+      contents: [{ role: "user", parts: [{ text: question }] }],
+      systemInstruction: systemPrompt,
+      apiKey,
+      userId
+    });
+    
+    if (result.text) {
+      const parsed = JSON.parse(result.text.trim());
+      return {
+        flagged: parsed.flagged === true,
+        matchedTopic: parsed.topic,
+        isGeneralTalk: parsed.isGeneralTalk === true
+      };
     }
   } catch (e) {
     console.error("Semantic moderation failed:", e);
@@ -396,7 +311,8 @@ Faqat toza JSON qaytaring, boshqa yozuv qo'shmang.`;
 async function analyzeMessageForCustDev(
   text: string,
   agentType: string,
-  apiKey: string
+  apiKey: string,
+  userId: string
 ): Promise<{ intent: string; sentiment: "positive" | "neutral" | "negative"; painPoint: string }> {
   const isSales = agentType === "sales";
   
@@ -427,37 +343,26 @@ Qoidalar:
 Faqat toza JSON qaytaring.`;
 
   try {
-    const res = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${apiKey}`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          system_instruction: { parts: [{ text: systemPrompt }] },
-          contents: [{ role: "user", parts: [{ text: text }] }],
-          generationConfig: {
-            temperature: 0.1,
-            responseMimeType: "application/json",
-            maxOutputTokens: 1000,
-          },
-        }),
-      }
-    );
-    if (res.ok) {
-      const data = await res.json();
-      const resText = data?.candidates?.[0]?.content?.parts?.[0]?.text;
-      if (resText) {
-        const parsed = JSON.parse(resText);
-        if (parsed.intent && parsed.sentiment && parsed.painPoint) {
-          return parsed;
-        }
-      }
+    const result = await executeGeminiCall({
+      operationType: "lead_qualification",
+      contents: [{ role: "user", parts: [{ text: text }] }],
+      systemInstruction: systemPrompt,
+      apiKey,
+      userId
+    });
+    
+    if (result.text) {
+      const parsed = JSON.parse(result.text.trim());
+      return {
+        intent: parsed.intent || "general",
+        sentiment: parsed.sentiment || "neutral",
+        painPoint: parsed.painPoint || ""
+      };
     }
   } catch (e) {
     console.error("AI CustDev analysis failed inside RAG:", e);
   }
   
-  // Fallback
   return {
     intent: "general",
     sentiment: "neutral",
@@ -474,7 +379,8 @@ export async function queryRAG(
   lessons: Lesson[],
   modules: Module[],
   settings: BotSettings,
-  history: { role: "user" | "model"; parts: { text: string }[] }[] = []
+  history: { role: "user" | "model"; parts: { text: string }[] }[] = [],
+  userId: string = "guest"
 ): Promise<RAGResult> {
   const apiKey = process.env.GEMINI_API_KEY || "";
 
@@ -490,8 +396,8 @@ export async function queryRAG(
 
   if (apiKey) {
     const [moderationResult, analysisResult] = await Promise.allSettled([
-      checkSemanticModeration(question, settings.topics || [], apiKey),
-      analyzeMessageForCustDev(question, settings.aiAgentType || "kurator", apiKey),
+      checkSemanticModeration(question, settings.topics || [], apiKey, userId),
+      analyzeMessageForCustDev(question, settings.aiAgentType || "kurator", apiKey, userId),
     ]);
 
     if (moderationResult.status === "fulfilled") {
@@ -551,32 +457,23 @@ Qoidalar:
     }
 
     try {
-      const res = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${apiKey}`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            system_instruction: { parts: [{ text: generalPrompt }] },
-            contents: formattedHistory,
-            generationConfig: { temperature: 0.7, maxOutputTokens: 8192 },
-          }),
-        }
-      );
-      if (res.ok) {
-        const data = await res.json();
-        const reply = data?.candidates?.[0]?.content?.parts?.[0]?.text;
-        if (reply) {
-          return {
-            text: reply.trim(),
-            confidence: 95,
-            sources: [],
-            intent,
-            sentiment,
-            painPoint,
-            isGeneralTalk: true
-          };
-        }
+      const result = await executeGeminiCall({
+        operationType: "chat_reply",
+        contents: formattedHistory,
+        systemInstruction: generalPrompt,
+        apiKey,
+        userId
+      });
+      if (result.text) {
+        return {
+          text: result.text.trim(),
+          confidence: 95,
+          sources: [],
+          intent,
+          sentiment,
+          painPoint,
+          isGeneralTalk: true
+        };
       }
     } catch (e) {
       console.error("General talk Gemini call failed:", e);
@@ -624,7 +521,7 @@ Qoidalar:
     formattedHistory = [{ role: "user", parts: [{ text: question }] }];
   }
 
-  const aiAnswer = await callGemini(formattedHistory, context, studentName, settings);
+  const aiAnswer = await callGemini(formattedHistory, context, studentName, settings, userId, lessons, modules);
   if (aiAnswer) {
     return {
       text: aiAnswer.trim(),

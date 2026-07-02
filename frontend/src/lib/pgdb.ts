@@ -4,7 +4,7 @@ import { Pool } from "pg";
 // Railway sets DATABASE_URL automatically when PostgreSQL plugin is added.
 let _pool: Pool | null = null;
 
-function getPool(): Pool {
+export function getPool(): Pool {
   if (!_pool) {
     const connectionString = process.env.DATABASE_URL;
     if (!connectionString) {
@@ -69,16 +69,112 @@ export async function initDb(): Promise<void> {
     CREATE INDEX IF NOT EXISTS idx_kv_email ON kv_store ((value->>'replai_current_user_email'));
     CREATE INDEX IF NOT EXISTS idx_kv_updated ON kv_store (updated_at DESC);
 
-    CREATE TABLE IF NOT EXISTS credit_ledger (
-      id          SERIAL PRIMARY KEY,
-      user_id     VARCHAR(255) NOT NULL,
-      action_type VARCHAR(50)  NOT NULL,
-      amount      INTEGER      NOT NULL,
-      description TEXT,
-      created_at  TIMESTAMPTZ DEFAULT NOW()
+    -- 1. credit_lots table
+    CREATE TABLE IF NOT EXISTS credit_lots (
+      id                 BIGSERIAL PRIMARY KEY,
+      user_id            VARCHAR(255) NOT NULL,
+      source             VARCHAR(50) NOT NULL,             -- 'plan' or 'purchase'
+      credits_total      INTEGER NOT NULL,
+      credits_remaining  INTEGER NOT NULL,
+      expires_at         TIMESTAMPTZ NOT NULL,
+      package_name       VARCHAR(100),
+      created_at         TIMESTAMPTZ DEFAULT NOW(),
+      CONSTRAINT chk_lot_remaining CHECK (credits_remaining >= 0 AND credits_remaining <= credits_total)
     );
-    CREATE INDEX IF NOT EXISTS idx_credit_ledger_user ON credit_ledger(user_id);
-    CREATE INDEX IF NOT EXISTS idx_credit_ledger_created ON credit_ledger(created_at DESC);
+
+    CREATE INDEX IF NOT EXISTS idx_credit_lots_user_source ON credit_lots(user_id, source);
+    CREATE INDEX IF NOT EXISTS idx_credit_lots_expires ON credit_lots(expires_at ASC);
+    CREATE INDEX IF NOT EXISTS idx_credit_lots_active ON credit_lots(user_id, expires_at ASC) WHERE credits_remaining > 0;
+
+    -- 2. credit_balances table
+    CREATE TABLE IF NOT EXISTS credit_balances (
+      user_id                VARCHAR(255) PRIMARY KEY,
+      plan_credits           INTEGER NOT NULL DEFAULT 0,
+      purchased_credits      INTEGER NOT NULL DEFAULT 0,
+      auto_recharge_enabled  BOOLEAN NOT NULL DEFAULT FALSE,
+      auto_recharge_package  VARCHAR(50) DEFAULT 'Starter',
+      recharge_attempts      INTEGER NOT NULL DEFAULT 0,
+      daily_spend_cap        INTEGER DEFAULT NULL,
+      updated_at             TIMESTAMPTZ DEFAULT NOW()
+    );
+
+    -- Re-create credit_ledger with correct fields (Drop old if exists)
+    DROP TABLE IF EXISTS credit_ledger CASCADE;
+    CREATE TABLE credit_ledger (
+      id                     BIGSERIAL PRIMARY KEY,
+      user_id                VARCHAR(255) NOT NULL,
+      action_type            VARCHAR(50) NOT NULL,             -- 'grant_plan', 'purchase', 'deduct', 'expiry', 'refund'
+      operation_type         VARCHAR(50),                      -- 'chat_reply', 'lead_qualification', va h.k.
+      credits_amount         INTEGER NOT NULL,
+      plan_amount            INTEGER NOT NULL DEFAULT 0,
+      purchased_amount       INTEGER NOT NULL DEFAULT 0,
+      balance_after          INTEGER NOT NULL,
+      description            TEXT,
+      idempotency_key        VARCHAR(255) UNIQUE,
+      tokens_used            INTEGER DEFAULT 0,
+      computed_api_cost_uzs  NUMERIC(10, 2) DEFAULT 0.00,
+      created_at             TIMESTAMPTZ DEFAULT NOW()
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_credit_ledger_user_date ON credit_ledger(user_id, created_at DESC);
+    CREATE INDEX IF NOT EXISTS idx_credit_ledger_idemp ON credit_ledger(idempotency_key);
+
+    -- 3. ledger_lot_allocations table
+    CREATE TABLE IF NOT EXISTS ledger_lot_allocations (
+      id          BIGSERIAL PRIMARY KEY,
+      ledger_id   BIGINT NOT NULL REFERENCES credit_ledger(id) ON DELETE CASCADE,
+      lot_id      BIGINT NOT NULL REFERENCES credit_lots(id),
+      amount      INTEGER NOT NULL CHECK (amount > 0)
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_allocations_ledger ON ledger_lot_allocations(ledger_id);
+
+    -- 4. cost_telemetry table
+    CREATE TABLE IF NOT EXISTS cost_telemetry (
+      id                     BIGSERIAL PRIMARY KEY,
+      user_id                VARCHAR(255) NOT NULL,
+      model_id               VARCHAR(100) NOT NULL,
+      operation_type         VARCHAR(50) NOT NULL,
+      input_tokens           INTEGER DEFAULT 0,
+      output_tokens          INTEGER DEFAULT 0,
+      thinking_tokens        INTEGER DEFAULT 0,
+      cached_tokens          INTEGER DEFAULT 0,
+      latency_ms             INTEGER DEFAULT 0,
+      real_cost_uzs          NUMERIC(10, 2) DEFAULT 0.00,
+      planned_cost_uzs       NUMERIC(10, 2) DEFAULT 0.00,
+      status                 VARCHAR(20) NOT NULL,
+      fallback_used          BOOLEAN DEFAULT FALSE,
+      idempotency_key        VARCHAR(255),
+      created_at             TIMESTAMPTZ DEFAULT NOW()
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_telemetry_user_date ON cost_telemetry(user_id, created_at DESC);
+    CREATE INDEX IF NOT EXISTS idx_telemetry_idemp ON cost_telemetry(idempotency_key);
+
+    -- 5. Config tables
+    CREATE TABLE IF NOT EXISTS deduction_rates (
+      operation_type  VARCHAR(50) PRIMARY KEY,
+      credits         INTEGER NOT NULL,
+      unit            VARCHAR(50) NOT NULL,
+      updated_at      TIMESTAMPTZ DEFAULT NOW()
+    );
+
+    CREATE TABLE IF NOT EXISTS credit_packages (
+      name       VARCHAR(50) PRIMARY KEY,
+      credits    INTEGER NOT NULL,
+      price_uzs  INTEGER NOT NULL,
+      active     BOOLEAN DEFAULT TRUE,
+      -- 7 UZS is the hardcoded minimum price per credit in UZS
+      CONSTRAINT chk_min_credit_price CHECK (price_uzs >= credits * 7)
+    );
+
+    CREATE TABLE IF NOT EXISTS context_caches (
+      id             BIGSERIAL PRIMARY KEY,
+      kb_hash        VARCHAR(255) UNIQUE NOT NULL,
+      cache_name     VARCHAR(255) NOT NULL,
+      expires_at     TIMESTAMP NOT NULL,
+      created_at     TIMESTAMP DEFAULT NOW()
+    );
   `);
   _initialized = true;
 }

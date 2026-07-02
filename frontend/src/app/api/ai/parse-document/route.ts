@@ -1,4 +1,6 @@
 import { NextResponse } from "next/server";
+import { verifyJwt } from "@/lib/jwt";
+import { executeGeminiCall } from "@/lib/ai/modelRouter";
 
 export async function POST(request: Request) {
   try {
@@ -17,6 +19,21 @@ export async function POST(request: Request) {
         { error: "Hujjat ma'lumotlari yuborilmagan." },
         { status: 400 }
       );
+    }
+
+    const authHeader = request.headers.get("Authorization");
+    const token = authHeader?.startsWith("Bearer ") ? authHeader.substring(7) : null;
+    const jwtSecret = process.env.JWT_SECRET;
+    let userId = "system-document-parser";
+    if (token && jwtSecret) {
+      try {
+        const payload = verifyJwt(token, jwtSecret);
+        if (payload?.user_id) {
+          userId = payload.user_id;
+        }
+      } catch {
+        // ignore
+      }
     }
 
     const isPdf = fileType === "application/pdf" || fileName.toLowerCase().endsWith(".pdf");
@@ -63,40 +80,28 @@ export async function POST(request: Request) {
 
     const systemPrompt = `Siz darsliklar va hujjatlarni tahlil qiluvchi professional yordamchisiz. Maqsadingiz: yuklangan hujjat (PDF yoki matn) ichidagi barcha ma'lumotlarni o'qib, ularni chatbot oson tushunadigan va aniq javob qaytara oladigan shaklda strukturalash va to'liq o'zbek tilida (lotin alifbosida) yozib berish. Javob matnida umuman Markdown formatlash belgilaridan (masalan, qalin matn uchun ** belgilari, sarlavhalar uchun # belgilari va boshqalar) foydalanmang. Qalin bo'lishi kerak bo'lgan so'zlarni oddiy matn ko'rinishida yozing (masalan, "**Savol:**" emas, balki oddiy "Savol:" shaklida).`;
 
-    const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          system_instruction: {
-            parts: [{ text: systemPrompt }],
-          },
-          contents: [
-            {
-              role: "user",
-              parts: parts
-            }
-          ],
-          generationConfig: {
-            temperature: 0.15,
-            maxOutputTokens: 8192,
-          },
-        }),
-      }
-    );
+    const result = await executeGeminiCall({
+      operationType: "pdf_analysis",
+      contents: [
+        {
+          role: "user",
+          parts: parts
+        }
+      ],
+      systemInstruction: systemPrompt,
+      apiKey,
+      userId
+    });
 
-    if (!response.ok) {
-      const errText = await response.text();
-      console.error("[Gemini PDF Parse Error]:", response.status, errText);
+    if (result.status === "error" || !result.text) {
+      console.error("[Gemini PDF Parse Error]:", result.error);
       return NextResponse.json(
-        { error: "Gemini API hujjatni o'qishda xatoga yo'l qo'ydi." },
+        { error: "Gemini API hujjatni o'qishda xatoga yo'l qo'ydi: " + (result.error || "") },
         { status: 500 }
       );
     }
 
-    const data = await response.json();
-    let resultText = data?.candidates?.[0]?.content?.parts?.[0]?.text || "";
+    let resultText = result.text;
     
     // Programmatically strip markdown symbols that look bad in plain text area
     resultText = resultText

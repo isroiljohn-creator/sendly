@@ -1,4 +1,6 @@
 import { NextResponse } from "next/server";
+import { verifyJwt } from "@/lib/jwt";
+import { executeGeminiCall } from "@/lib/ai/modelRouter";
 
 export async function POST(request: Request) {
   try {
@@ -17,6 +19,21 @@ export async function POST(request: Request) {
         { error: "Hujjat ma'lumotlari yuborilmagan." },
         { status: 400 }
       );
+    }
+
+    const authHeader = request.headers.get("Authorization");
+    const token = authHeader?.startsWith("Bearer ") ? authHeader.substring(7) : null;
+    const jwtSecret = process.env.JWT_SECRET;
+    let userId = "system-students-parser";
+    if (token && jwtSecret) {
+      try {
+        const payload = verifyJwt(token, jwtSecret);
+        if (payload?.user_id) {
+          userId = payload.user_id;
+        }
+      } catch {
+        // ignore
+      }
     }
 
     const isTxtOrCsv = fileType?.startsWith("text/") || 
@@ -63,41 +80,28 @@ Javobni FAQAT quyidagi ko'rinishdagi toza JSON formatida qaytaring, boshqa hech 
 
     const systemPrompt = `Siz o'quvchilar ro'yxatini tahlil qiluvchi va ularni JSON ko'rinishida strukturalovchi yordamchisiz. Siz faqat toza JSON formatida javob berishingiz kerak. Hech qanday qo'shimcha matn, tushuntirish yoki markdown belgilari kiritmang.`;
 
-    const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          system_instruction: {
-            parts: [{ text: systemPrompt }],
-          },
-          contents: [
-            {
-              role: "user",
-              parts: parts
-            }
-          ],
-          generationConfig: {
-            temperature: 0.1,
-            maxOutputTokens: 8192,
-            responseMimeType: "application/json"
-          },
-        }),
-      }
-    );
+    const result = await executeGeminiCall({
+      operationType: "lead_qualification",
+      contents: [
+        {
+          role: "user",
+          parts: parts
+        }
+      ],
+      systemInstruction: systemPrompt,
+      apiKey,
+      userId
+    });
 
-    if (!response.ok) {
-      const errText = await response.text();
-      console.error("[Gemini Students Parse Error]:", response.status, errText);
+    if (result.status === "error" || !result.text) {
+      console.error("[Gemini Students Parse Error]:", result.error);
       return NextResponse.json(
-        { error: "Gemini API faylni o'qishda xatoga yo'l qo'ydi." },
+        { error: "Gemini API faylni o'qishda xatoga yo'l qo'ydi: " + (result.error || "") },
         { status: 500 }
       );
     }
 
-    const data = await response.json();
-    let resultText = data?.candidates?.[0]?.content?.parts?.[0]?.text || "[]";
+    let resultText = result.text;
     
     // Parse result text to check validity
     let students = [];

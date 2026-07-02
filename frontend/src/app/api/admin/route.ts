@@ -3,6 +3,7 @@ import fs from "fs";
 import path from "path";
 import * as pgdb from "@/lib/pgdb";
 import { verifyJwt } from "@/lib/jwt";
+import modelPricing from "@/config/model_pricing.json";
 
 const DB_FILE = process.env.DB_FILE_PATH || path.join(process.cwd(), "db.json");
 
@@ -518,10 +519,12 @@ export async function POST(request: Request) {
             if (uData.replai_ai_credits_data) {
               try { creditsData = typeof uData.replai_ai_credits_data === "string" ? JSON.parse(uData.replai_ai_credits_data) : uData.replai_ai_credits_data; } catch {}
             }
-            let creditBalance = 500, description = "Bepul tarif uchun 500 ta sinov krediti taqdim etildi";
-            if (plan === "pro") { creditBalance = 1000; description = "PRO tarif obunasi uchun 1000 ta kredit taqdim etildi"; }
-            else if (plan === "premium") { creditBalance = 30000; description = "PREMIUM tarif obunasi uchun 30 000 ta kredit taqdim etildi"; }
-            else if (plan === "vip") { creditBalance = 150000; description = "VIP tarif obunasi uchun 150 000 ta kredit taqdim etildi"; }
+            let creditBalance = 500;
+            const planKey = plan.toLowerCase();
+            if (planKey in modelPricing.plans) {
+              creditBalance = (modelPricing.plans as Record<string, number>)[planKey];
+            }
+            const description = `${plan.toUpperCase()} tarif obunasi uchun ${creditBalance.toLocaleString("uz-UZ")} ta kredit taqdim etildi`;
             creditsData.balance = creditBalance;
             creditsData.history.unshift({ id: `tx-${Date.now()}-${Math.floor(Math.random() * 1000)}`, type: "purchase", amount: creditBalance, description, date: timestamp });
             uData.replai_ai_credits_data = creditsData;
@@ -605,10 +608,12 @@ export async function POST(request: Request) {
       let creditsData = { balance: 500, used: 0, history: [] as any[] };
       const rawCreds = dbData.userData[userId]["replai_ai_credits_data"];
       if (rawCreds) { try { creditsData = typeof rawCreds === "string" ? JSON.parse(rawCreds) : rawCreds; } catch {} }
-      let creditBalance = 500, description = "Bepul tarif uchun 500 ta sinov krediti taqdim etildi";
-      if (plan === "pro") { creditBalance = 1000; description = "PRO tarif obunasi uchun 1000 ta kredit taqdim etildi"; }
-      else if (plan === "premium") { creditBalance = 30000; description = "PREMIUM tarif obunasi uchun 30 000 ta kredit taqdim etildi"; }
-      else if (plan === "vip") { creditBalance = 150000; description = "VIP tarif obunasi uchun 150 000 ta kredit taqdim etildi"; }
+      let creditBalance = 500;
+      const planKey = plan.toLowerCase();
+      if (planKey in modelPricing.plans) {
+        creditBalance = (modelPricing.plans as Record<string, number>)[planKey];
+      }
+      const description = `${plan.toUpperCase()} tarif obunasi uchun ${creditBalance.toLocaleString("uz-UZ")} ta kredit taqdim etildi`;
       creditsData.balance = creditBalance;
       if (!creditsData.history) creditsData.history = [];
       creditsData.history.unshift({ id: `tx-${Date.now()}-${Math.floor(Math.random() * 1000)}`, type: "purchase", amount: creditBalance, description, date: timestamp });

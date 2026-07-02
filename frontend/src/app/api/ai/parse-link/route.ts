@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { verifyJwt } from "@/lib/jwt";
 import { readUserCredits, writeUserCredits } from "../../credits/route";
+import { executeGeminiCall } from "@/lib/ai/modelRouter";
 
 function cleanHtml(html: string): string {
   let clean = html;
@@ -203,37 +204,25 @@ export async function POST(request: Request) {
 
     const promptText = `Quyidagi matn tarkibini o'qib, o'quv chatbotining bilimlar bazasi uchun batafsil strukturalangan o'zbekcha matnga o'giring:\n\n${rawText.substring(0, 15000)}`;
 
-    const geminiRes = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${geminiKey}`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          system_instruction: {
-            parts: [{ text: systemPrompt }],
-          },
-          contents: [
-            {
-              role: "user",
-              parts: [{ text: promptText }]
-            }
-          ],
-          generationConfig: {
-            temperature: 0.15,
-            maxOutputTokens: 8192,
-          },
-        }),
-      }
-    );
+    const result = await executeGeminiCall({
+      operationType: "link_analysis",
+      contents: [
+        {
+          role: "user",
+          parts: [{ text: promptText }]
+        }
+      ],
+      systemInstruction: systemPrompt,
+      apiKey: geminiKey,
+      userId
+    });
 
-    if (!geminiRes.ok) {
-      console.error("[Parse Link Gemini Error]:", geminiRes.status);
-      // Fallback to raw text if Gemini fails
+    if (result.status === "error" || !result.text) {
+      console.error("[Parse Link Gemini Error]:", result.error);
       return NextResponse.json({ title, text: rawText.substring(0, 8000) });
     }
 
-    const geminiData = await geminiRes.json();
-    let structuredText = geminiData?.candidates?.[0]?.content?.parts?.[0]?.text || rawText;
+    let structuredText = result.text;
 
     // Clean markdown bold and header tags from Gemini output
     structuredText = structuredText

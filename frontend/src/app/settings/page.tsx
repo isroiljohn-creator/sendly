@@ -503,7 +503,7 @@ export default function SettingsPage() {
     showAlert(t("common.cancel") || "Bekor qilindi", t("pages.account.billing.card_unlink_success") || "Karta muvaffaqiyatli o'chirildi.");
   };
 
-  const handleSelectPlan = (plan: "free" | "pro" | "premium" | "vip") => {
+  const handleSelectPlan = (plan: "free" | "pro" | "premium" | "business" | "vip") => {
     if (plan !== "free" && !currentUser?.isCardLinked) {
       setIsPricingOpen(false);
       showAlert(
@@ -1486,14 +1486,18 @@ export default function SettingsPage() {
                   </div>
                   <div className="text-right">
                     <span className="text-[20px] font-black text-black">{channelsCount}</span>
-                    <span className="text-[11px] text-[#707070] font-bold ml-1">/ {currentUser?.plan === "vip" ? "10" : "1"}</span>
+                    <span className="text-[11px] text-[#707070] font-bold ml-1">
+                      / {currentUser?.plan === "vip" ? "10" : currentUser?.plan === "business" ? "5" : currentUser?.plan === "premium" ? "3" : "1"}
+                    </span>
                   </div>
                 </div>
 
                 <div className="w-full bg-[#E5E5E5] rounded-full h-2.5 overflow-hidden mt-1">
                   <div 
                     className="bg-black h-full rounded-full transition-all duration-300"
-                    style={{ width: `${Math.min(100, (channelsCount / (currentUser?.plan === "vip" ? 10 : 1)) * 100)}%` }}
+                    style={{
+                      width: `${Math.min(100, (channelsCount / (currentUser?.plan === "vip" ? 10 : currentUser?.plan === "business" ? 5 : currentUser?.plan === "premium" ? 3 : 1)) * 100)}%`
+                    }}
                   />
                 </div>
               </Card>
@@ -1512,14 +1516,18 @@ export default function SettingsPage() {
                   </div>
                   <div className="text-right">
                     <span className="text-[20px] font-black text-black">{activeAutomationsCount}</span>
-                    <span className="text-[11px] text-[#707070] font-bold ml-1">/ {currentUser?.plan === "vip" ? "50" : "5"}</span>
+                    <span className="text-[11px] text-[#707070] font-bold ml-1">
+                      / {currentUser?.plan === "vip" ? "50" : currentUser?.plan === "business" ? "25" : currentUser?.plan === "premium" ? "20" : "5"}
+                    </span>
                   </div>
                 </div>
 
                 <div className="w-full bg-[#E5E5E5] rounded-full h-2.5 overflow-hidden mt-1">
                   <div 
                     className="bg-purple-600 h-full rounded-full transition-all duration-300"
-                    style={{ width: `${Math.min(100, (activeAutomationsCount / (currentUser?.plan === "vip" ? 50 : 5)) * 100)}%` }}
+                    style={{
+                      width: `${Math.min(100, (activeAutomationsCount / (currentUser?.plan === "vip" ? 50 : currentUser?.plan === "business" ? 25 : currentUser?.plan === "premium" ? 20 : 5)) * 100)}%`
+                    }}
                   />
                 </div>
               </Card>
@@ -2288,7 +2296,7 @@ export default function SettingsPage() {
             </div>
 
             {/* Pricing Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
               {/* Pro Plan */}
               <div className="border border-[#E8E8E8] rounded-[24px] p-6 bg-[#F9F9F7] flex flex-col justify-between h-full hover:shadow-lg transition-all group">
                 <div>
@@ -2346,6 +2354,35 @@ export default function SettingsPage() {
                   }`}
                 >
                   {currentUser?.plan === "premium" ? "Faol tarif" : "Tanlash"}
+                </button>
+              </div>
+
+              {/* Business Plan */}
+              <div className="border border-[#E8E8E8] rounded-[24px] p-6 bg-[#F9F9F7] flex flex-col justify-between h-full hover:shadow-lg transition-all group">
+                <div>
+                  <h4 className="text-[17px] font-extrabold text-black">Business</h4>
+                  <p className="text-[11px] text-[#707070] mt-1.5">Kengayotgan bizneslar va bir nechta filiallar uchun.</p>
+                  <div className="mt-4 flex items-baseline gap-1">
+                    <span className="text-[28px] font-black text-black">
+                      {billingCycle === "monthly" ? "1 197 000" : "957 600"}
+                    </span>
+                    <span className="text-[11px] font-bold text-[#707070]">UZS / oy</span>
+                  </div>
+                  <ul className="mt-6 flex flex-col gap-3 text-[11.5px] text-[#505050] font-bold list-none p-0">
+                    <li className="flex items-center gap-2">✓ 5 ta faol kanal / bot</li>
+                    <li className="flex items-center gap-2">✓ 25 ta bot ssenariylari</li>
+                    <li className="flex items-center gap-2">✓ 75 000 AI krediti / oy</li>
+                    <li className="flex items-center gap-2">✓ Google Sheets va CRM</li>
+                    <li className="flex items-center gap-2">✓ Ustuvor qo'llab-quvvatlash</li>
+                  </ul>
+                </div>
+                <button
+                  onClick={() => handleSelectPlan("business")}
+                  className={`w-full py-3 mt-8 rounded-full text-[12px] font-bold transition-all border-none cursor-pointer ${
+                    currentUser?.plan === "business" ? "bg-black/10 text-black cursor-default" : "bg-black text-[#C7F33C] hover:bg-black/90"
+                  }`}
+                >
+                  {currentUser?.plan === "business" ? "Faol tarif" : "Tanlash"}
                 </button>
               </div>
 

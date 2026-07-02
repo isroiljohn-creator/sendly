@@ -4,6 +4,8 @@ import path from "path";
 import { startTelegramBots, getDefaultSystemPrompt } from "@/lib/telegramBotRunner";
 import * as pgdb from "@/lib/pgdb";
 import { verifyJwt } from "@/lib/jwt";
+import modelPricing from "@/config/model_pricing.json";
+import { executeGeminiCall } from "@/lib/ai/modelRouter";
 import { cookies } from "next/headers";
 
 const DB_FILE = process.env.DB_FILE_PATH || path.join(process.cwd(), "db.json");
@@ -278,8 +280,8 @@ export async function POST(request: Request) {
     }
   }
 
-  const maxChannels = plan === "vip" ? 10 : 1;
-  const maxActiveAutomations = plan === "vip" ? 50 : 5;
+  const maxChannels = plan === "vip" ? 10 : plan === "business" ? 5 : 1;
+  const maxActiveAutomations = plan === "vip" ? 50 : plan === "business" ? 25 : 5;
 
   let activeChannelIds: string[] = [];
   if (payload.replai_channels) {
@@ -426,17 +428,11 @@ export async function POST(request: Request) {
               }
 
               let creditBalance = 500;
-              let description = "Bepul tarif uchun 500 ta sinov krediti taqdim etildi";
-              if (newPlan === "pro") {
-                creditBalance = 1000;
-                description = "PRO tarif obunasi uchun 1000 ta kredit taqdim etildi";
-              } else if (newPlan === "premium") {
-                creditBalance = 30000;
-                description = "PREMIUM tarif obunasi uchun 30 000 ta kredit taqdim etildi";
-              } else if (newPlan === "vip") {
-                creditBalance = 150000;
-                description = "VIP tarif obunasi uchun 150 000 ta kredit taqdim etildi";
+              const planKey = newPlan.toLowerCase();
+              if (planKey in modelPricing.plans) {
+                creditBalance = (modelPricing.plans as Record<string, number>)[planKey];
               }
+              const description = `${newPlan.toUpperCase()} tarif obunasi uchun ${creditBalance.toLocaleString("uz-UZ")} ta kredit taqdim etildi`;
 
               creditsData.balance = creditBalance;
               creditsData.history.unshift({
@@ -564,17 +560,11 @@ export async function POST(request: Request) {
           }
 
           let creditBalance = 500;
-          let description = "Bepul tarif uchun 500 ta sinov krediti taqdim etildi";
-          if (newPlan === "pro") {
-            creditBalance = 1000;
-            description = "PRO tarif obunasi uchun 1000 ta kredit taqdim etildi";
-          } else if (newPlan === "premium") {
-            creditBalance = 30000;
-            description = "PREMIUM tarif obunasi uchun 30 000 ta kredit taqdim etildi";
-          } else if (newPlan === "vip") {
-            creditBalance = 150000;
-            description = "VIP tarif obunasi uchun 150 000 ta kredit taqdim etildi";
+          const planKey = newPlan.toLowerCase();
+          if (planKey in modelPricing.plans) {
+            creditBalance = (modelPricing.plans as Record<string, number>)[planKey];
           }
+          const description = `${newPlan.toUpperCase()} tarif obunasi uchun ${creditBalance.toLocaleString("uz-UZ")} ta kredit taqdim etildi`;
 
           creditsData.balance = creditBalance;
           creditsData.history.unshift({
@@ -711,7 +701,6 @@ async function runAutoLearningPipeline(userData: Record<string, any>, userId: st
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) return;
 
-  const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-2.5-flash';
 
   const botSettingsKeys = Object.keys(userData).filter(k => k.startsWith("replai_bot_settings_"));
 
@@ -754,32 +743,21 @@ async function runAutoLearningPipeline(userData: Record<string, any>, userId: st
                 `  "transcript": "Darslik/tushuntirish matni (mijoz so'ragan masalaga to'liq javob, batafsil yoritilgan)"\n` +
                 `}`;
 
-              const res = await fetch(
-                `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${apiKey}`,
-                {
-                  method: "POST",
-                  headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify({
-                    system_instruction: {
-                      parts: [{ text: systemPrompt }],
-                    },
-                    contents: [
-                      {
-                        role: "user",
-                        parts: [{ text: `SUHBAT:\n${conversationText}` }],
-                      }
-                    ],
-                    generationConfig: {
-                      temperature: 0.1,
-                      responseMimeType: "application/json",
-                    },
-                  }),
-                }
-              );
+              const result = await executeGeminiCall({
+                operationType: "lead_qualification",
+                contents: [
+                  {
+                    role: "user",
+                    parts: [{ text: `SUHBAT:\n${conversationText}` }],
+                  }
+                ],
+                systemInstruction: systemPrompt,
+                apiKey,
+                userId
+              });
 
-              if (res.ok) {
-                const data = await res.json();
-                const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+              if (result.status !== "error" && result.text) {
+                const text = result.text;
                 if (text) {
                   const parsed = JSON.parse(text);
                   if (parsed.title && parsed.transcript) {

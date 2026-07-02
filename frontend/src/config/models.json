@@ -1,0 +1,55 @@
+{
+  "exchange_rate_usd_uzs": 12000,
+  "min_credit_price_uzs": 7,
+  "operations": {
+    "chat_reply": {
+      "primary_model": "gemini-3.1-flash-lite",
+      "fallback_model": "gemini-3.5-flash",
+      "max_retries": 3,
+      "params": {
+        "thinking_config": {
+          "thinking_budget": 0
+        }
+      }
+    },
+    "lead_qualification": {
+      "primary_model": "gemini-3.1-flash-lite",
+      "fallback_model": "gemini-3.5-flash",
+      "max_retries": 3,
+      "params": {
+        "thinking_config": {
+          "thinking_budget": 0
+        },
+        "response_mime_type": "application/json"
+      }
+    },
+    "link_analysis": {
+      "primary_model": "gemini-3.5-flash",
+      "fallback_model": null,
+      "max_retries": 3,
+      "params": {}
+    },
+    "pdf_analysis": {
+      "primary_model": "gemini-3.5-flash",
+      "fallback_model": null,
+      "max_retries": 3,
+      "params": {}
+    },
+    "audio_transcription": {
+      "primary_model": "aisha-stt",
+      "fallback_model": "stub-stt-fallback",
+      "max_retries": 2,
+      "params": {}
+    },
+    "image_analysis": {
+      "primary_model": "gemini-3.1-flash-lite",
+      "fallback_model": "gemini-3.5-flash",
+      "max_retries": 3,
+      "params": {
+        "thinking_config": {
+          "thinking_budget": 0
+        }
+      }
+    }
+  }
+}

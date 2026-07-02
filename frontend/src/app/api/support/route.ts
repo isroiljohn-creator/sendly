@@ -1,4 +1,6 @@
 import { NextResponse } from "next/server";
+import { verifyJwt } from "@/lib/jwt";
+import { executeGeminiCall } from "@/lib/ai/modelRouter";
 
 export async function POST(req: Request) {
   try {
@@ -50,34 +52,37 @@ Siz "Sendly.uz" (Instagram chatbot va savdoni avtomatlashtirish platformasi) qo'
       parts: [{ text: m.text }]
     }));
 
-    const response = await fetch(
-       `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
-       {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          system_instruction: {
-            parts: [{ text: systemInstruction }],
-          },
-          contents: contents,
-          generationConfig: {
-            temperature: 0.3,
-            maxOutputTokens: 8192,
-          },
-        }),
+    const authHeader = req.headers.get("Authorization");
+    const token = authHeader?.startsWith("Bearer ") ? authHeader.substring(7) : null;
+    const jwtSecret = process.env.JWT_SECRET;
+    let userId = "sendly-support-user";
+    if (token && jwtSecret) {
+      try {
+        const payload = verifyJwt(token, jwtSecret);
+        if (payload?.user_id) {
+          userId = payload.user_id;
+        }
+      } catch {
+        // ignore
       }
-    );
+    }
 
-    if (!response.ok) {
-      console.error("Gemini Support API returned error:", response.status, await response.text());
+    const result = await executeGeminiCall({
+      operationType: "chat_reply",
+      contents,
+      systemInstruction,
+      apiKey,
+      userId
+    });
+
+    if (result.status === "error" || !result.text) {
+      console.error("Gemini Support API returned error:", result.error);
       return NextResponse.json({
         text: "Hozirda aloqa biroz sekinlashdi. Iltimos savolingizni pochta (6220v1@gmail.com) orqali yuboring yoki birozdan so'ng qayta urinib ko'ring."
       });
     }
 
-    const data = await response.json();
-    const replyText = data?.candidates?.[0]?.content?.parts?.[0]?.text || "Kechirasiz, javobni shakllantirishda xatolik yuz berdi.";
-    return NextResponse.json({ text: replyText.trim() });
+    return NextResponse.json({ text: result.text.trim() });
   } catch (err) {
     console.error("Failed to run Gemini support chat handler:", err);
     return NextResponse.json({
