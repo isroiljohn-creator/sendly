@@ -2326,20 +2326,17 @@ export default function SettingsPage() {
               </div>
 
               {/* Premium Plan */}
-              <div className="border-2 border-black rounded-[24px] p-6 bg-black text-white flex flex-col justify-between h-full relative overflow-hidden shadow-xl hover:scale-[1.01] transition-all">
-                <div className="absolute top-0 right-0 bg-[#C7F33C] text-black text-[9px] font-extrabold uppercase px-3 py-1 rounded-bl-[12px]">
-                  Tavsiya etiladi
-                </div>
+              <div className="border border-[#E8E8E8] rounded-[24px] p-6 bg-[#F9F9F7] flex flex-col justify-between h-full hover:shadow-lg transition-all group">
                 <div>
-                  <h4 className="text-[17px] font-extrabold text-[#C7F33C]">Premium</h4>
-                  <p className="text-[11px] text-white/60 mt-1.5">Tez o'sayotgan bizneslar va faol sotuvchilar uchun.</p>
+                  <h4 className="text-[17px] font-extrabold text-black">Premium</h4>
+                  <p className="text-[11px] text-[#707070] mt-1.5">Tez o'sayotgan bizneslar va faol sotuvchilar uchun.</p>
                   <div className="mt-4 flex items-baseline gap-1 whitespace-nowrap">
-                    <span className="text-[28px] font-black text-white">
+                    <span className="text-[28px] font-black text-black">
                       {billingCycle === "monthly" ? "497 000" : "397 600"}
                     </span>
-                    <span className="text-[11px] font-bold text-white/60">UZS / oy</span>
+                    <span className="text-[11px] font-bold text-[#707070]">UZS / oy</span>
                   </div>
-                  <ul className="mt-6 flex flex-col gap-3 text-[11.5px] text-white/80 font-bold list-none p-0">
+                  <ul className="mt-6 flex flex-col gap-3 text-[11.5px] text-[#505050] font-bold list-none p-0">
                     <li className="flex items-center gap-2">✓ 3 ta faol kanal / bot</li>
                     <li className="flex items-center gap-2">✓ 20 ta bot ssenariylari</li>
                     <li className="flex items-center gap-2">✓ 30 000 AI krediti / oy</li>
@@ -2350,7 +2347,7 @@ export default function SettingsPage() {
                 <button
                   onClick={() => handleSelectPlan("premium")}
                   className={`w-full py-3 mt-8 rounded-full text-[12px] font-bold transition-all border-none cursor-pointer ${
-                    currentUser?.plan === "premium" ? "bg-white/10 text-white cursor-default" : "bg-[#C7F33C] text-black hover:bg-[#b5df2b]"
+                    currentUser?.plan === "premium" ? "bg-black/10 text-black cursor-default" : "bg-black text-[#C7F33C] hover:bg-black/90"
                   }`}
                 >
                   {currentUser?.plan === "premium" ? "Faol tarif" : "Tanlash"}
@@ -2358,17 +2355,20 @@ export default function SettingsPage() {
               </div>
 
               {/* Business Plan */}
-              <div className="border border-[#E8E8E8] rounded-[24px] p-6 bg-[#F9F9F7] flex flex-col justify-between h-full hover:shadow-lg transition-all group">
+              <div className="border-2 border-black rounded-[24px] p-6 bg-black text-white flex flex-col justify-between h-full relative overflow-hidden shadow-xl hover:scale-[1.01] transition-all">
+                <div className="absolute top-0 right-0 bg-[#C7F33C] text-black text-[9px] font-extrabold uppercase px-3 py-1 rounded-bl-[12px]">
+                  Tavsiya etiladi
+                </div>
                 <div>
-                  <h4 className="text-[17px] font-extrabold text-black">Business</h4>
-                  <p className="text-[11px] text-[#707070] mt-1.5">Kengayotgan bizneslar va bir nechta filiallar uchun.</p>
+                  <h4 className="text-[17px] font-extrabold text-[#C7F33C]">Business</h4>
+                  <p className="text-[11px] text-white/60 mt-1.5">Kengayotgan bizneslar va bir nechta filiallar uchun.</p>
                   <div className="mt-4 flex items-baseline gap-1 whitespace-nowrap">
-                    <span className="text-[28px] font-black text-black">
+                    <span className="text-[28px] font-black text-white">
                       {billingCycle === "monthly" ? "1 197 000" : "957 600"}
                     </span>
-                    <span className="text-[11px] font-bold text-[#707070]">UZS / oy</span>
+                    <span className="text-[11px] font-bold text-white/60">UZS / oy</span>
                   </div>
-                  <ul className="mt-6 flex flex-col gap-3 text-[11.5px] text-[#505050] font-bold list-none p-0">
+                  <ul className="mt-6 flex flex-col gap-3 text-[11.5px] text-white/80 font-bold list-none p-0">
                     <li className="flex items-center gap-2">✓ 5 ta faol kanal / bot</li>
                     <li className="flex items-center gap-2">✓ 25 ta bot ssenariylari</li>
                     <li className="flex items-center gap-2">✓ 75 000 AI krediti / oy</li>
@@ -2379,7 +2379,7 @@ export default function SettingsPage() {
                 <button
                   onClick={() => handleSelectPlan("business")}
                   className={`w-full py-3 mt-8 rounded-full text-[12px] font-bold transition-all border-none cursor-pointer ${
-                    currentUser?.plan === "business" ? "bg-black/10 text-black cursor-default" : "bg-black text-[#C7F33C] hover:bg-black/90"
+                    currentUser?.plan === "business" ? "bg-white/10 text-white cursor-default" : "bg-[#C7F33C] text-black hover:bg-[#b5df2b]"
                   }`}
                 >
                   {currentUser?.plan === "business" ? "Faol tarif" : "Tanlash"}
