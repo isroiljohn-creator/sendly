@@ -201,6 +201,8 @@ export default function SettingsPage() {
   const [isUnlinkModalOpen, setIsUnlinkModalOpen] = useState(false);
   const [isPricingOpen, setIsPricingOpen] = useState(false);
   const [billingCycle, setBillingCycle] = useState<"monthly" | "yearly">("yearly");
+  const [historyFilter, setHistoryFilter] = useState<"all" | "in" | "out">("all");
+  const [pendingPlanUpgrade, setPendingPlanUpgrade] = useState<"free" | "pro" | "premium" | "business" | "vip" | null>(null);
 
   // Telegram Link Bot Form
   const [tgToken, setTgToken] = useState("");
@@ -210,6 +212,7 @@ export default function SettingsPage() {
   // Team Collaboration state
   const [teamMembers, setTeamMembers] = useState<any[]>([]);
   const [inviteEmail, setInviteEmail] = useState("");
+  const [inviteRole, setInviteRole] = useState("Operator");
 
   // Timers
   useEffect(() => {
@@ -487,7 +490,15 @@ export default function SettingsPage() {
       setOtpCode("");
       setCardStep("card");
       setIsLinking(false);
-      showAlert(t("common.success") || "Muvaffaqiyatli", t("pages.account.billing.link_success") || "Karta muvaffaqiyatli ulandi!");
+
+      if (pendingPlanUpgrade) {
+        db.updatePlan(pendingPlanUpgrade);
+        setCurrentUser(db.getCurrentUser());
+        showAlert(t("common.success") || "Muvaffaqiyatli", `${pendingPlanUpgrade.toUpperCase()} tarif obunasi muvaffaqiyatli sotib olindi!`);
+        setPendingPlanUpgrade(null);
+      } else {
+        showAlert(t("common.success") || "Muvaffaqiyatli", t("pages.account.billing.link_success") || "Karta muvaffaqiyatli ulandi!");
+      }
     } else {
       setCardError(res.error || t("pages.account.billing.otp_error") || "Kod noto'g'ri.");
     }
@@ -505,16 +516,14 @@ export default function SettingsPage() {
 
   const handleSelectPlan = (plan: "free" | "pro" | "premium" | "business" | "vip") => {
     if (plan !== "free" && !currentUser?.isCardLinked) {
+      setPendingPlanUpgrade(plan);
       setIsPricingOpen(false);
-      showAlert(
-        t("pages.account.billing.card_required_title") || "Karta ulanmagan", 
-        t("pages.account.billing.card_required_msg") || "Tarifni sotib olish uchun avval to'lov kartasini ulashingiz kerak.",
-        "warning",
-        () => {
-          setActiveSection("billing");
-          setIsLinking(true);
-        }
-      );
+      setIsLinking(true);
+      setCardStep("card");
+      setCardNumInput("");
+      setCardExpiryInput("");
+      setCardCvcInput("");
+      setCardError("");
       return;
     }
     db.updatePlan(plan);
@@ -938,10 +947,11 @@ export default function SettingsPage() {
         id: `member-${Date.now()}`,
         name: emailStr.split("@")[0],
         email: emailStr,
-        role: "Operator"
+        role: inviteRole
       };
       setTeamMembers([...teamMembers, newMember]);
       setInviteEmail("");
+      setInviteRole("Operator");
       showAlert(t("common.success"), "Taklifnoma muvaffaqiyatli yuborildi!");
     }, 1000);
   };
@@ -1308,118 +1318,7 @@ export default function SettingsPage() {
                 )}
               </div>
 
-              {/* Card Linking Input Block */}
-              {isLinking && (
-                <Card className="border border-black p-6 animate-in slide-in-from-top-4 duration-200">
-                  <div className="flex items-center justify-between pb-4 border-b border-[#F0F0F0] mb-4">
-                    <h4 className="text-[15px] font-black text-black">To'lov kartasini bog'lash</h4>
-                    <button 
-                      onClick={() => setIsLinking(false)} 
-                      className="text-[#707070] hover:text-black p-1 hover:bg-[#F5F5F5] rounded-full"
-                    >
-                      <X size={16} />
-                    </button>
-                  </div>
 
-                  {cardError && (
-                    <div className="p-3 text-[12px] bg-red-50 text-red-600 border border-red-150 rounded-xl mb-4 font-bold">
-                      {cardError}
-                    </div>
-                  )}
-
-                  {cardStep === "card" ? (
-                    <form onSubmit={handleGetOtp} className="flex flex-col gap-4">
-                      <div className="flex flex-col gap-1">
-                        <label className="text-[11px] font-bold text-[#707070] uppercase">Karta raqami</label>
-                        <input
-                          type="text"
-                          value={cardNumInput}
-                          onChange={(e) => {
-                            let val = e.target.value.replace(/\D/g, "");
-                            val = val.match(/.{1,4}/g)?.join(" ") || val;
-                            setCardNumInput(val.slice(0, 19));
-                          }}
-                          placeholder="8600 0000 0000 0000"
-                          className="w-full rounded-[10px] border border-[#D8D8D8] px-4 py-3 text-[13px] text-black font-mono font-bold focus:outline-none focus:border-black"
-                          required
-                        />
-                      </div>
-
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="flex flex-col gap-1">
-                          <label className="text-[11px] font-bold text-[#707070] uppercase">Muddati</label>
-                          <input
-                            type="text"
-                            value={cardExpiryInput}
-                            onChange={(e) => {
-                              let val = e.target.value.replace(/\D/g, "");
-                              if (val.length > 2) val = val.slice(0, 2) + "/" + val.slice(2, 4);
-                              setCardExpiryInput(val.slice(0, 5));
-                            }}
-                            placeholder="MM/YY"
-                            className="w-full rounded-[10px] border border-[#D8D8D8] px-4 py-3 text-[13px] text-black font-mono font-bold focus:outline-none focus:border-black text-center"
-                            required
-                          />
-                        </div>
-                        <div className="flex flex-col gap-1">
-                          <label className="text-[11px] font-bold text-[#707070] uppercase">CVC/CVV</label>
-                          <input
-                            type="password"
-                            value={cardCvcInput}
-                            onChange={(e) => setCardCvcInput(e.target.value.replace(/\D/g, "").slice(0, 3))}
-                            disabled={isUzCardOrHumo}
-                            placeholder={isUzCardOrHumo ? "Sart emas" : "123"}
-                            className="w-full rounded-[10px] border border-[#D8D8D8] px-4 py-3 text-[13px] text-black font-mono font-bold focus:outline-none focus:border-black text-center disabled:bg-neutral-100 disabled:text-[#A0A0A0]"
-                          />
-                        </div>
-                      </div>
-
-                      <Button type="submit" variant="primary" className="py-3 mt-2 text-[12px] font-bold rounded-xl">
-                        Tasdiqlash kodini olish
-                      </Button>
-                    </form>
-                  ) : (
-                    <form onSubmit={handleVerifyOtp} className="flex flex-col gap-4">
-                      <div className="p-3 text-[12px] bg-amber-50 text-amber-700 border border-amber-200 rounded-xl">
-                        Karta raqami bog'langan telefon raqamga SMS kod yuborildi. Kodni kiriting:
-                      </div>
-
-                      <div className="flex flex-col gap-1">
-                        <label className="text-[11px] font-bold text-[#707070] uppercase">SMS kod</label>
-                        <input
-                          type="text"
-                          value={otpCode}
-                          onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
-                          placeholder="000000"
-                          className="w-full rounded-[10px] border border-[#D8D8D8] px-4 py-3 text-[16px] text-black font-mono font-black text-center focus:outline-none focus:border-black tracking-widest"
-                          required
-                        />
-                        <p className="text-[10px] text-[#909090] text-center mt-1.5">
-                          Kodni qayta yuborish: {formatTimer(otpTimer)}
-                        </p>
-                      </div>
-
-                      <div className="flex gap-2.5">
-                        <Button 
-                          type="button" 
-                          variant="secondary" 
-                          onClick={() => setCardStep("card")} 
-                          className="flex-1 py-3 text-[12px] font-bold rounded-xl"
-                        >
-                          Orqaga
-                        </Button>
-                        <Button 
-                          type="submit" 
-                          variant="accent" 
-                          className="flex-1 py-3 text-[12px] font-bold rounded-xl"
-                        >
-                          Karta bog'lash
-                        </Button>
-                      </div>
-                    </form>
-                  )}
-                </Card>
-              )}
             </div>
           )}
 
@@ -1566,7 +1465,39 @@ export default function SettingsPage() {
 
               {/* Credit History Table */}
               <div className="flex flex-col gap-3">
-                <h4 className="text-[16px] font-bold text-black">Hisob tarixi</h4>
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                  <h4 className="text-[16px] font-bold text-black">Hisob tarixi</h4>
+                  <div className="flex bg-[#F0F0F0] p-0.5 rounded-full select-none self-start sm:self-auto border border-[#E0E0E0]">
+                    <button
+                      type="button"
+                      onClick={() => setHistoryFilter("all")}
+                      className={`px-3.5 py-1 rounded-full text-[10px] font-bold transition-all border-none cursor-pointer ${
+                        historyFilter === "all" ? "bg-black text-[#C7F33C]" : "text-[#707070] hover:text-black"
+                      }`}
+                    >
+                      Barchasi
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setHistoryFilter("in")}
+                      className={`px-3.5 py-1 rounded-full text-[10px] font-bold transition-all border-none cursor-pointer ${
+                        historyFilter === "in" ? "bg-black text-[#C7F33C]" : "text-[#707070] hover:text-black"
+                      }`}
+                    >
+                      Kirim
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setHistoryFilter("out")}
+                      className={`px-3.5 py-1 rounded-full text-[10px] font-bold transition-all border-none cursor-pointer ${
+                        historyFilter === "out" ? "bg-black text-[#C7F33C]" : "text-[#707070] hover:text-black"
+                      }`}
+                    >
+                      Chiqim
+                    </button>
+                  </div>
+                </div>
+
                 <Card className="overflow-hidden border border-[#D8D8D8] p-0 bg-white">
                   <div className="overflow-x-auto">
                     <table className="w-full text-left border-collapse">
@@ -1579,29 +1510,44 @@ export default function SettingsPage() {
                         </tr>
                       </thead>
                       <tbody>
-                        {aiCreditsData.history.length === 0 ? (
+                        {aiCreditsData.history.filter((h) => {
+                          const isUsage = h.type === "usage" || (h.description && (h.description.toLowerCase().includes("yechib") || h.description.toLowerCase().includes("boshlandi") || h.description.toLowerCase().includes("sarf")));
+                          if (historyFilter === "in") return !isUsage;
+                          if (historyFilter === "out") return isUsage;
+                          return true;
+                        }).length === 0 ? (
                           <tr>
                             <td colSpan={4} className="py-12 text-center text-[12px] text-[#909090] italic">
-                              Hozircha kredit harakatlari tarixi mavjud emas.
+                              Hozircha mos keladigan kredit harakatlari tarixi mavjud emas.
                             </td>
                           </tr>
                         ) : (
-                          aiCreditsData.history.map((h, i) => (
-                            <tr key={i} className="border-b border-[#F0F0F0] text-[12px] text-black">
-                              <td className="py-3.5 px-5">
-                                <span className={`inline-block px-2 py-0.5 rounded-full text-[9px] font-bold ${
-                                  h.amount > 0 ? "text-[#7CA607] bg-[#C7F33C]/20" : "text-red-600 bg-red-50"
-                                }`}>
-                                  {h.amount > 0 ? "Kirim" : "Chiqim"}
-                                </span>
-                              </td>
-                              <td className="py-3.5 px-5 font-bold">
-                                {h.amount > 0 ? `+${h.amount.toLocaleString()}` : h.amount.toLocaleString()}
-                              </td>
-                              <td className="py-3.5 px-5 text-[#707070]">{h.description}</td>
-                              <td className="py-3.5 px-5 text-[#909090] text-right">{h.date}</td>
-                            </tr>
-                          ))
+                          aiCreditsData.history
+                            .filter((h) => {
+                              const isUsage = h.type === "usage" || (h.description && (h.description.toLowerCase().includes("yechib") || h.description.toLowerCase().includes("boshlandi") || h.description.toLowerCase().includes("sarf")));
+                              if (historyFilter === "in") return !isUsage;
+                              if (historyFilter === "out") return isUsage;
+                              return true;
+                            })
+                            .map((h, i) => {
+                              const isUsage = h.type === "usage" || (h.description && (h.description.toLowerCase().includes("yechib") || h.description.toLowerCase().includes("boshlandi") || h.description.toLowerCase().includes("sarf")));
+                              return (
+                                <tr key={i} className="border-b border-[#F0F0F0] text-[12px] text-black">
+                                  <td className="py-3.5 px-5">
+                                    <span className={`inline-block px-2 py-0.5 rounded-full text-[9px] font-bold ${
+                                      !isUsage ? "text-[#7CA607] bg-[#C7F33C]/20" : "text-red-600 bg-red-50"
+                                    }`}>
+                                      {!isUsage ? "Kirim" : "Chiqim"}
+                                    </span>
+                                  </td>
+                                  <td className={`py-3.5 px-5 font-bold ${!isUsage ? "text-[#7CA607]" : "text-red-600"}`}>
+                                    {!isUsage ? `+${h.amount.toLocaleString()}` : `-${h.amount.toLocaleString()}`}
+                                  </td>
+                                  <td className="py-3.5 px-5 text-[#707070]">{h.description}</td>
+                                  <td className="py-3.5 px-5 text-[#909090] text-right">{h.date}</td>
+                                </tr>
+                              );
+                            })
                         )}
                       </tbody>
                     </table>
@@ -2011,22 +1957,34 @@ export default function SettingsPage() {
               {/* Invite member form */}
               <Card className="border border-[#D8D8D8] p-5">
                 <form onSubmit={handleInviteSubmit} className="flex flex-col gap-4">
-                  <div className="flex flex-col gap-2">
-                    <label className="text-[12px] font-bold text-black uppercase tracking-wider">Hamkorni taklif qilish (Email)</label>
-                    <div className="flex items-center gap-2">
+                  <div className="flex flex-col gap-4 md:flex-row md:items-end">
+                    <div className="flex-1 flex flex-col gap-1.5">
+                      <label className="text-[11px] font-bold text-black uppercase tracking-wider">Hamkorni taklif qilish (Email)</label>
                       <input
                         type="email"
                         value={inviteEmail}
                         onChange={(e) => setInviteEmail(e.target.value)}
                         placeholder="operator@sendly.uz"
-                        className="flex-1 rounded-[10px] border border-[#D8D8D8] px-4 py-3 text-[13px] text-black focus:outline-none focus:border-black font-semibold"
+                        className="w-full rounded-[10px] border border-[#D8D8D8] px-4 py-3 text-[13px] text-black focus:outline-none focus:border-black font-semibold"
                         required
                       />
-                      <Button type="submit" disabled={inviting} variant="accent" className="px-6 py-3 text-[12px] font-bold shrink-0 rounded-xl flex items-center gap-1">
-                        {inviting && <Loader2 size={13} className="animate-spin" />}
-                        Taklif etish
-                      </Button>
                     </div>
+                    <div className="w-full md:w-[150px] flex flex-col gap-1.5">
+                      <label className="text-[11px] font-bold text-black uppercase tracking-wider">Rol</label>
+                      <select
+                        value={inviteRole}
+                        onChange={(e) => setInviteRole(e.target.value)}
+                        className="w-full rounded-[10px] border border-[#D8D8D8] px-3 py-3.5 text-[13px] text-black focus:outline-none focus:border-black font-bold bg-white cursor-pointer"
+                      >
+                        <option value="Administrator">Administrator</option>
+                        <option value="Moderator">Moderator</option>
+                        <option value="Operator">Operator</option>
+                      </select>
+                    </div>
+                    <Button type="submit" disabled={inviting} variant="accent" className="px-6 py-3.5 text-[12px] font-bold shrink-0 rounded-[10px] h-[46px] flex items-center justify-center gap-1.5 border-none cursor-pointer">
+                      {inviting && <Loader2 size={13} className="animate-spin" />}
+                      Taklif etish
+                    </Button>
                   </div>
                 </form>
               </Card>
@@ -2416,6 +2374,124 @@ export default function SettingsPage() {
               </div>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* Card Linking Modal */}
+      {isLinking && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 overflow-y-auto animate-in fade-in duration-200">
+          <Card className="bg-white rounded-[24px] w-full max-w-[450px] shadow-2xl p-6 border border-[#D8D8D8] relative animate-in zoom-in-95 duration-200">
+            <div className="flex items-center justify-between pb-4 border-b border-[#F0F0F0] mb-4">
+              <h4 className="text-[15px] font-black text-black">To'lov kartasini bog'lash</h4>
+              <button 
+                onClick={() => {
+                  setIsLinking(false);
+                  setPendingPlanUpgrade(null);
+                }} 
+                className="text-[#707070] hover:text-black p-1 hover:bg-[#F5F5F5] rounded-full border-none bg-transparent cursor-pointer"
+              >
+                <X size={16} />
+              </button>
+            </div>
+
+            {cardError && (
+              <div className="p-3 text-[12px] bg-red-50 text-red-600 border border-red-150 rounded-xl mb-4 font-bold">
+                {cardError}
+              </div>
+            )}
+
+            {cardStep === "card" ? (
+              <form onSubmit={handleGetOtp} className="flex flex-col gap-4">
+                <div className="flex flex-col gap-1">
+                  <label className="text-[11px] font-bold text-[#707070] uppercase">Karta raqami</label>
+                  <input
+                    type="text"
+                    value={cardNumInput}
+                    onChange={(e) => {
+                      let val = e.target.value.replace(/\D/g, "");
+                      val = val.match(/.{1,4}/g)?.join(" ") || val;
+                      setCardNumInput(val.slice(0, 19));
+                    }}
+                    placeholder="8600 0000 0000 0000"
+                    className="w-full rounded-[10px] border border-[#D8D8D8] px-4 py-3 text-[13px] text-black font-mono font-bold focus:outline-none focus:border-black"
+                    required
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="flex flex-col gap-1">
+                    <label className="text-[11px] font-bold text-[#707070] uppercase">Muddati</label>
+                    <input
+                      type="text"
+                      value={cardExpiryInput}
+                      onChange={(e) => {
+                        let val = e.target.value.replace(/\D/g, "");
+                        if (val.length > 2) val = val.slice(0, 2) + "/" + val.slice(2, 4);
+                        setCardExpiryInput(val.slice(0, 5));
+                      }}
+                      placeholder="MM/YY"
+                      className="w-full rounded-[10px] border border-[#D8D8D8] px-4 py-3 text-[13px] text-black font-mono font-bold focus:outline-none focus:border-black text-center"
+                      required
+                    />
+                  </div>
+                  <div className="flex flex-col gap-1">
+                    <label className="text-[11px] font-bold text-[#707070] uppercase">CVC/CVV</label>
+                    <input
+                      type="password"
+                      value={cardCvcInput}
+                      onChange={(e) => setCardCvcInput(e.target.value.replace(/\D/g, "").slice(0, 3))}
+                      disabled={isUzCardOrHumo}
+                      placeholder={isUzCardOrHumo ? "Shart emas" : "123"}
+                      className="w-full rounded-[10px] border border-[#D8D8D8] px-4 py-3 text-[13px] text-black font-mono font-bold focus:outline-none focus:border-black text-center disabled:bg-neutral-100 disabled:text-[#A0A0A0]"
+                    />
+                  </div>
+                </div>
+
+                <Button type="submit" variant="primary" className="py-3 mt-2 text-[12px] font-bold rounded-xl border-none cursor-pointer">
+                  Tasdiqlash kodini olish
+                </Button>
+              </form>
+            ) : (
+              <form onSubmit={handleVerifyOtp} className="flex flex-col gap-4">
+                <div className="p-3 text-[12px] bg-amber-50 text-amber-700 border border-amber-200 rounded-xl">
+                  Karta raqami bog'langan telefon raqamga SMS kod yuborildi. Kodni kiriting:
+                </div>
+
+                <div className="flex flex-col gap-1">
+                  <label className="text-[11px] font-bold text-[#707070] uppercase">SMS kod</label>
+                  <input
+                    type="text"
+                    value={otpCode}
+                    onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                    placeholder="000000"
+                    className="w-full rounded-[10px] border border-[#D8D8D8] px-4 py-3 text-[16px] text-black font-mono font-black text-center focus:outline-none focus:border-black tracking-widest"
+                    required
+                  />
+                  <p className="text-[10px] text-[#909090] text-center mt-1.5">
+                    Kodni qayta yuborish: {formatTimer(otpTimer)}
+                  </p>
+                </div>
+
+                <div className="flex gap-2.5">
+                  <Button 
+                    type="button" 
+                    variant="secondary" 
+                    onClick={() => setCardStep("card")} 
+                    className="flex-1 py-3 text-[12px] font-bold rounded-xl border-none cursor-pointer"
+                  >
+                    Orqaga
+                  </Button>
+                  <Button 
+                    type="submit" 
+                    variant="accent" 
+                    className="flex-1 py-3 text-[12px] font-bold rounded-xl border-none cursor-pointer"
+                  >
+                    Karta bog'lash
+                  </Button>
+                </div>
+              </form>
+            )}
+          </Card>
         </div>
       )}
 
