@@ -200,7 +200,7 @@ export default function SettingsPage() {
   const [isChannelDeleteModalOpen, setIsChannelDeleteModalOpen] = useState(false);
   const [isUnlinkModalOpen, setIsUnlinkModalOpen] = useState(false);
   const [isPricingOpen, setIsPricingOpen] = useState(false);
-  const [billingCycle, setBillingCycle] = useState<"monthly" | "yearly">("monthly");
+  const [billingCycle, setBillingCycle] = useState<"monthly" | "yearly">("yearly");
 
   // Telegram Link Bot Form
   const [tgToken, setTgToken] = useState("");
